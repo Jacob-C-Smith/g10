@@ -3,11 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-G10/
 lib/
-include/JSON
+G10/*
 *.dll
 
+include/JSON/*
 # User-specific files
 *.rsuser
 *.suo
