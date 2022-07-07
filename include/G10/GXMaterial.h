@@ -1,7 +1,8 @@
 #pragma once
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
-//#include <G10/GXTexture.h>
+#include <G10/GXTexture.h>
+
 #include <JSON/JSON.h>
 
 struct GXMaterial_s {

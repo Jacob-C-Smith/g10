@@ -178,10 +178,13 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 	GXScene_t    *i_scene           = 0;
 	dict         *scene_json_object = 0;
 	JSONToken_t  *token             = 0;
+
+	// JSON array of object text
 	char        **entities          = 0,
 		        **cameras           = 0,
 		        **lights            = 0,
-		        **skyboxes          = 0;
+		        **skyboxes          = 0,
+		        **light_probes      = 0;
 
 	// Allocate a scene
 	create_scene(scene);
@@ -204,7 +207,7 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 	token         = dict_get(scene_json_object, "cameras");
 	cameras       = (token) ? token->value.a_where : 0;
 
-	// Get an array of camera objects and paths
+	// Get an array of light objects and paths
 	token         = dict_get(scene_json_object, "lights");
 	lights        = (token) ? token->value.a_where : 0;
 
@@ -223,7 +226,7 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 		// TODO: Spawn some worker threads to load entities
 		for (size_t i = 0; i < loading_thread_count; i++)
 		{
-			threads[i] = SDL_CreateThread(entity_thread, "", (void *)0);
+			//threads[i] = SDL_CreateThread(entity_thread, "", (void *)0);
 		}
 
 		for (size_t i = 0; i < loading_thread_count; i++)
@@ -253,11 +256,14 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 	}
 
 	// Load Lights
-	{
+	if(lights) {
 
 	}
 
+	// Load Light Probes
+	if(light_probes) {
 
+	}
 
 	return 1;
 
@@ -288,7 +294,6 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 	}
 }
 
-
 int append_entity(GXScene_t* scene, GXEntity_t* entity)
 {
 
@@ -306,9 +311,10 @@ int append_entity(GXScene_t* scene, GXEntity_t* entity)
 			goto no_name;
 	}
 
+	// Add the entity to the scene
 	dict_add(scene->entities, entity->name, entity);
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -332,6 +338,7 @@ int append_entity(GXScene_t* scene, GXEntity_t* entity)
 				#endif
 				return 0;
 			no_name:
+				g_print_error("[G10] [Scene] \"entity\" has no name in call to function \"%s\"\n", __FUNCSIG__);
 				return 0;
 		}
 	}

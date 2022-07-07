@@ -4,100 +4,20 @@
 
 const kn_t keys[] = {
     {
-        SDL_SCANCODE_RETURN,
-        "RETURN"
+        SDL_SCANCODE_UNKNOWN,
+        ""
     },
     {
-        SDL_SCANCODE_ESCAPE,
-        "ESCAPE"
+        1,
+        ""
     },
     {
-        SDL_SCANCODE_BACKSPACE,
-        "BACKSPACE"
+        2,
+        ""
     },
     {
-        SDL_SCANCODE_TAB,
-        "TAB"
-    },
-    {
-        SDL_SCANCODE_SPACE,
-        "SPACE"
-    },
-    {
-        SDL_SCANCODE_COMMA,
-        "COMMA"
-    },
-    {
-        SDL_SCANCODE_MINUS,
-        "MINUS"
-    },
-    {
-        SDL_SCANCODE_PERIOD,
-        "PERIOD"
-    },
-    {
-        SDL_SCANCODE_SLASH,
-        "SLASH"
-    },
-    {
-        SDL_SCANCODE_0,
-        "0"
-    },
-    {
-        SDL_SCANCODE_1,
-        "1"
-    },
-    {
-        SDL_SCANCODE_2,
-        "2"
-    },
-    {
-        SDL_SCANCODE_3,
-        "3"
-    },
-    {
-        SDL_SCANCODE_4,
-        "4"
-    },
-    {
-        SDL_SCANCODE_5,
-        "5"
-    },
-    {
-        SDL_SCANCODE_6,
-        "6"
-    },
-    {
-        SDL_SCANCODE_7,
-        "7"
-    },
-    {
-        SDL_SCANCODE_8,
-        "8"
-    },
-    {
-        SDL_SCANCODE_9,
-        "9"
-    },
-    {
-        SDL_SCANCODE_SEMICOLON,
-        "SEMICOLON"
-    },
-    {
-        SDL_SCANCODE_EQUALS,
-        "EQUALS"
-    },
-    {
-        SDL_SCANCODE_LEFTBRACKET,
-        "LEFT"
-    },
-    {
-        SDL_SCANCODE_BACKSLASH,
-        "BACKSLASH"
-    },
-    {
-        SDL_SCANCODE_RIGHTBRACKET,
-        "RIGHT BRACKET"
+        3,
+        ""
     },
     {
         SDL_SCANCODE_A,
@@ -204,8 +124,116 @@ const kn_t keys[] = {
         "Z"
     },
     {
-        SDL_SCANCODE_DELETE,
-        "DELETE"
+        SDL_SCANCODE_1,
+        "1"
+    },
+    {
+        SDL_SCANCODE_2,
+        "2"
+    },
+    {
+        SDL_SCANCODE_3,
+        "3"
+    },
+    {
+        SDL_SCANCODE_4,
+        "4"
+    },
+    {
+        SDL_SCANCODE_5,
+        "5"
+    },
+    {
+        SDL_SCANCODE_6,
+        "6"
+    },
+    {
+        SDL_SCANCODE_7,
+        "7"
+    },
+    {
+        SDL_SCANCODE_8,
+        "8"
+    },
+    {
+        SDL_SCANCODE_9,
+        "9"
+    },
+    {
+        SDL_SCANCODE_0,
+        "0"
+    },
+    {
+        SDL_SCANCODE_RETURN,
+        "RETURN"
+    },
+    {
+        SDL_SCANCODE_ESCAPE,
+        "ESCAPE"
+    },
+    {
+        SDL_SCANCODE_BACKSPACE,
+        "BACKSPACE"
+    },
+    {
+        SDL_SCANCODE_TAB,
+        "TAB"
+    },
+    {
+        SDL_SCANCODE_SPACE,
+        "SPACE"
+    },
+    {
+        SDL_SCANCODE_MINUS,
+        "MINUS"
+    },
+    {
+        SDL_SCANCODE_EQUALS,
+        "EQUALS"
+    },
+    {
+        SDL_SCANCODE_LEFTBRACKET,
+        "LEFT BRACKET"
+    },
+    {
+        SDL_SCANCODE_RIGHTBRACKET,
+        "RIGHT BRACKET"
+    },
+    {
+        SDL_SCANCODE_BACKSLASH,
+        "BACKSLASH"
+    },
+    {
+        50,
+        ""
+    },
+    {
+        SDL_SCANCODE_SEMICOLON,
+        "SEMICOLON"
+    },
+    {
+        SDL_SCANCODE_APOSTROPHE,
+        "APOSTROPHE"
+    },
+    {
+        SDL_SCANCODE_GRAVE,
+        "TILDE"
+    },
+    {
+        SDL_SCANCODE_COMMA,
+        "COMMA"
+    },
+    {
+        SDL_SCANCODE_PERIOD,
+        "PERIOD"
+    },
+    {
+        SDL_SCANCODE_PERIOD,
+        "PERIOD"
+    },
+    {
+        SDL_SCANCODE_SLASH,
+        "SLASH"
     },
     {
         SDL_SCANCODE_CAPSLOCK,
@@ -260,11 +288,11 @@ const kn_t keys[] = {
         "F12"
     },
     {
-        SDL_SCANCODE_PRINTSCREEN ,
+        SDL_SCANCODE_PRINTSCREEN,
         "PRINT SCREEN"
     },
     {
-        SDL_SCANCODE_SCROLLLOCK  ,
+        SDL_SCANCODE_SCROLLLOCK,
         "SCROLL LOCK"
     },
     {
@@ -282,6 +310,10 @@ const kn_t keys[] = {
     {
         SDL_SCANCODE_PAGEUP,
         "PAGE UP"
+    },
+    {
+        SDL_SCANCODE_DELETE,
+        "DELETE"
     },
     {
         SDL_SCANCODE_END,
@@ -306,6 +338,10 @@ const kn_t keys[] = {
     {
         SDL_SCANCODE_UP,
         "UP"
+    },
+    {
+        SDL_SCANCODE_NUMLOCKCLEAR,
+        "NUMLOCK"
     },
     {
         SDL_SCANCODE_KP_DIVIDE,
@@ -372,6 +408,10 @@ const kn_t keys[] = {
         "KEYPAD PERIOD"
     },
     {
+        100,
+        ""
+    },
+    {
         SDL_SCANCODE_LCTRL,
         "LEFT CONTROL"
     },
@@ -406,6 +446,16 @@ const kn_t keys[] = {
 };
 
 dict *key_dict = 0;
+
+int init_input()
+{
+    // Make a hash table of keys
+    dict_construct(&key_dict, 512);
+
+    // Construct the hash table
+    for (size_t i = 0; keys[i].code; i++)
+        dict_add(key_dict, keys[i].name, 0);
+}
 
 int          create_bind               ( GXBind_t    **bind )
 {
@@ -529,8 +579,6 @@ int          load_input                ( GXInput_t   **input, const char    path
     // Construct the input
     load_input_as_json_n(&ret, data, i);
 
-    free(data);
-
     // Error checking
     {
         #ifndef NDEBUG
@@ -651,9 +699,11 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
         // A JSON token
         JSONToken_t* token = 0;
 
+        // Set the name
         token = dict_get(input_json_object, "name");
         name = token->value.n_where;
 
+        // Set the binds
         token = dict_get(input_json_object, "binds");
         bind_tokens = token->value.a_where;
     }
@@ -682,14 +732,13 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
             
         }
 
-
-
         // Set binds
         {
             size_t bind_count = 0;
             while (bind_tokens[bind_count++]);
 
             dict_construct(&ret->binds, bind_count * 2);
+            dict_construct(&ret->bind_lut, 110);
 
             if (bind_tokens)
             {
@@ -701,8 +750,7 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
                     
                     load_bind_as_json(&bind, bind_tokens[j]);
 
-                    // Add the bind to the dictionary
-                    dict_add(ret->binds, bind->name, bind);
+                    append_bind(ret, bind);
                 }
             }
         }
@@ -715,7 +763,6 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
                 g_print_error("[G10] [Input] No binds in input set \"%s\"\n", ret->name);
         #endif
     }
-
 
     *input = ret;
 
@@ -771,114 +818,33 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
     }
 
     GXBind_t    *ret         = 0;
-    size_t       len         = strlen(token),
-                 token_count = parse_json(token, len, 0, 0);
-    JSONToken_t *tokens      = calloc(token_count, sizeof(JSONToken_t));
+    dict        *json_tokens = 0;
+    JSONToken_t *t           = 0;
 
     char        *name        = 0,
                **keys        = 0;
-    size_t       key_count   = 0,
-                 i           = 0;
 
-    create_bind(&ret);
-
-    parse_json(token, len, token_count, tokens);
-
-    for (i = 0; i < token_count; i++)
-    {
-
-        // Parse name
-        if (strcmp(tokens[i].key, "name")==0)
-        {
-            if (tokens[i].type == JSONstring)
-                name = tokens[i].value.n_where;
-            else
-                goto name_type_error;
-
-            continue;
-        }
-        
-        // Parse keys
-        else if (strcmp(tokens[i].key, "keys")==0)
-        {
-            if (tokens[i].type == JSONarray)
-                keys = tokens[i].value.a_where;
-            else
-                goto keys_type_error;
-
-            continue;
-        }
-
-        loop:;
-    }
-    
     // Error checking
     {
         #ifndef NDEBUG
-            if (name == (void*)0)
-                goto no_name;
+
         #endif
     }
 
     // Construct the bind
     {
+        // TODO: Improve
+        parse_json(token, strlen(token), &json_tokens);
+            
+        t    = dict_get(json_tokens, "name");
+        name = JSON_VALUE(t, JSONstring);
 
+        t = dict_get(json_tokens, "keys");
+        keys = JSON_VALUE(t, JSONarray);
 
-
-        // Copy and set the name
-        {
-            size_t name_len = strlen(name);
-            ret->name = calloc(name_len + 1, sizeof(char));
-
-            strncpy(ret->name, name, name_len);
-        }
-
-        // Set the keys
-        {
-
-            // Count up keys for the bind
-            for (key_count; keys[key_count]; ++key_count);
-
-            // Set key count
-            ret->key_count = key_count;
-
-            // Allocate space for keys
-            ret->keys = calloc(key_count + 1, sizeof(char*));
-
-            // Error checking
-            {
-                #ifndef NDEBUG
-                    if (ret->keys == (void*) 0)
-                        goto no_mem;
-                #endif
-            }
-
-            // Set keys
-            for (size_t j = 0; keys[j]; j++)
-            {
-
-                char* key_name = keys[j];
-                size_t k_len = strlen(key_name);
-
-                ret->keys[j] = calloc(k_len + 1, sizeof(char));
-
-                // Error handling
-                {
-                    #ifndef NDEBUG
-                        if (ret->keys[j] == (void*) 0)
-                            goto no_mem;
-                    #endif
-                }
-
-                strncpy(ret->keys[j], key_name, k_len);
-
-            }
-        }
     }
 
-    free(tokens);
-
-    *bind = ret;
+    construct_bind(bind, name, keys);
 
     return 1;
 
@@ -893,12 +859,13 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
                 return 0;
             #endif
         }
+
         // JSON type errors
         {
         name_type_error:
         keys_type_error:
+            return 0;
 
-            goto loop;
         }
 
         no_name:
@@ -911,6 +878,81 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
             #ifndef NDEBUG
                 g_print_error("[G10] [Bind] Null pointer provided for \"token\" in call to function \"%s\"\n", __FUNCSIG__);
             #endif
+            return 0;
+        }
+    }
+}
+
+int          construct_bind            ( GXBind_t** bind, char* name, char** keys)
+{
+    
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if(bind == (void *)0)
+                goto no_bind;
+            if(name == (void *)0)
+                goto no_name;
+            if (keys == (void*)0)
+                goto no_keys;
+        #endif
+    }
+
+    // Initialized data
+    GXBind_t *b = 0;
+
+    // Allocate for a bind
+    create_bind(bind);
+    
+    b = *bind;
+
+    // Error handling
+    {
+        #ifndef NDEBUG
+            if(b == (void *)0)
+                goto no_b;
+        #endif
+    }
+
+    // Construct the bind
+    {
+        b->name = name;
+        b->keys = keys;
+        while (keys[++b->key_count]);
+        
+        
+    }
+
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument check
+        {
+            no_bind:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Bind] Null pointer provided for \"bind\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+            no_name:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Bind] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+            no_keys:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Bind] Null pointer provided for \"keys\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+
+        // G10 Errors
+        {
+            no_b:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Bind] Failed to allocate a bind in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
             return 0;
         }
     }
@@ -977,73 +1019,22 @@ SDL_Scancode find_key                  ( const char   *name )
 
     // Argument check
     {
-        if (name == 0)
-            goto noName;
-    }
-
-    // TODO: Replace with a hash table
-    for (size_t i = 0; i < 98; i++)
-        if (strcmp(name, keys[i].name) == 0)
-            return keys[i].code;
-    
-    //g_print_warning("[G10] [Input] Unidentified key name \"%s\" passed to funciton \"%s\"\n", name, __FUNCSIG__);
-    return (SDL_Scancode)0;
-
-    // Error handling
-    {
-        noName:
-        g_print_error("[G10] [Input] No name provided to function \"%s\"\n", __FUNCSIG__);
-        return (SDL_Scancode)0;
-    }
-}
-
-int          print_all_keys            ( void )
-{
-    for (size_t i = 0; i < 98; i++)
-        printf("\"%s\"\n", keys[i].name);
-
-    return 0;
-}
-
-int          print_all_binds           ( GXInput_t    *inputs )
-{
-
-    // Argument check
-    {
         #ifndef NDEBUG
-            if (inputs == (void*)0)
-                goto no_inputs;
+            if (name == 0)
+                goto noName;    
         #endif
     }
 
-    GXBind_t *i = 0;
-    
-    {
-        printf("bind name: %s\n", i->name);
 
-        printf("keys: \n");
-        for (size_t j = 0; j < i->key_count; j++)
-            printf("\t%s\n", i->keys[j]);
-
-        printf("\ncallback pointers: \n");
-        for (size_t j = 0; j < i->callback_count; j++)
-            printf("\t%p\n",i->callbacks[j]);
-
-    }
-
-    return 0;
+    return (SDL_Scancode)dict_get(key_dict, name);
 
     // Error handling
     {
-
-        // Argument errors
-        {
-            no_inputs:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null pointer provided for \"inputs\" in call to function \"%s\"\n", __FUNCSIG__);
-            #endif 
-            return 0;
-        }
+        #ifndef NDEBUG
+            noName:
+                g_print_error("[G10] [Input] No name provided to function \"%s\"\n", __FUNCSIG__);
+                return (SDL_Scancode)0;
+        #endif
     }
 }
 
@@ -1070,7 +1061,6 @@ int          process_input             ( GXInstance_t *instance )
             case SDL_MOUSEMOTION:
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-            //case SDL_MOUSEWHEEL:
             {
                 // Don't fire binds if the mouse isn't lockced
                 if (!SDL_GetRelativeMouseMode())
@@ -1087,8 +1077,8 @@ int          process_input             ( GXInstance_t *instance )
                 input.inputs.mouse_state.yrel   = y_rel;
                 input.inputs.mouse_state.button = button;
 
-                void *mouse_up = dict_get(key_dict, "jn UP");
-                printf("asdf");
+                void *mouse_up = dict_get(key_dict, "UP");
+
                 
                 //if (strcmp(iter->keys[j], "MOUSE UP")    == 0 && y_rel < 0)
                 //    fire_bind(iter, input, instance);
@@ -1108,7 +1098,9 @@ int          process_input             ( GXInstance_t *instance )
             // Key up
             // Key down
             case SDL_KEYDOWN:            
-
+            {
+               
+            }
             // Window resize
             case SDL_WINDOWEVENT:
                 switch (instance->event.window.event)
@@ -1134,33 +1126,23 @@ int          process_input             ( GXInstance_t *instance )
 
     }
 
-    /*GXBind_t* iter = instance->input->binds;
-    callback_parameter_t input;
-    while (iter)
+    GXBind_t* iter = instance->input->binds;
+    callback_parameter_t input = { 0, {0}};
     {
         u8* keyboard_state = SDL_GetKeyboardState(NULL);
 
-        for (size_t j = 0; j < iter->key_count; j++)
-        {
-            SDL_Scancode k = find_key(iter->keys[j]);
-            if (k > 512)
-                continue;
-
-            if (keyboard_state[k])
+        for (size_t i = 0; i < 110; i++)
+            if (keyboard_state[i])
             {
-                input = (callback_parameter_t) {KEYBOARD, {1}};
-                iter->active = true;
-                fire_bind(iter, input, instance);
-            }
-            else if(iter->active == true) {
-                input = (callback_parameter_t){ KEYBOARD, {0} };
-                iter->active = false;
-                fire_bind(iter, input, instance);
-            }
-
-        }
-
-    }*/
+                GXBind_t *bind = dict_get(instance->input->bind_lut, keys[i].name);
+                if( bind )
+                    while (bind)
+                    {
+                        fire_bind(bind, input, instance);
+                        bind = bind->next;
+                    }
+            }       
+    }
 
     return 0;
 
@@ -1184,7 +1166,29 @@ int          process_input             ( GXInstance_t *instance )
 
     }
 }
- 
+
+int          append_bind               ( GXInput_t *input, GXBind_t *bind )
+{
+    for (size_t i = 0; i < bind->key_count; i++)
+    {
+        GXBind_t* b = dict_get(input->bind_lut, bind->keys[i]);
+        if (b)
+        {
+            while (b->next)
+                b = b->next;
+            b->next = bind;
+        }
+        else
+        {
+            dict_add(input->bind_lut, bind->keys[i], bind);
+        }
+    }
+
+    dict_add(input->binds, bind->name, bind);
+    
+    return 1;
+}
+
 int          fire_bind                 ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance )
 {
 
@@ -1275,6 +1279,7 @@ int          remove_bind               ( GXInput_t    *input   , GXBind_t       
                 g_print_error("[G10] [Input] Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCSIG__);
             #endif
             return 0;
+
             no_bind:
             #ifndef NDEBUG
                 g_print_error("[G10] [Input] Null pointer provided for \"bind\" in call to function \"%s\"\n", __FUNCSIG__);

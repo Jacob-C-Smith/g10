@@ -13,6 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\G10">
+      <UniqueIdentifier>{d49398ab-e5fb-4d9f-a326-1333e4b68ead}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Scene">
+      <UniqueIdentifier>{dac7a9f9-fa1c-4c7e-ae44-38081bb12810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Scene\Entity">
+      <UniqueIdentifier>{04170ec5-82aa-4961-84ef-526c807b3dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Texture">
+      <UniqueIdentifier>{f92122dc-71e2-423b-9729-4a535a699906}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Audio">
+      <UniqueIdentifier>{d8a2d3a1-de02-41b8-8414-0c941769859d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -33,24 +48,75 @@
     <ClCompile Include="GXEntity.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GXPart.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXTexture.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXAudio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXTransform.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXQuaternion.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXCamera.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXShader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXScheduler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\G10\G10.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXtypedef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\G10\GXInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXMaterial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXScene.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\G10\G10.h">
+      <Filter>Header Files\G10</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXEntity.h">
+      <Filter>Header Files\G10\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXScene.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXInput.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXPart.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXMaterial.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXAudio.h">
+      <Filter>Header Files\G10\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXTransform.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXLinear.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXQuaternion.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXCamera.h">
+      <Filter>Header Files\G10\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXTexture.h">
+      <Filter>Header Files\G10\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXScheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

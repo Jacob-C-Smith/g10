@@ -20,19 +20,21 @@
 
 struct GXBind_s
 {
-	bool      active;
-	char     *name,
-	   	    **keys;
-	void    **callbacks;
-	size_t    key_count,
-		      callback_count,
-		      callback_max;
+	bool             active;
+	char            *name,
+	   	           **keys;
+	void           **callbacks;
+	size_t           key_count,
+		             callback_count,
+		             callback_max;
+	struct GXBind_s *next;
 };
 
 struct GXInput_s
 {
 	char *name;
-	dict *binds;
+	dict *bind_lut,
+		 *binds;
 };
 
 enum input_state_e
@@ -58,19 +60,20 @@ struct callback_parameter_s
 };
 
 // Allocators
-int          create_bind              ( GXBind_t    **bind );
 int          create_input             ( GXInput_t   **input );
+int          create_bind              ( GXBind_t    **bind );
 
 // Constructors
-int          load_input               ( GXInput_t   **input, const char path[] );
-int          load_input_as_json       ( GXInput_t   **input, char      *token );
-int          load_input_as_json_n     ( GXInput_t   **input, char      *token_text, size_t len );
-int          load_bind_as_json        ( GXBind_t    **bind,  char      *token );
+int          load_input               ( GXInput_t   **input, const char  path[] );
+int          load_input_as_json       ( GXInput_t   **input, char       *token );
+int          load_input_as_json_n     ( GXInput_t   **input, char       *token_text, size_t   len );
+int          load_bind_as_json        ( GXBind_t    **bind , char       *token );
+int          construct_bind           ( GXBind_t    **bind , char       *name      , char   **keys );
 
-// Callback registration
+// Callback addition
 int          register_bind_callback   ( GXBind_t *bind       , void                 *function_pointer );
 
-// Callback removal
+// Callback remove
 int          unregister_bind_callback ( GXBind_t *bind       , void                 *function_pointer );
 
 // Keycode finder
@@ -82,6 +85,9 @@ int          print_all_binds          ( GXInput_t    *inputs );
 
 // Input processing
 int          process_input            ( GXInstance_t *instance );
+
+// Bind appending
+int          append_bind              ( GXInput_t *input, GXBind_t *bind );
 
 // Bind firing
 int          fire_bind                ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance);

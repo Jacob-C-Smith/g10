@@ -170,6 +170,10 @@ typedef struct connect_s connect_t;
 struct chat_s;
 typedef struct chat_s chat_t;
 
+// Scheduler
+struct GXScheduler_s;
+typedef struct GXScheduler_s GXScheduler_t;
+
 // Displace rotate command
 struct displace_rotate_s;
 typedef struct displace_rotate_s displace_rotate_t;
