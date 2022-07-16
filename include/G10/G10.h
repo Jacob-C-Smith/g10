@@ -43,6 +43,7 @@ struct GXInstance_s
 	VkQueue                   present_queue;
 	VkSwapchainKHR            swap_chain;
 	VkImage                  *swap_chain_images;
+	u32                       image_count;
 	VkFormat                  swap_chain_image_format;
 	VkExtent2D                swap_chain_extent;
 	VkImageView              *swap_chain_image_views;
@@ -55,6 +56,7 @@ struct GXInstance_s
 	VkSemaphore              *image_available_semaphores;
 	VkSemaphore              *render_finished_semaphores;
 	VkFence                   in_flight_fences;
+	VkCommandBuffer           command_buffer;
 
 	u32                       current_frame;
 	bool                      framebuffer_resized;
@@ -95,45 +97,46 @@ struct GXInstance_s
 };
 
 // Allocators
-int           g_init                ( GXInstance_t     **instance, const char *path);
+DLLEXPORT int           g_init                ( GXInstance_t     **instance, const char *path);
 
 // File operations
-size_t        g_load_file           ( const char        *path    , void       *buffer, bool binaryMode); 
+DLLEXPORT size_t        g_load_file           ( const char        *path    , void       *buffer, bool binaryMode);
 
 // Window operations
-int           g_clear               ( void );
-int           g_swap                ( GXInstance_t        *instance );
-int           g_window_resize       ( GXInstance_t        *instance );
+DLLEXPORT int           g_clear               ( void );
+DLLEXPORT int           g_swap                ( GXInstance_t        *instance );
+DLLEXPORT int           g_window_resize       ( GXInstance_t        *instance );
 
-int           g_delta               ( GXInstance_t        *instance );
-float         g_time                ( GXInstance_t        *instance );
+DLLEXPORT int           g_delta               ( GXInstance_t        *instance );
+DLLEXPORT float         g_time                ( GXInstance_t        *instance );
  
 
 // Debug logging
-int           g_print_error         ( const char *const  format  , ... );
-int           g_print_warning       ( const char *const  format  , ... );
-int           g_print_log           ( const char *const  format  , ... );
+DLLEXPORT int           g_print_error         ( const char *const  format  , ... );
+DLLEXPORT int           g_print_warning       ( const char *const  format  , ... );
+DLLEXPORT int           g_print_log           ( const char *const  format  , ... );
 
 // Getters
-GXInstance_t* g_get_active_instance ( void );
+DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 
 // Cache operations
-int           g_cache_material      ( GXInstance_t        *instance, GXMaterial_t *material );
-int           g_cache_part          ( GXInstance_t        *instance, GXPart_t     *part );
-int           g_cache_shader        ( GXInstance_t        *instance, GXShader_t   *shader );
+DLLEXPORT int           g_cache_material      ( GXInstance_t        *instance, GXMaterial_t *material );
+DLLEXPORT int           g_cache_part          ( GXInstance_t        *instance, GXPart_t     *part );
+DLLEXPORT int           g_cache_shader        ( GXInstance_t        *instance, GXShader_t   *shader );
+DLLEXPORT void          g_user_exit           ( callback_parameter_t *input, GXInstance_t *instance);
 
-GXMaterial_t *g_find_material       ( GXInstance_t        *instance, char         *name );
-GXPart_t     *g_find_part           ( GXInstance_t        *instance, char         *name );
-GXShader_t   *g_find_shader         ( GXInstance_t        *instance, char         *name );
+DLLEXPORT GXMaterial_t *g_find_material       ( GXInstance_t        *instance, char         *name );
+DLLEXPORT GXPart_t     *g_find_part           ( GXInstance_t        *instance, char         *name );
+DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, char         *name );
 
 // Conversions
-inline float  to_degrees            ( float radians ) 
+DLLEXPORT inline float  to_degrees            ( float radians )
 {
-    return radians * (180 / (float)M_PI);
+    return radians * (180.f / (float)M_PI);
 }
-inline float  to_radians            ( float degrees ) 
+DLLEXPORT inline float  to_radians            ( float degrees )
 {
-    return  degrees * ((float)M_PI / 180);
+    return  degrees * ((float)M_PI / 180.f);
 }
 
-int           g_exit                ( GXInstance_t      *instance );
+DLLEXPORT int           g_exit                ( GXInstance_t      *instance );

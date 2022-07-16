@@ -3,12 +3,52 @@
 static GXInstance_t *active_instance = 0;
 FILE                *log_file;
 
-void create_vulkan_instance(void);
+void create_vulkan_instance(char **requested_instance_extensions, char **requested_validation_layers);
 void create_surface(void);
-void pick_physical_device(void);
-void create_logical_device(void);
+void setup_debug_messenger(void);
+void pick_physical_device(char** required_extension_names);
+void create_logical_device(char** required_extension_names);
 void create_swap_chain(void);
-int check_vulkan_device(GXInstance_t* instance, VkPhysicalDevice physical_device, char** required_extension_names);
+void create_image_views();
+void create_render_pass();
+void create_framebuffers();
+void create_command_pool();
+void create_command_buffer();
+void record_command_buffer(VkCommandBuffer command_buffer, uint32_t image_index);
+void create_sync_objects();
+
+int  check_vulkan_device(GXInstance_t* instance, VkPhysicalDevice physical_device, char** required_extension_names);
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+
+    switch (messageSeverity)
+    {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            printf("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            g_print_log("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            g_print_warning("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            g_print_error("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
+            break;
+    }
+
+    return VK_FALSE;
+}
+
+VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+    PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if (func != 0) {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
+    else {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}
 
 int           g_init                 ( GXInstance_t      **instance, const char   *path)
 {
@@ -21,27 +61,27 @@ int           g_init                 ( GXInstance_t      **instance, const char 
     }
 
     // Initialized data
-    GXInstance_t *ret                         = calloc(1, sizeof(GXInstance_t));
-    size_t        token_text_len              = g_load_file(path, 0, false),
-                  token_count                 = 0,
-                  part_cache_count            = 32,
-                  material_cache_count        = 32,
-                  shader_cache_count          = 8,
-                  loading_thread_count        = 4;
-    dict         *instance_json_object        = 0;
-    char         *token_text                  = calloc(token_text_len, sizeof(u8)),
-                 *name                        = "Instance",
-                 *window_title                = "G10",
-                **requested_validation_layers = 0,
-                **instance_extensions         = 0,
-                **device_extensions           = 0,
-                 *requested_physical_device   = 0,
-                 *initial_scene               = 0,
-                 *log_file_i                  = 0,
-                 *input                       = 0;
-    size_t        window_width                = 0,
-                  window_height               = 0;
-    bool          fullscreen                  = false;
+    GXInstance_t *ret                           = calloc(1, sizeof(GXInstance_t));
+    size_t        token_text_len                = g_load_file(path, 0, false),
+                  token_count                   = 0,
+                  part_cache_count              = 32,
+                  material_cache_count          = 32,
+                  shader_cache_count            = 8,
+                  loading_thread_count          = 4;
+    dict         *instance_json_object          = 0;
+    char         *token_text                    = calloc(token_text_len, sizeof(u8)),
+                 *name                          = "Instance",
+                 *window_title                  = "G10",
+                **requested_validation_layers   = 0,
+                **requested_instance_extensions = 0,
+                **device_extensions             = 0,
+                 *requested_physical_device     = 0,
+                 *initial_scene                 = 0,
+                 *log_file_i                    = 0,
+                 *input                         = 0;
+    size_t        window_width                  = 0,
+                  window_height                 = 0;
+    bool          fullscreen                    = false;
 
 
     // Instance initialization
@@ -139,14 +179,14 @@ int           g_init                 ( GXInstance_t      **instance, const char 
             }
 
             // Requested instance extensions
-            {
-                token                       = dict_get(instance_json_object, "vulkan instance extensions");
-                instance_extensions         = JSON_VALUE(token, JSONarray);
+             {
+                token                         = dict_get(instance_json_object, "vulkan instance extensions");
+                requested_instance_extensions = JSON_VALUE(token, JSONarray);
             }
 
             // Requested device extensions
             {
-                token = dict_get(instance_json_object, "vulkan device extensions");
+                token             = dict_get(instance_json_object, "vulkan device extensions");
                 device_extensions = JSON_VALUE(token, JSONarray);
             }
 
@@ -190,10 +230,18 @@ int           g_init                 ( GXInstance_t      **instance, const char 
 
     // Vulkan initialization
     {
-        create_vulkan_instance();
+        create_vulkan_instance(requested_instance_extensions, requested_validation_layers);
         create_surface();
         pick_physical_device(device_extensions);
         create_logical_device(device_extensions);
+        create_swap_chain();
+        create_render_pass();
+        create_image_views();
+        create_render_pass();
+        create_framebuffers();
+        create_command_pool();
+        create_command_buffer();
+        create_sync_objects();
     }
 
     // G10 Initialization
@@ -226,6 +274,16 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                 init_input();
             }
 
+            // Audio initialization
+            {
+
+                // Get an external function
+                extern int init_audio(void);
+
+                // Run the audio system initializer
+                init_audio();
+            }
+
             // Material initialization
             {
                 GXMaterial_t* missing_material = 0;
@@ -244,7 +302,7 @@ int           g_init                 ( GXInstance_t      **instance, const char 
             dict_construct(&ret->cached_parts, ((material_cache_count) ? (material_cache_count) : 128));
 
             // Default to 32 cached shaders.
-            dict_construct(&ret->cached_materials, ((material_cache_count) ? (material_cache_count) : 32));
+            dict_construct(&ret->cached_shaders, ((shader_cache_count) ? (shader_cache_count) : 32));
         }
 
         // Load an input set
@@ -352,20 +410,24 @@ int           g_init                 ( GXInstance_t      **instance, const char 
 
 }
 
-void create_vulkan_instance ( void )
+void create_vulkan_instance ( char **requested_instance_extensions, char **requested_validation_layers )
 {
     GXInstance_t          *instance                  = g_get_active_instance();
 
     VkApplicationInfo     *application_info          = calloc(1, sizeof(VkApplicationInfo));
-    VkInstanceCreateInfo  *create_info               = calloc(1, sizeof(VkInstanceCreateInfo));
+    VkInstanceCreateInfo  *instance_create_info               = calloc(1, sizeof(VkInstanceCreateInfo));
     VkDebugUtilsMessengerCreateInfoEXT *debug_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));;
     char                 **required_extensions       = 0,
                          **requested_extensions      = 0;
     dict                  *extensions                = 0;
     u32                    required_extension_count  = 0,
-                           requested_extension_count = 0;
+                           requested_extension_count = 0,
+                           requested_layers_count    = 0;
+    
     VkResult               result                    = 0;
     
+    while (requested_instance_extensions[++requested_extension_count]);
+
     // Populate application info struct
     {
         application_info->sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -378,8 +440,8 @@ void create_vulkan_instance ( void )
 
     // Populate instance create info struct
     {
-        create_info->sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        create_info->pApplicationInfo = application_info;
+        instance_create_info->sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        instance_create_info->pApplicationInfo = application_info;
         
         // Get a list of the required instance extensions from SDL
         SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, (void *) 0);
@@ -390,18 +452,33 @@ void create_vulkan_instance ( void )
         dict_from_keys(&extensions, required_extensions, required_extension_count);
 
         // TODO: Add support for user defined extensions
+        instance_create_info->enabledExtensionCount   = required_extension_count;
+        instance_create_info->ppEnabledExtensionNames = required_extensions;
 
-        
-        
+        while (requested_validation_layers[++requested_layers_count]);
 
-        create_info->enabledExtensionCount  = required_extension_count;
-        create_info->ppEnabledExtensionNames = required_extensions;
+        instance_create_info->enabledLayerCount   = requested_layers_count;
+        instance_create_info->ppEnabledLayerNames = requested_validation_layers;
+
+        setup_debug_messenger(&instance_create_info->pNext);
     }
     
     
 
-    result = vkCreateInstance(create_info, (void*)0, &instance->instance);
+    result = vkCreateInstance(instance_create_info, (void*)0, &instance->instance);
     
+}
+
+void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenger_create_info )
+{
+    VkDebugUtilsMessengerCreateInfoEXT *i_debug_messenger_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));
+
+    i_debug_messenger_create_info->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    i_debug_messenger_create_info->messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    i_debug_messenger_create_info->messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    i_debug_messenger_create_info->pfnUserCallback = debug_callback;
+
+    *debug_messenger_create_info = i_debug_messenger_create_info;
 }
 
 void create_surface ( void )
@@ -439,23 +516,21 @@ no_devices:;
 
 void create_logical_device ( char **required_extension_names )
 {
-    GXInstance_t             *instance = g_get_active_instance();
-    VkDeviceQueueCreateInfo  *queue_create_infos = calloc(2, sizeof(VkDeviceQueueCreateInfo));
-    VkPhysicalDeviceFeatures *device_features = calloc(1, sizeof(VkPhysicalDeviceFeatures));
-    VkDeviceCreateInfo* device_create_info = calloc(1, sizeof(VkDeviceCreateInfo));
-    VkBool32 result = 0;
-    u32 unique_queue_families[2] = { instance->queue_family_indices.g, instance->queue_family_indices.p };
+    GXInstance_t             *instance                 = g_get_active_instance();
+    VkDeviceQueueCreateInfo  *queue_create_infos       = calloc(2, sizeof(VkDeviceQueueCreateInfo));
+    VkPhysicalDeviceFeatures *device_features          = calloc(1, sizeof(VkPhysicalDeviceFeatures));
+    VkDeviceCreateInfo       *device_create_info       = calloc(1, sizeof(VkDeviceCreateInfo));
+    VkBool32                  result                   = 0;
+    u32                       unique_queue_families[2] = { instance->queue_family_indices.g, instance->queue_family_indices.p };
 
     instance->priority = 1.f;
 
     for (size_t i = 0; i < 2; i++)
     {
-        VkDeviceQueueCreateInfo iter = queue_create_infos[i];
-
-        iter.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        iter.queueFamilyIndex = unique_queue_families[i];
-        iter.queueCount = 1;
-        iter.pQueuePriorities = &instance->priority;
+        queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_create_infos[i].queueFamilyIndex = i;
+        queue_create_infos[i].queueCount = 1;
+        queue_create_infos[i].pQueuePriorities = &instance->priority;
     }
 
     device_create_info->sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -472,7 +547,6 @@ void create_logical_device ( char **required_extension_names )
         printf("failed to create logical device!");
     }
 
-
     vkGetDeviceQueue(instance->device, unique_queue_families[0], 0, &instance->graphics_queue);
     vkGetDeviceQueue(instance->device, unique_queue_families[1], 0, &instance->present_queue);
 
@@ -480,6 +554,212 @@ void create_logical_device ( char **required_extension_names )
 
 void create_swap_chain ( void )
 {
+
+    // Uninitialized data
+    VkSurfaceFormatKHR        surface_format;
+    VkPresentModeKHR          present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+    VkExtent2D                extent;
+
+    // Initialized data
+    GXInstance_t             *instance               = g_get_active_instance();
+    VkSwapchainCreateInfoKHR *swapchain_create_info  = calloc(1, sizeof(VkSwapchainCreateInfoKHR));
+    u32                       qfi[2]                 = { 0, 0 };
+    
+    qfi[0] = instance->queue_family_indices.g;
+    qfi[1] = instance->queue_family_indices.p;
+
+    surface_format = instance->swap_chain_details.formats[0];
+
+    for (size_t i = 0; i < 2; i++)
+        if (instance->swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            surface_format = instance->swap_chain_details.formats[i];
+    
+    extent.width  = 1280;
+    extent.height = 720;
+
+    // TODO: Check memory
+    swapchain_create_info->sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchain_create_info->surface          = instance->surface;
+    swapchain_create_info->minImageCount    = 2;
+    swapchain_create_info->imageFormat      = surface_format.format;
+    swapchain_create_info->imageColorSpace  = surface_format.colorSpace;
+    swapchain_create_info->imageExtent      = extent;
+    swapchain_create_info->imageArrayLayers = 1;
+    swapchain_create_info->imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    
+    if (instance->queue_family_indices.g != instance->queue_family_indices.p)
+    {
+        swapchain_create_info->imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        swapchain_create_info->queueFamilyIndexCount = 2;
+        swapchain_create_info->pQueueFamilyIndices = &qfi;
+    }
+    else
+        swapchain_create_info->imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+
+    swapchain_create_info->preTransform   = instance->swap_chain_details.capabilities.currentTransform;
+    swapchain_create_info->compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapchain_create_info->presentMode    = present_mode;
+    swapchain_create_info->clipped        = VK_TRUE;
+
+    swapchain_create_info->oldSwapchain   = VK_NULL_HANDLE;
+
+
+    if (vkCreateSwapchainKHR(instance->device, swapchain_create_info, 0, &instance->swap_chain))
+        // TODO: Replace with goto
+        printf("FAILED TO CREATE SWAPCHAIN");
+
+    vkGetSwapchainImagesKHR(instance->device, instance->swap_chain, &instance->image_count, 0);
+
+    instance->swap_chain_images = calloc(instance->image_count, sizeof(VkImage));
+
+    vkGetSwapchainImagesKHR(instance->device, instance->swap_chain, &instance->image_count, instance->swap_chain_images);
+
+    instance->swap_chain_image_format = surface_format.format;
+    instance->swap_chain_extent       = extent;
+}
+
+void create_image_views() {
+    GXInstance_t          *instance = g_get_active_instance();
+    
+    instance->swap_chain_image_views = calloc(instance->image_count, sizeof(VkImageView));
+    
+    for (size_t i = 0; i < instance->image_count; i++)
+    {
+        VkImageViewCreateInfo* image_view_create_info = calloc(1, sizeof(VkImageViewCreateInfo));
+
+        image_view_create_info->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        image_view_create_info->image = instance->swap_chain_images[i];
+        image_view_create_info->viewType = VK_IMAGE_VIEW_TYPE_2D;
+        image_view_create_info->format = instance->swap_chain_image_format;
+
+        image_view_create_info->components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_create_info->components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_create_info->components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_create_info->components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        image_view_create_info->subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        image_view_create_info->subresourceRange.baseMipLevel = 0;
+        image_view_create_info->subresourceRange.levelCount = 1;
+        image_view_create_info->subresourceRange.baseArrayLayer = 0;
+        image_view_create_info->subresourceRange.layerCount = 1;
+
+        image_view_create_info->flags = 0;
+
+        image_view_create_info->pNext = 0;
+
+        if (vkCreateImageView(instance->device, image_view_create_info, 0, &instance->swap_chain_image_views[i]) != VK_SUCCESS) {
+            g_print_error("failed to create image views!\n");
+        }
+        
+    }
+}
+
+void create_render_pass() {
+    GXInstance_t *instance = g_get_active_instance();
+    VkAttachmentDescription *color_attachment = calloc(1, sizeof(VkAttachmentDescription));
+    VkAttachmentReference   *color_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
+    VkSubpassDescription    *subpass                    = calloc(1, sizeof(VkSubpassDescription));
+    VkRenderPassCreateInfo  *render_pass_create_info    = calloc(1, sizeof(VkRenderPassCreateInfo));
+
+    color_attachment->format = instance->swap_chain_image_format;
+    color_attachment->samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment->stencilLoadOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment->finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    color_attachment_reference->attachment = 0;
+    color_attachment_reference->layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    //The index of the attachment in this array is directly referenced from the fragment shader with the layout(location = 0) out vec4 outColor directive!
+    subpass->pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass->colorAttachmentCount = 1;
+    subpass->pColorAttachments = color_attachment_reference;
+
+    render_pass_create_info->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_create_info->attachmentCount = 1;
+    render_pass_create_info->pAttachments = color_attachment;
+    render_pass_create_info->subpassCount = 1;
+    render_pass_create_info->pSubpasses = subpass;
+
+    if (vkCreateRenderPass(instance->device, render_pass_create_info, 0, &instance->render_pass) != VK_SUCCESS) {
+        g_print_error("failed to create render pass!\n");
+    }
+}
+
+void create_framebuffers()
+{
+    GXInstance_t* instance = g_get_active_instance();
+    instance->swap_chain_framebuffers = calloc(instance->image_count, sizeof(VkFramebuffer));
+    for (size_t i = 0; i < instance->image_count; i++)
+    {
+        VkImageView attachments[1] = {
+            instance->swap_chain_image_views[i]
+        };
+
+        VkFramebufferCreateInfo* framebuffer_create_info = calloc(1, sizeof(VkFramebufferCreateInfo));
+        framebuffer_create_info->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_create_info->renderPass = instance->render_pass;
+        framebuffer_create_info->attachmentCount = 1;
+        framebuffer_create_info->pAttachments = attachments;
+        framebuffer_create_info->width = instance->swap_chain_extent.width;
+        framebuffer_create_info->height = instance->swap_chain_extent.height;
+        framebuffer_create_info->layers = 1;
+
+        if (vkCreateFramebuffer(instance->device, framebuffer_create_info, 0, &instance->swap_chain_framebuffers[i]) != VK_SUCCESS)
+            g_print_error("Failed to create framebuffer!\n");
+    }
+}
+
+void create_command_pool()
+{
+    GXInstance_t* instance = g_get_active_instance();
+    VkCommandPoolCreateInfo* pool_create_info = calloc(1, sizeof(VkCommandPoolCreateInfo));
+
+    pool_create_info->sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_create_info->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_create_info->queueFamilyIndex = instance->queue_family_indices.g;
+
+    if (vkCreateCommandPool(instance->device, pool_create_info, 0, &instance->command_pool)!=VK_SUCCESS)
+        g_print_error("Failed to create command pool!\n");
+}
+
+void create_command_buffer()
+{
+    GXInstance_t *instance = g_get_active_instance();
+
+    VkCommandBufferAllocateInfo* alloc_info = calloc(1, sizeof(VkCommandBufferAllocateInfo));
+
+    alloc_info->sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info->commandPool        = instance->command_pool;
+    alloc_info->level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info->commandBufferCount = 1;
+
+    if (vkAllocateCommandBuffers(instance->device, alloc_info, &instance->command_buffer) != VK_SUCCESS) {
+        g_print_error("failed to allocate command buffers!\n");
+    }
+}
+
+void create_sync_objects()
+{
+    GXInstance_t *instance = g_get_active_instance();
+
+    VkSemaphoreCreateInfo *semaphore_create_info = calloc(1, sizeof(VkSemaphoreCreateInfo));
+    VkFenceCreateInfo     *fence_create_info     = calloc(1, sizeof(VkFenceCreateInfo));
+
+    semaphore_create_info->sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    fence_create_info->sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_create_info->flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    if (vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->image_available_semaphores) != VK_SUCCESS ||
+        vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->render_finished_semaphores) != VK_SUCCESS ||
+        vkCreateFence(instance->device, fence_create_info, 0, &instance->in_flight_fences) != VK_SUCCESS) {
+        g_print_error("failed to create semaphores!\n");
+    }
 
 }
 
@@ -589,7 +869,7 @@ int check_vulkan_device  ( GXInstance_t *instance, VkPhysicalDevice physical_dev
 
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->surface, &present_mode_count, instance->swap_chain_details.present_modes);
             
-            if ((bool)(present_mode_count)& (bool)(format_count)==true)
+            if ((bool)(present_mode_count) & (bool)(format_count)==true)
             {
                 has_swap_chain = true;
             }
@@ -921,6 +1201,11 @@ int           g_cache_shader         ( GXInstance_t       *instance, GXShader_t 
     }
 }
 
+void          g_user_exit(callback_parameter_t* input, GXInstance_t* instance)
+{
+    instance->running = false;
+}
+
 GXMaterial_t *g_find_material        ( GXInstance_t       *instance, char         *name )
 {
     // Argument check
@@ -1039,7 +1324,7 @@ int           g_exit                 ( GXInstance_t       *instance )
 
     // G10 Cleanup
     {
-        free(instance->name);
+        //free(instance->name);
     }
 
     // Vulkan cleanup
@@ -1047,8 +1332,8 @@ int           g_exit                 ( GXInstance_t       *instance )
         
         vkDestroySwapchainKHR(instance->device, instance->swap_chain, (void*)0);
         vkDestroySurfaceKHR(instance->instance, instance->surface, (void*)0);
-        vkDestroyInstance(instance->instance, (void *)0);
-        vkDestroyDevice(instance->device, (void *)0);
+        vkDestroyDevice(instance->device, (void*)0);
+        vkDestroyInstance(instance->instance, (void*)0);
     }
 
     // SDL Cleanup
@@ -1059,6 +1344,8 @@ int           g_exit                 ( GXInstance_t       *instance )
     
     free(instance);
     
+    g_print_log("[G10] Exit successful\n");
+
     return 0;
 
     // Error handling

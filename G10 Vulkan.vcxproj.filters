@@ -72,6 +72,9 @@
     <ClCompile Include="GXScheduler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GXAI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\G10\GXtypedef.h">
@@ -117,6 +120,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXScheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXAI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

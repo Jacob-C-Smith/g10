@@ -154,6 +154,14 @@ typedef struct GXParticleSystem_s GXParticleSystem_t;
 struct GXParticle_s;
 typedef struct GXParticle_s GXParticle_t;
 
+// AI
+struct GXAI_s;
+typedef struct GXAI_s GXAI_t;
+
+// Sound
+struct GXSound_s;
+typedef struct GXSound_s GXSound_t;
+
 // Server
 struct GXServer_s;
 typedef struct GXServer_s GXServer_t;

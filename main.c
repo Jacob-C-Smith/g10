@@ -23,17 +23,17 @@ int main(int argc, const char* argv[])
 	// Create a debug instance
 	g_init(&instance, "G10/Debug instance.json");
 
-	load_shader(&shader, "G10/shaders/G10 PBR.json");
+	load_shader(&shader, "G10/shaders/G10 triange.json");
 
 	instance->running = true;
 	
 	GXBind_t *exit_bind = find_bind(instance->input, "QUIT");
-	register_bind_callback(exit_bind, &g_exit);
+	register_bind_callback(exit_bind, &g_user_exit);
 
-	// Game loop
-	while (instance->running)
+	// CONTROLLER TESTING
+	// TODO: Integrate into input system
 	{
-		/*
+				/*
 		 
 		SDL_GameController* controller = NULL;
 
@@ -92,9 +92,18 @@ int main(int argc, const char* argv[])
 			else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP))
 				printf("UP\r");*/
 			
+	}
+
+	// Game loop
+	while (instance->running)
+	{
 		process_input(instance);
 
+		draw_scene(0, shader);
+
 	}
+
+	vkDeviceWaitIdle(instance->device);
 
 	g_exit(instance);
 

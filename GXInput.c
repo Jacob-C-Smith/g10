@@ -858,6 +858,7 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
                 g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n", __FUNCSIG__);
                 return 0;
             #endif
+                return 0;
         }
 
         // JSON type errors
@@ -1064,7 +1065,7 @@ int          process_input             ( GXInstance_t *instance )
             {
                 // Don't fire binds if the mouse isn't lockced
                 if (!SDL_GetRelativeMouseMode())
-                    ;// break;
+                    break;
 
                 u8 button = 0;
 

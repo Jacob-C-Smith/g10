@@ -13,7 +13,7 @@ struct GXShader_s
     char           *name;
     VkShaderModule  vertex_shader_module,
                     fragment_shader_module;
-
+    VkPipeline      pipeline;
 };
 
 int create_shader_module(char* code, size_t code_len, VkShaderModule* shader_module);

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <G10/GXtypedef.h>
+#include <G10/G10.h>
 
 
 struct GXEntity_s
@@ -12,6 +13,6 @@ struct GXEntity_s
 	char *name;
 };
 
-int load_entity(GXEntity_t** entity, char* path);
+DLLEXPORT int load_entity ( GXEntity_t** entity, char* path);
 
-int load_entity_as_json(GXEntity_t** entity, char* token_text);
+DLLEXPORT int load_entity_as_json(GXEntity_t** entity, char* token_text);

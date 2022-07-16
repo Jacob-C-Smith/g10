@@ -24,14 +24,13 @@ struct GXCamera_s {
           projection;
 };
 
-int create_camera       ( GXCamera_t** camera);
+// Allocators
+DLLEXPORT int create_camera       ( GXCamera_t** camera);
 
-int construct_camera    ( GXCamera_t** camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
+// Constructors
+DLLEXPORT int construct_camera    ( GXCamera_t** camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
+DLLEXPORT int load_camera         ( GXCamera_t** camera, const char* path);
+DLLEXPORT int load_camera_as_json ( GXCamera_t** camera, char* object_text, size_t len);
 
-int load_camera         ( GXCamera_t** camera, const char* path);
-
-int load_camera_as_json ( GXCamera_t** camera, char* object_text, size_t len);
-
-
-
-int destroy_camera      ( GXCamera_t* camera);
+// Deallocators
+DLLEXPORT int destroy_camera      ( GXCamera_t* camera);
