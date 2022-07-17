@@ -10,4 +10,5 @@ void init_audio(void)
 
 void load_sound(GXSound_t** sound, const char* path)
 {
+
 }

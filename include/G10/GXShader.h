@@ -6,7 +6,12 @@
 
 #include <vulkan/vulkan.h>
 
+#include <G10/GXtypedef.h>
 #include <G10/G10.h>
+
+enum {
+    uniform_type_e = 1,
+};
 
 struct GXShader_s
 {
@@ -14,6 +19,13 @@ struct GXShader_s
     VkShaderModule  vertex_shader_module,
                     fragment_shader_module;
     VkPipeline      pipeline;
+};
+
+struct GXUniform_s
+{
+    char           *name;
+    //uniform_type_t  type;
+    void           *reference;
 };
 
 int create_shader_module(char* code, size_t code_len, VkShaderModule* shader_module);

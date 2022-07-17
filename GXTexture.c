@@ -242,7 +242,107 @@ int create_texture ( GXTexture_t **texture )
 	}
 }
 
-int load_texture ( GXTexture_t **texture, const char *path, char *addressing, char *filtering )
+int load_texture(GXTexture_t** texture, char* path)
+{
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if(texture == (void *)0)
+                goto no_texture;
+            if (path == (void*)0)
+                goto no_path;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t  *instance              = g_get_active_instance();
+    GXTexture_t   *i_texture             = 0;
+    size_t         json_len              = g_load_file(path, 0, false);
+    char          *json_text             = calloc(json_len+1, sizeof(char));
+    
+    // Load the file
+    g_load_file(path, json_text, false);
+
+    // Load the texture 
+    load_texture_as_json(texture, json_text, json_len);
+
+    return 1;
+
+    no_texture:
+    no_path:
+    return 0;
+}
+
+int load_texture_as_json (GXTexture_t **texture, char *token_text, size_t token_len )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if(texture == (void *)0)
+                goto no_texture;
+            if (token_text == (void*)0)
+                goto no_token;
+        #endif
+    }
+
+    // Initialized data
+    dict                 *json_data            = 0;
+    char                 *name                 = 0,
+                         *path                 = 0;
+    VkSamplerAddressMode  sampler_address_mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    VkFilter              filter               = VK_FILTER_LINEAR;
+
+    // Parse the JSON
+    {
+
+        // Initialized data
+        JSONToken_t *token = 0;
+
+        // Parse the JSON text into a dictionary
+        parse_json(token_text, token_len, &json_data);
+
+        // Get the name
+        token = dict_get(json_data, "name");
+        name  = JSON_VALUE(token, JSONstring);
+
+        // Get the addressing mode
+        {
+            token                = dict_get(json_data, "addressing");
+
+            // Recycle the token pointer 
+            token                = JSON_VALUE(token, JSONstring);
+
+            // Get the corresponding enum value
+            sampler_address_mode = (VkSamplerAddressMode)dict_get(filtering_modes, token);
+        }
+
+        // Get the filter mode
+        {
+            token  = dict_get(json_data, "filter");
+
+            // Recycle the token pointer
+            token  = JSON_VALUE(token, JSONstring);
+
+            // Get the corresponding enum value
+            filter = (VkFilter)dict_get(filtering_modes, token);
+        }
+
+        // Get the path
+        token = dict_get(json_data, "path");
+        path  = JSON_VALUE(token, JSONstring);
+    }
+
+    return 1;
+
+    no_texture:
+    no_token:
+    return 0;
+
+
+}
+
+int load_texture_f ( GXTexture_t **texture, const char *path, VkSamplerAddressMode addressing, VkFilter filtering )
 {
 
     // Argument check

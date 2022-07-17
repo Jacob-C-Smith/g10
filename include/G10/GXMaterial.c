@@ -161,88 +161,88 @@ int load_material_as_json_n(GXMaterial_t** material, char* token_text, size_t le
 			return 0;
 	}
 
-	// Initialized data
-	GXInstance_t *instance             = g_get_active_instance();
-	GXMaterial_t *i_material           = 0;
-	dict         *material_object_json = 0;
-	JSONToken_t  *token                = 0;
+	//// Initialized data
+	//GXInstance_t *instance             = g_get_active_instance();
+	//GXMaterial_t *i_material           = 0;
+	//dict         *material_object_json = 0;
+	//JSONToken_t  *token                = 0;
 
-	// JSON data
-	char         *name                 = 0;
+	//// JSON data
+	//char         *name                 = 0;
 
-	// Allocate for the material
-	create_material(material);
+	//// Allocate for the material
+	//create_material(material);
 
-	// Get a pointer to the material
-	i_material = *material;
+	//// Get a pointer to the material
+	//i_material = *material;
 
-	// Parse token_text object into a dictionary
-	parse_json(token_text, len, &material_object_json);
+	//// Parse token_text object into a dictionary
+	//parse_json(token_text, len, &material_object_json);
 
-	// Construct the material
-	{
-		
-		// Initialized data
-		char    *textures_object_json = 0,
-			   **keys                 = 0,
-			   **values               = 0;
-		size_t   textures_len         = 0;
+	//// Construct the material
+	//{
+	//	
+	//	// Initialized data
+	//	char    *textures_object_json = 0,
+	//		   **keys                 = 0,
+	//		   **values               = 0;
+	//	size_t   textures_len         = 0;
 
-		// Get the name
-		token                = dict_get(material_object_json, "name");
-		i_material->name     = (token) ? token->value.n_where : 0;
+	//	// Get the name
+	//	token                = dict_get(material_object_json, "name");
+	//	i_material->name     = (token) ? token->value.n_where : 0;
 
-		// Get the textures object
-		token                = dict_get(material_object_json, "textures");
-		textures_object_json = (token) ? token->value.n_where : 0;
+	//	// Get the textures object
+	//	token                = dict_get(material_object_json, "textures");
+	//	textures_object_json = (token) ? token->value.n_where : 0;
 
-		// Parse the JSON into a texture dictionary
-		parse_json(textures_object_json, strlen(textures_object_json), &i_material->textures);
+	//	// Parse the JSON into a texture dictionary
+	//	parse_json(textures_object_json, strlen(textures_object_json), &i_material->textures);
 
-		// Get the texture count
-		textures_len = i_material->textures->n_entries;
+	//	// Get the texture count
+	//	textures_len = i_material->textures->n_entries;
 
-		// Allocate space for pointer lists
-		keys   = calloc(textures_len + 1, sizeof(void*));
-		values = calloc(textures_len + 1, sizeof(void*));
+	//	// Allocate space for pointer lists
+	//	keys   = calloc(textures_len + 1, sizeof(void*));
+	//	values = calloc(textures_len + 1, sizeof(void*));
 
-		// Populate the list of keys and values
-		dict_keys(i_material->textures, keys);
-		dict_values(i_material->textures, values);
+	//	// Populate the list of keys and values
+	//	dict_keys(i_material->textures, keys);
+	//	dict_values(i_material->textures, values);
 
-		// Iterate over each texture
-		for (size_t i = 0; i < textures_len; i++)
-		{
+	//	// Iterate over each texture
+	//	for (size_t i = 0; i < textures_len; i++)
+	//	{
 
-			// Initialized data
-			GXTexture_t* texture = 0;
+	//		// Initialized data
+	//		GXTexture_t* texture = 0;
 
-			// Get the JSON token
-			token = dict_get(i_material->textures, keys[i]);
+	//		// Get the JSON token
+	//		token = dict_get(i_material->textures, keys[i]);
 
-			// Error checking
-			{
-				#ifndef NDEBUG
-					if(token->type != JSONstring)
-					{
-						g_print_warning("[G10] [Material] Failed to load texture \"%s\" in call to function \"%s\". Texture will display as missing.\n", token->key, __FUNCSIG__);
-					}
-				#endif
-			}
+	//		// Error checking
+	//		{
+	//			#ifndef NDEBUG
+	//				if(token->type != JSONstring)
+	//				{
+	//					g_print_warning("[G10] [Material] Failed to load texture \"%s\" in call to function \"%s\". Texture will display as missing.\n", token->key, __FUNCSIG__);
+	//				}
+	//			#endif
+	//		}
 
-			load_texture(&texture, token->value.n_where);
+	//		load_texture(&texture, token->value.n_where);
 
-			dict_add(i_material->textures, keys[i], texture);
+	//		dict_add(i_material->textures, keys[i], texture);
 
-		}
+	//	}
 
-		free(keys);
-		free(values);
+	//	free(keys);
+	//	free(values);
 
-	}
+	//}
 
-	// Add the constructed material to the instacne cache
-	dict_add(instance->cached_materials, i_material->name, i_material);
+	//// Add the constructed material to the instacne cache
+	//dict_add(instance->cached_materials, i_material->name, i_material);
 
 	return 1;
 

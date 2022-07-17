@@ -64,6 +64,15 @@ typedef struct quaternion_s quaternion;
 struct GXInstance_s;
 typedef struct GXInstance_s GXInstance_t;
 
+// Threads
+struct GXThread_s;
+typedef struct GXThread_s GXThread_t;
+
+// Tasks
+struct GXTask_s;
+typedef struct GXTask_s GXTask_s;
+
+
 // Bind
 struct GXBind_s;
 typedef struct GXBind_s GXBind_t;
@@ -85,6 +94,9 @@ typedef struct GXEntity_s GXEntity_t;
 // Camera type
 struct GXCamera_s;
 typedef struct GXCamera_s GXCamera_t;
+
+enum uniform_type_e;
+enum uniform_type_e uniform_type_t;
 
 // Light type
 struct GXLight_s;

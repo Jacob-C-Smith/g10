@@ -70,6 +70,9 @@
     <ClInclude Include="include\G10\GXTransform.h" />
     <ClInclude Include="include\G10\GXtypedef.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="time partitioning.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -224,7 +227,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;C:\Users\j\Desktop\C Projects\G10 Vulkan\lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic Library|x64'">

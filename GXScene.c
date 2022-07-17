@@ -80,7 +80,7 @@ int load_scene(GXScene_t** scene, const char path[])
 	}
 
 	// Load the scene as a JSON token
-	load_scene_as_json_n(scene, token_text, token_text_len); 
+	load_scene_as_json(scene, token_text, token_text_len); 
 
 	return 1;
 
@@ -107,46 +107,6 @@ int load_scene(GXScene_t** scene, const char path[])
 	}
 }
 
-int load_scene_as_json(GXScene_t** scene, char* token_text)
-{
-	// Argument checking
-	{
-		#ifndef NDEBUG
-			if (scene == (void *)0)
-				goto no_scene;
-			if (token_text == (void *)0)
-				goto no_token_text;
-		#endif
-	}
-
-	// Initialized data
-	size_t token_text_len = strlen(token_text);
-	
-	// Load the scene
-	load_scene_as_json_n(scene, token_text, token_text_len);
-
-	return 1;
-
-	// Error handling
-	{
-
-		// Argument checking
-		{
-			no_scene:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
-				#endif
-				return 0;
-
-			no_token_text:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Scene] Null pointer provided for \"no_token_text\" in call to function \"%s\"\n", __FUNCSIG__);
-				#endif
-				return 0;
-		}
-	}
-}
-
 int entity_thread()
 {
 	size_t j = 0;
@@ -159,7 +119,7 @@ int entity_thread()
 	return 1;
 }
 
-int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
+int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 {
 	// Argument checking
 	{
@@ -174,7 +134,6 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 	}
 
 	// Initialized data
-	size_t        token_text_len    = strlen(token_text);
 	GXScene_t    *i_scene           = 0;
 	dict         *scene_json_object = 0;
 
@@ -228,22 +187,27 @@ int load_scene_as_json_n(GXScene_t** scene, char* token_text, size_t len)
 		char         *entity_text          = entities[0];
 		GXEntity_t   *entity               = 0;
 		size_t        loading_thread_count = instance->loading_thread_count;
-		SDL_Thread  **threads              = 0;
 		
 		// TODO: Thread
-		threads = calloc(loading_thread_count + 1, sizeof(void*));
+		//threads = calloc(loading_thread_count + 1, sizeof(GXThread_t));
 
 		// TODO: Spawn some worker threads to load entities
-		for (size_t i = 0; i < loading_thread_count; i++)
-		{
-			//threads[i] = SDL_CreateThread(entity_thread, "", (void *)0);
-		}
+		//for (size_t i = 0; i < loading_thread_count; i++)
+		//{
+			// Very cursed idea:
+			// Use malloca
+		//	GXThread_t *work 
+		//	threads[i] = SDL_CreateThread(entity_thread, "", (void *)i);
 
-		for (size_t i = 0; i < loading_thread_count; i++)
-		{
-			int ret = 0;
-			SDL_WaitThread(threads[i], &ret);
-		}
+
+		//}
+
+		// Wait for each thread to finish execution before continuing
+		//for (size_t i = 0; i < loading_thread_count; i++)
+		//{
+		//	int ret = 0;
+		//	SDL_WaitThread(threads[i], &ret);
+		//}
 
 		//{
 		//	// Differentiate between objects and paths
@@ -506,6 +470,8 @@ int append_light(GXScene_t* scene, GXLight_t* light)
 int draw_scene(GXScene_t* scene, GXShader_t *shader)
 {
 
+	// TODO: Partition into draw_frame and draw_scene
+
 	// Uninitialized data
 	u32                       image_index;
 
@@ -513,7 +479,7 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 	GXInstance_t             *instance                = g_get_active_instance();
 	VkCommandBufferBeginInfo *begin_info              = calloc(1, sizeof(VkCommandBufferBeginInfo));
 	VkRenderPassBeginInfo    *render_pass_begin_info  = calloc(1, sizeof(VkRenderPassBeginInfo));
-	VkClearValue              clear_color             = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	VkClearValue              clear_color             = { {{0.2f, 0.3f, 0.3f, 1.0f}} };
 	VkViewport               *viewport                = calloc(1, sizeof(VkViewport));
 	VkSemaphore               wait_semaphores[]       = { instance->image_available_semaphores };
 	VkSemaphore               signal_semaphores[]     = { instance->render_finished_semaphores };
@@ -531,10 +497,8 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 	vkResetCommandBuffer(instance->command_buffer, 0);
 	
 	//record_command_buffer(instance->command_buffer, image_index);
-
+	
 	{
-
-
 		begin_info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 		vkBeginCommandBuffer(instance->command_buffer, begin_info);
@@ -545,7 +509,6 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 		render_pass_begin_info->renderArea.offset.x = 0;
 		render_pass_begin_info->renderArea.offset.y = 0;
 		render_pass_begin_info->renderArea.extent   = instance->swap_chain_extent;
-			
 
 		render_pass_begin_info->clearValueCount = 1;
 		render_pass_begin_info->pClearValues = &clear_color;
@@ -567,7 +530,6 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 		scissor->offset.y = 0;
 
 		scissor->extent = instance->swap_chain_extent;
-
 
 		vkCmdSetScissor(instance->command_buffer, 0, 1, scissor);
 

@@ -7,6 +7,8 @@
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 
+#include <SDL2/SDL_audio.h>
+
 struct GXSound_s
 {
 	int i;

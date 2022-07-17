@@ -76,22 +76,14 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                 **requested_instance_extensions = 0,
                 **device_extensions             = 0,
                  *requested_physical_device     = 0,
+                 *max_buffered_frames           = 0,
                  *initial_scene                 = 0,
                  *log_file_i                    = 0,
-                 *input                         = 0;
+                 *input                         = 0,
+                 *scheduler                     = 0;
     size_t        window_width                  = 0,
                   window_height                 = 0;
     bool          fullscreen                    = false;
-
-
-    // Instance initialization
-    {
-        // Set the instance
-        *instance = ret;
-
-        // Set the active instance
-        active_instance = ret;
-    }
 
     // Load the file
     g_load_file(path, token_text, false);
@@ -195,142 +187,181 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                 token                     = dict_get(instance_json_object, "vulkan physical device");
                 requested_physical_device = JSON_VALUE(token, JSONstring);
             }
+
+            // Max buffered frames
+            {
+                token                     = dict_get(instance_json_object, "max buffered frames");
+                max_buffered_frames       = JSON_VALUE(token, JSONprimative);
+            }
+        }
+
+        // Scheduler
+        {
+            token = dict_get(instance_json_object, "scheduler");
+            scheduler = JSON_VALUE(token, JSONobject);
         }
 
     }
+
+    
+    // Instance initialization
+    {
+        // Set the instance
+        *instance = ret;
+
+        // Set the active instance
+        active_instance = ret;
+
+        ret->window_width = window_width;
+        ret->window_height = window_height;
+
+    }
+
 
     // Set the log file before doing anything else
     {
-        if (log_file_i)
-            log_file = fopen(log_file_i, "w");
-        else
-            log_file = stdout;
+        if   (log_file_i) { log_file = fopen(log_file_i, "w"); }
+        else              { log_file = stdout; }
     }
 
-    // SDL Initialization
+    // Global initialization
     {
 
-        // Initialize SDL
-        if (SDL_Init(SDL_INIT_EVERYTHING))
-            goto noSDL;
-
-        // Create the window
-        ret->window = SDL_CreateWindow(window_title,
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            (int)window_width, (int)window_height,
-            SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((fullscreen) ? SDL_WINDOW_FULLSCREEN : 0) ); 
-
-        // Check the window
-        if (!ret->window)
-            goto noWindow;
-
-
-    }
-
-    // Vulkan initialization
-    {
-        create_vulkan_instance(requested_instance_extensions, requested_validation_layers);
-        create_surface();
-        pick_physical_device(device_extensions);
-        create_logical_device(device_extensions);
-        create_swap_chain();
-        create_render_pass();
-        create_image_views();
-        create_render_pass();
-        create_framebuffers();
-        create_command_pool();
-        create_command_buffer();
-        create_sync_objects();
-    }
-
-    // G10 Initialization
-    {
-
-        // Set the name
-        ret->name = name;
-        ret->loading_thread_count = loading_thread_count;
-
-        // Subsystem initialization
+        // SDL initialization
         {
 
-            // Texture initialization
-            {
+            // Initialize SDL
+            if (SDL_Init(SDL_INIT_EVERYTHING))
+                goto noSDL;
 
-                // Get an external function
-                extern int init_texture ( void );
+            // Create the window
+            ret->window = SDL_CreateWindow(window_title,
+                SDL_WINDOWPOS_CENTERED,
+                SDL_WINDOWPOS_CENTERED,
+                (int)window_width, (int)window_height,
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((fullscreen) ? SDL_WINDOW_FULLSCREEN : 0));
 
-                // Run the texture system initializer
-                init_texture();
-            }
+            // Check the window
+            if (!ret->window)
+                goto noWindow;
 
-            // Input initialization
-            {
-                
-                // Get an external function
-                extern int init_input(void);
-
-                // Run the input system initializer
-                init_input();
-            }
-
-            // Audio initialization
-            {
-
-                // Get an external function
-                extern int init_audio(void);
-
-                // Run the audio system initializer
-                init_audio();
-            }
-
-            // Material initialization
-            {
-                GXMaterial_t* missing_material = 0;
-
-                //load_material(&missing_material, "G10/missing material.json");
-            }
+            // Display the window
+            SDL_ShowWindow(ret->window);
 
         }
 
-        // Construct dictionaries to cache materials, parts, and shaders.
+        // Vulkan initialization
         {
-            // If no count is specified by the JSON object. Default to 128.
-            dict_construct(&ret->cached_materials, ((material_cache_count) ? (material_cache_count) : 128));
-
-            // Default to 128 cached parts.
-            dict_construct(&ret->cached_parts, ((material_cache_count) ? (material_cache_count) : 128));
-
-            // Default to 32 cached shaders.
-            dict_construct(&ret->cached_shaders, ((shader_cache_count) ? (shader_cache_count) : 32));
+            create_vulkan_instance(requested_instance_extensions, requested_validation_layers);
+            create_surface();
+            pick_physical_device(device_extensions);
+            create_logical_device(device_extensions);
+            create_swap_chain();
+            create_render_pass();
+            create_image_views();
+            create_render_pass();
+            create_framebuffers();
+            create_command_pool();
+            create_command_buffer();
+            create_sync_objects();
         }
 
-        // Load an input set
+        // G10 Initialization
         {
-            // Load user defined input
-            if (input)
-                load_input(&ret->input, input);
+
+            // Set the name
+            ret->name = name;
+            ret->loading_thread_count = loading_thread_count;
+
+            // Subsystem initialization
+            {
+
+                // Texture initialization
+                {
+
+                    // Get an external function
+                    extern int init_texture(void);
+
+                    // Run the texture system initializer
+                    init_texture();
+                }
+
+                // Input initialization
+                {
+
+                    // Get an external function
+                    extern int init_input(void);
+
+                    // Run the input system initializer
+                    init_input();
+                }
+
+                // Audio initialization
+                {
+
+                    // Get an external function
+                    extern int init_audio(void);
+
+                    // Run the audio system initializer
+                    init_audio();
+                }
+
+                // Material initialization
+                {
+                    GXMaterial_t* missing_material = 0;
+
+                    //load_material(&missing_material, "G10/missing material.json");
+                }
+
+                // Scheduler initialization
+                {
+                    extern void init_scheduler( void );
+                    init_scheduler();
+                    
+                }
+
+            }
+
+            // Construct dictionaries to cache materials, parts, and shaders.
+            {
+                // If no count is specified by the JSON object. Default to 128.
+                dict_construct(&ret->cached_materials, ((material_cache_count) ? (material_cache_count) : 128));
+
+                // Default to 128 cached parts.
+                dict_construct(&ret->cached_parts, ((material_cache_count) ? (material_cache_count) : 128));
+
+                // Default to 32 cached shaders.
+                dict_construct(&ret->cached_shaders, ((shader_cache_count) ? (shader_cache_count) : 32));
+            }
+
+            // Load an input set
+            {
+                // Load user defined input
+                if (input)
+                    load_input(&ret->input, input);
+            }
+
+            // Load a schedule
+            {
+                load_scheduler_as_json(&ret->scheduler, scheduler, strlen(scheduler));
+            }
+
+            // Scene dictionary
+            dict_construct(&ret->scenes, 16);
+
+            // Load the initial scene
+            if (initial_scene) {
+                GXScene_t* scene = 0;
+                load_scene(&scene, initial_scene);
+
+                if (scene)
+                    dict_add(ret->scenes, scene->name, scene);
+                else
+                    goto no_initial_scene;
+            }
+
         }
-
-        // Scene dictionary
-        dict_construct(&ret->scenes, 16);
-
-        // Load the initial scene
-        if(initial_scene) {
-            GXScene_t* scene = 0;
-            load_scene(&scene, initial_scene);
-
-            if (scene)
-                dict_add(ret->scenes, scene->name, scene);
-            else
-                goto no_initial_scene;
-        }
-
     }
-
-    // Display the window
-    SDL_ShowWindow(ret->window);
-
     return 1;
 
     // DEBUG: Error handling
@@ -574,8 +605,8 @@ void create_swap_chain ( void )
         if (instance->swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             surface_format = instance->swap_chain_details.formats[i];
     
-    extent.width  = 1280;
-    extent.height = 720;
+    extent.width  = instance->window_width;
+    extent.height = instance->window_height;
 
     // TODO: Check memory
     swapchain_create_info->sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -935,6 +966,12 @@ size_t        g_load_file            ( const char         *path,     void       
         }
     }
 }
+
+int           render_frame           ( GXInstance_t        *instance )
+{
+
+}
+
 
 int           g_print_error          ( const char *const   format, ... ) 
 {

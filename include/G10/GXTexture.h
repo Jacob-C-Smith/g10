@@ -17,10 +17,7 @@ struct GXTexture_s
 };
 
 // Allocator
-int create_texture    ( GXTexture_t **texture );
+DLLEXPORT int create_texture    ( GXTexture_t **texture );
 
 // Constructor
-int construct_texture ( GXTexture_t **texture, char       *name, char *path_to_image );
-
-int load_texture      ( GXTexture_t **texture, char       *path );
-
+DLLEXPORT int load_texture      ( GXTexture_t **texture, char *path );

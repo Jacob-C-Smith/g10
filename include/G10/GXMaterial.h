@@ -7,7 +7,8 @@
 
 struct GXMaterial_s {
     char   *name;
-    dict   *textures;
+    dict   *data;
+
 };
 
 // Allocators

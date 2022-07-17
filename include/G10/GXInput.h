@@ -60,42 +60,42 @@ struct callback_parameter_s
 };
 
 // Allocators
-int          create_input             ( GXInput_t   **input );
-int          create_bind              ( GXBind_t    **bind );
+DLLEXPORT int          create_input             ( GXInput_t   **input );
+DLLEXPORT int          create_bind              ( GXBind_t    **bind );
 
 // Constructors
-int          load_input               ( GXInput_t   **input, const char  path[] );
-int          load_input_as_json       ( GXInput_t   **input, char       *token );
-int          load_input_as_json_n     ( GXInput_t   **input, char       *token_text, size_t   len );
-int          load_bind_as_json        ( GXBind_t    **bind , char       *token );
-int          construct_bind           ( GXBind_t    **bind , char       *name      , char   **keys );
-
+DLLEXPORT int          load_input               ( GXInput_t   **input, const char  path[] );
+DLLEXPORT int          load_input_as_json       ( GXInput_t   **input, char       *token );
+DLLEXPORT int          load_input_as_json_n     ( GXInput_t   **input, char       *token_text, size_t   len );
+DLLEXPORT int          load_bind_as_json        ( GXBind_t    **bind , char       *token );
+DLLEXPORT int          construct_bind           ( GXBind_t    **bind , char       *name      , char   **keys );
+ 
 // Callback addition
-int          register_bind_callback   ( GXBind_t *bind       , void                 *function_pointer );
+DLLEXPORT int          register_bind_callback   ( GXBind_t *bind       , void                 *function_pointer );
 
 // Callback remove
-int          unregister_bind_callback ( GXBind_t *bind       , void                 *function_pointer );
+DLLEXPORT int          unregister_bind_callback ( GXBind_t *bind       , void                 *function_pointer );
 
 // Keycode finder
-SDL_Scancode find_key                 ( const char *name );
+DLLEXPORT SDL_Scancode find_key                 ( const char *name );
 
 // Key information
-int          print_all_keys           ( void );
-int          print_all_binds          ( GXInput_t    *inputs );
+DLLEXPORT int          print_all_keys           ( void );
+DLLEXPORT int          print_all_binds          ( GXInput_t    *inputs );
 
 // Input processing
-int          process_input            ( GXInstance_t *instance );
+DLLEXPORT int          process_input            ( GXInstance_t *instance );
 
 // Bind appending
-int          append_bind              ( GXInput_t *input, GXBind_t *bind );
+DLLEXPORT int          append_bind              ( GXInput_t *input, GXBind_t *bind );
 
 // Bind firing
-int          fire_bind                ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance);
+DLLEXPORT int          fire_bind                ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance);
 
 // Bind operations
-GXBind_t    *find_bind                ( GXInput_t    *input   , char                *name );
-int          remove_bind              ( GXInput_t    *input   , GXBind_t            *bind );
+DLLEXPORT GXBind_t    *find_bind                ( GXInput_t    *input   , char                *name );
+DLLEXPORT int          remove_bind              ( GXInput_t    *input   , GXBind_t            *bind );
 
 // Deallocators
-int          destroy_bind             ( GXBind_t     *bind );
-int          destroy_input            ( GXInput_t    *input ); 
+DLLEXPORT int          destroy_bind             ( GXBind_t     *bind );
+DLLEXPORT int          destroy_input            ( GXInput_t    *input );

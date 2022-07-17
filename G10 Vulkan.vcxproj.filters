@@ -28,6 +28,9 @@
     <Filter Include="Header Files\G10\Audio">
       <UniqueIdentifier>{d8a2d3a1-de02-41b8-8414-0c941769859d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\G10\Math">
+      <UniqueIdentifier>{dffc8f5a-49e2-45e7-bb3c-66e4ab441be5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -104,12 +107,6 @@
     <ClInclude Include="include\G10\GXTransform.h">
       <Filter>Header Files\G10</Filter>
     </ClInclude>
-    <ClInclude Include="include\G10\GXLinear.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXQuaternion.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXCamera.h">
       <Filter>Header Files\G10\Scene</Filter>
     </ClInclude>
@@ -128,5 +125,16 @@
     <ClInclude Include="include\G10\GXLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\G10\GXLinear.h">
+      <Filter>Header Files\G10\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXQuaternion.h">
+      <Filter>Header Files\G10\Math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="time partitioning.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

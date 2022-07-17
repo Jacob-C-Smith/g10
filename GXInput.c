@@ -2,6 +2,7 @@
 
 #include <G10/GXInput.h>
 
+// Abstract keys into keyboard file. Same w gamepad
 const kn_t keys[] = {
     {
         SDL_SCANCODE_UNKNOWN,

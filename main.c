@@ -30,6 +30,16 @@ int main(int argc, const char* argv[])
 	GXBind_t *exit_bind = find_bind(instance->input, "QUIT");
 	register_bind_callback(exit_bind, &g_user_exit);
 
+	// AUDIO TESTING
+	{
+		SDL_AudioSpec wav_spec;
+		u32 wav_len;
+		u8 *wav_buffer;
+
+		SDL_LoadWAV("G10/audio/explosion.wav", &wav_spec, &wav_buffer, &wav_len);
+		
+	}
+
 	// CONTROLLER TESTING
 	// TODO: Integrate into input system
 	{
@@ -94,6 +104,7 @@ int main(int argc, const char* argv[])
 			
 	}
 
+	// TODO: Refactor to use the scheduler
 	// Game loop
 	while (instance->running)
 	{

@@ -18,6 +18,7 @@
 #include <G10/GXtypedef.h>
 #include <G10/GXScene.h>
 #include <G10/GXInput.h>
+#include <G10/GXScheduler.h>
 #include <G10/GXMaterial.h>
 
 
@@ -32,6 +33,7 @@ struct GXInstance_s
 	// SDL2 data
 	SDL_Window               *window;
 	SDL_Event                 event;
+	SDL_AudioDeviceID         audio_device;
 
 	// Vulkan data
 	VkInstance                instance;
@@ -50,7 +52,6 @@ struct GXInstance_s
 	VkFramebuffer            *swap_chain_framebuffers;
 	VkRenderPass              render_pass;
 	VkPipelineLayout          pipeline_layout;
-	VkPipeline                graphics_pipeline;
 	VkCommandPool             command_pool;
 	VkCommandBuffer          *command_buffers;
 	VkSemaphore              *image_available_semaphores;
@@ -59,41 +60,53 @@ struct GXInstance_s
 	VkCommandBuffer           command_buffer;
 
 	u32                       current_frame;
-	bool                      framebuffer_resized;
+	u32                       max_buffered_frames;
+	float                     priority;
 
 	#pragma pack(push)
 	#pragma pack 4
-	struct { int g, p; } queue_family_indices;
+	struct { int g, p; }      queue_family_indices;
 	#pragma pack(pop)
 
 	struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
 
 	// G10 data
-	GXInput_t        *input;
+	GXInput_t                *input;
+
+	GXScheduler_t            *scheduler;
 
 	// Loaded scenes
-	dict             *scenes;
+	dict                     *scenes;
 
 	// Server 
-	//GXServer_t    *server;
+	//GXServer_t             *server;
+
+	// Threads
+	dict                     *threads;
+
 
 	// Cached assets
-	dict             *cached_parts;
-	dict             *cached_materials;
-	dict             *cached_shaders;
+	dict                     *cached_parts;
+	dict                     *cached_materials;
+	dict                     *cached_shaders;
 
 	// Delta time
-	u32               d, 
-		              lastTime;
-	float             delta_time;
+	u32                       d, 
+		                      last_time;
+	float                     delta_time;
 
-	u32 	          window_width,
-		              window_height;
+	// Window parameters
+	// TODO: Update while processing inputs; reconstruct the framebuffer
+	u32 	                  window_width,
+		                      window_height;
 
-	size_t            loading_thread_count;
+	// How many threads should be assigned to load a scene
+	size_t                    loading_thread_count;
 
-    bool              running;
-	float             priority;
+	// 
+    bool                      running;
+
+
 };
 
 // Allocators
@@ -109,7 +122,9 @@ DLLEXPORT int           g_window_resize       ( GXInstance_t        *instance );
 
 DLLEXPORT int           g_delta               ( GXInstance_t        *instance );
 DLLEXPORT float         g_time                ( GXInstance_t        *instance );
- 
+
+// Operations
+DLLEXPORT int           render_frame          ( GXInstance_t        *instance );
 
 // Debug logging
 DLLEXPORT int           g_print_error         ( const char *const  format  , ... );
