@@ -12,7 +12,7 @@ int create_transform( GXTransform_t **transform )
 	}
 
 	// Allocate for the transform
-	GXTransform_t* ret = calloc(1, sizeof(GXTransform_t));
+	GXTransform_t *ret = calloc(1, sizeof(GXTransform_t));
 
 	// Memory check
 	{
@@ -62,22 +62,23 @@ int construct_transform(GXTransform_t** transform, vec3 location, quaternion rot
 	}
 
 	// Initialized data
-	GXTransform_t *t = 0;
+	GXTransform_t *i_transform = 0;
 
 	// Allocate the transform
 	{
 		create_transform(transform);
-		t=*transform;
+		i_transform = *transform;
 	}
 
 	// Set the location, rotation, and scale
 	{
-		t->location = location;
-		t->rotation = rotation;
-		t->scale    = scale;
+		i_transform->location = location;
+		i_transform->rotation = rotation;
+		i_transform->scale    = scale;
 
-		//t->model_matrix = 
+		transform_model_matrix(&i_transform->model_matrix, i_transform);
 	}
+
 	return 1;
 
 	// Error handling
@@ -94,24 +95,24 @@ int construct_transform(GXTransform_t** transform, vec3 location, quaternion rot
 	}
 }
 
-int load_transform(GXTransform_t** transform, const char* path)
+int load_transform( GXTransform_t **transform, const char* path)
 {
 	// Argument check
 	{
 		#ifndef NDEBUG
 			if(transform == (void *)0)
 				goto no_transform;
+			if(path == (void *)0)
+				goto no_path;
 		#endif
 	}
 
 	// Initialized data
 	GXTransform_t *t      = 0;
-	size_t         i      = 0;
-	char          *buffer = 0;
+	size_t         i      = g_load_file(path, 0, false);;
+	char          *buffer = calloc(i + 1, sizeof(char));
 
 	// Load the file
-	i = g_load_file(path, 0, false);
-	buffer = calloc(i + 1, sizeof(char));
 	g_load_file(path, buffer, false);
 
 	// Load the transform as a json string
@@ -129,7 +130,12 @@ int load_transform(GXTransform_t** transform, const char* path)
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n",__FUNCSIG__);
+					g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+			no_path:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
 				return 0;
 		}
@@ -405,13 +411,14 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 	}
 }
 
-void model_matrix(mat4 *r, GXTransform_t* transform)
+void transform_model_matrix( GXTransform_t* transform, mat4 *r )
 {
 
     // Argument check
     {
         if(r ==  (void*)0)
             goto no_result;
+
         if (transform == (void*)0)
             goto no_transform;
     }
@@ -438,13 +445,13 @@ void model_matrix(mat4 *r, GXTransform_t* transform)
             #ifndef NDEBUG
                 g_print_error("[G10] [Transform] Null pointer provided for \"r\" in call to function \"%s\"\n", __FUNCSIG__);
             #endif
-            return 0;
+            return;
 
             no_transform:
             #ifndef NDEBUG
                 g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n", __FUNCSIG__);
             #endif
-            return 0;
+            return;
         }
     }
 }

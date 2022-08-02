@@ -1,5 +1,4 @@
 #include <G10/GXTexture.h>
-#include <Windows.h>
 
 dict *texturing_modes                                = (void *) 0;
 dict *filtering_modes                                = (void *) 0;
@@ -70,126 +69,6 @@ int init_texture ( void )
                     g_print_error("[G10] [Texture] Failed to initialize texture system");
                 #endif
                 return 0;
-        }
-    }
-}
-
-uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-
-
-    VkPhysicalDeviceMemoryProperties memProperties;
-    GXInstance_t* instance = g_get_active_instance();
-
-    vkGetPhysicalDeviceMemoryProperties(instance->physical_device, &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-            return i;
-        }
-    }
-
-    g_print_error("[Vulkan] Failed to find suitable memory type in call to function \"%s\"\n", __FUNCSIG__);
-
-    return 0;
-
-    
-}
-
-void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer buffer, VkDeviceMemory buffer_memory)
-{
-    
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if (size == 0)
-                goto no_size;
-            if (usage == 0)
-                goto no_usage;
-            if (properties == 0)
-                goto no_properties;
-
-        #endif
-    }
-
-    // Uninitialized data
-    VkMemoryRequirements  mem_requirements;
-
-    // Initialized data
-    GXInstance_t         *instance        = g_get_active_instance();
-    VkBufferCreateInfo    buffer_info     = { 0 };
-    VkMemoryAllocateInfo  allocation_info = { 0 };
-    VkDevice              device          = instance->device;
-
-    // Create a buffer
-    {
-
-        // Populate buffer info struct
-        buffer_info.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffer_info.size        = size;
-        buffer_info.usage       = usage;
-        buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    
-        // Create the buffer
-        if (vkCreateBuffer(device, &buffer_info, 0, &buffer) != VK_SUCCESS)
-
-            // Error checking
-            goto failed_buffer_create;
-    }
-
-    // Allocate for the buffer
-    {
-
-        // Populate the mem_requirements struct
-        vkGetBufferMemoryRequirements(device, buffer, &mem_requirements);
-
-        // Populate the allocation info struct
-        allocation_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocation_info.allocationSize  = mem_requirements.size;
-        allocation_info.memoryTypeIndex = findMemoryType(mem_requirements.memoryTypeBits, properties);
-
-        // Allocate memory
-        if (vkAllocateMemory(device, &allocation_info, 0, &buffer_memory) != VK_SUCCESS)
-
-            // Error checking
-            goto failed_buffer_allocate;
-    }
-
-    // Bind the buffer to the device
-    vkBindBufferMemory(device, buffer, buffer_memory, 0);
-
-    return 0;
-
-    // Error handling
-    {
-        
-        // Argument errors
-        {
-            no_size:
-                #ifndef NDEBUG
-                
-                #endif
-                return 0;
-            no_usage:
-            no_properties:
-            no_buffer:
-            no_buffer_memory:
-                return 0;
-        }
-
-        // Vulkan errors
-        {
-            failed_buffer_create:
-                #ifndef NDEBUG
-                    g_print_error("[Vulkan] Failed to create buffer in call to function \"%s\"\n", __FUNCSIG__);
-                #endif
-                return 0;
-
-            failed_buffer_allocate:
-                #ifndef NDEBUG
-                    g_print_error("[Vulkan] Failed to allocate buffer memory in call to function \"%s\"\n",__FUNCSIG__);
-                #endif
-                return 0;
-
         }
     }
 }
@@ -286,13 +165,36 @@ int load_texture_as_json (GXTexture_t **texture, char *token_text, size_t token_
         #endif
     }
 
+    extern u32 find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
+
+    // Uninitialized data
+    VkMemoryRequirements  memory_requirements;
+
     // Initialized data
     dict                 *json_data            = 0;
     char                 *name                 = 0,
                          *path                 = 0;
     VkSamplerAddressMode  sampler_address_mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     VkFilter              filter               = VK_FILTER_LINEAR;
+    GXInstance_t         *instance              = g_get_active_instance();
+    GXTexture_t          *i_texture             = 0;
+    char                 *file_extension        = 0;
+    size_t                width                 = 0,
+                          height                = 0,
+                          depth                 = 0;
+    i8                   *image_data            = 0;
+    SDL_Surface          *image                 = 0;
 
+    VkDeviceSize          image_size            = 0;
+    VkBuffer              buffer                = 0;
+    VkDeviceMemory        staging_buffer_memory = 0;
+    VkMemoryAllocateInfo *allocate_info         = calloc(1, sizeof(VkMemoryAllocateInfo));
+
+    VkBuffer              staging_buffer        = 0;
+    VkImageCreateInfo    *image_create_info     = calloc(1, sizeof(VkImageCreateInfo));
+    void                 *data                  = 0;
+
+    
     // Parse the JSON
     {
 
@@ -333,54 +235,18 @@ int load_texture_as_json (GXTexture_t **texture, char *token_text, size_t token_
         path  = JSON_VALUE(token, JSONstring);
     }
 
-    return 1;
+    create_texture(texture);
+    i_texture = *texture;
 
-    no_texture:
-    no_token:
-    return 0;
-
-
-}
-
-int load_texture_f ( GXTexture_t **texture, const char *path, VkSamplerAddressMode addressing, VkFilter filtering )
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if(texture == (void *)0)
-                goto no_texture;
-            if (path == (void*)0)
-                goto no_path;
-        #endif
-    }
-
-    // Initialized data
-    GXInstance_t  *instance              = g_get_active_instance();
-    GXTexture_t   *i_texture             = 0;
-    char          *file_extension        = 1 + strrchr(path, '.');
-    size_t         width                 = 0,
-                   height                = 0,
-                   depth                 = 0;
-    i8            *image_data            = 0;
-    SDL_Surface   *image                 = 0;
-
-    VkDevice       device                = instance->device;
-    VkDeviceSize   image_size            = 0;
-    VkBuffer       buffer                = 0;
-    VkDeviceMemory staging_buffer_memory = 0;
-    VkBuffer       staging_buffer        = 0;
-    void          *data;
-
-    *texture = i_texture;
     // Get the file extension
-    
+    file_extension = 1 + strrchr(path, '.');
+
     // Load as a png
     if (strcmp(file_extension, "hdr") == 0 || strcmp(file_extension, "HDR") == 0)
         ; // TODO
     else
     {
-        //image      = IMG_Load(path);
+        image      = IMG_Load(path);
         image_data = image->pixels;
         width      = image->w;
         height     = image->h;
@@ -389,21 +255,61 @@ int load_texture_f ( GXTexture_t **texture, const char *path, VkSamplerAddressMo
 
     image_size = width * height * depth;
 
-    create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
+    create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging_buffer, &staging_buffer_memory);
 
-    VkResult i = vkMapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-
+    vkMapMemory(instance->device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(data, image_data, image_size);
+    vkUnmapMemory(instance->device, staging_buffer_memory);
 
-    vkUnmapMemory(device, staging_buffer_memory);
+    {
+        image_create_info->sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        image_create_info->imageType = VK_IMAGE_TYPE_2D;
+        image_create_info->extent.width = width;
+        image_create_info->extent.height = height;
+        
+        image_create_info->extent.depth = 1;
+        image_create_info->mipLevels = 1;
+        image_create_info->arrayLayers = 1;
 
-    SDL_FreeSurface(image);
+
+        if (depth == 3)
+        {
+            g_print_error("[G10] [Texture] No 24 bit images allowed!");
+            return 0;
+        }
+        else if (depth == 4)
+            image_create_info->format = VK_FORMAT_R8G8B8A8_SRGB;
+
+        image_create_info->tiling = VK_IMAGE_TILING_OPTIMAL;
+        image_create_info->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image_create_info->usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        image_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        image_create_info->samples = VK_SAMPLE_COUNT_1_BIT;
+        image_create_info->flags = 0;
+    }
+
+    if (vkCreateImage(instance->device, image_create_info, 0, &i_texture->texture_image) != VK_SUCCESS)
+        g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCSIG__);
+
+    vkGetImageMemoryRequirements(instance->device, i_texture->texture_image, &memory_requirements);
+
+    allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocate_info->allocationSize = memory_requirements.size;
+    allocate_info->memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    if (vkAllocateMemory(instance->device, allocate_info, 0, &i_texture->texture_image_memory) != VK_SUCCESS) {
+        printf("failed to allocate image memory!");
+    }
+
+    vkBindImageMemory(instance->device, i_texture->texture_image, i_texture->texture_image_memory, 0);
+
+
 
     return 1;
 
     no_texture:
-    no_path:
+    no_token:
     return 0;
+
+
 }
-
-

@@ -2,7 +2,7 @@
 
 dict* scheduler_tasks = 0;
 
-char* task_names[9] = {
+char* task_names[12] = {
 	"Input",
 	"UI",
 	"AI",
@@ -11,28 +11,39 @@ char* task_names[9] = {
 	"Update Forces",
 	"Move objects",
 	"Animation",
-	"Render"
+	"Render",
+	"Load Entity",
+	"Load Light Probe",
+	"sayhi"
 };
 
-void* task_function_pointers[9] = {
+int sayhi(GXInstance_t* instance)
+{
+	SDL_Delay(300);
+}
+
+void* task_function_pointers[12] = {
 	&process_input,
 	0,
 	0,
 	0,
 	0,
 	0,
+	&move_entities,
 	0,
+	&render_frame,
+	0,//load_entity_from_queue,
 	0,
-	&render_frame
+	&sayhi
 };
 
-void init_scheduler(void)
+void init_scheduler        ( void )
 {
 	GXInstance_t *instance = g_get_active_instance();
 
 	dict_construct(&scheduler_tasks, 16);
 
-	for (size_t i = 0; i < 9; i++)
+	for (size_t i = 0; i < 12; i++)
 	{
 		GXTask_t *task = 0;
 		
@@ -43,13 +54,12 @@ void init_scheduler(void)
 
 }
 
-int create_task (GXTask_t **task, char *name, int(*function_pointer)(GXInstance_t *))
+int create_task            ( GXTask_t      **task     , char *name      , int(*function_pointer)(GXInstance_t *) )
 {
 	// TODO: Argument check
 
 	GXTask_t *i_task = calloc(1, sizeof(GXTask_t));
 	*task = i_task;
-
 
 	i_task->name = name;
 
@@ -60,11 +70,11 @@ int create_task (GXTask_t **task, char *name, int(*function_pointer)(GXInstance_
 	// TODO: Error handling
 }
 
-int create_scheduler(GXScheduler_t  **scheduler)
+int create_schedule       ( GXSchedule_t  **scheduler )
 {
 	// TODO: Argument check
 
-	GXScheduler_t *i_scheduler = calloc(1, sizeof(GXScheduler_t));
+	GXSchedule_t *i_scheduler = calloc(1, sizeof(GXSchedule_t));
 
 	// TODO: Memory check
 	*scheduler = i_scheduler;
@@ -73,7 +83,7 @@ int create_scheduler(GXScheduler_t  **scheduler)
 	return 1;
 }
 
-int create_thread ( GXThread_t **thread )
+int create_thread          ( GXThread_t    **thread )
 {
 	// TODO: Argument check
 
@@ -86,7 +96,7 @@ int create_thread ( GXThread_t **thread )
 	return 1;
 }
 
-int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t len )
+int load_schedule_as_json ( GXSchedule_t **scheduler, char *token_text, size_t len )
 {
 	// TODO: Argument check
 
@@ -102,8 +112,7 @@ int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t
 		/*
 			{
 				"name"         : "Scheduler",
-			    "thread count" : 1,
-				"blocks"       : [
+				"threads"      : [
 					{
 						"name"        : "Game loop",
 						"description" : "Single threaded solution",
@@ -127,7 +136,7 @@ int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t
 		name                = JSON_VALUE(token, JSONstring);
 
 		// Get the blocks
-		token               = dict_get(scheduler_json, "blocks");
+		token               = dict_get(scheduler_json, "threads");
 		thread_json_objects = JSON_VALUE(token, JSONarray);
 
 	}
@@ -136,10 +145,10 @@ int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t
 	{
 
 		// Initialized data
-		GXScheduler_t *i_scheduler = 0;
+		GXSchedule_t *i_scheduler = 0;
 
 		// Allocate a scheduler
-		create_scheduler(scheduler);
+		create_schedule(scheduler);
 
 		i_scheduler = *scheduler;
 
@@ -158,7 +167,7 @@ int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t
 
 		// Construct each thread
 		{
-
+			
 			// Count up the blocks
 			while (thread_json_objects[++thread_count]);
 
@@ -186,7 +195,70 @@ int load_scheduler_as_json ( GXScheduler_t** scheduler, char* token_text, size_t
 	// TODO: Error handling
 }
 
-int load_thread_as_json(GXThread_t** thread, char* token_text, size_t len)
+int work ( GXThread_t* thread )
+{
+	GXTask_t **tasks = thread->tasks;
+	while (thread->running)
+	{
+		for (size_t i = 0; i < thread->task_count; i++)
+		{
+			int (*function_pointer)(GXInstance_t*) = thread->tasks[i]->function_pointer;
+
+			function_pointer(g_get_active_instance());
+		}
+	}
+	return 0;
+}
+
+int start_schedule         ( GXSchedule_t  *schedule )
+{
+	// Initialized data
+	GXInstance_t *instance              = g_get_active_instance();
+	size_t        schedule_thread_count = dict_values(schedule->threads, 0);
+	GXThread_t  **schedule_threads      = calloc(schedule_thread_count+1, sizeof(void *));
+
+	// Get a list of threads
+	dict_values(schedule->threads, schedule_threads);
+
+	// Iterate over each thread
+	for (size_t i = 0; i < schedule_thread_count; i++)
+	{
+
+		// Initialized data
+		GXThread_t *thread = schedule_threads[i];
+
+
+		thread->running = true;
+		thread->thread = SDL_CreateThread(work, thread->name, thread);
+
+	}
+
+	return 0;
+}
+
+int stop_schedule(GXSchedule_t* schedule)
+{
+	GXInstance_t *instance              = g_get_active_instance();
+	size_t        schedule_thread_count = dict_values(schedule->threads, 0);
+	GXThread_t  **schedule_threads      = calloc(schedule_thread_count+1, sizeof(void *));
+
+	size_t r_stat = 0;
+
+	// Get a list of threads
+	dict_values(schedule->threads, schedule_threads);
+
+
+	for (size_t i = 0; i < schedule_thread_count; i++)
+	{
+		// Initialized data
+		GXThread_t* thread = schedule_threads[i];
+
+		thread->running = false;
+		SDL_WaitThread(schedule_threads[i]->thread, &r_stat);
+	}
+}
+
+int load_thread_as_json    ( GXThread_t    **thread   , char *token_text, size_t len )
 {
 	// TODO: Argument check
 
@@ -208,6 +280,7 @@ int load_thread_as_json(GXThread_t** thread, char* token_text, size_t len)
             ]
         }
 		*/
+
 		// Initiaized data
 		JSONToken_t *token = 0;
 
@@ -254,20 +327,21 @@ int load_thread_as_json(GXThread_t** thread, char* token_text, size_t len)
 			// Count up the tasks
 			while (tasks[++task_count]);
 
-			i_thread->tasks = calloc(task_count + 1, sizeof(void*));
+			i_thread->tasks      = calloc(task_count + 1, sizeof(GXTask_t*));
+			i_thread->task_count = task_count;
 
 			// Iterate over each block JSON object
 			for (size_t i = 0; i < task_count; i++)
 			{
 				// Initialized data
-				i_thread->tasks[i] = (GXThread_t*)dict_get(scheduler_tasks, tasks[i]);
-
+				i_thread->tasks[i] = (GXTask_t*)dict_get(scheduler_tasks, tasks[i]);
+				
 			}
 		}
 	}
-
 
 	return 0;
 
 	// TODO: Error handling
 }
+

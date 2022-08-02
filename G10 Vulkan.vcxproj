@@ -42,7 +42,10 @@
     <ClCompile Include="GXEntity.c" />
     <ClCompile Include="GXInput.c" />
     <ClCompile Include="GXPart.c" />
+    <ClCompile Include="GXPhysics.c" />
+    <ClCompile Include="GXPLY.c" />
     <ClCompile Include="GXQuaternion.c" />
+    <ClCompile Include="GXRigidbody.c" />
     <ClCompile Include="GXScene.c" />
     <ClCompile Include="GXScheduler.c" />
     <ClCompile Include="GXShader.c" />
@@ -62,7 +65,10 @@
     <ClInclude Include="include\G10\GXLinear.h" />
     <ClInclude Include="include\G10\GXMaterial.h" />
     <ClInclude Include="include\G10\GXPart.h" />
+    <ClInclude Include="include\G10\GXPhysics.h" />
     <ClInclude Include="include\G10\GXQuaternion.h" />
+    <ClInclude Include="include\G10\GXRenderer.h" />
+    <ClInclude Include="include\G10\GXRigidbody.h" />
     <ClInclude Include="include\G10\GXScene.h" />
     <ClInclude Include="include\G10\GXScheduler.h" />
     <ClInclude Include="include\G10\GXShader.h" />
@@ -72,6 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="time partitioning.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GXLinearA.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -105,6 +114,8 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic Library|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -215,13 +226,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.216.0\Include;C:\Users\j\Desktop\C Projects\G10 Vulkan\include;../Dictionary/include</AdditionalIncludeDirectories>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PrecompiledHeaderFile />
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

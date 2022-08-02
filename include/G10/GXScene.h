@@ -24,6 +24,9 @@ struct GXScene_s
 	// A bounding volume heierarchy tree containing entities
 	GXBV_t     *bvh;
 
+	// A list of entities with rigidbodies
+	dict       *actors;
+
 	// The camera to be used while drawing the scene
 	GXCamera_t *active_camera;
 };
@@ -33,8 +36,7 @@ int            create_scene         ( GXScene_t  **scene );
 
 // Constructors
 int            load_scene           ( GXScene_t  **scene, const char   path[] );
-int            load_scene_as_json   ( GXScene_t  **scene, char*        token_text );
-int            load_scene_as_json_n ( GXScene_t  **scene, char*        token_text, size_t len );
+int            load_scene_as_json   ( GXScene_t  **scene, char*        token_text, size_t len );
 int            construct_scene      ( GXScene_t  **scene, char*        name      , char **entities, char  **cameras, char **lights, char *skybox );
 
 // Appenders

@@ -73,8 +73,6 @@ int load_material(GXMaterial_t** material, const char path[])
 
 	load_material_as_json_n(material, token_text, len);
 
-
-
 	return 1;
 
 	// Error handling
@@ -118,7 +116,7 @@ int load_material_as_json(GXMaterial_t** material, char* token_text)
 		#endif
 	}
 
-	size_t  len        = strlen(token_text);
+	size_t  len = strlen(token_text);
 
 	load_material_as_json_n(material, token_text, len);
 

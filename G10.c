@@ -1,25 +1,32 @@
-﻿#include <G10\G10.h>
+﻿#include <G10/G10.h>
 
+// Initialized data
+FILE* log_file;
+
+// Uninitialized data
 static GXInstance_t *active_instance = 0;
-FILE                *log_file;
+typedef VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback_return_t;
 
-void create_vulkan_instance(char **requested_instance_extensions, char **requested_validation_layers);
-void create_surface(void);
-void setup_debug_messenger(void);
-void pick_physical_device(char** required_extension_names);
-void create_logical_device(char** required_extension_names);
-void create_swap_chain(void);
-void create_image_views();
-void create_render_pass();
-void create_framebuffers();
-void create_command_pool();
-void create_command_buffer();
-void record_command_buffer(VkCommandBuffer command_buffer, uint32_t image_index);
-void create_sync_objects();
+// Vulkan 
+void create_vulkan_instance ( char        **requested_instance_extensions, char **requested_validation_layers );
+void create_surface         ( void );
+void setup_debug_messenger  ( void );
+void pick_physical_device   ( char        **required_extension_names );
+void create_logical_device  ( char        **required_extension_names );
+void create_swap_chain      ( void );
+void create_image_views     ( void );
+void create_render_pass     ( void );
+void create_framebuffers    ( void );
+void create_command_pool    ( void );
+void create_command_buffers ( void );
+void create_sync_objects    ( void );
 
-int  check_vulkan_device(GXInstance_t* instance, VkPhysicalDevice physical_device, char** required_extension_names);
+void create_buffer          ( VkDeviceSize  size       , VkBufferUsageFlags    usage     , VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
+u32  find_memory_type       ( u32           type_filter, VkMemoryPropertyFlags properties );
+int  check_vulkan_device    ( GXInstance_t *instance, VkPhysicalDevice physical_device, char** required_extension_names);
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+
+static debug_callback_return_t debug_callback               ( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 
     switch (messageSeverity)
     {
@@ -40,7 +47,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverity
     return VK_FALSE;
 }
 
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+VkResult      CreateDebugUtilsMessengerEXT ( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
     PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != 0) {
         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
@@ -50,7 +57,7 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMes
     }
 }
 
-int           g_init                 ( GXInstance_t      **instance, const char   *path)
+int           g_init                       ( GXInstance_t      **instance, const char   *path          )
 {
     // Argument Check
     {
@@ -76,11 +83,11 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                 **requested_instance_extensions = 0,
                 **device_extensions             = 0,
                  *requested_physical_device     = 0,
-                 *max_buffered_frames           = 0,
+                 *max_buffered_frames           = 2,
                  *initial_scene                 = 0,
                  *log_file_i                    = 0,
                  *input                         = 0,
-                 *scheduler                     = 0;
+                **schedules                     = 0;
     size_t        window_width                  = 0,
                   window_height                 = 0;
     bool          fullscreen                    = false;
@@ -195,10 +202,10 @@ int           g_init                 ( GXInstance_t      **instance, const char 
             }
         }
 
-        // Scheduler
+        // Schedules
         {
-            token = dict_get(instance_json_object, "scheduler");
-            scheduler = JSON_VALUE(token, JSONobject);
+            token     = dict_get(instance_json_object, "schedules");
+            schedules = JSON_VALUE(token, JSONarray);
         }
 
     }
@@ -214,7 +221,7 @@ int           g_init                 ( GXInstance_t      **instance, const char 
 
         ret->window_width = window_width;
         ret->window_height = window_height;
-
+        ret->max_buffered_frames = atoi(max_buffered_frames);
     }
 
 
@@ -262,7 +269,7 @@ int           g_init                 ( GXInstance_t      **instance, const char 
             create_render_pass();
             create_framebuffers();
             create_command_pool();
-            create_command_buffer();
+            create_command_buffers();
             create_sync_objects();
         }
 
@@ -270,11 +277,22 @@ int           g_init                 ( GXInstance_t      **instance, const char 
         {
 
             // Set the name
-            ret->name = name;
+            ret->name                 = name;
+
             ret->loading_thread_count = loading_thread_count;
+
+            dict_construct(&ret->load_entity_queue, 16);
+
+            ret->load_entity_mutex = SDL_CreateMutex();
 
             // Subsystem initialization
             {
+
+                // Shader initialization
+                {
+                    extern void init_shader ( void );
+                    init_shader();
+                }
 
                 // Texture initialization
                 {
@@ -316,22 +334,23 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                 // Scheduler initialization
                 {
                     extern void init_scheduler( void );
-                    init_scheduler();
                     
+                    init_scheduler();
                 }
 
             }
 
             // Construct dictionaries to cache materials, parts, and shaders.
             {
+
                 // If no count is specified by the JSON object. Default to 128.
                 dict_construct(&ret->cached_materials, ((material_cache_count) ? (material_cache_count) : 128));
 
                 // Default to 128 cached parts.
-                dict_construct(&ret->cached_parts, ((material_cache_count) ? (material_cache_count) : 128));
+                dict_construct(&ret->cached_parts    , ((material_cache_count) ? (material_cache_count) : 128));
 
                 // Default to 32 cached shaders.
-                dict_construct(&ret->cached_shaders, ((shader_cache_count) ? (shader_cache_count) : 32));
+                dict_construct(&ret->cached_shaders  , ((shader_cache_count)   ? (shader_cache_count)   : 32));
             }
 
             // Load an input set
@@ -341,9 +360,20 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                     load_input(&ret->input, input);
             }
 
-            // Load a schedule
-            {
-                load_scheduler_as_json(&ret->scheduler, scheduler, strlen(scheduler));
+            // Load schedules
+            if(schedules) {
+
+                dict_construct(&ret->schedules, 8);
+
+                for (size_t i = 0; schedules[i]; i++)
+                {
+                    GXSchedule_t *schedule = 0;
+
+                    load_schedule_as_json(&schedule, schedules[i], strlen(schedules[i]));
+
+                    dict_add(ret->schedules, schedule->name, schedule);
+                }
+                
             }
 
             // Scene dictionary
@@ -358,10 +388,13 @@ int           g_init                 ( GXInstance_t      **instance, const char 
                     dict_add(ret->scenes, scene->name, scene);
                 else
                     goto no_initial_scene;
+
+                ret->active_scene = scene;
             }
 
         }
     }
+
     return 1;
 
     // DEBUG: Error handling
@@ -441,7 +474,13 @@ int           g_init                 ( GXInstance_t      **instance, const char 
 
 }
 
-void create_vulkan_instance ( char **requested_instance_extensions, char **requested_validation_layers )
+int           g_start                      ( GXInstance_t       *instance, char         *schedule_name )
+{
+    
+
+    return 0;
+}
+void          create_vulkan_instance       ( char **requested_instance_extensions, char **requested_validation_layers )
 {
     GXInstance_t          *instance                  = g_get_active_instance();
 
@@ -485,8 +524,9 @@ void create_vulkan_instance ( char **requested_instance_extensions, char **reque
         // TODO: Add support for user defined extensions
         instance_create_info->enabledExtensionCount   = required_extension_count;
         instance_create_info->ppEnabledExtensionNames = required_extensions;
-
-        while (requested_validation_layers[++requested_layers_count]);
+        
+        if(requested_validation_layers)
+            while (requested_validation_layers[++requested_layers_count]);
 
         instance_create_info->enabledLayerCount   = requested_layers_count;
         instance_create_info->ppEnabledLayerNames = requested_validation_layers;
@@ -500,7 +540,7 @@ void create_vulkan_instance ( char **requested_instance_extensions, char **reque
     
 }
 
-void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenger_create_info )
+void          setup_debug_messenger        ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenger_create_info )
 {
     VkDebugUtilsMessengerCreateInfoEXT *i_debug_messenger_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));
 
@@ -512,15 +552,24 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     *debug_messenger_create_info = i_debug_messenger_create_info;
 }
 
-void create_surface ( void )
+void          create_surface               ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
     SDL_Vulkan_CreateSurface(instance->window, instance->instance, &instance->surface);
 
 }
 
-void pick_physical_device ( char **required_extension_names )
+void          pick_physical_device         ( char **required_extension_names )
 {
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if(required_extension_names == (void *)0)
+                goto no_required_extension_names;
+        #endif
+    }
+
     GXInstance_t* instance = g_get_active_instance();
 
     u32 device_count = 0;
@@ -541,11 +590,11 @@ void pick_physical_device ( char **required_extension_names )
             instance->physical_device = devices[i];
     }
 
-no_devices:;
-
+    no_devices:;
+    no_required_extension_names:;
 }
 
-void create_logical_device ( char **required_extension_names )
+void          create_logical_device        ( char **required_extension_names )
 {
     GXInstance_t             *instance                 = g_get_active_instance();
     VkDeviceQueueCreateInfo  *queue_create_infos       = calloc(2, sizeof(VkDeviceQueueCreateInfo));
@@ -583,17 +632,18 @@ void create_logical_device ( char **required_extension_names )
 
 } 
 
-void create_swap_chain ( void )
+void          create_swap_chain            ( void )
 {
 
     // Uninitialized data
     VkSurfaceFormatKHR        surface_format;
-    VkPresentModeKHR          present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
     VkExtent2D                extent;
 
     // Initialized data
     GXInstance_t             *instance               = g_get_active_instance();
     VkSwapchainCreateInfoKHR *swapchain_create_info  = calloc(1, sizeof(VkSwapchainCreateInfoKHR));
+    VkPresentModeKHR          present_mode           = VK_PRESENT_MODE_MAILBOX_KHR;
+
     u32                       qfi[2]                 = { 0, 0 };
     
     qfi[0] = instance->queue_family_indices.g;
@@ -650,7 +700,7 @@ void create_swap_chain ( void )
     instance->swap_chain_extent       = extent;
 }
 
-void create_image_views() {
+void          create_image_views           ( void ) {
     GXInstance_t          *instance = g_get_active_instance();
     
     instance->swap_chain_image_views = calloc(instance->image_count, sizeof(VkImageView));
@@ -686,7 +736,7 @@ void create_image_views() {
     }
 }
 
-void create_render_pass() {
+void          create_render_pass           ( void ) {
     GXInstance_t *instance = g_get_active_instance();
     VkAttachmentDescription *color_attachment = calloc(1, sizeof(VkAttachmentDescription));
     VkAttachmentReference   *color_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
@@ -721,7 +771,7 @@ void create_render_pass() {
     }
 }
 
-void create_framebuffers()
+void          create_framebuffers          ( void )
 {
     GXInstance_t* instance = g_get_active_instance();
     instance->swap_chain_framebuffers = calloc(instance->image_count, sizeof(VkFramebuffer));
@@ -745,7 +795,7 @@ void create_framebuffers()
     }
 }
 
-void create_command_pool()
+void          create_command_pool          ( void )
 {
     GXInstance_t* instance = g_get_active_instance();
     VkCommandPoolCreateInfo* pool_create_info = calloc(1, sizeof(VkCommandPoolCreateInfo));
@@ -758,43 +808,66 @@ void create_command_pool()
         g_print_error("Failed to create command pool!\n");
 }
 
-void create_command_buffer()
+void          create_command_buffers       ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
 
     VkCommandBufferAllocateInfo* alloc_info = calloc(1, sizeof(VkCommandBufferAllocateInfo));
+    instance->command_buffers = calloc(instance->max_buffered_frames, sizeof(VkCommandBuffer));
 
     alloc_info->sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info->commandPool        = instance->command_pool;
     alloc_info->level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info->commandBufferCount = 1;
+    alloc_info->commandBufferCount = instance->max_buffered_frames;
 
-    if (vkAllocateCommandBuffers(instance->device, alloc_info, &instance->command_buffer) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(instance->device, alloc_info, instance->command_buffers) != VK_SUCCESS) {
         g_print_error("failed to allocate command buffers!\n");
     }
 }
 
-void create_sync_objects()
+void          create_sync_objects          ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
 
-    VkSemaphoreCreateInfo *semaphore_create_info = calloc(1, sizeof(VkSemaphoreCreateInfo));
-    VkFenceCreateInfo     *fence_create_info     = calloc(1, sizeof(VkFenceCreateInfo));
-
+    VkSemaphoreCreateInfo *semaphore_create_info = calloc(instance->max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
+    VkFenceCreateInfo     *fence_create_info     = calloc(instance->max_buffered_frames, sizeof(VkFenceCreateInfo));
+    
     semaphore_create_info->sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     fence_create_info->sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info->flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    if (vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->image_available_semaphores) != VK_SUCCESS ||
-        vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->render_finished_semaphores) != VK_SUCCESS ||
-        vkCreateFence(instance->device, fence_create_info, 0, &instance->in_flight_fences) != VK_SUCCESS) {
-        g_print_error("failed to create semaphores!\n");
+    instance->image_available_semaphores = calloc(instance->max_buffered_frames, sizeof(VkSemaphore));
+    instance->render_finished_semaphores = calloc(instance->max_buffered_frames, sizeof(VkSemaphore));
+    instance->in_flight_fences           = calloc(instance->max_buffered_frames, sizeof(VkFence));
+    for (size_t i = 0; i < instance->max_buffered_frames; i++)
+    {
+        if (vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->image_available_semaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->render_finished_semaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(instance->device, fence_create_info, 0, &instance->in_flight_fences[i]) != VK_SUCCESS) {
+            g_print_error("failed to create semaphores!\n");
+        }
     }
 
 }
 
-int check_vulkan_device  ( GXInstance_t *instance, VkPhysicalDevice physical_device, char **required_extension_names )
+u32           find_memory_type             ( u32 type_filter, VkMemoryPropertyFlags properties)
+{
+    GXInstance_t *instance = g_get_active_instance();
+    VkPhysicalDeviceMemoryProperties mem_properties;
+    vkGetPhysicalDeviceMemoryProperties(instance->physical_device, &mem_properties);
+
+    for (u32 i = 0; i < mem_properties.memoryTypeCount; i++) {
+        if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    g_print_error("[G10] Failed to find a suitable memory type\n");
+    return 0;
+}
+
+int           check_vulkan_device          ( GXInstance_t *instance, VkPhysicalDevice physical_device, char **required_extension_names )
 {
 
     bool passes_queue   = false,
@@ -911,7 +984,68 @@ int check_vulkan_device  ( GXInstance_t *instance, VkPhysicalDevice physical_dev
     return passes_queue && has_extensions && has_swap_chain;
 }
 
-size_t        g_load_file            ( const char         *path,     void         *buffer   , bool binaryMode )
+void          create_buffer                ( VkDeviceSize         size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory )
+{
+    VkMemoryRequirements  mem_requirements;
+    GXInstance_t         *instance         = g_get_active_instance();
+    VkBufferCreateInfo   *buffer_info      = calloc(1, sizeof(VkBufferCreateInfo));
+    VkMemoryAllocateInfo  *alloc_info      = calloc(1, sizeof(VkMemoryAllocateInfo));
+    
+        //{
+        //    buffer_create_info->sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        //    buffer_create_info->size = ply_file->elements[0].s_stride * vertices_in_buffer;
+        //    buffer_create_info->usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        //    buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        //}
+
+        //if (vkCreateBuffer(instance->device, buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
+        //    g_print_error("[G10] [PLY] Failed to create vertex buffer");
+
+        //vkGetBufferMemoryRequirements(instance->device, part->vertex_buffer, memory_requirements);
+
+        //allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        //allocate_info->allocationSize = memory_requirements->size;
+        //allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        //
+        //if (vkAllocateMemory(instance->device, allocate_info, 0, &part->vertex_buffer_memory))
+        //    g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
+
+    // Create a buffer
+    {
+
+        // Populate the create info struct
+        buffer_info->sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        buffer_info->size        = size;
+        buffer_info->usage       = usage;
+        buffer_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        // Create a buffer
+        if ( vkCreateBuffer( instance->device, buffer_info, 0, &buffer ) != VK_SUCCESS )
+            g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCSIG__);
+
+        vkGetBufferMemoryRequirements(instance->device, buffer, &mem_requirements);
+    }
+    
+
+    // Allocate memory for the buffer
+    {
+
+        // Populate the allocation struct
+        alloc_info->sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc_info->allocationSize  = mem_requirements.size;
+        alloc_info->memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties);
+
+        // Allocate memory for the buffer
+        if (vkAllocateMemory(instance->device, alloc_info, 0, buffer_memory) != VK_SUCCESS)
+            g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCSIG__);
+
+        // Bind the buffer to the device
+        vkBindBufferMemory(instance->device, buffer, *buffer_memory, 0);
+    }
+}
+
+size_t        g_load_file                  ( const char          *path,     void         *buffer   , bool binaryMode )
 {
 
     // Argument checking 
@@ -951,7 +1085,7 @@ size_t        g_load_file            ( const char         *path,     void       
         {
             noPath:
             #ifndef NDEBUG
-                g_print_error("[G10] Null path provided to funciton \"%s\\n",__FUNCSIG__);
+                g_print_error("[G10] Null path provided to funciton \"%s\n",__FUNCSIG__);
             #endif
             return 0;
         }
@@ -967,13 +1101,127 @@ size_t        g_load_file            ( const char         *path,     void       
     }
 }
 
-int           render_frame           ( GXInstance_t        *instance )
+void          clear_swap_chain             ( )
 {
+    GXInstance_t *instance = g_get_active_instance();
+    for (size_t i = 0; i < instance->image_count; i++) {
+        vkDestroyFramebuffer(instance->device, instance->swap_chain_framebuffers[i], 0);
+        vkDestroyImageView(instance->device, instance->swap_chain_image_views[i], 0);
+    }
 
+    vkDestroySwapchainKHR(instance->device, instance->swap_chain, 0);
 }
 
+int           g_window_resize              ( GXInstance_t        *instance)
+{
+    SDL_GetWindowSize(instance->window, &instance->window_width, &instance->window_height);
 
-int           g_print_error          ( const char *const   format, ... ) 
+    while (instance->window_height == 0 || instance->window_width == 0 )
+        SDL_GetWindowSize(instance->window, &instance->window_width, &instance->window_height);
+
+    vkDeviceWaitIdle(instance->device);
+
+    clear_swap_chain();
+
+    create_swap_chain();
+    create_image_views();
+    create_framebuffers();
+    return 0;
+}
+
+int           render_frame                 ( GXInstance_t        *instance )
+{
+    // Initialized data
+	VkSemaphore               wait_semaphores[]       = { instance->image_available_semaphores[instance->current_frame]};
+	VkSemaphore               signal_semaphores[]     = { instance->render_finished_semaphores[instance->current_frame]};
+	VkPipelineStageFlags      wait_stages[]           = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    VkPresentInfoKHR         *present_info            = calloc(1, sizeof(VkPresentInfoKHR));
+	VkSubmitInfo             *submit_info             = calloc(1, sizeof(VkSubmitInfo));
+	VkSwapchainKHR            swap_chains[]           = { instance->swap_chain };
+    VkResult                  result;
+
+    // Get the command buffer ready for drawing
+    {
+
+        // Wait for the previous frame to finish rendering
+	    vkWaitForFences(instance->device, 1, &instance->in_flight_fences[instance->current_frame], VK_TRUE, UINT64_MAX);
+	
+        // Grab an image from the swapchain
+        result = vkAcquireNextImageKHR(instance->device, instance->swap_chain, UINT64_MAX, instance->image_available_semaphores[instance->current_frame], VK_NULL_HANDLE, &instance->image_index);
+	
+        // Make sure the image is usable
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            g_window_resize(instance);
+            return;
+        }
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            printf("Failed to acquire swap chain image!\n");
+        }
+
+        // Only reset the fence if we are submitting work
+        vkResetFences(instance->device, 1, &instance->in_flight_fences[instance->current_frame]);
+
+        // Clear out the command buffer
+    	vkResetCommandBuffer(instance->command_buffers[instance->current_frame], 0);
+	}
+
+    // Draw the frame
+    draw_scene(instance->active_scene, 0);
+
+    // Submit the commands and present the last frame
+    {
+        // Populate the submit info struct
+        {
+            submit_info->sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submit_info->waitSemaphoreCount = 1;
+            submit_info->pWaitSemaphores = &wait_semaphores;
+            submit_info->pWaitDstStageMask = &wait_stages;
+            submit_info->commandBufferCount = 1;
+            submit_info->pCommandBuffers = &instance->command_buffers[instance->current_frame];
+            submit_info->signalSemaphoreCount = 1;
+            submit_info->pSignalSemaphores = &signal_semaphores;
+        }
+
+        // Submit the draw commands
+        if (vkQueueSubmit(instance->graphics_queue, 1, submit_info, instance->in_flight_fences[instance->current_frame]))
+            g_print_error("Failed to submit draw command buffer!\n");
+
+        // Populate the present info struct
+        {
+            present_info->sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+            present_info->waitSemaphoreCount = 1;
+            present_info->pWaitSemaphores = &signal_semaphores;
+            present_info->swapchainCount = 1;
+            present_info->pSwapchains = swap_chains;
+            present_info->pImageIndices = &instance->image_index;
+        }
+
+        // Present the image to the swapchain
+        result = vkQueuePresentKHR(instance->present_queue, present_info);
+
+        // Does the window need to be resized?
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+            g_window_resize(instance);
+        }
+        else if (result != VK_SUCCESS) {
+            printf("failed to present swap chain image!");
+        }
+    }
+
+    // Compute the current frame index
+    instance->current_frame = (instance->current_frame + 1) % instance->max_buffered_frames;
+
+    // Deallocation
+	free(present_info);
+	free(submit_info);
+
+    instance->ticks += 1;
+    printf("%d\r", instance->ticks);
+    fflush(stdout);
+	return 0;
+}
+
+int           g_print_error                ( const char *const   format, ... ) 
 {
 
     // Argument check
@@ -1014,7 +1262,7 @@ int           g_print_error          ( const char *const   format, ... )
     }
 }
 
-int           g_print_warning        ( const char *const   format, ... ) 
+int           g_print_warning              ( const char *const   format, ... ) 
 {
 
     // Argument check
@@ -1052,7 +1300,7 @@ int           g_print_warning        ( const char *const   format, ... )
 
 }
 
-int           g_print_log            ( const char *const   format, ... ) 
+int           g_print_log                  ( const char *const   format, ... ) 
 {
     // Argument check
     {
@@ -1090,12 +1338,12 @@ int           g_print_log            ( const char *const   format, ... )
 
 }
 
-GXInstance_t *g_get_active_instance  ( void )
+GXInstance_t *g_get_active_instance        ( void )
 {
     return active_instance;
 }
 
-void          g_create_vulkan_buffer ( VkDeviceSize        size    , VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
+void          g_create_vulkan_buffer       ( VkDeviceSize          size    , VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *bufferMemory) {
      
     GXInstance_t         *instance        = g_get_active_instance();
     VkBufferCreateInfo   *buffer_info     = 0;
@@ -1125,7 +1373,7 @@ void          g_create_vulkan_buffer ( VkDeviceSize        size    , VkBufferUsa
     vkBindBufferMemory(instance->device, buffer, bufferMemory, 0);
 }
 
-int           g_cache_material       ( GXInstance_t       *instance, GXMaterial_t *material )
+int           g_cache_material             ( GXInstance_t         *instance, GXMaterial_t *material )
 {
     // Argument check
     {
@@ -1162,7 +1410,7 @@ int           g_cache_material       ( GXInstance_t       *instance, GXMaterial_
     }
 }
 
-int           g_cache_part           ( GXInstance_t       *instance, GXPart_t     *part)
+int           g_cache_part                 ( GXInstance_t         *instance, GXPart_t     *part)
 {
 
     // Argument check
@@ -1200,7 +1448,7 @@ int           g_cache_part           ( GXInstance_t       *instance, GXPart_t   
     }
 }
 
-int           g_cache_shader         ( GXInstance_t       *instance, GXShader_t   *shader)
+int           g_cache_shader               ( GXInstance_t         *instance, GXShader_t   *shader)
 {
 
     // Argument check
@@ -1213,7 +1461,7 @@ int           g_cache_shader         ( GXInstance_t       *instance, GXShader_t 
         #endif
     }
 
-    //dict_add(instance->cached_shaders, shader->name, shader);
+    dict_add(instance->cached_shaders, shader->name, shader);
 
     return 1;
 
@@ -1238,12 +1486,12 @@ int           g_cache_shader         ( GXInstance_t       *instance, GXShader_t 
     }
 }
 
-void          g_user_exit(callback_parameter_t* input, GXInstance_t* instance)
+void          g_user_exit                  ( callback_parameter_t *input, GXInstance_t* instance)
 {
     instance->running = false;
 }
 
-GXMaterial_t *g_find_material        ( GXInstance_t       *instance, char         *name )
+GXMaterial_t *g_find_material              ( GXInstance_t         *instance, char         *name )
 {
     // Argument check
     {
@@ -1278,7 +1526,7 @@ GXMaterial_t *g_find_material        ( GXInstance_t       *instance, char       
     }
 }
 
-GXPart_t     *g_find_part            ( GXInstance_t       *instance, char         *name)
+GXPart_t     *g_find_part                  ( GXInstance_t         *instance, char         *name)
 {
 
     // Argument check
@@ -1314,7 +1562,7 @@ GXPart_t     *g_find_part            ( GXInstance_t       *instance, char       
     }
 }
 
-GXShader_t   *g_find_shader          ( GXInstance_t       *instance, char         *name)
+GXShader_t   *g_find_shader                ( GXInstance_t         *instance, char         *name)
 {
 
     // Argument check
@@ -1350,7 +1598,7 @@ GXShader_t   *g_find_shader          ( GXInstance_t       *instance, char       
     }
 }
 
-int           g_exit                 ( GXInstance_t       *instance )
+int           g_exit                       ( GXInstance_t         *instance )
 {
 
     // Argument check
@@ -1359,17 +1607,43 @@ int           g_exit                 ( GXInstance_t       *instance )
             goto no_instance;
     }
 
+    vkDeviceWaitIdle(instance->device);
+
     // G10 Cleanup
     {
-        //free(instance->name);
+
+        // Free shaders
+        {
+            size_t       shader_count = dict_values(instance->cached_shaders, 0);
+            GXShader_t** shaders = calloc(shader_count, sizeof(GXShader_t*));
+
+            dict_values(instance->cached_shaders, shaders);
+
+            for (size_t i = 0; i < shader_count; i++)
+            {
+                char* c = shaders[i];
+                destroy_shader(c);
+            }
+            free(shaders);
+        }
     }
 
     // Vulkan cleanup
     {
-        
-        vkDestroySwapchainKHR(instance->device, instance->swap_chain, (void*)0);
-        vkDestroySurfaceKHR(instance->instance, instance->surface, (void*)0);
+        clear_swap_chain();
+
+        for (size_t i = 0; i < instance->max_buffered_frames; i++)
+        {
+            vkDestroySemaphore(instance->device, instance->render_finished_semaphores[i], 0);
+            vkDestroySemaphore(instance->device, instance->image_available_semaphores[i], 0);
+            vkDestroyFence(instance->device, instance->in_flight_fences[i], 0);
+
+        }
+
+        vkDestroyCommandPool(instance->device, instance->command_pool, 0);
+
         vkDestroyDevice(instance->device, (void*)0);
+        vkDestroySurfaceKHR(instance->instance, instance->surface, (void*)0);
         vkDestroyInstance(instance->instance, (void*)0);
     }
 

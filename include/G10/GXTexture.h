@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include <dict/dict.h>
 #include <JSON/JSON.h>
@@ -11,8 +12,10 @@
 struct GXTexture_s
 {
 	char           *name;
-	VkImage        *texture_image;
+	VkImage         texture_image;
 	VkDeviceMemory  texture_image_memory;
+	VkImageView     texture_image_view;
+
 
 };
 

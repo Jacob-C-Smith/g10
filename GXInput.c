@@ -1110,7 +1110,7 @@ int          process_input             ( GXInstance_t *instance )
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                 {
                     // TODO: Uncomment
-                    //g_window_resize(instance);
+                    g_window_resize(instance);
                     break;
                 }
                 default:
@@ -1145,6 +1145,7 @@ int          process_input             ( GXInstance_t *instance )
                     }
             }       
     }
+
 
     return 0;
 
@@ -1181,9 +1182,8 @@ int          append_bind               ( GXInput_t *input, GXBind_t *bind )
             b->next = bind;
         }
         else
-        {
             dict_add(input->bind_lut, bind->keys[i], bind);
-        }
+
     }
 
     dict_add(input->binds, bind->name, bind);
@@ -1336,18 +1336,19 @@ int          destroy_input             ( GXInput_t    *input )
         #endif
     }
 
+    // Initialized data
+    size_t     bind_count = dict_values(input->binds, 0);
+    GXBind_t **binds      = calloc(bind_count, sizeof(void *));
+
     // Free the input name
     free(input->name);
 
-    GXBind_t *bind = input->binds;
+    // Get each bind
+    dict_values(input->binds, binds);
 
-    //while (bind)
-    //{
-    //    GXBind_t *i = bind;
-    //    bind = bind->next;
-    //    destroy_bind(i);
-
-    //}
+    // Free each bind
+    for (size_t i = 0; i < bind_count; i++)
+        free(binds[i]);
 
     free(input);
 

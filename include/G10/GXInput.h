@@ -20,14 +20,14 @@
 
 struct GXBind_s
 {
-	bool             active;
-	char            *name,
-	   	           **keys;
-	void           **callbacks;
-	size_t           key_count,
-		             callback_count,
-		             callback_max;
-	struct GXBind_s *next;
+	bool              active;
+	char             *name,
+	   	            **keys;
+	void            **callbacks;
+	size_t            key_count,
+		              callback_count,
+		              callback_max;
+	struct GXBind_s  *next;
 };
 
 struct GXInput_s
@@ -40,7 +40,8 @@ struct GXInput_s
 enum input_state_e
 {
 	KEYBOARD = 1,
-	MOUSE    = 2
+	MOUSE    = 2,
+	GAMEPAD  = 3
 };
 
 struct callback_parameter_s
@@ -56,6 +57,11 @@ struct callback_parameter_s
 				yrel;
 			u8  button;
 		} mouse_state;
+		
+		struct gamepad_state_s {
+			bool depressed;
+
+		};
 	} inputs;
 };
 

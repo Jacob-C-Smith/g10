@@ -118,10 +118,6 @@ typedef struct GXPart_s GXPart_t;
 struct GXShader_s;
 typedef struct GXShader_s GXShader_t;
 
-// Shader uniform 
-struct GXUniform_s;
-typedef struct GXUniform_s GXUniform_t;
-
 // Material 
 struct GXMaterial_s;
 typedef struct GXMaterial_s GXMaterial_t;
@@ -192,7 +188,7 @@ typedef struct chat_s chat_t;
 
 // Scheduler
 struct GXScheduler_s;
-typedef struct GXScheduler_s GXScheduler_t;
+typedef struct GXScheduler_s GXSchedule_t;
 
 // Displace rotate command
 struct displace_rotate_s;

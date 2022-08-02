@@ -27,8 +27,9 @@ int load_ai                    ( GXAI_t **ai, char *path );
 int load_ai_as_json            ( GXAI_t **ai, char *token_text );
 
 // User callbacks
-int set_ai_state_callback      ( GXAI_t *ai, char  *state_name                             , int(*function_pointer)(/*TODO: PARAMETERS*/));
-int set_ai_pre_update_callback ( GXAI_t *ai, int  (*function_pointer)(/*TODO: PARAMETERS*/));
+int add_ai_state_callback      ( GXAI_t  *ai, char  *state_name                             , int(*function_pointer)(/*TODO: PARAMETERS*/));
+int set_ai_state               ( GXAI_t  *ai, char  *state_name );
+int set_ai_pre_update_callback ( GXAI_t  *ai, int  (*function_pointer)(/*TODO: PARAMETERS*/) );
 
 // Deallocators
-int destroy_ai                 ( GXAI_t *ai );
+int destroy_ai                 ( GXAI_t  *ai );

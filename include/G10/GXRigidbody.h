@@ -5,6 +5,7 @@
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
+#include <G10/GXLinear.h>
 
 struct GXRigidbody_s
 {
@@ -28,21 +29,9 @@ struct GXRigidbody_s
 	size_t      torque_count;
 };
 
-int create_rigidbody(GXRigidbody_t **rigidbody)
-{
-	GXRigidbody_t *i_rigidbody = calloc(1, sizeof(GXRigidbody_t));
+int create_rigidbody(GXRigidbody_t** rigidbody);
 
-	*rigidbody = i_rigidbody;
+int load_rigidbody (GXRigidbody_t **rigidbody, const char *path);
+int load_rigidbody_as_json (GXRigidbody_t **rigidbody, char *token_text, size_t token_text_len);
 
-	return 1;
-}
-
-int update_force(GXRigidbody_t* rigidbody)
-{
-	rigidbody->forces[0] = (vec3) {0.f, 0.f, 0.f, 0.f};
-
-	// Newtons first law; summate forces
-	for (size_t i = 1; i < rigidbody->force_count; i++)
-		add_vec3(&rigidbody->forces[0], rigidbody->forces[0], rigidbody->forces[i]);
-
-}
+int destroy_rigidbody ( GXRigidbody_t *rigidbody );

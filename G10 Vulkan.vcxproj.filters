@@ -31,6 +31,27 @@
     <Filter Include="Header Files\G10\Math">
       <UniqueIdentifier>{dffc8f5a-49e2-45e7-bb3c-66e4ab441be5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\G10\AI">
+      <UniqueIdentifier>{77d62c05-92c1-4577-8075-55af134d01dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Input">
+      <UniqueIdentifier>{e1217e44-ad9e-4ccc-8bea-aea45fb3c521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Renderer">
+      <UniqueIdentifier>{f0781c1e-82ac-4660-8a49-b1774773f3e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asm">
+      <UniqueIdentifier>{33fdebf5-1a61-4682-8ef4-b02efdae56ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Physics">
+      <UniqueIdentifier>{a3acca41-694a-48fb-8112-c12cbcde1f5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asm\x64">
+      <UniqueIdentifier>{e2ca124d-f0d1-412f-9df0-4b192c99435b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asm\x64\avx2">
+      <UniqueIdentifier>{46ac174e-7376-4746-accd-13f181b8e70a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -78,6 +99,15 @@
     <ClCompile Include="GXAI.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GXRigidbody.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXPLY.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXPhysics.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\G10\GXtypedef.h">
@@ -92,9 +122,6 @@
     <ClInclude Include="include\G10\GXScene.h">
       <Filter>Header Files\G10</Filter>
     </ClInclude>
-    <ClInclude Include="include\G10\GXInput.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXPart.h">
       <Filter>Header Files\G10\Scene\Entity</Filter>
     </ClInclude>
@@ -104,25 +131,13 @@
     <ClInclude Include="include\G10\GXAudio.h">
       <Filter>Header Files\G10\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\G10\GXTransform.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXCamera.h">
       <Filter>Header Files\G10\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXTexture.h">
       <Filter>Header Files\G10\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="include\G10\GXShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXScheduler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXAI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXLinear.h">
@@ -131,10 +146,39 @@
     <ClInclude Include="include\G10\GXQuaternion.h">
       <Filter>Header Files\G10\Math</Filter>
     </ClInclude>
+    <ClInclude Include="include\G10\GXTransform.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXShader.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXRigidbody.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXLight.h">
+      <Filter>Header Files\G10\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXAI.h">
+      <Filter>Header Files\G10\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXInput.h">
+      <Filter>Header Files\G10\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXRenderer.h">
+      <Filter>Header Files\G10\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXPhysics.h">
+      <Filter>Header Files\G10\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="time partitioning.txt">
       <Filter>Source Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GXLinearA.asm">
+      <Filter>Source Files\asm\x64\avx2</Filter>
+    </None>
   </ItemGroup>
 </Project>
