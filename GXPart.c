@@ -94,6 +94,7 @@ int draw_part(GXPart_t* part)
 	vkCmdBindIndexBuffer(instance->command_buffers[instance->current_frame], part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(instance->command_buffers[instance->current_frame], (u32)part->index_count*3, 1, 0, 0, 0);
+
 	return 0;
 }
 
@@ -102,10 +103,8 @@ int destroy_part(GXPart_t* part)
 {
 	
 	// Initialized data
-	GXInstance_t *instance = g_get_active_instance;
+	GXInstance_t *instance = g_get_active_instance();
 	
-
-
 	// Remove the part from the cache
 	if (dict_get(instance->cached_parts, part->name) == part)
 	{

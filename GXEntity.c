@@ -1,12 +1,19 @@
-#include <G10/GXEntity.h>
+﻿#include <G10/GXEntity.h>
 
-int create_entity(GXEntity_t** entity)
+vec3 calculate_force_gravitational(GXEntity_t* entity);
+vec3 calculate_force_applied(GXEntity_t* entity);
+vec3 calculate_force_normal(GXEntity_t* entity);
+vec3 calculate_force_friction(GXEntity_t* entity);
+vec3 calculate_force_tension(GXEntity_t* entity);
+vec3 calculate_force_spring(GXEntity_t* entity);
+
+int create_entity(GXEntity_t** pp_entity)
 {
 	// TODO: Argument check
 	GXEntity_t *ret = calloc(1,sizeof(GXEntity_t));
 	
 	// TODO: Memory check
-	*entity = ret;
+	*pp_entity = ret;
 
 	return 1;
 	
@@ -15,7 +22,7 @@ int create_entity(GXEntity_t** entity)
 	//          - Standard library errors
 }
 
-int load_entity(GXEntity_t** entity, char* path)
+int load_entity(GXEntity_t** pp_entity, char* path)
 {
 	// TODO: Argument check
 	// TODO: Memory check
@@ -23,7 +30,7 @@ int load_entity(GXEntity_t** entity, char* path)
 	char   *token_text = calloc(len+1, sizeof(char));
 	g_load_file(path, token_text, false);
 
-	load_entity_as_json(entity, token_text, len);
+	load_entity_as_json(pp_entity, token_text, len);
 
 	return 0;
 	
@@ -32,23 +39,12 @@ int load_entity(GXEntity_t** entity, char* path)
 	//          - Standard library errors
 }
 
-/* !
- *  Load an entity as JSON object text
- *
- * @param entity     : Double pointer to entity
- * @param token_text : The entity JSON object text
- * @param len        : The length of the entity JSON object text
- *
- * @sa destroy_entity
- *
- * @return 1 on success, 0 on error
- */
-int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
+int load_entity_as_json(GXEntity_t** pp_entity, char* token_text, size_t len)
 {
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(entity == (void *)0)
+			if(pp_entity == (void *)0)
 				goto no_entity;
 			if (token_text == (void*)0)
 				goto no_token;
@@ -65,7 +61,9 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 		      **materials   = 0,
 		       *shader      = 0,
 		       *transform   = 0,
-		       *rigid_body  = 0;
+		       *rigid_body  = 0,
+		       *collider    = 0,
+		       *ai          = 0;
 
 
 	// Parse the JSON
@@ -97,6 +95,14 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 		token      = dict_get(entity_json, "rigid body");
 		rigid_body = JSON_VALUE(token, JSONobject);
 
+		// Collider
+		token      = dict_get(entity_json, "collider");
+		collider   = JSON_VALUE(token, JSONobject);
+
+		// AI
+		token      = dict_get(entity_json, "ai");
+		ai         = JSON_VALUE(token, JSONobject);
+
 	}
 
 	// Is there enough information to construct an entity?
@@ -114,10 +120,10 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 	{
 
 		// Allocate the entity
-		create_entity(entity);
+		create_entity(pp_entity);
 
 		// Get a reference to the entity
-		i_entity = *entity;
+		i_entity = *pp_entity;
 
 		// Name
 		if (name)
@@ -198,6 +204,7 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 			// Path branch
 			else
 				load_transform(&i_entity->transform, transform);
+
 		}
 
 		// Rigidbody
@@ -214,6 +221,37 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 				load_rigidbody(&i_entity->rigidbody, rigid_body);
 		}
 
+		// Collider
+		if (collider) {
+
+			// Differentiate objects from paths
+
+			// Object branch
+			if (*collider == '{')
+				load_collider_as_json(&i_entity->collider, collider, strlen(collider));
+
+			// Path branch
+			else
+				load_collider(&i_entity->collider, collider);
+			
+			if (i_entity->collider->bv)
+				i_entity->collider->bv->entity = i_entity;
+
+		}
+
+		// AI
+		if (ai)
+		{
+			// Differentiate objects from paths
+
+			// Object branch
+			if (*ai == '{')
+				load_ai_as_json(&i_entity->ai, ai, strlen(ai));
+
+			// Path branch
+			else
+				load_ai(&i_entity->ai, ai);
+		}
 	}
 
 	return 0;
@@ -257,101 +295,293 @@ int load_entity_as_json(GXEntity_t** entity, char* token_text, size_t len)
 	}
 }
 
-int load_entity_from_queue(GXScene_t *scene)
+int calculate_entity_force ( GXEntity_t *p_entity )
 {
 
 	// Initialized data
-	GXInstance_t *instance = g_get_active_instance();
+	vec3* forces = p_entity->rigidbody->forces;
+
+	forces[0] = (vec3){0.f, 0.f, 0.f, 0.f};
+
+	// Calculate each forces effect on the entity
+	forces[1] = calculate_force_gravitational ( p_entity );
+	forces[2] = calculate_force_applied       ( p_entity );
+	forces[3] = calculate_force_normal        ( p_entity );
+	forces[4] = calculate_force_friction      ( p_entity );
+	forces[5] = calculate_force_tension       ( p_entity );
+	forces[6] = calculate_force_spring        ( p_entity );
+
+	// Summate each force
+	for (size_t i = 0; i < 6; i++)
+		add_vec3(&forces[0], forces[0], forces[i]);
+
+	// forces[0] = net force
+
+	return 1;
+}
+
+int preupdate_entity_ai(GXEntity_t* p_entity)
+{
+	// Initialized data
+	GXAI_t* p_ai = p_entity->ai;
+
+	// Get the callback function associated with the current state 
+	void (*preupdate_ai)(GXEntity_t * p_entity) = p_ai->pre_ai;
+
+	// Pre update
+	if(preupdate_ai)
+		preupdate_ai(p_entity);
+}
+
+int update_entity_ai(GXEntity_t* p_entity)
+{
+	// Initialized data
+	GXAI_t *p_ai = p_entity->ai;
+
+	if (dict_get(p_entity->ai->states, p_entity->ai->current_state))
+	{
+
+		// Get the callback function associated with the current state 
+		void (*update_ai_function)(GXEntity_t * p_entity) = dict_get(p_ai->states, p_ai->current_state);
+	
+		// Update
+		update_ai_function(p_entity);
+	}
+	return 1;
+}
+
+vec3 calculate_force_gravitational ( GXEntity_t * p_entity )
+{
+	vec3 ret = { 0.f, 0.f, -9.8f, 0 };
+
+	// -50 m / s terminal velocity
+	if (p_entity->rigidbody->velocity.z < -50.f)
+		ret.z = 0.f;
+
+	return ret;
+}
+
+vec3 calculate_force_applied ( GXEntity_t * p_entity )
+{
+	vec3 ret = { 0, 0, 0, 0 };
+
+	// TODO: Get collisions
+	dict* collisions = p_entity->collider->collisions;
+
+	for (size_t i = 0; i < collisions->entry_count; i++)
+	{
+
+		// Initialized data
+		dict_item *di = collisions->entries[i];
+
+		if ( di )
+		{
+			// Initialized data
+			GXCollision_t *collision    = di->value;
+			GXEntity_t    *other_entity = (p_entity == collision->a) ? (collision->b) : (collision->a);
+			
+
+		}
+		
+	}
+	
+	return ret;
+}
+
+vec3 calculate_force_normal ( GXEntity_t * p_entity )
+{
+	vec3 ret = { 0, 0, 0, 0 };
+
+	if (false/*entity->collider */ )
+	{
+		vec3 gravitational_force = calculate_force_gravitational(p_entity);
+		ret.z = gravitational_force.z * -1;
+	}
+
+	return ret;
+}
+
+vec3 calculate_force_friction(GXEntity_t* p_entity)
+{
+	vec3 ret = { 0, 0, 0, 0 };
+
+	return ret;
+}
+
+vec3 calculate_force_tension(GXEntity_t* p_entity)
+{
+	vec3 ret = { 0, 0, 0, 0 };
+
+	return ret;
+}
+
+vec3 calculate_force_spring(GXEntity_t* p_entity)
+{
+	vec3 ret = { 0, 0, 0, 0 };
+
+	return ret;
+}
+
+int load_entity_from_queue(GXInstance_t *instance)
+{
+
+	// Initialized data
 	size_t        i        = 0;
 	char         *text     = 0;
 	GXEntity_t   *entity   = 0;
+	GXScene_t    *scene    = instance->loading_scene;
 
-
-	// Lock the loading mutex while we find an entity to load
-	SDL_LockMutex(instance->load_entity_mutex);
-	
-	if (dict_keys(instance->load_entity_queue, 0) == 0)
+	while (queue_empty(instance->load_entity_queue)==false)
 	{
-		SDL_UnlockMutex(instance->load_entity_mutex);
-		return 0;
-	}
+		// Lock the loading mutex while we find an entity to load
+		SDL_LockMutex(instance->load_entity_mutex);
 
-
-	// Atomic
-	{
-
-		// Find an entity
-		while (instance->load_entity_queue->entries[i] == 0)
+		if (queue_empty(instance->load_entity_queue))
 		{
-			if (i >= instance->load_entity_queue->entry_count - 1)
-			{
-				SDL_UnlockMutex(instance->load_entity_mutex);
-				return 0;
-			}
-			else i++;
+			SDL_UnlockMutex(instance->load_entity_mutex);
+			return 0;
 		}
-		text = instance->load_entity_queue->entries[i]->key;
 
-		// Remove the entity from the list
-		
-		dict_pop(instance->load_entity_queue, text, 0);
+		text = queue_dequeue(instance->load_entity_queue);
+
+		// Unlock the mutex
+		SDL_UnlockMutex(instance->load_entity_mutex);
+
+		// Load the entity
+		if (*text == '{')
+			load_entity_as_json(&entity, text, strlen(text));
+		else
+			load_entity(&entity, text);
+
+		// Add the entity to the active scene
+		append_entity(scene, entity);
 	}
+	return 0;
+}
 
-	// Unlock the mutex
-	SDL_UnlockMutex(instance->load_entity_mutex);
+int load_light_probe_from_queue(GXInstance_t* instance)
+{
 
-	// Load the entity
-	if (*text == '{')
-		load_entity_as_json(&entity, text, strlen(text));
-	else
-		load_entity(&entity, text);
-
-	// Add the entity to the active scene
-	append_entity(scene, entity);
+	// TODO:
 
 	return 0;
 }
 
-int draw_entity(GXEntity_t* entity)
+int draw_entity(GXEntity_t* p_entity)
 {
 	GXInstance_t* instance = g_get_active_instance();
 	
 	// Draw the thing
-	size_t part_count = dict_values(entity->parts, 0);
+	size_t part_count = dict_values(p_entity->parts, 0);
 	GXPart_t **parts  = calloc(part_count, sizeof(void *));
 	
-	dict_values(entity->parts, parts);
+	dict_values(p_entity->parts, parts);
 
-	use_shader(entity->shader);
+	use_shader(p_entity->shader);
+	//set_shader_camera(entity->shader);
 
 	for (size_t i = 0; i < part_count; i++)
 		draw_part(parts[i]);
 
 	free(parts);
 
-
 	return 1;
 }
 
-int move_entity(GXEntity_t* entity, float delta_time)
+int destroy_entity(GXEntity_t* p_entity)
 {
-	GXRigidbody_t* rigidbody = entity->rigidbody;
-	GXTransform_t* transform = entity->transform;
 
-	// force = ( kg * m / s^2 )
-	vec3 force = rigidbody->forces[0]; 
+	free(p_entity->name);
 
-	// Calculate acceleration
-	// acceleration = ( m / s^2 )
-	div_vec3_f(&rigidbody->acceleration, force, rigidbody->mass);
+	if (p_entity->parts)
+	{
+		size_t     part_count = dict_keys(p_entity->parts, 0);
+		GXPart_t **parts      = calloc(part_count, sizeof(void*));
+
+		dict_values(p_entity->parts, parts);
+
+		for (size_t i = 0; i < part_count; i++)
+			destroy_part(parts[i]);
+
+		free(parts);
+
+		dict_destroy(p_entity->parts);
+
+	}
+
+	if (p_entity->materials)
+	{
+		size_t         material_count = dict_keys(p_entity->materials, 0);
+		GXMaterial_t **materials      = calloc(material_count, sizeof(void*));
+
+		dict_values(p_entity->materials, materials);
+
+		// TODO:
+		for (size_t i = 0; i < material_count; i++)
+			;//destroy_material(materials[i]);
+
+		free(materials);
+
+		dict_destroy(p_entity->materials);
+	}
+
+	if (p_entity->shader)
+		destroy_shader(p_entity->shader);
+
+	if (p_entity->transform)
+		destroy_transform(p_entity->transform);
 	
-	// Calculate velocity
-	// velocity = ( m / s )
-	rigidbody->velocity = mul_vec3_f(rigidbody->acceleration, delta_time);
+	if(p_entity->rigidbody)
+		destroy_rigidbody(p_entity->rigidbody);
 
-	// Calculate location
-	// location = ( m )
-	transform->location = mul_vec3_f(rigidbody->velocity, rigidbody->mass);
+
+	free(p_entity);
+
+	return 0;
+}
+
+int move_entity ( GXEntity_t* p_entity )
+{
+	GXInstance_t* instance = g_get_active_instance();
+
+	float delta_time = instance->delta_time;
+
+	GXRigidbody_t* rigidbody = p_entity->rigidbody;
+	GXTransform_t* transform = p_entity->transform;
+
+	// Calculate displacement and its derivatives from force
+	{
+		// force = ( kg * m / s^2 )
+
+		// Calculate acceleration
+		// acceleration = ( m / s^2 )
+		div_vec3_f(&rigidbody->acceleration, rigidbody->forces[0], rigidbody->mass);
+
+		// Calculate velocity
+		// velocity = ( m / s )
+		add_vec3(&rigidbody->velocity, mul_vec3_f(rigidbody->acceleration, delta_time), rigidbody->velocity);
+
+		// Calculate linear momentum
+		// momentum = kg * ( m / s ) 
+		rigidbody->momentum = mul_vec3_f(rigidbody->velocity, rigidbody->mass);
+
+		// Calculate location
+		// location = ( m )
+		add_vec3(&transform->location, mul_vec3_f(rigidbody->velocity, delta_time), transform->location);
+	}
+
+	// Calculate rotation and its derivatives from torque
+	{
+
+		// torque = ( kg * m^2 / s^2 )
+
+		// Calculate angular acceleration
+		// α = ( m^2 / s^2 )
+
+	}
+
+	// Update the model matrix
+	transform_model_matrix(transform, &transform->model_matrix);
 
 	return 1;
 }

@@ -62,6 +62,10 @@ typedef struct quaternion_s quaternion;
 
 // Insatnce 
 struct GXInstance_s;
+
+/* !
+    An instance stores information about G10 in an application
+ */
 typedef struct GXInstance_s GXInstance_t;
 
 // Threads
@@ -75,6 +79,9 @@ typedef struct GXTask_s GXTask_s;
 
 // Bind
 struct GXBind_s;
+/* !
+    A bind is a set of callback function triggered by an input
+*/
 typedef struct GXBind_s GXBind_t;
 
 // Input
@@ -85,6 +92,10 @@ typedef struct { SDL_KeyCode code; const char* name; } kn_t;
 
 // Scene type
 struct GXScene_s;
+
+/* !
+   A scene stores lights, cameras, and entities
+*/
 typedef struct GXScene_s GXScene_t;
 
 // Entity type
@@ -116,6 +127,10 @@ typedef struct GXPart_s GXPart_t;
 
 // Shader type
 struct GXShader_s;
+
+/* !
+   A shader contains a vulkan shader, its sets, descriptors, and push constant.
+*/
 typedef struct GXShader_s GXShader_t;
 
 // Material 
@@ -188,6 +203,8 @@ typedef struct chat_s chat_t;
 
 // Scheduler
 struct GXScheduler_s;
+
+// A schedule is how G10 gets work done. A definable number of threads concurrently process lists of tasks. If that doesn't make sense to you, please just load the provided schedule.
 typedef struct GXScheduler_s GXSchedule_t;
 
 // Displace rotate command

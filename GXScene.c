@@ -128,7 +128,8 @@ int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 	dict         *scene_json_object = 0;
 
 	// JSON array of object text
-	char        **entities          = 0,
+	char         *name              = 0,
+		        **entities          = 0,
 		        **cameras           = 0,
 		        **lights            = 0,
 		        **skyboxes          = 0,
@@ -151,7 +152,7 @@ int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 
 		// Set the name
 		token           = dict_get(scene_json_object, "name");
-		i_scene->name   = JSON_VALUE(token, JSONstring);
+		name            = JSON_VALUE(token, JSONstring);
 
 		// Get array of entity objects and paths
 		token           = dict_get(scene_json_object, "entities");
@@ -170,19 +171,40 @@ int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 		//i_scene->skybox = 0;//TODO: 
 	}
 
+	// Set the name
+	{
+		size_t name_len = strlen(name);
+
+		i_scene->name = calloc(name_len + 1, sizeof(char));
+
+		strncpy(i_scene->name, name, name_len);
+
+	}
+
 	// Load entities
 	if(entities) 
 	{
 		GXThread_t  **entity_loading_threads = calloc(instance->loading_thread_count, sizeof(void *));
 
 		size_t len = 0;
-		for (; entities[len]; len++)
-			dict_add(instance->load_entity_queue, entities[len], entities[len]);
+		
+		for (; entities[len]; len++);
+
+		if (instance->load_entity_queue)
+			queue_destroy(instance->load_entity_queue);
+
+		queue_construct(&instance->load_entity_queue, len+1);
+
+		for (size_t i = 0; i < len; i++)
+			queue_enqueue(instance->load_entity_queue, entities[i]);
 		
 		dict_construct(&i_scene->entities, len);
 		dict_construct(&i_scene->actors, len);
+		dict_construct(&i_scene->ais, len);
 
 		extern int load_entity_from_queue(GXScene_t * scene);
+
+		instance->loading_scene = i_scene;
 
 		for (size_t i = 0; i < instance->loading_thread_count; i++)
 		{
@@ -192,7 +214,7 @@ int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 
 			thread = entity_loading_threads[i];
 			
-			thread->thread = SDL_CreateThread(load_entity_from_queue, 0, i_scene);
+			thread->thread = SDL_CreateThread(load_entity_from_queue, 0, instance);
 
 		}
 
@@ -206,20 +228,29 @@ int load_scene_as_json(GXScene_t** scene, char* token_text, size_t len)
 
 	// Load cameras
 	if(cameras) {
-		
+		for (size_t i = 0; cameras[i]; i++)
+		{
+			GXCamera_t *camera = 0;
+			
+			if (*cameras[i] == '{')
+				load_camera_as_json(&camera, cameras[i], strlen(cameras[i]));
+			else
+				load_camera(&camera, cameras[i]);
+		}
 	}
 
-	// Load Lights
+	// Load lights
 	if(lights) {
 
 	}
 
-	// Load Light Probes
+	// Load light probes
 	if(light_probes) {
 
 	}
 
-	// Join each entity loading thread
+	// Construct a bounding volume heierarchy tree from the entities in the scene
+	construct_bvh_from_scene(&i_scene->bvh, i_scene);
 
 	return 1;
 
@@ -272,6 +303,9 @@ int append_entity(GXScene_t* scene, GXEntity_t* entity)
 
 	if (entity->rigidbody)
 		dict_add(scene->actors, entity->name, entity);
+
+	if (entity->ai)
+		dict_add(scene->ais, entity->name, entity);
 
 	return 1;
 
@@ -400,7 +434,13 @@ int append_light(GXScene_t* scene, GXLight_t* light)
 	}
 }
 
-int draw_scene(GXScene_t* scene, GXShader_t *shader)
+int append_collision(GXScene_t* scene, GXCollision_t* collision)
+{
+	
+	return 0;
+}
+
+int draw_scene(GXScene_t* scene)
 {
 
 	// Initialized data
@@ -439,7 +479,6 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 	for (size_t i = 0; i < entity_count; i++)
 		draw_entity(entities[i]);
 
-
 	free(entities);
 
 	// End the render pass
@@ -454,7 +493,7 @@ int draw_scene(GXScene_t* scene, GXShader_t *shader)
 	return 0;
 }
 
-GXEntity_t* get_entity(GXScene_t* scene, const char name[])
+GXEntity_t *get_entity(GXScene_t* scene, const char name[])
 {
 
 	// Argument check
@@ -478,8 +517,211 @@ GXEntity_t* get_entity(GXScene_t* scene, const char name[])
 			return 0;
 		no_name:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Scene] Null pointer provided for \"name       \" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
 			#endif
 			return 0;
 	}
+}
+
+GXCamera_t *get_camera(GXScene_t* scene, const char name[])
+{
+	
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if(scene==(void*)0)
+				goto no_scene;
+			if (name == (void*)0)
+				goto no_name;
+		#endif
+	}
+
+	return dict_get(scene->cameras, name);
+
+	// Error handling
+	{
+		no_scene:
+			#ifndef NDEBUG
+				g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+			#endif
+			return 0;
+		no_name:
+			#ifndef NDEBUG
+				g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+			#endif
+			return 0;
+	}
+}
+
+GXLight_t *get_light(GXScene_t* scene, const char name[])
+{
+	
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if(scene==(void*)0)
+				goto no_scene;
+			if (name == (void*)0)
+				goto no_name;
+		#endif
+	}
+
+	return dict_get(scene->lights, name);
+
+	// Error handling
+	{
+		no_scene:
+			#ifndef NDEBUG
+				g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+			#endif
+			return 0;
+		no_name:
+			#ifndef NDEBUG
+				g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+			#endif
+			return 0;
+	}
+}
+
+int set_active_camera(GXScene_t* scene, const char name[])
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if(scene == (void *)0)
+				goto no_scene;
+			if (name == (void *)0)
+				goto no_name;
+		#endif
+	}
+
+	// Initialized data
+	GXCamera_t *c = dict_get(scene->cameras, name);
+
+	// Is the requested camera real?
+	if (c)
+
+		// Set the active camera
+		scene->active_camera = c;
+
+	else
+		
+		// Error
+		goto failed_to_find_camera;
+
+	return 0;
+
+	// Error handling
+	{
+
+		// Argument check
+		{
+			no_scene:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+			no_name:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+
+		// Data errors
+		{
+			failed_to_find_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scene] Failed to find camera \"%s\" in call to function \"%s\"\n", name, __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+}
+
+int destroy_scene(GXScene_t* scene)
+{
+	/*
+	
+	struct GXScene_s
+	{
+	
+		// The name of the scene
+		char       *name;
+
+		// Scene data
+		dict       *entities;
+		dict       *cameras;
+		dict       *lights;
+		dict       *collisions;
+
+		// A bounding volume heierarchy tree containing entities
+		GXBV_t     *bvh;
+
+		// A list of entities with rigidbodies
+		dict       *actors;
+
+		// The camera to be used while drawing the scene
+		GXCamera_t *active_camera;
+	};
+
+	*/
+
+	free(scene->name);
+
+	if (scene->entities)
+	{
+		size_t entity_count = dict_keys(scene->entities, 0);
+		GXEntity_t **entities = calloc(entity_count, sizeof(void *));
+
+		dict_values(scene->entities, entities);
+
+		for (size_t i = 0; i < entity_count; i++)
+			destroy_entity(entities[i]);
+		
+		free(entities);
+
+		dict_destroy(scene->entities);
+
+	}
+
+	if (scene->cameras)
+	{
+		size_t camera_count = dict_keys(scene->cameras, 0);
+		GXCamera_t **cameras = calloc(camera_count, sizeof(void*));
+
+		dict_values(scene->cameras, cameras);
+
+		// TODO:
+		for (size_t i = 0; i < camera_count; i++)
+			;// destroy_camera(cameras[i]);
+
+		free(cameras);
+
+		dict_destroy(scene->cameras);
+
+	}
+
+	if (scene->lights)
+	{
+		size_t light_count = dict_keys(scene->lights, 0);
+		GXLight_t** lights = calloc(light_count, sizeof(void*));
+
+		dict_values(scene->lights, lights);
+
+
+		// TODO:
+		for (size_t i = 0; i < light_count; i++)
+			;// destroy_light(lights[i]);
+
+		free(lights);
+
+		dict_destroy(scene->lights);
+	}
+
+
+	free(scene);
+
+	return 0;
 }

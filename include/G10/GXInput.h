@@ -61,7 +61,7 @@ struct callback_parameter_s
 		struct gamepad_state_s {
 			bool depressed;
 
-		};
+		} gamepad_state;
 	} inputs;
 };
 

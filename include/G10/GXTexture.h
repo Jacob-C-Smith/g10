@@ -15,8 +15,6 @@ struct GXTexture_s
 	VkImage         texture_image;
 	VkDeviceMemory  texture_image_memory;
 	VkImageView     texture_image_view;
-
-
 };
 
 // Allocator

@@ -6,6 +6,7 @@
 lib/
 G10/*
 *.dll
+Level 1/
 
 include/JSON/*
 # User-specific files

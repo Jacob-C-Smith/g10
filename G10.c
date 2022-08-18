@@ -254,6 +254,8 @@ int           g_init                       ( GXInstance_t      **instance, const
 
             // Display the window
             SDL_ShowWindow(ret->window);
+            
+            ret->clock_div = SDL_GetPerformanceFrequency();
 
         }
 
@@ -281,9 +283,18 @@ int           g_init                       ( GXInstance_t      **instance, const
 
             ret->loading_thread_count = loading_thread_count;
 
-            dict_construct(&ret->load_entity_queue, 16);
-
-            ret->load_entity_mutex = SDL_CreateMutex();
+            // Initialize mutexes
+            {
+                ret->load_entity_mutex       = SDL_CreateMutex();
+                ret->shader_cache_mutex      = SDL_CreateMutex();
+                ret->part_cache_mutex        = SDL_CreateMutex();
+                ret->material_cache_mutex    = SDL_CreateMutex();
+                ret->move_object_mutex       = SDL_CreateMutex();
+                ret->update_force_mutex      = SDL_CreateMutex();
+                ret->resolve_collision_mutex = SDL_CreateMutex();
+                ret->ai_preupdate_mutex      = SDL_CreateMutex();
+                ret->ai_update_mutex         = SDL_CreateMutex();
+            }
 
             // Subsystem initialization
             {
@@ -291,6 +302,7 @@ int           g_init                       ( GXInstance_t      **instance, const
                 // Shader initialization
                 {
                     extern void init_shader ( void );
+
                     init_shader();
                 }
 
@@ -338,6 +350,12 @@ int           g_init                       ( GXInstance_t      **instance, const
                     init_scheduler();
                 }
 
+                // Collider initialization
+                {
+                    extern void init_collider( void );
+
+                    init_collider();
+                }
             }
 
             // Construct dictionaries to cache materials, parts, and shaders.
@@ -939,7 +957,8 @@ int           check_vulkan_device          ( GXInstance_t *instance, VkPhysicalD
             {
                 if (strcmp(required_extension_names[i], available_device_extension_names[j]) == 0)
                 {
-                    dict_pop(device_extension_name_dict, required_extension_names[i], 0);
+                    char *t = 0;
+                    dict_pop(device_extension_name_dict, required_extension_names[i], &t);
                     break;
                 }
             }
@@ -991,26 +1010,6 @@ void          create_buffer                ( VkDeviceSize         size, VkBuffer
     VkBufferCreateInfo   *buffer_info      = calloc(1, sizeof(VkBufferCreateInfo));
     VkMemoryAllocateInfo  *alloc_info      = calloc(1, sizeof(VkMemoryAllocateInfo));
     
-        //{
-        //    buffer_create_info->sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        //    buffer_create_info->size = ply_file->elements[0].s_stride * vertices_in_buffer;
-        //    buffer_create_info->usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        //    buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        //}
-
-        //if (vkCreateBuffer(instance->device, buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
-        //    g_print_error("[G10] [PLY] Failed to create vertex buffer");
-
-        //vkGetBufferMemoryRequirements(instance->device, part->vertex_buffer, memory_requirements);
-
-        //allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        //allocate_info->allocationSize = memory_requirements->size;
-        //allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-        //
-        //if (vkAllocateMemory(instance->device, allocate_info, 0, &part->vertex_buffer_memory))
-        //    g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
-
     // Create a buffer
     {
 
@@ -1021,10 +1020,10 @@ void          create_buffer                ( VkDeviceSize         size, VkBuffer
         buffer_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         // Create a buffer
-        if ( vkCreateBuffer( instance->device, buffer_info, 0, &buffer ) != VK_SUCCESS )
+        if ( vkCreateBuffer( instance->device, buffer_info, 0, buffer ) != VK_SUCCESS )
             g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCSIG__);
 
-        vkGetBufferMemoryRequirements(instance->device, buffer, &mem_requirements);
+        vkGetBufferMemoryRequirements(instance->device, *buffer, &mem_requirements);
     }
     
 
@@ -1041,7 +1040,7 @@ void          create_buffer                ( VkDeviceSize         size, VkBuffer
             g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCSIG__);
 
         // Bind the buffer to the device
-        vkBindBufferMemory(instance->device, buffer, *buffer_memory, 0);
+        vkBindBufferMemory(instance->device, *buffer, *buffer_memory, 0);
     }
 }
 
@@ -1127,98 +1126,6 @@ int           g_window_resize              ( GXInstance_t        *instance)
     create_image_views();
     create_framebuffers();
     return 0;
-}
-
-int           render_frame                 ( GXInstance_t        *instance )
-{
-    // Initialized data
-	VkSemaphore               wait_semaphores[]       = { instance->image_available_semaphores[instance->current_frame]};
-	VkSemaphore               signal_semaphores[]     = { instance->render_finished_semaphores[instance->current_frame]};
-	VkPipelineStageFlags      wait_stages[]           = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-    VkPresentInfoKHR         *present_info            = calloc(1, sizeof(VkPresentInfoKHR));
-	VkSubmitInfo             *submit_info             = calloc(1, sizeof(VkSubmitInfo));
-	VkSwapchainKHR            swap_chains[]           = { instance->swap_chain };
-    VkResult                  result;
-
-    // Get the command buffer ready for drawing
-    {
-
-        // Wait for the previous frame to finish rendering
-	    vkWaitForFences(instance->device, 1, &instance->in_flight_fences[instance->current_frame], VK_TRUE, UINT64_MAX);
-	
-        // Grab an image from the swapchain
-        result = vkAcquireNextImageKHR(instance->device, instance->swap_chain, UINT64_MAX, instance->image_available_semaphores[instance->current_frame], VK_NULL_HANDLE, &instance->image_index);
-	
-        // Make sure the image is usable
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            g_window_resize(instance);
-            return;
-        }
-        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            printf("Failed to acquire swap chain image!\n");
-        }
-
-        // Only reset the fence if we are submitting work
-        vkResetFences(instance->device, 1, &instance->in_flight_fences[instance->current_frame]);
-
-        // Clear out the command buffer
-    	vkResetCommandBuffer(instance->command_buffers[instance->current_frame], 0);
-	}
-
-    // Draw the frame
-    draw_scene(instance->active_scene, 0);
-
-    // Submit the commands and present the last frame
-    {
-        // Populate the submit info struct
-        {
-            submit_info->sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            submit_info->waitSemaphoreCount = 1;
-            submit_info->pWaitSemaphores = &wait_semaphores;
-            submit_info->pWaitDstStageMask = &wait_stages;
-            submit_info->commandBufferCount = 1;
-            submit_info->pCommandBuffers = &instance->command_buffers[instance->current_frame];
-            submit_info->signalSemaphoreCount = 1;
-            submit_info->pSignalSemaphores = &signal_semaphores;
-        }
-
-        // Submit the draw commands
-        if (vkQueueSubmit(instance->graphics_queue, 1, submit_info, instance->in_flight_fences[instance->current_frame]))
-            g_print_error("Failed to submit draw command buffer!\n");
-
-        // Populate the present info struct
-        {
-            present_info->sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-            present_info->waitSemaphoreCount = 1;
-            present_info->pWaitSemaphores = &signal_semaphores;
-            present_info->swapchainCount = 1;
-            present_info->pSwapchains = swap_chains;
-            present_info->pImageIndices = &instance->image_index;
-        }
-
-        // Present the image to the swapchain
-        result = vkQueuePresentKHR(instance->present_queue, present_info);
-
-        // Does the window need to be resized?
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-            g_window_resize(instance);
-        }
-        else if (result != VK_SUCCESS) {
-            printf("failed to present swap chain image!");
-        }
-    }
-
-    // Compute the current frame index
-    instance->current_frame = (instance->current_frame + 1) % instance->max_buffered_frames;
-
-    // Deallocation
-	free(present_info);
-	free(submit_info);
-
-    instance->ticks += 1;
-    printf("%d\r", instance->ticks);
-    fflush(stdout);
-	return 0;
 }
 
 int           g_print_error                ( const char *const   format, ... ) 
@@ -1336,6 +1243,118 @@ int           g_print_log                  ( const char *const   format, ... )
         }
     }
 
+}
+
+int           copy_state                 ( GXInstance_t* instance )
+{
+    
+    // Initialized data
+    size_t       actor_count = 0,
+                 ai_count    = 0;
+
+    GXEntity_t **actors      = 0,
+               **ais         = 0;
+
+    // Lock the mutexes
+    {
+
+        // Physics
+        SDL_LockMutex(instance->move_object_mutex);
+        SDL_LockMutex(instance->update_force_mutex);
+        SDL_LockMutex(instance->resolve_collision_mutex);
+
+        // AI
+        SDL_LockMutex(instance->ai_preupdate_mutex);
+        SDL_LockMutex(instance->ai_update_mutex);
+    }
+
+    // Get a list of actors and ais
+    {
+        actor_count = dict_keys(instance->active_scene->actors, 0);
+        ai_count    = dict_keys(instance->active_scene->ais, 0);
+
+        actors      = calloc(actor_count+1, sizeof(void *));
+        ais         = calloc(ai_count+1, sizeof(void *));
+
+        dict_values(instance->active_scene->actors, actors);
+        dict_values(instance->active_scene->ais, ais);
+    }
+
+    // Destroy the old queues
+    {
+
+        // Physics
+        {
+            if (instance->actor_move_queue)
+                queue_destroy(instance->actor_move_queue);
+
+            if (instance->actor_force_queue)
+                queue_destroy(instance->actor_force_queue);
+
+            if (instance->actor_collision_queue)
+                queue_destroy(instance->actor_collision_queue);
+        }
+
+        // AI
+        {
+            if (instance->ai_preupdate_queue)
+                queue_destroy(instance->ai_preupdate_queue);
+
+            if (instance->ai_update_queue)
+                queue_destroy(instance->ai_update_queue);
+        }
+    }
+
+    // Reconstruct the queues
+    {
+        
+        // Physics
+        queue_construct(&instance->actor_move_queue     , actor_count + 1);
+        queue_construct(&instance->actor_force_queue    , actor_count + 1);
+        queue_construct(&instance->actor_collision_queue, actor_count + 1);
+
+        // AI
+        queue_construct(&instance->ai_preupdate_queue   , ai_count + 1 );
+        queue_construct(&instance->ai_update_queue      , ai_count + 1 );
+    }
+
+    // Populate the new queues
+    {
+
+        // Physics
+        for (size_t i = 0; i < actor_count; i++)
+        {
+            queue_enqueue(instance->actor_move_queue, actors[i]);
+            queue_enqueue(instance->actor_force_queue, actors[i]);
+            queue_enqueue(instance->actor_collision_queue, actors[i]);
+        }
+
+        // AI
+        for (size_t i = 0; i < ai_count; i++)
+        {
+            queue_enqueue(instance->ai_preupdate_queue, ais[i]);
+            queue_enqueue(instance->ai_update_queue, ais[i]);
+        }
+    }
+
+    // Free the lists
+    free(actors);
+    free(ais);
+
+    // Unlock the mutexes
+    {
+        
+        // Physics
+        SDL_UnlockMutex(instance->move_object_mutex);
+        SDL_UnlockMutex(instance->update_force_mutex);
+        SDL_UnlockMutex(instance->resolve_collision_mutex);
+
+        // AI
+        SDL_UnlockMutex(instance->ai_preupdate_mutex);
+        SDL_UnlockMutex(instance->ai_update_mutex);
+    }
+
+    return 0;
 }
 
 GXInstance_t *g_get_active_instance        ( void )
@@ -1460,7 +1479,7 @@ int           g_cache_shader               ( GXInstance_t         *instance, GXS
                 goto no_shader;
         #endif
     }
-
+    
     dict_add(instance->cached_shaders, shader->name, shader);
 
     return 1;
@@ -1489,6 +1508,11 @@ int           g_cache_shader               ( GXInstance_t         *instance, GXS
 void          g_user_exit                  ( callback_parameter_t *input, GXInstance_t* instance)
 {
     instance->running = false;
+    if (instance->active_schedule)
+    {
+        GXThread_t *main_thread = dict_get(instance->active_schedule->threads, "Main Thread");
+        main_thread->running = false;
+    }
 }
 
 GXMaterial_t *g_find_material              ( GXInstance_t         *instance, char         *name )
@@ -1575,7 +1599,11 @@ GXShader_t   *g_find_shader                ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cached_shaders, name);
+    GXShader_t* ret = 0;
+
+    ret = dict_get(instance->cached_shaders, name);
+
+    return ret;
 
     // Error handling
     {
@@ -1607,24 +1635,59 @@ int           g_exit                       ( GXInstance_t         *instance )
             goto no_instance;
     }
 
+    // Wait for the GPU to finish whatever its doing
     vkDeviceWaitIdle(instance->device);
 
     // G10 Cleanup
     {
 
+        // Free scenes
+        {
+            size_t scene_count = dict_keys(instance->scenes, 0);
+            GXScene_t **scenes = calloc(scene_count, sizeof(void *));
+
+            dict_values(instance->scenes, scenes);
+
+            for (size_t i = 0; i < scene_count; i++)
+                destroy_scene(scenes[i]);
+
+            free(scenes);
+
+            dict_destroy(instance->scenes);
+        }
+
         // Free shaders
         {
-            size_t       shader_count = dict_values(instance->cached_shaders, 0);
-            GXShader_t** shaders = calloc(shader_count, sizeof(GXShader_t*));
 
+            // Initialized data
+            size_t        shader_count = dict_values(instance->cached_shaders, 0);
+            GXShader_t  **shaders      = calloc(shader_count, sizeof(GXShader_t*));
+
+            // Get a list of orphan shaders
             dict_values(instance->cached_shaders, shaders);
 
+            // Iterate over each shader
             for (size_t i = 0; i < shader_count; i++)
             {
-                char* c = shaders[i];
-                destroy_shader(c);
+
+                // Destroy the shader
+                shaders[i]->users = 1;
+                destroy_shader(shaders[i]);
+
             }
+
+            // Free the list
             free(shaders);
+        }
+
+        // Free materials
+        {
+            ;
+        }
+
+        // Free parts
+        {
+            ;
         }
     }
 

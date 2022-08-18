@@ -1,8 +1,8 @@
-﻿#pragma once
+﻿ #pragma once
 
 #include <stdio.h>
 #include <stdbool.h>
-#define _USE_MATH_DEFINES // For some (utterly stupid) reason, macros for numerical constants are not automatically defined... 
+#define _USE_MATH_DEFINES 
 #include <math.h>
 
 #include <vulkan/vulkan.h>
@@ -12,6 +12,7 @@
 #include <SDL2/SDL_vulkan.h>
 
 #include <dict/dict.h>
+#include <queue/queue.h>
 
 #include <JSON/JSON.h>
 
@@ -21,10 +22,17 @@
 #include <G10/GXScheduler.h>
 #include <G10/GXMaterial.h>
 #include <G10/GXScheduler.h>
+#include <G10/GXCollider.h>
 
 #ifdef main
 #undef main
 #endif
+
+/*
+#define G10ASSERT (expression) \
+        if(!expression)
+			g_assertion_failed();
+*/
 
 struct GXInstance_s
 {
@@ -68,40 +76,58 @@ struct GXInstance_s
 	float                     priority;
 
 	#pragma pack(push)
-	#pragma pack 4
+	#pragma pack (4)
 	struct { int g, p; }      queue_family_indices;
 	#pragma pack(pop)
 
 	struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
 
-	// G10 data
-	GXInput_t                *input;
+	// G10 
 
+	// Context data
+
+	// Input 
+	GXInput_t                *input;
+	GXSchedule_t             *active_schedule;
+	GXScene_t                *active_scene;
+
+	// Schedules
 	dict                     *schedules;
 
 	// Loaded scenes
 	dict                     *scenes;
-	GXScene_t                *active_scene,
-		                     *loading_scene;
+	GXScene_t                *loading_scene;
 
 	// Server 
 	GXServer_t               *server;
 
-	// Cached assets
 	dict                     *cached_parts;
 	dict                     *cached_materials;
 	dict                     *cached_shaders;
 	
 	// G10 queues
-	dict                     *load_entity_queue;
-	dict                     *actor_queue;
+	queue                    *load_entity_queue;
+	queue                    *actor_move_queue;
+	queue                    *actor_collision_queue;
+	queue                    *actor_force_queue;
+	queue                    *ai_preupdate_queue;
+	queue                    *ai_update_queue;
 
-	// Loading mutexes
-	SDL_mutex                *load_entity_mutex;
+	// Mutexes
+	SDL_mutex                *load_entity_mutex,
+	                         *shader_cache_mutex,
+		                     *part_cache_mutex,
+		                     *material_cache_mutex,
+		                     *move_object_mutex,
+		                     *update_force_mutex,
+		                     *resolve_collision_mutex,
+		                     *ai_preupdate_mutex,
+		                     *ai_update_mutex;
 
 	// Delta time
 	u32                       d, 
 		                      last_time;
+	u64                       clock_div;
 	float                     delta_time;
 
 	// Window parameters
@@ -111,14 +137,44 @@ struct GXInstance_s
 	// How many threads should be assigned to load a scene
 	size_t                    loading_thread_count;
 
-	// 
     bool                      running;
 };
 
 // Allocators
+
+/* !
+ *  Construct a G10 instance
+ *
+ * @param pp_instance : Double pointer to instance
+ * @param path        : Path to instance JSON file
+ * 
+ * @sa g_exit
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_init                ( GXInstance_t     **instance, const char *path);
 
+/* !
+ *  Create a Vulkan buffer
+ *
+ * @param pp_instance : Double pointer to instance
+ * @param path        : Path to instance JSON file
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT void          create_buffer         ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
+
 // File operations
+/* !
+ *  Load a file. If buffer is null pointer, returns size of file
+ *
+ * @param path       : Path to file
+ * @param buffer     : Buffer to read file
+ * @param binaryMode : "r" if false else "rb"
+ * @sa g_exit
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT size_t        g_load_file           ( const char        *path    , void       *buffer, bool binaryMode);
 
 // Window operations
@@ -129,38 +185,116 @@ DLLEXPORT int           g_window_resize       ( GXInstance_t        *instance );
 DLLEXPORT int           g_delta               ( GXInstance_t        *instance );
 DLLEXPORT float         g_time                ( GXInstance_t        *instance );
 
-// Operations
-DLLEXPORT int           render_frame          ( GXInstance_t        *instance );
-
 // Debug logging
+
+/* !
+ *  printf, but in red
+ *
+ * @param format : printf formatted text
+ * @param ...    : Additional parameters
+ * @sa g_exit
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_print_error         ( const char *const  format  , ... );
+
+/* !
+ *  printf, but in yellow
+ *
+ * @param format : printf formatted text
+ * @param ...    : Additional parameters
+ * @sa g_exit
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_print_warning       ( const char *const  format  , ... );
+
+/* !
+ *  printf, but in blue
+ *
+ * @param format : printf formatted text
+ * @param ...    : Additional parameters
+ * @sa g_exit
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_print_log           ( const char *const  format  , ... );
+DLLEXPORT int           g_assertion_failed    ( const char        *format  );
+
+// State copy
+/* !
+ *  Copies state from context data into instance
+ *
+ * @param instance: The active instance
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int           copy_state            ( GXInstance_t *instance );
 
 // Getters
+/* !
+ *  Returns the active instance
+ * 
+ *  @return pointer to active instance on success, 0 on error
+ */
 DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 
-DLLEXPORT void          create_buffer         ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
-
 // Cache operations
+/* !
+ * Cache a material. Caching a material adds it to the garbage collector.
+ * Cached materials can be accessed, so long as they are in memory 
+ * 
+ * @param instance: The active instance
+ * @param material: A pointer to a material
+ *
+ * @sa g_find_material
+ * 
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_cache_material      ( GXInstance_t        *instance, GXMaterial_t *material );
+
+/* !
+ * Cache a part. Caching a part adds it to the garbage collector.
+ * Cached parts can be accessed, so long as they are in memory
+ *
+ * @param instance: The active instance
+ * @param part    : A pointer to a part
+ *
+ * @sa g_find_part
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_cache_part          ( GXInstance_t        *instance, GXPart_t     *part );
+
+/* !
+ * Cache a shader. Caching a shader adds it to the garbage collector.
+ * Cached shaders can be accessed, so long as they are in memory
+ *
+ * @param instance: The active instance
+ * @param shader  : A pointer to a shader
+ *
+ * @sa g_find_shader
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_cache_shader        ( GXInstance_t        *instance, GXShader_t   *shader );
 
 DLLEXPORT GXMaterial_t *g_find_material       ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXPart_t     *g_find_part           ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, char         *name );
 
+// User opertations
 DLLEXPORT void          g_user_exit           ( callback_parameter_t *input, GXInstance_t *instance);
 
 // Conversions
-inline float  to_degrees            ( float radians )
+inline float            to_degrees            ( float radians )
 {
     return radians * (180.f / (float)M_PI);
 }
-inline float  to_radians            ( float degrees )
+inline float            to_radians            ( float degrees )
 {
     return  degrees * ((float)M_PI / 180.f);
 }
 
+// Destructors
 DLLEXPORT int           g_exit                ( GXInstance_t      *instance );

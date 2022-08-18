@@ -76,7 +76,7 @@ int construct_transform(GXTransform_t** transform, vec3 location, quaternion rot
 		i_transform->rotation = rotation;
 		i_transform->scale    = scale;
 
-		transform_model_matrix(&i_transform->model_matrix, i_transform);
+		transform_model_matrix(i_transform, &i_transform->model_matrix);
 	}
 
 	return 1;

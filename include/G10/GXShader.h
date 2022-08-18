@@ -11,15 +11,26 @@
 
 struct GXShader_s
 {
-    char             *name;
+    char                   *name;
 
-    VkShaderModule    vertex_shader_module,
-                      fragment_shader_module;
+    VkShaderModule          vertex_shader_module,
+                            tessellation_control_shader_module,
+                            tessellation_evaluation_shader_module,
+                            geometry_shader_module,
+                            fragment_shader_module;
 
-    VkPipeline        pipeline;
-    VkPipelineLayout  pipeline_layout;
+    VkPipeline              pipeline;
+    VkPipelineLayout        pipeline_layout;
+    VkDescriptorPool        descriptor_pool;
+    VkDescriptorSet        *descriptor_sets;
+    VkDescriptorSetLayout   descriptor_set_layout;
 
-    dict             *sets;
+    size_t                  descriptor_set_count,
+                            descriptor_set_layout_count;
+
+    dict                   *sets;
+
+    size_t                  users;
 };
 
 int create_shader_module(char* code, size_t code_len, VkShaderModule* shader_module);

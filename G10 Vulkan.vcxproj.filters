@@ -43,14 +43,29 @@
     <Filter Include="Source Files\asm">
       <UniqueIdentifier>{33fdebf5-1a61-4682-8ef4-b02efdae56ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\G10\Physics">
-      <UniqueIdentifier>{a3acca41-694a-48fb-8112-c12cbcde1f5a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\asm\x64">
       <UniqueIdentifier>{e2ca124d-f0d1-412f-9df0-4b192c99435b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\asm\x64\avx2">
       <UniqueIdentifier>{46ac174e-7376-4746-accd-13f181b8e70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Collider">
+      <UniqueIdentifier>{346e4e5b-1ddd-4795-b7ef-18a811667c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Collider\BVH">
+      <UniqueIdentifier>{32f0f7dc-cd75-41a1-ab79-277be2e8e199}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Collider\Convex Hull">
+      <UniqueIdentifier>{8afb9056-e454-469b-9d49-619fafaad35d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Animation">
+      <UniqueIdentifier>{e6e2c04c-4e88-4c56-83fb-ac3303012882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Network">
+      <UniqueIdentifier>{7296aab6-37e7-4fd1-9eba-05a8d93704e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\G10\Physics">
+      <UniqueIdentifier>{a3acca41-694a-48fb-8112-c12cbcde1f5a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -108,18 +123,27 @@
     <ClCompile Include="GXPhysics.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GXLinear.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXCollider.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXBV.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXRenderer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXCollision.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXServer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\G10\GXtypedef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\G10.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXEntity.h">
-      <Filter>Header Files\G10\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXScene.h">
       <Filter>Header Files\G10</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXPart.h">
@@ -136,9 +160,6 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXTexture.h">
       <Filter>Header Files\G10\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXScheduler.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXLinear.h">
       <Filter>Header Files\G10\Math</Filter>
@@ -169,6 +190,39 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXPhysics.h">
       <Filter>Header Files\G10\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXCollider.h">
+      <Filter>Header Files\G10\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXBV.h">
+      <Filter>Header Files\G10\Collider\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXEPA.h">
+      <Filter>Header Files\G10\Collider\Convex Hull</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXGJK.h">
+      <Filter>Header Files\G10\Collider\Convex Hull</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXCollision.h">
+      <Filter>Header Files\G10\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXRig.h">
+      <Filter>Header Files\G10\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXScheduler.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXtypedef.h">
+      <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXScene.h">
+      <Filter>Header Files\G10\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXEntity.h">
+      <Filter>Header Files\G10\Scene\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXServer.h">
+      <Filter>Header Files\G10\Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

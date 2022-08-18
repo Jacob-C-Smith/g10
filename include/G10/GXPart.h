@@ -14,6 +14,11 @@
 struct GXPart_s
 {
 	char           *name;
+
+	GXMaterial_t   *active_material;
+	GXShader_t     *active_shader;
+
+
 	VkBuffer        vertex_buffer,
 	                element_buffer;
 	VkDeviceMemory  vertex_buffer_memory,
@@ -32,7 +37,7 @@ DLLEXPORT int load_part         ( GXPart_t **part, char     *path );
 DLLEXPORT int load_part_as_json ( GXPart_t **part, char     *token_text, size_t len );
 
 // Drawing
-int          draw_part          ( GXPart_t   *part );
+DLLEXPORT int draw_part          ( GXPart_t   *part );
 
 // Destructors
-int          destroy_part       ( GXPart_t   *part );
+DLLEXPORT int destroy_part       ( GXPart_t   *part );

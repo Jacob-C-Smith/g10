@@ -25,15 +25,14 @@ struct GXTransform_s
 };
 
 
-int create_transform          ( GXTransform_t **transform );
+DLLEXPORT int create_transform          ( GXTransform_t **transform );
 
-int construct_transform       ( GXTransform_t **transform, vec3 location, quaternion rotation, vec3 scale );
+DLLEXPORT int construct_transform       ( GXTransform_t **transform, vec3 location, quaternion rotation, vec3 scale );
 
-void transform_model_matrix   ( GXTransform_t* transform, mat4* r);
+DLLEXPORT void transform_model_matrix   ( GXTransform_t* transform, mat4* r);
 
+DLLEXPORT int load_transform            ( GXTransform_t **transform, const char *path );
+DLLEXPORT int load_transform_as_json    ( GXTransform_t **transform, char       *object_text, size_t len );
 
-int load_transform            ( GXTransform_t **transform, const char *path );
-int load_transform_as_json    ( GXTransform_t **transform, char       *object_text, size_t len );
-
-int destroy_transform         ( GXTransform_t  *transform );
+DLLEXPORT int destroy_transform         ( GXTransform_t  *transform );
 

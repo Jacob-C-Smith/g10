@@ -54,9 +54,24 @@ int load_rigidbody_as_json(GXRigidbody_t** rigidbody, char* token_text, size_t t
 	create_rigidbody(rigidbody);
 	i_rigidbody = *rigidbody;
 
-	i_rigidbody->mass = atoi(mass);
+	if(mass)
+		i_rigidbody->mass = atoi(mass);
 
 	i_rigidbody->active = active;
+
+
+	i_rigidbody->forces = calloc(16, sizeof(vec3));
+
+	i_rigidbody->torques = calloc(16, sizeof(quaternion));
+
+	return 0;
+}
+
+int destroy_rigidbody(GXRigidbody_t* rigidbody)
+{
+	free(rigidbody->forces);
+	free(rigidbody->torques);
+	free(rigidbody);
 
 	return 0;
 }
