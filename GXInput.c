@@ -448,7 +448,9 @@ const kn_t keys[] = {
 
 dict *key_dict = 0;
 
-int init_input()
+SDL_GameController *controller;
+
+int init_input ( void )
 {
     // Make a hash table of keys
     dict_construct(&key_dict, 512);
@@ -456,6 +458,12 @@ int init_input()
     // Construct the hash table
     for (size_t i = 0; keys[i].code; i++)
         dict_add(key_dict, keys[i].name, 0);
+
+    // Is there a controller?
+    if (SDL_IsGameController(0)) 
+        controller = SDL_GameControllerOpen(0);
+
+    return 0;
 }
 
 int          create_bind               ( GXBind_t    **bind )
@@ -1053,6 +1061,13 @@ int          process_input             ( GXInstance_t *instance )
         #endif  
     }
 
+    // TODO: Refactor bind fires into a queue. 
+
+    if (instance->ui_instance)
+        if (instance->ui_instance->active_window)
+            if (SDL_GetWindowFlags(instance->ui_instance->active_window->window) & SDL_WINDOW_INPUT_FOCUS)
+                ui_process_input(instance->ui_instance);
+
     // TODO: Reimplement for other libraries?
 
     // Poll for events 
@@ -1073,27 +1088,27 @@ int          process_input             ( GXInstance_t *instance )
                 callback_parameter_t input;
                 int                  x_rel = instance->event.motion.xrel,
                                      y_rel = instance->event.motion.yrel;
-
-                input.input_state               = MOUSE;
-                input.inputs.mouse_state.xrel   = x_rel;
-                input.inputs.mouse_state.yrel   = y_rel;
-                input.inputs.mouse_state.button = button;
-
-                void *mouse_up = dict_get(key_dict, "UP");
-
-                
-                //if (strcmp(iter->keys[j], "MOUSE UP")    == 0 && y_rel < 0)
-                //    fire_bind(iter, input, instance);
-                //if (strcmp(iter->keys[j], "MOUSE DOWN")  == 0 && y_rel > 0)
-                //    fire_bind(iter, input, instance);
-                //if (strcmp(iter->keys[j], "MOUSE LEFT") == 0 && x_rel < 0)
-                //    fire_bind(iter, input, instance);
-                //if (strcmp(iter->keys[j], "MOUSE RIGHT") == 0 && x_rel > 0)
-                //    fire_bind(iter, input, instance);
-
-                    
+                {
+                    input.input_state               = MOUSE;
+                    input.inputs.mouse_state.xrel   = x_rel;
+                    input.inputs.mouse_state.yrel   = y_rel;
+                    input.inputs.mouse_state.button = button;
                 }
-                break;
+
+                // Fire mouse motion binds
+                {
+                if (y_rel < 0)
+                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
+                if (y_rel > 0)
+                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
+                if (x_rel < 0)
+                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
+                if (x_rel > 0)
+                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
+                }
+                    
+            }
+            break;
             
             // Keyboard events
 
@@ -1146,6 +1161,122 @@ int          process_input             ( GXInstance_t *instance )
             }       
     }
 
+    // Game controller
+    if(controller) {
+        callback_parameter_t input;
+        
+        // Initialize input struct
+        {
+            input.input_state = GAMEPAD;
+        
+            input.inputs.gamepad_state.left_trigger  = false;
+            input.inputs.gamepad_state.right_trigger = false;
+
+            input.inputs.gamepad_state.left_bumper   = false;
+            input.inputs.gamepad_state.right_bumper  = false;
+
+            input.inputs.gamepad_state.A             = false;
+            input.inputs.gamepad_state.B             = false;
+            input.inputs.gamepad_state.X             = false;
+            input.inputs.gamepad_state.Y             = false;
+
+            input.inputs.gamepad_state.dpad_down     = false;
+            input.inputs.gamepad_state.dpad_left     = false;
+            input.inputs.gamepad_state.dpad_right    = false;
+            input.inputs.gamepad_state.dpad_up       = false;
+
+            input.inputs.gamepad_state.start         = false;
+            input.inputs.gamepad_state.select        = false;
+
+            input.inputs.gamepad_state.left_stick    = (vec2){0.f, 0.f};
+            input.inputs.gamepad_state.right_stick   = (vec2){0.f, 0.f};
+        }
+
+        // Set bumpers
+        {
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER))
+                input.inputs.gamepad_state.right_bumper = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))
+                input.inputs.gamepad_state.left_bumper = true;
+        }
+
+        // Set ABXY buttons
+        {
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A))
+                input.inputs.gamepad_state.A = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B))
+                input.inputs.gamepad_state.B = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X))
+                input.inputs.gamepad_state.X = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y))
+                input.inputs.gamepad_state.Y = true;
+        }
+   
+        // Set DPAD buttons
+        {
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP))
+                input.inputs.gamepad_state.A = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN))
+                input.inputs.gamepad_state.B = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT))
+                input.inputs.gamepad_state.X = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
+                input.inputs.gamepad_state.Y = true;
+        }
+
+        // Set start/select buttons
+        {
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START))
+                input.inputs.gamepad_state.start = true;
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK))
+                input.inputs.gamepad_state.select = true;
+        }
+
+        // Set joysticks and triggers
+        {
+
+            // Set joysticks
+            {
+
+                // Set left joystick
+                {
+                    // X
+                    input.inputs.gamepad_state.right_stick.x = (float)SDL_GameControllerGetAxis(controller, 0) / (float)SHRT_MAX;
+
+                    // Y
+                    input.inputs.gamepad_state.right_stick.y = (float)SDL_GameControllerGetAxis(controller, 1) / (float)SHRT_MAX;
+                }
+
+                // Set right joystick
+                {
+                    // X
+                    input.inputs.gamepad_state.right_stick.x = (float)SDL_GameControllerGetAxis(controller, 2) / (float)SHRT_MAX;
+                
+                    // Y
+                    input.inputs.gamepad_state.right_stick.y = (float)SDL_GameControllerGetAxis(controller, 3) / (float)SHRT_MAX;
+                }
+            }
+            
+            // Set triggers
+            {
+
+                // Left trigger
+                input.inputs.gamepad_state.left_trigger = (float)SDL_GameControllerGetAxis(controller, 4) / (float)SHRT_MAX;
+                
+                // Right trigger
+                input.inputs.gamepad_state.right_trigger = (float)SDL_GameControllerGetAxis(controller, 5) / (float)SHRT_MAX;
+            }
+
+        }
+
+        // Fire binds
+        {
+            if (true)
+            {
+
+            }
+        }
+    }
 
     return 0;
 

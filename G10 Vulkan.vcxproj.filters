@@ -67,6 +67,9 @@
     <Filter Include="Header Files\G10\Physics">
       <UniqueIdentifier>{a3acca41-694a-48fb-8112-c12cbcde1f5a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\G10\Scene\Camera">
+      <UniqueIdentifier>{8be68c16-c05c-43de-8e5c-a34b68f3f802}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -96,28 +99,13 @@
     <ClCompile Include="GXAudio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GXTransform.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GXQuaternion.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GXCamera.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GXShader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GXScheduler.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GXAI.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GXRigidbody.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GXPLY.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GXPhysics.c">
@@ -129,9 +117,6 @@
     <ClCompile Include="GXCollider.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GXBV.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GXRenderer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -139,6 +124,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GXServer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXAI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXTransform.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXBV.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXScheduler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXPLY.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXCamera.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXCameraController.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -154,9 +160,6 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXAudio.h">
       <Filter>Header Files\G10\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXCamera.h">
-      <Filter>Header Files\G10\Scene</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXTexture.h">
       <Filter>Header Files\G10\Texture</Filter>
@@ -223,6 +226,12 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXServer.h">
       <Filter>Header Files\G10\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXCamera.h">
+      <Filter>Header Files\G10\Scene\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXCameraController.h">
+      <Filter>Header Files\G10\Scene\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

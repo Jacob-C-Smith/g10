@@ -33,7 +33,7 @@
 #define GXPLY_double              0x62756F64 // "doub"
 #define GXPLY_list                0x7473696C // "list"
 
-// Vertex groups that are likely to be en_countered
+// Vertex groups that are likely to be encountered
 #define GXPLY_Geometric           0x00001
 #define GXPLY_Texture             0x00002
 #define GXPLY_Normal              0x00004

@@ -15,6 +15,7 @@
 #include <G10/GXRenderer.h>
 #include <G10/GXInput.h>
 #include <G10/GXServer.h>
+#include <G10/GXUI.h>
 
 struct GXTask_s
 {
@@ -55,7 +56,6 @@ struct GXThread_s
  */
 DLLEXPORT int create_schedule        ( GXSchedule_t **pp_schedule );
 
-
 /* !
  *  Allocate memory for a thread
  *
@@ -82,11 +82,10 @@ DLLEXPORT int create_thread          ( GXThread_t    **pp_thread );
  */
 DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
 
-
 /* !
  *  Load a schedule from a JSON file
  *
- * @param pp_schedule : Double pointer to a schedule
+ * @param pp_schedule : return
  * @param token_text  : The schedule JSON object text
  * @param len         : The length of the schedule JSON object text
  *

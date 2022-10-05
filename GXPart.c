@@ -93,6 +93,8 @@ int draw_part(GXPart_t* part)
 	vkCmdBindVertexBuffers(instance->command_buffers[instance->current_frame], 0, 1, vertex_buffers, offsets);
 	vkCmdBindIndexBuffer(instance->command_buffers[instance->current_frame], part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
 
+
+
 	vkCmdDrawIndexed(instance->command_buffers[instance->current_frame], (u32)part->index_count*3, 1, 0, 0, 0);
 
 	return 0;

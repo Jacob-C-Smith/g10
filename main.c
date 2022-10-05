@@ -11,6 +11,9 @@
 #include <G10/GXTransform.h>
 #include <G10/GXPart.h>
 #include <G10/GXMaterial.h>
+#include <G10/GXCameraController.h>
+
+GXCameraController_t* camera_controller = 0;
 
 int main ( int argc, const char *argv[] )
 {
@@ -18,9 +21,8 @@ int main ( int argc, const char *argv[] )
     // Initialized data
     GXInstance_t  *instance      = 0;
     GXScene_t     *scene         = 0;
-    GXSchedule_t  *game_schedule = 0;
     GXShader_t    *shader        = 0;
-    
+
     // Create a debug instance
     g_init(&instance, "G10/Debug instance.json");
 
@@ -33,6 +35,11 @@ int main ( int argc, const char *argv[] )
             // Add an exit bind
             GXBind_t *exit_bind = find_bind(instance->input, "QUIT");
             register_bind_callback(exit_bind, &g_user_exit);
+
+            // Set up the camera controller
+            {
+                camera_controller = camera_controller_from_camera(instance, instance->active_scene->active_camera);
+            }
         }
 
         // Set up AI
@@ -50,8 +57,7 @@ int main ( int argc, const char *argv[] )
             //add_ai_state_callback(ai, "RUN LEFT", &goomba_state_run_left);
         }
         
-        // Get the schedule
-        game_schedule = dict_get(instance->schedules, "Simple Schedule");
+
     }
 
     // Debugging
@@ -65,6 +71,7 @@ int main ( int argc, const char *argv[] )
 
         // Generate lists
         {
+
             // Entity list
             dict_keys(instance->active_scene->entities, entities);
 
@@ -95,7 +102,7 @@ int main ( int argc, const char *argv[] )
     instance->running = true;
 
     // Start the game loop
-    start_schedule(game_schedule);
+    g_start_schedule(instance, "Simple Schedule");
     
     // Exit 
     g_exit(instance);

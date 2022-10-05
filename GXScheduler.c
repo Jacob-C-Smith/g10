@@ -22,7 +22,7 @@ char* task_names[15] = {
 
 void* task_function_pointers[15] = {
 	&process_input,
-	0, // update_ui
+	(void*) 0,
 	&update_ai, 
 	&pre_update_ai, 
 	&detect_collisions,

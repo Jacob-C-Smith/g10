@@ -6,8 +6,8 @@ int create_transform( GXTransform_t **transform )
 	// Argument check
 	{
 		#ifndef NDEBUG
-		if (transform == (void*)0)
-			goto no_transform;
+			if (transform == (void*)0)
+				goto no_transform;
 		#endif
 	}
 
@@ -97,6 +97,7 @@ int construct_transform(GXTransform_t** transform, vec3 location, quaternion rot
 
 int load_transform( GXTransform_t **transform, const char* path)
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -197,9 +198,9 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 				#endif
 			}
 
-			location.x = atof(token->value.a_where[0]);
-			location.y = atof(token->value.a_where[1]);
-			location.z = atof(token->value.a_where[2]);
+			location.x = (float) atof(token->value.a_where[0]);
+			location.y = (float) atof(token->value.a_where[1]);
+			location.z = (float) atof(token->value.a_where[2]);
 		}
 
 		// Set the rotation
@@ -215,6 +216,10 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 				// Error checking
 				{
 					#ifndef NDEBUG
+
+						if (token == (void *) 0)
+							goto no_rotation;
+
 						// Is the token an array?
 						if (token->type != JSONarray)
 							goto rotation_type_error;
@@ -230,9 +235,9 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 
 				vec3 eu_rot = { 0, 0, 0 };
 
-				eu_rot.x = atof(token->value.a_where[0]);
-				eu_rot.y = atof(token->value.a_where[1]);
-				eu_rot.z = atof(token->value.a_where[2]);
+				eu_rot.x = (float)atof(token->value.a_where[0]);
+				eu_rot.y = (float)atof(token->value.a_where[1]);
+				eu_rot.z = (float)atof(token->value.a_where[2]);
 
 				rotation = quaternion_from_euler_angle(eu_rot);
 
@@ -265,10 +270,10 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 					#endif
 				}
 	
-				rotation.u = atof(token->value.a_where[0]);
-				rotation.i = atof(token->value.a_where[1]);
-				rotation.j = atof(token->value.a_where[2]);
-				rotation.k = atof(token->value.a_where[3]);
+				rotation.u = (float)atof(token->value.a_where[0]);
+				rotation.i = (float)atof(token->value.a_where[1]);
+				rotation.j = (float)atof(token->value.a_where[2]);
+				rotation.k = (float)atof(token->value.a_where[3]);
 			
 			}
 		}
@@ -299,9 +304,9 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 				#endif
 			}
 
-			scale.x = atof(token->value.a_where[0]);
-			scale.y = atof(token->value.a_where[1]);
-			scale.z = atof(token->value.a_where[2]);
+			scale.x = (float)atof(token->value.a_where[0]);
+			scale.y = (float)atof(token->value.a_where[1]);
+			scale.z = (float)atof(token->value.a_where[2]);
 		}
 
 	}

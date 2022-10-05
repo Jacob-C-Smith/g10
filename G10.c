@@ -1,11 +1,10 @@
-﻿#include <G10/G10.h>
+﻿ #include <G10/G10.h>
 
 // Initialized data
 FILE* log_file;
 
 // Uninitialized data
 static GXInstance_t *active_instance = 0;
-typedef VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback_return_t;
 
 // Vulkan 
 void create_vulkan_instance ( char        **requested_instance_extensions, char **requested_validation_layers );
@@ -14,6 +13,8 @@ void setup_debug_messenger  ( void );
 void pick_physical_device   ( char        **required_extension_names );
 void create_logical_device  ( char        **required_extension_names );
 void create_swap_chain      ( void );
+void recreate_swap_chain    ( void );
+void cleanup_swap_chain     ( void );
 void create_image_views     ( void );
 void create_render_pass     ( void );
 void create_framebuffers    ( void );
@@ -26,12 +27,12 @@ u32  find_memory_type       ( u32           type_filter, VkMemoryPropertyFlags p
 int  check_vulkan_device    ( GXInstance_t *instance, VkPhysicalDevice physical_device, char** required_extension_names);
 
 
-static debug_callback_return_t debug_callback               ( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback               ( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 
     switch (messageSeverity)
     {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            printf("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
+            //printf("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
             g_print_log("[Vulkan] [Validation layer] %s\n\n", pCallbackData->pMessage);
@@ -57,7 +58,7 @@ VkResult      CreateDebugUtilsMessengerEXT ( VkInstance instance, const VkDebugU
     }
 }
 
-int           g_init                       ( GXInstance_t      **instance, const char   *path          )
+int           g_init                       ( GXInstance_t      **pp_instance, const char   *path          )
 {
     // Argument Check
     {
@@ -68,29 +69,30 @@ int           g_init                       ( GXInstance_t      **instance, const
     }
 
     // Initialized data
-    GXInstance_t *ret                           = calloc(1, sizeof(GXInstance_t));
-    size_t        token_text_len                = g_load_file(path, 0, false),
-                  token_count                   = 0,
-                  part_cache_count              = 32,
-                  material_cache_count          = 32,
-                  shader_cache_count            = 8,
-                  loading_thread_count          = 4;
-    dict         *instance_json_object          = 0;
-    char         *token_text                    = calloc(token_text_len, sizeof(u8)),
-                 *name                          = "Instance",
-                 *window_title                  = "G10",
-                **requested_validation_layers   = 0,
-                **requested_instance_extensions = 0,
-                **device_extensions             = 0,
-                 *requested_physical_device     = 0,
-                 *max_buffered_frames           = 2,
-                 *initial_scene                 = 0,
-                 *log_file_i                    = 0,
-                 *input                         = 0,
-                **schedules                     = 0;
-    size_t        window_width                  = 0,
-                  window_height                 = 0;
-    bool          fullscreen                    = false;
+    GXInstance_t  *ret                           = calloc(1, sizeof(GXInstance_t));
+    size_t         token_text_len                = g_load_file(path, 0, false),
+                   token_count                   = 0,
+                   part_cache_count              = 32,
+                   material_cache_count          = 32,
+                   shader_cache_count            = 8,
+                   loading_thread_count          = 4,
+                   window_width                  = 0,
+                   window_height                 = 0;
+    dict          *instance_json_object          = 0;
+    bool           fullscreen                    = false;
+    char          *token_text                    = calloc(token_text_len, sizeof(u8)),
+                  *name                          = "Instance",
+                  *window_title                  = "G10",
+                 **requested_validation_layers   = 0,
+                 **requested_instance_extensions = 0,
+                 **device_extensions             = 0,
+                  *requested_physical_device     = 0,
+                  *max_buffered_frames           = 2,
+                  *initial_scene                 = 0,
+                  *log_file_i                    = 0,
+                  *input                         = 0,
+                 **schedules                     = 0;
+
 
     // Load the file
     g_load_file(path, token_text, false);
@@ -112,13 +114,13 @@ int           g_init                       ( GXInstance_t      **instance, const
         {
             // Set the window width. Default to 800
             token         = dict_get(instance_json_object, "window width");
-            window_width  = (size_t) JSON_VALUE(token, JSONprimative);
-            window_width  = (window_width) ? atol((char*)window_width) : 1280;
+            window_width  = JSON_VALUE(token, JSONprimative);
+            window_width  = (long) (window_width) ? atol((char*)window_width) : 1280;
 
             // Set the window height. Default to 600
             token         = dict_get(instance_json_object, "window height");
             window_height = JSON_VALUE(token, JSONprimative);
-            window_height = (window_height) ? atol(window_height) : 720;
+            window_height = (long) (window_height) ? atol(window_height) : 720;
 
             // Set the window title. Default to "G10"
             token         = dict_get(instance_json_object, "window title");
@@ -210,18 +212,17 @@ int           g_init                       ( GXInstance_t      **instance, const
 
     }
 
+    // Set the instance
+    *pp_instance = ret;
+
+    // Set the active instance
+    active_instance = ret;
     
     // Instance initialization
     {
-        // Set the instance
-        *instance = ret;
-
-        // Set the active instance
-        active_instance = ret;
-
         ret->window_width = window_width;
         ret->window_height = window_height;
-        ret->max_buffered_frames = atoi(max_buffered_frames);
+        ret->max_buffered_frames = (long)atoi(max_buffered_frames);
     }
 
 
@@ -261,7 +262,9 @@ int           g_init                       ( GXInstance_t      **instance, const
 
         // Vulkan initialization
         {
-            create_vulkan_instance(requested_instance_extensions, requested_validation_layers);
+            VkResult result = 0;
+
+            create_vulkan_instance(requested_instance_extensions, requested_validation_layers, &result);
             create_surface();
             pick_physical_device(device_extensions);
             create_logical_device(device_extensions);
@@ -285,6 +288,8 @@ int           g_init                       ( GXInstance_t      **instance, const
 
             // Initialize mutexes
             {
+
+                // TODO: Create mutexes in subsystem initializers
                 ret->load_entity_mutex       = SDL_CreateMutex();
                 ret->shader_cache_mutex      = SDL_CreateMutex();
                 ret->part_cache_mutex        = SDL_CreateMutex();
@@ -373,6 +378,7 @@ int           g_init                       ( GXInstance_t      **instance, const
 
             // Load an input set
             {
+
                 // Load user defined input
                 if (input)
                     load_input(&ret->input, input);
@@ -399,14 +405,25 @@ int           g_init                       ( GXInstance_t      **instance, const
 
             // Load the initial scene
             if (initial_scene) {
+
+                // Scene pointer
                 GXScene_t* scene = 0;
+
+                // Load the scene from the path
                 load_scene(&scene, initial_scene);
 
+                // Did the scene load?
                 if (scene)
+
+                    // Add the scene to the instance
                     dict_add(ret->scenes, scene->name, scene);
+
+                // Error
                 else
+
                     goto no_initial_scene;
 
+                // Set the active scene
                 ret->active_scene = scene;
             }
 
@@ -492,87 +509,97 @@ int           g_init                       ( GXInstance_t      **instance, const
 
 }
 
-int           g_start                      ( GXInstance_t       *instance, char         *schedule_name )
+void          create_vulkan_instance       ( char **requested_instance_extensions, char **requested_validation_layers, VkResult *ret )
 {
     
-
-    return 0;
-}
-void          create_vulkan_instance       ( char **requested_instance_extensions, char **requested_validation_layers )
-{
-    GXInstance_t          *instance                  = g_get_active_instance();
-
-    VkApplicationInfo     *application_info          = calloc(1, sizeof(VkApplicationInfo));
-    VkInstanceCreateInfo  *instance_create_info               = calloc(1, sizeof(VkInstanceCreateInfo));
-    VkDebugUtilsMessengerCreateInfoEXT *debug_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));;
-    char                 **required_extensions       = 0,
-                         **requested_extensions      = 0;
-    dict                  *extensions                = 0;
-    u32                    required_extension_count  = 0,
-                           requested_extension_count = 0,
-                           requested_layers_count    = 0;
+    // Initialized data
+    GXInstance_t                        *instance                  = g_get_active_instance();
+    VkApplicationInfo                   *application_info          = calloc(1, sizeof(VkApplicationInfo));
+    VkInstanceCreateInfo                *instance_create_info      = calloc(1, sizeof(VkInstanceCreateInfo));
+    VkDebugUtilsMessengerCreateInfoEXT  *debug_create_info         = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));;
+    char                               **required_extensions       = 0,
+                                       **requested_extensions      = 0;
+    dict                                *extensions                = 0;
+    u32                                  required_extension_count  = 0,
+                                         requested_extension_count = 0,
+                                         requested_layers_count    = 0;
     
-    VkResult               result                    = 0;
+    VkResult                             result                    = 0;
     
-    while (requested_instance_extensions[++requested_extension_count]);
+    if(requested_instance_extensions)
+        while (requested_instance_extensions[++requested_extension_count]);
 
     // Populate application info struct
     {
         application_info->sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         application_info->pApplicationName   = "G10";
-        application_info->applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         application_info->pEngineName        = "G10";
-        application_info->engineVersion      = VK_MAKE_VERSION(1, 0, 0);
+        application_info->applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        application_info->engineVersion      = VK_MAKE_VERSION(0, 0, 1);
         application_info->apiVersion         = VK_API_VERSION_1_3;
     }
 
     // Populate instance create info struct
     {
-        instance_create_info->sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instance_create_info->pApplicationInfo = application_info;
-        
-        // Get a list of the required instance extensions from SDL
-        SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, (void *) 0);
-        required_extensions = calloc(required_extension_count + 1, sizeof(char*));
-        SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, required_extensions);
 
+        // Get a list of the required instance extensions from SDL
+        {
+            SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, (void*)0);
+            required_extensions = calloc(required_extension_count + 1, sizeof(char*));
+            SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, required_extensions);
+        }
+        
         // Construct a dictionary from the required extensions
         dict_from_keys(&extensions, required_extensions, required_extension_count);
 
-        // TODO: Add support for user defined extensions
-        instance_create_info->enabledExtensionCount   = required_extension_count;
-        instance_create_info->ppEnabledExtensionNames = required_extensions;
-        
+        // Count requested validation layers
         if(requested_validation_layers)
             while (requested_validation_layers[++requested_layers_count]);
 
-        instance_create_info->enabledLayerCount   = requested_layers_count;
-        instance_create_info->ppEnabledLayerNames = requested_validation_layers;
+        // TODO: Add support for user defined extensions
+        {
+            instance_create_info->sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+            instance_create_info->pApplicationInfo        = application_info;
+            instance_create_info->enabledExtensionCount   = required_extension_count;
+            instance_create_info->ppEnabledExtensionNames = required_extensions;
+            instance_create_info->enabledLayerCount       = requested_layers_count;
+            instance_create_info->ppEnabledLayerNames     = requested_validation_layers;
+        }
 
+        // Create the debug messenger
         setup_debug_messenger(&instance_create_info->pNext);
     }
     
+    *ret = vkCreateInstance(instance_create_info, (void*)0, &instance->instance);
     
-
-    result = vkCreateInstance(instance_create_info, (void*)0, &instance->instance);
-    
+    return;
 }
 
 void          setup_debug_messenger        ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenger_create_info )
 {
+
+    // Initialized data
     VkDebugUtilsMessengerCreateInfoEXT *i_debug_messenger_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));
 
-    i_debug_messenger_create_info->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    i_debug_messenger_create_info->messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    i_debug_messenger_create_info->messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    i_debug_messenger_create_info->pfnUserCallback = debug_callback;
+    // Populate debug messenger create info struct 
+    {
+        i_debug_messenger_create_info->sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        i_debug_messenger_create_info->messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        i_debug_messenger_create_info->messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        i_debug_messenger_create_info->pfnUserCallback = debug_callback;
+    }
 
-    *debug_messenger_create_info = i_debug_messenger_create_info;
+    // Return
+    *debug_messenger_create_info                   = i_debug_messenger_create_info;
 }
 
 void          create_surface               ( void )
 {
+
+    // Initialized data
     GXInstance_t *instance = g_get_active_instance();
+
+    // Create a surface with SDL2
     SDL_Vulkan_CreateSurface(instance->window, instance->instance, &instance->surface);
 
 }
@@ -716,6 +743,45 @@ void          create_swap_chain            ( void )
 
     instance->swap_chain_image_format = surface_format.format;
     instance->swap_chain_extent       = extent;
+}
+
+void          recreate_swap_chain          ( void )
+{
+    int w = 0,
+        h = 0;
+
+    GXInstance_t *instance = g_get_active_instance();
+
+    SDL_GetWindowSize(instance->window, &w, &h);
+    while (w == 0 || h == 0)
+    {
+        SDL_Event e;
+        SDL_GetWindowSize(instance->window, &w, &h);
+        SDL_PollEvent(&e);
+    }
+
+    vkDeviceWaitIdle(instance->device);
+
+    cleanup_swap_chain();
+
+    create_swap_chain();
+    create_image_views();
+    create_framebuffers();
+
+}
+
+void cleanup_swap_chain(void)
+{
+    GXInstance_t *instance = g_get_active_instance();
+
+    for (size_t i = 0; i < 2; i++)
+        vkDestroyFramebuffer(instance->device, instance->swap_chain_framebuffers[i], 0);
+
+    for (size_t i = 0; i < 2; i++)
+        vkDestroyImageView(instance->device, instance->swap_chain_image_views[i], 0);
+
+    vkDestroySwapchainKHR(instance->device, instance->swap_chain, (void *)0);
+
 }
 
 void          create_image_views           ( void ) {
@@ -869,7 +935,7 @@ void          create_sync_objects          ( void )
 
 }
 
-u32           find_memory_type             ( u32 type_filter, VkMemoryPropertyFlags properties)
+u32           find_memory_type             ( u32                   type_filter, VkMemoryPropertyFlags properties)
 {
     GXInstance_t *instance = g_get_active_instance();
     VkPhysicalDeviceMemoryProperties mem_properties;
@@ -885,7 +951,7 @@ u32           find_memory_type             ( u32 type_filter, VkMemoryPropertyFl
     return 0;
 }
 
-int           check_vulkan_device          ( GXInstance_t *instance, VkPhysicalDevice physical_device, char **required_extension_names )
+int           check_vulkan_device          ( GXInstance_t         *instance, VkPhysicalDevice physical_device, char **required_extension_names )
 {
 
     bool passes_queue   = false,
@@ -1003,7 +1069,7 @@ int           check_vulkan_device          ( GXInstance_t *instance, VkPhysicalD
     return passes_queue && has_extensions && has_swap_chain;
 }
 
-void          create_buffer                ( VkDeviceSize         size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory )
+void          create_buffer                ( VkDeviceSize          size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory )
 {
     VkMemoryRequirements  mem_requirements;
     GXInstance_t         *instance         = g_get_active_instance();
@@ -1044,7 +1110,7 @@ void          create_buffer                ( VkDeviceSize         size, VkBuffer
     }
 }
 
-size_t        g_load_file                  ( const char          *path,     void         *buffer   , bool binaryMode )
+size_t        g_load_file                  ( const char           *path,     void         *buffer   , bool binaryMode )
 {
 
     // Argument checking 
@@ -1100,7 +1166,7 @@ size_t        g_load_file                  ( const char          *path,     void
     }
 }
 
-void          clear_swap_chain             ( )
+void          clear_swap_chain             ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
     for (size_t i = 0; i < instance->image_count; i++) {
@@ -1111,7 +1177,7 @@ void          clear_swap_chain             ( )
     vkDestroySwapchainKHR(instance->device, instance->swap_chain, 0);
 }
 
-int           g_window_resize              ( GXInstance_t        *instance)
+int           g_window_resize              ( GXInstance_t         *instance)
 {
     SDL_GetWindowSize(instance->window, &instance->window_width, &instance->window_height);
 
@@ -1128,7 +1194,7 @@ int           g_window_resize              ( GXInstance_t        *instance)
     return 0;
 }
 
-int           g_print_error                ( const char *const   format, ... ) 
+int           g_print_error                ( const char *const     format, ... ) 
 {
 
     // Argument check
@@ -1169,7 +1235,7 @@ int           g_print_error                ( const char *const   format, ... )
     }
 }
 
-int           g_print_warning              ( const char *const   format, ... ) 
+int           g_print_warning              ( const char *const     format, ... ) 
 {
 
     // Argument check
@@ -1207,7 +1273,7 @@ int           g_print_warning              ( const char *const   format, ... )
 
 }
 
-int           g_print_log                  ( const char *const   format, ... ) 
+int           g_print_log                  ( const char *const     format, ... ) 
 {
     // Argument check
     {
@@ -1245,7 +1311,15 @@ int           g_print_log                  ( const char *const   format, ... )
 
 }
 
-int           copy_state                 ( GXInstance_t* instance )
+int           g_start_schedule             ( GXInstance_t* instance, char* name )
+{
+
+    start_schedule(dict_get(instance->schedules, name));
+
+    return 0;
+}
+
+int           copy_state                   ( GXInstance_t         *instance )
 {
     
     // Initialized data
@@ -1735,4 +1809,3 @@ int           g_exit                       ( GXInstance_t         *instance )
         }
     }
 }
-

@@ -7,40 +7,112 @@ vec3 calculate_force_friction(GXEntity_t* entity);
 vec3 calculate_force_tension(GXEntity_t* entity);
 vec3 calculate_force_spring(GXEntity_t* entity);
 
-int create_entity(GXEntity_t** pp_entity)
+int create_entity ( GXEntity_t **pp_entity )
 {
-	// TODO: Argument check
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_entity == (void *) 0 )
+				goto no_entity;
+		#endif
+	}
+
+	// Initialized data
 	GXEntity_t *ret = calloc(1,sizeof(GXEntity_t));
 	
-	// TODO: Memory check
+	// Memory check
+	{
+		#ifndef NDEBUG
+			if(ret == (void *)0)
+				goto no_mem;
+		#endif
+	}
+
+	// Return the allocated memory
 	*pp_entity = ret;
 
 	return 1;
 	
-	// TODO: Error handling
-	//			- Argument errors
-	//          - Standard library errors
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
-int load_entity(GXEntity_t** pp_entity, char* path)
+int load_entity ( GXEntity_t** pp_entity, char* path)
 {
-	// TODO: Argument check
-	// TODO: Memory check
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_entity == (void *) 0 )
+				goto no_entity;
+			if ( path      == (void *) 0 )
+				goto no_path;
+		#endif
+	}
+
+	// Initialized data
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len+1, sizeof(char));
+	
 	g_load_file(path, token_text, false);
 
 	load_entity_as_json(pp_entity, token_text, len);
 
 	return 0;
 	
-	// TODO: Error handling
-	//			- Argument errors
-	//          - Standard library errors
+	
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+
+			no_path:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
-int load_entity_as_json(GXEntity_t** pp_entity, char* token_text, size_t len)
+int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -134,6 +206,14 @@ int load_entity_as_json(GXEntity_t** pp_entity, char* token_text, size_t len)
 
 			// Allocate memory for the name
 			i_entity->name = calloc(name_len + 1, sizeof(char));
+
+			// Error checking
+			{
+				#ifndef NDEBUG
+					if (i_entity->name == (void *)0)
+						goto no_mem;
+				#endif
+			}
 
 			// Copy the name 
 			strncpy(i_entity->name, name, name_len);
@@ -320,7 +400,7 @@ int calculate_entity_force ( GXEntity_t *p_entity )
 	return 1;
 }
 
-int preupdate_entity_ai(GXEntity_t* p_entity)
+int preupdate_entity_ai ( GXEntity_t* p_entity)
 {
 	// Initialized data
 	GXAI_t* p_ai = p_entity->ai;
@@ -333,7 +413,7 @@ int preupdate_entity_ai(GXEntity_t* p_entity)
 		preupdate_ai(p_entity);
 }
 
-int update_entity_ai(GXEntity_t* p_entity)
+int update_entity_ai ( GXEntity_t* p_entity)
 {
 	// Initialized data
 	GXAI_t *p_ai = p_entity->ai;
@@ -401,21 +481,21 @@ vec3 calculate_force_normal ( GXEntity_t * p_entity )
 	return ret;
 }
 
-vec3 calculate_force_friction(GXEntity_t* p_entity)
+vec3 calculate_force_friction ( GXEntity_t* p_entity)
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
 	return ret;
 }
 
-vec3 calculate_force_tension(GXEntity_t* p_entity)
+vec3 calculate_force_tension ( GXEntity_t* p_entity)
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
 	return ret;
 }
 
-vec3 calculate_force_spring(GXEntity_t* p_entity)
+vec3 calculate_force_spring ( GXEntity_t* p_entity)
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
@@ -478,11 +558,20 @@ int draw_entity(GXEntity_t* p_entity)
 	dict_values(p_entity->parts, parts);
 
 	use_shader(p_entity->shader);
-	//set_shader_camera(entity->shader);
 
 	for (size_t i = 0; i < part_count; i++)
-		draw_part(parts[i]);
+	{
 
+		// Update descriptor sets
+		{
+			// TODO: Uncomment when shader sets are done
+			set_shader_camera(p_entity->shader, instance->active_scene->active_camera);
+		}
+
+		vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->descriptor_sets[instance->current_frame], 0, 0);
+
+		draw_part(parts[i]);
+	}
 	free(parts);
 
 	return 1;

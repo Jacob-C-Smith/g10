@@ -81,16 +81,16 @@ struct GXCollider_s
 };
 
 // Allocators
-int create_collider              ( GXCollider_t **collider );                     // Creates an empty collider
+DLLEXPORT int create_collider              ( GXCollider_t **collider );                     // Creates an empty collider
 
 // Constructors
-int load_collider                ( GXCollider_t **collider, const char   *path );       // Creates and loads a collider from a path and populates it
-int load_collider_as_json        ( GXCollider_t **collider, char         *token_text , size_t len );      // Creates a collider from JSON text
+DLLEXPORT int load_collider                ( GXCollider_t **collider, const char   *path );       // Creates and loads a collider from a path and populates it
+DLLEXPORT int load_collider_as_json        ( GXCollider_t **collider, char         *token_text , size_t len );      // Creates a collider from JSON text
 
 // Callbacks
-int add_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
-int add_collision_callback       ( GXCollider_t *collider, void* function_pointer );
-int add_end_collision_callback   ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_collision_callback       ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_end_collision_callback   ( GXCollider_t *collider, void* function_pointer );
 
 // Destructors
-int destroy_collider             ( GXCollider_t *collider );   // Destroys a collider
+DLLEXPORT int destroy_collider             ( GXCollider_t *collider );   // Destroys a collider

@@ -7,7 +7,7 @@
 #include <vulkan/vulkan.h>
 
 #include <G10/G10.h>
-
+#include <G10/GXCameraController.h>
 
 struct GXRenderer_s
 {

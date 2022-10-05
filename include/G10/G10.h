@@ -2,8 +2,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#define _USE_MATH_DEFINES 
-#include <math.h>
+#define HAVE_M_PI
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_sdk_platform.h>
@@ -21,18 +20,13 @@
 #include <G10/GXInput.h>
 #include <G10/GXScheduler.h>
 #include <G10/GXMaterial.h>
-#include <G10/GXScheduler.h>
 #include <G10/GXCollider.h>
+
+#include <UI/UI.h>
 
 #ifdef main
 #undef main
 #endif
-
-/*
-#define G10ASSERT (expression) \
-        if(!expression)
-			g_assertion_failed();
-*/
 
 struct GXInstance_s
 {
@@ -123,6 +117,9 @@ struct GXInstance_s
 		                     *resolve_collision_mutex,
 		                     *ai_preupdate_mutex,
 		                     *ai_update_mutex;
+	
+	// UI
+	UIInstance_t             *ui_instance;
 
 	// Delta time
 	u32                       d, 
@@ -143,16 +140,16 @@ struct GXInstance_s
 // Allocators
 
 /* !
- *  Construct a G10 instance
+ *  Construct a G10 instance from a JSON file
  *
- * @param pp_instance : Double pointer to instance
+ * @param pp_instance : Pointer to pointer to instance
  * @param path        : Path to instance JSON file
  * 
  * @sa g_exit
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int           g_init                ( GXInstance_t     **instance, const char *path);
+DLLEXPORT int           g_init                ( GXInstance_t     **pp_instance, const char *path);
 
 /* !
  *  Create a Vulkan buffer
@@ -188,7 +185,7 @@ DLLEXPORT float         g_time                ( GXInstance_t        *instance );
 // Debug logging
 
 /* !
- *  printf, but in red
+ *  printf in red
  *
  * @param format : printf formatted text
  * @param ...    : Additional parameters
@@ -199,7 +196,7 @@ DLLEXPORT float         g_time                ( GXInstance_t        *instance );
 DLLEXPORT int           g_print_error         ( const char *const  format  , ... );
 
 /* !
- *  printf, but in yellow
+ *  printf in yellow
  *
  * @param format : printf formatted text
  * @param ...    : Additional parameters
@@ -210,7 +207,7 @@ DLLEXPORT int           g_print_error         ( const char *const  format  , ...
 DLLEXPORT int           g_print_warning       ( const char *const  format  , ... );
 
 /* !
- *  printf, but in blue
+ *  printf in blue
  *
  * @param format : printf formatted text
  * @param ...    : Additional parameters
@@ -220,6 +217,8 @@ DLLEXPORT int           g_print_warning       ( const char *const  format  , ...
  */
 DLLEXPORT int           g_print_log           ( const char *const  format  , ... );
 DLLEXPORT int           g_assertion_failed    ( const char        *format  );
+
+DLLEXPORT int           g_start_schedule      ( GXInstance_t *instance, char *name );
 
 // State copy
 /* !
@@ -289,11 +288,11 @@ DLLEXPORT void          g_user_exit           ( callback_parameter_t *input, GXI
 // Conversions
 inline float            to_degrees            ( float radians )
 {
-    return radians * (180.f / (float)M_PI);
+    return radians * (180.f / (float)3.141593);
 }
 inline float            to_radians            ( float degrees )
 {
-    return  degrees * ((float)M_PI / 180.f);
+    return  degrees * ((float)3.141593 / 180.f);
 }
 
 // Destructors

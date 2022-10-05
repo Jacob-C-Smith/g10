@@ -24,6 +24,10 @@ struct GXShader_s
     VkDescriptorPool        descriptor_pool;
     VkDescriptorSet        *descriptor_sets;
     VkDescriptorSetLayout   descriptor_set_layout;
+    VkDescriptorSetLayout  *descriptor_set_layouts;
+
+    VkBuffer               *uniform_buffers;
+    VkDeviceMemory         *uniform_buffers_memory;
 
     size_t                  descriptor_set_count,
                             descriptor_set_layout_count;
@@ -33,15 +37,15 @@ struct GXShader_s
     size_t                  users;
 };
 
-int create_shader_module(char* code, size_t code_len, VkShaderModule* shader_module);
+DLLEXPORT int create_shader_module(char* code, size_t code_len, VkShaderModule* shader_module);
 
-int create_shader       ( GXShader_t **shader );
-int load_shader         ( GXShader_t **shader, const char* path );
-int load_shader_as_json ( GXShader_t **shader, char* token_text, size_t token_text_len );
-int construct_shader    ( GXShader_t **shader, u8* vertex_shader, u8* tesselation_control_shader, u8* tesselation_evaluation_shader, u8* geometry_shader, u8* fragment_shader );
+DLLEXPORT int create_shader       ( GXShader_t **shader );
+DLLEXPORT int load_shader         ( GXShader_t **shader, const char* path );
+DLLEXPORT int load_shader_as_json ( GXShader_t **shader, char* token_text, size_t token_text_len );
+DLLEXPORT int construct_shader    ( GXShader_t **shader, u8* vertex_shader, u8* tesselation_control_shader, u8* tesselation_evaluation_shader, u8* geometry_shader, u8* fragment_shader );
 
-int use_shader          ( GXShader_t  *shader );
+DLLEXPORT int use_shader          ( GXShader_t  *shader );
 
-int set_shader_camera   ( GXShader_t  *shader );
+DLLEXPORT int set_shader_camera   ( GXShader_t  *shader );
 
-int destroy_shader      ( GXShader_t  *shader );
+DLLEXPORT int destroy_shader      ( GXShader_t  *shader );

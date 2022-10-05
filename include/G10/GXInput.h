@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <SDL2/SDL.h>
 
@@ -58,8 +59,30 @@ struct callback_parameter_s
 			u8  button;
 		} mouse_state;
 		
-		struct gamepad_state_s {
-			bool depressed;
+		// A la xbox one controller
+		struct {
+
+			bool A;
+			bool B;
+			bool X;
+			bool Y;
+
+			bool dpad_down;
+			bool dpad_left;
+			bool dpad_right;
+			bool dpad_up;
+
+			vec2 left_stick;
+			vec2 right_stick;
+
+			float left_trigger;
+			float right_trigger;
+
+			bool left_bumper;
+			bool right_bumper;
+
+			bool start;
+			bool select;
 
 		} gamepad_state;
 	} inputs;

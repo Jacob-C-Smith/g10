@@ -184,7 +184,7 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 	{
 		create_camera(camera);
 
-		i_camera =*camera;
+		i_camera = *camera;
 	}
 
 	// Construct the camera
@@ -196,18 +196,18 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 			strncpy(i_camera->name, name, name_len);
 		}
 
-		vec3 a_location = { atof(location[0]), atof(location[1]), atof(location[2]) };
-		vec3 a_front    = { atof(front[0])   , atof(front[1])   , atof(front[2]) };
-		vec3 a_up       = { atof(up[0])      , atof(up[1])      , atof(up[2]) };
+		vec3 a_location = { (float)atof(location[0]), (float)atof(location[1]), (float)atof(location[2]) };
+		vec3 a_front    = { (float)atof(front[0])   , (float)atof(front[1])   , (float)atof(front[2]) };
+		vec3 a_up       = { (float)atof(up[0])      , (float)atof(up[1])      , (float)atof(up[2]) };
 
 		i_camera->location = a_location;
 		i_camera->target   = a_front;
 		i_camera->up       = a_up;
 		
-		i_camera->near_clip    = atof(near_clip);
-		i_camera->far_clip     = atof(far_clip);
+		i_camera->near_clip    = (float)atof(near_clip);
+		i_camera->far_clip     = (float)atof(far_clip);
 		i_camera->aspect_ratio = 16.f / 9.f;
-		i_camera->fov          = atof(fov);
+		i_camera->fov          = (float)atof(fov);
 		
 		// Set the matricies
 		i_camera->view       = look_at(i_camera->location, i_camera->target, i_camera->up);

@@ -25,7 +25,9 @@ enum   chat_channel_e
 
 struct GXServer_s {
 
-	dict *clients;
+	dict        *clients;
+	GXEntity_t **actors;
+
 };
 
 struct GXClient_s
@@ -40,7 +42,7 @@ struct GXClient_s
 
 struct GXCommand_s {
 
-	enum command_type_e command_type;
+	enum command_type_e type;
 	union {
 
 		// No operation
@@ -50,7 +52,7 @@ struct GXCommand_s {
 
 		// Connect 
 		struct {
-			char *name;
+			char *connection_json;
 		} connect;
 
 		// Initialize an actor
@@ -59,13 +61,14 @@ struct GXCommand_s {
 			vec3        location;
 			quaternion  quaternion;
 			vec3        scale;
-
+			u16         index;
 		} actor_initialize;
 
 		// Actor displace rotate
 		struct {
 			vec3        location;
 			quaternion  quaternion;
+			u16         index;
 		} actor_displace_rotate;
 
 		// Send chat
@@ -79,22 +82,22 @@ struct GXCommand_s {
 			size_t i;
 		} disconnect;
 
-	}      commands;
+	};
 };
 
-int create_server    ( GXServer_t  **pp_server );
+DLLEXPORT int create_server    ( GXServer_t  **pp_server );
 
-int construct_server ( GXServer_t  **pp_server );
+DLLEXPORT int construct_server ( GXServer_t  **pp_server );
 
-int process_command  ( GXCommand_t  *p_command );
+DLLEXPORT int process_command  ( GXCommand_t  *p_command );
 
-int server_recv      ( GXInstance_t *instance );
+DLLEXPORT int server_recv      ( GXInstance_t *instance );
 
-int server_send      ( GXInstance_t *instance );
+DLLEXPORT int server_send      ( GXInstance_t *instance );
 
-int send_command     ( GXServer_t   *p_server );
+DLLEXPORT int send_command     ( GXServer_t   *p_server, GXCommand_t *p_command );
 
-int recv_command     ( GXServer_t   *p_server );
+DLLEXPORT int recv_command     ( GXServer_t   *p_server );
 
-int destroy_server   ( GXServer_t   *p_server );
+DLLEXPORT int destroy_server   ( GXServer_t   *p_server );
 

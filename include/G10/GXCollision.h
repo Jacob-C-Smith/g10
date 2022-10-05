@@ -21,20 +21,20 @@ struct GXCollision_s
 };
 
 // Allocators
-int  create_collision                  ( GXCollision_t **pp_collision );
+DLLEXPORT int  create_collision                  ( GXCollision_t **pp_collision );
 
 // Constructors
-int  construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t *a, GXEntity_t *b );
+DLLEXPORT int  construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t *a, GXEntity_t *b );
 
 // Collision testing
-bool test_collision                    ( GXCollision_t *collision );
-bool test_aabb                         ( GXCollision_t *collision );
-bool test_obb                          ( GXCollision_t *collision );
-bool test_convex_hull                  ( GXCollision_t *collision );
+DLLEXPORT bool test_collision                    ( GXCollision_t *collision );
+DLLEXPORT bool test_aabb                         ( GXCollision_t *collision );
+DLLEXPORT bool test_obb                          ( GXCollision_t *collision );
+DLLEXPORT bool test_convex_hull                  ( GXCollision_t *collision );
 
 // Collision update
-int  update_collision                  ( GXCollision_t *collision );
-int  resolve_collision                 ( GXCollision_t *collision );
+DLLEXPORT int  update_collision                  ( GXCollision_t *collision );
+DLLEXPORT int  resolve_collision                 ( GXCollision_t *collision );
 
 // Destructors
-int  destroy_collision                 ( GXCollision_t *collision );
+DLLEXPORT int  destroy_collision                 ( GXCollision_t *collision );

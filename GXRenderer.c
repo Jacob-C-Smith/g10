@@ -23,10 +23,11 @@ int           render_frame                 ( GXInstance_t        *instance )
         // Make sure the image is usable
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             g_window_resize(instance);
-            return;
+            goto fail;
         }
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             printf("Failed to acquire swap chain image!\n");
+            goto fail;
         }
 
         // Only reset the fence if we are submitting work
@@ -47,6 +48,7 @@ int           render_frame                 ( GXInstance_t        *instance )
 
     // Submit the commands and present the last frame
     {
+
         // Populate the submit info struct
         {
             submit_info->sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -77,17 +79,18 @@ int           render_frame                 ( GXInstance_t        *instance )
         result = vkQueuePresentKHR(instance->present_queue, present_info);
 
         // Does the window need to be resized?
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        if      (    result == VK_ERROR_OUT_OF_DATE_KHR
+                  || result == VK_SUBOPTIMAL_KHR ) {
             g_window_resize(instance);
         }
-        else if (result != VK_SUCCESS) {
+        else if ( result != VK_SUCCESS ) {
             printf("failed to present swap chain image!");
         }
     }
 
     // Compute the current frame index
     instance->current_frame = (instance->current_frame + 1) % instance->max_buffered_frames;
-
+    fail:
     // Deallocation
 	free(present_info);
 	free(submit_info);

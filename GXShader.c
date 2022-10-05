@@ -96,17 +96,21 @@ typedef struct {
         } uniform;
 
         struct {
+
+            // TODO: 
             size_t i;
         } image;
-    } data;
+    };
     size_t                        index;
 } GXDescriptor_t;
 
 typedef struct { 
-    char* name;
-    dict* descriptors; 
-    size_t len, 
-           index;
+    char            *name;
+    dict            *descriptors; 
+    GXDescriptor_t **descriptor_data;
+    size_t           len, 
+                     index,
+                     descriptor_len;
 } GXSet_t;
 
 void init_shader                 ( void )
@@ -123,195 +127,6 @@ void init_shader                 ( void )
 
     for (size_t i = 0; i < 11; i++)
         dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]);
-}
-
-int construct_descriptor         ( GXDescriptor_t **ret, dict *binding_json )
-{
-    GXDescriptor_t *i_descriptor = calloc(1, sizeof(GXDescriptor_t));
-
-    char* name = 0,
-        * type = 0;
-
-    *ret = i_descriptor;
-
-    // Parse the dictionary
-    {
-        JSONToken_t* token = 0;
-
-        token = dict_get(binding_json, "name");
-        name  = JSON_VALUE(token, JSONstring);
-
-        token = dict_get(binding_json, "type");
-        type  = JSON_VALUE(token, JSONstring);
-    }
-
-    // Construct the descriptor
-    {
-
-        // Set the name
-        {
-            size_t name_len    = strlen(name);
-
-            i_descriptor->name = calloc(name_len + 1, sizeof(char));
-
-            strncpy(i_descriptor->name, name, name_len);
-        }
-
-        {
-            i_descriptor->descriptor_type = (VkDescriptorType) dict_get(descriptor_types, type);
-
-            switch (i_descriptor->descriptor_type){
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                {
-                    JSONToken_t  *token = 0;
-
-                    char        **struct_json_text = 0;
-                    size_t        buffer_size      = 0;
-
-                    token             = dict_get(binding_json, "struct");
-                    struct_json_text  = JSON_VALUE(token, JSONarray);
-
-                    for (size_t i = 0; struct_json_text[i]; i++)
-                    {
-
-                        dict        *struct_member = 0;
-                        char        *name          = 0,
-                                    *type          = 0;
-
-                        parse_json(struct_json_text[i], strlen(struct_json_text[i]), &struct_member);
-
-                        token = dict_get(struct_member, "name");
-                        name  = JSON_VALUE(token, JSONstring);
-
-                        token = dict_get(struct_member, "type");
-                        type  = JSON_VALUE(token, JSONstring);
-
-                        buffer_size += (size_t) dict_get(format_sizes, type);
-
-                        {
-                            i_descriptor->data.uniform.size = buffer_size;
-                            
-                        }
-
-                        dict_destroy(struct_member);
-
-                    }
-
-                    {
-                        i_descriptor->descriptor_set_layout_binding.binding = i_descriptor->index;
-                        i_descriptor->descriptor_set_layout_binding.descriptorCount = 1;
-                        i_descriptor->descriptor_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                        i_descriptor->descriptor_set_layout_binding.pImmutableSamplers = 0;
-                        i_descriptor->descriptor_set_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                    }
-
-                    printf("Uniform\n");
-                }
-                break;
-
-                case VK_DESCRIPTOR_TYPE_SAMPLER:
-                {
-                    printf("Image\n");
-                }
-                break;
-
-                default:
-                    break;
-            }
-
-
-        }
-
-        
-    }
-
-    return 0;
-};
-
-int construct_set                ( GXSet_t        **ret, dict *set_json )
-{
-    // Initialized data
-    GXSet_t *set                 = calloc(1, sizeof(GXSet_t));
-
-    char    *set_name            = 0;
-    size_t   set_index           = 0;
-
-    size_t   descriptor_count = 0;
-    char   **descriptors      = 0;
-
-    // Parse the set JSON
-    {
-        // Initialized data
-        JSONToken_t* token = 0;
-
-        token       = dict_get(set_json, "descriptors");
-        descriptors = JSON_VALUE(token, JSONarray);
-
-        token       = dict_get(set_json, "name");
-        set_name    = JSON_VALUE(token, JSONstring);
-    }
-
-    // Construct a set
-    {
-
-        // Count up descriptors
-        while (descriptors[++descriptor_count]);
-
-        // Copy the name
-        {
-            // Initialized data
-            size_t name_len = strlen(set_name);
-
-            // Allocate memory for the name
-            set->name = calloc(name_len + 1, sizeof(char));
-
-            // Copy the name
-            strncpy(set->name, set_name, name_len);
-        }
-
-        // Set the binding count
-        set->len = descriptor_count;
-
-        // Construct a dictionary for the uniforms
-        dict_construct(&set->descriptors, descriptor_count);
-
-        // Construct each descriptor
-        {
-
-            // Iterate over each binding slot
-            for (size_t j = 0; j < descriptor_count; j++)
-            {
-
-                // Initialized data
-                char           *name                       = 0,
-                               *descriptor_object_text     = descriptors[j];
-                size_t          descriptor_object_text_len = strlen(descriptors[j]),
-                                descriptor_index           = j;
-                dict           *descriptor_json            = 0;
-
-                GXDescriptor_t *desc                       = 0;
-
-                // Parse the JSON 
-                parse_json(descriptor_object_text, descriptor_object_text_len, &descriptor_json);
-
-                // Construct the descriptor from the dictionary
-                construct_descriptor(&desc, descriptor_json);
-
-                desc->index = j;
-                
-                desc->descriptor_set_layout_binding;
-
-                // Add the descriptor to the set
-                dict_add(set->descriptors, desc->name, desc);
-            }
-
-        }
-
-        
-    }
-
-    *ret = set;
-    return 0;
 }
 
 int create_shader_module         ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
@@ -384,7 +199,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
     char         **vertex_groups             = 0,
                  **sets                      = 0,
                   *push_constant             = 0;
-    size_t         set_count                 = 0;
+    u32            set_count                 = 0;
 
     JSONToken_t   *token                     = 0;
 
@@ -494,7 +309,8 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             VkViewport                             *viewport                            = calloc(1, sizeof(VkViewport));
             VkRect2D                               *scissor                             = calloc(1, sizeof(VkRect2D));
             VkVertexInputAttributeDescription      *vertex_input_attribute_descriptions = 0;
-            
+            VkDescriptorSetLayoutCreateInfo        *descriptor_set_layout               = 0;
+
             // Set up the shader stages
             {
 
@@ -615,7 +431,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 rasterizer_create_info->polygonMode             = VK_POLYGON_MODE_FILL;
                 rasterizer_create_info->lineWidth               = 1.f;
                 rasterizer_create_info->cullMode                = VK_CULL_MODE_BACK_BIT;
-                rasterizer_create_info->frontFace               = VK_FRONT_FACE_CLOCKWISE;
+                rasterizer_create_info->frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
                 rasterizer_create_info->depthBiasEnable         = VK_FALSE;
             }
 
@@ -655,6 +471,29 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 color_blend_create_info->pAttachments    = color_blend_attachment_create_info;
             }
 
+            // Set up descriptor layout
+            {
+                VkDescriptorSetLayoutBinding    *ubo_layout_binding = calloc(1, sizeof(VkDescriptorSetLayoutBinding));
+                VkDescriptorSetLayoutCreateInfo *layout_info        = calloc(1, sizeof(VkDescriptorSetLayoutCreateInfo));
+
+                {
+                    ubo_layout_binding->binding            = 0;
+                    ubo_layout_binding->descriptorCount    = 1;
+                    ubo_layout_binding->descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    ubo_layout_binding->pImmutableSamplers = 0;
+                    ubo_layout_binding->stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
+                }
+
+                {
+                    layout_info->sType                     = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+                    layout_info->bindingCount              = 1;
+                    layout_info->pBindings                 = ubo_layout_binding;
+                }
+                if (vkCreateDescriptorSetLayout(instance->device, layout_info, 0, &i_shader->descriptor_set_layout) != VK_SUCCESS) {
+                    return -1;
+                }
+            }
+
             // Set up the dynamic state
             {
                 
@@ -666,74 +505,18 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 dynamic_state_create_info->pDynamicStates    = dynamic_states;
             }
 
+            
+
             // Set up the pipeline layout
             {
 
-                // Initialized data
-                VkDescriptorSetLayoutCreateInfo* descriptor_set_layout = 0;
-                size_t                           set_count             = 0;
+                pipeline_layout_create_info->sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+                pipeline_layout_create_info->setLayoutCount = 1;
 
-                // Construct set layouts
-                if (sets)
-                {
-                    // Count up sets
-                    while (sets[++set_count]);
+                i_shader->descriptor_set_layouts            = calloc(1, sizeof(VkDescriptorSetLayout));
 
-                    // Construct a dictionary for shader sets
-                    dict_construct(&i_shader->sets, set_count);
-
-                    // Allocate memory for descriptor sets
-                    descriptor_set_layout = calloc(set_count, sizeof(VkDescriptorSetLayoutCreateInfo));
-
-                    // Iterate over each set
-                    for (size_t i = 0; i < set_count; i++)
-                    {
-                        // Initialized data
-                        GXSet_t         *set              = 0;
-                        dict            *set_json         = 0;
-                        size_t           set_len          = strlen(sets[i]),
-                                         descriptor_count = 0;
-                        GXDescriptor_t **descriptors      = 0;
-
-
-                        // Parse the set JSON object into a dictionary
-                        parse_json(sets[i], set_len, &set_json);
-
-                        // Construct a set
-                        construct_set(&set, set_json);
-
-                        descriptor_count = dict_values(set->descriptors, 0);
-                        descriptors      = calloc(descriptor_count, sizeof(GXDescriptor_t*));
-
-                        dict_values(set->descriptors, descriptors);
-
-                        {
-                            descriptor_set_layout[i].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-                            descriptor_set_layout[i].bindingCount = descriptor_count; // TODO: 
-                            descriptor_set_layout[i].pBindings = calloc(descriptor_count, sizeof(VkDescriptorSetLayoutBinding));
-                        }
-                        
-                        for (size_t j = 0; j < descriptor_count; j++)
-                            memcpy(&descriptor_set_layout[i].pBindings[j], &descriptors[j]->descriptor_set_layout_binding, sizeof(VkDescriptorSetLayoutBinding));
-
-                        // Add the set to the dictionary
-                        dict_add(i_shader->sets, set->name, set);
-
-                    }
-
-                    if (vkCreateDescriptorSetLayout(instance->device, descriptor_set_layout, 0, &i_shader->descriptor_set_layout) != VK_SUCCESS)
-                        g_print_error("failed to create descriptor set layout!");
-                    
-
-                }
-
-                // Populate the pipeline layout create info struct
-                {
-                    pipeline_layout_create_info->sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                    pipeline_layout_create_info->setLayoutCount = set_count;
-                    pipeline_layout_create_info->pSetLayouts    = &i_shader->descriptor_set_layout;
-                }
-
+                pipeline_layout_create_info->pSetLayouts    = &i_shader->descriptor_set_layout;
+                
             }
 
             // Construct the pipeline
@@ -765,106 +548,6 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             if (vkCreateGraphicsPipelines(instance->device, VK_NULL_HANDLE, 1, graphics_pipeline_create_info, 0, &i_shader->pipeline) != VK_SUCCESS)
                 g_print_error("failed to create graphics pipeline!\n");
 
-            // Create uniform buffers
-            {
-                size_t    set_count = dict_values(i_shader->sets, 0);
-                GXSet_t **sets      = calloc(set_count, sizeof(GXSet_t *));
-
-                dict_values(i_shader->sets, sets);
-
-                for (size_t i = 0; i < set_count; i++)
-                {
-                    GXSet_t         *set              = sets[i];
-                    size_t           descriptor_count = dict_values(i_shader->sets, 0);
-                    GXDescriptor_t **descriptors      = calloc(set_count, sizeof(GXDescriptor_t *));
-
-                    dict_values(set->descriptors, descriptors);
-
-                    for (size_t j = 0; j < descriptor_count; j++)
-                    {
-                        GXDescriptor_t *descriptor = descriptors[j];
-
-                        switch (descriptor->descriptor_type)
-                        {
-                        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                        {
-                            descriptor->data.uniform.buffers  = calloc(instance->max_buffered_frames, sizeof(VkBuffer));
-                            descriptor->data.uniform.memories = calloc(instance->max_buffered_frames, sizeof(VkDeviceMemory));
-
-                            for (size_t k = 0; k < instance->max_buffered_frames; k++)
-                                create_buffer(descriptor->data.uniform.size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &descriptor->data.uniform.buffers[i], &descriptor->data.uniform.memories[i]);
-                        }
-
-                            break;
-
-                        case VK_DESCRIPTOR_TYPE_SAMPLER:
-                            break;
-
-
-                        default:
-                            break;
-                        }
-                    }
-
-                }
-
-            }
-
-            // Create descriptor pool
-            {
-                VkDescriptorPoolSize       *pool_size = calloc(1, sizeof(VkDescriptorPoolSize));
-                VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
-
-                pool_size->type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                pool_size->descriptorCount = instance->max_buffered_frames;
-
-                pool_info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-                pool_info->poolSizeCount = 1;
-                pool_info->pPoolSizes = pool_size;
-                pool_info->maxSets = instance->max_buffered_frames;
-
-                if (vkCreateDescriptorPool(instance->device, pool_info, 0, &i_shader->descriptor_pool) != VK_SUCCESS) {
-                    g_print_error("failed to create descriptor pool!");
-                }
-            }
-
-            // Create descriptor sets
-            {
-                VkDescriptorSetLayout       *layouts    = calloc(instance->max_buffered_frames, sizeof(VkDescriptorSetLayout));
-                VkDescriptorSetAllocateInfo *alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
-
-                //copy to descriptorSetLayout
-                alloc_info->sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-                alloc_info->descriptorPool     = i_shader->descriptor_pool;
-                alloc_info->descriptorSetCount = instance->max_buffered_frames;
-                alloc_info->pSetLayouts        = layouts;
-
-                i_shader->descriptor_sets;
-
-                //if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
-                //    throw std::runtime_error("failed to allocate descriptor sets!");
-                //}
-
-                //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-                //    VkDescriptorBufferInfo bufferInfo{};
-                //    VkWriteDescriptorSet descriptorWrite{};
-
-                //    bufferInfo.buffer = uniformBuffers[i];
-                //    bufferInfo.offset = 0;
-                //    bufferInfo.range = sizeof(UniformBufferObject);
-
-                //    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                //    descriptorWrite.dstSet = descriptorSets[i];
-                //    descriptorWrite.dstBinding = 0;
-                //    descriptorWrite.dstArrayElement = 0;
-                //    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                //    descriptorWrite.descriptorCount = 1;
-                //    descriptorWrite.pBufferInfo = &bufferInfo;
-
-                //    vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-                //}
-            }
-
             // Clean up 
             {
                 free(shader_stages);
@@ -886,6 +569,84 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             }
 
         }
+
+        // Create uniform buffers
+        {
+            // Iterate over each uniform
+            // Iterate over each frame
+            // Create a buffer for each uniform for each frame
+
+            VkDeviceSize buffer_size = 3 * sizeof(mat4);
+    
+            i_shader->uniform_buffers        = calloc(sizeof(void *), 2);
+            i_shader->uniform_buffers_memory = calloc(sizeof(void *), 2);
+
+            for (size_t i = 0; i < 2; i++)
+                create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->uniform_buffers[i], &i_shader->uniform_buffers_memory[i]);
+        }
+
+        // Create descriptor pool
+        {
+            VkDescriptorPoolSize       *pool_size = calloc(1, sizeof(VkDescriptorPoolSize));
+            VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
+
+            {
+                pool_size->type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                pool_size->descriptorCount = (u32)2;
+            }
+
+            {
+                pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+                pool_info->poolSizeCount = 1;
+                pool_info->pPoolSizes    = pool_size;
+                pool_info->maxSets       = (u32)2;
+            }
+
+            if (vkCreateDescriptorPool(instance->device, pool_info, (void *)0, &i_shader->descriptor_pool) != VK_SUCCESS) {
+                return -1;
+        }
+        }
+
+        // Create descriptor sets
+        {
+            VkDescriptorSetLayout       *layouts    = calloc(2, sizeof(VkDescriptorSetLayout));
+            VkDescriptorSetAllocateInfo *alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
+
+            for (size_t i = 0; i < 2; i++)
+                memcpy(&layouts[i], &i_shader->descriptor_set_layout, sizeof(VkDescriptorSetLayout));
+
+            {
+                alloc_info->sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+                alloc_info->descriptorPool     = i_shader->descriptor_pool;
+                alloc_info->descriptorSetCount = 2;
+                alloc_info->pSetLayouts        = layouts;
+            }
+
+            i_shader->descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
+
+            if (vkAllocateDescriptorSets(instance->device, alloc_info, i_shader->descriptor_sets) != VK_SUCCESS) {
+
+            }
+
+            for (size_t i = 0; i < 2; i++) {
+                VkDescriptorBufferInfo *buffer_info      = calloc(1, sizeof(VkDescriptorBufferInfo));
+                VkWriteDescriptorSet   *descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
+
+                buffer_info->buffer = i_shader->uniform_buffers[i];
+                buffer_info->offset = 0;
+                buffer_info->range  = 3*sizeof(mat4);
+
+                descriptor_write->sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptor_write->dstSet          = i_shader->descriptor_sets[i];
+                descriptor_write->dstBinding      = 0;
+                descriptor_write->dstArrayElement = 0;
+                descriptor_write->descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                descriptor_write->descriptorCount = 1;
+                descriptor_write->pBufferInfo     = buffer_info;
+    
+                vkUpdateDescriptorSets(instance->device, 1, descriptor_write, 0, 0);
+            }
+        }
     }
 
     // Cache the shader
@@ -901,32 +662,32 @@ int use_shader                   ( GXShader_t   *shader )
 {
     GXInstance_t *instance = g_get_active_instance();
     VkViewport   *viewport = calloc(1, sizeof(VkViewport));
-	VkRect2D     *scissor  = calloc(1, sizeof(VkRect2D));
+    VkRect2D     *scissor  = calloc(1, sizeof(VkRect2D));
 
-	// Use the shader
-	vkCmdBindPipeline(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipeline);
+    // Use the shader
+    vkCmdBindPipeline(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipeline);
     
-	// Set the viewport
-	{
-		viewport->x        = 0.f;
-		viewport->y        = 0.f;
-		viewport->width    = instance->swap_chain_extent.width;
-		viewport->height   = instance->swap_chain_extent.height;
-		viewport->minDepth = 0.f;
-		viewport->maxDepth = 1.f;
+    // Set the viewport
+    {
+        viewport->x        = 0.f;
+        viewport->y        = 0.f;
+        viewport->width    = instance->swap_chain_extent.width;
+        viewport->height   = instance->swap_chain_extent.height;
+        viewport->minDepth = 0.f;
+        viewport->maxDepth = 1.f;
 
-		vkCmdSetViewport(instance->command_buffers[instance->current_frame], 0, 1, viewport);
-	}
-	
-	// Set the scissor
-	{
-		scissor->offset.x = 0;
-		scissor->offset.y = 0;
+        vkCmdSetViewport(instance->command_buffers[instance->current_frame], 0, 1, viewport);
+    }
+    
+    // Set the scissor
+    {
+        scissor->offset.x = 0;
+        scissor->offset.y = 0;
 
-		scissor->extent   = instance->swap_chain_extent;
+        scissor->extent   = instance->swap_chain_extent;
 
-		vkCmdSetScissor(instance->command_buffers[instance->current_frame], 0, 1, scissor);
-	}
+        vkCmdSetScissor(instance->command_buffers[instance->current_frame], 0, 1, scissor);
+    }
 
     // Clean up
     {
@@ -937,65 +698,52 @@ int use_shader                   ( GXShader_t   *shader )
     return 0;
 }
 
-int set_shader_camera            ( GXShader_t   *shader )
+int set_shader_camera(GXShader_t* shader)
 {
-    GXInstance_t   *instance   = g_get_active_instance();
-    GXCamera_t     *camera     = instance->active_scene->active_camera;
-
-    GXSet_t        *set        = dict_get(shader->sets, "camera");
-    GXDescriptor_t *descriptor = dict_get(set->descriptors, "camera data");
-
-
-    // TODO: Set shader data
+     
+    // Argument check
     {
-        mat4 *v       = &camera->view,
-             *p       = &camera->projection;
-        vec3 *cam_pos = &camera->location;
-        // TODO: Set V
-        // TODO: Set P
-        // TODO: Set cam pos
-
+        #ifndef NDEBUG
+            if (shader == (void *)0)
+                goto no_shader;
+        #endif
     }
 
-    return 0;
-}
+    GXInstance_t *instance = g_get_active_instance();
+    GXCamera_t   *camera   = instance->active_scene->active_camera;
+    //mat4          M        = ;
+    //mat4          V        = ;
+    camera->view = look_at(camera->location, camera->target, camera->up);
 
-int set_shader_camera_parameters ( GXShader_t   *shader )
-{
-    GXInstance_t   *instance   = g_get_active_instance();
-    GXCamera_t     *camera     = instance->active_scene->active_camera;
+    mat4 uniform_buffer[3];
+    uniform_buffer[0] = identity_mat4();
+    uniform_buffer[0].a = 2;
+    uniform_buffer[0].f = 2;
+    uniform_buffer[0].k = 2;
 
-    GXSet_t        *set        = dict_get(shader->sets, "camera");
-    GXDescriptor_t *descriptor = dict_get(set->descriptors, "camera parameters");
+    uniform_buffer[1] = camera->view;
+    uniform_buffer[2] = camera->projection;
 
-    // TODO: Set shader data
+    void *data;
+
+    vkMapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame], 0, 3 * sizeof(mat4), 0, &data);
+    memcpy(data, uniform_buffer, 3*sizeof(mat4));
+    vkUnmapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame]);
+
+    return 1;
+
+    // Error handling
     {
-        vec4  *lightDir;
-        float *exposure;
-        float *gamma;
-        float *prefilteredCubeMipLevels;
-        float *scaleIBLAmbient;
-        float *debugViewInputs;
-        float *debugViewEquation;
+
+        // Argument error
+        {
+            #ifndef NDEBUG
+                no_shader:
+                    g_print_log("[G10] [Shader] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCSIG__);
+                    return 0;
+            #endif
+        }
     }
-
-    return 0;
-}
-
-int set_shader_skybox            ( GXShader_t   *shader )
-{
-    GXInstance_t   *instance   = g_get_active_instance();
-    //GXSkybox_t     *skybox     = instance->active_scene->skybox;
-
-    GXSet_t        *set        = dict_get(shader->sets, "camera");
-    GXDescriptor_t *descriptor = dict_get(set->descriptors, "camera parameters");
-
-    // TODO: Set shader data
-    {
-        // VkImage* skybox->
-    }
-
-    return 0;
 }
 
 int destroy_shader               ( GXShader_t   *shader )

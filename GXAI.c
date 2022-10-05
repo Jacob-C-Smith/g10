@@ -386,6 +386,13 @@ int set_ai_pre_update_callback ( GXAI_t  *p_ai , int        (*function_pointer) 
 
 int pre_update_ai              ( GXInstance_t *instance )
 {
+
+	// Argument check
+	{
+		if (instance == (void*)0)
+			goto no_instance;
+	}
+
     // Initialized data
 	GXEntity_t* entity = 0;
 
@@ -413,10 +420,30 @@ int pre_update_ai              ( GXInstance_t *instance )
         preupdate_entity_ai(entity);
 
     return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_instance:
+				#ifndef NDEBUG
+					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
 int update_ai                  ( GXInstance_t* instance )
 {
+
+	// Argument check
+	{
+		if (instance == (void*)0)
+			goto no_instance;
+	}
+
     // Initialized data
 	GXEntity_t* entity = 0;
 
@@ -445,6 +472,19 @@ int update_ai                  ( GXInstance_t* instance )
         update_entity_ai(entity);
 
     return 1;
+	
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_instance:
+				#ifndef NDEBUG
+					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
 int destroy_ai                 ( GXAI_t  *p_ai )

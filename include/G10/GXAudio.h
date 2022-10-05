@@ -8,13 +8,14 @@
 #include <G10/G10.h>
 
 #include <SDL2/SDL_audio.h>
+#include <SDL2/SDL_mixer.h>
 
 struct GXSound_s
 {
 	int i;
 };
 
-DLLEXPORT void load_sound                 ( GXSound_t  **sound  , const char *path );
+DLLEXPORT int  load_sound                 ( GXSound_t  **sound  , const char *path );
 DLLEXPORT void unload_sound               ( GXSound_t   *sound );
 DLLEXPORT void set_3d_listener_and_orient ( GXCamera_t  *camera );
 DLLEXPORT int  play_sound                 ( GXSound_t   *sound  , vec3        position, float dB);
