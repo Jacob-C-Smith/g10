@@ -39,7 +39,7 @@ int           render_frame                 ( GXInstance_t        *instance )
 
     // Draw the frame
     {
-        // TODO: Make draw functions for each pass
+        // TODO: Make draw functions for each 
         // draw_scene_shadows(instance->active_scene)
         draw_scene(instance->active_scene);
         // draw_scene_composite(instance->active_scene)

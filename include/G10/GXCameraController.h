@@ -12,19 +12,19 @@
 // This camera controller is based off the movement of a certain first person shooter game... Shhhhhh ;^)
 struct GXCameraController_s
 {
-	// Camera object
-	GXCamera_t *camera;
+    // Camera object
+    GXCamera_t *camera;
 
     float v_ang,
           h_ang,
           spdlim;
 
-	// Displacement derivatives
-    vec2        orientation;
-	vec3		velocity,
-				acceleration;
+    // Displacement derivatives
+    vec2  orientation;
+    vec3  velocity,
+          acceleration;
     
 };
 
-GXCameraController_t *camera_controller_from_camera ( GXInstance_t         *instance , GXCamera_t   *camera );
-int                   update_controlee_camera       ( float delta_time );
+int camera_controller_from_camera ( GXInstance_t *instance , GXCamera_t   *camera );
+int update_controlee_camera       ( float         delta_time );

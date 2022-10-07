@@ -82,8 +82,10 @@ struct GXInstance_s
 
 	// Input 
 	GXInput_t                *input;
+
 	GXSchedule_t             *active_schedule;
 	GXScene_t                *active_scene;
+	GXServer_t               *active_server;
 
 	// Schedules
 	dict                     *schedules;
@@ -106,6 +108,8 @@ struct GXInstance_s
 	queue                    *actor_force_queue;
 	queue                    *ai_preupdate_queue;
 	queue                    *ai_update_queue;
+
+	int                     (*user_code_callback)(GXInstance_t* instance);
 
 	// Mutexes
 	SDL_mutex                *load_entity_mutex,

@@ -507,8 +507,6 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 dynamic_state_create_info->pDynamicStates    = dynamic_states;
             }
 
-            
-
             // Set up the pipeline layout
             {
 

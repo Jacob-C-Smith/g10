@@ -1300,7 +1300,7 @@ int          process_input             ( GXInstance_t *instance )
     }
 
     extern GXCameraController_t* camera_controller;
-    update_controlee_camera(instance->delta_time);
+
     return 0;
 
     // Error handling

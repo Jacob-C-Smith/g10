@@ -16,6 +16,7 @@
 #include <G10/GXInput.h>
 #include <G10/GXServer.h>
 #include <G10/GXUI.h>
+#include <G10/GXUserCode.h>
 
 struct GXTask_s
 {

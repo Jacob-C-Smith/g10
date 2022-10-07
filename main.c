@@ -11,8 +11,15 @@
 #include <G10/GXTransform.h>
 #include <G10/GXPart.h>
 #include <G10/GXMaterial.h>
+#include <G10/GXUserCode.h>
 #include <G10/GXCameraController.h>
 
+int user_code_callback(GXInstance_t* instance)
+{
+    printf("USER CODE\n");
+
+    return 0;
+}
 
 int main ( int argc, const char *argv[] )
 {
@@ -63,6 +70,10 @@ int main ( int argc, const char *argv[] )
             //add_ai_state_callback(ai, "RUN LEFT", &goomba_state_run_left);
         }
         
+        // Set up user code
+        {
+            add_user_code_callback(instance, &user_code_callback);
+        }
 
     }
 

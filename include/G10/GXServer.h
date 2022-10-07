@@ -26,6 +26,9 @@ enum   chat_channel_e
 struct GXServer_s {
 
 	dict        *clients;
+	GXClient_t  *client_list;
+	IPaddress    ip;
+	TCPsocket    sock;
 	GXEntity_t **actors;
 
 };
@@ -43,6 +46,7 @@ struct GXClient_s
 struct GXCommand_s {
 
 	enum command_type_e type;
+
 	union {
 
 		// No operation
@@ -85,19 +89,31 @@ struct GXCommand_s {
 	};
 };
 
+// Allocator
 DLLEXPORT int create_server    ( GXServer_t  **pp_server );
 
+// Constructor
 DLLEXPORT int construct_server ( GXServer_t  **pp_server );
+
+// Start
+DLLEXPORT int start_server     ( GXServer_t   *p_server );
 
 DLLEXPORT int process_command  ( GXCommand_t  *p_command );
 
+// Sending / Recieving over the internet
 DLLEXPORT int server_recv      ( GXInstance_t *instance );
-
 DLLEXPORT int server_send      ( GXInstance_t *instance );
 
-DLLEXPORT int send_command     ( GXServer_t   *p_server, GXCommand_t *p_command );
+// Turn a command queue into data or vice versa
+DLLEXPORT int server_parse     ( GXInstance_t *instance );
+DLLEXPORT int server_serialize ( GXInstance_t *instance );
 
-DLLEXPORT int recv_command     ( GXServer_t   *p_server );
+// Process server commands
+DLLEXPORT int server_process   ( GXInstance_t *instance );
 
+// Wait for clients to join
+DLLEXPORT int server_wait      ( GXInstance_t *instance );
+
+// Destructors
 DLLEXPORT int destroy_server   ( GXServer_t   *p_server );
 

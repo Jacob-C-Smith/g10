@@ -79,7 +79,7 @@ void                  camera_controller_right        ( callback_parameter_t stat
 
 }
 
-GXCameraController_t *camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera )
+int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera )
 {
     // Argument check
     {
@@ -157,6 +157,8 @@ GXCameraController_t *camera_controller_from_camera  ( GXInstance_t* instance, G
     register_bind_callback(orient_right, &camera_controller_right);
 
     ret->camera = camera;
+
+    camera_controller = ret;
 
     return ret;
     

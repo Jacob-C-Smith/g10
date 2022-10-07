@@ -242,6 +242,17 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             if (SDL_Init(SDL_INIT_EVERYTHING))
                 goto noSDL;
 
+            // Initialize SDL Image
+            //if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ))
+                
+                // TODO: this needs to be more specific
+                //goto noSDL;
+
+            //if (SDLNet_Init())
+
+                // TODO: this needs to be more specific
+                //goto noSDL;
+
             // Create the window
             ret->window = SDL_CreateWindow(window_title,
                 SDL_WINDOWPOS_CENTERED,
@@ -252,7 +263,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             // Check the window
             if (!ret->window)
                 goto noWindow;
-
+            
             // Display the window
             SDL_ShowWindow(ret->window);
             

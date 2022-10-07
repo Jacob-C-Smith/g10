@@ -2,11 +2,12 @@
 
 dict* scheduler_tasks = 0;
 
-char* task_names[15] = {
+char* task_names[20] = {
 	"Input",
 	"UI",
 	"AI",
 	"Pre AI",
+	"User Code",
 	"Resolve Collisions",
 	"Update Forces",
 	"Move Objects",
@@ -17,14 +18,19 @@ char* task_names[15] = {
 	"Copy State",
 	"Server Recieve",
 	"Server Send",
+	"Server Parse",
+	"Server Serialize",
+	"Server Process",
+	"Server Wait"
 	"Audio"
 };
 
-void* task_function_pointers[15] = {
+void* task_function_pointers[20] = {
 	&process_input,
 	(void*) 0,
 	&update_ai, 
-	&pre_update_ai, 
+	&pre_update_ai,
+	&user_code,
 	&detect_collisions,
 	&update_forces,
 	&move_objects,
@@ -35,6 +41,10 @@ void* task_function_pointers[15] = {
 	&copy_state,
     &server_recv, // 
 	&server_send, // 
+	&server_parse,
+	&server_serialize,
+	&server_process,
+	&server_wait, 
 	0  // process_audio
 };
 
@@ -45,10 +55,10 @@ void init_scheduler        ( void )
 	GXInstance_t *instance = g_get_active_instance();
 
 	// Construct a function lookup table
-	dict_construct(&scheduler_tasks, 16);
+	dict_construct(&scheduler_tasks, 20);
 
 	// Iterate over each task
-	for (size_t i = 0; i < 14; i++)
+	for (size_t i = 0; i < 20; i++)
 		
 		// Add each task to the lookup table
 		dict_add(scheduler_tasks, task_names[i], task_function_pointers[i]);
@@ -311,6 +321,7 @@ int main_work              ( GXThread_t    *thread )
 
 		for (size_t i = 0; i < thread->task_count; i++)
 		{
+
 			// Are we waiting on anything else to finish?
 			if (thread->tasks[i]->wait_thread)
 			{

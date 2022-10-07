@@ -47,7 +47,7 @@ DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
 DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char *path );
 
 /* !
- *  Load an AI from a JSON file
+ *  Load an AI from JSON text
  *
  * @param pp_ai      : Double pointer to AI
  * @param token_text : The AI JSON object text
@@ -87,11 +87,11 @@ DLLEXPORT int pre_update_ai              ( GXInstance_t *instance );
 // User callbacks
 
 /* !
- *  Add a callback function for a particular state
+ *  Add a callback function for a state
  *
  * @param p_ai             : Pointer to AI
  * @param state_name       : The name of the state
- * @param function_pointer : Pointer to a function that with GXEntity_t * argument and int return
+ * @param function_pointer : Pointer to a function with GXEntity_t pointer argument and int return
  *
  * @sa set_ai_state
  * @sa set_ai_pre_update_callback

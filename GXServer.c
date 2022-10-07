@@ -17,6 +17,14 @@ int construct_server ( GXServer_t **pp_server )
 	return 0;
 }
 
+int start_server(GXServer_t* p_server)
+{
+
+	p_server->sock = SDLNet_TCP_Open(&p_server->ip);
+
+	return 0;
+}
+
 int server_recv(GXInstance_t* instance)
 {
 	return 0;
@@ -24,6 +32,37 @@ int server_recv(GXInstance_t* instance)
 
 int server_send(GXInstance_t* instance)
 {
+	return 0;
+}
+
+int server_parse     ( GXInstance_t *instance )
+{
+
+	return 0;
+}
+
+int server_serialize ( GXInstance_t *instance )
+{
+
+	return 0;
+}
+
+int server_process   ( GXInstance_t *instance )
+{
+
+	return 0;
+}
+
+int server_wait(GXInstance_t* instance)
+{
+
+	// TODO: Argument check instance->active_server
+
+	while (true)
+	{
+		SDLNet_TCP_Accept(instance->active_server->sock);
+	}
+
 	return 0;
 }
 

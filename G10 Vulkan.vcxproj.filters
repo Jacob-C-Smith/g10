@@ -70,6 +70,9 @@
     <Filter Include="Header Files\G10\Scene\Camera">
       <UniqueIdentifier>{8be68c16-c05c-43de-8e5c-a34b68f3f802}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\G10\User Code">
+      <UniqueIdentifier>{50ac2c5c-384b-45d0-87ee-1676e4d4628e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -145,6 +148,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GXCameraController.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXUserCode.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -232,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXCameraController.h">
       <Filter>Header Files\G10\Scene\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXUserCode.h">
+      <Filter>Header Files\G10\User Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

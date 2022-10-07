@@ -189,6 +189,10 @@ typedef struct GXSound_s GXSound_t;
 struct GXServer_s;
 typedef struct GXServer_s GXServer_t;
 
+// Client
+struct GXClient_s;
+typedef struct GXClient_s GXClient_t;
+
 // Command
 struct GXCommand_s;
 typedef struct GXCommand_s GXCommand_t;

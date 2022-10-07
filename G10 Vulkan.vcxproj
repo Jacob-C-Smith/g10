@@ -58,6 +58,7 @@
     <ClCompile Include="GXShader.c" />
     <ClCompile Include="GXTexture.c" />
     <ClCompile Include="GXTransform.c" />
+    <ClCompile Include="GXUserCode.c" />
     <ClCompile Include="include\G10\GXMaterial.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
@@ -90,6 +91,7 @@
     <ClInclude Include="include\G10\GXTexture.h" />
     <ClInclude Include="include\G10\GXTransform.h" />
     <ClInclude Include="include\G10\GXtypedef.h" />
+    <ClInclude Include="include\G10\GXUserCode.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="time partitioning.txt" />
