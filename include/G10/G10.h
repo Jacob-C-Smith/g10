@@ -274,6 +274,7 @@ DLLEXPORT int           g_cache_part          ( GXInstance_t        *instance, G
  *
  * @sa g_find_shader
  *
+ * `/*-+b
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int           g_cache_shader        ( GXInstance_t        *instance, GXShader_t   *shader );
@@ -284,6 +285,7 @@ DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, c
 
 // User opertations
 DLLEXPORT void          g_user_exit           ( callback_parameter_t *input, GXInstance_t *instance);
+DLLEXPORT void          g_toggle_mouse_lock(callback_parameter_t state, GXInstance_t* instance);
 
 // Conversions
 inline float            to_degrees            ( float radians )

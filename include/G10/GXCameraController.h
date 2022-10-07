@@ -27,4 +27,4 @@ struct GXCameraController_s
 };
 
 GXCameraController_t *camera_controller_from_camera ( GXInstance_t         *instance , GXCamera_t   *camera );
-int                   update_controlee_camera       ( GXCameraController_t *camera_controller, float delta_time );
+int                   update_controlee_camera       ( float delta_time );

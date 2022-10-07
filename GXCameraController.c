@@ -5,6 +5,8 @@ float x_orient,
       h_ang,
       v_ang;
 
+GXCameraController_t* camera_controller = 0;
+
 GXCameraController_t* create_camera_controller       ( void )
 {
     GXCameraController_t *ret = calloc(1, sizeof(GXCameraController_t));
@@ -204,7 +206,7 @@ GXCameraController_t *camera_controller_from_camera  ( GXInstance_t* instance, G
     }
 }
 
-int                   update_controlee_camera        ( GXCameraController_t *camera_controller, float delta_time ) 
+int                   update_controlee_camera        ( float delta_time ) 
 {
     // Checks
     {
@@ -246,14 +248,14 @@ int                   update_controlee_camera        ( GXCameraController_t *cam
     // Compute new target from vertical and horizontal angles
     camera->target.x = sinf(camera_controller->h_ang) * cosf(camera_controller->v_ang);
     camera->target.y = cosf(camera_controller->h_ang) * cosf(camera_controller->v_ang);
-    camera->target.z = sinf(-camera_controller->v_ang);
+    camera->target.z = sinf(camera_controller->v_ang);
 
     float sl = camera_controller->spdlim;
 
     // Turn orientation into movement
-    camera->location.x += sl * (float)l_orient.x * camera->view.a + -(float)l_orient.y * sl * camera->view.c,
-    camera->location.y += sl * (float)l_orient.x * camera->view.e + -(float)l_orient.y * sl * camera->view.g;
-    camera->location.z += sl * (float)l_orient.x * camera->view.i + -(float)l_orient.y * sl * camera->view.k;
+    camera->location.x += sl * (float)l_orient.x * camera->view.a + (float)l_orient.y * sl * camera->view.c,
+    camera->location.y += sl * (float)l_orient.x * camera->view.e + (float)l_orient.y * sl * camera->view.g;
+    camera->location.z += sl * (float)l_orient.x * camera->view.i + (float)l_orient.y * sl * camera->view.k;
 
     // Define and populate target where vector
     vec3 tw;
@@ -261,8 +263,6 @@ int                   update_controlee_camera        ( GXCameraController_t *cam
 
     // look at
     camera->view = look_at(camera->location, tw, camera->up);
-
-
 
     return 0;
 

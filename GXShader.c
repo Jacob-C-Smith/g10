@@ -15,7 +15,8 @@ char             *format_type_names     [ ] = {
     "uvec4",
     "double",
     "mat4",
-    "mat3"
+    "mat3",
+    "u8vec4"
 };
 char             *descriptor_type_names [ ] = {
     "sampler",
@@ -59,7 +60,8 @@ VkFormat          format_type_enums     [ ] = {
     VK_FORMAT_R64_SFLOAT,
     // TODO: 
     0,
-    0
+    0,
+    VK_FORMAT_R8G8B8A8_UINT
 };
 size_t            format_type_sizes     [ ] = {
     4,
@@ -119,7 +121,7 @@ void init_shader                 ( void )
     dict_construct(&format_sizes , 16);
     dict_construct(&descriptor_types, 16);
 
-    for (size_t i = 0; i < 15; i++)
+    for (size_t i = 0; i < 16; i++)
     {
         dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
         dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);
@@ -576,7 +578,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             // Iterate over each frame
             // Create a buffer for each uniform for each frame
 
-            VkDeviceSize buffer_size = 3 * sizeof(mat4);
+            VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
     
             i_shader->uniform_buffers        = calloc(sizeof(void *), 2);
             i_shader->uniform_buffers_memory = calloc(sizeof(void *), 2);
@@ -634,7 +636,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
 
                 buffer_info->buffer = i_shader->uniform_buffers[i];
                 buffer_info->offset = 0;
-                buffer_info->range  = 3*sizeof(mat4);
+                buffer_info->range  = 3*sizeof(mat4) + sizeof(vec3);
 
                 descriptor_write->sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 descriptor_write->dstSet          = i_shader->descriptor_sets[i];
@@ -713,21 +715,21 @@ int set_shader_camera(GXShader_t* shader)
     GXCamera_t   *camera   = instance->active_scene->active_camera;
     //mat4          M        = ;
     //mat4          V        = ;
-    camera->view = look_at(camera->location, camera->target, camera->up);
+    camera->view       = look_at(camera->location, camera->target, camera->up);
+    camera->projection = perspective_matrix(camera->fov, camera->aspect_ratio, camera->near_clip, camera->far_clip);
 
-    mat4 uniform_buffer[3];
+    mat4 uniform_buffer[4];
     uniform_buffer[0] = identity_mat4();
-    uniform_buffer[0].a = 2;
-    uniform_buffer[0].f = 2;
-    uniform_buffer[0].k = 2;
-
     uniform_buffer[1] = camera->view;
     uniform_buffer[2] = camera->projection;
+    uniform_buffer[3].a = camera->location.x;
+    uniform_buffer[3].b = camera->location.y;
+    uniform_buffer[3].c = camera->location.z;
 
     void *data;
 
-    vkMapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame], 0, 3 * sizeof(mat4), 0, &data);
-    memcpy(data, uniform_buffer, 3*sizeof(mat4));
+    vkMapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
+    memcpy(data, uniform_buffer, sizeof(vec3) + 3*sizeof(mat4));
     vkUnmapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame]);
 
     return 1;

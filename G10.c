@@ -427,6 +427,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 ret->active_scene = scene;
             }
 
+            ret->delta_time = 0.001;
         }
     }
 
@@ -1588,7 +1589,21 @@ void          g_user_exit                  ( callback_parameter_t *input, GXInst
         main_thread->running = false;
     }
 }
+ 
+void          g_toggle_mouse_lock   ( callback_parameter_t state, GXInstance_t *instance )
+{
+    if(state.inputs.key.depressed == true)
+    {
+        SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 
+        #ifndef NDEBUG
+            g_print_log("[G10] Toggling mouse locking\n");
+        #endif
+    }
+
+    SDL_Delay(333);
+}
+ 
 GXMaterial_t *g_find_material              ( GXInstance_t         *instance, char         *name )
 {
     // Argument check

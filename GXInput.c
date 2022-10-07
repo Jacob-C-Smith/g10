@@ -1144,21 +1144,42 @@ int          process_input             ( GXInstance_t *instance )
     }
 
     GXBind_t* iter = instance->input->binds;
-    callback_parameter_t input = { 0, {0}};
+    callback_parameter_t input = { KEYBOARD, {0}};
+
+    
+        size_t     l = dict_values(instance->input->binds, 0);
+        GXBind_t **b = calloc(l, sizeof(void *));
+        dict_values(instance->input->binds, b);
+
+        for (size_t i = 0; i < l; i++)
+        {
+            GXBind_t *it = b[i];
+            if (it->active)
+            {
+                it->active = false;
+                input.inputs.key.depressed = false;
+                fire_bind(it, input, instance);
+            }
+        }
+
+
     {
         u8* keyboard_state = SDL_GetKeyboardState(NULL);
 
         for (size_t i = 0; i < 110; i++)
+        {
             if (keyboard_state[i])
             {
-                GXBind_t *bind = dict_get(instance->input->bind_lut, keys[i].name);
-                if( bind )
-                    while (bind)
-                    {
-                        fire_bind(bind, input, instance);
-                        bind = bind->next;
-                    }
-            }       
+                GXBind_t* bind = dict_get(instance->input->bind_lut, keys[i].name);
+                if (bind)
+                {
+                    bind->active = true;
+                    input.inputs.key.depressed = true;
+                    fire_bind(bind, input, instance);
+                }
+            }
+        }
+
     }
 
     // Game controller
@@ -1278,6 +1299,8 @@ int          process_input             ( GXInstance_t *instance )
         }
     }
 
+    extern GXCameraController_t* camera_controller;
+    update_controlee_camera(instance->delta_time);
     return 0;
 
     // Error handling

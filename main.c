@@ -13,7 +13,6 @@
 #include <G10/GXMaterial.h>
 #include <G10/GXCameraController.h>
 
-GXCameraController_t* camera_controller = 0;
 
 int main ( int argc, const char *argv[] )
 {
@@ -33,11 +32,18 @@ int main ( int argc, const char *argv[] )
         {
 
             // Add an exit bind
-            GXBind_t *exit_bind = find_bind(instance->input, "QUIT");
+            GXBind_t *exit_bind  = find_bind(instance->input, "QUIT"),
+                     *lock_mouse = find_bind(instance->input, "TOGGLE LOCK MOUSE");
+
+            // If quit is fired, exit the game loop
             register_bind_callback(exit_bind, &g_user_exit);
+
+            // Toggle mouse locking
+            register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
 
             // Set up the camera controller
             {
+                extern GXCameraController_t *camera_controller;
                 camera_controller = camera_controller_from_camera(instance, instance->active_scene->active_camera);
             }
         }
@@ -46,8 +52,8 @@ int main ( int argc, const char *argv[] )
         {
 
             // Initialized data
-            GXEntity_t *entity = get_entity(instance->active_scene, "entity");
-            GXAI_t     *ai     = entity->ai;
+            //GXEntity_t *entity = get_entity(instance->active_scene, "Teapot");
+            //GXAI_t     *ai     = entity->ai;
 
             // Pre AI update
             //set_ai_pre_update_callback(ai, &goomba_preupdate);
@@ -90,7 +96,7 @@ int main ( int argc, const char *argv[] )
                 g_print_log("\tentities:\n");
 
                 for (size_t i = 0; i < entity_count; i++)
-                    g_print_log("\t\t%d %s\n", i, entities[i]);
+                    g_print_log("\t\t[%d] %s\n", i, entities[i]);
 
                 g_print_log("\tactive camera: \"%s\"\n", (instance->active_scene->active_camera) ? (instance->active_scene->active_camera->name) : "(null)");
 
