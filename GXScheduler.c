@@ -128,7 +128,7 @@ int load_schedule          ( GXSchedule_t **schedule, char* path)
 	
 	g_load_file(path, token_text, false);
 
-	load_schedule_as_json(&schedule, token_text, len);
+	load_schedule_as_json(schedule, token_text, len);
 
 	free(token_text);
 
@@ -312,12 +312,10 @@ int main_work              ( GXThread_t    *thread )
 
 	GXTask_t **tasks = thread->tasks;
 	GXInstance_t* instance = g_get_active_instance();
-	u64 start = 0,
-		end   = 0;
+
 
 	while (thread->running)
 	{
-		start = SDL_GetPerformanceCounter();
 
 		for (size_t i = 0; i < thread->task_count; i++)
 		{
@@ -357,11 +355,6 @@ int main_work              ( GXThread_t    *thread )
 		for (size_t i = 0; i < thread->task_count; i++)
 			thread->complete_tasks[i] = 0;
 
-		end = SDL_GetPerformanceCounter();
-		instance->delta_time = (float) ( ( (double) (end - start) ) / (double) ( instance->clock_div ) );
-
-		//printf("%f seconds\n", instance->delta_time);
-		fflush(stdout);
 	}
 	return 0;
 }

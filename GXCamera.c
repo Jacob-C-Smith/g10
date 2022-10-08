@@ -198,7 +198,7 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 
 		vec3 a_location = { (float)atof(location[0]), (float)atof(location[1]), (float)atof(location[2]) };
 		vec3 a_front    = { (float)atof(front[0])   , (float)atof(front[1])   , (float)atof(front[2]) };
-		vec3 a_up       = { (float)atof(up[0])      , (float)atof(up[1])      , (float)atof(up[2]) };
+		vec3 a_up       = { -(float)atof(up[0])      , -(float)atof(up[1])      , -(float)atof(up[2]) };
 
 		i_camera->location = a_location;
 		i_camera->target   = a_front;

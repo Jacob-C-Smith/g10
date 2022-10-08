@@ -16,8 +16,11 @@
 
 int user_code_callback(GXInstance_t* instance)
 {
-    printf("USER CODE\n");
 
+    // Update the camera controller
+    update_controlee_camera(instance->delta_time);
+
+    
     return 0;
 }
 
@@ -25,12 +28,38 @@ int main ( int argc, const char *argv[] )
 {
 
     // Initialized data
-    GXInstance_t  *instance      = 0;
-    GXScene_t     *scene         = 0;
-    GXShader_t    *shader        = 0;
+    GXInstance_t  *instance               = 0;
+    GXScene_t     *scene                  = 0;
+    GXShader_t    *shader                 = 0;
+
+    dict          *command_line_arguments = 0;
+
+    char *instance_path = "G10/debug client instance.json";
+    char *schedule_name = 0;
+
+    // Parse command line arguments
+    {
+
+        // Initialized data
+        char *instance_load_path = 0;
+
+        // Construct a dictionary from the command line arguments
+        dict_from_keys(&command_line_arguments, argv, argc);
+        
+        // Iterate over each command line argument
+        for (size_t i = 0; i < argc; i++)
+        {
+            if (strcmp("-instance", argv[i]) == 0)
+                instance_path = argv[++i];
+
+            if (strcmp("-schedule", argv[i]) == 0)
+                schedule_name = argv[++i];
+        }
+
+    }
 
     // Create a debug instance
-    g_init(&instance, "G10/Debug instance.json");
+    g_init(&instance, instance_path);
 
     // Game setup
     {
@@ -50,24 +79,8 @@ int main ( int argc, const char *argv[] )
 
             // Set up the camera controller
             {
-                extern GXCameraController_t *camera_controller;
-                camera_controller = camera_controller_from_camera(instance, instance->active_scene->active_camera);
+                camera_controller_from_camera(instance, instance->active_scene->active_camera);
             }
-        }
-
-        // Set up AI
-        {
-
-            // Initialized data
-            //GXEntity_t *entity = get_entity(instance->active_scene, "Teapot");
-            //GXAI_t     *ai     = entity->ai;
-
-            // Pre AI update
-            //set_ai_pre_update_callback(ai, &goomba_preupdate);
-
-            // AI update
-            //add_ai_state_callback(ai, "ATTACK", &goomba_state_attack);
-            //add_ai_state_callback(ai, "RUN LEFT", &goomba_state_run_left);
         }
         
         // Set up user code
@@ -119,7 +132,7 @@ int main ( int argc, const char *argv[] )
     instance->running = true;
 
     // Start the game loop
-    g_start_schedule(instance, "Simple Schedule");
+    g_start_schedule(instance, schedule_name);
     
     // Exit 
     g_exit(instance);

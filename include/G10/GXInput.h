@@ -54,7 +54,7 @@ struct callback_parameter_s
 		} key;
 
 		struct mouse_state_s {
-			u32 xrel,
+			s32 xrel,
 				yrel;
 			u8  button;
 		} mouse_state;

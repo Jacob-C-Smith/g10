@@ -432,7 +432,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 rasterizer_create_info->rasterizerDiscardEnable = VK_FALSE;
                 rasterizer_create_info->polygonMode             = VK_POLYGON_MODE_FILL;
                 rasterizer_create_info->lineWidth               = 1.f;
-                rasterizer_create_info->cullMode                = VK_CULL_MODE_BACK_BIT;
+                rasterizer_create_info->cullMode                = VK_CULL_MODE_NONE;
                 rasterizer_create_info->frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
                 rasterizer_create_info->depthBiasEnable         = VK_FALSE;
             }
@@ -698,37 +698,42 @@ int use_shader                   ( GXShader_t   *shader )
     return 0;
 }
 
-int set_shader_camera(GXShader_t* shader)
+int set_shader_camera(GXEntity_t *p_entity)
 {
      
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if (shader == (void *)0)
-                goto no_shader;
-        #endif
-    }
+    // TODO: Argument check
 
-    GXInstance_t *instance = g_get_active_instance();
-    GXCamera_t   *camera   = instance->active_scene->active_camera;
-    //mat4          M        = ;
-    //mat4          V        = ;
-    camera->view       = look_at(camera->location, camera->target, camera->up);
+    // Initialized data
+    GXInstance_t  *instance  = g_get_active_instance();
+    GXCamera_t    *camera    = instance->active_scene->active_camera;
+    GXTransform_t *transform = p_entity->transform;
+
+    // Update the transform
+    transform_model_matrix(transform, &transform->model_matrix);
+
+    vec3 a;
+    add_vec3(&a, camera->target, camera->location);
+
+    // Update the view matrix
+    camera->view       = look_at(camera->location, a, camera->up);
+
+    // Update the projection matrix
     camera->projection = perspective_matrix(camera->fov, camera->aspect_ratio, camera->near_clip, camera->far_clip);
 
     mat4 uniform_buffer[4];
-    uniform_buffer[0] = identity_mat4();
-    uniform_buffer[1] = camera->view;
-    uniform_buffer[2] = camera->projection;
+    uniform_buffer[0]   = transform->model_matrix;
+    uniform_buffer[1]   = camera->view;
+    uniform_buffer[2]   = camera->projection;
+
     uniform_buffer[3].a = camera->location.x;
     uniform_buffer[3].b = camera->location.y;
     uniform_buffer[3].c = camera->location.z;
 
     void *data;
 
-    vkMapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
+    vkMapMemory(instance->device, p_entity->shader->uniform_buffers_memory[instance->current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
     memcpy(data, uniform_buffer, sizeof(vec3) + 3*sizeof(mat4));
-    vkUnmapMemory(instance->device, shader->uniform_buffers_memory[instance->current_frame]);
+    vkUnmapMemory(instance->device, p_entity->shader->uniform_buffers_memory[instance->current_frame]);
 
     return 1;
 

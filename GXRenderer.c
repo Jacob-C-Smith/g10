@@ -10,6 +10,10 @@ int           render_frame                 ( GXInstance_t        *instance )
 	VkSubmitInfo             *submit_info             = calloc(1, sizeof(VkSubmitInfo));
 	VkSwapchainKHR            swap_chains[]           = { instance->swap_chain };
     VkResult                  result;
+    u64 start = 0,
+        end = 0;
+    start = SDL_GetPerformanceCounter();
+
 
     // Get the command buffer ready for drawing
     {
@@ -94,6 +98,8 @@ int           render_frame                 ( GXInstance_t        *instance )
     // Deallocation
 	free(present_info);
 	free(submit_info);
+    end = SDL_GetPerformanceCounter();
+    instance->delta_time = (float)(((double)(end - start)) / (double)(instance->clock_div));
 
     instance->ticks += 1;
 

@@ -1063,11 +1063,6 @@ int          process_input             ( GXInstance_t *instance )
 
     // TODO: Refactor bind fires into a queue. 
 
-    if (instance->ui_instance)
-        if (instance->ui_instance->active_window)
-            if (SDL_GetWindowFlags(instance->ui_instance->active_window->window) & SDL_WINDOW_INPUT_FOCUS)
-                ui_process_input(instance->ui_instance);
-
     // TODO: Reimplement for other libraries?
 
     // Poll for events 
@@ -1097,14 +1092,14 @@ int          process_input             ( GXInstance_t *instance )
 
                 // Fire mouse motion binds
                 {
-                if (y_rel < 0)
-                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
-                if (y_rel > 0)
-                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
-                if (x_rel < 0)
-                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
-                if (x_rel > 0)
-                    fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
+                    if (y_rel < 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
+                    if (y_rel > 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
+                    if (x_rel < 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
+                    if (x_rel > 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
                 }
                     
             }
@@ -1161,7 +1156,7 @@ int          process_input             ( GXInstance_t *instance )
                 fire_bind(it, input, instance);
             }
         }
-
+        free(b);
 
     {
         u8* keyboard_state = SDL_GetKeyboardState(NULL);
@@ -1298,8 +1293,6 @@ int          process_input             ( GXInstance_t *instance )
             }
         }
     }
-
-    extern GXCameraController_t* camera_controller;
 
     return 0;
 

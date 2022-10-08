@@ -57,25 +57,25 @@ void                  camera_controller_strafe_right ( callback_parameter_t stat
 void                  camera_controller_up           ( callback_parameter_t state, GXInstance_t* instance ) 
 {
     if (state.input_state == MOUSE)
-        v_ang -= 0.025f * instance->delta_time;
+        v_ang += instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_down         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        v_ang += 0.025f * instance->delta_time;
+        v_ang -= instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_left         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang -= 0.025f * instance->delta_time;
+        h_ang -= instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.xrel);
 
 }
 void                  camera_controller_right        ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang += 0.025f * instance->delta_time;
+        h_ang += instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.xrel);
 
 }
 
@@ -91,7 +91,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         #endif
     }
 
-    GXCameraController_t *ret = create_camera_controller();;
+    GXCameraController_t *ret = create_camera_controller();
     u8 errors = 0;
     ret->camera = camera;
 
@@ -142,7 +142,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         #endif
     }
 
-    ret->spdlim = 0.25;
+    ret->spdlim = 0.0025;
 
     // Assign displacement callbacks
     register_bind_callback(forward     , &camera_controller_forward);
@@ -160,7 +160,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
 
     camera_controller = ret;
 
-    return ret;
+    return 1;
     
     // Error handling
     {
@@ -210,6 +210,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
 
 int                   update_controlee_camera        ( float delta_time ) 
 {
+
     // Checks
     {
         if (camera_controller == 0)
@@ -229,42 +230,41 @@ int                   update_controlee_camera        ( float delta_time )
                           len_a_proj_t = 0,
                           speed_lim    = 10;
 
+    camera_controller->orientation.x = x_orient,
+    camera_controller->orientation.y = y_orient;
+
     l_orient = camera_controller->orientation;
 
-    // Clamp vertical angle 
-    if (v_ang > (float)M_PI_2 - 0.00025f)
-        v_ang = (float)M_PI_2 - 0.00025f;
-    if (v_ang < (float)-M_PI_2 + 0.00025f)
-        v_ang = (float)-M_PI_2 + 0.00025f;
+    const float camera_speed = 0.006;
 
-    // Clamp horizontal angle
-    if (h_ang > (float)M_PI - 0.00025f)
-        h_ang = (float)-M_PI + 0.00025f;
-    if (h_ang < (float)-M_PI + 0.00025f)
-        h_ang = (float)M_PI - 0.00025f;
+    printf("%.2f %.2f        \r", h_ang, v_ang);
 
-    camera_controller->orientation = (vec2){ x_orient, y_orient };
-    camera_controller->v_ang = v_ang;
-    camera_controller->h_ang = h_ang;
+    if (v_ang > 89.0f)
+        v_ang = 89.0f;
+    if (v_ang < -89.0f)
+        v_ang = -89.0f;
 
-    // Compute new target from vertical and horizontal angles
-    camera->target.x = sinf(camera_controller->h_ang) * cosf(camera_controller->v_ang);
-    camera->target.y = cosf(camera_controller->h_ang) * cosf(camera_controller->v_ang);
-    camera->target.z = sinf(camera_controller->v_ang);
-
-    float sl = camera_controller->spdlim;
-
-    // Turn orientation into movement
-    camera->location.x += sl * (float)l_orient.x * camera->view.a + (float)l_orient.y * sl * camera->view.c,
-    camera->location.y += sl * (float)l_orient.x * camera->view.e + (float)l_orient.y * sl * camera->view.g;
-    camera->location.z += sl * (float)l_orient.x * camera->view.i + (float)l_orient.y * sl * camera->view.k;
-
-    // Define and populate target where vector
-    vec3 tw;
-    add_vec3(&tw, camera->target, camera->location);
+    if (h_ang > 179.99f)
+        h_ang = -179.98f;
+    if (h_ang < -179.99)
+        h_ang = 179.98f;
 
     // look at
-    camera->view = look_at(camera->location, tw, camera->up);
+    if (l_orient.x > 0.f)
+        add_vec3(&camera->location, camera->location, mul_vec3_f(normalize(cross_product_vec3(camera->target, camera->up)), camera_controller->spdlim));
+
+    if (l_orient.x < 0.f)
+        sub_vec3(&camera->location, camera->location, mul_vec3_f(normalize(cross_product_vec3(camera->target, camera->up)), camera_controller->spdlim));
+    
+    if (l_orient.y < 0.f)
+        sub_vec3(&camera->location, camera->location, mul_vec3_f(camera->target, camera_controller->spdlim));
+
+    if (l_orient.y >  0.f)
+        add_vec3(&camera->location, camera->location, mul_vec3_f(camera->target, camera_controller->spdlim));
+
+    camera->target.x = cosf(to_radians(h_ang)) * cosf(to_radians(v_ang));
+    camera->target.z = sinf(to_radians(v_ang));
+    camera->target.y = sinf(to_radians(h_ang)) * cosf(to_radians(v_ang));
 
     return 0;
 

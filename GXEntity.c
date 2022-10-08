@@ -435,7 +435,7 @@ vec3 calculate_force_gravitational ( GXEntity_t * p_entity )
 	vec3 ret = { 0.f, 0.f, -9.8f, 0 };
 
 	// -50 m / s terminal velocity
-	if (p_entity->rigidbody->velocity.z < -50.f)
+	if (p_entity->rigidbody->velocity.z < -50.0f)
 		ret.z = 0.f;
 
 	return ret;
@@ -565,7 +565,7 @@ int draw_entity(GXEntity_t* p_entity)
 		// Update descriptor sets
 		{
 			// TODO: Uncomment when shader sets are done
-			set_shader_camera(p_entity->shader, instance->active_scene->active_camera);
+			set_shader_camera(p_entity, instance->active_scene->active_camera);
 		}
 
 		vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->descriptor_sets[instance->current_frame], 0, 0);

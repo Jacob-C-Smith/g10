@@ -90,30 +90,35 @@ struct GXCommand_s {
 };
 
 // Allocator
-DLLEXPORT int create_server    ( GXServer_t  **pp_server );
-
+DLLEXPORT int create_server       ( GXServer_t  **pp_server );
+ 
 // Constructor
-DLLEXPORT int construct_server ( GXServer_t  **pp_server );
+DLLEXPORT int construct_server    ( GXServer_t  **pp_server );
+
+DLLEXPORT int load_server         ( GXServer_t  **pp_server, char *path );
+
+
+DLLEXPORT int load_server_as_json ( GXServer_t  **pp_server, char *token_text, size_t len );
 
 // Start
-DLLEXPORT int start_server     ( GXServer_t   *p_server );
+DLLEXPORT int start_server        ( GXServer_t   *p_server );
 
-DLLEXPORT int process_command  ( GXCommand_t  *p_command );
+DLLEXPORT int process_command     ( GXCommand_t  *p_command );
 
 // Sending / Recieving over the internet
-DLLEXPORT int server_recv      ( GXInstance_t *instance );
-DLLEXPORT int server_send      ( GXInstance_t *instance );
+DLLEXPORT int server_recv         ( GXInstance_t *instance );
+DLLEXPORT int server_send         ( GXInstance_t *instance );
 
 // Turn a command queue into data or vice versa
-DLLEXPORT int server_parse     ( GXInstance_t *instance );
-DLLEXPORT int server_serialize ( GXInstance_t *instance );
+DLLEXPORT int server_parse        ( GXInstance_t *instance );
+DLLEXPORT int server_serialize    ( GXInstance_t *instance );
 
 // Process server commands
-DLLEXPORT int server_process   ( GXInstance_t *instance );
+DLLEXPORT int server_process      ( GXInstance_t *instance );
 
 // Wait for clients to join
-DLLEXPORT int server_wait      ( GXInstance_t *instance );
+DLLEXPORT int server_wait         ( GXInstance_t *instance );
 
 // Destructors
-DLLEXPORT int destroy_server   ( GXServer_t   *p_server );
+DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 

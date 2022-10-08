@@ -46,6 +46,6 @@ DLLEXPORT int construct_shader    ( GXShader_t **shader, u8* vertex_shader, u8* 
 
 DLLEXPORT int use_shader          ( GXShader_t  *shader );
 
-DLLEXPORT int set_shader_camera   ( GXShader_t  *shader );
+DLLEXPORT int set_shader_camera   ( GXEntity_t *p_entity );
 
 DLLEXPORT int destroy_shader      ( GXShader_t  *shader );

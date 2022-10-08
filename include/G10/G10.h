@@ -21,6 +21,7 @@
 #include <G10/GXScheduler.h>
 #include <G10/GXMaterial.h>
 #include <G10/GXCollider.h>
+#include <G10/GXServer.h>
 
 #include <UI/UI.h>
 

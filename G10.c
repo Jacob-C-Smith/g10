@@ -91,6 +91,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                   *initial_scene                 = 0,
                   *log_file_i                    = 0,
                   *input                         = 0,
+                  *server                        = 0,
                  **schedules                     = 0;
 
 
@@ -134,8 +135,10 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         }
         
         // Input
-        token                = dict_get(instance_json_object, "input");
-        input                = (token) ? token->value.n_where : 0;
+        {
+            token = dict_get(instance_json_object, "input");
+            input = (token) ? token->value.n_where : 0;
+        }
 
         // Log file
         token                = dict_get(instance_json_object, "log file");
@@ -202,6 +205,12 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 token                     = dict_get(instance_json_object, "max buffered frames");
                 max_buffered_frames       = JSON_VALUE(token, JSONprimative);
             }
+        }
+
+        // Server
+        {
+            token  = dict_get(instance_json_object, "server");
+            server = JSON_VALUE(token, JSONstring);
         }
 
         // Schedules
@@ -404,7 +413,10 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 {
                     GXSchedule_t *schedule = 0;
 
-                    load_schedule_as_json(&schedule, schedules[i], strlen(schedules[i]));
+                    if (schedules[i][0] == '{')
+                        load_schedule_as_json(&schedule, schedules[i], strlen(schedules[i]));
+                    else
+                        load_schedule(&schedule, schedules[i]);
 
                     dict_add(ret->schedules, schedule->name, schedule);
                 }
@@ -436,6 +448,16 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
                 // Set the active scene
                 ret->active_scene = scene;
+            }
+
+            if (server)
+            {
+
+                if (server[0] == '{')
+                    load_server_as_json(&ret->server, server, strlen(server));
+                else
+                    load_server(&ret->server, server);
+
             }
 
             ret->delta_time = 0.001;
@@ -782,7 +804,7 @@ void          recreate_swap_chain          ( void )
 
 }
 
-void cleanup_swap_chain(void)
+void          cleanup_swap_chain           ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
 
@@ -1326,9 +1348,54 @@ int           g_print_log                  ( const char *const     format, ... )
 int           g_start_schedule             ( GXInstance_t* instance, char* name )
 {
 
-    start_schedule(dict_get(instance->schedules, name));
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if(instance == (void *)0)
+                goto no_instance;
+            if(name == (void *)0)
+                goto no_name;
+        #endif
+    }
+
+    GXSchedule_t* schedule = dict_get(instance->schedules, name);
+
+    // Error checking
+    {
+        #ifndef NDEBUG
+            if (schedule == (void *)0)
+                goto no_schedule;
+        #endif
+    }
+
+    start_schedule(schedule);
 
     return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scheduler] Null pointer provided for \"instance\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                #endif  
+                return 0;
+
+            no_name:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scheduler] Null pointer provided for \"name\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                #endif  
+                return 0;
+        }
+
+        no_schedule:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Scheduler] Failed to find a schedule named \"%s\" in call to function \"%s\"\n", name, __FUNCSIG__);
+            #endif  
+            return 0;
+    }
 }
 
 int           copy_state                   ( GXInstance_t         *instance )
