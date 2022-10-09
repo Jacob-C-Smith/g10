@@ -210,7 +210,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Server
         {
             token  = dict_get(instance_json_object, "server");
-            server = JSON_VALUE(token, JSONstring);
+            server = JSON_VALUE(token, JSONobject);
         }
 
         // Schedules
@@ -257,10 +257,10 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 // TODO: this needs to be more specific
                 //goto noSDL;
 
-            //if (SDLNet_Init())
+            if (SDLNet_Init())
 
                 // TODO: this needs to be more specific
-                //goto noSDL;
+                goto noSDL;
 
             // Create the window
             ret->window = SDL_CreateWindow(window_title,

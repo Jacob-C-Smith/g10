@@ -23,7 +23,7 @@
 #include <G10/GXCollider.h>
 #include <G10/GXServer.h>
 
-#include <UI/UI.h>
+//#include <UI/UI.h>
 
 #ifdef main
 #undef main
@@ -124,7 +124,7 @@ struct GXInstance_s
 		                     *ai_update_mutex;
 	
 	// UI
-	UIInstance_t             *ui_instance;
+	//UIInstance_t             *ui_instance;
 
 	// Delta time
 	u32                       d, 

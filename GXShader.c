@@ -432,7 +432,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 rasterizer_create_info->rasterizerDiscardEnable = VK_FALSE;
                 rasterizer_create_info->polygonMode             = VK_POLYGON_MODE_FILL;
                 rasterizer_create_info->lineWidth               = 1.f;
-                rasterizer_create_info->cullMode                = VK_CULL_MODE_NONE;
+                rasterizer_create_info->cullMode                = VK_CULL_MODE_BACK_BIT;
                 rasterizer_create_info->frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
                 rasterizer_create_info->depthBiasEnable         = VK_FALSE;
             }

@@ -25,22 +25,28 @@ enum   chat_channel_e
 
 struct GXServer_s {
 
-	dict        *clients;
-	GXClient_t  *client_list;
+	dict* clients; //Clients that have confirmed connection by sending a connect packet
+	GXClient_t** client_list; //Clients that have been accepted over TCP
+	size_t		client_list_size; //Size of client_list
 	IPaddress    ip;
 	TCPsocket    sock;
-	GXEntity_t **actors;
+	GXEntity_t** actors;
 
+	char* name;
+	char* password;
 };
 
 struct GXClient_s
 {
-	u8    *send_data,
-		  *recv_data;
+	TCPsocket socket;
+	char* name;
 
-	queue *send_queue;
-	queue *recv_queue;
-	
+	u8* send_data,
+		* recv_data;
+
+	queue* send_queue;
+	queue* recv_queue;
+
 };
 
 struct GXCommand_s {
@@ -122,3 +128,7 @@ DLLEXPORT int server_wait         ( GXInstance_t *instance );
 // Destructors
 DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 
+DLLEXPORT int create_client(GXClient_t** client);
+
+//Destroy client instance and close TCP connection with client
+DLLEXPORT int destroy_client(GXClient_t* client);

@@ -8,6 +8,6 @@
 #include <G10/GXCollision.h>
 #include <G10/GXEntity.h>
 
-#include <UI/UI.h>
+//#include <UI/UI.h>
 
 DLLEXPORT int update_ui ( GXInstance_t *instance );

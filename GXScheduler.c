@@ -21,7 +21,7 @@ char* task_names[20] = {
 	"Server Parse",
 	"Server Serialize",
 	"Server Process",
-	"Server Wait"
+	"Server Wait",
 	"Audio"
 };
 

@@ -8,7 +8,7 @@
 #include <G10/G10.h>
 
 #include <SDL2/SDL_audio.h>
-#include <SDL2/SDL_mixer.h>
+//#include <SDL2/SDL_mixer.h>
 
 struct GXSound_s
 {

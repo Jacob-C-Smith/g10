@@ -20,7 +20,13 @@ int user_code_callback(GXInstance_t* instance)
     // Update the camera controller
     update_controlee_camera(instance->delta_time);
 
-    
+    static float r = 0.f;
+
+    GXEntity_t* entity = get_entity(instance->active_scene, "entity");
+    entity->transform->rotation = quaternion_from_euler_angle((vec3) { 0.f, r, 0.f });
+
+    r += instance->delta_time * 5;
+
     return 0;
 }
 
@@ -34,8 +40,8 @@ int main ( int argc, const char *argv[] )
 
     dict          *command_line_arguments = 0;
 
-    char *instance_path = "G10/debug client instance.json";
-    char *schedule_name = 0;
+    char *instance_path = "G10/debug server instance.json";
+    char *schedule_name = "Server Schedule";
 
     // Parse command line arguments
     {
@@ -132,6 +138,7 @@ int main ( int argc, const char *argv[] )
     instance->running = true;
 
     // Start the game loop
+    start_server(instance->server);
     g_start_schedule(instance, schedule_name);
     
     // Exit 
