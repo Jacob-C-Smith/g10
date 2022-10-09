@@ -19,10 +19,10 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x64.ActiveCfg = Debug|x64
-		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x64.Build.0 = Debug|x64
-		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x86.ActiveCfg = Debug|Win32
-		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x86.Build.0 = Debug|Win32
+		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x64.ActiveCfg = Debug Client|x64
+		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x64.Build.0 = Debug Client|x64
+		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x86.ActiveCfg = Debug Client|Win32
+		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Client|x86.Build.0 = Debug Client|Win32
 		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Dynamic Library|x64.ActiveCfg = Debug Dynamic Library|x64
 		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Dynamic Library|x64.Build.0 = Debug Dynamic Library|x64
 		{7312605A-C0E1-4225-9553-3104997513B8}.Debug Dynamic Library|x86.ActiveCfg = Debug Dynamic Library|Win32

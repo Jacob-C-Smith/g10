@@ -237,8 +237,6 @@ int                   update_controlee_camera        ( float delta_time )
 
     const float camera_speed = 0.006;
 
-    printf("%.2f %.2f        \r", h_ang, v_ang);
-
     if (v_ang > 89.0f)
         v_ang = 89.0f;
     if (v_ang < -89.0f)

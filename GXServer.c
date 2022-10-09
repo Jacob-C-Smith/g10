@@ -118,7 +118,6 @@ int load_server ( GXServer_t **pp_server, char *path )
 	}
 }
 
-
 /*
 "server"                     : {
 		"name"        : "localhost",
@@ -215,6 +214,14 @@ int start_server(GXServer_t* p_server)
 
 int server_recv(GXInstance_t* instance)
 {
+	// Argument check
+	{
+		printf("RECV DATA! %d\r", instance->ticks);
+		instance->ticks++;
+	}
+
+	// Write the data
+
 	return 0;
 }
 
@@ -241,7 +248,7 @@ int server_process   ( GXInstance_t *instance )
 	return 0;
 }
 
-int server_wait(GXInstance_t* instance)
+int server_wait    ( GXInstance_t* instance )
 {
 
 	// TODO: Argument check instance->active_server
@@ -262,35 +269,41 @@ int server_wait(GXInstance_t* instance)
 				++server->client_list_size;
 				server->client_list = realloc(server->client_list, sizeof(GXClient_t*) * server->client_list_size);
 			}
-			//Add client to list
-			GXClient_t* client;
+
+			// Add client to list
+			GXClient_t *client        = 0;
+			GXThread_t *server_thread = 0;
+
 			create_client(&client);
+			
+			load_thread(&server_thread, "G10/client thread.json");
+
+			client->thread = server_thread;
+			client->thread->running = true;
+
+			dict_add(instance->active_schedule->threads, client->thread->name, client->thread);
+
+			extern int work(GXThread_t * thread);
+
+			client->thread->thread = SDL_CreateThread(work, client->thread->name, client->thread);
+
 			client->socket = sock;
 			server->client_list[server->client_list_size - 1] = client;
+			
+			char *buf = calloc(4096, sizeof(char));
+			SDLNet_TCP_Recv(client->socket, buf, 4096);
+
+			printf("CLIENT SAYS: %s\n", buf);
+			
 		}
 	}
 
 	return 0;
 }
 
-int recv_server(GXServer_t* p_server)
-{
 
-	// Argument check
-	{
 
-	}
-
-	// Write 
-
-	// Write the data
-
-	// 
-	
-	return 0;
-}
-
-DLLEXPORT int create_client(GXClient_t** client)
+int create_client  ( GXClient_t** client)
 {
 	GXClient_t* c = malloc(sizeof(GXClient_t));
 	*client = c;
@@ -303,7 +316,27 @@ DLLEXPORT int create_client(GXClient_t** client)
 	return 0;
 }
 
-DLLEXPORT int destroy_client(GXClient_t* client)
+int connect_client ( GXClient_t** client )
+{
+	GXClient_t *i_client = 0;
+
+	create_client(client);
+
+	i_client = *client;
+
+	IPaddress addr = { 0 };
+	SDLNet_ResolveHost(&addr, "localhost", 9999);
+
+	i_client->socket = SDLNet_TCP_Open(&addr);
+	i_client->send_data = "JKL;JKL;JKL;JKL;";
+	SDLNet_TCP_Send(i_client->socket, i_client->send_data, strlen(i_client->send_data) + 1);
+
+
+
+	return 0;
+}
+
+int destroy_client ( GXClient_t *client )
 {
 	free(client->name);
 	free(client->send_data);

@@ -37,21 +37,17 @@ int main ( int argc, const char *argv[] )
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
     GXShader_t    *shader                 = 0;
-
-    dict          *command_line_arguments = 0;
-
+    
+    GXClient_t    *client                 = 0;
+     
     char *instance_path = "G10/debug server instance.json";
     char *schedule_name = "Server Schedule";
+
+    bool connect_to_server = false;
 
     // Parse command line arguments
     {
 
-        // Initialized data
-        char *instance_load_path = 0;
-
-        // Construct a dictionary from the command line arguments
-        dict_from_keys(&command_line_arguments, argv, argc);
-        
         // Iterate over each command line argument
         for (size_t i = 0; i < argc; i++)
         {
@@ -60,6 +56,9 @@ int main ( int argc, const char *argv[] )
 
             if (strcmp("-schedule", argv[i]) == 0)
                 schedule_name = argv[++i];
+
+            if (strcmp("-connect", argv[i]) == 0)
+                connect_to_server = true;
         }
 
     }
@@ -115,7 +114,7 @@ int main ( int argc, const char *argv[] )
 
         // Print scene info
         {
-
+            g_print_log("G10 Instance: \"%s\"\n", instance->name);
             g_print_log("G10 Scene information:\n");
 
             // Print scene name
@@ -135,10 +134,21 @@ int main ( int argc, const char *argv[] )
         }
     }
 
+    // Network testing
+    {
+        if (instance->server)
+            start_server(instance->server);
+
+        if (connect_to_server)
+        {
+            SDL_Delay(5000);
+            connect_client(&client);
+        }
+    }
+
     instance->running = true;
 
     // Start the game loop
-    start_server(instance->server);
     g_start_schedule(instance, schedule_name);
     
     // Exit 

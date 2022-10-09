@@ -12,8 +12,9 @@ enum   command_type_e  {
 	connect               = 1,
 	actor_initialize      = 2,
 	actor_displace_rotate = 3,
-	chat                  = 4,
-	disconnect            = 5 
+	actor_detach          = 4,
+	chat                  = 5,
+	disconnect            = 6 
 };
 
 enum   chat_channel_e
@@ -27,10 +28,12 @@ struct GXServer_s {
 
 	dict* clients; //Clients that have confirmed connection by sending a connect packet
 	GXClient_t** client_list; //Clients that have been accepted over TCP
-	size_t		client_list_size; //Size of client_list
+	GXEntity_t** actors;
+
+	size_t		 client_list_size; //Size of client_list
 	IPaddress    ip;
 	TCPsocket    sock;
-	GXEntity_t** actors;
+	
 
 	char* name;
 	char* password;
@@ -38,14 +41,15 @@ struct GXServer_s {
 
 struct GXClient_s
 {
-	TCPsocket socket;
-	char* name;
+	GXThread_t *thread;
+	TCPsocket   socket;
+	char       *name;
+	 
+	u8         *send_data,
+		       *recv_data;
 
-	u8* send_data,
-		* recv_data;
-
-	queue* send_queue;
-	queue* recv_queue;
+	queue      *send_queue;
+	queue      *recv_queue;
 
 };
 
@@ -128,7 +132,10 @@ DLLEXPORT int server_wait         ( GXInstance_t *instance );
 // Destructors
 DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 
+
 DLLEXPORT int create_client(GXClient_t** client);
+
+DLLEXPORT int connect_client (GXClient_t **client);
 
 //Destroy client instance and close TCP connection with client
 DLLEXPORT int destroy_client(GXClient_t* client);

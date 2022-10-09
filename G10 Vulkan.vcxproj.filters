@@ -84,9 +84,6 @@
     <ClCompile Include="GXInput.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\G10\GXMaterial.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GXScene.c">
       <Filter>Source Files</Filter>
     </ClCompile>

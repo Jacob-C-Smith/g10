@@ -39,8 +39,8 @@ void* task_function_pointers[20] = {
 	&load_entity_from_queue, 
 	&load_light_probe_from_queue, 
 	&copy_state,
-    &server_recv, // 
-	&server_send, // 
+    &server_recv, 
+	&server_send, 
 	&server_parse,
 	&server_serialize,
 	&server_process,
@@ -442,6 +442,49 @@ int stop_schedule          ( GXSchedule_t  *schedule )
 		// Wait for each thread to finish
 		SDL_WaitThread(schedule_threads[i]->thread, &r_stat);
 
+}
+
+int load_thread            ( GXThread_t **thread, char* path )
+{
+
+	// Argument check
+	{
+		if ( thread == (void*)0 )
+			goto no_thread;
+		if ( path == (void *)0 )
+			goto no_path;
+	}
+
+	// Initialized data
+	size_t  len        = g_load_file(path, 0, false);
+	char   *token_text = calloc(len+1, sizeof(char));
+	
+	g_load_file(path, token_text, false);
+
+	load_thread_as_json(thread, token_text, len);
+
+	free(token_text);
+
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_thread:
+				#ifndef NDEBUG
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"thread\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+
+			no_path:
+				#ifndef NDEBUG
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
 int load_thread_as_json    ( GXThread_t   **thread   , char *token_text, size_t len )
