@@ -17,15 +17,23 @@
 int user_code_callback(GXInstance_t* instance)
 {
 
-    // Update the camera controller
     update_controlee_camera(instance->delta_time);
 
+    //Rotate teapot
     static float r = 0.f;
 
     GXEntity_t* entity = get_entity(instance->active_scene, "entity");
     entity->transform->rotation = quaternion_from_euler_angle((vec3) { 0.f, r, 0.f });
 
     r += instance->delta_time * 5;
+
+    entity->transform->location.x = sin(r / 10) * 5;
+    entity->transform->location.y = cos(r / 10) * 5;
+
+    printf("Teapot pos: %d,%d,%d\r",
+        entity->transform->location.x,
+        entity->transform->location.y,
+        entity->transform->location.z);
 
     return 0;
 }
@@ -141,8 +149,8 @@ int main ( int argc, const char *argv[] )
 
         if (connect_to_server)
         {
-            SDL_Delay(5000);
-            connect_client(&client);
+            //SDL_Delay(5000);
+            //connect_client(&client);
         }
     }
 

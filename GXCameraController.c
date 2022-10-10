@@ -57,25 +57,25 @@ void                  camera_controller_strafe_right ( callback_parameter_t stat
 void                  camera_controller_up           ( callback_parameter_t state, GXInstance_t* instance ) 
 {
     if (state.input_state == MOUSE)
-        v_ang += instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.yrel);
+        v_ang += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_down         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        v_ang -= instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.yrel);
+        v_ang -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_left         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang -= instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.xrel);
+        h_ang -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
 
 }
 void                  camera_controller_right        ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang += instance->delta_time * 10.f * fabsf(state.inputs.mouse_state.xrel);
+        h_ang += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
 
 }
 

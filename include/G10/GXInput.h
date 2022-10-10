@@ -36,6 +36,7 @@ struct GXInput_s
 	char *name;
 	dict *bind_lut,
 		 *binds;
+	float mouse_sensitivity;
 };
 
 enum input_state_e

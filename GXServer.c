@@ -295,6 +295,13 @@ int server_wait    ( GXInstance_t* instance )
 
 			printf("CLIENT SAYS: %s\n", buf);
 			
+			if (*((u16*)buf) == connect) {
+				char* clName = &buf[2];
+				size_t nameLen = strlen(clName);
+				client->name = calloc(nameLen + 1, sizeof(char));
+				strncpy(client->name, clName, nameLen+1);
+				printf("%s connected\n", client->name);
+			}
 		}
 	}
 
@@ -324,14 +331,19 @@ int connect_client ( GXClient_t** client )
 
 	i_client = *client;
 
+	i_client->name = "Parma Jawn";
+
 	IPaddress addr = { 0 };
 	SDLNet_ResolveHost(&addr, "localhost", 9999);
 
 	i_client->socket = SDLNet_TCP_Open(&addr);
-	i_client->send_data = "JKL;JKL;JKL;JKL;";
-	SDLNet_TCP_Send(i_client->socket, i_client->send_data, strlen(i_client->send_data) + 1);
 
+	size_t nameLen = strlen(i_client->name);
 
+	i_client->send_data = malloc(4096);
+	*((u16*)&i_client->send_data[0]) = connect;
+	strncpy(&i_client->send_data[2], i_client->name, nameLen+1);
+	SDLNet_TCP_Send(i_client->socket, i_client->send_data, 4096);
 
 	return 0;
 }

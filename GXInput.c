@@ -697,6 +697,8 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
     char        *name        = 0;
     char       **bind_tokens = 0;
 
+    char        *mouse_sensitivity = 0;
+
     // Allocate an input struct
     create_input(&ret);
 
@@ -715,6 +717,10 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
         // Set the binds
         token = dict_get(input_json_object, "binds");
         bind_tokens = token->value.a_where;
+
+        //Set mouse sensitivity
+        token = dict_get(input_json_object, "mouse-sensitivity");
+        mouse_sensitivity = token->value.n_where;
     }
 
     // Construct Input
@@ -762,6 +768,14 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
                     append_bind(ret, bind);
                 }
             }
+        }
+
+        //Set mouse sensitivity
+        {
+            if (mouse_sensitivity)
+                ret->mouse_sensitivity = atof(mouse_sensitivity);
+            else
+                ret->mouse_sensitivity = 1.f;
         }
     }
 
@@ -1085,8 +1099,8 @@ int          process_input             ( GXInstance_t *instance )
                                      y_rel = instance->event.motion.yrel;
                 {
                     input.input_state               = MOUSE;
-                    input.inputs.mouse_state.xrel   = x_rel;
-                    input.inputs.mouse_state.yrel   = y_rel;
+                    input.inputs.mouse_state.xrel   = x_rel * instance->input->mouse_sensitivity;
+                    input.inputs.mouse_state.yrel   = y_rel * instance->input->mouse_sensitivity;
                     input.inputs.mouse_state.button = button;
                 }
 
