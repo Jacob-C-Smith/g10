@@ -43,6 +43,7 @@ struct GXClient_s
 {
 	GXThread_t *thread;
 	TCPsocket   socket;
+
 	char       *name;
 	 
 	u8         *send_data,
@@ -82,8 +83,13 @@ struct GXCommand_s {
 		struct {
 			vec3        location;
 			quaternion  quaternion;
+			vec3        velocity;
 			u16         index;
 		} actor_displace_rotate;
+
+		struct {
+			u16 index;
+		} actor_detach;
 
 		// Send chat
 		struct {
@@ -95,7 +101,6 @@ struct GXCommand_s {
 		struct {
 			size_t i;
 		} disconnect;
-
 	};
 };
 
@@ -132,6 +137,8 @@ DLLEXPORT int server_wait         ( GXInstance_t *instance );
 // Destructors
 DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 
+DLLEXPORT int command_from_data   ( GXCommand_t **ret, void        *data ); 
+DLLEXPORT int data_from_command   ( void        **ret, GXCommand_t *conmmand );
 
 DLLEXPORT int create_client(GXClient_t** client);
 

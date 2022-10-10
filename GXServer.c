@@ -212,12 +212,23 @@ int start_server(GXServer_t* p_server)
 	return 0;
 }
 
+int process_command(GXClient_t *client, GXCommand_t* p_command)
+{
+	switch (p_command->type)
+	{
+	case chat:
+		printf("%s says %s\n", client->name, p_command->chat.chat);
+		break;
+	}
+}
+
 int server_recv(GXInstance_t* instance)
 {
 	// Argument check
 	{
-		printf("RECV DATA! %d\r", instance->ticks);
-		instance->ticks++;
+		GXClient_t* c = instance->server->client_list[0];
+		SDLNet_TCP_Recv(c->socket, c->recv_data, 4096);
+
 	}
 
 	// Write the data
@@ -232,6 +243,14 @@ int server_send(GXInstance_t* instance)
 
 int server_parse     ( GXInstance_t *instance )
 {
+
+	GXClient_t* c = instance->server->client_list[0];
+	GXCommand_t *command = 0;
+	command_from_data(&command, c->recv_data);
+
+	queue_enqueue(c->recv_queue, command);
+
+
 
 	return 0;
 }
@@ -308,8 +327,6 @@ int server_wait    ( GXInstance_t* instance )
 	return 0;
 }
 
-
-
 int create_client  ( GXClient_t** client)
 {
 	GXClient_t* c = malloc(sizeof(GXClient_t));
@@ -322,6 +339,7 @@ int create_client  ( GXClient_t** client)
 	queue_create(&c->recv_queue);
 	return 0;
 }
+DLLEXPORT int process_command(GXCommand_t* p_command);
 
 int connect_client ( GXClient_t** client )
 {
@@ -347,6 +365,89 @@ int connect_client ( GXClient_t** client )
 
 	return 0;
 }
+
+int command_from_data(GXCommand_t** ret, void* data)
+{
+	GXCommand_t *i_ret = calloc(1, sizeof(GXCommand_t));
+
+	u16 command_type = *((u16*)data);
+
+	i_ret->type = command_type;
+
+	switch (command_type)
+	{
+		case no_op:
+			break;
+		case connect:
+			break;
+		case actor_initialize:
+			break;
+		case actor_displace_rotate:
+			break;
+		case actor_detach:
+			break;
+		case chat:
+		{
+			u16   chat_channel = *((u16*)data+1),
+                  chat_len     = *((u16*)data+2);
+			char* text_chat    = (char *)data+6;
+
+			i_ret->chat.chat_channel = chat_channel;
+			i_ret->chat.chat         = calloc(chat_len + 1, sizeof(char));
+			strncpy(i_ret->chat.chat, text_chat, chat_len);
+		}
+		break;
+		case disconnect:
+			break;
+		default:
+			break;
+	}
+
+	*ret = i_ret;
+	return 0;
+}
+
+int data_from_command(void** ret, GXCommand_t* command)
+{
+
+	switch (command->type)
+	{
+		case no_op:
+			break;
+		case connect:
+			break;
+		case actor_initialize:
+			break;
+		case actor_displace_rotate:
+			break;
+		case actor_detach:
+			break;
+		case chat:
+		{
+			size_t ret_len = 0,
+				   chat_len = strlen(command->chat.chat);
+			ret_len += chat_len;
+			ret_len += 2 + 2 + 2 + 1;
+
+			char *retn = calloc(ret_len, sizeof(u8));
+
+			*(u16*)retn = chat;
+			*((u16*)retn+1) = command->chat.chat_channel;
+			*((u16*)retn+2) = (u16)chat_len;
+			strncpy(&retn[6], command->chat.chat, chat_len);
+
+			*ret = retn;
+		}
+		break;
+		case disconnect:
+			break;
+		default:
+			break;
+	}
+
+	return 0;
+}
+
 
 int destroy_client ( GXClient_t *client )
 {

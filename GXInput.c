@@ -712,15 +712,15 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
 
         // Set the name
         token = dict_get(input_json_object, "name");
-        name = token->value.n_where;
+        name = JSON_VALUE(token, JSONstring);
 
         // Set the binds
         token = dict_get(input_json_object, "binds");
-        bind_tokens = token->value.a_where;
+        bind_tokens = JSON_VALUE(token, JSONarray);
 
         //Set mouse sensitivity
-        token = dict_get(input_json_object, "mouse-sensitivity");
-        mouse_sensitivity = token->value.n_where;
+        token = dict_get(input_json_object, "mouse sensitivity");
+        mouse_sensitivity = JSON_VALUE(token, JSONprimative);
     }
 
     // Construct Input

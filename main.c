@@ -30,7 +30,7 @@ int user_code_callback(GXInstance_t* instance)
     entity->transform->location.x = sin(r / 10) * 5;
     entity->transform->location.y = cos(r / 10) * 5;
 
-    printf("Teapot pos: %d,%d,%d\r",
+    printf("Teapot pos: %.2f, %.2f, %.2f\r",
         entity->transform->location.x,
         entity->transform->location.y,
         entity->transform->location.z);
@@ -144,6 +144,28 @@ int main ( int argc, const char *argv[] )
 
     // Network testing
     {
+
+        // Command testing
+        {
+            GXCommand_t *cfd_command = 0;
+            u8           cfd_data[]  = { 0x05, 0x00, 0x34, 0x12, 0x89, 0x67, 'h' , 'e' , 'l' , 'l', 'o', 0x00 };
+            //                           ID1   ID2   CHN1  CHN2  LEN   LEN   C[0], C[1], C[2], C[3] C[4] C[5]
+
+            GXCommand_t *dfc_command = 0;
+            u8          *dfc_data    = 0;
+            
+            dfc_command = calloc(1, sizeof(GXCommand_t));
+
+            dfc_command->type = chat;
+            dfc_command->chat.chat         = "hello";
+            dfc_command->chat.chat_channel = chat_channel_all;
+
+            command_from_data(&cfd_command, &cfd_data);
+            data_from_command(&dfc_data   , dfc_command);
+
+            printf("");
+        }
+
         if (instance->server)
             start_server(instance->server);
 
