@@ -43,6 +43,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="APS_3rdPersonCtrl.c" />
     <ClCompile Include="G10.c" />
     <ClCompile Include="GXAI.c" />
     <ClCompile Include="GXAudio.c" />
@@ -70,6 +71,7 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="APS_3rdPersonCtrl.h" />
     <ClInclude Include="include\G10\G10.h" />
     <ClInclude Include="include\G10\GXAI.h" />
     <ClInclude Include="include\G10\GXAudio.h" />

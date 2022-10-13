@@ -12,29 +12,52 @@
 #include <G10/GXPart.h>
 #include <G10/GXMaterial.h>
 #include <G10/GXUserCode.h>
-#include <G10/GXCameraController.h>
+#include "APS_3rdPersonCtrl.h"
 
+/* User code goes here for now */
+
+//User code callback
 int user_code_callback(GXInstance_t* instance)
 {
 
-    update_controlee_camera(instance->delta_time);
+    update_aps_3rdpersonctrl(instance->delta_time);
 
-    //Rotate teapot
-    static float r = 0.f;
+    return 0;
+}
 
-    GXEntity_t* entity = get_entity(instance->active_scene, "entity");
-    entity->transform->rotation = quaternion_from_euler_angle((vec3) { 0.f, r, 0.f });
+GXClient_t* client = 0;
 
-    r += instance->delta_time * 5;
+bool chatDown = false;
 
-    entity->transform->location.x = sin(r / 10) * 5;
-    entity->transform->location.y = cos(r / 10) * 5;
+//Server chat test callback
+void chat_callback(callback_parameter_t state, GXInstance_t* instance) {
+    if (state.input_state == KEYBOARD) {
+        if (state.inputs.key.depressed) {
+            if (!chatDown) {
+                chatDown = true;
 
-    printf("Teapot pos: %.2f, %.2f, %.2f\r",
-        entity->transform->location.x,
-        entity->transform->location.y,
-        entity->transform->location.z);
+                //Key was just pressed
+                //Send chat message to server
+                if (client) {
+                    GXCommand_t cmd;
+                    cmd.type = chat;
+                    cmd.chat.chat_channel = chat_channel_all;
+                    cmd.chat.chat = "yeet";
 
+                    char* packet;
+                    data_from_command(&packet, &cmd);
+
+                    SDLNet_TCP_Send(client->socket, packet, 4096);
+                    printf("[Client] Sent chat packet\n");
+
+                    SDL_Delay(1000);
+
+                    free(packet);
+                }
+            }
+        } else
+            chatDown = false;
+    }
     return 0;
 }
 
@@ -46,7 +69,7 @@ int main ( int argc, const char *argv[] )
     GXScene_t     *scene                  = 0;
     GXShader_t    *shader                 = 0;
     
-    GXClient_t    *client                 = 0;
+    
      
     char *instance_path = "G10/debug server instance.json";
     char *schedule_name = "Server Schedule";
@@ -90,10 +113,17 @@ int main ( int argc, const char *argv[] )
             // Toggle mouse locking
             register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
 
-            // Set up the camera controller
+            // Set up 3rd person controller
             {
-                camera_controller_from_camera(instance, instance->active_scene->active_camera);
+                aps_3rdpersonctrl_from_camera_and_entity(
+                    instance, 
+                    instance->active_scene->active_camera,
+                    get_entity(instance->active_scene, "player1"));
             }
+            
+            //Chat test bind
+            GXBind_t* chat_bind = find_bind(instance->input, "TEXT CHAT");
+            register_bind_callback(chat_bind, &chat_callback);
         }
         
         // Set up user code
@@ -160,10 +190,8 @@ int main ( int argc, const char *argv[] )
             dfc_command->chat.chat         = "hello";
             dfc_command->chat.chat_channel = chat_channel_all;
 
-            command_from_data(&cfd_command, &cfd_data);
-            data_from_command(&dfc_data   , dfc_command);
-
-            printf("");
+            //command_from_data(&cfd_command, &cfd_data);
+            //data_from_command(&dfc_data   , dfc_command);
         }
 
         if (instance->server)
@@ -171,8 +199,8 @@ int main ( int argc, const char *argv[] )
 
         if (connect_to_server)
         {
-            //SDL_Delay(5000);
-            //connect_client(&client);
+            SDL_Delay(5000);
+            connect_client(&client, "Parma Jawn", "localhost", 9999);
         }
     }
 
