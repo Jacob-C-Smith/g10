@@ -86,7 +86,6 @@ struct GXInstance_s
 
 	GXSchedule_t             *active_schedule;
 	GXScene_t                *active_scene;
-	GXServer_t               *active_server;
 
 	// Schedules
 	dict                     *schedules;
@@ -97,6 +96,7 @@ struct GXInstance_s
 
 	// Server 
 	GXServer_t               *server;
+	GXClient_t               *client;
 
 	dict                     *cached_parts;
 	dict                     *cached_materials;

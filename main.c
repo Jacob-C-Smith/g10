@@ -14,43 +14,24 @@
 #include <G10/GXUserCode.h>
 #include "APS_3rdPersonCtrl.h"
 
-/* User code goes here for now */
 
-//User code callback
 int user_code_callback(GXInstance_t* instance)
 {
 
-    update_aps_3rdpersonctrl(instance->delta_time);
+    update_controlee_camera(instance->delta_time);
+    GXEntity_t* e = get_entity(instance->active_scene, "entity");
+    vec3 l = e->transform->location;
 
-    return 0;
-}
+    printf("%.2f %.2f %.2f\r", l.x, l.y, l.z);
 
-GXClient_t* client = 0;
+    if(instance->client == (void *)0 && instance->server == (void*) 0)
+    {
+        SDL_Delay(6000);
+        connect_client("Jake");
+    }
 
-bool chatDown = false;
-
-//Server chat test callback
-void chat_callback(callback_parameter_t state, GXInstance_t* instance) {
-    if (state.input_state == KEYBOARD) {
-        if (state.inputs.key.depressed) {
-            if (!chatDown) {
-                chatDown = true;
-
-                //Key was just pressed
-                //Send chat message to server
-                if (client) {
-                    GXCommand_t cmd;
-                    cmd.type = chat;
-                    cmd.chat.chat_channel = chat_channel_all;
-                    cmd.chat.chat = "yeet";
-
-                    char* packet;
-                    data_from_command(&packet, &cmd);
-
-                    SDLNet_TCP_Send(client->socket, packet, 4096);
-                    printf("[Client] Sent chat packet\n");
-
-                    SDL_Delay(1000);
+    if (instance->client)
+        queue_enqueue(instance->client->send_queue, no_operation);
 
                     free(packet);
                 }
@@ -68,9 +49,7 @@ int main ( int argc, const char *argv[] )
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
     GXShader_t    *shader                 = 0;
-    
-    
-     
+
     char *instance_path = "G10/debug server instance.json";
     char *schedule_name = "Server Schedule";
 
@@ -132,7 +111,7 @@ int main ( int argc, const char *argv[] )
         }
 
     }
-
+    no_operation = calloc(1, sizeof(GXCommand_t));
     // Debugging
     {
         
@@ -171,38 +150,9 @@ int main ( int argc, const char *argv[] )
 
         }
     }
-
-    // Network testing
-    {
-
-        // Command testing
-        {
-            GXCommand_t *cfd_command = 0;
-            u8           cfd_data[]  = { 0x05, 0x00, 0x34, 0x12, 0x89, 0x67, 'h' , 'e' , 'l' , 'l', 'o', 0x00 };
-            //                           ID1   ID2   CHN1  CHN2  LEN   LEN   C[0], C[1], C[2], C[3] C[4] C[5]
-
-            GXCommand_t *dfc_command = 0;
-            u8          *dfc_data    = 0;
-            
-            dfc_command = calloc(1, sizeof(GXCommand_t));
-
-            dfc_command->type = chat;
-            dfc_command->chat.chat         = "hello";
-            dfc_command->chat.chat_channel = chat_channel_all;
-
-            //command_from_data(&cfd_command, &cfd_data);
-            //data_from_command(&dfc_data   , dfc_command);
-        }
-
-        if (instance->server)
-            start_server(instance->server);
-
-        if (connect_to_server)
-        {
-            SDL_Delay(5000);
-            connect_client(&client, "Parma Jawn", "localhost", 9999);
-        }
-    }
+    
+    if (instance->server)
+        start_server();
 
     instance->running = true;
 

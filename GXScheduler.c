@@ -260,6 +260,56 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 	}
 }
 
+
+int client_work                   ( GXClient_t    *client )
+{
+	GXThread_t* thread = client->thread;
+	GXTask_t **tasks = thread->tasks;
+	GXInstance_t* instance = g_get_active_instance();
+
+	while (thread->running)
+	{
+		for (size_t i = 0; i < thread->task_count; i++)
+		{
+			// Are we waiting on anything else to finish?
+			if (thread->tasks[i]->wait_thread)
+			{
+
+				// Initialized data
+				GXThread_t *wait_thread = dict_get(instance->active_schedule->threads, thread->tasks[i]->wait_thread);
+				GXTask_t   *wait_task   = 0;
+				size_t      v           = 0;
+
+				// Figure out what task we are waiting on
+				for (size_t j = 0; j < wait_thread->task_count; j++)
+				{
+					if (strcmp(thread->tasks[i]->wait_task, wait_thread->tasks[j]->name) == 0)
+						v = j;
+				}
+
+				// Wait for the task to finish
+				while (wait_thread->complete_tasks[i] == 0);
+
+			}
+
+			int (*function_pointer)(GXClient_t*) = thread->tasks[i]->function_pointer;
+
+			// Run the function
+			if(function_pointer)
+				function_pointer(client);
+
+			// Update the task
+			thread->complete_tasks[i]=1;
+		}
+
+		// Reset
+		for (size_t i = 0; i < thread->task_count; i++)
+			thread->complete_tasks[i] = 0;
+	}
+	return 0;
+}
+
+
 int work                   ( GXThread_t    *thread )
 {
 	GXTask_t **tasks = thread->tasks;
