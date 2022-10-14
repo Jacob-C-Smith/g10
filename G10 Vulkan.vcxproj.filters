@@ -150,6 +150,9 @@
     <ClCompile Include="GXUserCode.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="APS_3rdPersonCtrl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\G10\G10.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="include\G10\GXUserCode.h">
       <Filter>Header Files\G10\User Code</Filter>
+    </ClInclude>
+    <ClInclude Include="APS_3rdPersonCtrl.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

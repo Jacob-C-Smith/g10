@@ -12,9 +12,8 @@
 #include <G10/GXPart.h>
 #include <G10/GXMaterial.h>
 #include <G10/GXUserCode.h>
-#include <G10/GXCameraController.h>
+#include "APS_3rdPersonCtrl.h"
 
-GXCommand_t* no_operation = 0;
 
 int user_code_callback(GXInstance_t* instance)
 {
@@ -34,6 +33,12 @@ int user_code_callback(GXInstance_t* instance)
     if (instance->client)
         queue_enqueue(instance->client->send_queue, no_operation);
 
+                    free(packet);
+                }
+            }
+        } else
+            chatDown = false;
+    }
     return 0;
 }
 
@@ -44,7 +49,7 @@ int main ( int argc, const char *argv[] )
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
     GXShader_t    *shader                 = 0;
-         
+
     char *instance_path = "G10/debug server instance.json";
     char *schedule_name = "Server Schedule";
 
@@ -87,10 +92,17 @@ int main ( int argc, const char *argv[] )
             // Toggle mouse locking
             register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
 
-            // Set up the camera controller
+            // Set up 3rd person controller
             {
-                camera_controller_from_camera(instance, instance->active_scene->active_camera);
+                aps_3rdpersonctrl_from_camera_and_entity(
+                    instance, 
+                    instance->active_scene->active_camera,
+                    get_entity(instance->active_scene, "player1"));
             }
+            
+            //Chat test bind
+            GXBind_t* chat_bind = find_bind(instance->input, "TEXT CHAT");
+            register_bind_callback(chat_bind, &chat_callback);
         }
         
         // Set up user code

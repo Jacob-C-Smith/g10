@@ -221,7 +221,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 	switch (p_command->type)
 	{
 	case chat:
-		printf("%s says %s\n", client->name, p_command->chat.chat);
+		printf("[Chat]%s: %s\n", client->name, p_command->chat.chat);
 		break;
 	}
 }
@@ -307,6 +307,7 @@ int server_parse     ( GXClient_t *client )
 int server_serialize ( GXClient_t *client )
 {
 
+
 	GXCommand_t *command = 0;
 	size_t       i       = 0;
 
@@ -329,6 +330,14 @@ int server_serialize ( GXClient_t *client )
 
 int server_process   ( GXClient_t *client )
 {
+	GXClient_t* c = instance->server->client_list[0];
+
+	if (queue_empty(c->recv_queue)) {
+		for (GXCommand_t* cmd = queue_dequeue(c->recv_queue); cmd != NULL; cmd = queue_dequeue(c->recv_queue)) {
+			process_command(c, cmd);
+			destroy_command(cmd);
+		}
+	}
 
 
 
@@ -454,6 +463,7 @@ int create_client  ( GXClient_t** client)
 }
 DLLEXPORT int process_command(GXCommand_t* p_command);
 
+
 int connect_client(char* name)
 {
 	GXInstance_t* instance = g_get_active_instance();
@@ -462,12 +472,16 @@ int connect_client(char* name)
 	create_client(&instance->client);
 	i_client = instance->client;
 
-	i_client->name = name;
+
+	size_t nameLen = strlen(username);
+	i_client->name = malloc(nameLen + 1);
+	strcpy(i_client->name, username);
 
 	IPaddress addr = { 0 };
-	SDLNet_ResolveHost(&addr, "localhost", 9999);
+	SDLNet_ResolveHost(&addr, host, port);
 
 	i_client->socket = SDLNet_TCP_Open(&addr);
+
 
 	size_t nameLen = strlen(i_client->name);
 
@@ -498,7 +512,6 @@ int connect_client(char* name)
 	extern int client_work(GXThread_t * thread);
 
 	i_client->thread->thread = SDL_CreateThread(client_work, i_client->thread->name, i_client);
-	
 
 	return 0;
 }
@@ -655,4 +668,15 @@ int destroy_client ( GXClient_t *client )
 	free(client);
 
 	return 0;
+}
+
+DLLEXPORT int destroy_command(GXCommand_t* command)
+{
+	switch (command->type) {
+	case chat:
+		free(command->chat.chat);
+		break;
+	default: break;
+	}
+	free(command);
 }

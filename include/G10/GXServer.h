@@ -140,9 +140,12 @@ DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 DLLEXPORT int command_from_data   ( GXCommand_t **ret, void        *data ); 
 DLLEXPORT int data_from_command   ( void        **ret, GXCommand_t *conmmand );
 
+
 DLLEXPORT int create_client(GXClient_t** client);
 
 DLLEXPORT int connect_client (char *name);
 
 //Destroy client instance and close TCP connection with client
 DLLEXPORT int destroy_client(GXClient_t* client);
+
+DLLEXPORT int destroy_command(GXCommand_t* command);
