@@ -67,7 +67,7 @@ struct GXCommand_s {
 
 		// Connect 
 		struct {
-			char *connection_json;
+			char *name;
 		} connect;
 
 		// Initialize an actor
@@ -116,20 +116,20 @@ DLLEXPORT int load_server         ( GXServer_t  **pp_server, char *path );
 DLLEXPORT int load_server_as_json ( GXServer_t  **pp_server, char *token_text, size_t len );
 
 // Start
-DLLEXPORT int start_server        ( GXServer_t   *p_server );
+DLLEXPORT int start_server        ( );
 
 DLLEXPORT int process_command     ( GXCommand_t  *p_command );
 
 // Sending / Recieving over the internet
-DLLEXPORT int server_recv         ( GXInstance_t *instance );
-DLLEXPORT int server_send         ( GXInstance_t *instance );
+DLLEXPORT int server_recv         ( GXClient_t   *client );
+DLLEXPORT int server_send         ( GXClient_t* client );
 
 // Turn a command queue into data or vice versa
-DLLEXPORT int server_parse        ( GXInstance_t *instance );
-DLLEXPORT int server_serialize    ( GXInstance_t *instance );
+DLLEXPORT int server_parse        ( GXClient_t   *client );
+DLLEXPORT int server_serialize    ( GXClient_t   *client );
 
 // Process server commands
-DLLEXPORT int server_process      ( GXInstance_t *instance );
+DLLEXPORT int server_process      ( GXClient_t   *client );
 
 // Wait for clients to join
 DLLEXPORT int server_wait         ( GXInstance_t *instance );
@@ -142,7 +142,7 @@ DLLEXPORT int data_from_command   ( void        **ret, GXCommand_t *conmmand );
 
 DLLEXPORT int create_client(GXClient_t** client);
 
-DLLEXPORT int connect_client (GXClient_t **client);
+DLLEXPORT int connect_client (char *name);
 
 //Destroy client instance and close TCP connection with client
 DLLEXPORT int destroy_client(GXClient_t* client);

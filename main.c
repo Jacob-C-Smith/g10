@@ -14,26 +14,25 @@
 #include <G10/GXUserCode.h>
 #include <G10/GXCameraController.h>
 
+GXCommand_t* no_operation = 0;
+
 int user_code_callback(GXInstance_t* instance)
 {
 
     update_controlee_camera(instance->delta_time);
+    GXEntity_t* e = get_entity(instance->active_scene, "entity");
+    vec3 l = e->transform->location;
 
-    //Rotate teapot
-    static float r = 0.f;
+    printf("%.2f %.2f %.2f\r", l.x, l.y, l.z);
 
-    GXEntity_t* entity = get_entity(instance->active_scene, "entity");
-    entity->transform->rotation = quaternion_from_euler_angle((vec3) { 0.f, r, 0.f });
+    if(instance->client == (void *)0 && instance->server == (void*) 0)
+    {
+        SDL_Delay(6000);
+        connect_client("Jake");
+    }
 
-    r += instance->delta_time * 5;
-
-    entity->transform->location.x = sin(r / 10) * 5;
-    entity->transform->location.y = cos(r / 10) * 5;
-
-    printf("Teapot pos: %.2f, %.2f, %.2f\r",
-        entity->transform->location.x,
-        entity->transform->location.y,
-        entity->transform->location.z);
+    if (instance->client)
+        queue_enqueue(instance->client->send_queue, no_operation);
 
     return 0;
 }
@@ -45,9 +44,7 @@ int main ( int argc, const char *argv[] )
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
     GXShader_t    *shader                 = 0;
-    
-    GXClient_t    *client                 = 0;
-     
+         
     char *instance_path = "G10/debug server instance.json";
     char *schedule_name = "Server Schedule";
 
@@ -102,7 +99,7 @@ int main ( int argc, const char *argv[] )
         }
 
     }
-
+    no_operation = calloc(1, sizeof(GXCommand_t));
     // Debugging
     {
         
@@ -141,40 +138,9 @@ int main ( int argc, const char *argv[] )
 
         }
     }
-
-    // Network testing
-    {
-
-        // Command testing
-        {
-            GXCommand_t *cfd_command = 0;
-            u8           cfd_data[]  = { 0x05, 0x00, 0x34, 0x12, 0x89, 0x67, 'h' , 'e' , 'l' , 'l', 'o', 0x00 };
-            //                           ID1   ID2   CHN1  CHN2  LEN   LEN   C[0], C[1], C[2], C[3] C[4] C[5]
-
-            GXCommand_t *dfc_command = 0;
-            u8          *dfc_data    = 0;
-            
-            dfc_command = calloc(1, sizeof(GXCommand_t));
-
-            dfc_command->type = chat;
-            dfc_command->chat.chat         = "hello";
-            dfc_command->chat.chat_channel = chat_channel_all;
-
-            command_from_data(&cfd_command, &cfd_data);
-            data_from_command(&dfc_data   , dfc_command);
-
-            printf("");
-        }
-
-        if (instance->server)
-            start_server(instance->server);
-
-        if (connect_to_server)
-        {
-            //SDL_Delay(5000);
-            //connect_client(&client);
-        }
-    }
+    
+    if (instance->server)
+        start_server();
 
     instance->running = true;
 
