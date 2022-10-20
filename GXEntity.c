@@ -73,11 +73,15 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len+1, sizeof(char));
 	
-	g_load_file(path, token_text, false);
+	if ( g_load_file(path, token_text, false) == 0 )
+		goto failed_to_load_entity;
 
-	load_entity_as_json(pp_entity, token_text, len);
+	if ( load_entity_as_json(pp_entity, token_text, len) == 0 )
+		goto failed_to_load_entity_as_json;
 
-	return 0;
+	free(token_text);
+
+	return 1;
 	
 	
 	// Error handling
@@ -107,6 +111,20 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 				#endif
 				return 0;
 		}
+
+		// G10 errors
+		{
+			failed_to_load_entity_as_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Failed to open file \"%s\" text in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif
+				return 0;
+			failed_to_load_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Failed to load entity from \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif
+				return 0;
+		}
 	}
 }
 
@@ -126,7 +144,6 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 	// Initialized data
 	GXEntity_t *i_entity    = 0;
 	dict       *entity_json = 0;
-
 
 	char       *name        = 0,
 		      **parts       = 0,
@@ -279,11 +296,17 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 
 			// Object branch
 			if (*transform == '{')
-				load_transform_as_json(&i_entity->transform, transform, strlen(transform));
+			{
+				if ( load_transform_as_json(&i_entity->transform, transform, strlen(transform)) == 0 )
+					goto failed_to_load_transform_as_json;
+			}
 
 			// Path branch
 			else
-				load_transform(&i_entity->transform, transform);
+			{
+				if ( load_transform(&i_entity->transform, transform) )
+					goto failed_to_load_transform;
+			}
 
 		}
 
@@ -334,7 +357,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		}
 	}
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -371,6 +394,25 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 				#endif
 				return 0;
 
+		}
+
+		// G10 errors
+		{
+
+			// Transform errors
+			{
+				failed_to_load_transform_as_json:
+					#ifndef NDEBUG
+						g_print_error("[G10] [Entity] Failed to load transform as JSON text in call to function \"%s\"\n", __FUNCSIG__);
+					#endif
+					return 0;
+
+				failed_to_load_transform:
+					#ifndef NDEBUG
+						g_print_error("[G10] [Entity] Failed to load transform in call to function \"%s\"\n", __FUNCSIG__);
+					#endif
+					return 0;
+			}
 		}
 	}
 }
@@ -432,10 +474,10 @@ int update_entity_ai ( GXEntity_t* p_entity)
 
 vec3 calculate_force_gravitational ( GXEntity_t * p_entity )
 {
-	vec3 ret = { 0.f, 0.f, -9.8f, 0 };
+	vec3 ret = { 0.f, 0.f, -0.0098f, 0 };
 
 	// -50 m / s terminal velocity
-	if (p_entity->rigidbody->velocity.z < -50.0f)
+	if (p_entity->rigidbody->velocity.z < -0.0050f)
 		ret.z = 0.f;
 
 	return ret;
@@ -529,14 +571,39 @@ int load_entity_from_queue(GXInstance_t *instance)
 
 		// Load the entity
 		if (*text == '{')
-			load_entity_as_json(&entity, text, strlen(text));
+		{
+			if ( load_entity_as_json(&entity, text, strlen(text)) == 0 )
+				goto failed_to_load_entity_as_json;
+		}
 		else
-			load_entity(&entity, text);
-
+		{
+			if ( load_entity(&entity, text) == 0 )
+				goto failed_to_load_entity;
+		}
 		// Add the entity to the active scene
 		append_entity(scene, entity);
 	}
+	
 	return 0;
+
+	// Error handling
+	{
+
+		// G10 errors
+		{
+			failed_to_load_entity_as_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+			failed_to_load_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+
 }
 
 int load_light_probe_from_queue(GXInstance_t* instance)
@@ -567,7 +634,8 @@ int draw_entity(GXEntity_t* p_entity)
 			// TODO: Uncomment when shader sets are done
 			set_shader_camera(p_entity, instance->active_scene->active_camera);
 		}
-
+		update_shader_push_constant(p_entity->shader);
+		vkCmdPushConstants(instance->command_buffers[instance->current_frame], p_entity->shader->pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->push_constant_size, p_entity->shader->push_constant_data );
 		vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->descriptor_sets[instance->current_frame], 0, 0);
 
 		draw_part(parts[i]);

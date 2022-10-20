@@ -20,6 +20,40 @@ mat4 perspective_matrix      ( float       fov,    float       aspect       , fl
 	};
 }
 
+int get_camera_position(void* ret)
+{
+
+	// Argument errors
+	{
+		#ifndef NDEBUG
+			if ( ret == (void *) 0 )
+				goto no_return;
+		#endif
+	}
+
+	// Initialized data
+	GXInstance_t *instance        = g_get_active_instance();
+	vec3          camera_position = instance->active_scene->active_camera->location;
+
+	// Write the camera position to the return
+	*(vec3 *)ret = camera_position;
+
+	return sizeof(vec3);
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_return:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+}
+
 mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up )                                        // ✅ Computes a view matrix from eye, target, and up vectors
 { 
     // Compute forward direction

@@ -454,8 +454,6 @@ int start_schedule         ( GXSchedule_t  *schedule )
 	// Call the thread worker function (on the main thread...)
 	main_work(main_thread);
 
-	free(schedule_threads);
-
 	return 0;
 }
 

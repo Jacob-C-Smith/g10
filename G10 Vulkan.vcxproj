@@ -71,7 +71,7 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="APS_3rdPersonCtrl.h" />
+    <ClInclude Include="include\G10\APS_3rdPersonCtrl.h" />
     <ClInclude Include="include\G10\G10.h" />
     <ClInclude Include="include\G10\GXAI.h" />
     <ClInclude Include="include\G10\GXAudio.h" />
@@ -103,7 +103,7 @@
     <ClInclude Include="include\G10\GXUserCode.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="time partitioning.txt" />
+    <Text Include="TODO" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GXLinearA.asm" />
@@ -336,7 +336,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.216.0\Include;C:\Users\j\Desktop\C Projects\G10 Vulkan\include;../Dictionary/include;../Queue/include;C:\Users\j\Desktop\C Projects\UI\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -349,8 +349,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;C:\Users\j\Desktop\C Projects\G10 Vulkan\lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;Queue.lib;UI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)/Lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_net.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;Queue.lib;Stack.lib;UI.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

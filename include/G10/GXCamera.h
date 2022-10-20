@@ -37,5 +37,7 @@ DLLEXPORT int  load_camera_as_json ( GXCamera_t** camera, char* object_text, siz
 DLLEXPORT mat4 look_at             ( vec3        eye,    vec3        target       , vec3  up );
 DLLEXPORT mat4 perspective_matrix  ( float       fov,    float       aspect       , float near_clip , float far_clip);
 
+DLLEXPORT int  get_camera_position ( void       *ret );
+
 // Deallocators
 DLLEXPORT int  destroy_camera      ( GXCamera_t* camera);

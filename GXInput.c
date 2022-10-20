@@ -2,7 +2,7 @@
 
 #include <G10/GXInput.h>
 
-// Abstract keys into keyboard file. Same w gamepad
+// Abstract keys into keyboard file.
 const kn_t keys[] = {
     {
         SDL_SCANCODE_UNKNOWN,
@@ -450,8 +450,9 @@ dict *key_dict = 0;
 
 SDL_GameController *controller;
 
-int init_input ( void )
+int          init_input ( void )
 {
+
     // Make a hash table of keys
     dict_construct(&key_dict, 512);
 
@@ -468,6 +469,7 @@ int init_input ( void )
 
 int          create_bind               ( GXBind_t    **bind )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -1145,7 +1147,7 @@ int          process_input             ( GXInstance_t *instance )
             // Quit
             case SDL_QUIT:
             {
-                instance->running = false;
+                g_user_exit( (callback_parameter_t) { 0, {0} }, instance);
                 break;
             }
         }

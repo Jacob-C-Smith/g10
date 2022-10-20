@@ -1,6 +1,6 @@
 #include <G10/GXUserCode.h>
 
-int user_code(GXInstance_t* instance)
+int user_code              ( GXInstance_t *instance )
 {
 	
 	// Argument check
@@ -11,14 +11,14 @@ int user_code(GXInstance_t* instance)
 		#endif
 	}
 
-	// Check for a user callback
+	// Check for a user callback function, so to avoid calling a null pointer
 	if (instance->user_code_callback)
 
-		// Call the callback
+		// Call the callback function
 		instance->user_code_callback(instance);
 
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -34,8 +34,7 @@ int user_code(GXInstance_t* instance)
 	}
 }
 
-
-int add_user_code_callback (GXInstance_t *instance, int (*user_code_callback)(GXInstance_t* instance) )
+int add_user_code_callback ( GXInstance_t *instance, int ( *user_code_callback ) ( GXInstance_t *instance ) )
 {
 
 	// Argument check
@@ -48,9 +47,10 @@ int add_user_code_callback (GXInstance_t *instance, int (*user_code_callback)(GX
 		#endif
 	}
 
+	// Set the instance's user code callback function to the specified user code callback function
 	instance->user_code_callback = user_code_callback;
 
-	return 0; 
+	return 1; 
 
 	// Error handling
 	{

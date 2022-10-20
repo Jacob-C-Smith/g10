@@ -118,87 +118,136 @@ int load_server ( GXServer_t **pp_server, char *path )
 	}
 }
 
-/*
-"server"                     : {
-		"name"        : "localhost",
-		"host"        : "127.0.0.1",
-		"port"        : 8877,
-		"max players" : 16,
-		"password"    : "password",
-		"bans"        : [
-			{
-				"host"       : "11.20.22.39",
-				"expiration" : 1623996636,
-				"note"       : ""
-			},
-			{
-				"name"       : "Chris",
-				"expiration" : 1624000000,
-				"note"       : "Text chat spamming"
-			},
-			{
-				"host"      : "168.183.212.227",
-				"expiation" : 0,
-				"note"      : "Permabanned for being a bot"
-			}
-		],
-		"tick rate"   : 50
-	}
-*/
 int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 {
-	GXServer_t* server;
-	char* name = 0,
-		* host = 0,
-		* port = 0,
-		* max_players = 0,
-		* password = 0,
-		* tick_rate = 0;
-
-	dict* json;
-	parse_json(token_text, len, &json);
-	JSONToken_t* token = 0;
-
-	token = dict_get(json, "name");
-	name = JSON_VALUE(token, JSONstring);
 	
-	token = dict_get(json, "host");
-	host = JSON_VALUE(token, JSONstring);
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if (pp_server == (void *)0)
+				goto no_server;
+		#endif
+	}
 
-	token = dict_get(json, "port");
-	port = JSON_VALUE(token, JSONprimative);
-
-	token = dict_get(json, "max players");
-	max_players = JSON_VALUE(token, JSONprimative);
-
-	token = dict_get(json, "password");
-	password = JSON_VALUE(token, JSONstring);
-
-	token = dict_get(json, "tick rate");
-	tick_rate = JSON_VALUE(token, JSONprimative);
-
-	//Create server
-
-	create_server(pp_server);
-	server = *pp_server;
-
-	size_t name_len = strlen(name);
-	server->name = calloc(name_len + 1, sizeof(char));
-	strncpy(server->name, name, name_len);
-
-	size_t retries = 0;
+	// Constant data
 	const size_t MAX_RETRIES = 32;
-	retryConnection:
+
+	// Initialized data
+	GXServer_t  *server      = 0;
+	char        *name        = 0,
+		        *host        = 0,
+	            *port        = 0,
+		        *max_players = 0,
+		        *password    = 0,
+		        *tick_rate   = 0;
+	dict        *json        = 0;
+	size_t       retries     = 0;
+
+	// Parse JSON
+	{
+
+		// Initialized data
+		JSONToken_t* token = 0;
+
+		// Parse the JSON text into a dictionary
+		parse_json(token_text, len, &json);
+		
+		// Get the name
+		token       = dict_get(json, "name");
+		name        = JSON_VALUE(token, JSONstring);
+
+		// Get the host
+		token       = dict_get(json, "host");
+		host        = JSON_VALUE(token, JSONstring);
+
+		// Get the port
+		token       = dict_get(json, "port");
+		port        = JSON_VALUE(token, JSONprimative);
+
+		// Get the player max
+		token       = dict_get(json, "max players");
+		max_players = JSON_VALUE(token, JSONprimative);
+
+		// Get the password
+		token       = dict_get(json, "password");
+		password    = JSON_VALUE(token, JSONstring);
+
+		// Get the tick rate
+		token       = dict_get(json, "tick rate");
+		tick_rate   = JSON_VALUE(token, JSONprimative);
+	}
+	
+	// Create the server
+	{
+
+		// Allocate server struct memory
+		create_server(pp_server);
+
+		// Return
+		server = *pp_server;
+	}
+
+	// Copy the name
+	{
+
+		// Initialized data
+		size_t name_len = strlen(name);
+
+		// Allocate memory for the name
+		server->name = calloc(name_len + 1, sizeof(char));
+
+		// Copy the name into the allocated memory
+		strncpy(server->name, name, name_len);
+	}
+
+	// Set max players
+	if (max_players)
+		server->max_clients = atoi(max_players);
+
+	retry_connection:
+
+	// Try to resolve the host
 	if (SDLNet_ResolveHost(&server->ip, NULL, atoi(port)))
 	{
+
 		if (++retries == MAX_RETRIES + 1)
 			return 0;
+
+		// Print an error
 		g_print_error("[G10] [Networking] Failed to resolve \"%s\":%hu. Attempting reconnect %d/%d\r", host, port, (int)retries, MAX_RETRIES);
+		
+		// Small delay
 		SDL_Delay(100);
-		goto retryConnection;
+		
+		// Try again
+		goto retry_connection;
 	}
 
 	return 0;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_server:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+
+	}
 };
 
 int start_server()
@@ -208,22 +257,124 @@ int start_server()
 	GXInstance_t *instance = g_get_active_instance();
 	GXServer_t   *p_server = instance->server;
 
+	// Open a TCP socket
 	p_server->sock = SDLNet_TCP_Open(&p_server->ip);
 
+	// Error handling
 	if(!p_server->sock)
 		g_print_error("[SDLNet Error]: %s\n", SDLNet_GetError());
 
+	// TODO: Correct return
 	return 0;
 }
 
 int process_command(GXClient_t *client, GXCommand_t* p_command)
 {
-	switch (p_command->type)
+
+	// Initialized data
+	GXInstance_t* instance = g_get_active_instance();
+
+	// Server processing
+	if (instance->server)
 	{
-	case chat:
-		printf("[Chat]%s: %s\n", client->name, p_command->chat.chat);
-		break;
+		GXServer_t* server = instance->server;
+
+		switch (p_command->type)
+		{
+
+		case chat:
+			printf("[Chat]\"%s\" says \"%s\"\n", client->name, p_command->chat.chat);
+			for (size_t i = 0; i < server->client_list_size; i++)
+			{
+				GXClient_t *c = server->client_list[i];
+				
+				// Construct a chat command for each client
+			}
+			break;
+		}
 	}
+
+	// Client processing
+	else if (instance->client) {
+		switch (p_command->type)
+		{
+			case actor_initialize:
+			{
+				u16         i     = p_command->actor_initialize.index;
+				vec3        l     = p_command->actor_initialize.location;
+				quaternion  r     = p_command->actor_initialize.quaternion;
+				vec3        s     = p_command->actor_initialize.scale;
+
+				GXEntity_t *actor = get_entity(instance->active_scene, p_command->actor_initialize.name);
+
+				// Error checking
+				{
+					#ifndef NDEBUG
+						if (actor == (void*)0)
+							;// TODO: Error handling 
+					#endif
+				}
+
+				// Add the actor to the client actor list
+				client->actors[i] = actor;
+
+				// Set the actors location, rotation, and scale
+				{
+					actor->transform->location = l;
+					actor->transform->rotation = r;
+					actor->transform->scale    = s;
+				}
+			}
+			break;
+
+			case actor_displace_rotate:
+			{
+				u8          i     = p_command->actor_displace_rotate.index >> 8;
+				vec3        l     = p_command->actor_displace_rotate.location;
+				quaternion  r     = p_command->actor_displace_rotate.quaternion;
+				vec3        v     = p_command->actor_displace_rotate.velocity;
+
+				GXEntity_t *actor = client->actors[i];
+
+				// Error checking
+				{
+					#ifndef NDEBUG
+						if (actor == (void*)0)
+							;// TODO: Error handling 
+					#endif
+				}
+
+
+				// Set the actors location, rotation, and scale
+				{
+					actor->transform->location = l;
+					actor->transform->rotation = r;
+					actor->rigidbody->velocity = v;
+				}
+
+			}
+			break;
+
+			case actor_detach:
+			{
+				u16 i = p_command->actor_detach.index;
+
+				client->actors[i] = 0x0;
+			}
+
+			case chat:
+				{
+					printf("[Chat]\"%s\" says \"%s\"\n", client->name, p_command->chat.chat);
+				}
+				break;
+		}
+	}
+
+	// Deallocate the command
+	destroy_command(p_command);
+
+	return 0;
+
 }
 
 int server_recv(GXClient_t *client)
@@ -236,8 +387,14 @@ int server_recv(GXClient_t *client)
 				goto no_client;
 		#endif
 	}
+	if (client->recv_data == 0)
+	{
+		client->recv_data = calloc(4096, sizeof(u8));
+		return 1;
+	}
 
-	SDLNet_TCP_Recv(client->socket, client->recv_data, 4096);
+	// TODO: Error handling
+	client->recv_len = SDLNet_TCP_Recv(client->socket, client->recv_data, 4096);
 
 	return 1;
 
@@ -266,7 +423,8 @@ int server_send(GXClient_t* client)
 		#endif
 	}
 
-	SDLNet_TCP_Send(client->socket, client->send_data, 4096);
+	// TODO: Error handling
+	SDLNet_TCP_Send(client->socket, client->send_data, client->send_len);
 
 	return 1;
 
@@ -286,61 +444,111 @@ int server_send(GXClient_t* client)
 
 int server_parse     ( GXClient_t *client )
 {
-	GXCommand_t *command = 0;
-	size_t       i       = 0;
 
-	command_from_data(&command, &client->recv_data[i]);
-
-	queue_enqueue(client->recv_queue, command);
-
-	while (i < 4096)
+	// Argument errors
 	{
-		i += command_from_data(&command, &client->recv_data[i]);
+		#ifndef NDEBUG
+			if (client == (void *) 0 )
+				goto no_client;
+		#endif
+	}
 
-		queue_enqueue(client->recv_queue, command);
+	// Initialized data
+	GXCommand_t *i_command = 0;
+	size_t       i         = 0;
+
+	// Iterate over data
+	while (i <= client->recv_len && !queue_full(client->recv_queue))
+	{
+
+		// Parse data into a command
+		i += command_from_data(&i_command, &client->recv_data[i]);
+
+		// Add the parsed command into the recv queue
+		queue_enqueue(client->recv_queue, i_command);
 
 	}
 
-	return 0;
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+
+			// TODO: 
+			no_client:
+				
+				return 0;
+		}
+	}
 }
 
 int server_serialize ( GXClient_t *client )
 {
 
-
 	GXCommand_t *command = 0;
 	size_t       i       = 0;
 
+	if (queue_empty(client->send_queue))
+	{
+		return 1;
+	}
+
 	while (i < 4096 && !queue_empty(client->send_queue))
 	{
-		char* a = 0;
-		size_t j = 0;
 
 		command = queue_dequeue(client->send_queue);
-
-		j = data_from_command(&a , command);
-		memcpy(&client->send_data[i], a, j);
-
-		i += j;
-
-
+		u8* z = client->send_data + i;
+		i += data_from_command(&z, command);
 	}
-	return 0;
+
+	client->send_len = i;
+
+	return 1;
 }
 
 int server_process   ( GXClient_t *client )
 {
-	GXClient_t* c = instance->server->client_list[0];
+	GXInstance_t *instance = g_get_active_instance();
 
-	if (queue_empty(c->recv_queue)) {
-		for (GXCommand_t* cmd = queue_dequeue(c->recv_queue); cmd != NULL; cmd = queue_dequeue(c->recv_queue)) {
-			process_command(c, cmd);
-			destroy_command(cmd);
+	if (!queue_empty(client->recv_queue))
+		while (!queue_empty(client->recv_queue))
+		{
+			GXCommand_t* cmd = queue_dequeue(client->recv_queue);
+
+			process_command(client, cmd);
 		}
+
+	queue_destroy(client->recv_queue);
+	queue_construct(&client->recv_queue, 64);
+
+	if(instance->server)
+		for (size_t i = 0; i < client->actor_count; i++)
+		{
+			GXCommand_t *adr   = calloc(1, sizeof(GXCommand_t));
+			GXEntity_t  *actor = client->actors[i];
+
+			{
+				adr->type                             = actor_displace_rotate;
+
+				adr->actor_displace_rotate.index      = i;
+				adr->actor_displace_rotate.location   = actor->transform->location;
+				adr->actor_displace_rotate.quaternion = actor->transform->rotation;
+				adr->actor_displace_rotate.velocity   = actor->rigidbody->velocity;
+			}
+
+			queue_enqueue(client->send_queue, adr);
+		}
+
+	if (queue_empty(client->send_queue))
+	{
+		GXCommand_t* adr = calloc(1, sizeof(GXCommand_t));
+
+		queue_enqueue(instance->client->send_queue, adr);
 	}
-
-
-
+	
 	return 0;
 }
 
@@ -359,81 +567,124 @@ int server_wait    ( GXInstance_t* instance )
 	{
 
 		// Initialized data
-		GXServer_t *server = instance->server;
-		TCPsocket   sock   = SDLNet_TCP_Accept(server->sock);
+		GXServer_t  *server          = instance->server;
+		TCPsocket    sock            = SDLNet_TCP_Accept(server->sock);
+		GXClient_t  *client          = 0;
+		GXThread_t  *server_thread   = 0;
+		GXCommand_t *connect_command = 0;
+		size_t       client_name_len = 0; 
 
-		if (sock) {
-			g_print_log("[SDLNet] New TCP connection accepted\n");
+		// Error checking
+		{
+			#ifndef NDEBUG
+				if (sock == NULL) {
+					goto no_socket;
+				}
+			#endif
+		}
 
-			//Resize client list
-			if (server->client_list == NULL) {
-				server->client_list = malloc(sizeof(GXClient_t*));
-				server->client_list_size = 1;
-			}
-			else {
-				++server->client_list_size;
-				server->client_list = realloc(server->client_list, sizeof(GXClient_t*) * server->client_list_size);
-			}
+		g_print_log("[SDLNet] New TCP connection accepted\n");
+		
+		//Resize client list
+		if (server->client_list == NULL) {
+			server->client_list = malloc(sizeof(GXClient_t*));
+			server->client_list_size = 1;
+		}
+		else {
+			++server->client_list_size;
+			server->client_list = realloc(server->client_list, sizeof(GXClient_t*) * server->client_list_size);
+		}
 
-			// Add client to list
-			GXClient_t *client        = 0;
-			GXThread_t *server_thread = 0;
+		// Allocate a client
+		create_client(&client);
 
-			create_client(&client);
+		// Set the clients socket
+		client->socket = sock;
 
-			char* buf = calloc(4096, sizeof(char));
-			client->socket = sock;
-
-			SDLNet_TCP_Recv(client->socket, buf, 4096);
+		// Read data from the socket
+		SDLNet_TCP_Recv(client->socket, client->recv_data, 4096);
 			
-			GXCommand_t *connect_command = 0;
+		// Parse the data into a connect command
+		command_from_data(&connect_command, client->recv_data);
 
-			command_from_data(&connect_command, buf);
+		// Make sure it's a connect command
+		if(connect_command->type == connect)
+			printf("%s connected\n", connect_command->connect.name);
 
-			if(connect_command->type == connect)
-				printf("%s connected\n", connect_command->connect.name);
+		client_name_len = strlen(connect_command->connect.name);
 
-			load_thread(&server_thread, "G10/client thread.json");
+		// Load a player thread
+		load_thread(&server_thread, "G10/client thread.json");
 
-			client->thread = server_thread;
+		sprintf(server_thread->name, "%.*s thread\0", (client_name_len > 31) ? 32 : client_name_len, connect_command->connect.name);
 
-			dict_add(instance->active_schedule->threads, client->thread->name, client->thread);
+		// Set the thread in the client
+		client->thread = server_thread;
 
+		// Add the thread to the scheduler
+		dict_add(instance->active_schedule->threads, client->thread->name, client->thread);
 
-			server->client_list[0] = client;
-			client->name = connect_command->connect.name;
+		server->client_list [server->client_list_size] = client;
+		server->client_list_size++;
 
-			// TODO: Dynamically switch actors 
-			size_t       active_scene_actors_count = dict_values(instance->active_scene->actors, 0);
-			GXEntity_t **actor_list                = calloc(active_scene_actors_count+1, sizeof(void *));
+		// TODO: Copy
+		client->name = connect_command->connect.name;
 
-			dict_values(instance->active_scene->actors, actor_list);
+		// TODO: Dynamically switch actors 
+		size_t       active_scene_actors_count = dict_values(instance->active_scene->actors, 0);
+		GXEntity_t **actor_list                = calloc(active_scene_actors_count+1, sizeof(void *));
 
-			for (size_t i = 0; i < active_scene_actors_count; i++)
+		client->actors = actor_list;
+
+		// Get a list of actors from the active scene
+		dict_values(instance->active_scene->actors, actor_list);
+
+		// Iterate over each actor in the active scene
+		for (size_t i = 0; i < active_scene_actors_count; i++)
+		{
+			
+			// Get an entity from the actor list
+			GXEntity_t *entity              = actor_list[i];
+			
+			// Allocate a command
+			GXCommand_t *actor_init_command = calloc(1, sizeof(GXCommand_t));
+
+			// Construct the actor initialize packets
 			{
-				GXEntity_t *entity = actor_list[i];
-				GXCommand_t *actor_init_command                 = calloc(1, sizeof(GXCommand_t));
 				actor_init_command->type                        = actor_initialize;
 				actor_init_command->actor_initialize.name       = entity->name;
 				actor_init_command->actor_initialize.location   = entity->transform->location;
 				actor_init_command->actor_initialize.quaternion = entity->transform->rotation;
 				actor_init_command->actor_initialize.scale      = entity->transform->scale;
-				actor_init_command->actor_initialize.index      = 0;
+				actor_init_command->actor_initialize.index      = i;
 
-				
-				{
-					vec3 l = entity->transform->location;
+				client->actors[i] = entity;
 
-					printf("\n\"entity\" @ %.2f %.2f %.2f\n", l.x, l.y, l.z);
-				}
 
-				queue_enqueue(client->send_queue, actor_init_command);
+				// Increment the actor count
+				client->actor_count++;
+
 			}
 
-			server_serialize(client);
-			server_send(client);
+			// Log the entities position
+			{
+				vec3 l = entity->transform->location;
 
+				printf("\"%s\" @ %.2f %.2f %.2f\n", entity->name, l.x, l.y, l.z);
+			}
 
+			// Add the actor initialize packet to the send queue
+			queue_enqueue(client->send_queue, actor_init_command);
+		}
+
+		// Serialize each command into a data block
+		server_serialize(client);
+
+		// Send the  data block to the client
+		server_send(client);
+
+		// Start running the client thread
+		{
 			client->thread->running = true;
 
 			extern int client_work(GXThread_t * thread);
@@ -443,7 +694,11 @@ int server_wait    ( GXInstance_t* instance )
 	}
 
 	// TODO: 
-	no_instance:
+no_instance:
+	g_print_error("[G10] [Server] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+
+	return 0;
+no_socket:
 	return 0;
 }
 
@@ -454,108 +709,258 @@ int create_client  ( GXClient_t** client)
 
 	// TODO: Make a constructor 
 	c->socket = NULL;
-	c->name = NULL;
+	c->name   = NULL;
 	c->send_data = calloc(4096, sizeof(u8));
 	c->recv_data = calloc(4096, sizeof(u8));
+
 	queue_construct(&c->send_queue, 64);
 	queue_construct(&c->recv_queue, 64);
+
 	return 0;
 }
-DLLEXPORT int process_command(GXCommand_t* p_command);
-
 
 int connect_client(char* name)
 {
-	GXInstance_t* instance = g_get_active_instance();
-	GXClient_t *i_client = 0;
 
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if (name == (void *)0)
+				goto no_client_name;
+		#endif
+	}
+
+	// Initialized data
+	GXInstance_t *instance            = g_get_active_instance();
+	GXClient_t   *i_client            = 0;
+	GXThread_t   *client_thread       = 0;
+	IPaddress     addr                = { 0 };
+	size_t        name_len            = strlen(name),
+		          connect_command_len = 0;
+	GXCommand_t  *connect_command     = calloc(1, sizeof(GXCommand_t));
+
+	// Allocate a client
 	create_client(&instance->client);
+
+	// Return the client
 	i_client = instance->client;
 
+	// Set the name
+	{
 
-	size_t nameLen = strlen(username);
-	i_client->name = malloc(nameLen + 1);
-	strcpy(i_client->name, username);
+		// Initialized data
+		size_t name_len = strlen(name);
 
-	IPaddress addr = { 0 };
-	SDLNet_ResolveHost(&addr, host, port);
+		// Allocate memory for the name
+		i_client->name = calloc(name_len+1, sizeof(char));
 
-	i_client->socket = SDLNet_TCP_Open(&addr);
+		// Copy the name
+		strncpy(i_client->name, name, name_len);
+	}
+
+	// Connect to the server
+	{
+
+		// Resolve the host, or branch to error
+		if (SDLNet_ResolveHost(&addr, "localhost", 9999) == -1)
+			goto failed_to_resolve_host;
+
+		// Try and open a socket
+		i_client->socket = SDLNet_TCP_Open(&addr);
+
+		// Error checking
+		{
+			if (i_client->socket == NULL)
+				goto failed_to_open_tcp_socket;
+		}
+	}
+
+	GXEntity_t** actor_list = calloc(16 + 1, sizeof(void*));
+
+	i_client->actors = actor_list;
+
+	// Create a connection command
+	{
 
 
-	size_t nameLen = strlen(i_client->name);
+		// Set up the connect command
+		{
+			connect_command->type         = connect;
+			connect_command->connect.name = name;
+		}
 
-	i_client->send_data = calloc(4096, 1);
+		// Write the command to the send buffer
+		connect_command_len = data_from_command(&i_client->send_data, connect_command);
+	}
 
-	GXCommand_t* connect_command = calloc(1, sizeof(GXCommand_t));
-
-	connect_command->type = connect;
-	connect_command->connect.name = name;
-
-
-	size_t connect_command_len = data_from_command(&i_client->send_data, connect_command);
-
-
+	// Send the connect command to the server
 	SDLNet_TCP_Send(i_client->socket, i_client->send_data, connect_command_len);
 
-	GXThread_t* server_thread = 0;
+	free(connect_command);
 
-	char* buf = calloc(4096, sizeof(char));
+	// Set up the networking thread
+	{
 
-	load_thread(&server_thread, "G10/client thread.json");
+		// Load a scheduler thread for the client
+		load_thread(&client_thread, "G10/client thread.json");
 
-	i_client->thread = server_thread;
-	i_client->thread->running = true;
+		sprintf(client_thread->name, "Network thread\0");
 
-	dict_add(instance->active_schedule->threads, i_client->thread->name, i_client->thread);
+		// Set the client thread
+		{
+			i_client->thread          = client_thread;
 
-	extern int client_work(GXThread_t * thread);
+			// Start running 
+			i_client->thread->running = true;
+		}
 
-	i_client->thread->thread = SDL_CreateThread(client_work, i_client->thread->name, i_client);
+		// Add the scheduler to the thread list
+		dict_add(instance->active_schedule->threads, i_client->thread->name, i_client->thread);
+
+		// Start running the thread
+		{
+
+			// Client worker thread
+			extern int client_work(GXThread_t * thread);
+
+			// Create a new thread
+			i_client->thread->thread = SDL_CreateThread(client_work, i_client->thread->name, i_client);
+
+		}
+	}
 
 	return 0;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_client_name:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Client] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+
+		// Networking errors
+		{
+			// TODO:
+			failed_to_resolve_host:
+			failed_to_open_tcp_socket:
+				return 0;
+		}
+	}
 }
 
 int command_from_data(GXCommand_t** ret, void* data)
 {
-	GXCommand_t *i_ret = calloc(1, sizeof(GXCommand_t));
+	// TODO: Argument check
 
-	u16 command_type = *((u16*)data);
+	// Initialized data
+	GXCommand_t  *i_ret        = calloc(1, sizeof(GXCommand_t));
+	GXInstance_t *instance     = g_get_active_instance();
+
+	u16           command_type = * ( (u16 *) data );
+	size_t        ret_len      = 0;
 
 	i_ret->type = command_type;
 
 	switch (command_type)
 	{
 		case no_op:
+
+			// Construct the no operation command
+			{
+				i_ret->no_op.i = 0;
+				ret_len += 2;
+			}
+
 			break;
+
 		case connect:
-		{
+			
+			// Construct the connection command
 			{
-				size_t name_len = strlen(&((u8*)data)[2]);
-				char* name = (char *)data+2;
-					
-				i_ret->connect.name = calloc(name_len+1, sizeof(u8));
-				
+
+				// Initialized data
+				size_t  name_len    = strlen(((u8 *)data)+2);
+				char   *name        = ((char *)data)+2;
+			
+				// Allocate memory for client name
+				i_ret->connect.name = calloc(name_len + 1, sizeof(u8));
+
+				// Copy the client name
 				strncpy(i_ret->connect.name, name, name_len);
 			}
-		}
+
 			break;
+
 		case actor_initialize:
+
+			// Construct actor initialize command
 			{
-				size_t name_len = strlen(&((u8*)data)[0x34]);
-				char* name = (char *)data+ 0x34;
-					
-				i_ret->actor_initialize.name = calloc(name_len+1, sizeof(u8));
-				i_ret->actor_initialize.location = *(vec3*)(&((u8*)data)[0x4]);
 
-				GXEntity_t *actor = get_entity(instance->active_scene, i_ret->actor_initialize.name);
+				// Initialized data
+				size_t      name_len = strlen( ((u8 *)data) + 0x34 );
+				char       *name     = (char *)data + 0x34;
+				GXEntity_t *actor    = 0;
 
-				actor->transform->location = i_ret->actor_initialize.location;
+				// Set the actor name
+				{
+					// Allocate memory for actor name
+					i_ret->actor_initialize.name = calloc(name_len + 1, sizeof(u8));
 
-				strncpy(i_ret->connect.name, name, name_len);
+					// Copy the client name
+					strncpy(i_ret->connect.name, name, name_len);
+				}
+
+				i_ret->actor_initialize.index      = * ( (u16 *) data + 1);
+
+				// Set actor location
+				i_ret->actor_initialize.location   = * ( (vec3 *)       ( (u8 *) data ) + ( 0x4 ) );
+
+				// Set actor rotation
+				i_ret->actor_initialize.quaternion = * ( (quaternion *) ( (u8 *) data ) + ( 0x4 + sizeof(vec3) ) );
+
+				// Set actor scale
+				i_ret->actor_initialize.scale      = * ( (vec3 *)       ( (u8 *) data ) + ( 0x4 + sizeof(vec3) + sizeof(quaternion) ) );
+
+				// Find the entity in the scene
+				actor = get_entity(instance->active_scene, i_ret->actor_initialize.name);
+
+				//// Set location, rotataion, scale
+				//actor->transform->location = i_ret->actor_initialize.location;
+				//actor->transform->rotation = i_ret->actor_initialize.quaternion;
+				//actor->transform->scale    = i_ret->actor_initialize.scale;
+
+				// Return the size of the packet in bytes
+				ret_len = 4 + name_len + ( 2 * sizeof(vec3)) + sizeof(quaternion) + 1;
 			}
+
 			break;
+
 		case actor_displace_rotate:
+
+			// Construct actor displace rotate command
+			{
+
+				// Set the actor index
+				i_ret->actor_displace_rotate.index         = * ( (u16 *)        ( (u8 *) data+1 ) );
+
+				// Set actor location
+				i_ret->actor_displace_rotate.location      = * ( (vec3 *)       ( (u8 *) data + ( 0x4 ) ) );
+
+				// Set actor rotation
+				i_ret->actor_displace_rotate.quaternion    = * ( (quaternion *) ( (u8 *) data + ( 0x4 + sizeof(vec3) ) ) );
+
+				// Set actor scale
+				i_ret->actor_displace_rotate.velocity      = * ( (vec3 *)       ( (u8 *) data + ( 0x4 + sizeof(vec3) + sizeof(quaternion) ) ) );
+
+				// Return the size of the packet in bytes
+				ret_len = ( sizeof(u16) + 2 * sizeof(vec3) + sizeof(quaternion) );
+			}
+
 			break;
 		case actor_detach:
 			break;
@@ -577,30 +982,29 @@ int command_from_data(GXCommand_t** ret, void* data)
 	}
 
 	*ret = i_ret;
-	return 0;
+	return ret_len;
 }
 
 int data_from_command(void** ret, GXCommand_t* command)
 {
 	size_t ret_len = 0;
-
+	u8 *retn = *(u8**)ret;
 	switch (command->type)
 	{
 		case no_op:
+			ret_len = 2;
+			
 			break;
 		case connect:
 		{
 			
-			size_t chat_len = strlen(command->chat.chat);
-			ret_len += chat_len;
+			size_t name_len = strlen(command->connect.name);
+			ret_len += name_len;
 			ret_len += 2 + 1;
 
-			char *retn = calloc(ret_len, sizeof(u8));
-
 			*(u16*)retn = connect;
-			strncpy(&retn[2], command->chat.chat, chat_len);
+			strncpy(&retn[2], command->connect.name, name_len);
 
-			*ret = retn;
 		}
 			break;
 		case actor_initialize:
@@ -610,22 +1014,30 @@ int data_from_command(void** ret, GXCommand_t* command)
 			ret_len += chat_len;
 			ret_len += 2 + 2 + 1 + (2 * sizeof(vec3) ) + sizeof(quaternion);
 
-			char *retn = calloc(ret_len, sizeof(u8));
-
-			*(u16*)retn                              = actor_initialize;
-			*((u16*)retn+1)                          = command->actor_initialize.index;
-			*((vec3*)       ((u8*)retn + 4))                = command->actor_initialize.location;
+			*(u16*)retn                                                           = actor_initialize;
+			*((u16*)retn+1)                                                       = command->actor_initialize.index;
+			*((vec3*)       ((u8*)retn + 4))                                      = command->actor_initialize.location;
 			*((quaternion*) ((u8*)retn + 4 + sizeof(vec3)                      )) = command->actor_initialize.quaternion;
 			*((vec3*)       ((u8*)retn + 4 + sizeof(vec3) + sizeof(quaternion) )) = command->actor_initialize.scale;
 
 
 			strncpy( (u8*) ((u8*)retn + 4 + ( 2 * sizeof(vec3) ) + sizeof(quaternion) ), command->actor_initialize.name, chat_len);
 
-			*ret = retn;
 		}
 			break;
 		case actor_displace_rotate:
-			break;
+		{
+
+			ret_len += 2 + 2 + (2 * sizeof(vec3)) + sizeof(quaternion);
+
+			*(u16*)retn                                                   = actor_displace_rotate;
+			*((u16*)retn + 1)                                             = command->actor_displace_rotate.index;
+			*((vec3*)((u8*)retn + 4))                                     = command->actor_displace_rotate.location;
+			*((quaternion*)((u8*)retn + 4 + sizeof(vec3)))                = command->actor_displace_rotate.quaternion;
+			*((vec3*)((u8*)retn + 4 + sizeof(vec3) + sizeof(quaternion))) = command->actor_displace_rotate.velocity;
+
+		}
+		break;
 		case actor_detach:
 			break;
 		case chat:
@@ -635,14 +1047,11 @@ int data_from_command(void** ret, GXCommand_t* command)
 			ret_len += chat_len;
 			ret_len += 2 + 2 + 2 + 1;
 
-			char *retn = calloc(ret_len, sizeof(u8));
-
 			*(u16*)retn = chat;
 			*((u16*)retn+1) = command->chat.chat_channel;
 			*((u16*)retn+2) = (u16)chat_len;
 			strncpy(&retn[6], command->chat.chat, chat_len);
 
-			*ret = retn;
 		}
 		break;
 		case disconnect:
@@ -653,7 +1062,6 @@ int data_from_command(void** ret, GXCommand_t* command)
 
 	return ret_len;
 }
-
 
 int destroy_client ( GXClient_t *client )
 {
@@ -670,13 +1078,49 @@ int destroy_client ( GXClient_t *client )
 	return 0;
 }
 
-DLLEXPORT int destroy_command(GXCommand_t* command)
+int destroy_command(GXCommand_t* command)
 {
-	switch (command->type) {
-	case chat:
-		free(command->chat.chat);
-		break;
-	default: break;
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( command == (void *) 0 ) 
+				goto no_command;
+		#endif
 	}
+
+	// Deallocate command data
+	switch (command->type) {
+		case no_op:
+		case actor_displace_rotate:
+		case actor_detach:
+		case disconnect:
+		break;
+
+		case connect:
+		{
+			free(command->connect.name);
+		}
+		break;
+
+		case actor_initialize:
+		{
+			free(command->actor_initialize.name);
+		}
+		break;
+
+		case chat:
+		{
+			free(command->chat.chat);
+		}
+		break;
+
+		default: 
+		break;
+	}
+	
+	// Deallocate the command
 	free(command);
+
+	no_command:
+		return 0;
 }

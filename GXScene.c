@@ -60,24 +60,18 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
     }
 
     // Initialized data
-    char      *token_text     = 0;
-    size_t     token_text_len = 0;
+    size_t     token_text_len = g_load_file(path, 0, false);
+    char      *token_text     = calloc(token_text_len + 1, sizeof(char));
 
-    // Load the file from the path
+    // Error checking
     {
-        token_text_len = g_load_file(path, 0, false);
-        token_text     = calloc(token_text_len + 1, sizeof(char));
-
-        // Error checking
-        {
-            #ifndef NDEBUG
-                if(token_text == (void*)0)
-                    goto no_mem;
-            #endif
-        }
-        
-        g_load_file(path, token_text, false);
+        #ifndef NDEBUG
+            if(token_text == (void*)0)
+                goto no_mem;
+        #endif
     }
+        
+    g_load_file(path, token_text, false);
 
     // Load the scene as a JSON token
     load_scene_as_json(scene, token_text, token_text_len); 
@@ -172,13 +166,10 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
     }
 
     // Set the name
-    {
+    if(name) {
         size_t name_len = strlen(name);
-
         i_scene->name = calloc(name_len + 1, sizeof(char));
-
         strncpy(i_scene->name, name, name_len);
-
     }
 
     // Load entities
@@ -449,7 +440,7 @@ int         draw_scene         ( GXScene_t  *scene )
     // Initialized data
     GXInstance_t             *instance                = g_get_active_instance();
     VkCommandBufferBeginInfo *begin_info              = calloc(1, sizeof(VkCommandBufferBeginInfo));
-    VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 1.0f}} };
+    VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 0.0f}} };
 
     VkRenderPassBeginInfo    *render_pass_begin_info  = calloc(1, sizeof(VkRenderPassBeginInfo));
 
@@ -495,6 +486,61 @@ int         draw_scene         ( GXScene_t  *scene )
 
     return 0;
 }
+
+//
+//int         draw_scene_bv      ( GXScene_t  *scene )
+//{
+//
+//    // Initialized data
+//    GXInstance_t             *instance                = g_get_active_instance();
+//    VkCommandBufferBeginInfo *begin_info              = calloc(1, sizeof(VkCommandBufferBeginInfo));
+//    VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 0.0f}} };
+//
+//    VkRenderPassBeginInfo    *render_pass_begin_info  = calloc(1, sizeof(VkRenderPassBeginInfo));
+//
+//    begin_info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+//
+//    vkBeginCommandBuffer(instance->command_buffers[instance->current_frame], begin_info);
+//
+//    // Set up the first render pass
+//    {
+//        render_pass_begin_info->sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//        render_pass_begin_info->renderPass          = instance->render_pass;
+//        render_pass_begin_info->framebuffer         = instance->swap_chain_framebuffers[instance->image_index];
+//        render_pass_begin_info->renderArea.offset.x = 0;
+//        render_pass_begin_info->renderArea.offset.y = 0;
+//        render_pass_begin_info->renderArea.extent   = instance->swap_chain_extent;
+//        render_pass_begin_info->clearValueCount     = 1;
+//        render_pass_begin_info->pClearValues        = &clear_color;
+//    }
+//
+//    // Start the render pass
+//    vkCmdBeginRenderPass(instance->command_buffers[instance->current_frame], render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+//    
+//    // Get a list of entities
+//    size_t       entity_count = dict_values(scene->entities, 0);
+//    GXEntity_t **entities     = calloc(entity_count, sizeof(void*));
+//
+//    dict_values(scene->entities, entities);
+//
+//    // Draw each entity
+//    for (size_t i = 0; i < entity_count; i++)
+//        draw_entity(entities[i]);
+//
+//    free(entities);
+//
+//    // End the render pass
+//    vkCmdEndRenderPass(instance->command_buffers[instance->current_frame]);
+//
+//    // End the command buffer
+//    vkEndCommandBuffer(instance->command_buffers[instance->current_frame]);
+//
+//    free(begin_info);
+//    free(render_pass_begin_info);
+//
+//    return 0;
+//}
+
 
 GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[])
 {
@@ -645,32 +691,7 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
 
 int         destroy_scene      ( GXScene_t  *scene )
 {
-    /*
     
-    struct GXScene_s
-    {
-    
-        // The name of the scene
-        char       *name;
-
-        // Scene data
-        dict       *entities;
-        dict       *cameras;
-        dict       *lights;
-        dict       *collisions;
-
-        // A bounding volume heierarchy tree containing entities
-        GXBV_t     *bvh;
-
-        // A list of entities with rigidbodies
-        dict       *actors;
-
-        // The camera to be used while drawing the scene
-        GXCamera_t *active_camera;
-    };
-
-    */
-
     free(scene->name);
 
     if (scene->entities)

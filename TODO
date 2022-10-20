@@ -1,0 +1,117 @@
+- Error Handling - 
+
+	- Argument errors - 
+		- check each parameter
+
+	- Memory errors -
+		- check for zero returns after every alloc
+
+	- JSON errors - 
+		- check each neccisary parameter in JSON functions
+
+	- File errors - 
+		- check for file open errors
+
+	- G10 errors -
+		- check for return codes after calling g10 functions
+
+- AI -
+	- TODO - 
+		DONE!
+
+- Rig - 
+	- TODO - 
+
+- Audio - 
+	- TODO - 
+
+- Collision - 
+	- TODO - 
+	
+	- Collider - 
+		- TODO - 
+
+		- Bounding Volume - 
+			- TODO - 
+
+		- Expanding Polytope Algorithm - 
+			- TODO - 
+
+		- Gilbert Johnson Keerthi -
+			- TODO - 
+
+- Input -
+	- TODO - 
+
+- Math -
+
+	- Linear - 
+		- TODO - 
+
+	- Quaternion - 
+		- TODO - 
+
+- Networking - 
+	- TODO -
+
+	- Server - 
+		- TODO -
+
+	- Client - 
+		- TODO -
+
+	- Commands -
+		- TODO -
+
+- Physics - 
+	- TODO - 
+
+- Physics - 
+	- TODO -
+
+- Renderer - 
+	- TODO -
+
+- Scene - 
+	- TODO -
+
+	- Entity - 
+		- TODO -
+
+		- Part -
+			- TODO -
+
+		- Material - 
+			- TODO -
+		
+		- Shader - 
+			- TODO -
+
+		- Transform - 
+			- TODO -
+				DONE!
+
+		- Rigidbody -
+			- TODO -
+
+	- Camera - 
+		- TODO -
+
+		- Controller - 
+			- TODO - 
+
+			- First person - 
+				- TODO -
+			
+			- Third person - 
+				- TODO -
+
+	- Light -
+		- TODO - 
+
+- Texture -
+	- TODO - 
+
+- User Code - 
+	- TODO - 
+		DONE!

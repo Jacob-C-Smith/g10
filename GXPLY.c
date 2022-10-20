@@ -264,7 +264,6 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                 {
                     i = 0;
                     while (c_data[++i] != '\n');
-                    g_print_log("[G10] [PLY] Comment in file \"%s\" : %.*s\n", path, i-8, &c_data[8]);
                 }
             #endif
 

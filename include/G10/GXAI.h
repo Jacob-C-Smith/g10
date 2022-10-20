@@ -23,7 +23,7 @@ struct GXAI_s
 /* !
  *  Allocate memory for an AI
  *
- * @param pp_ai : Double pointer to AI
+ * @param pp_ai : return
  *
  * @sa destroy_ai
  *
@@ -36,7 +36,7 @@ DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
 /* !
  *  Load an AI from a JSON file
  *
- * @param pp_ai : Double pointer to AI
+ * @param pp_ai : return
  * @param path  : The path to a JSON file containing an AI object
  *
  * @sa load_ai_as_json

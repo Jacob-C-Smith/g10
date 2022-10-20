@@ -1,12 +1,12 @@
 #include <G10/GXTransform.h>
 
-int create_transform( GXTransform_t **transform ) 
+int  create_transform        ( GXTransform_t **pp_transform ) 
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (transform == (void*)0)
+			if (pp_transform == (void*)0)
 				goto no_transform;
 		#endif
 	}
@@ -23,7 +23,7 @@ int create_transform( GXTransform_t **transform )
 	}
 
 	// Assign the transform pointer
-	*transform = ret;
+	*pp_transform = ret;
 
 	return 1;
 
@@ -50,34 +50,37 @@ int create_transform( GXTransform_t **transform )
 	}
 }
 
-int construct_transform(GXTransform_t** transform, vec3 location, quaternion rotation, vec3 scale)
+int  construct_transform     ( GXTransform_t **pp_transform, vec3        location,    quaternion rotation, vec3 scale)
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(transform == (void *)0)
+			if(pp_transform == (void *)0)
 				goto no_transform;
 		#endif
 	}
 
 	// Initialized data
-	GXTransform_t *i_transform = 0;
+	GXTransform_t *p_transform = 0;
 
 	// Allocate the transform
-	{
-		create_transform(transform);
-		i_transform = *transform;
-	}
+	if ( create_transform(pp_transform) == 0 )
+		goto failed_to_create_transform;
+
+	// Return the transform 
+	p_transform = *pp_transform;
 
 	// Set the location, rotation, and scale
 	{
-		i_transform->location = location;
-		i_transform->rotation = rotation;
-		i_transform->scale    = scale;
-
-		transform_model_matrix(i_transform, &i_transform->model_matrix);
+		p_transform->location = location;
+		p_transform->rotation = rotation;
+		p_transform->scale    = scale;
 	}
+
+	// Compute a model matrix
+	transform_model_matrix(p_transform, &p_transform->model_matrix);
+
 
 	return 1;
 
@@ -92,16 +95,25 @@ int construct_transform(GXTransform_t** transform, vec3 location, quaternion rot
 				#endif
 				return 0;
 		}
+
+		// G10 errors
+		{
+			failed_to_create_transform:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to create transform in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
 	}
 }
 
-int load_transform( GXTransform_t **transform, const char* path)
+int  load_transform          ( GXTransform_t **pp_transform, const char *path)
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(transform == (void *)0)
+			if(pp_transform == (void *)0)
 				goto no_transform;
 			if(path == (void *)0)
 				goto no_path;
@@ -114,10 +126,12 @@ int load_transform( GXTransform_t **transform, const char* path)
 	char          *buffer = calloc(i + 1, sizeof(char));
 
 	// Load the file
-	g_load_file(path, buffer, false);
+	if ( g_load_file(path, buffer, false) == 0 )
+		goto failed_to_load_file;
 
 	// Load the transform as a json string
-	load_transform_as_json(transform, buffer, i);
+	if ( load_transform_as_json(pp_transform, buffer, i) == 0 )
+		goto failed_to_load_transform;
 
 	// Free up the memory
 	free(buffer);
@@ -140,16 +154,35 @@ int load_transform( GXTransform_t **transform, const char* path)
 				#endif
 				return 0;
 		}
+
+		// G10 errors
+		{
+			failed_to_load_file:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to open file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif
+				return 0;
+
+			failed_to_load_transform:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to load transform from file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif
+				return 0;
+
+		}
 	}
 }
 
-int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t len)
+int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_text, size_t     len)
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(transform == (void *)0)
+			if ( pp_transform == (void *)0 )
 				goto no_transform;
+			if (object_text == (void*)0)
+				goto no_text;
 		#endif
 	}
 
@@ -163,7 +196,7 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 
 	// Debug only
 	#ifndef NDEBUG
-	size_t         i        = 0;
+	size_t i = 0;
 	#endif
 
 	// Parse the JSON into a dictionary
@@ -312,7 +345,8 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 	}
 
 	// Construct the transform
-	construct_transform(transform, location, rotation, scale);
+	if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
+		goto failed_to_create_transform;
 
 	// Free the dictionary
 	dict_destroy(d);
@@ -329,9 +363,14 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 					g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n",__FUNCSIG__);
 				#endif
 				return 0;
+
+			no_text:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Null pointer provided for \"text\" in call to function \"%s\"\n",__FUNCSIG__);
+				#endif
+				return 0;
 		}
 
-		
 		// JSON errors
 		{
 
@@ -413,10 +452,19 @@ int load_transform_as_json(GXTransform_t** transform, char* object_text, size_t 
 					return 0;
 			}
 		}
+
+		// G10 errors
+		{
+			failed_to_create_transform:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to create transform in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
 	}
 }
 
-void transform_model_matrix( GXTransform_t* transform, mat4 *r )
+void transform_model_matrix  ( GXTransform_t  *p_transform , mat4       *r )
 {
 
     // Argument check
@@ -424,13 +472,13 @@ void transform_model_matrix( GXTransform_t* transform, mat4 *r )
         if(r ==  (void*)0)
             goto no_result;
 
-        if (transform == (void*)0)
+        if (p_transform == (void*)0)
             goto no_transform;
     }
 
-    mat4 sca = scale_mat4(transform->scale),
-         rot = rotation_mat4_from_quaternion(transform->rotation),
-         tra = translation_mat4(transform->location),
+    mat4 sca = scale_mat4(p_transform->scale),
+         rot = rotation_mat4_from_quaternion(p_transform->rotation),
+         tra = translation_mat4(p_transform->location),
          M   = mul_mat4_mat4(sca, mul_mat4_mat4(rot, tra));
 
 	// Set up the 4x4 matrix
@@ -461,63 +509,63 @@ void transform_model_matrix( GXTransform_t* transform, mat4 *r )
     }
 }
 
-//int            rotate_about_quaternion ( GXTransform_t *transform, quaternion axis, float theta)
-//{
-//    // Argument check
-//    {
-//        if ( transform == (void *) 0 )
-//            goto no_transform;
-//    }
-//
-//    /*
-//    * To rotate around a quaternion, multiply the transform
-//    * quaternion a special quaternion called 'p', derived by multiplying
-//    * u by sin( theta/2 ) and multiplying i, j, and k by cos( theta/2 ).
-//    * Then, multiply the inverse of p, henceforth " p' ". This is analogous
-//    * to complex multiplication.
-//    */
-//
-//    float      halfAngle = theta / 2,
-//               cosHalf   = cosf(halfAngle),
-//               sinHalf   = sinf(halfAngle);
-//    vec3       newIJK    = { transform->rotation.i,transform->rotation.j,transform->rotation.k };
-//    
-//    rotate_vec3_by_quaternion(&newIJK, newIJK, axis);
-//    transform->rotation = (quaternion){ cosHalf, sinHalf * newIJK.x, sinHalf * newIJK.y, sinHalf * newIJK.z };
-//
-//    return 0;
-//
-//    // Error handling
-//    {
-//        no_transform:
-//        #ifndef NDEBUG
-//            g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to funciton \"%s\"\n",__FUNCSIG__);
-//        #endif
-//        return 0;
-//    }
-//
-//}
+int  rotate_about_quaternion ( GXTransform_t  *p_transform , quaternion  axis,        float      theta)
+{
+    // Argument check
+    {
+        if ( p_transform == (void *) 0 )
+            goto no_transform;
+    }
 
-int            destroy_transform      ( GXTransform_t *transform )
+    /*
+    * To rotate around a quaternion, multiply the transform
+    * quaternion a special quaternion called 'p', derived by multiplying
+    * u by sin( theta/2 ) and multiplying i, j, and k by cos( theta/2 ).
+    * Then, multiply the inverse of p, henceforth " p' ". This is analogous
+    * to complex multiplication.
+    */
+
+    float      halfAngle = theta / 2,
+               cosHalf   = cosf(halfAngle),
+               sinHalf   = sinf(halfAngle);
+    vec3       newIJK    = { p_transform->rotation.i, p_transform->rotation.j, p_transform->rotation.k };
+    
+    rotate_vec3_by_quaternion(&newIJK, newIJK, axis);
+	p_transform->rotation = (quaternion){ cosHalf, sinHalf * newIJK.x, sinHalf * newIJK.y, sinHalf * newIJK.z };
+
+    return 1;
+
+    // Error handling
+    {
+        no_transform:
+        #ifndef NDEBUG
+            g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to funciton \"%s\"\n",__FUNCSIG__);
+        #endif
+        return 0;
+    }
+
+}
+
+int  destroy_transform       ( GXTransform_t  *p_transform )
 {
 
     // Argument check
     {
-        if (transform == (void*)0)
-            goto noTransform;
+        if (p_transform == (void*)0)
+            goto no_transform;
     }
 
     // Free the transform
-    free(transform);
+    free(p_transform);
 
-    return 0;
+    return 1;
 
     //  Error handling
     {
 
 		// Argument error
 		{
-	        noTransform:
+	        no_transform:
 		    #ifndef NDEBUG
 			    g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n", __FUNCSIG__);
 		    #endif

@@ -26,31 +26,34 @@ enum   chat_channel_e
 
 struct GXServer_s {
 
-	dict* clients; //Clients that have confirmed connection by sending a connect packet
-	GXClient_t** client_list; //Clients that have been accepted over TCP
-	GXEntity_t** actors;
+	dict         *clients;  
+	GXClient_t  **client_list;  
 
-	size_t		 client_list_size; //Size of client_list
-	IPaddress    ip;
-	TCPsocket    sock;
+	size_t		  client_list_size,
+		          max_clients;
+	IPaddress     ip;
+	TCPsocket     sock;
 	
-
-	char* name;
-	char* password;
+	char         *name;
+	char         *password;
 };
 
 struct GXClient_s
 {
-	GXThread_t *thread;
-	TCPsocket   socket;
+	GXThread_t  *thread;
+	TCPsocket    socket;
+	GXEntity_t **actors;
+	size_t       actor_count,
+		         recv_len,
+				 send_len;
 
-	char       *name;
+	char        *name;
 	 
-	u8         *send_data,
-		       *recv_data;
+	u8          *send_data,
+		        *recv_data;
 
-	queue      *send_queue;
-	queue      *recv_queue;
+	queue       *send_queue;
+	queue       *recv_queue;
 
 };
 
@@ -87,6 +90,7 @@ struct GXCommand_s {
 			u16         index;
 		} actor_displace_rotate;
 
+		// Stop tracking an actor
 		struct {
 			u16 index;
 		} actor_detach;
@@ -105,34 +109,131 @@ struct GXCommand_s {
 };
 
 // Allocator
+/* !
+ *  Allocate memory for a server structure. 
+ *
+ * @param pp_server : return
+ *
+ * @sa destroy_server
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int create_server       ( GXServer_t  **pp_server );
- 
-// Constructor
-DLLEXPORT int construct_server    ( GXServer_t  **pp_server );
 
+// Constructors
+/* !
+ *  Load a server from a JSON file
+ *
+ * @param pp_server : return
+ * @param path      : The path to a JSON server object on the filesystem
+ *
+ * @sa load_server_as_json
+ * @sa create_server
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int load_server         ( GXServer_t  **pp_server, char *path );
 
-
+/* !
+ *  Load a server as JSON text
+ *
+ * @param pp_server  : return
+ * @param token_text : The server JSON object text
+ * @param len        : The length of the server JSON object text
+ *
+ * @sa load_server
+ * @sa create_server
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int load_server_as_json ( GXServer_t  **pp_server, char *token_text, size_t len );
 
 // Start
+/* !
+ *  Start running a server
+ *
+ * @param p_server  : Pointer to a server
+ *
+ * @sa stop_server
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int start_server        ( );
 
-DLLEXPORT int process_command     ( GXCommand_t  *p_command );
-
 // Sending / Recieving over the internet
+/* !
+ *  Copy data from the TCP socket into client->recv_data 
+ *
+ * @param client : Pointer to a client
+ *
+ * @sa server_send
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int server_recv         ( GXClient_t   *client );
-DLLEXPORT int server_send         ( GXClient_t* client );
 
-// Turn a command queue into data or vice versa
+/* !
+ *  Write client->send_data to the TCP socket
+ *
+ * @param client : Pointer to a client
+ *
+ * @sa server_recv
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int server_send         ( GXClient_t   *client );
+
+// Parsing / Serializing commands into queues
+/* !
+ *  Parse each raw command in client->recv_data into a command queue
+ *
+ * @param client : Pointer to a client
+ *
+ * @sa server_serialize
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int server_parse        ( GXClient_t   *client );
+
+/* !
+ *  Parse client->recv_data into a command queue
+ *
+ * @param client : Pointer to a client
+ *
+ * @sa server_process
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int server_serialize    ( GXClient_t   *client );
 
-// Process server commands
+// Process command queues
+/* !
+ *  This function will do different things if you are a server or a client. 
+ * 
+ *  Run commands in recv command queue, generate new commands for send command queue
+ *
+ * @param client : Pointer to a client
+ *
+ * @sa server_process
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int server_process      ( GXClient_t   *client );
 
 // Wait for clients to join
+/* !
+ *  Start running a server wait thread. 
+ *  The wait thread will wait for TCP connections. If the TCP connections are suitable, a new client thread will be spawned.  
+ *
+ * @param p_server  : Pointer to a server
+ *
+ * @sa stop_server
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int server_wait         ( GXInstance_t *instance );
+
+// TODO: Document
 
 // Destructors
 DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
@@ -140,12 +241,9 @@ DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 DLLEXPORT int command_from_data   ( GXCommand_t **ret, void        *data ); 
 DLLEXPORT int data_from_command   ( void        **ret, GXCommand_t *conmmand );
 
-
 DLLEXPORT int create_client(GXClient_t** client);
-
 DLLEXPORT int connect_client (char *name);
 
 //Destroy client instance and close TCP connection with client
 DLLEXPORT int destroy_client(GXClient_t* client);
-
 DLLEXPORT int destroy_command(GXCommand_t* command);

@@ -4,8 +4,10 @@ int create_ai                  ( GXAI_t **pp_ai )
 {
 	// Argument check
 	{
-		if(pp_ai == (void *)0)
-			goto no_ai;
+		#ifndef NDEBUG
+			if(pp_ai == (void *)0)
+				goto no_ai;
+		#endif
 	}
 
 	// Initialized data
@@ -21,7 +23,7 @@ int create_ai                  ( GXAI_t **pp_ai )
 
 	*pp_ai = p_ai;
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -52,9 +54,9 @@ int load_ai                    ( GXAI_t **pp_ai, char        *path )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_ai == (void *)0 )
+			if ( pp_ai == (void *) 0 )
 				goto no_ai;
-			if ( path  == (void *)0 )
+			if ( path  == (void *) 0 )
 				goto no_path;
 		#endif
 	}
@@ -64,15 +66,17 @@ int load_ai                    ( GXAI_t **pp_ai, char        *path )
 	char   *file_data = calloc(file_len+1, sizeof(char));
 
 	// Load the file contents into memory
-	g_load_file(path, file_data, false);
+	if ( g_load_file(path, file_data, false) == 0 )
+		goto failed_to_load_file;
 
 	// Parse the file contents into an AI struct
-	load_ai_as_json(pp_ai, file_data, file_len);
+	if ( load_ai_as_json(pp_ai, file_data, file_len) == 0)
+		goto failed_to_construct_ai_from_file_json;
 
 	// Free the file data
 	free(file_data);
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -97,6 +101,22 @@ int load_ai                    ( GXAI_t **pp_ai, char        *path )
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
+				return 0;
+		}
+
+		// G10 errors
+		{
+			failed_to_load_file:
+				#ifndef NDEBUG
+					free(file_data);
+					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif	
+				return 0;
+			failed_to_construct_ai_from_file_json:
+				#ifndef NDEBUG
+					free(file_data);
+					g_print_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+				#endif	
 				return 0;
 		}
 	}
@@ -234,7 +254,7 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 
 	}
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -282,7 +302,7 @@ int add_ai_state_callback      ( GXAI_t  *p_ai , char        *state_name, int   
 	// Update the state callback
 	dict_add(p_ai->states, state_name, function_pointer);
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -326,7 +346,7 @@ int set_ai_state               ( GXAI_t  *p_ai , const char  *state_name )
 	if(dict_get(p_ai->states, state_name))
 		p_ai->current_state = state_name;
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -362,7 +382,7 @@ int set_ai_pre_update_callback ( GXAI_t  *p_ai , int        (*function_pointer) 
 
 	p_ai->pre_ai = function_pointer;
 
-	return 0;
+	return 1;
 	
 	// Error handling
 	{
@@ -379,7 +399,6 @@ int set_ai_pre_update_callback ( GXAI_t  *p_ai , int        (*function_pointer) 
 					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n", __FUNCSIG__);
 				#endif
 				return 0;
-			return 0;
 		}
 	}
 }
@@ -505,7 +524,7 @@ int destroy_ai                 ( GXAI_t  *p_ai )
 	dict_destroy(p_ai->states);
 	free(p_ai);
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{

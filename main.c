@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#include <SDL2/SDL_gamecontroller.h>
-
 #include <G10/G10.h>
 #include <G10/GXScheduler.h>
 #include <G10/GXScene.h>
@@ -12,48 +10,30 @@
 #include <G10/GXPart.h>
 #include <G10/GXMaterial.h>
 #include <G10/GXUserCode.h>
-#include "APS_3rdPersonCtrl.h"
 
+#include <G10/APS_3rdPersonCtrl.h>
 
+// This gets called once a frame
 int user_code_callback(GXInstance_t* instance)
 {
 
+    // This updates the camera controller
     update_controlee_camera(instance->delta_time);
-    GXEntity_t* e = get_entity(instance->active_scene, "entity");
-    vec3 l = e->transform->location;
 
-    printf("%.2f %.2f %.2f\r", l.x, l.y, l.z);
-
-    if(instance->client == (void *)0 && instance->server == (void*) 0)
-    {
-        SDL_Delay(6000);
-        connect_client("Jake");
-    }
-
-    if (instance->client)
-        queue_enqueue(instance->client->send_queue, no_operation);
-
-                    free(packet);
-                }
-            }
-        } else
-            chatDown = false;
-    }
     return 0;
 }
 
+// Entry point 
 int main ( int argc, const char *argv[] )
 {
 
     // Initialized data
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
-    GXShader_t    *shader                 = 0;
-
-    char *instance_path = "G10/debug server instance.json";
-    char *schedule_name = "Server Schedule";
-
-    bool connect_to_server = false;
+    char          *instance_path          = 0;
+    char          *schedule_name          = 0;
+    char          *client_name            = 0;
+    bool           connect_to_server      = false;
 
     // Parse command line arguments
     {
@@ -61,20 +41,28 @@ int main ( int argc, const char *argv[] )
         // Iterate over each command line argument
         for (size_t i = 0; i < argc; i++)
         {
+
+            // Path to instance
             if (strcmp("-instance", argv[i]) == 0)
                 instance_path = argv[++i];
 
+            // Name of schedule
             if (strcmp("-schedule", argv[i]) == 0)
                 schedule_name = argv[++i];
 
+            // Connect to a host
             if (strcmp("-connect", argv[i]) == 0)
                 connect_to_server = true;
-        }
 
+            // Client name 
+            if (strcmp("-client_name", argv[i]) == 0)
+                client_name = argv[++i];
+        }
     }
 
-    // Create a debug instance
-    g_init(&instance, instance_path);
+    // Create an instance
+    if (instance_path)
+        g_init(&instance, instance_path);
 
     // Game setup
     {
@@ -92,17 +80,21 @@ int main ( int argc, const char *argv[] )
             // Toggle mouse locking
             register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
 
-            // Set up 3rd person controller
+            // Set up the camera controller
             {
-                aps_3rdpersonctrl_from_camera_and_entity(
-                    instance, 
-                    instance->active_scene->active_camera,
-                    get_entity(instance->active_scene, "player1"));
+
+                // First person controller
+                camera_controller_from_camera(instance, instance->active_scene->active_camera);
+
+                // Third person controller
+                //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
             }
-            
+
             //Chat test bind
-            GXBind_t* chat_bind = find_bind(instance->input, "TEXT CHAT");
-            register_bind_callback(chat_bind, &chat_callback);
+            {
+                //GXBind_t* chat_bind = find_bind(instance->input, "TEXT CHAT");
+                //register_bind_callback(chat_bind, &chat_callback);
+            }
         }
         
         // Set up user code
@@ -111,15 +103,13 @@ int main ( int argc, const char *argv[] )
         }
 
     }
-    no_operation = calloc(1, sizeof(GXCommand_t));
+    
     // Debugging
     {
         
         // Initialized data
         size_t       entity_count = dict_keys(instance->active_scene->entities, 0);
         GXEntity_t **entities     = calloc(entity_count + 1, sizeof(void *));
-
-        load_shader(&shader, "G10/shaders/G10 triangle camera.json");
 
         // Generate lists
         {
@@ -159,6 +149,9 @@ int main ( int argc, const char *argv[] )
     // Start the game loop
     g_start_schedule(instance, schedule_name);
     
+    // Stop execution
+    stop_schedule(instance->active_schedule);
+
     // Exit 
     g_exit(instance);
 

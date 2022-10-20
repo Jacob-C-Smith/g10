@@ -234,7 +234,6 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         ret->max_buffered_frames = (long)atoi(max_buffered_frames);
     }
 
-
     // Set the log file before doing anything else
     {
         if   (log_file_i) { log_file = fopen(log_file_i, "w"); }
@@ -1358,6 +1357,7 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
         #endif
     }
 
+    // Initialized data
     GXSchedule_t* schedule = dict_get(instance->schedules, name);
 
     // Error checking
@@ -1368,6 +1368,7 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
         #endif
     }
 
+    // Start the schedule
     start_schedule(schedule);
 
     return 0;
@@ -1658,7 +1659,7 @@ int           g_cache_shader               ( GXInstance_t         *instance, GXS
     }
 }
 
-void          g_user_exit                  ( callback_parameter_t *input, GXInstance_t* instance)
+void          g_user_exit                  ( callback_parameter_t input, GXInstance_t* instance)
 {
     instance->running = false;
     if (instance->active_schedule)
@@ -1839,7 +1840,8 @@ int           g_exit                       ( GXInstance_t         *instance )
 
                 // Destroy the shader
                 shaders[i]->users = 1;
-                destroy_shader(shaders[i]);
+                // TODO: Fix
+                //destroy_shader(shaders[i]);
 
             }
 

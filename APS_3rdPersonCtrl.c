@@ -1,4 +1,4 @@
-#include "APS_3rdPersonCtrl.h"
+#include <G10/APS_3rdPersonCtrl.h>
 
 APS_3rdPersonCtrl_t *thirdpersonctrl = 0;
 float moveX, moveY;

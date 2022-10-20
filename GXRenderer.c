@@ -46,6 +46,7 @@ int           render_frame                 ( GXInstance_t        *instance )
         // TODO: Make draw functions for each 
         // draw_scene_shadows(instance->active_scene)
         draw_scene(instance->active_scene);
+        //draw_scene_bv()
         // draw_scene_composite(instance->active_scene)
         // draw_scene_bloom(instance->active_scene)
     }
@@ -83,8 +84,8 @@ int           render_frame                 ( GXInstance_t        *instance )
         result = vkQueuePresentKHR(instance->present_queue, present_info);
 
         // Does the window need to be resized?
-        if      (    result == VK_ERROR_OUT_OF_DATE_KHR
-                  || result == VK_SUBOPTIMAL_KHR ) {
+        if      ( result == VK_ERROR_OUT_OF_DATE_KHR ||
+                  result == VK_SUBOPTIMAL_KHR ) {
             g_window_resize(instance);
         }
         else if ( result != VK_SUCCESS ) {
@@ -95,6 +96,7 @@ int           render_frame                 ( GXInstance_t        *instance )
     // Compute the current frame index
     instance->current_frame = (instance->current_frame + 1) % instance->max_buffered_frames;
     fail:
+
     // Deallocation
 	free(present_info);
 	free(submit_info);

@@ -242,12 +242,12 @@
     <ClInclude Include="include\G10\GXUserCode.h">
       <Filter>Header Files\G10\User Code</Filter>
     </ClInclude>
-    <ClInclude Include="APS_3rdPersonCtrl.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\G10\APS_3rdPersonCtrl.h">
+      <Filter>Header Files\G10\Scene\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="time partitioning.txt">
+    <Text Include="TODO">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>

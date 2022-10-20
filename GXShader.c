@@ -1,6 +1,6 @@
 #include <G10/GXShader.h>
 
-char             *format_type_names     [ ] = {
+char             *format_type_names              [ ] = {
     "float",
     "vec2",
     "vec3",
@@ -18,7 +18,7 @@ char             *format_type_names     [ ] = {
     "mat3",
     "u8vec4"
 };
-char             *descriptor_type_names [ ] = {
+char             *descriptor_type_names          [ ] = {
     "sampler",
     "combined image sampler",
     "sampled image",
@@ -31,7 +31,10 @@ char             *descriptor_type_names [ ] = {
     "storage buffer dynamic",
     "input attachment"
 };
-VkDescriptorType  descriptor_type_enums [ ] = {
+char             *push_constant_getter_names     [ ] = {
+    "camera position",
+};
+VkDescriptorType  descriptor_type_enums          [ ] = {
     VK_DESCRIPTOR_TYPE_SAMPLER,
     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
     VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
@@ -44,7 +47,7 @@ VkDescriptorType  descriptor_type_enums [ ] = {
     VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
     VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 };
-VkFormat          format_type_enums     [ ] = {
+VkFormat          format_type_enums              [ ] = {
     VK_FORMAT_R32_SFLOAT,
     VK_FORMAT_R32G32_SFLOAT,
     VK_FORMAT_R32G32B32_SFLOAT,
@@ -63,7 +66,7 @@ VkFormat          format_type_enums     [ ] = {
     0,
     VK_FORMAT_R8G8B8A8_UINT
 };
-size_t            format_type_sizes     [ ] = {
+size_t            format_type_sizes              [ ] = {
     4,
     8,
     12,
@@ -80,10 +83,14 @@ size_t            format_type_sizes     [ ] = {
     64,
     36
 };
+void            **push_constant_getter_functions [ ] = {
+    &get_camera_position
+};
 
-dict             *format_types              = 0;
-dict             *format_sizes              = 0;
-dict             *descriptor_types          = 0;
+dict             *format_types                       = 0;
+dict             *format_sizes                       = 0;
+dict             *descriptor_types                   = 0;
+dict             *push_constant_getters              = 0;
 
 typedef struct { 
     char                         *name; 
@@ -120,6 +127,7 @@ void init_shader                 ( void )
     dict_construct(&format_types , 16);
     dict_construct(&format_sizes , 16);
     dict_construct(&descriptor_types, 16);
+    dict_construct(&push_constant_getters, 64);
 
     for (size_t i = 0; i < 16; i++)
     {
@@ -128,7 +136,12 @@ void init_shader                 ( void )
     }
 
     for (size_t i = 0; i < 11; i++)
-        dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]);
+        dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]); 
+
+    // Initialize push constant getters 
+    for (size_t i = 0; i < 1; i++)
+        dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
+
 }
 
 int create_shader_module         ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
@@ -200,7 +213,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                   *fragment_shader_json_data = 0;
     char         **vertex_groups             = 0,
                  **sets                      = 0,
-                  *push_constant             = 0;
+                  *push_constant_text        = 0;
     u32            set_count                 = 0;
 
     JSONToken_t   *token                     = 0;
@@ -226,7 +239,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
         sets                 = JSON_VALUE(token, JSONarray);
 
         token                = dict_get(json_data, "push constant");
-        push_constant        = JSON_VALUE(token, JSONobject);
+        push_constant_text        = JSON_VALUE(token, JSONobject);
     }
     
     // Check the cache
@@ -306,6 +319,7 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             VkPipelineDynamicStateCreateInfo       *dynamic_state_create_info           = calloc(1, sizeof(VkPipelineDynamicStateCreateInfo));
             VkPipelineLayoutCreateInfo             *pipeline_layout_create_info         = calloc(1, sizeof(VkPipelineLayoutCreateInfo));
             VkDynamicState                         *dynamic_states                      = calloc(2, sizeof(VkPipelineDynamicStateCreateInfo));
+            VkPushConstantRange                    *push_constant                       = calloc(1, sizeof(VkPushConstantRange));
             VkGraphicsPipelineCreateInfo           *graphics_pipeline_create_info       = calloc(1, sizeof(VkGraphicsPipelineCreateInfo));
             VkVertexInputBindingDescription        *binding_description                 = calloc(1, sizeof(VkVertexInputBindingDescription));
             VkViewport                             *viewport                            = calloc(1, sizeof(VkViewport));
@@ -507,11 +521,101 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 dynamic_state_create_info->pDynamicStates    = dynamic_states;
             }
 
+            // Set up the push constant
+            if(push_constant_text) {
+                
+                // Initialized data
+                dict    *push_constant_dict           = 0;
+                char   **push_constant_struct         = 0;
+                size_t   push_constant_size           = 0;
+                size_t   push_constant_property_count = 0;
+
+                // Parse the push constant JSON into a dictionary
+                parse_json(push_constant_text, strlen(push_constant_text), &push_constant_dict);
+
+                // Parse the push constant dictionary
+                {
+
+                    // Initialized data
+                    JSONToken_t  *token                = 0;
+
+                    // Get the push constant struct
+                    token                = dict_get(push_constant_dict, "struct");
+                    push_constant_struct = JSON_VALUE(token, JSONarray);
+                }
+
+                while (push_constant_struct[++push_constant_property_count]);
+                
+                i_shader->push_constant_properties = calloc(push_constant_property_count + 1, sizeof(char*));
+                
+                for (size_t i = 0; i < push_constant_property_count; i++)
+                {
+
+                    // Initialized data
+                    char   *push_constant_property     = push_constant_struct[i];
+                    size_t  push_constant_property_len = strlen(push_constant_property);
+                    dict   *property_dict              = 0;
+
+                    char   *property_name              = 0;
+                    size_t  property_size              = 0;
+
+                    parse_json(push_constant_property, push_constant_property_len, &property_dict);
+
+                    // Parse the property dictionary
+                    {
+
+                        // Initialized data
+                        JSONToken_t *token = 0;
+                        
+                        token = dict_get(property_dict, "name");
+                        property_name = JSON_VALUE(token, JSONstring);
+
+                        token = dict_get(property_dict, "type");
+                        char* property_type = JSON_VALUE(token, JSONstring);
+
+                        // TODO: Check property_type?
+                        property_size = dict_get(format_sizes, property_type);
+
+                    }
+
+                    // Copy the property name
+                    {
+                        
+                        // Initialized data
+                        size_t property_name_len              = strlen(property_name);
+
+                        // Allocate the property name
+                        i_shader->push_constant_properties[i] = calloc(property_name_len + 1, sizeof(char));
+
+                        // Copy the propery name
+                        strncpy(i_shader->push_constant_properties[i], property_name, property_name_len);
+
+                    }
+
+                    // Copy the property size
+                    push_constant_size += property_size;
+
+                }
+
+                if (push_constant_size > 128)
+                    goto push_constant_is_too_large;
+
+                i_shader->push_constant_size = push_constant_size;
+
+                i_shader->push_constant_data = calloc(128, sizeof(u8));
+
+                push_constant->offset     = 0;
+                push_constant->size       = push_constant_size;
+                push_constant->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            }
+
             // Set up the pipeline layout
             {
 
                 pipeline_layout_create_info->sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
                 pipeline_layout_create_info->setLayoutCount = 1;
+                pipeline_layout_create_info->pPushConstantRanges = push_constant;
+                pipeline_layout_create_info->pushConstantRangeCount = 1;
 
                 i_shader->descriptor_set_layouts            = calloc(1, sizeof(VkDescriptorSetLayout));
 
@@ -655,6 +759,8 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
     return 1;
 
     // TODO: Error handling
+push_constant_is_too_large:
+    return 0;
         
 }
 
@@ -696,6 +802,74 @@ int use_shader                   ( GXShader_t   *shader )
     }
 
     return 0;
+}
+
+int update_shader_push_constant  ( GXShader_t   *shader )
+{
+    size_t offset = 0;
+    for (size_t i = 0; i < shader->push_constant_properties[i]; i++)
+    {
+        char   *push_constant_property_name = shader->push_constant_properties[i];
+        int   (*getter) ( void * )          = dict_get(push_constant_getters, push_constant_property_name);
+
+        if (getter)
+            offset = getter((u8*)shader->push_constant_data + offset);
+
+    }
+    return 1;
+}
+
+int add_shader_push_constant_getter ( char* getter_name, int(*getter_function)(void*) )
+{
+
+    // Argument errors
+    {
+        #ifndef NDEBUG
+            if (getter_name == (void *)0)
+                goto no_getter_name;
+            if (getter_function == (void*)0)
+                goto no_getter_function;
+        #endif
+    }
+
+    // Error checking
+    {
+        #ifndef NDEBUG
+            if (dict_get(push_constant_getters, getter_name))
+                goto already_has_getter;
+        #endif
+    }
+
+    dict_add(push_constant_getters, getter_name, getter_function);
+
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_getter_name:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+            no_getter_function:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+
+        // User errors
+        {
+            already_has_getter:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to add getter in call to function \"%s\". There is already a getter called \"%s\"\n", __FUNCSIG__, getter_name);
+                #endif
+                return 0;
+        }
+    }
 }
 
 int set_shader_camera(GXEntity_t *p_entity)
@@ -753,6 +927,8 @@ int set_shader_camera(GXEntity_t *p_entity)
 
 int destroy_shader               ( GXShader_t   *shader )
 {
+
+    // TODO: Cache destruction
     GXInstance_t* instance = g_get_active_instance();
 
     vkDestroyPipeline(instance->device, shader->pipeline, 0);

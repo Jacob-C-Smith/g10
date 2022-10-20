@@ -49,7 +49,7 @@ struct GXThread_s
 /* !
  *  Allocate memory for a schedule
  *
- * @param pp_schedule : Double pointer to schedule
+ * @param pp_schedule : return
  *
  * @sa destroy_schedule
  *
@@ -60,7 +60,7 @@ DLLEXPORT int create_schedule        ( GXSchedule_t **pp_schedule );
 /* !
  *  Allocate memory for a thread
  *
- * @param pp_thread : Double pointer to schedule
+ * @param pp_thread : return
  *
  * @sa destroy_thread
  *
@@ -73,7 +73,7 @@ DLLEXPORT int create_thread          ( GXThread_t    **pp_thread );
 /* !
  *  Load a schedule from a JSON file
  *
- * @param pp_schedule : Double pointer to a schedule
+ * @param pp_schedule : return
  * @param path        : The path to a JSON file containing an schedule object
  *
  * @sa load_schedule_as_json
@@ -84,7 +84,7 @@ DLLEXPORT int create_thread          ( GXThread_t    **pp_thread );
 DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
 
 /* !
- *  Load a schedule from a JSON file
+ *  Load a schedule from JSON text
  *
  * @param pp_schedule : return
  * @param token_text  : The schedule JSON object text
@@ -97,6 +97,18 @@ DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
  */
 DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t len );
 
+
+/* !
+ *  Load a thread from a JSON file
+ *
+ * @param pp_thread : return
+ * @param path      : The path to a JSON file containing an schedule object
+ *
+ * @sa load_schedule_as_json
+ * @sa create_schedule
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int load_thread            ( GXThread_t   **thread, char *path );
 
 
