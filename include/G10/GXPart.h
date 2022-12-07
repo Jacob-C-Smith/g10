@@ -30,14 +30,54 @@ struct GXPart_s
 };
 
 // Allocators
-DLLEXPORT int create_part       ( GXPart_t **part );
+/* !
+ *  Allocates memory for a part.
+ *
+ * @param pp_part : return
+ *
+ * @sa destroy_part
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int create_part       ( GXPart_t   **pp_part );
 
 // Constructors
-DLLEXPORT int load_part         ( GXPart_t **part, char     *path );
-DLLEXPORT int load_part_as_json ( GXPart_t **part, char     *token_text, size_t len );
+/* !
+ *  Load a part from the filesystem
+ *
+ * @param pp_part : return
+ * @param path    : The path to a part JSON file
+ *
+ * @sa load_part_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_part         ( GXPart_t   **pp_part, char *path );
+
+/* !
+ *  Load a part from a JSON object
+ *
+ * @param pp_part    : return
+ * @param token_text : The part JSON object text
+ * @param len        : The length of the JSON object text
+ * 
+ * @sa load_part
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_part_as_json ( GXPart_t   **pp_part, char *token_text, size_t len );
 
 // Drawing
-DLLEXPORT int draw_part          ( GXPart_t   *part );
+DLLEXPORT int draw_part          ( GXPart_t   *p_part );
 
 // Destructors
-DLLEXPORT int destroy_part       ( GXPart_t   *part );
+/* !
+ *  Free a part and all its contents
+ *
+ * @param p_part : Pointer to Part
+ *
+ * @sa create_part
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int destroy_part       ( GXPart_t   *p_part );

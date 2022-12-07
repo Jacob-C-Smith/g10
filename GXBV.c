@@ -1,7 +1,16 @@
 ﻿#include <G10/GXBV.h>
 
-int     create_bv ( GXBV_t** bv )
+int     create_bv                ( GXBV_t **pp_bv )
 {
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_bv == (void *)0 )
+                goto no_bv;
+        #endif
+    }
+
     // Initialized data
     GXBV_t *ret = calloc(1, sizeof(GXBV_t));
 
@@ -13,16 +22,75 @@ int     create_bv ( GXBV_t** bv )
         #endif
     }
 
-    *bv = ret;
+    // Write the return value
+    *pp_bv = ret;
 
-    return 0;
+    return 1;
 
     // Error handling
     {
 
+        // Argument errors
+        {
+            no_bv:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+
         // Standard library errors
         {
             no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+            return 0;
+        }
+    }
+}
+
+int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
+{
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_bv == (void *)0 )
+                goto no_bv;
+        #endif
+    }
+
+    // Initialized data
+    GXBV_t *p_bv = 0;
+
+    // Try to create the BV
+    if ( create_bv(pp_bv) == 0 )
+        goto failed_to_create_bv;
+
+    // Return the BV
+    p_bv = *pp_bv;
+
+    // Set the minimum and maximum
+    p_bv->maximum = max;
+    p_bv->minimum = min;
+
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_bv:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+
+        // G10 errors
+        {
+            failed_to_create_bv:
                 #ifndef NDEBUG
                     g_print_error("[G10] [BVH] Out of memory\n");
                 #endif
@@ -31,22 +99,10 @@ int     create_bv ( GXBV_t** bv )
     }
 }
 
-int     construct_bv ( GXBV_t **bv, vec3 min, vec3 max )
+int     construct_bv_from_bvs    ( GXBV_t **bv   , GXBV_t    *a    , GXBV_t* b )
 {
-    GXBV_t *i_bv = 0;
 
-    create_bv(bv);
 
-    i_bv = *bv;
-
-    i_bv->maximum = max;
-    i_bv->minimum = min;
-
-    return 0;
-}
-
-int     construct_bv_from_bvs ( GXBV_t **bv, GXBV_t* a, GXBV_t* b)
-{
     GXBV_t* i_bv = 0;
 
     create_bv(bv);
@@ -61,13 +117,13 @@ int     construct_bv_from_bvs ( GXBV_t **bv, GXBV_t* a, GXBV_t* b)
     return 0;
 }
 
-int     construct_bvh_from_scene ( GXBV_t ** bv, GXScene_t* scene )
+int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
 {
 
     // Commentary
     {
         /*
-         * This function constructs a bounding volume heierarchy from a scene. The algorithm is
+         * This function constructs a bounding volume hierarchy from a scene. The algorithm is
          * relatively simple, and constructs the tree on O(n^3) time. The algorithm creates the
          * tree in a bottum up fashion.
          *
@@ -94,7 +150,7 @@ int     construct_bvh_from_scene ( GXBV_t ** bv, GXScene_t* scene )
     GXBV_t     **bounding_volumes  = 0; // List of qualifying entities
     
     // Initialized data
-    size_t       actors_in_scene       = dict_keys(scene->actors, 0), // How many entities are in the scene?
+    size_t       actors_in_scene       = dict_values(scene->actors, 0), // How many entities are in the scene?
                  actors_with_colliders = 0,
                  i                     = 0,                           // Iterators      ...
                  j                     = 0,                           //                ...
@@ -213,7 +269,7 @@ int     construct_bvh_from_scene ( GXBV_t ** bv, GXScene_t* scene )
     }
 }
 
-float   bv_distance ( GXBV_t* a, GXBV_t* b )
+float   bv_distance              ( GXBV_t  *a    , GXBV_t    *b )
 {
     float  ret             = 0.f;
     vec3   distance_vector = { 0.f, 0.f, 0.f, 0.f };
@@ -227,7 +283,7 @@ float   bv_distance ( GXBV_t* a, GXBV_t* b )
     return ret;
 }
 
-GXBV_t* find_parent_bv(GXBV_t* bvh, GXBV_t* bv)
+GXBV_t *find_parent_bv           ( GXBV_t  *bvh  , GXBV_t    *bv )
 {
     GXBV_t *b   = bvh,
            *ret = 0;
@@ -238,24 +294,118 @@ GXBV_t* find_parent_bv(GXBV_t* bvh, GXBV_t* bv)
     if (bvh->right == bv)
         return bvh;
 
-    if(b->left)
+    if (b->left)
+    {
         if (aabb_intersect(b->left, bv))
         {
-            printf("L\n");
-            return find_parent_bv(b->left, bv);
+            GXBV_t* p_ret = find_parent_bv(b->left, bv);
+
+            ret = (p_ret) ? p_ret : ret;
         }
+    }
 
     if (b->right)
+    {
         if (aabb_intersect(b->right, bv))
         {
-            printf("R\n");
-            return find_parent_bv(b->right, bv);
+            GXBV_t *p_ret = find_parent_bv(b->right, bv);
+
+            ret = (p_ret) ? p_ret : ret;
         }
+    }
 
     return ret;
 }
 
-int     resize_bv ( GXBV_t* bv )
+int     insert_bv                ( GXBV_t  *bvh  , GXBV_t    *bv )
+{
+    
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if (bvh == 0)
+                goto no_bvh;
+        #endif
+    }
+
+    // Branching
+    {
+        if (bvh->entity) return 0;
+        if (bvh->left == 0 && bvh->right == 0) goto no_left_no_right;
+        if (bvh->left      && bvh->right == 0) goto no_right;
+        if (bvh->left == 0 && bvh->right     ) goto no_left;
+        if (bvh->left      && bvh->right     ) goto left_and_right;
+    }
+
+    no_left_no_right:
+    {
+        bvh->left = bv;
+
+        goto exit;
+    }
+
+    no_right:
+    {
+        if ( aabb_intersect(bvh->left, bv) )
+        {
+            if ( bvh->left->entity )
+            {
+                
+            }
+            else
+            {
+                insert_bv(bvh->left, bv);
+            }
+        }
+        else
+            bvh->right = bv;
+
+        goto exit;
+    }
+
+    no_left:
+    {
+        if ( aabb_intersect(bvh->right, bv) )
+            insert_bv(bvh->right, bv);
+        else
+            bvh->left = bv;
+
+        goto exit;
+    }
+
+    left_and_right:
+    {
+        if ( bv_distance(bvh->left, bv) > bv_distance(bvh->right, bv) )
+        {
+            if (bvh->left->entity)
+            {
+                GXBV_t *t_bv = 0;
+                construct_bv_from_bvs(&t_bv, bv, bvh->left);
+                bvh->left = t_bv;
+                return 0;
+            }
+            insert_bv(bvh->left, bv);
+        }
+        else
+            insert_bv(bvh->right, bv);
+
+        goto exit;
+    }
+
+    exit:
+    return 1;
+
+    // Argument errors
+    {
+        no_bvh:
+            #ifndef NDEBUG
+                g_print_error("[G10] [BV] Null pointer provided for \"bvh\" in call to function \"%s\"\n", __FUNCSIG__);
+            #endif
+            return 0;
+    }
+}
+
+int     resize_bv                ( GXBV_t  *bv )
 {
     // Argument check
     {
@@ -461,11 +611,11 @@ int     resize_bv ( GXBV_t* bv )
 
         // Copy the left node into the parent bounding volume
         {
-            bv->entity = right->entity;
-            bv->left   = right->left;
-            bv->right  = right->right;
-            bv->maximum    = right->maximum;
-            bv->minimum    = right->minimum;
+            bv->entity  = right->entity;
+            bv->left    = right->left;
+            bv->right   = right->right;
+            bv->maximum = right->maximum;
+            bv->minimum = right->minimum;
         }
 
         // Reparent the entity
@@ -503,10 +653,12 @@ int     resize_bv ( GXBV_t* bv )
 
     entity:
     {
-        // Get the model matrix of the entity
-        GXCollider_t *collider = bv->entity->collider;
 
-        mat4 m = bv->entity->transform->model_matrix;
+        // Get the model matrix of the entity
+        
+        // Initialized data
+        GXCollider_t *collider = bv->entity->collider;
+        mat4          m        = bv->entity->transform->model_matrix;
         
         // Compute axis aligned radius
         float x_radius = (fabsf(m.a) + fabsf(m.b) + fabsf(m.c) ),
@@ -525,6 +677,8 @@ int     resize_bv ( GXBV_t* bv )
         return 0;
     }
 
+    resize_bv(find_parent_bv(g_get_active_instance(), bv));
+
     return 0;
 
     // Error handling
@@ -537,7 +691,7 @@ int     resize_bv ( GXBV_t* bv )
     }
 }
 
-int     print_bv  ( FILE *f, GXBV_t* bv, size_t d )
+int     print_bv                 ( FILE    *f    , GXBV_t    *bv,    size_t d )
 {
 
     // Argument check
@@ -548,7 +702,7 @@ int     print_bv  ( FILE *f, GXBV_t* bv, size_t d )
 
     // Base case, print out a header
     if (d == 0)
-        fprintf(f, "[G10] [BVH] Bounding volume heierarchy\n[ entity name ] - < location > - < dimension >\n\n");
+        fprintf(f, "[G10] [BV] Bounding volume hierarchy\n[ entity name ] - < location > - < dimension >\n\n");
         
     // Indent proportional to the deapth of the BVH
     for (size_t i = 0; i < d * 4; i++)
@@ -593,34 +747,83 @@ int     print_bv  ( FILE *f, GXBV_t* bv, size_t d )
     }
 }
 
-size_t get_entities_from_bv(GXBV_t* bv, queue** entity_queue)
+size_t  get_entities_from_bv     ( GXBV_t  *bv   , queue     *entity_queue )
 {
 
-    // TODO: counting branch (when entity_queue = 0), populating branch (when entity_queue != 0)
-    size_t ret = 0;
+    // Argument check
+    {
+        if (bv == (void*)0)
+            goto no_bv;
+    }
 
-    return ret;
+    // If the bounding volume is an entity, print the entities name
+    if (bv->entity)
+        queue_enqueue(entity_queue, bv->entity);
+
+    // Print the left node
+    if (bv->left)
+        get_entities_from_bv(bv->left, entity_queue);
+
+    // Print the right node
+    if (bv->right)
+        get_entities_from_bv(bv->right, entity_queue);
+
+    return 0;
+
+    // Error handling
+    {
+        no_bv:
+        #ifndef NDEBUG
+            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCSIG__);
+        #endif
+        return 0;
+    }
 }
 
-bool    aabb_intersect(GXBV_t* a, GXBV_t* b)
+bool    aabb_intersect           ( GXBV_t  *a    , GXBV_t    *b )
 {
-    // TODO: Argument check
-    {
 
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if (a == (void *)0)
+                goto no_a;
+            if (b == (void*)0)
+                goto no_b;
+        #endif
     }
 
+    // Initialized data
+    vec3 a_min = a->minimum,
+         a_max = a->maximum,
+         b_min = b->minimum,
+         b_max = b->maximum;
 
-    return (a->minimum.x <= b->maximum.x) && (a->maximum.x >= b->minimum.x) &&
-           (a->minimum.y <= b->maximum.y) && (a->maximum.y >= b->minimum.y) &&
-           (a->minimum.z <= b->maximum.z) && (a->maximum.z >= b->minimum.z);
+    // Intersection test
+    return ( (a_min.x <= b_max.x) && (a_max.x >= b_min.x) &&
+             (a_min.y <= b_max.y) && (a_max.y >= b_min.y) &&
+             (a_min.z <= b_max.z) && (a_max.z >= b_min.z)    );
 
-    // TODO: Error handling
+    // Error handling
     {
 
+        // Argument errors
+        {
+            no_a:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] Null pointer provided for \"a\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return false;
+            no_b:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] Null pointer provided for \"b\" in call to function \"%s\"\n", __FUNCSIG__);
+                #endif
+                return false;
+        }
     }
 }
 
-int     destroy_bv(GXBV_t* bv)
+int     destroy_bv               ( GXBV_t  *bv )
 {
     free(bv);
 

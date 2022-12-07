@@ -44,7 +44,7 @@ DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char *path );
+DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char   *path );
 
 /* !
  *  Load an AI from JSON text
@@ -58,7 +58,21 @@ DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai_as_json            ( GXAI_t **pp_ai, char *token_text, size_t len );
+DLLEXPORT int load_ai_as_json            ( GXAI_t **pp_ai, char   *token_text, size_t len );
+
+/* !
+ *  Load an AI from JSON text
+ *
+ * @param pp_ai : return
+ * @param p_ai  : pointer to ai to copy
+ *
+ * @sa create_ai
+ * @sa load_ai
+ * @sa load_ai_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int copy_ai                    ( GXAI_t **pp_ai, GXAI_t *p_ai );
 
 // Tasks
 

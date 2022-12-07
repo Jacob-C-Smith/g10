@@ -116,6 +116,8 @@ DLLEXPORT int preupdate_entity_ai    ( GXEntity_t *p_entity );
  */
 DLLEXPORT int update_entity_ai       ( GXEntity_t *p_entity );
 
+DLLEXPORT int get_model_matrix       ( void *ret );
+
 // Renderer
 
 /* !

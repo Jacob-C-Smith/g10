@@ -22,8 +22,6 @@ struct GXCamera_s {
     // Matricies
     mat4  view,
           projection;
-
-    void *uniform_data;
 };
 
 // Allocators

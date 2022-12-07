@@ -1087,6 +1087,36 @@ int          process_input             ( GXInstance_t *instance )
         {
             // Mouse events
             case SDL_MOUSEMOTION:
+            {
+                // Don't fire binds if the mouse isn't lockced
+                if (!SDL_GetRelativeMouseMode())
+                    break;
+
+                u8 button = 0;
+
+                callback_parameter_t input;
+                int                  x_rel = instance->event.motion.xrel,
+                    y_rel = instance->event.motion.yrel;
+                {
+                    input.input_state = MOUSE;
+                    input.inputs.mouse_state.xrel = x_rel * instance->input->mouse_sensitivity;
+                    input.inputs.mouse_state.yrel = y_rel * instance->input->mouse_sensitivity;
+                    input.inputs.mouse_state.button = 0;
+                }
+
+                // Fire mouse motion binds
+                {
+                    if (y_rel < 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
+                    if (y_rel > 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
+                    if (x_rel < 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
+                    if (x_rel > 0)
+                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
+                }
+
+            }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
             {
@@ -1106,17 +1136,6 @@ int          process_input             ( GXInstance_t *instance )
                     input.inputs.mouse_state.button = button;
                 }
 
-                // Fire mouse motion binds
-                {
-                    if (y_rel < 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
-                    if (y_rel > 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
-                    if (x_rel < 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
-                    if (x_rel > 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
-                }
                     
             }
             break;

@@ -38,9 +38,11 @@ _TEXT SEGMENT
 ; Summates vector array pointed to by rdx+0x10. Stores resultant vector rdx.
 PUBLIC AVXSumVecs
 AVXSumVecs PROC 
+
     push rdx                    ; Save rdx on the stack so it can be dereferenced later
-    add rdx, 10h                ; Start at the array pointed to by rdx+0x10
+    add rdx, 10h                ; Start at the pointer rdx+0x10
     vmovaps xmm4, [rdx]         ; Copy out the vector
+
     loops:                      
         add rdx, 10h            ; Iterate to the next vector
         vmovaps xmm5, [rdx]     ; Copy out the second vector

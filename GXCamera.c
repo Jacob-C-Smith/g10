@@ -164,7 +164,7 @@ int  load_camera(GXCamera_t** camera, const char* path)
 {
 	size_t  file_len  = g_load_file(path, 0, false);
 	char* file_text = calloc(file_len + 1, sizeof(char));
-	g_load_file(path, 0, false);
+	g_load_file(path, file_text, false);
 
 	load_camera_as_json(camera, file_text, file_len);
 
@@ -247,7 +247,6 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 		i_camera->view       = look_at(i_camera->location, i_camera->target, i_camera->up);
 		i_camera->projection = perspective_matrix(i_camera->fov, i_camera->aspect_ratio, i_camera->near_clip, i_camera->far_clip);
 
-		i_camera->uniform_data = calloc(140, sizeof(char));
 	}
 
 	return 0;

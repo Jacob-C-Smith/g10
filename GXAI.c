@@ -1,6 +1,15 @@
 #include <G10/GXAI.h>
 
-int create_ai                  ( GXAI_t **pp_ai )
+void init_ai                   ( void )
+{
+	GXInstance_t *instance       = g_get_active_instance();
+
+	instance->ai_cache_mutex     = SDL_CreateMutex();
+	instance->ai_preupdate_mutex = SDL_CreateMutex();
+	instance->ai_update_mutex    = SDL_CreateMutex();
+}
+
+int create_ai                  ( GXAI_t       **pp_ai )
 {
 	// Argument check
 	{
@@ -49,7 +58,7 @@ int create_ai                  ( GXAI_t **pp_ai )
 	}
 }
 
-int load_ai                    ( GXAI_t **pp_ai, char        *path )
+int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 {
 	// Argument check
 	{
@@ -122,7 +131,7 @@ int load_ai                    ( GXAI_t **pp_ai, char        *path )
 	}
 }
 
-int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t   len )
+int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, size_t   len )
 {
 	// Argument check
 	{
@@ -135,11 +144,13 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 	}
 
 	// Initialized data
-	size_t state_count   = 0;
-	char  *name          = 0,
-		 **states        = 0,
-		  *initial_state = 0;
-	dict  *ai_dict       = 0;
+	GXInstance_t *instance      = g_get_active_instance();
+	size_t        state_count   = 0;
+	char         *name          = 0,
+		        **states        = 0,
+		         *initial_state = 0;
+	dict         *ai_dict       = 0;
+	int           ret           = 1;
 
 	// Parse the JSON
 	{
@@ -149,6 +160,14 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 
 		// Parse the JSON text into a dictionary
 		parse_json(token_text, len, &ai_dict);
+
+		// Error checking
+		{
+			if (ai_dict == 0)
+
+				// TODO: Error handling
+				return 0;
+		}
 
 		// Get the name 
 		token         = dict_get(ai_dict, "name");
@@ -168,12 +187,37 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 	{
 
 		// Initialized data
-		GXAI_t *p_ai = 0;
+		GXAI_t* p_ai = 0;
+
+		// Check the cache
+		{
+			// Lock the AI cache mutex
+			SDL_LockMutex(instance->ai_cache_mutex);
+
+			// Initialized data
+			GXAI_t* c_ai = g_find_ai(instance, name);
+			
+			// If the ai was in the cache, copy it
+			if ( c_ai )
+			{
+
+				// Make a copy of the cached ai
+				copy_ai(pp_ai, c_ai);
+
+				// Write the return
+				p_ai = *pp_ai;
+
+				// Set the initial state
+				goto set_initial_state;
+			}
+		}
 
 		// Allocate an AI
-		create_ai(pp_ai);
+		{
+			create_ai(pp_ai);
 
-		p_ai = *pp_ai;
+			p_ai = *pp_ai;
+		}
 
 		// Set the name
 		{
@@ -231,6 +275,10 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 			}
 		}
 
+		// Cache the AI
+		g_cache_ai(instance, p_ai);
+
+		set_initial_state:
 		// Set the initial state
 		{
 			
@@ -250,11 +298,15 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 
 			// Copy the initial state name
 			strncpy(p_ai->current_state, initial_state, current_state_len);
+
 		}
 
+		SDL_UnlockMutex(instance->ai_cache_mutex);
 	}
 
-	return 1;
+	free_memory:
+	exit:
+	return ret;
 
 	// Error handling
 	{
@@ -265,12 +317,14 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
-				return 0;
+				ret = 0;
+				goto free_memory;
 			no_token_text:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
-				return 0;
+				ret = 0;
+				goto free_memory;
 		}
 
 		// Standard library errors
@@ -284,7 +338,7 @@ int load_ai_as_json            ( GXAI_t **pp_ai, char        *token_text, size_t
 	}
 }
 
-int add_ai_state_callback      ( GXAI_t  *p_ai , char        *state_name, int    (*function_pointer) ( GXEntity_t *entity ) )
+int add_ai_state_callback      ( GXAI_t        *p_ai , char        *state_name, int    (*function_pointer) ( GXEntity_t *entity ) )
 {
 
 	// Argument errors
@@ -329,7 +383,7 @@ int add_ai_state_callback      ( GXAI_t  *p_ai , char        *state_name, int   
 	}
 }
 
-int set_ai_state               ( GXAI_t  *p_ai , const char  *state_name )
+int set_ai_state               ( GXAI_t        *p_ai , const char  *state_name )
 {
 
 	// Argument errors
@@ -367,7 +421,7 @@ int set_ai_state               ( GXAI_t  *p_ai , const char  *state_name )
 	}
 }
 
-int set_ai_pre_update_callback ( GXAI_t  *p_ai , int        (*function_pointer) ( GXEntity_t *entity ) )
+int set_ai_pre_update_callback ( GXAI_t        *p_ai , int        (*function_pointer) ( GXEntity_t *entity ) )
 {
 	
 	// Argument errors
@@ -403,7 +457,7 @@ int set_ai_pre_update_callback ( GXAI_t  *p_ai , int        (*function_pointer) 
 	}
 }
 
-int pre_update_ai              ( GXInstance_t *instance )
+int pre_update_ai              ( GXInstance_t  *instance )
 {
 
 	// Argument check
@@ -454,6 +508,57 @@ int pre_update_ai              ( GXInstance_t *instance )
 	}
 }
 
+int copy_ai                    ( GXAI_t       **pp_ai, GXAI_t *p_ai )
+{
+
+	// Argument errors
+	{
+		#ifndef NDEBUG
+			if (pp_ai == (void *) 0)
+				goto no_return;
+			if (p_ai == (void*)0)
+				goto no_ai;
+		#endif
+	}
+
+	// Initialized data
+	GXAI_t *ai = 0;
+
+	// Allocate a new AI
+	{
+		create_ai(pp_ai);
+		ai = *pp_ai;
+	}
+
+	// Copy the AI
+	{
+		ai->name          = p_ai->name;
+		ai->current_state = p_ai->current_state;
+		ai->pre_ai        = p_ai->pre_ai;
+		ai->states        = p_ai->states;
+	}
+
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_return:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+			no_ai:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+}
+
 int update_ai                  ( GXInstance_t* instance )
 {
 
@@ -484,7 +589,6 @@ int update_ai                  ( GXInstance_t* instance )
 
 		SDL_UnlockMutex(instance->ai_update_mutex);
 	}
-
 
     // Update the AI
     if (entity)

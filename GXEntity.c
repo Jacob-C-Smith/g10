@@ -181,7 +181,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		transform  = JSON_VALUE(token, JSONobject);
 
 		// Rigidbody
-		token      = dict_get(entity_json, "rigid body");
+		token      = dict_get(entity_json, "rigidbody");
 		rigid_body = JSON_VALUE(token, JSONobject);
 
 		// Collider
@@ -304,7 +304,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 			// Path branch
 			else
 			{
-				if ( load_transform(&i_entity->transform, transform) )
+				if ( load_transform(&i_entity->transform, transform) == 0)
 					goto failed_to_load_transform;
 			}
 
@@ -337,8 +337,9 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 			else
 				load_collider(&i_entity->collider, collider);
 			
-			if (i_entity->collider->bv)
-				i_entity->collider->bv->entity = i_entity;
+			i_entity->collider->bv->entity = i_entity;
+
+			resize_bv(i_entity->collider->bv);
 
 		}
 
@@ -469,15 +470,53 @@ int update_entity_ai ( GXEntity_t* p_entity)
 		// Update
 		update_ai_function(p_entity);
 	}
+
 	return 1;
+}
+
+int get_model_matrix(void* ret)
+{
+
+	// Argument errors
+	{
+		#ifndef NDEBUG
+			if ( ret == (void *) 0 )
+				goto no_return;
+		#endif
+	}
+
+	// Initialized data
+	GXInstance_t *instance        = g_get_active_instance();
+	mat4          model_matrix    = instance->active_scene->active_entity->transform->model_matrix;
+
+	// Write the camera position to the return
+	*(mat4 *)ret = model_matrix;
+
+	return sizeof(mat4);
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_return:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
 vec3 calculate_force_gravitational ( GXEntity_t * p_entity )
 {
-	vec3 ret = { 0.f, 0.f, -0.0098f, 0 };
+	vec3 ret = { 0.f, 0.f, -9.8, 0 };
 
 	// -50 m / s terminal velocity
-	if (p_entity->rigidbody->velocity.z < -0.0050f)
+	if (p_entity->rigidbody->velocity.z < -0.55f)
+		ret.z = 0.f;
+
+	if (p_entity->rigidbody->active == false)
 		ret.z = 0.f;
 
 	return ret;
@@ -512,13 +551,36 @@ vec3 calculate_force_applied ( GXEntity_t * p_entity )
 
 vec3 calculate_force_normal ( GXEntity_t * p_entity )
 {
-	vec3 ret = { 0, 0, 0, 0 };
+	GXInstance_t  *instance = g_get_active_instance();
+	vec3           ret      = { 0, 0, 0, 0 };
 
-	if (false/*entity->collider */ )
-	{
-		vec3 gravitational_force = calculate_force_gravitational(p_entity);
-		ret.z = gravitational_force.z * -1;
-	}
+    GXEntity_t    *entity   = p_entity;
+    GXCollider_t  *a        = entity->collider,
+                  *b        = 0;
+    GXCollision_t *c        = 0;
+
+    dict_values(a->collisions, &c);
+    
+    if ( c ) {
+
+        b = c->b->collider;
+        
+        vec3  a_min = a->bv->minimum,
+              a_max = a->bv->maximum,
+              b_min = b->bv->minimum,
+              b_max = b->bv->maximum;
+
+        float mA = a_min.z,
+              MA = a_max.z,
+              mB = b_min.z + ( ( b_max.z - b_min.z ) / 2 ),
+              MB = b_max.z + entity->rigidbody->velocity.z - 0.01;
+
+        if ( mA > MB  )
+        {
+			entity->rigidbody->forces[1].z = 0.f;
+			entity->rigidbody->velocity.z = 0.f;
+        }
+    }
 
 	return ret;
 }
@@ -616,8 +678,11 @@ int load_light_probe_from_queue(GXInstance_t* instance)
 
 int draw_entity(GXEntity_t* p_entity)
 {
+	if (p_entity->parts == 0)
+		return 0;
 	GXInstance_t* instance = g_get_active_instance();
-	
+	instance->active_scene->active_entity = p_entity;
+
 	// Draw the thing
 	size_t part_count = dict_values(p_entity->parts, 0);
 	GXPart_t **parts  = calloc(part_count, sizeof(void *));
@@ -634,12 +699,20 @@ int draw_entity(GXEntity_t* p_entity)
 			// TODO: Uncomment when shader sets are done
 			set_shader_camera(p_entity, instance->active_scene->active_camera);
 		}
-		update_shader_push_constant(p_entity->shader);
-		vkCmdPushConstants(instance->command_buffers[instance->current_frame], p_entity->shader->pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->push_constant_size, p_entity->shader->push_constant_data );
-		vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->descriptor_sets[instance->current_frame], 0, 0);
+		if (p_entity->shader->push_constant_data)
+		{
+			update_shader_push_constant(p_entity->shader);
+			vkCmdPushConstants(instance->command_buffers[instance->current_frame], p_entity->shader->pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->push_constant_size, p_entity->shader->push_constant_data);
+		}
+
+		for (size_t i = 0; i < p_entity->shader->set_count; i++)
+		{
+			vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->sets_data[i].descriptor_sets[instance->current_frame], 0, 0);
+		}
 
 		draw_part(parts[i]);
 	}
+
 	free(parts);
 
 	return 1;
@@ -699,6 +772,8 @@ int destroy_entity(GXEntity_t* p_entity)
 
 int move_entity ( GXEntity_t* p_entity )
 {
+	if (p_entity->rigidbody->mass == 0.f)
+		return 0;
 	GXInstance_t* instance = g_get_active_instance();
 
 	float delta_time = instance->delta_time;
@@ -739,6 +814,7 @@ int move_entity ( GXEntity_t* p_entity )
 
 	// Update the model matrix
 	transform_model_matrix(transform, &transform->model_matrix);
+	resize_bv(p_entity->collider->bv);
 
 	return 1;
 }

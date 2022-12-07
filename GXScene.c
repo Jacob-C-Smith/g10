@@ -1,5 +1,15 @@
 #include <G10/GXScene.h>
 
+
+void init_scene(void)
+{
+
+    // Initialized data
+    GXInstance_t* instance = g_get_active_instance();
+
+    instance->load_entity_mutex = SDL_CreateMutex();
+}
+
 int         create_scene       ( GXScene_t **scene )
 {
     // Argument check
@@ -51,6 +61,7 @@ int         create_scene       ( GXScene_t **scene )
 
 int         load_scene         ( GXScene_t **scene, const char     path[])
 {
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -60,7 +71,7 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
     }
 
     // Initialized data
-    size_t     token_text_len = g_load_file(path, 0, false);
+    size_t     token_text_len = g_load_file(path, 0, true);
     char      *token_text     = calloc(token_text_len + 1, sizeof(char));
 
     // Error checking
@@ -71,7 +82,7 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
         #endif
     }
         
-    g_load_file(path, token_text, false);
+    g_load_file(path, token_text, true);
 
     // Load the scene as a JSON token
     load_scene_as_json(scene, token_text, token_text_len); 
@@ -142,7 +153,7 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
         JSONToken_t* token = 0;
 
         // Parse the JSON text into a dictionary
-        parse_json(token_text, len, &scene_json_object);
+        parse_json(token_text, len+1, &scene_json_object);
 
         // Set the name
         token           = dict_get(scene_json_object, "name");
@@ -243,15 +254,17 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
 
     }
 
-    // Construct a bounding volume heierarchy tree from the entities in the scene
+    // Construct a bounding volume hierarchy tree from the entities in the scene
     construct_bvh_from_scene(&i_scene->bvh, i_scene);
+
+    i_scene->collisions = calloc(16, sizeof (void *));
 
     return 1;
 
     // Error handling
     {
 
-        // Argument checking
+        // Argument errors
         {
             no_scene:
                 #ifndef NDEBUG
@@ -430,7 +443,12 @@ int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
 
 int         append_collision   ( GXScene_t  *scene, GXCollision_t *collision)
 {
+    size_t i = 0;
     
+    while (scene->collisions[++i]);
+
+    scene->collisions[i-1] = collision;
+
     return 0;
 }
 
@@ -483,6 +501,44 @@ int         draw_scene         ( GXScene_t  *scene )
 
     free(begin_info);
     free(render_pass_begin_info);
+
+    return 0;
+}
+
+int         scene_info         ( GXScene_t *p_scene )
+{
+    size_t       entity_count    = dict_keys(p_scene->entities, 0),
+                 re              = entity_count,
+                 fs              = 1,
+                 le              = 0;
+    GXEntity_t **entity_names    = calloc(entity_count, sizeof(void *));
+    GXEntity_t **entity_pointers = calloc(entity_count, sizeof(void *));
+
+    while (re >= 10)
+    {
+        re /= 10;
+        fs++;
+    }
+
+    dict_keys(p_scene->entities, entity_names);
+    dict_values(p_scene->entities, entity_pointers);
+
+    for (size_t i = 0; i < entity_count; i++)
+    {
+        size_t el = strlen(entity_names[i]);
+
+        le = (el > le) ? el : le;
+    }
+
+    g_print_log("\n - Scene info -\n");
+    g_print_log("name     : \"%s\"\n", p_scene->name);
+    g_print_log("entities :\n");
+
+    for (size_t i = 0; i < entity_count; i++)
+        g_print_log("           [%.*i] \"%s\"\n", fs, i, entity_names[i]);
+
+    free(entity_names);
+    free(entity_pointers);
 
     return 0;
 }
@@ -540,7 +596,6 @@ int         draw_scene         ( GXScene_t  *scene )
 //
 //    return 0;
 //}
-
 
 GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[])
 {

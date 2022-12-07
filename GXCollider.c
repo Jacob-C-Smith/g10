@@ -88,11 +88,17 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
 
     i_collider->type = (collider_type_t)dict_get(collider_type_dict, type);
 
-    construct_bv( &i_collider->bv, i_collider->aabb_min, i_collider->aabb_max );
+
+    construct_bv(&i_collider->bv, i_collider->aabb_min, i_collider->aabb_max);
 
     // TODO: Change 16 to something smarter
     dict_construct(&i_collider->collisions, 16);
 
+    return 0;
+}
+
+int add_aabb_start_collision_callback(GXCollider_t* collider, void* function_pointer)
+{
     return 0;
 }
 

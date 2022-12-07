@@ -105,6 +105,7 @@ int  construct_transform     ( GXTransform_t **pp_transform, vec3        locatio
 				return 0;
 		}
 	}
+
 }
 
 int  load_transform          ( GXTransform_t **pp_transform, const char *path)

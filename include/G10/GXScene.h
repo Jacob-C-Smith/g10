@@ -12,28 +12,29 @@ struct GXScene_s
 {
 	
 	// The name of the scene
-	char       *name;
+	char           *name;
 
 	// Scene data
-	dict       *entities;
-	dict       *cameras;
-	dict       *lights;
-	dict       *collisions;
+	dict           *entities;
+	dict           *cameras;
+	dict           *lights;
+	GXCollision_t **collisions;
 
 	// A list of entities with rigidbodies
-	dict       *actors;
+	dict           *actors;
 
 	// A list of entities with rigs
-	dict       *rigs;
+	dict           *rigs;
 
 	// A list of entities with AIs
-	dict       *ais;
+	dict           *ais;
 
-	// A bounding volume heierarchy tree containing entities with colliders
-	GXBV_t     *bvh;
+	// A bounding volume hierarchy tree containing entities with colliders
+	GXBV_t         *bvh;
 
 	// The camera to be used while drawing the scene
-	GXCamera_t *active_camera;
+	GXCamera_t     *active_camera;
+	GXEntity_t     *active_entity;
 };
 
 // Allocators
@@ -53,6 +54,9 @@ DLLEXPORT int            append_collision            ( GXScene_t   *scene, GXCol
 // Drawing 
 DLLEXPORT int            draw_scene                  ( GXScene_t   *scene );
 DLLEXPORT int            draw_lights                 ( GXScene_t   *scene, GXPart_t      *light_part, GXShader_t *shader );
+
+// Logging
+DLLEXPORT int            scene_info                  ( GXScene_t   *p_scene );
 
 // Getters
 DLLEXPORT GXEntity_t    *get_entity                  ( GXScene_t   *scene, const char     name[] );

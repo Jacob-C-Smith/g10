@@ -10,6 +10,21 @@
 #include <G10/G10.h>
 #include <G10/GXCamera.h>
 
+struct GXDescriptor_s
+{
+    char           *name;
+
+};
+
+struct GXSet_s
+{
+    char                  *name;
+    size_t                 index;
+    VkDescriptorPool       descriptor_pool;
+    VkDescriptorSet       *descriptor_sets;
+    struct GXDescriptor_s *descriptors_data;
+};
+
 struct GXShader_s
 {
     char                   *name;
@@ -32,24 +47,25 @@ struct GXShader_s
     VkBuffer               *uniform_buffers;
     VkDeviceMemory         *uniform_buffers_memory;
 
-    size_t                  descriptor_set_count,
-                            descriptor_set_layout_count,
-                            push_constant_size;
+    size_t                  push_constant_size, 
+                            set_count;
 
-    dict                   *sets;
+    struct GXSet_s         *sets_data;
 
     size_t                  users;
 };
 
-DLLEXPORT int create_shader_module        ( char        *code, size_t code_len, VkShaderModule* shader_module);
 
-DLLEXPORT int create_shader               ( GXShader_t **shader );
-DLLEXPORT int load_shader                 ( GXShader_t **shader, const char* path );
-DLLEXPORT int load_shader_as_json         ( GXShader_t **shader, char* token_text, size_t token_text_len );
 
-DLLEXPORT int use_shader                  ( GXShader_t  *shader );
+DLLEXPORT int create_shader_module            ( char        *code, size_t code_len, VkShaderModule* shader_module);
 
-DLLEXPORT int update_shader_push_constant ( GXShader_t  *shader );
+DLLEXPORT int create_shader                   ( GXShader_t **shader );
+DLLEXPORT int load_shader                     ( GXShader_t **shader, const char* path );
+DLLEXPORT int load_shader_as_json             ( GXShader_t **shader, char* token_text, size_t token_text_len );
+
+DLLEXPORT int use_shader                      ( GXShader_t  *shader );
+
+DLLEXPORT int update_shader_push_constant     ( GXShader_t  *shader );
 DLLEXPORT int add_shader_push_constant_getter ( char *getter_name, int (*getter_function) (void *));
 
 DLLEXPORT int set_shader_camera               ( GXEntity_t  *p_entity );

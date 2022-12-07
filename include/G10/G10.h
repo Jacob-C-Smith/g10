@@ -86,6 +86,7 @@ struct GXInstance_s
 
     GXSchedule_t             *active_schedule;
     GXScene_t                *active_scene;
+    GXRenderer_t             *active_renderer;
 
     // Schedules
     dict                     *schedules;
@@ -98,17 +99,19 @@ struct GXInstance_s
     GXServer_t               *server;
     GXClient_t               *client;
 
-    dict                     *cached_parts;
-    dict                     *cached_materials;
-    dict                     *cached_shaders;
+    // Cache
+    dict                     *cached_parts,
+                             *cached_materials,
+                             *cached_shaders,
+                             *cached_ais;
     
     // G10 queues
-    queue                    *load_entity_queue;
-    queue                    *actor_move_queue;
-    queue                    *actor_collision_queue;
-    queue                    *actor_force_queue;
-    queue                    *ai_preupdate_queue;
-    queue                    *ai_update_queue;
+    queue                    *load_entity_queue,
+                             *actor_move_queue,
+                             *actor_collision_queue,
+                             *actor_force_queue,
+                             *ai_preupdate_queue,
+                             *ai_update_queue;
 
     int                     (*user_code_callback)(GXInstance_t* instance);
 
@@ -116,6 +119,7 @@ struct GXInstance_s
     SDL_mutex                *load_entity_mutex,
                              *shader_cache_mutex,
                              *part_cache_mutex,
+                             *ai_cache_mutex,
                              *material_cache_mutex,
                              *move_object_mutex,
                              *update_force_mutex,
@@ -252,7 +256,6 @@ DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 // Cache operations
 /* !
  * Cache a material. Caching a material adds it to the garbage collector.
- * Cached materials can be accessed, so long as they are in memory 
  * 
  * @param instance: The active instance
  * @param material: A pointer to a material
@@ -265,7 +268,6 @@ DLLEXPORT int           g_cache_material      ( GXInstance_t        *instance, G
 
 /* !
  * Cache a part. Caching a part adds it to the garbage collector.
- * Cached parts can be accessed, so long as they are in memory
  *
  * @param instance: The active instance
  * @param part    : A pointer to a part
@@ -278,21 +280,33 @@ DLLEXPORT int           g_cache_part          ( GXInstance_t        *instance, G
 
 /* !
  * Cache a shader. Caching a shader adds it to the garbage collector.
- * Cached shaders can be accessed, so long as they are in memory
  *
  * @param instance: The active instance
  * @param shader  : A pointer to a shader
  *
  * @sa g_find_shader
  *
- * `/*-+b
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int           g_cache_shader        ( GXInstance_t        *instance, GXShader_t   *shader );
 
+/* !
+ * Cache an ai. Caching an ai adds it to the garbage collector.
+ *
+ * @param instance : The active instance
+ * @param ai       : A pointer to an ai
+ *
+ * @sa g_find_shader
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int           g_cache_ai            ( GXInstance_t        *instance, GXAI_t       *ai);
+
+
 DLLEXPORT GXMaterial_t *g_find_material       ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXPart_t     *g_find_part           ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, char         *name );
+DLLEXPORT GXAI_t       *g_find_ai             ( GXInstance_t        *instance, char         *name );
 
 // User opertations
 DLLEXPORT void          g_user_exit           ( callback_parameter_t input, GXInstance_t    *instance);

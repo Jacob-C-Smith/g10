@@ -33,6 +33,47 @@ char             *descriptor_type_names          [ ] = {
 };
 char             *push_constant_getter_names     [ ] = {
     "camera position",
+    "model matrix"
+};
+char             *rasterizer_polygon_mode_names  [ ] = {
+    "fill",
+    "line",
+    "point"
+};
+char             *blend_operation_names          [ ] = {
+    "add",
+    "subtract",
+    "reverse subtract",
+    "minimum",
+    "maximum"
+};
+char             *blend_factor_names             [ ] = {
+    "zero",
+    "one",
+    "source color",
+    "one minus source color",
+    "destination color",
+    "one minus destination color",
+    "source alpha",
+    "one minus source alpha",
+    "destination alpha"
+    "one minus destination alpha",
+    "constant color",
+    "one minus constant color",
+    "constant alpha",
+    "one minus constant alpha",
+    "source alpha saturate",
+    "source one color",
+    "one minus source one color",
+    "source one alpha",
+    "one minus source one alpha"
+};
+char             *shader_stages_names            [ ] = {
+    "vertex",
+    "tessellation control",
+    "tessellation evaluation",
+    "geometry",
+    "fragment"
 };
 VkDescriptorType  descriptor_type_enums          [ ] = {
     VK_DESCRIPTOR_TYPE_SAMPLER,
@@ -84,13 +125,58 @@ size_t            format_type_sizes              [ ] = {
     36
 };
 void            **push_constant_getter_functions [ ] = {
-    &get_camera_position
+    &get_camera_position,
+    &get_model_matrix
+};
+VkPolygonMode     rasterizer_polygon_mode_enum   [ ] = {
+    VK_POLYGON_MODE_FILL,
+    VK_POLYGON_MODE_LINE,
+    VK_POLYGON_MODE_POINT
+};
+VkBlendOp         blend_operation_enums          [ ] = {
+    VK_BLEND_OP_ADD,
+    VK_BLEND_OP_SUBTRACT,
+    VK_BLEND_OP_REVERSE_SUBTRACT,
+    VK_BLEND_OP_MIN,
+    VK_BLEND_OP_MAX
+};
+VkBlendFactor     blend_factor_enums             [ ] = {
+    VK_BLEND_FACTOR_ZERO,
+    VK_BLEND_FACTOR_ONE,
+    VK_BLEND_FACTOR_SRC_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+    VK_BLEND_FACTOR_DST_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+    VK_BLEND_FACTOR_SRC_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+    VK_BLEND_FACTOR_DST_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+    VK_BLEND_FACTOR_CONSTANT_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+    VK_BLEND_FACTOR_CONSTANT_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA,
+    VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+    VK_BLEND_FACTOR_SRC1_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+    VK_BLEND_FACTOR_SRC1_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+};
+VkShaderStageFlagBits shader_stages_enum             [ ] = {
+    VK_SHADER_STAGE_VERTEX_BIT,
+    VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+    VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+    VK_SHADER_STAGE_GEOMETRY_BIT,
+    VK_SHADER_STAGE_FRAGMENT_BIT
 };
 
 dict             *format_types                       = 0;
 dict             *format_sizes                       = 0;
 dict             *descriptor_types                   = 0;
 dict             *push_constant_getters              = 0;
+dict             *polygon_modes                      = 0;
+dict             *blend_operations                   = 0;
+dict             *blend_factors                      = 0;
+dict             *shader_stagesD                     = 0;
 
 typedef struct { 
     char                         *name; 
@@ -99,16 +185,23 @@ typedef struct {
     union                         
     {
         struct {
+            size_t i;
+        } sampler;
+
+        struct {
+            size_t i;
+        } combined_image_sampler;
+
+        struct {
             VkDeviceSize    size;
             VkBuffer       *buffers;
             VkDeviceMemory *memories;
         } uniform;
 
         struct {
-
-            // TODO: 
             size_t i;
-        } image;
+        } input_attachment;
+
     };
     size_t                        index;
 } GXDescriptor_t;
@@ -122,14 +215,21 @@ typedef struct {
                      descriptor_len;
 } GXSet_t;
 
-void init_shader                 ( void )
+void init_shader                    ( void )
 {
+
+    GXInstance_t *instance = g_get_active_instance();
+
     dict_construct(&format_types , 16);
     dict_construct(&format_sizes , 16);
     dict_construct(&descriptor_types, 16);
     dict_construct(&push_constant_getters, 64);
+    dict_construct(&polygon_modes, 3);
+    dict_construct(&blend_operations, 5);
+    dict_construct(&blend_factors, 19);
+    dict_construct(&shader_stagesD, 5);
 
-    for (size_t i = 0; i < 16; i++)
+    for (size_t i = 0; i < 15; i++)
     {
         dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
         dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);
@@ -139,12 +239,26 @@ void init_shader                 ( void )
         dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]); 
 
     // Initialize push constant getters 
-    for (size_t i = 0; i < 1; i++)
+    for (size_t i = 0; i < 2; i++)
         dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
+
+    for (size_t i = 0; i < 3; i++)
+        dict_add(polygon_modes, rasterizer_polygon_mode_names[i], (void*)rasterizer_polygon_mode_enum[i]);
+
+    for (size_t i = 0; i < 5; i++)
+    {
+        dict_add(blend_operations, blend_operation_names[i], (void*)blend_operation_enums[i]);
+        dict_add(shader_stagesD, shader_stages_names[i], (void*)shader_stages_enum[i]);
+    }
+
+    for (size_t i = 0; i < 18; i++)
+        dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
+
+    instance->shader_cache_mutex = SDL_CreateMutex();
 
 }
 
-int create_shader_module         ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
+int create_shader_module            ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
 {
     GXInstance_t* instance = g_get_active_instance();
 
@@ -161,7 +275,7 @@ int create_shader_module         ( char         *code   , size_t     code_len  ,
     return 0;
 }
 
-int create_shader                ( GXShader_t  **shader )
+int create_shader                   ( GXShader_t  **shader )
 {
     // TODO: Argument check
     {
@@ -182,7 +296,7 @@ int create_shader                ( GXShader_t  **shader )
     }
 }
 
-int load_shader                  ( GXShader_t  **shader, const char *path )
+int load_shader                     ( GXShader_t  **shader, const char *path )
 {
     // TODO: Argument check
 
@@ -200,23 +314,27 @@ int load_shader                  ( GXShader_t  **shader, const char *path )
     // TODO: Error handling
 }
 
-int load_shader_as_json          ( GXShader_t  **shader, char       *token_text, size_t          token_text_len )
+int load_shader_as_json             ( GXShader_t  **shader, char       *token_text, size_t          token_text_len )
 {
     // TODO: Argument check
     GXInstance_t  *instance                  = g_get_active_instance();
     GXShader_t    *i_shader                  = 0;
     char          *name                      = 0,
                   *vertex_shader_path        = 0,
-                  *fragment_shader_path      = 0;
+                  *geometry_shader_path      = 0,
+                  *fragment_shader_path      = 0,
+                  *rasterizer_json           = 0;
     dict          *json_data                 = 0,
                   *vertex_shader_json_data   = 0,
+                  *geometry_shader_json_data = 0,
                   *fragment_shader_json_data = 0;
     char         **vertex_groups             = 0,
+                 **attachments               = 0,
                  **sets                      = 0,
                   *push_constant_text        = 0;
-    u32            set_count                 = 0;
 
     JSONToken_t   *token                     = 0;
+    size_t         set_count                 = 0;
 
     // Parse JSON data
     {
@@ -229,17 +347,26 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
         token                = dict_get(json_data, "vertex shader path");
         vertex_shader_path   = JSON_VALUE(token, JSONstring);
 
+        token                = dict_get(json_data, "geometry shader path");
+        geometry_shader_path = JSON_VALUE(token, JSONstring);
+
         token                = dict_get(json_data, "fragment shader path");
         fragment_shader_path = JSON_VALUE(token, JSONstring);
 
         token                = dict_get(json_data, "in");
         vertex_groups        = JSON_VALUE(token, JSONarray);
 
+        token                = dict_get(json_data, "attachments");
+        attachments          = JSON_VALUE(token, JSONarray);
+
         token                = dict_get(json_data, "sets");
         sets                 = JSON_VALUE(token, JSONarray);
 
         token                = dict_get(json_data, "push constant");
-        push_constant_text        = JSON_VALUE(token, JSONobject);
+        push_constant_text   = JSON_VALUE(token, JSONobject);
+
+        token                = dict_get(json_data, "rasterizer");
+        rasterizer_json      = JSON_VALUE(token, JSONobject);
     }
     
     // Check the cache
@@ -249,10 +376,8 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
         if (r != (void*)0)
         {
             *shader = r;
-            return 1;
+            goto exit;
         }
-        
-        
     }
 
     // Construct the shader
@@ -270,13 +395,19 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
 
             i_shader->name = calloc(name_len + 1, sizeof(char));
 
-            // TODO: Check memory
+            // Error check
+            {
+                #ifndef NDEBUG
+                    if (i_shader->name == (void *)0)
+                        goto no_mem;
+                #endif
+            }
 
             strncpy(i_shader->name, name, name_len);
         }
 
         // Load the vertex shader binary
-        {
+        if (vertex_shader_path) {
 
             // Initialized data
             size_t   vertex_shader_data_len = g_load_file(vertex_shader_path, 0, true);
@@ -290,6 +421,21 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             free(vertex_shader_data);
         }
         
+        // Load the geometry shader binary
+        if(geometry_shader_path) {
+
+            // Initialized data
+            size_t   geometry_shader_data_len = g_load_file(geometry_shader_path, 0, true);
+            char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
+
+            g_load_file(geometry_shader_path, geometry_shader_data, true);
+
+            // Create a shader module
+            create_shader_module(geometry_shader_data, geometry_shader_data_len, &i_shader->geometry_shader_module);
+
+            free(geometry_shader_data);
+        }
+
         // Load the fragment shader binary
         {
             size_t fragment_shader_data_len = g_load_file(fragment_shader_path, 0, true);
@@ -308,13 +454,15 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
         {
 
             // Initialized data
-            VkPipelineShaderStageCreateInfo        *shader_stages                       = calloc(2, sizeof(VkPipelineShaderStageCreateInfo));
+            VkPipelineShaderStageCreateInfo        *shader_stages                       = calloc(5, sizeof(VkPipelineShaderStageCreateInfo));
+            size_t                                  shader_stage_iterator               = 0,
+                                                    attachment_count                    = 0;
             VkPipelineVertexInputStateCreateInfo   *vertex_input_info_create_info       = calloc(1, sizeof(VkPipelineVertexInputStateCreateInfo));
             VkPipelineInputAssemblyStateCreateInfo *input_assembly_create_info          = calloc(1, sizeof(VkPipelineInputAssemblyStateCreateInfo));
             VkPipelineViewportStateCreateInfo      *viewport_state_create_info          = calloc(1, sizeof(VkPipelineViewportStateCreateInfo));
             VkPipelineRasterizationStateCreateInfo *rasterizer_create_info              = calloc(1, sizeof(VkPipelineRasterizationStateCreateInfo));
             VkPipelineMultisampleStateCreateInfo   *multisampling_create_info           = calloc(1, sizeof(VkPipelineMultisampleStateCreateInfo));
-            VkPipelineColorBlendAttachmentState    *color_blend_attachment_create_info  = calloc(1, sizeof(VkPipelineColorBlendAttachmentState));
+            VkPipelineColorBlendAttachmentState    *color_blend_attachment_create_info  = 0;
             VkPipelineColorBlendStateCreateInfo    *color_blend_create_info             = calloc(1, sizeof(VkPipelineColorBlendStateCreateInfo));
             VkPipelineDynamicStateCreateInfo       *dynamic_state_create_info           = calloc(1, sizeof(VkPipelineDynamicStateCreateInfo));
             VkPipelineLayoutCreateInfo             *pipeline_layout_create_info         = calloc(1, sizeof(VkPipelineLayoutCreateInfo));
@@ -329,20 +477,51 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
 
             // Set up the shader stages
             {
-
+                
                 // Set up the vertex shader
-                {
-                    VkPipelineShaderStageCreateInfo* vertex_shader_stage_create_info = &shader_stages[0];
+                if (i_shader->vertex_shader_module) {
+                    VkPipelineShaderStageCreateInfo* vertex_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
+
                     vertex_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     vertex_shader_stage_create_info->stage  = VK_SHADER_STAGE_VERTEX_BIT;
                     vertex_shader_stage_create_info->module = i_shader->vertex_shader_module;
                     vertex_shader_stage_create_info->pName  = "main";
                 }
 
-                // Set up the fragment shader
-                {
+                // Set up the tessellation control shader
+                if (i_shader->tessellation_control_shader_module) {
+                    VkPipelineShaderStageCreateInfo* tessellation_control_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
-                    VkPipelineShaderStageCreateInfo *fragment_shader_stage_create_info = &shader_stages[1];
+                    tessellation_control_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                    tessellation_control_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+                    tessellation_control_shader_stage_create_info->module = i_shader->tessellation_control_shader_module;
+                    tessellation_control_shader_stage_create_info->pName  = "main";
+                }
+
+                // Set up the tessellation evaluation shader
+                if (i_shader->tessellation_evaluation_shader_module) {
+                    VkPipelineShaderStageCreateInfo* tessellation_evaluation_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
+
+                    tessellation_evaluation_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                    tessellation_evaluation_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+                    tessellation_evaluation_shader_stage_create_info->module = i_shader->tessellation_evaluation_shader_module;
+                    tessellation_evaluation_shader_stage_create_info->pName  = "main";
+                }
+
+                // Set up the geometry shader
+                if (i_shader->geometry_shader_module) {
+                    VkPipelineShaderStageCreateInfo* geometry_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
+
+                    geometry_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                    geometry_shader_stage_create_info->stage  = VK_SHADER_STAGE_GEOMETRY_BIT;
+                    geometry_shader_stage_create_info->module = i_shader->geometry_shader_module;
+                    geometry_shader_stage_create_info->pName  = "main";
+                }
+
+                // Set up the fragment shader
+                if (i_shader->fragment_shader_module) {
+
+                    VkPipelineShaderStageCreateInfo *fragment_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     fragment_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     fragment_shader_stage_create_info->stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -353,26 +532,33 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
 
             // Set up the vertex input state
             {
-                u32 vertex_group_count = 0;
 
-                size_t stride = 0,
-                    binding_description_count = 0;
+                // Initialized data
+                u32    vertex_group_count        = 0;
+                size_t stride                    = 0,
+                       binding_description_count = 0;
 
+                // Did the user specify vertex groups?
                 if (vertex_groups)
                 {
 
+                    // Count vertex groups
                     while (vertex_groups[++vertex_group_count]);
                     
-
+                    // Allocate vertex attributes
                     vertex_input_attribute_descriptions = calloc(vertex_group_count, sizeof(VkVertexInputAttributeDescription));
 
+                    // Iterate over each vertex group
                     for (size_t i = 0; i < vertex_group_count; i++)
                     {
+
+                        // Initialized data
                         dict        *vertex_group   = 0;
                         JSONToken_t *token          = 0;
                         char        *type           = 0;
                         char        *location       = 0;
 
+                        // Parse the JSON objects into a dictionary
                         parse_json(vertex_groups[i], strlen(vertex_groups[i]), &vertex_group);
 
                         token    = dict_get(vertex_group, "type");
@@ -381,26 +567,35 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                         token    = dict_get(vertex_group, "location");
                         location = JSON_VALUE(token, JSONprimative);
 
-                        vertex_input_attribute_descriptions[i].binding  = 0;
-                        vertex_input_attribute_descriptions[i].location = atoi(location);
-                        vertex_input_attribute_descriptions[i].format   = (VkFormat)dict_get(format_types, type);
-                        vertex_input_attribute_descriptions[i].offset   = stride;
-                        
+                        // Construct a vertex input attribute
+                        {
+                            vertex_input_attribute_descriptions[i].binding  = 0;
+                            vertex_input_attribute_descriptions[i].location = atoi(location);
+                            vertex_input_attribute_descriptions[i].format   = (VkFormat)dict_get(format_types, type);
+                            vertex_input_attribute_descriptions[i].offset   = stride;
+                        }
+
                         stride += (size_t) dict_get(format_sizes, type);
 
                     }
-
-                    binding_description->binding = 0;
-                    binding_description->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-                    binding_description->stride = stride;
-                    binding_description_count = 1;
+                    
+                    // Construct a binding description
+                    {
+                        binding_description->binding   = 0;
+                        binding_description->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+                        binding_description->stride    = stride;
+                        binding_description_count      = 1;
+                    }
                 }
 
-                vertex_input_info_create_info->sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                vertex_input_info_create_info->vertexBindingDescriptionCount   = binding_description_count;
-                vertex_input_info_create_info->pVertexBindingDescriptions      = binding_description;
-                vertex_input_info_create_info->vertexAttributeDescriptionCount = vertex_group_count;
-                vertex_input_info_create_info->pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
+                // Set up the vertex input 
+                {
+                    vertex_input_info_create_info->sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+                    vertex_input_info_create_info->vertexBindingDescriptionCount   = binding_description_count;
+                    vertex_input_info_create_info->pVertexBindingDescriptions      = binding_description;
+                    vertex_input_info_create_info->vertexAttributeDescriptionCount = vertex_group_count;
+                    vertex_input_info_create_info->pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
+                }
             }
 
             // Set up the input assembly
@@ -408,7 +603,6 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 input_assembly_create_info->sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 input_assembly_create_info->topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
                 input_assembly_create_info->primitiveRestartEnable = VK_FALSE;
-
             }
 
             // Set up the viewport state
@@ -431,51 +625,212 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                     scissor->extent = instance->swap_chain_extent;
                 }
 
-                viewport_state_create_info->sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                viewport_state_create_info->viewportCount = 1;
-                viewport_state_create_info->pViewports    = viewport;
-                viewport_state_create_info->scissorCount  = 1;
-                viewport_state_create_info->pScissors     = scissor;
+                // Populate the viewport state create struct
+                {
+                    viewport_state_create_info->sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+                    viewport_state_create_info->viewportCount = 1;
+                    viewport_state_create_info->pViewports    = viewport;
+                    viewport_state_create_info->scissorCount  = 1;
+                    viewport_state_create_info->pScissors     = scissor;
+                }
             }
 
             // Set up the rasterizer 
             {
-                rasterizer_create_info->sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                rasterizer_create_info->depthClampEnable        = VK_FALSE;
-                rasterizer_create_info->depthBiasClamp          = 0.0f;
-                rasterizer_create_info->rasterizerDiscardEnable = VK_FALSE;
-                rasterizer_create_info->polygonMode             = VK_POLYGON_MODE_FILL;
-                rasterizer_create_info->lineWidth               = 1.f;
-                rasterizer_create_info->cullMode                = VK_CULL_MODE_BACK_BIT;
-                rasterizer_create_info->frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-                rasterizer_create_info->depthBiasEnable         = VK_FALSE;
+
+                VkPolygonMode polygon_mode               = VK_POLYGON_MODE_FILL;
+                float         line_width                 = 1.f,
+                              depth_bias_constant_factor = 0.f,
+                              depth_bias_clamp           = 0.f,
+                              depth_bias_slope_factor    = 0.f;
+
+                bool          depth_clamp_enable         = false,
+                              rasterizer_discard_enable  = false,
+                              clockwise                  = false,
+                              depth_bias_enable          = false;
+
+                // Parse the rasterizer property
+                if (rasterizer_json) {
+
+                    // Initialized data
+                    dict *rasterizer_json_dict              = 0;
+                    char *polygon_mode_string               = 0,
+                         *line_width_string                 = 0,
+                         *depth_bias_constant_factor_string = 0,
+                         *depth_bias_clamp_string           = 0,
+                         *depth_bias_slope_factor_string    = 0;
+
+                    // Parse the rasterizer JSON text into a JSON dictionary
+                    parse_json(rasterizer_json, strlen(rasterizer_json), &rasterizer_json_dict);
+
+                    // Parse the JSON dictionary into rasterizer parameters
+                    {
+                        JSONToken_t *token                = 0;
+
+                        token                             = dict_get(rasterizer_json_dict, "depth clamp enable");
+                        depth_clamp_enable                = JSON_VALUE(token, JSONprimative);
+
+                        token                             = dict_get(rasterizer_json_dict, "rasterizer discard enable");
+                        rasterizer_discard_enable         = JSON_VALUE(token, JSONprimative);
+                        
+                        token                             = dict_get(rasterizer_json_dict, "polygon mode");
+                        polygon_mode_string               = JSON_VALUE(token, JSONstring);
+                        
+                        token                             = dict_get(rasterizer_json_dict, "cull mode");
+                        rasterizer_discard_enable         = JSON_VALUE(token, JSONarray);
+                                                
+                        token                             = dict_get(rasterizer_json_dict, "clockwise");
+                        clockwise                         = JSON_VALUE(token, JSONprimative);
+                                                
+                        token                             = dict_get(rasterizer_json_dict, "depth bias enable");
+                        depth_bias_enable                 = JSON_VALUE(token, JSONprimative);
+
+                        token                             = dict_get(rasterizer_json_dict, "depth bias constant factor");
+                        depth_bias_constant_factor_string = JSON_VALUE(token, JSONprimative);
+
+                        token                             = dict_get(rasterizer_json_dict, "depth bias clamp");
+                        depth_bias_clamp_string           = JSON_VALUE(token, JSONprimative);
+
+                        token                             = dict_get(rasterizer_json_dict, "depth bias slope factor");
+                        depth_bias_slope_factor_string    = JSON_VALUE(token, JSONprimative);
+
+                        token                             = dict_get(rasterizer_json_dict, "line width");
+                        line_width_string                 = JSON_VALUE(token, JSONprimative);
+
+                    }
+
+                    // Get rasterizer parameters
+                    {
+                        if (polygon_mode_string)
+                            polygon_mode = (VkPolygonMode)dict_get(polygon_modes, polygon_mode_string);
+
+                        if(depth_bias_constant_factor_string)
+                            depth_bias_constant_factor = atof(depth_bias_constant_factor_string);
+
+                        if (depth_bias_clamp_string)
+                            depth_bias_clamp = atof(depth_bias_clamp_string);
+
+                        if (depth_bias_slope_factor_string)
+                            depth_bias_slope_factor = atof(depth_bias_slope_factor_string);
+
+                        if (line_width_string)
+                            if (polygon_mode == VK_POLYGON_MODE_LINE)
+                            line_width = atof(line_width_string);
+
+                    }
+
+                    // Free the dictionary
+                    dict_destroy(rasterizer_json_dict);
+                }
+
+                // Populate the rasterizer create struct
+                {
+                    rasterizer_create_info->sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+                    rasterizer_create_info->depthClampEnable        = depth_clamp_enable;
+                    rasterizer_create_info->rasterizerDiscardEnable = rasterizer_discard_enable;
+                    rasterizer_create_info->polygonMode             = polygon_mode;
+                    rasterizer_create_info->cullMode                = VK_CULL_MODE_FRONT_BIT;
+                    rasterizer_create_info->frontFace               = clockwise;
+                    rasterizer_create_info->depthBiasEnable         = depth_bias_enable;
+                    rasterizer_create_info->depthBiasConstantFactor = depth_bias_constant_factor;
+                    rasterizer_create_info->depthBiasClamp          = depth_bias_clamp;
+                    rasterizer_create_info->depthBiasSlopeFactor    = depth_bias_slope_factor;
+                    rasterizer_create_info->lineWidth               = line_width;
+                }
+
             }
 
             // Set up the multisampler
             {
                 multisampling_create_info->sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling_create_info->sampleShadingEnable  = VK_FALSE;
                 multisampling_create_info->rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+                multisampling_create_info->sampleShadingEnable  = VK_FALSE;
                 multisampling_create_info->minSampleShading     = 1.f;
             }
 
             // Set up the color blend attachment
-            {
-                color_blend_attachment_create_info->colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-                color_blend_attachment_create_info->blendEnable         = VK_FALSE;
-                color_blend_attachment_create_info->srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-                color_blend_attachment_create_info->dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-                color_blend_attachment_create_info->colorBlendOp        = VK_BLEND_OP_ADD;
-                color_blend_attachment_create_info->srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-                color_blend_attachment_create_info->dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-                color_blend_attachment_create_info->alphaBlendOp        = VK_BLEND_OP_ADD;
-                color_blend_attachment_create_info->blendEnable         = VK_TRUE;
-                color_blend_attachment_create_info->srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-                color_blend_attachment_create_info->dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                color_blend_attachment_create_info->colorBlendOp        = VK_BLEND_OP_ADD;
-                color_blend_attachment_create_info->srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-                color_blend_attachment_create_info->dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-                color_blend_attachment_create_info->alphaBlendOp        = VK_BLEND_OP_ADD;
+            if(attachments){
+
+                // Count each attachment
+                while (attachments[++attachment_count]);
+
+                // Allocate memory to create each attachment
+                color_blend_attachment_create_info = calloc(attachment_count, sizeof(VkPipelineColorBlendAttachmentState));
+
+                // Iterate over each JSON attachment object
+                for (size_t i = 0; i < attachment_count; i++)
+                {
+
+                    // Initialized data
+                    char *name                           = 0,
+                         *source_color_blend_factor      = 0,
+                         *destination_color_blend_factor = 0,
+                         *color_blend_operation          = 0,
+                         *source_alpha_blend_factor      = 0,
+                         *destination_alpha_blend_factor = 0,
+                         *alpha_blend_operation          = 0;
+                    dict *a                              = 0;
+
+                    bool  blend_enable                   = true;
+
+                    // Parse JSON 
+                    {
+
+                        // Parse the JSON text into a dictionary
+                        parse_json(attachments[i], strlen(attachments[i]), &a);
+
+                        // Parse JSON properties
+                        {
+
+                            // Initialized data
+                            JSONToken_t *token = 0;
+
+                            token                          = dict_get(a, "name");
+                            name                           = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "blend enable");
+                            blend_enable                   = JSON_VALUE(token, JSONprimative);
+
+                            token                          = dict_get(a, "source color blend factor");
+                            source_color_blend_factor      = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "destination color blend factor");
+                            destination_color_blend_factor = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "color blend operation");
+                            color_blend_operation          = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "source alpha blend factor");
+                            source_alpha_blend_factor      = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "destination alpha blend factor");
+                            destination_alpha_blend_factor = JSON_VALUE(token, JSONstring);
+
+                            token                          = dict_get(a, "alpha blend operation");
+                            alpha_blend_operation          = JSON_VALUE(token, JSONstring);
+
+                        }
+
+                    }
+
+                    // Set up the attachment
+                    {
+                        color_blend_attachment_create_info[i].colorWriteMask    = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+                        color_blend_attachment_create_info[i].blendEnable       = blend_enable;
+
+                        color_blend_attachment_create_info[i].srcColorBlendFactor = (VkBlendFactor) dict_get(blend_factors   , source_color_blend_factor);
+                        color_blend_attachment_create_info[i].dstColorBlendFactor = (VkBlendFactor) dict_get(blend_factors   , destination_color_blend_factor);
+                        color_blend_attachment_create_info[i].colorBlendOp        = (VkBlendOp)     dict_get(blend_operations, color_blend_operation);
+                    
+                        color_blend_attachment_create_info[i].srcAlphaBlendFactor = (VkBlendFactor) dict_get(blend_factors   , source_alpha_blend_factor);
+                        color_blend_attachment_create_info[i].dstAlphaBlendFactor = (VkBlendFactor) dict_get(blend_factors   , destination_alpha_blend_factor);
+                        color_blend_attachment_create_info[i].alphaBlendOp        = (VkBlendOp)     dict_get(blend_operations, alpha_blend_operation);
+                    }
+
+                    // Destroy the JSON
+                    dict_destroy(a);
+                }
+
             }
 
             // Set up the color blending state
@@ -483,36 +838,211 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
                 color_blend_create_info->sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 color_blend_create_info->logicOpEnable   = VK_FALSE;
                 color_blend_create_info->logicOp         = VK_LOGIC_OP_COPY;
-                color_blend_create_info->attachmentCount = 1;
+                color_blend_create_info->attachmentCount = attachment_count;
                 color_blend_create_info->pAttachments    = color_blend_attachment_create_info;
             }
 
             // Set up descriptor layout
             {
-                VkDescriptorSetLayoutBinding    *ubo_layout_binding = calloc(1, sizeof(VkDescriptorSetLayoutBinding));
-                VkDescriptorSetLayoutCreateInfo *layout_info        = calloc(1, sizeof(VkDescriptorSetLayoutCreateInfo));
 
-                {
-                    ubo_layout_binding->binding            = 0;
-                    ubo_layout_binding->descriptorCount    = 1;
-                    ubo_layout_binding->descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    ubo_layout_binding->pImmutableSamplers = 0;
-                    ubo_layout_binding->stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
-                }
+                // Count up sets
+                while (sets[++set_count]);
 
+                i_shader->set_count              = set_count;
+                i_shader->sets_data              = calloc(set_count, sizeof(struct GXSet_s));
+                i_shader->descriptor_set_layouts = calloc(set_count, sizeof(VkDescriptorSetLayout));
+
+
+                // Iterate over each set JSON object
+                for (size_t i = 0; i < set_count; i++)
                 {
-                    layout_info->sType                     = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-                    layout_info->bindingCount              = 1;
-                    layout_info->pBindings                 = ubo_layout_binding;
-                }
-                if (vkCreateDescriptorSetLayout(instance->device, layout_info, 0, &i_shader->descriptor_set_layout) != VK_SUCCESS) {
-                    return -1;
+
+                    // Initialized data
+                    VkDescriptorSetLayoutCreateInfo  *layout_info         = calloc(1, sizeof(VkDescriptorSetLayoutCreateInfo));
+                    VkDescriptorSetLayoutBinding     *ubo_layout_bindings = 0;
+                    VkDescriptorPoolSize             *pool_size           = 0;
+
+                    char                             *set_name            = 0,
+                                                    **descriptors         = 0;
+                    size_t                            descriptor_count    = 0;
+
+                    // Parse JSON 
+                    {
+
+                        // Initialized data
+                        dict *set_json = 0;
+                        
+                        // Parse JSON text into a dictionary
+                        parse_json(sets[i], strlen(sets[i]), &set_json);
+
+                        // Parse JSON properties
+                        {
+
+                            // Initialized data
+                            JSONToken_t *token = 0;
+
+                            token       = dict_get(set_json, "name");
+                            set_name    = JSON_VALUE(token, JSONstring);
+
+                            token       = dict_get(set_json, "descriptors");
+                            descriptors = JSON_VALUE(token, JSONarray);
+
+                        }
+
+                        // Free
+                        dict_destroy(set_json);
+                        
+                    }
+
+                    // Count descriptors
+                    while (descriptors[++descriptor_count]);
+
+                    // Allocate memory for descriptors
+                    ubo_layout_bindings                     = calloc(descriptor_count, sizeof(VkDescriptorSetLayoutBinding));
+                    pool_size                               = calloc(descriptor_count, sizeof(VkDescriptorPoolSize));
+                    i_shader->sets_data[i].descriptors_data = calloc(descriptor_count, sizeof(struct GXSet_s));;
+
+                    dict* descriptor_json = 0;
+
+                    // Iterate over each descriptor JSON object
+                    for (size_t j = 0; j < descriptor_count; j++)
+                    {
+
+                        // Initialized data
+                        char   *descriptor_name = 0, 
+                               *type            = 0,
+                              **stages          = 0; 
+
+                        // Parse JSON 
+                        {
+                            
+                        
+                            // Parse JSON text into a dictionary
+                            parse_json(descriptors[j], strlen(descriptors[j]), &descriptor_json);
+
+                            // Parse JSON properties
+                            {
+
+                                // Initialized data
+                                JSONToken_t *token = 0;
+
+                                token           = dict_get(descriptor_json, "name");
+                                descriptor_name = JSON_VALUE(token, JSONstring);
+
+                                token           = dict_get(descriptor_json, "type");
+                                type            = JSON_VALUE(token, JSONstring);
+
+                                token           = dict_get(descriptor_json, "stages");
+                                stages          = JSON_VALUE(token, JSONarray);
+
+                            }
+
+                            // Copy the descriptor name
+                            {
+
+                                // Initialized dtaa
+                                size_t len = strlen(descriptor_name);
+                                
+                                // Allocate memory to copy the name
+                                i_shader->sets_data[i].descriptors_data[j].name = calloc(len+1, sizeof(char));
+
+                                // Error checking
+                                strncpy(i_shader->sets_data[i].descriptors_data[j].name, descriptor_name, len);
+                            }
+
+                            // Construct each descriptor set layout binding
+                            {
+                                VkShaderStageFlagBits f = 0;
+
+                                // Set shader stages
+                                for (size_t i = 0; stages[i]; i++)
+                                    f |= (VkShaderStageFlagBits) dict_get(shader_stagesD, stages[i]);
+
+                                ubo_layout_bindings[j].binding            = j;
+
+                                // > 1 if array
+                                ubo_layout_bindings[j].descriptorCount    = 1;
+                                ubo_layout_bindings[j].descriptorType     = (VkDescriptorType)dict_get(descriptor_types, type);
+                                ubo_layout_bindings[j].pImmutableSamplers = 0;
+                                ubo_layout_bindings[j].stageFlags         = f;
+                            }
+
+                            // Construct each pool size
+                            {
+                                pool_size[j].type            = ubo_layout_bindings[j].descriptorType;
+                                pool_size[j].descriptorCount = (u32)2;
+                            }
+
+                            // Free
+                            dict_destroy(descriptor_json);
+                        
+                        }
+
+                    }
+
+                    // Populate descriptor set layout info struct
+                    {
+                        layout_info->sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+                        layout_info->bindingCount = descriptor_count;
+                        layout_info->pBindings    = ubo_layout_bindings;
+                    }
+
+                    // Create a descriptor set layout
+                    if (vkCreateDescriptorSetLayout(instance->device, layout_info, 0, &i_shader->descriptor_set_layouts[i]) != VK_SUCCESS) {
+                        
+                        g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCSIG__);
+                        return -1;
+                    }
+
+                    // Copy the name of the set
+                    {
+                                
+                        // Initialized data
+                        size_t len = strlen(set_name);
+                            
+                        i_shader->sets_data[i].name = calloc(len + 1, sizeof(char));
+
+                        // Error checking
+                        {
+                            #ifndef NDEBUG
+                                if (i_shader->sets_data[i].name == (void *) 0)
+                                    goto no_mem;
+                            #endif
+                        }
+
+                        // Copy the name into the buffer
+                        strncpy(i_shader->sets_data[i].name, set_name, len);
+
+                    }
+
+                    // Set the index of the set
+                    i_shader->sets_data[i].index = i;
+                    
+                    // Create descriptor pool
+                    {
+                        VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
+
+                        {
+                            pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+                            pool_info->flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+                            pool_info->poolSizeCount = descriptor_count;
+                            pool_info->pPoolSizes    = pool_size;
+
+                            // TODO: Figure out what to do here
+                            pool_info->maxSets       = (u32)64;
+                        }
+
+                        if (vkCreateDescriptorPool(instance->device, pool_info, (void*)0, &i_shader->sets_data[i].descriptor_pool) != VK_SUCCESS) {
+                            g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCSIG__);
+                            return 0;
+                        }
+                    }
+
                 }
             }
 
             // Set up the dynamic state
             {
-                
                 dynamic_states[0] = VK_DYNAMIC_STATE_VIEWPORT;
                 dynamic_states[1] = VK_DYNAMIC_STATE_SCISSOR;
 
@@ -613,38 +1143,44 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
             {
 
                 pipeline_layout_create_info->sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                pipeline_layout_create_info->setLayoutCount = 1;
-                pipeline_layout_create_info->pPushConstantRanges = push_constant;
-                pipeline_layout_create_info->pushConstantRangeCount = 1;
+                pipeline_layout_create_info->setLayoutCount = set_count;
 
-                i_shader->descriptor_set_layouts            = calloc(1, sizeof(VkDescriptorSetLayout));
+                if (push_constant_text)
+                {
+                    pipeline_layout_create_info->pPushConstantRanges = push_constant;
+                    pipeline_layout_create_info->pushConstantRangeCount = 1;
+                }
 
-                pipeline_layout_create_info->pSetLayouts    = &i_shader->descriptor_set_layout;
+                pipeline_layout_create_info->pSetLayouts    = i_shader->descriptor_set_layouts;
                 
             }
 
-            // Construct the pipeline
+            // Construct the pipeline layout
             if (vkCreatePipelineLayout(instance->device, pipeline_layout_create_info, 0, &i_shader->pipeline_layout) != VK_SUCCESS)
-                g_print_error("[G10] [Shader] Failed to create vulkan pipeline");
+                g_print_error("[G10] [Shader] Failed to create pipeline layout");
 
             // Set up the graphics pipeline
             {
                 graphics_pipeline_create_info->sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                graphics_pipeline_create_info->stageCount          = 2;
+                graphics_pipeline_create_info->stageCount          = shader_stage_iterator;
                 graphics_pipeline_create_info->pStages             = shader_stages;
                 graphics_pipeline_create_info->pVertexInputState   = vertex_input_info_create_info;
                 graphics_pipeline_create_info->pInputAssemblyState = input_assembly_create_info;
+
+                // TODO: 
+                graphics_pipeline_create_info->pTessellationState  = 0;
                 graphics_pipeline_create_info->pViewportState      = viewport_state_create_info;
                 graphics_pipeline_create_info->pRasterizationState = rasterizer_create_info;
                 graphics_pipeline_create_info->pMultisampleState   = multisampling_create_info;
+
+                // TODO: 
+                graphics_pipeline_create_info->pDepthStencilState  = 0;
                 graphics_pipeline_create_info->pColorBlendState    = color_blend_create_info;
                 graphics_pipeline_create_info->pDynamicState       = dynamic_state_create_info;
                 graphics_pipeline_create_info->layout              = pipeline_layout_create_info;
-                graphics_pipeline_create_info->renderPass          = instance->render_pass;
-                graphics_pipeline_create_info->subpass             = 0;
-                graphics_pipeline_create_info->basePipelineHandle  = VK_NULL_HANDLE;
                 graphics_pipeline_create_info->layout              = i_shader->pipeline_layout;
                 graphics_pipeline_create_info->renderPass          = instance->render_pass;
+                graphics_pipeline_create_info->basePipelineHandle  = VK_NULL_HANDLE;
                 graphics_pipeline_create_info->basePipelineIndex   = -1;
             }
 
@@ -674,81 +1210,64 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
 
         }
 
-        // Create uniform buffers
+        // 
         {
-            // Iterate over each uniform
+
+            // Create uniform buffers
+            {
+                // Iterate over each uniform
             // Iterate over each frame
             // Create a buffer for each uniform for each frame
 
-            VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
-    
-            i_shader->uniform_buffers        = calloc(sizeof(void *), 2);
-            i_shader->uniform_buffers_memory = calloc(sizeof(void *), 2);
+                VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
+        
+                i_shader->uniform_buffers        = calloc(sizeof(void *), 2);
+                i_shader->uniform_buffers_memory = calloc(sizeof(void *), 2);
 
-            for (size_t i = 0; i < 2; i++)
-                create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->uniform_buffers[i], &i_shader->uniform_buffers_memory[i]);
-        }
+                for (size_t i = 0; i < 2; i++)
+                    create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->uniform_buffers[i], &i_shader->uniform_buffers_memory[i]);
+            }
 
-        // Create descriptor pool
-        {
-            VkDescriptorPoolSize       *pool_size = calloc(1, sizeof(VkDescriptorPoolSize));
-            VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
-
+            // Create descriptor sets
             {
-                pool_size->type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                pool_size->descriptorCount = (u32)2;
-            }
+                VkDescriptorSetLayout       *layouts    = calloc(2, sizeof(VkDescriptorSetLayout));
+                VkDescriptorSetAllocateInfo *alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
 
-            {
-                pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-                pool_info->poolSizeCount = 1;
-                pool_info->pPoolSizes    = pool_size;
-                pool_info->maxSets       = (u32)2;
-            }
+                for (size_t i = 0; i < 2; i++)
+                    memcpy(&layouts[i], &i_shader->descriptor_set_layouts[0], sizeof(VkDescriptorSetLayout));
 
-            if (vkCreateDescriptorPool(instance->device, pool_info, (void *)0, &i_shader->descriptor_pool) != VK_SUCCESS) {
-                return -1;
-        }
-        }
+                {
+                    alloc_info->sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+                    alloc_info->descriptorPool     = i_shader->sets_data[0].descriptor_pool;
+                    alloc_info->descriptorSetCount = 2;
+                    alloc_info->pSetLayouts        = layouts;
+                }
 
-        // Create descriptor sets
-        {
-            VkDescriptorSetLayout       *layouts    = calloc(2, sizeof(VkDescriptorSetLayout));
-            VkDescriptorSetAllocateInfo *alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
+                i_shader->sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
 
-            for (size_t i = 0; i < 2; i++)
-                memcpy(&layouts[i], &i_shader->descriptor_set_layout, sizeof(VkDescriptorSetLayout));
+                if ( vkAllocateDescriptorSets(instance->device, alloc_info, i_shader->sets_data[0].descriptor_sets ) != VK_SUCCESS) {
+                    g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCSIG__);
+                }
 
-            {
-                alloc_info->sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-                alloc_info->descriptorPool     = i_shader->descriptor_pool;
-                alloc_info->descriptorSetCount = 2;
-                alloc_info->pSetLayouts        = layouts;
-            }
+                for (size_t i = 0; i < 2; i++)
+                {
+                    VkDescriptorBufferInfo *buffer_info      = calloc(1, sizeof(VkDescriptorBufferInfo));
+                    VkWriteDescriptorSet   *descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
 
-            i_shader->descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
+                    buffer_info->buffer = i_shader->uniform_buffers[i];
+                    buffer_info->offset = 0;
+                    buffer_info->range  = 3*sizeof(mat4) + sizeof(vec3);
 
-            if (vkAllocateDescriptorSets(instance->device, alloc_info, i_shader->descriptor_sets) != VK_SUCCESS) {
-
-            }
-
-            for (size_t i = 0; i < 2; i++) {
-                VkDescriptorBufferInfo *buffer_info      = calloc(1, sizeof(VkDescriptorBufferInfo));
-                VkWriteDescriptorSet   *descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
-
-                buffer_info->buffer = i_shader->uniform_buffers[i];
-                buffer_info->offset = 0;
-                buffer_info->range  = 3*sizeof(mat4) + sizeof(vec3);
-
-                descriptor_write->sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptor_write->dstSet          = i_shader->descriptor_sets[i];
-                descriptor_write->dstBinding      = 0;
-                descriptor_write->dstArrayElement = 0;
-                descriptor_write->descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                descriptor_write->descriptorCount = 1;
-                descriptor_write->pBufferInfo     = buffer_info;
-    
-                vkUpdateDescriptorSets(instance->device, 1, descriptor_write, 0, 0);
+                    descriptor_write->sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    descriptor_write->dstSet          = i_shader->sets_data[0].descriptor_sets[i];
+                    descriptor_write->dstBinding      = 0;
+                    descriptor_write->dstArrayElement = 0;
+                    descriptor_write->descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    descriptor_write->descriptorCount = 1;
+                    descriptor_write->pBufferInfo     = buffer_info;
+        
+                    vkUpdateDescriptorSets(instance->device, 1, descriptor_write, 0, 0);
+                }
             }
         }
     }
@@ -756,15 +1275,17 @@ int load_shader_as_json          ( GXShader_t  **shader, char       *token_text,
     // Cache the shader
     g_cache_shader(instance, i_shader);
 
+    exit:
     return 1;
 
     // TODO: Error handling
-push_constant_is_too_large:
-    return 0;
+    no_mem:
+    push_constant_is_too_large:
+        return 0;
         
 }
 
-int use_shader                   ( GXShader_t   *shader )
+int use_shader                      ( GXShader_t   *shader )
 {
     GXInstance_t *instance = g_get_active_instance();
     VkViewport   *viewport = calloc(1, sizeof(VkViewport));
@@ -804,7 +1325,7 @@ int use_shader                   ( GXShader_t   *shader )
     return 0;
 }
 
-int update_shader_push_constant  ( GXShader_t   *shader )
+int update_shader_push_constant     ( GXShader_t   *shader )
 {
     size_t offset = 0;
     for (size_t i = 0; i < shader->push_constant_properties[i]; i++)
@@ -819,7 +1340,7 @@ int update_shader_push_constant  ( GXShader_t   *shader )
     return 1;
 }
 
-int add_shader_push_constant_getter ( char* getter_name, int(*getter_function)(void*) )
+int add_shader_push_constant_getter ( char         *getter_name, int(*getter_function)(void*) )
 {
 
     // Argument errors
@@ -872,7 +1393,7 @@ int add_shader_push_constant_getter ( char* getter_name, int(*getter_function)(v
     }
 }
 
-int set_shader_camera(GXEntity_t *p_entity)
+int set_shader_camera               ( GXEntity_t   *p_entity )
 {
      
     // TODO: Argument check
@@ -882,27 +1403,29 @@ int set_shader_camera(GXEntity_t *p_entity)
     GXCamera_t    *camera    = instance->active_scene->active_camera;
     GXTransform_t *transform = p_entity->transform;
 
-    // Update the transform
-    transform_model_matrix(transform, &transform->model_matrix);
-
-    vec3 a;
-    add_vec3(&a, camera->target, camera->location);
-
-    // Update the view matrix
-    camera->view       = look_at(camera->location, a, camera->up);
-
-    // Update the projection matrix
-    camera->projection = perspective_matrix(camera->fov, camera->aspect_ratio, camera->near_clip, camera->far_clip);
-
     mat4 uniform_buffer[4];
-    uniform_buffer[0]   = transform->model_matrix;
-    uniform_buffer[1]   = camera->view;
-    uniform_buffer[2]   = camera->projection;
 
-    uniform_buffer[3].a = camera->location.x;
-    uniform_buffer[3].b = camera->location.y;
-    uniform_buffer[3].c = camera->location.z;
+    {
+        // Update the transform
+        transform_model_matrix(transform, &uniform_buffer[0]);
 
+        vec3 a;
+        add_vec3(&a, camera->target, camera->location);
+
+        // Update the view matrix
+        camera->view = look_at(camera->location, a, camera->up);
+
+        // Update the projection matrix
+        camera->projection = perspective_matrix(camera->fov, camera->aspect_ratio, camera->near_clip, camera->far_clip);
+
+        uniform_buffer[1] = camera->view;
+        uniform_buffer[2] = camera->projection;
+
+        uniform_buffer[3].a = camera->location.x;
+        uniform_buffer[3].b = camera->location.y;
+        uniform_buffer[3].c = camera->location.z;
+    }
+    
     void *data;
 
     vkMapMemory(instance->device, p_entity->shader->uniform_buffers_memory[instance->current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
@@ -925,7 +1448,7 @@ int set_shader_camera(GXEntity_t *p_entity)
     }
 }
 
-int destroy_shader               ( GXShader_t   *shader )
+int destroy_shader                  ( GXShader_t   *shader )
 {
 
     // TODO: Cache destruction

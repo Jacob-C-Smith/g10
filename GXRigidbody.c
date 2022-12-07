@@ -17,7 +17,7 @@ int update_force(GXRigidbody_t* rigidbody)
 	for (size_t i = 1; i < rigidbody->force_count; i++)
 		add_vec3(&rigidbody->forces[0], rigidbody->forces[0], rigidbody->forces[i]);
 
-
+	return 1;
 }
 
 int load_rigidbody(GXRigidbody_t** rigidbody, const char* path)
@@ -29,7 +29,7 @@ int load_rigidbody(GXRigidbody_t** rigidbody, const char* path)
 
 	load_rigidbody_as_json(rigidbody, token_text, token_text_len);
 
-	return 0;
+	return 1;
 }
 
 int load_rigidbody_as_json(GXRigidbody_t** rigidbody, char* token_text, size_t token_text_len)
@@ -54,7 +54,7 @@ int load_rigidbody_as_json(GXRigidbody_t** rigidbody, char* token_text, size_t t
 	create_rigidbody(rigidbody);
 	i_rigidbody = *rigidbody;
 
-	if(mass)
+	if (mass)
 		i_rigidbody->mass = atoi(mass);
 
 	i_rigidbody->active = active;
@@ -64,7 +64,7 @@ int load_rigidbody_as_json(GXRigidbody_t** rigidbody, char* token_text, size_t t
 
 	i_rigidbody->torques = calloc(16, sizeof(quaternion));
 
-	return 0;
+	return 1;
 }
 
 int destroy_rigidbody(GXRigidbody_t* rigidbody)
@@ -73,5 +73,5 @@ int destroy_rigidbody(GXRigidbody_t* rigidbody)
 	free(rigidbody->torques);
 	free(rigidbody);
 
-	return 0;
+	return 1;
 }

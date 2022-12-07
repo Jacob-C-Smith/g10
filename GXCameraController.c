@@ -3,7 +3,8 @@
 float x_orient,
       y_orient,
       h_ang,
-      v_ang;
+      v_ang,
+      camera_acceleration = 0.25;
 
 GXCameraController_t* camera_controller = 0;
 
@@ -57,25 +58,25 @@ void                  camera_controller_strafe_right ( callback_parameter_t stat
 void                  camera_controller_up           ( callback_parameter_t state, GXInstance_t* instance ) 
 {
     if (state.input_state == MOUSE)
-        v_ang += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        v_ang += camera_acceleration * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_down         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        v_ang -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        v_ang -= camera_acceleration * fabsf(state.inputs.mouse_state.yrel);
 
 }
 void                  camera_controller_left         ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        h_ang -= camera_acceleration * fabsf(state.inputs.mouse_state.xrel);
 
 }
 void                  camera_controller_right        ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == MOUSE)
-        h_ang += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        h_ang += camera_acceleration * fabsf(state.inputs.mouse_state.xrel);
 
 }
 
@@ -142,7 +143,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         #endif
     }
 
-    ret->spdlim = 0.0025;
+    ret->spdlim = 0.00025;
 
     // Assign displacement callbacks
     register_bind_callback(forward     , &camera_controller_forward);

@@ -97,7 +97,6 @@ DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
  */
 DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t len );
 
-
 /* !
  *  Load a thread from a JSON file
  *
@@ -110,7 +109,6 @@ DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_thread            ( GXThread_t   **thread, char *path );
-
 
 /* !
  *  Load a thread from a JSON file
@@ -149,8 +147,6 @@ DLLEXPORT int start_schedule         ( GXSchedule_t  *schedule );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int stop_schedule          ( GXSchedule_t  *schedule );
-
-
 
 // Destructors
 DLLEXPORT int destroy_schedule       ( GXSchedule_t **schedule );

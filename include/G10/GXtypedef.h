@@ -205,6 +205,19 @@ typedef struct connect_s connect_t;
 struct chat_s;
 typedef struct chat_s chat_t;
 
+// Renderer
+struct GXRenderer_s;
+typedef struct GXRenderer_s GXRenderer_t;
+
+struct GXRenderPass_s;
+typedef struct GXRenderPass_s GXRenderPass_t;
+
+struct GXSubpass_s;
+typedef struct GXSubpass_s    GXSubpass_t;
+
+struct GXAttachment_s;
+typedef struct GXAttachment_s GXAttachment_t;
+
 // Scheduler
 struct GXScheduler_s;
 

@@ -13,7 +13,7 @@
 		- check for file open errors
 
 	- G10 errors -
-		- check for return codes after calling g10 functions
+		- check for return codes after calling g functions
 
 - AI -
 	- TODO - 
@@ -21,38 +21,49 @@
 
 - Rig - 
 	- TODO - 
+		Header documentation
 
 - Audio - 
 	- TODO - 
+		Header documentation
 
 - Collision - 
 	- TODO - 
+		Header documentation
 	
 	- Collider - 
 		- TODO - 
+			Header documentation
 
 		- Bounding Volume - 
 			- TODO - 
+				Header documentation
 
 		- Expanding Polytope Algorithm - 
 			- TODO - 
+				Header documentation
 
 		- Gilbert Johnson Keerthi -
 			- TODO - 
+				Header documentation
 
 - Input -
 	- TODO - 
+		Header documentation
 
 - Math -
 
 	- Linear - 
 		- TODO - 
+			Header documentation
 
 	- Quaternion - 
 		- TODO - 
+			Header documentation
 
 - Networking - 
 	- TODO -
+		Finish header documentation
 
 	- Server - 
 		- TODO -
@@ -65,9 +76,7 @@
 
 - Physics - 
 	- TODO - 
-
-- Physics - 
-	- TODO -
+		Update rigs
 
 - Renderer - 
 	- TODO -

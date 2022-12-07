@@ -88,9 +88,13 @@ DLLEXPORT int load_collider                ( GXCollider_t **collider, const char
 DLLEXPORT int load_collider_as_json        ( GXCollider_t **collider, char         *token_text , size_t len );      // Creates a collider from JSON text
 
 // Callbacks
-DLLEXPORT int add_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
-DLLEXPORT int add_collision_callback       ( GXCollider_t *collider, void* function_pointer );
-DLLEXPORT int add_end_collision_callback   ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_aabb_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_aabb_collision_callback       ( GXCollider_t *collider, void* function_pointer );
+DLLEXPORT int add_aabb_end_collision_callback   ( GXCollider_t *collider, void* function_pointer );
+
+//DLLEXPORT int add_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
+//DLLEXPORT int add_collision_callback       ( GXCollider_t *collider, void* function_pointer );
+//DLLEXPORT int add_end_collision_callback   ( GXCollider_t *collider, void* function_pointer );
 
 // Destructors
 DLLEXPORT int destroy_collider             ( GXCollider_t *collider );   // Destroys a collider
