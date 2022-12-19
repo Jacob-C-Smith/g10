@@ -25,17 +25,111 @@ struct GXCamera_s {
 };
 
 // Allocators
-DLLEXPORT int  create_camera       ( GXCamera_t** camera);
+
+/* !
+ *  Allocate memory for a camera
+ *
+ * @param pp_camera : return
+ *
+ * @sa destroy_camera
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int  create_camera       ( GXCamera_t **pp_camera );
 
 // Constructors
-DLLEXPORT int  construct_camera    ( GXCamera_t** camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
-DLLEXPORT int  load_camera         ( GXCamera_t** camera, const char* path);
-DLLEXPORT int  load_camera_as_json ( GXCamera_t** camera, char* object_text, size_t len);
 
+/* !
+ *  Construct a camera from view and projection parameters
+ *
+ * @param pp_camera    : return
+ * @param location     : The location of the camera in 3D space
+ * @param front        : The vector pointing from the camera to where it is looking
+ * @param up           : The camera's up vector
+ * @param near_clip    : The near clipping plane
+ * @param far_clip     : The far clipping plane
+ * @param aspect_ratio : Window width divided by window height
+ * @param fov          : The camera's field of view, in degreesº
+ *
+ * @sa load_camera_as_json
+ * @sa create_camera
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int  construct_camera    ( GXCamera_t** camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
+
+/* !
+ *  Load a camera from a JSON file
+ *
+ * @param pp_camera : return
+ * @param path      : The path to a JSON file containing a camera object
+ *
+ * @sa load_camera_as_json
+ * @sa create_camera
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int  load_camera         ( GXCamera_t **camera, const char *path );
+
+/* !
+ *  Load a camera from JSON text
+ *
+ * @param pp_camera  : return
+ * @param token_text : The camera JSON object text
+ * @param len        : The length of the camera JSON object text
+ *
+ * @sa load_camera_as_json
+ * @sa create_camera
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int  load_camera_as_json ( GXCamera_t **camera, char       *object_text, size_t len);
+
+/* !
+ *  Construct a 4x4 view matrix from it's parameters
+ *
+ * @param eye    : The object's position in 3D space
+ * @param target : The direction the object is pointing in
+ * @param up     : The up vectors
+ *
+ * @sa perspective_matrix
+ *
+ * @return a view mat4 
+ */
 DLLEXPORT mat4 look_at             ( vec3        eye,    vec3        target       , vec3  up );
+
+/* !
+ *  Construct a 4x4 perspective matrix from it's parameters
+ *
+ * @param fov       : The field of view of the camera
+ * @param aspect    : The window's width divided by its height
+ * @param near_clip : The near clipping plane
+ * @param far_clip  : The far clipping plane
+ *
+ * @sa look_at
+ *
+ * @return a projection mat4 
+ */
 DLLEXPORT mat4 perspective_matrix  ( float       fov,    float       aspect       , float near_clip , float far_clip);
 
+/* !
+ *  Get the position of the active instance's active scene's active camera
+ *
+ * @param ret : the pointer to the active... ya know
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int  get_camera_position ( void       *ret );
 
 // Deallocators
-DLLEXPORT int  destroy_camera      ( GXCamera_t* camera);
+
+/* !
+ *  Destroy a camera and deallocate it's memory
+ *
+ * @param p_camera : The camera to destroy
+ *
+ * @sa create_camera
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int  destroy_camera      ( GXCamera_t* camera );

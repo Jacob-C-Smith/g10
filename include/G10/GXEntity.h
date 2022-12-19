@@ -92,6 +92,9 @@ DLLEXPORT int calculate_entity_force ( GXEntity_t *p_entity );
  */
 DLLEXPORT int move_entity            ( GXEntity_t *p_entity );
 
+// Info
+DLLEXPORT int entity_info            ( GXEntity_t  *p_entity );
+
 // AI
 
 /* !

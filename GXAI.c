@@ -270,8 +270,10 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 					#endif
 				}
 
+				strncpy(state_name, states[i], state_len);
+
 				// Add the state name to the state dictionary
-				dict_add(p_ai->states, states[i], 0);
+				dict_add(p_ai->states, state_name, 0);
 			}
 		}
 
@@ -550,6 +552,68 @@ int copy_ai                    ( GXAI_t       **pp_ai, GXAI_t *p_ai )
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
 				return 0;
+			no_ai:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+}
+
+int ai_info ( GXAI_t *p_ai )
+{
+
+	// Argument errors
+	{
+		#ifndef NDEBUG
+			if (p_ai == (void*)0)
+				goto no_ai;
+		#endif
+	}
+
+	// Initialized data
+	size_t   state_count = dict_keys(p_ai->states, 0);
+	char   **state_names = calloc(state_count, sizeof (char *));
+
+	// Formatting 
+    g_print_log(" - AI info - \n");
+    
+    // Print the name
+    g_print_log("name        : \"%s\"\n", p_ai->name);
+
+	// Print the active state
+	g_print_log("active state: \"%s\"\n", p_ai->current_state);
+
+
+    // Formatting 
+    g_print_log("states      : \n");
+
+	// Get each AI state
+	if(state_count)
+		dict_keys(p_ai->states, state_names);
+
+    // Iterate over each state
+    for (size_t i = 0; i < state_count; i++)
+    {
+        
+        // Print the name of each state
+        g_print_log("\t[%d] \"%s\"\n", i, state_names[i]);
+
+    }
+
+	putchar('\n');
+
+	// Free the list of state names
+	free(state_names);
+
+    return 1;
+	
+	// Error handling
+	{
+
+		// Argument errors
+		{
 			no_ai:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);

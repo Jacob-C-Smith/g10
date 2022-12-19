@@ -16,7 +16,8 @@ char             *format_type_names              [ ] = {
     "double",
     "mat4",
     "mat3",
-    "u8vec4"
+    "u8vec4",
+    "u8vec4 sRGB"
 };
 char             *descriptor_type_names          [ ] = {
     "sampler",
@@ -105,7 +106,8 @@ VkFormat          format_type_enums              [ ] = {
     // TODO: 
     0,
     0,
-    VK_FORMAT_R8G8B8A8_UINT
+    VK_FORMAT_R8G8B8A8_UINT,
+    VK_FORMAT_R8G8B8A8_SRGB
 };
 size_t            format_type_sizes              [ ] = {
     4,
@@ -122,7 +124,9 @@ size_t            format_type_sizes              [ ] = {
     16,
     8,
     64,
-    36
+    36,
+    32,
+    32
 };
 void            **push_constant_getter_functions [ ] = {
     &get_camera_position,
@@ -220,8 +224,8 @@ void init_shader                    ( void )
 
     GXInstance_t *instance = g_get_active_instance();
 
-    dict_construct(&format_types , 16);
-    dict_construct(&format_sizes , 16);
+    dict_construct(&format_types , 17);
+    dict_construct(&format_sizes , 17);
     dict_construct(&descriptor_types, 16);
     dict_construct(&push_constant_getters, 64);
     dict_construct(&polygon_modes, 3);
@@ -229,7 +233,7 @@ void init_shader                    ( void )
     dict_construct(&blend_factors, 19);
     dict_construct(&shader_stagesD, 5);
 
-    for (size_t i = 0; i < 15; i++)
+    for (size_t i = 0; i < 17; i++)
     {
         dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
         dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);

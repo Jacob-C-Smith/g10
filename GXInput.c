@@ -1373,6 +1373,74 @@ int          append_bind               ( GXInput_t *input, GXBind_t *bind )
     return 1;
 }
 
+int input_info ( GXInput_t *input )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( input == (void *) 0 )
+                goto no_input;
+        #endif
+    }
+
+    // Formatting 
+    g_print_log(" - Input info - \n");
+    
+    // Print the name
+    g_print_log("name             : \"%s\"\n", input->name);
+
+	// Print the mouse sensitivity
+	g_print_log("mouse sensitivity: \"%.2f\"\n", input->mouse_sensitivity);
+
+    // Format
+    g_print_log("binds            : \n");
+
+	// Print each bind
+    size_t l         = dict_values(input->binds, 0);
+    GXBind_t** binds = calloc(l, sizeof( GXBind_t *));
+
+    dict_values(input->binds, binds);
+
+    // TODO: Better formatting, like the scene_info function
+    for (size_t i = 0; i < l; i++)
+    {
+        g_print_log("                   [%d] \"%s\": \n", i, binds[i]->name);
+        g_print_log("                         [ ", i, binds[i]->name);
+        
+
+        if (binds[i]->key_count)
+        {
+            g_print_log("%s", binds[i]->keys[0]);
+
+            for (size_t j = 1; j < binds[i]->key_count; j++)
+            {
+                g_print_log(", %s", binds[i]->keys[j]);
+            }
+
+            g_print_log(" ]\n");
+        }
+
+    }
+	putchar('\n');
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_input:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input} Null pointer provided for \"input\" in call to funciton \"%s\"\n", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+    }
+}
+
 int          fire_bind                 ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance )
 {
 

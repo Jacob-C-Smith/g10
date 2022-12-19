@@ -197,12 +197,6 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 	// Is there enough information to construct an entity?
 	{
 
-		// Initialized data
-		bool suitable = true;
-
-		// If the device is unsuitable, abort
-		if (suitable == false)
-			goto not_enough_info;
 	}
 
 	// Construct the entity
@@ -678,6 +672,15 @@ int load_light_probe_from_queue(GXInstance_t* instance)
 
 int draw_entity(GXEntity_t* p_entity)
 {
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if (p_entity == (void *)0)
+				goto no_entity;
+		#endif
+	}
+
 	if (p_entity->parts == 0)
 		return 0;
 	GXInstance_t* instance = g_get_active_instance();
@@ -716,6 +719,19 @@ int draw_entity(GXEntity_t* p_entity)
 	free(parts);
 
 	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
 }
 
 int destroy_entity(GXEntity_t* p_entity)
@@ -817,6 +833,45 @@ int move_entity ( GXEntity_t* p_entity )
 	resize_bv(p_entity->collider->bv);
 
 	return 1;
+}
+
+int entity_info(GXEntity_t* p_entity)
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( p_entity == (void *)0 )
+				goto no_entity;
+		#endif
+	}
+
+	// Formatting 
+    g_print_log(" - Entity info - \n");
+    
+    // Print the name
+    g_print_log("name          : \"%s\"\n", p_entity->name);
+
+	// TODO: Print each struct field.
+
+
+    putchar('\n');
+
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_entity:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+		
+	}
 }
 
 // TODO: Argument check

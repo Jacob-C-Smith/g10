@@ -208,6 +208,57 @@ int draw_part         ( GXPart_t  *part)
 	return 1;
 }
 
+int part_info         ( GXPart_t *p_part )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( p_part == (void *)0 )
+				goto no_part;
+		#endif
+	}
+
+	// Formatting 
+    g_print_log(" - Part info - \n");
+    
+    // Print the name
+    g_print_log("name            : \"%s\"\n", p_part->name);
+
+	// Print the active material
+	if (p_part->active_material)
+		g_print_log("active material : \"%s\"\n", p_part->active_material->name);
+
+	// Print the active shader
+	if (p_part->active_shader)
+		g_print_log("active shader   : \"%s\"\n", p_part->active_shader->name);
+
+	// Print the vertex count
+	if (p_part->vertex_count)
+		g_print_log("vertices        : %lld\n", p_part->vertex_count);
+
+	// Print the face count
+	if (p_part->vertex_count)
+		g_print_log("faces           : %lld\n", p_part->index_count);
+
+	putchar('\n');
+
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_part:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCSIG__);
+				#endif
+				return 0;
+		}
+	}
+}
+
 int destroy_part      ( GXPart_t  *part)
 {
 	

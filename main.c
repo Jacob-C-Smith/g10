@@ -27,6 +27,8 @@ int main ( int argc, const char *argv[] )
                   *schedule_name          = "Client Schedule",
                   *client_name            = 0;
     bool           connect_to_server      = false;
+    GXAI_t        *p_ai                   = 0;
+    GXTexture_t   *abc_texture            = 0;
 
     // Parse command line arguments
     {
@@ -58,6 +60,7 @@ int main ( int argc, const char *argv[] )
         g_init(&instance, instance_path);
 
     load_camera(&instance->active_scene->active_camera, "G10/camera.json");
+    load_texture(&abc_texture, "G10/t.json");
     
     // Game setup
     {
@@ -100,10 +103,14 @@ int main ( int argc, const char *argv[] )
 
     }
 
-    scene_info(instance->active_scene);
+    // Log a lot of stuff
+    if(0){
+        scene_info(instance->active_scene);
 
-    if (instance->server)
-        start_server();
+        renderer_info(instance->active_renderer);
+
+        input_info(instance->input);
+    }
 
     instance->running = true;
 
@@ -117,5 +124,5 @@ int main ( int argc, const char *argv[] )
     // Exit 
     g_exit(instance);
 
-    return 0;
+    return 1;
 }

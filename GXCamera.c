@@ -78,29 +78,29 @@ mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up 
     };
 };
 
-int  create_camera    ( GXCamera_t **camera)
+int  create_camera    ( GXCamera_t **pp_camera )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( camera == (void *) 0 )
+			if ( pp_camera == (void *) 0 )
 				goto no_camera;
 		#endif
 	}
 
 	// Initialized data
-	GXCamera_t *ret = calloc(1, sizeof(GXCamera_t));
+	GXCamera_t *p_camera = calloc(1, sizeof(GXCamera_t));
 
 	// Error checking
 	{
 		#ifndef NDEBUG
-			if(ret == (void*)0)
+			if(p_camera == (void*)0)
 				goto no_mem;
 		#endif
 	}
 
-	*camera = ret;
+	*pp_camera = p_camera;
 
 	return 1;
 
@@ -111,7 +111,7 @@ int  create_camera    ( GXCamera_t **camera)
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"camera\" in call to function \"%s\"", __FUNCSIG__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"", __FUNCSIG__);
 				#endif
 				return 0;
 		}

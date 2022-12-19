@@ -2,7 +2,7 @@
 
 dict* scheduler_tasks = 0;
 
-char* task_names[20] = {
+char* task_names[21] = {
 	"Input",
 	"UI",
 	"AI",
@@ -13,6 +13,7 @@ char* task_names[20] = {
 	"Move Objects",
 	"Animation",
 	"Render",
+	"Present",
 	"Load Entity",
 	"Load Light Probe",
 	"Copy State",
@@ -25,7 +26,7 @@ char* task_names[20] = {
 	"Audio"
 };
 
-void* task_function_pointers[20] = {
+void* task_function_pointers[21] = {
 	&process_input,
 	(void*) 0,
 	&update_ai, 
@@ -36,6 +37,7 @@ void* task_function_pointers[20] = {
 	&move_objects,
 	&update_rigs,
 	&render_frame,
+	&present_frame,
 	&load_entity_from_queue, 
 	&load_light_probe_from_queue, 
 	&copy_state,
@@ -55,10 +57,10 @@ void init_scheduler        ( void )
 	GXInstance_t *instance = g_get_active_instance();
 
 	// Construct a function lookup table
-	dict_construct(&scheduler_tasks, 20);
+	dict_construct(&scheduler_tasks, 21);
 
 	// Iterate over each task
-	for (size_t i = 0; i < 20; i++)
+	for (size_t i = 0; i < 21; i++)
 		
 		// Add each task to the lookup table
 		dict_add(scheduler_tasks, task_names[i], task_function_pointers[i]);

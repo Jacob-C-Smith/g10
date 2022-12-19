@@ -17,6 +17,7 @@
 
 #include <G10/GXtypedef.h>
 #include <G10/GXScene.h>
+#include <G10/GXRenderer.h>
 #include <G10/GXInput.h>
 #include <G10/GXScheduler.h>
 #include <G10/GXMaterial.h>

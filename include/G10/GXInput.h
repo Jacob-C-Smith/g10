@@ -119,6 +119,9 @@ DLLEXPORT int          process_input            ( GXInstance_t *instance );
 // Bind appending
 DLLEXPORT int          append_bind              ( GXInput_t *input, GXBind_t *bind );
 
+// Info
+DLLEXPORT int          input_info               ( GXInput_t *input );
+
 // Bind firing
 DLLEXPORT int          fire_bind                ( GXBind_t     *bind    , callback_parameter_t input, GXInstance_t* instance);
 

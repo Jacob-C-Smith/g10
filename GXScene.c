@@ -475,7 +475,7 @@ int         draw_scene         ( GXScene_t  *scene )
         render_pass_begin_info->renderArea.offset.y = 0;
         render_pass_begin_info->renderArea.extent   = instance->swap_chain_extent;
         render_pass_begin_info->clearValueCount     = 1;
-        render_pass_begin_info->pClearValues        = &clear_color;
+        render_pass_begin_info->pClearValues        = instance->active_renderer->clear_color;
     }
 
     // Start the render pass
@@ -536,6 +536,8 @@ int         scene_info         ( GXScene_t *p_scene )
 
     for (size_t i = 0; i < entity_count; i++)
         g_print_log("           [%.*i] \"%s\"\n", fs, i, entity_names[i]);
+
+    printf("\n");
 
     free(entity_names);
     free(entity_pointers);

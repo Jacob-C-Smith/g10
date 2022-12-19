@@ -407,6 +407,7 @@ int     insert_bv                ( GXBV_t  *bvh  , GXBV_t    *bv )
 
 int     resize_bv                ( GXBV_t  *bv )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -430,12 +431,12 @@ int     resize_bv                ( GXBV_t  *bv )
         else if (bv->right && bv->left  == 0)
             goto no_left;
 
-        
         else if (bv->entity)
             goto entity;
 
         // Remove the node
         else 
+
             // TODO: 
             return 0;
     }
