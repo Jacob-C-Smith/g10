@@ -1,8 +1,10 @@
 #include <G10/GXScheduler.h>
 
+#define TASK_COUNT 21
+
 dict* scheduler_tasks = 0;
 
-char* task_names[21] = {
+char* task_names[TASK_COUNT] = {
 	"Input",
 	"UI",
 	"AI",
@@ -26,7 +28,7 @@ char* task_names[21] = {
 	"Audio"
 };
 
-void* task_function_pointers[21] = {
+void* task_function_pointers[TASK_COUNT] = {
 	&process_input,
 	(void*) 0,
 	&update_ai, 
@@ -57,10 +59,10 @@ void init_scheduler        ( void )
 	GXInstance_t *instance = g_get_active_instance();
 
 	// Construct a function lookup table
-	dict_construct(&scheduler_tasks, 21);
+	dict_construct(&scheduler_tasks, TASK_COUNT);
 
 	// Iterate over each task
-	for (size_t i = 0; i < 21; i++)
+	for (size_t i = 0; i < TASK_COUNT; i++)
 		
 		// Add each task to the lookup table
 		dict_add(scheduler_tasks, task_names[i], task_function_pointers[i]);
@@ -278,7 +280,7 @@ int client_work                   ( GXClient_t    *client )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->active_schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -326,7 +328,7 @@ int work                   ( GXThread_t    *thread )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->active_schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -377,7 +379,7 @@ int main_work              ( GXThread_t    *thread )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->active_schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -419,7 +421,7 @@ int start_schedule         ( GXSchedule_t  *schedule )
 	GXThread_t  **schedule_threads      = malloc(schedule_thread_count * sizeof(void *));
 
 	// Set the active schedule
-	instance->active_schedule = schedule;
+	instance->context.schedule = schedule;
 
 	// Copy the state
 	copy_state(instance);

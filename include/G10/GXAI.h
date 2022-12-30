@@ -79,7 +79,7 @@ DLLEXPORT int copy_ai                    ( GXAI_t       **pp_ai   , GXAI_t      
 /* !
  *  Print info about an AI
  *
- * @param p_ai  : pointer to ai to copy
+ * @param p_ai  : pointer to ai to log
  *
  * @sa load_ai
  *

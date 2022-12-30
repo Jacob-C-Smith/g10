@@ -209,30 +209,21 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
     }
 }
 
-int                   update_controlee_camera        ( float delta_time ) 
+int                   update_controlee_camera        ( void ) 
 {
 
-    // Checks
+    // Context check
     {
         if (camera_controller == 0)
-            goto noActiveCameraController;
+            goto no_active_camera_controller;
     }
 
     // Initialized data
-    vec2                  l_orient;
-    vec3                  target = (vec3){ 0.f, 0.f, 0.f };
-    GXCamera_t           *camera     = camera_controller->camera;
+    vec2                  l_orient     = { 0 };
+    vec3                  target       = (vec3){ 0.f, 0.f, 0.f };
+    GXCamera_t           *camera       = camera_controller->camera;
 
-    float                 n            = 0,
-                          d            = 0,
-                          c            = 0,
-                          cos_theta    = 0,
-                          len_v_proj_a = 0,
-                          len_a_proj_t = 0,
-                          speed_lim    = 10;
-
-    camera_controller->orientation.x = x_orient,
-    camera_controller->orientation.y = y_orient;
+    camera_controller->orientation = (vec2) { x_orient, y_orient };
 
     l_orient = camera_controller->orientation;
 
@@ -258,18 +249,19 @@ int                   update_controlee_camera        ( float delta_time )
     if (l_orient.y < 0.f)
         sub_vec3(&camera->location, camera->location, mul_vec3_f(camera->target, camera_controller->spdlim));
 
-    if (l_orient.y >  0.f)
+    if (l_orient.y > 0.f)
         add_vec3(&camera->location, camera->location, mul_vec3_f(camera->target, camera_controller->spdlim));
 
     camera->target.x = cosf(to_radians(h_ang)) * cosf(to_radians(v_ang));
     camera->target.z = sinf(to_radians(v_ang));
     camera->target.y = sinf(to_radians(h_ang)) * cosf(to_radians(v_ang));
 
-    return 0;
+    // Success
+    return 1;
 
     // Error handling
     {
-        noActiveCameraController:
+        no_active_camera_controller:
         #ifndef NDEBUG
             g_print_warning("[G10] [Camera controller] No active camera, set a camera with \"camera_controller_from_camera()\"\n");        
         #endif

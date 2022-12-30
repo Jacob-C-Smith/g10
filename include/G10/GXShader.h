@@ -27,34 +27,44 @@ struct GXSet_s
 
 struct GXShader_s
 {
-    char                   *name;
-    char                  **push_constant_properties;
-    void                   *push_constant_data;
 
-    VkShaderModule          vertex_shader_module,
-                            tessellation_control_shader_module,
-                            tessellation_evaluation_shader_module,
-                            geometry_shader_module,
-                            fragment_shader_module;
+    char   *name;
+    size_t  users;
 
-    VkPipeline              pipeline;
-    VkPipelineLayout        pipeline_layout;
-    VkDescriptorPool        descriptor_pool;
-    VkDescriptorSet        *descriptor_sets;
-    VkDescriptorSetLayout   descriptor_set_layout;
-    VkDescriptorSetLayout  *descriptor_set_layouts;
+    union 
+    {
+        struct 
+        {
+            char                  **push_constant_properties;
+            void                   *push_constant_data;
 
-    VkBuffer               *uniform_buffers;
-    VkDeviceMemory         *uniform_buffers_memory;
+            VkShaderModule          vertex_shader_module,
+                                    tessellation_control_shader_module,
+                                    tessellation_evaluation_shader_module,
+                                    geometry_shader_module,
+                                    fragment_shader_module;
+        
+            VkPipeline              pipeline;
+            VkPipelineLayout        pipeline_layout;
+            VkDescriptorPool        descriptor_pool;
+            VkDescriptorSet        *descriptor_sets;
+            VkDescriptorSetLayout   descriptor_set_layout;
+            VkDescriptorSetLayout  *descriptor_set_layouts;
 
-    size_t                  push_constant_size, 
-                            set_count;
+            VkBuffer               *uniform_buffers;
+            VkDeviceMemory         *uniform_buffers_memory;
 
-    struct GXSet_s         *sets_data;
+            size_t                  push_constant_size, 
+                                    set_count;
 
-    size_t                  users;
+            struct GXSet_s         *sets_data;
+        } graphics;
+
+        struct {
+            int i;
+        } compute;
+    };
 };
-
 
 
 DLLEXPORT int create_shader_module            ( char        *code, size_t code_len, VkShaderModule* shader_module);

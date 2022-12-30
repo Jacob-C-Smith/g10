@@ -96,7 +96,7 @@ char                      *swizzle_names               [ ] = {
     "a"
 };
 
-enum VkImageViewType       swizzle_enums               [ ] = {
+enum VkComponentSwizzle    swizzle_enums               [ ] = {
     VK_COMPONENT_SWIZZLE_IDENTITY,
     VK_COMPONENT_SWIZZLE_ZERO,
     VK_COMPONENT_SWIZZLE_ONE,
@@ -186,28 +186,28 @@ int init_texture         ( void )
     }
 }
 
-int create_texture       ( GXTexture_t **texture )
+int create_texture       ( GXTexture_t **pp_texture )
 {
     // Argument check
 	{
 		#ifndef NDEBUG
-			if ( texture == (void *) 0 )
+			if (pp_texture == (void *) 0 )
 				goto no_texture;
 		#endif
 	}
 
 	// Initialized data
-	GXTexture_t *ret = calloc(1, sizeof(GXTexture_t));
+	GXTexture_t *p_texture = calloc(1, sizeof(GXTexture_t));
 
 	// Error checking
 	{
 		#ifndef NDEBUG
-			if(ret == (void*)0)
+			if(p_texture == (void*)0)
 				goto no_mem;
 		#endif
 	}
 
-	*texture = ret;
+	*pp_texture = p_texture;
 
 	return 1;
 
@@ -218,7 +218,7 @@ int create_texture       ( GXTexture_t **texture )
 		{
 			no_texture:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Texture] Null pointer provided for \"texture\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCSIG__);
 				#endif
 				return 0;
 		}
@@ -284,9 +284,6 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
     extern u32 find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
 
-    // Uninitialized data
-    VkMemoryRequirements  memory_requirements;
-
     // Initialized data
     dict                 *json_data              = 0;
     char                 *name                   = 0,
@@ -308,7 +305,6 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
     VkDeviceSize          image_size             = 0;
     VkBuffer              buffer                 = 0;
     VkDeviceMemory        staging_buffer_memory  = 0;
-    VkMemoryAllocateInfo *allocate_info          = calloc(1, sizeof(VkMemoryAllocateInfo));
 
     VkBuffer              staging_buffer         = 0;
     VkImageCreateInfo     image_create_info      = { 0 };
@@ -326,32 +322,6 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
         // Parse the dictionary
         {
-
-            // Get the name
-            t = dict_get(json_data, "name");
-            name  = JSON_VALUE(t, JSONstring);
-
-            // Get the addressing mode
-            {
-                t                = dict_get(json_data, "addressing");
-
-                // Recycle the token pointer 
-                t                = JSON_VALUE(t, JSONstring);
-
-                // Get the corresponding enum value
-                sampler_address_mode = (VkSamplerAddressMode)dict_get(filtering_modes, t);
-            }
-
-            // Get the filter mode
-            {
-                t  = dict_get(json_data, "filter");
-
-                // Recycle the token pointer
-                t  = JSON_VALUE(t, JSONstring);
-
-                // Get the corresponding enum value
-                filter = (VkFilter)dict_get(filtering_modes, t);
-            }
 
             // Get the image
             t = dict_get(json_data, "image");
@@ -401,14 +371,14 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
         // Copy the image 
         {
-            vkMapMemory(instance->device, staging_buffer_memory, 0, image_size, 0, &data);
+            vkMapMemory(instance->vulkan.device, staging_buffer_memory, 0, image_size, 0, &data);
             memcpy(data, image_data, image_size);
-            vkUnmapMemory(instance->device, staging_buffer_memory);
+            vkUnmapMemory(instance->vulkan.device, staging_buffer_memory);
         }
 
         // Popultate image create info struct
         {
-            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB, width, height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
+            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, width, height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
         }
 
     }
@@ -482,7 +452,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
             p_texture, 
             0, 
             (view_type)    ? (VkImageType)dict_get(view_type_lut, view_type) : VK_IMAGE_TYPE_2D,
-            (format)       ? (VkFormat)dict_get(format_types, format) : VK_FORMAT_R8G8B8A8_SRGB,
+            (format)       ? (VkFormat)dict_get(format_types, format) : VK_FORMAT_B8G8R8A8_UNORM,
             (extent[0])    ? atoi(extent[0])    : 1, 
             (extent[1])    ? atoi(extent[1])    : 1, 
             (extent[2])    ? atoi(extent[2])    : 1,
@@ -495,24 +465,6 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
             VK_IMAGE_LAYOUT_UNDEFINED
         );
     }
-
-    // Figure out how much memory the image will use
-    vkGetImageMemoryRequirements(instance->device, p_texture->texture_image, &memory_requirements);
-
-    // Popultate the allocate info struct
-    {
-        allocate_info->sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocate_info->allocationSize  = memory_requirements.size;
-        allocate_info->memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    }
-
-    // Allocate memory for the image
-    if ( vkAllocateMemory(instance->device, allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS ) {
-        printf("failed to allocate image memory!");
-    }
-
-    // Bind the image to the image memory
-    vkBindImageMemory(instance->device, p_texture->texture_image, p_texture->texture_image_memory, 0);
 
     // Construct an image view
     if (image_view_json_object)
@@ -630,6 +582,9 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
     GXInstance_t      *instance          = g_get_active_instance();
     VkImageCreateInfo  image_create_info = { 0 };
     size_t             dim               = 0;
+    VkMemoryAllocateInfo  allocate_info = { 0 };
+    // Uninitialized data
+    VkMemoryRequirements  memory_requirements;
 
     if ( height > 1 ) dim++;
     if ( depth  > 1 ) dim++;
@@ -639,22 +594,41 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
         image_create_info.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         image_create_info.flags         = 0;
         image_create_info.imageType     = image_type;
-        image_create_info.format        = VK_FORMAT_R8G8B8A8_SRGB;
+        image_create_info.format        = format;
         image_create_info.extent.width  = width;
         image_create_info.extent.height = height;
         image_create_info.extent.depth  = depth;
         image_create_info.mipLevels     = mip_levels;
         image_create_info.arrayLayers   = array_layers;
         image_create_info.tiling        = tiling;
-        image_create_info.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        image_create_info.usage         = usage;
         image_create_info.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
         image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         image_create_info.samples       = samples;
     }
        
     // Create the image
-    if ( vkCreateImage(instance->device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
+    if ( vkCreateImage(instance->vulkan.device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
         goto failed_to_create_image;
+
+    // Figure out how much memory the image will use
+    vkGetImageMemoryRequirements(instance->vulkan.device, p_texture->texture_image, &memory_requirements);
+
+    // Popultate the allocate info struct
+    {
+        allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocate_info.allocationSize = memory_requirements.size;
+        allocate_info.memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    }
+
+    // Allocate memory for the image
+    if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS) {
+        // TODO: GOTO, error handling
+        printf("failed to allocate image memory!");
+    }
+
+    // Bind the image to the image memory
+    vkBindImageMemory(instance->vulkan.device, p_texture->texture_image, p_texture->texture_image_memory, 0);
 
     return 1;
 
@@ -689,7 +663,6 @@ int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, V
         image_view_create_info.image                           = p_texture->texture_image;
         image_view_create_info.viewType                        = view_type;
         image_view_create_info.format                          = format;
-        image_view_create_info.image                           = p_texture->texture_image;
 
         image_view_create_info.subresourceRange.aspectMask     = aspect_mask;
         image_view_create_info.subresourceRange.baseMipLevel   = 0;
@@ -698,7 +671,7 @@ int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, V
         image_view_create_info.subresourceRange.layerCount     = 1;
     }
 
-    if ( vkCreateImageView(instance->device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
+    if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
         ;// TODO: Throw an error
 
     return 1;

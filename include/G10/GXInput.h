@@ -90,17 +90,61 @@ struct callback_parameter_s
 };
 
 // Allocators
-DLLEXPORT int          create_input             ( GXInput_t   **input );
+
+/* !
+ *  Allocate memory for an input
+ *
+ * @param pp_input : return
+ *
+ * @sa destroy_input
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int          create_input             ( GXInput_t   **pp_input );
 DLLEXPORT int          create_bind              ( GXBind_t    **bind );
 
 // Constructors
+
+/* !
+ *  Load an input from a JSON file
+ *
+ * @param pp_input : return
+ * @param path     : The path to a JSON file containing an input object
+ *
+ * @sa load_input_as_json
+ * @sa create_input
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int          load_input               ( GXInput_t   **input, const char  path[] );
-DLLEXPORT int          load_input_as_json       ( GXInput_t   **input, char       *token );
-DLLEXPORT int          load_input_as_json_n     ( GXInput_t   **input, char       *token_text, size_t   len );
+
+/* !
+ *  Load an input from JSON text
+ *
+ * @param pp_input   : return
+ * @param token_text : The input JSON object text
+ * @param len        : The length of the input JSON object text
+ *
+ * @sa load_input_as_json
+ * @sa create_input
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int          load_input_as_json       ( GXInput_t   **input, char       *token_text, size_t   len );
 DLLEXPORT int          load_bind_as_json        ( GXBind_t    **bind , char       *token );
 DLLEXPORT int          construct_bind           ( GXBind_t    **bind , char       *name      , char   **keys );
  
 // Callback addition
+/* !
+ *  Add a callback to a bind
+ *
+ * @param p_bind           : The bind
+ * @param function_pointer : The pointer to the callback function
+ *
+ * @sa unregister_bind_callback
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int          register_bind_callback   ( GXBind_t *bind       , void                 *function_pointer );
 
 // Callback remove
@@ -120,6 +164,15 @@ DLLEXPORT int          process_input            ( GXInstance_t *instance );
 DLLEXPORT int          append_bind              ( GXInput_t *input, GXBind_t *bind );
 
 // Info
+/* !
+ *  Print info about an input
+ *
+ * @param p_input : Write information about an input
+ *
+ * @sa load_input
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int          input_info               ( GXInput_t *input );
 
 // Bind firing
@@ -130,5 +183,25 @@ DLLEXPORT GXBind_t    *find_bind                ( GXInput_t    *input   , char  
 DLLEXPORT int          remove_bind              ( GXInput_t    *input   , GXBind_t            *bind );
 
 // Deallocators
+
+/* !
+ *  Free a bind and all its contents
+ *
+ * @param p_bind : Pointer to bind
+ *
+ * @sa create_bind
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int          destroy_bind             ( GXBind_t     *bind );
+
+/* !
+ *  Free an input and all its contents
+ *
+ * @param p_input : Pointer to input
+ *
+ * @sa create_input
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int          destroy_input            ( GXInput_t    *input );

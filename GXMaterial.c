@@ -1,6 +1,6 @@
 #include <G10/GXMaterial.h>
 
-int create_material(GXMaterial_t** material)
+int create_material ( GXMaterial_t** material)
 {
 
 	// Argument check
@@ -48,30 +48,34 @@ int create_material(GXMaterial_t** material)
 	}
 }
 
-int load_material(GXMaterial_t** material, const char path[])
+int load_material ( GXMaterial_t **material, const char path[])
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-		if (material == (void *)0)
-			goto no_material;
-		if (path == (void *)0)
-			goto no_path;
+			if (material == (void *)0)
+				goto no_material;
+			if (path == (void *)0)
+				goto no_path;
 		#endif
 	}
 
-	char   *token_text = 0;
-	size_t  len        = 0;
+	// Initialized data
+	size_t  len        = g_load_file(path, 0, false);
+	char   *token_text = calloc(len + 1, sizeof(char));
 	
 	// Load the file
-	{
-		len = g_load_file(path, 0, false);
-		token_text = calloc(len + 1, sizeof(char));
-		g_load_file(path, token_text, false);
-	}
+	if ( g_load_file(path, token_text, false) == 0 )
 
-	load_material_as_json_n(material, token_text, len);
+		// TODO: goto, error handling
+		return 0;
+
+	if ( load_material_as_json(material, token_text, len) == 0)
+		// TODO: goto, error handling
+		return 0;
+
+	free(token_text);
 
 	return 1;
 
@@ -104,45 +108,7 @@ int load_material(GXMaterial_t** material, const char path[])
 	}
 }
 
-int load_material_as_json(GXMaterial_t** material, char* token_text)
-{
-	// Argument check
-	{
-		#ifndef NDEBUG
-		if (material == (void *)0)
-			goto no_material;
-		if (token_text == (void *)0)
-			goto no_token_text;
-		#endif
-	}
-
-	size_t  len = strlen(token_text);
-
-	load_material_as_json_n(material, token_text, len);
-
-	return 1;
-
-	// Error handling
-	{
-		
-		// Argument checking
-		{
-			no_material:
-			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCSIG__);
-			#endif
-			return 0;
-
-			no_token_text:
-			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
-			#endif
-			return 0;
-		}
-	}
-}
-
-int load_material_as_json_n(GXMaterial_t** material, char* token_text, size_t len)
+int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 {
 	
 	// Argument check
@@ -159,88 +125,64 @@ int load_material_as_json_n(GXMaterial_t** material, char* token_text, size_t le
 			return 0;
 	}
 
-	//// Initialized data
-	//GXInstance_t *instance             = g_get_active_instance();
-	//GXMaterial_t *i_material           = 0;
-	//dict         *material_object_json = 0;
-	//JSONToken_t  *token                = 0;
+	// Initialized data
+	GXInstance_t  *instance             = g_get_active_instance();
+	GXMaterial_t  *p_material           = 0;
+	dict          *material_object_json = 0;
+	JSONToken_t   *token                = 0;
+	char          *name                 = 0,
+		         **textures             = 0;
 
-	//// JSON data
-	//char         *name                 = 0;
+	// Parse the JSON into a dictionary
+	parse_json(token_text, len, &material_object_json);
 
-	//// Allocate for the material
-	//create_material(material);
+	/*
+	{
+		"$schema": "https://raw.githubusercontent.com/Jacob-C-Smith/G10-Schema/main/material-schema.json",
+	    "name": "Material",
+		"textures": [
+			{
+				"name": "Texture",
+		        "path": "path/to/file.png",
+	            "addressing": "repeat",
+				"filter": "linear"
+			}
+		]
+	}
+	*/
 
-	//// Get a pointer to the material
-	//i_material = *material;
+	// Parse the dictionary
+	{
 
-	//// Parse token_text object into a dictionary
-	//parse_json(token_text, len, &material_object_json);
+		// Initialized data
+		JSONToken_t *t = 0;
 
-	//// Construct the material
-	//{
-	//	
-	//	// Initialized data
-	//	char    *textures_object_json = 0,
-	//		   **keys                 = 0,
-	//		   **values               = 0;
-	//	size_t   textures_len         = 0;
+		t        = dict_get(material_object_json, "name");
+		name     = JSON_VALUE(t, JSONstring);
 
-	//	// Get the name
-	//	token                = dict_get(material_object_json, "name");
-	//	i_material->name     = (token) ? token->value.n_where : 0;
+		t        = dict_get(material_object_json, "textures");
+		textures = JSON_VALUE(t, JSONarray);
+	}
 
-	//	// Get the textures object
-	//	token                = dict_get(material_object_json, "textures");
-	//	textures_object_json = (token) ? token->value.n_where : 0;
+	// Construct the material
+	{
 
-	//	// Parse the JSON into a texture dictionary
-	//	parse_json(textures_object_json, strlen(textures_object_json), &i_material->textures);
+		// Copy the name
+		{
 
-	//	// Get the texture count
-	//	textures_len = i_material->textures->n_entries;
+			// Initialized data
+			size_t len = strlen(name);
+			
+			// Allocate memory for the name
+			p_material->name = calloc(1, sizeof(char));
 
-	//	// Allocate space for pointer lists
-	//	keys   = calloc(textures_len + 1, sizeof(void*));
-	//	values = calloc(textures_len + 1, sizeof(void*));
+			// Copy the name
+			strncpy(p_material->name, name, len);
+		}
 
-	//	// Populate the list of keys and values
-	//	dict_keys(i_material->textures, keys);
-	//	dict_values(i_material->textures, values);
+		// Construct the textures
 
-	//	// Iterate over each texture
-	//	for (size_t i = 0; i < textures_len; i++)
-	//	{
-
-	//		// Initialized data
-	//		GXTexture_t* texture = 0;
-
-	//		// Get the JSON token
-	//		token = dict_get(i_material->textures, keys[i]);
-
-	//		// Error checking
-	//		{
-	//			#ifndef NDEBUG
-	//				if(token->type != JSONstring)
-	//				{
-	//					g_print_warning("[G10] [Material] Failed to load texture \"%s\" in call to function \"%s\". Texture will display as missing.\n", token->key, __FUNCSIG__);
-	//				}
-	//			#endif
-	//		}
-
-	//		load_texture(&texture, token->value.n_where);
-
-	//		dict_add(i_material->textures, keys[i], texture);
-
-	//	}
-
-	//	free(keys);
-	//	free(values);
-
-	//}
-
-	//// Add the constructed material to the instacne cache
-	//dict_add(instance->cached_materials, i_material->name, i_material);
+	}
 
 	return 1;
 

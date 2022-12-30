@@ -7,33 +7,36 @@ void init_scene(void)
     // Initialized data
     GXInstance_t* instance = g_get_active_instance();
 
-    instance->load_entity_mutex = SDL_CreateMutex();
+    instance->mutexes.load_entity = SDL_CreateMutex();
 }
 
-int         create_scene       ( GXScene_t **scene )
+int         create_scene       ( GXScene_t **pp_scene )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
-            if ( scene == (void *) 0 )
+            if (pp_scene == (void *) 0 )
                 goto no_scene;
         #endif
     }
 
     // Initialized data
-    GXScene_t *ret = calloc(1, sizeof(GXScene_t));
+    GXScene_t *p_scene = calloc(1, sizeof(GXScene_t));
 
     // Error checking
     {
         #ifndef NDEBUG
-            if(ret == (void*)0)
+            if(p_scene == (void*)0)
                 goto no_mem;
         #endif
 
     }
 
-    *scene = ret;
+    // Return the allocated memory
+    *pp_scene = p_scene;
 
+    // Success
     return 1;
 
     // Error handling
@@ -43,7 +46,7 @@ int         create_scene       ( GXScene_t **scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("Null pointer provided for \"scene\" in call to function \"%s\"", __FUNCSIG__);
+                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCSIG__);
                 #endif
                 return 0;
         }
@@ -59,13 +62,13 @@ int         create_scene       ( GXScene_t **scene )
     }
 }
 
-int         load_scene         ( GXScene_t **scene, const char     path[])
+int         load_scene         ( GXScene_t **pp_scene, const char     path[])
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( scene == (void *) 0 )
+            if (pp_scene == (void *) 0 )
                 goto no_scene;
         #endif
     }
@@ -81,12 +84,16 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
                 goto no_mem;
         #endif
     }
-        
-    g_load_file(path, token_text, true);
+    
+    // Load the file from the file system
+    if ( g_load_file(path, token_text, true) == 0 )
+        goto failed_to_load_file;
 
     // Load the scene as a JSON token
-    load_scene_as_json(scene, token_text, token_text_len); 
+    if ( load_scene_as_json(pp_scene, token_text, token_text_len) == 0 )
+        goto failed_to_load_scene;
 
+    // Success
     return 1;
 
     // Error handling
@@ -96,7 +103,22 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("Null pointer provided for \"scene\" in call to function \"%s\"", __FUNCSIG__);
+                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCSIG__);
+                #endif
+                return 0;
+        }
+
+        // G10 Errors
+        {
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to load file in call to function \"%s\"\n",__FUNCSIG__);
+                #endif
+                return 0;
+
+            failed_to_load_scene:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to load scene in call to function \"%s\"\n",__FUNCSIG__);
                 #endif
                 return 0;
         }
@@ -112,13 +134,13 @@ int         load_scene         ( GXScene_t **scene, const char     path[])
     }
 }
 
-int         load_scene_as_json ( GXScene_t **scene, char          *token_text, size_t len)
+int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text, size_t len)
 {
     
     // Argument checking
     {
         #ifndef NDEBUG
-            if (scene == (void *)0)
+            if (pp_scene == (void *)0)
                 goto no_scene;
             if (token_text == (void *)0)
                 goto no_token_text;
@@ -129,7 +151,7 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
 
     // Initialized data
     GXInstance_t *instance          = g_get_active_instance();
-    GXScene_t    *i_scene           = 0;
+    GXScene_t    *p_scene           = 0;
     dict         *scene_json_object = 0;
 
     // JSON array of object text
@@ -141,10 +163,10 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
                 **light_probes      = 0;
 
     // Allocate a scene
-    create_scene(scene);
+    create_scene(pp_scene);
 
-    // Get an internal pointer to the scene
-    i_scene = *scene;
+    // Get a pointer to the scene
+    p_scene = *pp_scene;
 
     // Parse the JSON
     {
@@ -177,14 +199,28 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
     }
 
     // Set the name
-    if(name) {
+    if ( name ) {
+
+        // Initialized data
         size_t name_len = strlen(name);
-        i_scene->name = calloc(name_len + 1, sizeof(char));
-        strncpy(i_scene->name, name, name_len);
+
+        // Allocate memory
+        p_scene->name = calloc(name_len + 1, sizeof(char));
+
+        // Error checking
+        {
+            #ifndef NDEBUG
+                if ( p_scene->name == (void *)0 )
+                    goto no_mem;
+            #endif
+        }
+
+        // Copy the name
+        strncpy(p_scene->name, name, name_len);
     }
 
     // Load entities
-    if(entities) 
+    if ( entities ) 
     {
         GXThread_t  **entity_loading_threads = calloc(instance->loading_thread_count, sizeof(void *));
 
@@ -192,21 +228,21 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
         
         for (; entities[len]; len++);
 
-        if (instance->load_entity_queue)
-            queue_destroy(instance->load_entity_queue);
+        if (instance->queues.load_entity)
+            queue_destroy(instance->queues.load_entity);
 
-        queue_construct(&instance->load_entity_queue, len+1);
+        queue_construct(&instance->queues.load_entity, len+1);
 
         for (size_t i = 0; i < len; i++)
-            queue_enqueue(instance->load_entity_queue, entities[i]);
+            queue_enqueue(instance->queues.load_entity, entities[i]);
         
-        dict_construct(&i_scene->entities, len);
-        dict_construct(&i_scene->actors, len);
-        dict_construct(&i_scene->ais, len);
+        dict_construct(&p_scene->entities, len);
+        dict_construct(&p_scene->actors, len);
+        dict_construct(&p_scene->ais, len);
 
         extern int load_entity_from_queue(GXScene_t * scene);
 
-        instance->loading_scene = i_scene;
+        instance->context.loading_scene = p_scene;
 
         for (size_t i = 0; i < instance->loading_thread_count; i++)
         {
@@ -229,7 +265,7 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
     }	
 
     // Load cameras
-    if(cameras) {
+    if ( cameras ) {
         for (size_t i = 0; cameras[i]; i++)
         {
             GXCamera_t *camera = 0;
@@ -240,25 +276,27 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
                 load_camera(&camera, cameras[i]);
 
             if (camera)
-                i_scene->active_camera = camera;
+                p_scene->active_camera = camera;
         }
     }
 
     // Load lights
-    if(lights) {
+    if ( lights ) {
 
     }
 
     // Load light probes
-    if(light_probes) {
+    if ( light_probes ) {
 
     }
 
     // Construct a bounding volume hierarchy tree from the entities in the scene
-    construct_bvh_from_scene(&i_scene->bvh, i_scene);
+    construct_bvh_from_scene(&p_scene->bvh, p_scene);
 
-    i_scene->collisions = calloc(16, sizeof (void *));
+    // Allocate a list to store collisions
+    p_scene->collisions = calloc(16, sizeof (void *));
 
+    // Success
     return 1;
 
     // Error handling
@@ -268,7 +306,7 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"pp_scene\" in call to function \"%s\"\n", __FUNCSIG__);
                 #endif
                 return 0;
 
@@ -285,18 +323,27 @@ int         load_scene_as_json ( GXScene_t **scene, char          *token_text, s
                 return 0;
 
         }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+                #endif
+                return 0;
+        }
     }
 }
 
-int         append_entity      ( GXScene_t  *scene, GXEntity_t    *entity)
+int         append_entity      ( GXScene_t  *p_scene, GXEntity_t    *entity)
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (scene == (void *)0)
+            if (p_scene == (void *)0)
                 goto no_scene;
-            if (scene->entities == (void*)0)
+            if (p_scene->entities == (void*)0)
                 goto no_entities;
             if (entity == (void *)0)
                 goto no_entity;
@@ -306,14 +353,17 @@ int         append_entity      ( GXScene_t  *scene, GXEntity_t    *entity)
     }
 
     // Add the entity to the scene
-    dict_add(scene->entities, entity->name, entity);
+    dict_add(p_scene->entities, entity->name, entity);
 
+    // If the entity has a rigidbody, add it to the actor list
     if (entity->rigidbody)
-        dict_add(scene->actors, entity->name, entity);
+        dict_add(p_scene->actors, entity->name, entity);
 
+    // If the entity has an AI, add it to the AI list
     if (entity->ai)
-        dict_add(scene->ais, entity->name, entity);
+        dict_add(p_scene->ais, entity->name, entity);
 
+    // Success
     return 1;
 
     // Error handling
@@ -323,12 +373,12 @@ int         append_entity      ( GXScene_t  *scene, GXEntity_t    *entity)
         {
             no_scene:
                 #ifndef NDEBUG 
-                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"p_scene\" in call to function \"%s\"\n", __FUNCSIG__);
                 #endif
                 return 0;
             no_entities:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No entity dictionary in scene in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] No entity dictionary in \"p_scene\" in call to function \"%s\"\n", __FUNCSIG__);
                 #endif
                 return 0;
             no_entity:
@@ -364,6 +414,7 @@ int         append_camera      ( GXScene_t  *scene, GXCamera_t    *camera)
     // Add the camera to the scene
     dict_add(scene->cameras, camera->name, camera);
 
+    // Success
     return 1;
 
     // Error handling
@@ -412,6 +463,7 @@ int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
     // Add the entity to the scene
     dict_add(scene->lights, light->name, light);
 
+    // Success
     return 1;
 
     // Error handling
@@ -449,7 +501,8 @@ int         append_collision   ( GXScene_t  *scene, GXCollision_t *collision)
 
     scene->collisions[i-1] = collision;
 
-    return 0;
+    // Success
+    return 1;
 }
 
 int         draw_scene         ( GXScene_t  *scene )
@@ -457,29 +510,30 @@ int         draw_scene         ( GXScene_t  *scene )
 
     // Initialized data
     GXInstance_t             *instance                = g_get_active_instance();
-    VkCommandBufferBeginInfo *begin_info              = calloc(1, sizeof(VkCommandBufferBeginInfo));
+    VkCommandBufferBeginInfo  begin_info              = { 0 };
     VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 0.0f}} };
 
-    VkRenderPassBeginInfo    *render_pass_begin_info  = calloc(1, sizeof(VkRenderPassBeginInfo));
+    VkRenderPassBeginInfo     render_pass_begin_info  = { 0 };
 
-    begin_info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    vkBeginCommandBuffer(instance->command_buffers[instance->current_frame], begin_info);
+
+    vkBeginCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], &begin_info);
 
     // Set up the first render pass
     {
-        render_pass_begin_info->sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        render_pass_begin_info->renderPass          = instance->render_pass;
-        render_pass_begin_info->framebuffer         = instance->swap_chain_framebuffers[instance->image_index];
-        render_pass_begin_info->renderArea.offset.x = 0;
-        render_pass_begin_info->renderArea.offset.y = 0;
-        render_pass_begin_info->renderArea.extent   = instance->swap_chain_extent;
-        render_pass_begin_info->clearValueCount     = 1;
-        render_pass_begin_info->pClearValues        = instance->active_renderer->clear_color;
+        render_pass_begin_info.sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        render_pass_begin_info.renderPass          = instance->vulkan.render_pass;
+        render_pass_begin_info.framebuffer         = instance->vulkan.swap_chain_framebuffers[instance->vulkan.image_index];
+        render_pass_begin_info.renderArea.offset.x = 0;
+        render_pass_begin_info.renderArea.offset.y = 0;
+        render_pass_begin_info.renderArea.extent   = instance->vulkan.swap_chain_extent;
+        render_pass_begin_info.clearValueCount     = 2;
+        render_pass_begin_info.pClearValues        = instance->context.renderer->clear_colors;
     }
 
     // Start the render pass
-    vkCmdBeginRenderPass(instance->command_buffers[instance->current_frame], render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
     
     // Get a list of entities
     size_t       entity_count = dict_values(scene->entities, 0);
@@ -494,15 +548,13 @@ int         draw_scene         ( GXScene_t  *scene )
     free(entities);
 
     // End the render pass
-    vkCmdEndRenderPass(instance->command_buffers[instance->current_frame]);
+    vkCmdEndRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
 
     // End the command buffer
-    vkEndCommandBuffer(instance->command_buffers[instance->current_frame]);
+    vkEndCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
 
-    free(begin_info);
-    free(render_pass_begin_info);
-
-    return 0;
+    // Success
+    return 1;
 }
 
 int         scene_info         ( GXScene_t *p_scene )
@@ -545,61 +597,7 @@ int         scene_info         ( GXScene_t *p_scene )
     return 0;
 }
 
-//
-//int         draw_scene_bv      ( GXScene_t  *scene )
-//{
-//
-//    // Initialized data
-//    GXInstance_t             *instance                = g_get_active_instance();
-//    VkCommandBufferBeginInfo *begin_info              = calloc(1, sizeof(VkCommandBufferBeginInfo));
-//    VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 0.0f}} };
-//
-//    VkRenderPassBeginInfo    *render_pass_begin_info  = calloc(1, sizeof(VkRenderPassBeginInfo));
-//
-//    begin_info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-//
-//    vkBeginCommandBuffer(instance->command_buffers[instance->current_frame], begin_info);
-//
-//    // Set up the first render pass
-//    {
-//        render_pass_begin_info->sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-//        render_pass_begin_info->renderPass          = instance->render_pass;
-//        render_pass_begin_info->framebuffer         = instance->swap_chain_framebuffers[instance->image_index];
-//        render_pass_begin_info->renderArea.offset.x = 0;
-//        render_pass_begin_info->renderArea.offset.y = 0;
-//        render_pass_begin_info->renderArea.extent   = instance->swap_chain_extent;
-//        render_pass_begin_info->clearValueCount     = 1;
-//        render_pass_begin_info->pClearValues        = &clear_color;
-//    }
-//
-//    // Start the render pass
-//    vkCmdBeginRenderPass(instance->command_buffers[instance->current_frame], render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-//    
-//    // Get a list of entities
-//    size_t       entity_count = dict_values(scene->entities, 0);
-//    GXEntity_t **entities     = calloc(entity_count, sizeof(void*));
-//
-//    dict_values(scene->entities, entities);
-//
-//    // Draw each entity
-//    for (size_t i = 0; i < entity_count; i++)
-//        draw_entity(entities[i]);
-//
-//    free(entities);
-//
-//    // End the render pass
-//    vkCmdEndRenderPass(instance->command_buffers[instance->current_frame]);
-//
-//    // End the command buffer
-//    vkEndCommandBuffer(instance->command_buffers[instance->current_frame]);
-//
-//    free(begin_info);
-//    free(render_pass_begin_info);
-//
-//    return 0;
-//}
-
-GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[])
+GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[] )
 {
 
     // Argument check
@@ -612,6 +610,7 @@ GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[])
         #endif
     }
 
+    // Success OR null pointer if name is not in scene->entities
     return dict_get(scene->entities, name);
 
     // Error handling

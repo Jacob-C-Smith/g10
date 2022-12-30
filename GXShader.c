@@ -1,6 +1,15 @@
 #include <G10/GXShader.h>
 
-char             *format_type_names              [ ] = {
+#define FORMATS_COUNT                 17
+#define DESCRIPTOR_TYPE_COUNT         11
+#define PUSH_CONSTANT_GETTERS_COUNT   2
+#define RASTERIZER_POLYGON_MODE_COUNT 3
+#define BLEND_OPERATIONS_COUNT        5
+#define BLEND_FACTORS_COUNT           19
+#define SHADER_STAGES_COUNT           5
+
+
+char             *format_type_names              [FORMATS_COUNT] = {
     "float",
     "vec2",
     "vec3",
@@ -19,7 +28,7 @@ char             *format_type_names              [ ] = {
     "u8vec4",
     "u8vec4 sRGB"
 };
-char             *descriptor_type_names          [ ] = {
+char             *descriptor_type_names          [DESCRIPTOR_TYPE_COUNT] = {
     "sampler",
     "combined image sampler",
     "sampled image",
@@ -32,23 +41,23 @@ char             *descriptor_type_names          [ ] = {
     "storage buffer dynamic",
     "input attachment"
 };
-char             *push_constant_getter_names     [ ] = {
+char             *push_constant_getter_names     [PUSH_CONSTANT_GETTERS_COUNT] = {
     "camera position",
     "model matrix"
 };
-char             *rasterizer_polygon_mode_names  [ ] = {
+char             *rasterizer_polygon_mode_names  [RASTERIZER_POLYGON_MODE_COUNT] = {
     "fill",
     "line",
     "point"
 };
-char             *blend_operation_names          [ ] = {
+char             *blend_operation_names          [BLEND_OPERATIONS_COUNT] = {
     "add",
     "subtract",
     "reverse subtract",
     "minimum",
     "maximum"
 };
-char             *blend_factor_names             [ ] = {
+char             *blend_factor_names             [BLEND_FACTORS_COUNT] = {
     "zero",
     "one",
     "source color",
@@ -57,7 +66,7 @@ char             *blend_factor_names             [ ] = {
     "one minus destination color",
     "source alpha",
     "one minus source alpha",
-    "destination alpha"
+    "destination alpha",
     "one minus destination alpha",
     "constant color",
     "one minus constant color",
@@ -69,14 +78,14 @@ char             *blend_factor_names             [ ] = {
     "source one alpha",
     "one minus source one alpha"
 };
-char             *shader_stages_names            [ ] = {
+char             *shader_stages_names            [SHADER_STAGES_COUNT] = {
     "vertex",
     "tessellation control",
     "tessellation evaluation",
     "geometry",
     "fragment"
 };
-VkDescriptorType  descriptor_type_enums          [ ] = {
+VkDescriptorType  descriptor_type_enums          [DESCRIPTOR_TYPE_COUNT] = {
     VK_DESCRIPTOR_TYPE_SAMPLER,
     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
     VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
@@ -89,7 +98,7 @@ VkDescriptorType  descriptor_type_enums          [ ] = {
     VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
     VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 };
-VkFormat          format_type_enums              [ ] = {
+VkFormat          format_type_enums              [FORMATS_COUNT] = {
     VK_FORMAT_R32_SFLOAT,
     VK_FORMAT_R32G32_SFLOAT,
     VK_FORMAT_R32G32B32_SFLOAT,
@@ -109,7 +118,7 @@ VkFormat          format_type_enums              [ ] = {
     VK_FORMAT_R8G8B8A8_UINT,
     VK_FORMAT_R8G8B8A8_SRGB
 };
-size_t            format_type_sizes              [ ] = {
+size_t            format_type_sizes              [FORMATS_COUNT] = {
     4,
     8,
     12,
@@ -128,23 +137,23 @@ size_t            format_type_sizes              [ ] = {
     32,
     32
 };
-void            **push_constant_getter_functions [ ] = {
+void            **push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] = {
     &get_camera_position,
     &get_model_matrix
 };
-VkPolygonMode     rasterizer_polygon_mode_enum   [ ] = {
+VkPolygonMode     rasterizer_polygon_mode_enum   [RASTERIZER_POLYGON_MODE_COUNT] = {
     VK_POLYGON_MODE_FILL,
     VK_POLYGON_MODE_LINE,
     VK_POLYGON_MODE_POINT
 };
-VkBlendOp         blend_operation_enums          [ ] = {
+VkBlendOp         blend_operation_enums          [BLEND_OPERATIONS_COUNT] = {
     VK_BLEND_OP_ADD,
     VK_BLEND_OP_SUBTRACT,
     VK_BLEND_OP_REVERSE_SUBTRACT,
     VK_BLEND_OP_MIN,
     VK_BLEND_OP_MAX
 };
-VkBlendFactor     blend_factor_enums             [ ] = {
+VkBlendFactor     blend_factor_enums             [BLEND_FACTORS_COUNT] = {
     VK_BLEND_FACTOR_ZERO,
     VK_BLEND_FACTOR_ONE,
     VK_BLEND_FACTOR_SRC_COLOR,
@@ -165,7 +174,7 @@ VkBlendFactor     blend_factor_enums             [ ] = {
     VK_BLEND_FACTOR_SRC1_ALPHA,
     VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
 };
-VkShaderStageFlagBits shader_stages_enum             [ ] = {
+VkShaderStageFlagBits shader_stages_enum         [SHADER_STAGES_COUNT] = {
     VK_SHADER_STAGE_VERTEX_BIT,
     VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
     VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
@@ -224,41 +233,41 @@ void init_shader                    ( void )
 
     GXInstance_t *instance = g_get_active_instance();
 
-    dict_construct(&format_types , 17);
-    dict_construct(&format_sizes , 17);
-    dict_construct(&descriptor_types, 16);
-    dict_construct(&push_constant_getters, 64);
-    dict_construct(&polygon_modes, 3);
-    dict_construct(&blend_operations, 5);
-    dict_construct(&blend_factors, 19);
-    dict_construct(&shader_stagesD, 5);
+    dict_construct(&format_types         , FORMATS_COUNT);
+    dict_construct(&format_sizes         , FORMATS_COUNT);
+    dict_construct(&descriptor_types     , DESCRIPTOR_TYPE_COUNT);
+    dict_construct(&push_constant_getters, PUSH_CONSTANT_GETTERS_COUNT);
+    dict_construct(&polygon_modes        , RASTERIZER_POLYGON_MODE_COUNT);
+    dict_construct(&blend_operations     , BLEND_OPERATIONS_COUNT);
+    dict_construct(&blend_factors        , BLEND_FACTORS_COUNT);
+    dict_construct(&shader_stagesD       , SHADER_STAGES_COUNT);
 
-    for (size_t i = 0; i < 17; i++)
+    for (size_t i = 0; i < FORMATS_COUNT; i++)
     {
         dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
         dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);
     }
 
-    for (size_t i = 0; i < 11; i++)
+    for (size_t i = 0; i < DESCRIPTOR_TYPE_COUNT; i++)
         dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]); 
 
     // Initialize push constant getters 
-    for (size_t i = 0; i < 2; i++)
+    for (size_t i = 0; i < PUSH_CONSTANT_GETTERS_COUNT; i++)
         dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
 
-    for (size_t i = 0; i < 3; i++)
+    for (size_t i = 0; i < RASTERIZER_POLYGON_MODE_COUNT; i++)
         dict_add(polygon_modes, rasterizer_polygon_mode_names[i], (void*)rasterizer_polygon_mode_enum[i]);
 
-    for (size_t i = 0; i < 5; i++)
-    {
+    for (size_t i = 0; i < BLEND_OPERATIONS_COUNT; i++)
         dict_add(blend_operations, blend_operation_names[i], (void*)blend_operation_enums[i]);
-        dict_add(shader_stagesD, shader_stages_names[i], (void*)shader_stages_enum[i]);
-    }
 
-    for (size_t i = 0; i < 18; i++)
+    for (size_t i = 0; i < SHADER_STAGES_COUNT; i++)
+        dict_add(shader_stagesD, shader_stages_names[i], (void*)shader_stages_enum[i]);
+
+    for (size_t i = 0; i < BLEND_FACTORS_COUNT; i++)
         dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
 
-    instance->shader_cache_mutex = SDL_CreateMutex();
+    instance->mutexes.shader_cache = SDL_CreateMutex();
 
 }
 
@@ -266,12 +275,12 @@ int create_shader_module            ( char         *code   , size_t     code_len
 {
     GXInstance_t* instance = g_get_active_instance();
 
-    VkShaderModuleCreateInfo* shader_module_create_info = calloc(1, sizeof(VkShaderModuleCreateInfo));
-    shader_module_create_info->sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shader_module_create_info->codeSize = code_len;
-    shader_module_create_info->pCode = code;
+    VkShaderModuleCreateInfo shader_module_create_info = { 0 };
+    shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    shader_module_create_info.codeSize = code_len;
+    shader_module_create_info.pCode = code;
 
-    if (vkCreateShaderModule(instance->device, shader_module_create_info, (void*)0, shader_module))
+    if (vkCreateShaderModule(instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module))
 
         // TODO: Replace with a goto
         printf("Failed to create a shader module");
@@ -327,16 +336,17 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                   *vertex_shader_path        = 0,
                   *geometry_shader_path      = 0,
                   *fragment_shader_path      = 0,
+                  *compute_shader_path       = 0,
                   *rasterizer_json           = 0;
     dict          *json_data                 = 0,
                   *vertex_shader_json_data   = 0,
                   *geometry_shader_json_data = 0,
-                  *fragment_shader_json_data = 0;
+                  *fragment_shader_json_data = 0,
+                  *compute_shader_json_data  = 0;
     char         **vertex_groups             = 0,
                  **attachments               = 0,
                  **sets                      = 0,
                   *push_constant_text        = 0;
-
     JSONToken_t   *token                     = 0;
     size_t         set_count                 = 0;
 
@@ -356,6 +366,9 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
         token                = dict_get(json_data, "fragment shader path");
         fragment_shader_path = JSON_VALUE(token, JSONstring);
+
+        token                = dict_get(json_data, "compute shader path");
+        compute_shader_path = JSON_VALUE(token, JSONstring);
 
         token                = dict_get(json_data, "in");
         vertex_groups        = JSON_VALUE(token, JSONarray);
@@ -395,8 +408,11 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
         // Set the name
         {
+
+            // Initialized data
             size_t name_len = strlen(name);
 
+            // Allocate memory for the name
             i_shader->name = calloc(name_len + 1, sizeof(char));
 
             // Error check
@@ -407,75 +423,92 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 #endif
             }
 
+            // Copy the name
             strncpy(i_shader->name, name, name_len);
         }
 
-        // Load the vertex shader binary
-        if (vertex_shader_path) {
+    }
 
-            // Initialized data
-            size_t   vertex_shader_data_len = g_load_file(vertex_shader_path, 0, true);
-            char    *vertex_shader_data     = calloc(vertex_shader_data_len, sizeof(char));
+    // Construct the graphics shader
+    if      ( fragment_shader_path ){
 
-            g_load_file(vertex_shader_path, vertex_shader_data, true);
-
-            // Create a shader module
-            create_shader_module(vertex_shader_data, vertex_shader_data_len, &i_shader->vertex_shader_module);
-
-            free(vertex_shader_data);
-        }
-        
-        // Load the geometry shader binary
-        if(geometry_shader_path) {
-
-            // Initialized data
-            size_t   geometry_shader_data_len = g_load_file(geometry_shader_path, 0, true);
-            char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
-
-            g_load_file(geometry_shader_path, geometry_shader_data, true);
-
-            // Create a shader module
-            create_shader_module(geometry_shader_data, geometry_shader_data_len, &i_shader->geometry_shader_module);
-
-            free(geometry_shader_data);
-        }
-
-        // Load the fragment shader binary
+        // Load the graphics shader binaries
         {
-            size_t fragment_shader_data_len = g_load_file(fragment_shader_path, 0, true);
-            char* fragment_shader_data      = calloc(fragment_shader_data_len + 1, sizeof(char));
-            
-            g_load_file(fragment_shader_path, fragment_shader_data, true);
 
-            // Create a shader module
-            create_shader_module(fragment_shader_data, fragment_shader_data_len, &i_shader->fragment_shader_module);
-                
-            free(fragment_shader_data);
+            // Load the vertex shader binary
+            if (vertex_shader_path) {
+
+                // Initialized data
+                size_t   vertex_shader_data_len = g_load_file(vertex_shader_path, 0, true);
+                char* vertex_shader_data = calloc(vertex_shader_data_len, sizeof(char));
+
+                g_load_file(vertex_shader_path, vertex_shader_data, true);
+
+
+                // Create a shader module
+                create_shader_module(vertex_shader_data, vertex_shader_data_len, &i_shader->graphics.vertex_shader_module);
+
+                free(vertex_shader_data);
+            }
+
+            // TODO: Load tessellation control shader
+            
+            // TODO: Load tessellation evaluation shader
+             
+            // Load the geometry shader binary
+            if (geometry_shader_path) {
+
+                // Initialized data
+                size_t   geometry_shader_data_len = g_load_file(geometry_shader_path, 0, true);
+                char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
+
+                g_load_file(geometry_shader_path, geometry_shader_data, true);
+
+                // Create a shader module
+                create_shader_module(geometry_shader_data, geometry_shader_data_len, &i_shader->graphics.geometry_shader_module);
+
+                free(geometry_shader_data);
+            }
+
+            // Load the fragment shader binary
+            if (fragment_shader_path) {
+                size_t fragment_shader_data_len = g_load_file(fragment_shader_path, 0, true);
+                char* fragment_shader_data = calloc(fragment_shader_data_len + 1, sizeof(char));
+
+                g_load_file(fragment_shader_path, fragment_shader_data, true);
+
+                // Create a shader module
+                create_shader_module(fragment_shader_data, fragment_shader_data_len, &i_shader->graphics.fragment_shader_module);
+
+                free(fragment_shader_data);
+
+            }
 
         }
 
-        // Set up the shader pipeline
+        // Set up the graphics shader pipeline
         {
 
             // Initialized data
             VkPipelineShaderStageCreateInfo        *shader_stages                       = calloc(5, sizeof(VkPipelineShaderStageCreateInfo));
             size_t                                  shader_stage_iterator               = 0,
                                                     attachment_count                    = 0;
-            VkPipelineVertexInputStateCreateInfo   *vertex_input_info_create_info       = calloc(1, sizeof(VkPipelineVertexInputStateCreateInfo));
-            VkPipelineInputAssemblyStateCreateInfo *input_assembly_create_info          = calloc(1, sizeof(VkPipelineInputAssemblyStateCreateInfo));
-            VkPipelineViewportStateCreateInfo      *viewport_state_create_info          = calloc(1, sizeof(VkPipelineViewportStateCreateInfo));
-            VkPipelineRasterizationStateCreateInfo *rasterizer_create_info              = calloc(1, sizeof(VkPipelineRasterizationStateCreateInfo));
-            VkPipelineMultisampleStateCreateInfo   *multisampling_create_info           = calloc(1, sizeof(VkPipelineMultisampleStateCreateInfo));
+            VkPipelineVertexInputStateCreateInfo    vertex_input_info_create_info       = { 0 };
+            VkPipelineInputAssemblyStateCreateInfo  input_assembly_create_info          = { 0 };
+            VkPipelineViewportStateCreateInfo       viewport_state_create_info          = { 0 };
+            VkPipelineRasterizationStateCreateInfo  rasterizer_create_info              = { 0 };
+            VkPipelineMultisampleStateCreateInfo    multisampling_create_info           = { 0 };
             VkPipelineColorBlendAttachmentState    *color_blend_attachment_create_info  = 0;
-            VkPipelineColorBlendStateCreateInfo    *color_blend_create_info             = calloc(1, sizeof(VkPipelineColorBlendStateCreateInfo));
-            VkPipelineDynamicStateCreateInfo       *dynamic_state_create_info           = calloc(1, sizeof(VkPipelineDynamicStateCreateInfo));
-            VkPipelineLayoutCreateInfo             *pipeline_layout_create_info         = calloc(1, sizeof(VkPipelineLayoutCreateInfo));
-            VkDynamicState                         *dynamic_states                      = calloc(2, sizeof(VkPipelineDynamicStateCreateInfo));
+            VkPipelineColorBlendStateCreateInfo     color_blend_create_info             = { 0 };
+            VkPipelineDepthStencilStateCreateInfo   depth_stencil_state_create_info     = { 0 };
+            VkPipelineDynamicStateCreateInfo        dynamic_state_create_info           = { 0 };
+            VkPipelineLayoutCreateInfo              pipeline_layout_create_info         = { 0 };
+            VkDynamicState                          dynamic_states[2]                   = { { 0 }, { 0 } };
             VkPushConstantRange                    *push_constant                       = calloc(1, sizeof(VkPushConstantRange));
-            VkGraphicsPipelineCreateInfo           *graphics_pipeline_create_info       = calloc(1, sizeof(VkGraphicsPipelineCreateInfo));
+            VkGraphicsPipelineCreateInfo            graphics_pipeline_create_info       = { 0 };
             VkVertexInputBindingDescription        *binding_description                 = calloc(1, sizeof(VkVertexInputBindingDescription));
-            VkViewport                             *viewport                            = calloc(1, sizeof(VkViewport));
-            VkRect2D                               *scissor                             = calloc(1, sizeof(VkRect2D));
+            VkViewport                              viewport                            = { 0 };
+            VkRect2D                                scissor                             = { 0 };
             VkVertexInputAttributeDescription      *vertex_input_attribute_descriptions = 0;
             VkDescriptorSetLayoutCreateInfo        *descriptor_set_layout               = 0;
 
@@ -483,53 +516,53 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
             {
                 
                 // Set up the vertex shader
-                if (i_shader->vertex_shader_module) {
+                if (i_shader->graphics.vertex_shader_module) {
                     VkPipelineShaderStageCreateInfo* vertex_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     vertex_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     vertex_shader_stage_create_info->stage  = VK_SHADER_STAGE_VERTEX_BIT;
-                    vertex_shader_stage_create_info->module = i_shader->vertex_shader_module;
+                    vertex_shader_stage_create_info->module = i_shader->graphics.vertex_shader_module;
                     vertex_shader_stage_create_info->pName  = "main";
                 }
 
                 // Set up the tessellation control shader
-                if (i_shader->tessellation_control_shader_module) {
+                if (i_shader->graphics.tessellation_control_shader_module) {
                     VkPipelineShaderStageCreateInfo* tessellation_control_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     tessellation_control_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     tessellation_control_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-                    tessellation_control_shader_stage_create_info->module = i_shader->tessellation_control_shader_module;
+                    tessellation_control_shader_stage_create_info->module = i_shader->graphics.tessellation_control_shader_module;
                     tessellation_control_shader_stage_create_info->pName  = "main";
                 }
 
                 // Set up the tessellation evaluation shader
-                if (i_shader->tessellation_evaluation_shader_module) {
+                if (i_shader->graphics.tessellation_evaluation_shader_module) {
                     VkPipelineShaderStageCreateInfo* tessellation_evaluation_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     tessellation_evaluation_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     tessellation_evaluation_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-                    tessellation_evaluation_shader_stage_create_info->module = i_shader->tessellation_evaluation_shader_module;
+                    tessellation_evaluation_shader_stage_create_info->module = i_shader->graphics.tessellation_evaluation_shader_module;
                     tessellation_evaluation_shader_stage_create_info->pName  = "main";
                 }
 
                 // Set up the geometry shader
-                if (i_shader->geometry_shader_module) {
+                if (i_shader->graphics.geometry_shader_module) {
                     VkPipelineShaderStageCreateInfo* geometry_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     geometry_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     geometry_shader_stage_create_info->stage  = VK_SHADER_STAGE_GEOMETRY_BIT;
-                    geometry_shader_stage_create_info->module = i_shader->geometry_shader_module;
+                    geometry_shader_stage_create_info->module = i_shader->graphics.geometry_shader_module;
                     geometry_shader_stage_create_info->pName  = "main";
                 }
 
                 // Set up the fragment shader
-                if (i_shader->fragment_shader_module) {
+                if (i_shader->graphics.fragment_shader_module) {
 
                     VkPipelineShaderStageCreateInfo *fragment_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
 
                     fragment_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     fragment_shader_stage_create_info->stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-                    fragment_shader_stage_create_info->module = i_shader->fragment_shader_module;
+                    fragment_shader_stage_create_info->module = i_shader->graphics.fragment_shader_module;
                     fragment_shader_stage_create_info->pName  = "main";
                 }
             }
@@ -594,19 +627,19 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                 // Set up the vertex input 
                 {
-                    vertex_input_info_create_info->sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                    vertex_input_info_create_info->vertexBindingDescriptionCount   = binding_description_count;
-                    vertex_input_info_create_info->pVertexBindingDescriptions      = binding_description;
-                    vertex_input_info_create_info->vertexAttributeDescriptionCount = vertex_group_count;
-                    vertex_input_info_create_info->pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
+                    vertex_input_info_create_info.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+                    vertex_input_info_create_info.vertexBindingDescriptionCount   = binding_description_count;
+                    vertex_input_info_create_info.pVertexBindingDescriptions      = binding_description;
+                    vertex_input_info_create_info.vertexAttributeDescriptionCount = vertex_group_count;
+                    vertex_input_info_create_info.pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
                 }
             }
 
             // Set up the input assembly
             {
-                input_assembly_create_info->sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                input_assembly_create_info->topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                input_assembly_create_info->primitiveRestartEnable = VK_FALSE;
+                input_assembly_create_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+                input_assembly_create_info.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+                input_assembly_create_info.primitiveRestartEnable = VK_FALSE;
             }
 
             // Set up the viewport state
@@ -614,28 +647,28 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                 // Set up the viewport
                 {
-                    viewport->x = 0.f;
-                    viewport->y = 0.f;
-                    viewport->width = instance->swap_chain_extent.width;
-                    viewport->height = instance->swap_chain_extent.height;
-                    viewport->minDepth = 0.0f;
-                    viewport->maxDepth = 1.0f;
+                    viewport.x = 0.f;
+                    viewport.y = 0.f;
+                    viewport.width = instance->vulkan.swap_chain_extent.width;
+                    viewport.height = instance->vulkan.swap_chain_extent.height;
+                    viewport.minDepth = 0.0f;
+                    viewport.maxDepth = 1.0f;
                 }
 
                 // Set up the scissor
                 {
-                    scissor->offset.x = 0;
-                    scissor->offset.y = 0;
-                    scissor->extent = instance->swap_chain_extent;
+                    scissor.offset.x = 0;
+                    scissor.offset.y = 0;
+                    scissor.extent = instance->vulkan.swap_chain_extent;
                 }
 
                 // Populate the viewport state create struct
                 {
-                    viewport_state_create_info->sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                    viewport_state_create_info->viewportCount = 1;
-                    viewport_state_create_info->pViewports    = viewport;
-                    viewport_state_create_info->scissorCount  = 1;
-                    viewport_state_create_info->pScissors     = scissor;
+                    viewport_state_create_info.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+                    viewport_state_create_info.viewportCount = 1;
+                    viewport_state_create_info.pViewports    = &viewport;
+                    viewport_state_create_info.scissorCount  = 1;
+                    viewport_state_create_info.pScissors     = &scissor;
                 }
             }
 
@@ -729,27 +762,27 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                 // Populate the rasterizer create struct
                 {
-                    rasterizer_create_info->sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                    rasterizer_create_info->depthClampEnable        = depth_clamp_enable;
-                    rasterizer_create_info->rasterizerDiscardEnable = rasterizer_discard_enable;
-                    rasterizer_create_info->polygonMode             = polygon_mode;
-                    rasterizer_create_info->cullMode                = VK_CULL_MODE_FRONT_BIT;
-                    rasterizer_create_info->frontFace               = clockwise;
-                    rasterizer_create_info->depthBiasEnable         = depth_bias_enable;
-                    rasterizer_create_info->depthBiasConstantFactor = depth_bias_constant_factor;
-                    rasterizer_create_info->depthBiasClamp          = depth_bias_clamp;
-                    rasterizer_create_info->depthBiasSlopeFactor    = depth_bias_slope_factor;
-                    rasterizer_create_info->lineWidth               = line_width;
+                    rasterizer_create_info.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+                    rasterizer_create_info.depthClampEnable        = depth_clamp_enable;
+                    rasterizer_create_info.rasterizerDiscardEnable = rasterizer_discard_enable;
+                    rasterizer_create_info.polygonMode             = polygon_mode;
+                    rasterizer_create_info.cullMode                = VK_CULL_MODE_FRONT_BIT;
+                    rasterizer_create_info.frontFace               = clockwise;
+                    rasterizer_create_info.depthBiasEnable         = depth_bias_enable;
+                    rasterizer_create_info.depthBiasConstantFactor = depth_bias_constant_factor;
+                    rasterizer_create_info.depthBiasClamp          = depth_bias_clamp;
+                    rasterizer_create_info.depthBiasSlopeFactor    = depth_bias_slope_factor;
+                    rasterizer_create_info.lineWidth               = line_width;
                 }
 
             }
 
             // Set up the multisampler
             {
-                multisampling_create_info->sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling_create_info->rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-                multisampling_create_info->sampleShadingEnable  = VK_FALSE;
-                multisampling_create_info->minSampleShading     = 1.f;
+                multisampling_create_info.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+                multisampling_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+                multisampling_create_info.sampleShadingEnable  = VK_FALSE;
+                multisampling_create_info.minSampleShading     = 1.f;
             }
 
             // Set up the color blend attachment
@@ -837,13 +870,25 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
             }
 
+            // Set up the depth / stencil state
+            {
+                depth_stencil_state_create_info.sType           = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+                depth_stencil_state_create_info.depthTestEnable = VK_TRUE;
+                depth_stencil_state_create_info.depthWriteEnable = VK_TRUE;
+                depth_stencil_state_create_info.depthCompareOp   = VK_COMPARE_OP_LESS;
+                depth_stencil_state_create_info.depthBoundsTestEnable = VK_FALSE;
+                depth_stencil_state_create_info.minDepthBounds = 0.f;
+                depth_stencil_state_create_info.maxDepthBounds = 1.f;
+                depth_stencil_state_create_info.stencilTestEnable = VK_FALSE;
+            }
+
             // Set up the color blending state
             {
-                color_blend_create_info->sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-                color_blend_create_info->logicOpEnable   = VK_FALSE;
-                color_blend_create_info->logicOp         = VK_LOGIC_OP_COPY;
-                color_blend_create_info->attachmentCount = attachment_count;
-                color_blend_create_info->pAttachments    = color_blend_attachment_create_info;
+                color_blend_create_info.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+                color_blend_create_info.logicOpEnable   = VK_FALSE;
+                color_blend_create_info.logicOp         = VK_LOGIC_OP_COPY;
+                color_blend_create_info.attachmentCount = attachment_count;
+                color_blend_create_info.pAttachments    = color_blend_attachment_create_info;
             }
 
             // Set up descriptor layout
@@ -852,9 +897,9 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 // Count up sets
                 while (sets[++set_count]);
 
-                i_shader->set_count              = set_count;
-                i_shader->sets_data              = calloc(set_count, sizeof(struct GXSet_s));
-                i_shader->descriptor_set_layouts = calloc(set_count, sizeof(VkDescriptorSetLayout));
+                i_shader->graphics.set_count              = set_count;
+                i_shader->graphics.sets_data              = calloc(set_count, sizeof(struct GXSet_s));
+                i_shader->graphics.descriptor_set_layouts = calloc(set_count, sizeof(VkDescriptorSetLayout));
 
 
                 // Iterate over each set JSON object
@@ -904,7 +949,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     // Allocate memory for descriptors
                     ubo_layout_bindings                     = calloc(descriptor_count, sizeof(VkDescriptorSetLayoutBinding));
                     pool_size                               = calloc(descriptor_count, sizeof(VkDescriptorPoolSize));
-                    i_shader->sets_data[i].descriptors_data = calloc(descriptor_count, sizeof(struct GXSet_s));;
+                    i_shader->graphics.sets_data[i].descriptors_data = calloc(descriptor_count, sizeof(struct GXSet_s));;
 
                     dict* descriptor_json = 0;
 
@@ -948,10 +993,10 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                                 size_t len = strlen(descriptor_name);
                                 
                                 // Allocate memory to copy the name
-                                i_shader->sets_data[i].descriptors_data[j].name = calloc(len+1, sizeof(char));
+                                i_shader->graphics.sets_data[i].descriptors_data[j].name = calloc(len+1, sizeof(char));
 
                                 // Error checking
-                                strncpy(i_shader->sets_data[i].descriptors_data[j].name, descriptor_name, len);
+                                strncpy(i_shader->graphics.sets_data[i].descriptors_data[j].name, descriptor_name, len);
                             }
 
                             // Construct each descriptor set layout binding
@@ -992,7 +1037,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     }
 
                     // Create a descriptor set layout
-                    if (vkCreateDescriptorSetLayout(instance->device, layout_info, 0, &i_shader->descriptor_set_layouts[i]) != VK_SUCCESS) {
+                    if (vkCreateDescriptorSetLayout(instance->vulkan.device, layout_info, 0, &i_shader->graphics.descriptor_set_layouts[i]) != VK_SUCCESS) {
                         
                         g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCSIG__);
                         return -1;
@@ -1004,23 +1049,23 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         // Initialized data
                         size_t len = strlen(set_name);
                             
-                        i_shader->sets_data[i].name = calloc(len + 1, sizeof(char));
+                        i_shader->graphics.sets_data[i].name = calloc(len + 1, sizeof(char));
 
                         // Error checking
                         {
                             #ifndef NDEBUG
-                                if (i_shader->sets_data[i].name == (void *) 0)
+                                if (i_shader->graphics.sets_data[i].name == (void *) 0)
                                     goto no_mem;
                             #endif
                         }
 
                         // Copy the name into the buffer
-                        strncpy(i_shader->sets_data[i].name, set_name, len);
+                        strncpy(i_shader->graphics.sets_data[i].name, set_name, len);
 
                     }
 
                     // Set the index of the set
-                    i_shader->sets_data[i].index = i;
+                    i_shader->graphics.sets_data[i].index = i;
                     
                     // Create descriptor pool
                     {
@@ -1036,7 +1081,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             pool_info->maxSets       = (u32)64;
                         }
 
-                        if (vkCreateDescriptorPool(instance->device, pool_info, (void*)0, &i_shader->sets_data[i].descriptor_pool) != VK_SUCCESS) {
+                        if (vkCreateDescriptorPool(instance->vulkan.device, pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
                             g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCSIG__);
                             return 0;
                         }
@@ -1050,9 +1095,9 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 dynamic_states[0] = VK_DYNAMIC_STATE_VIEWPORT;
                 dynamic_states[1] = VK_DYNAMIC_STATE_SCISSOR;
 
-                dynamic_state_create_info->sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-                dynamic_state_create_info->dynamicStateCount = 2;
-                dynamic_state_create_info->pDynamicStates    = dynamic_states;
+                dynamic_state_create_info.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+                dynamic_state_create_info.dynamicStateCount = 2;
+                dynamic_state_create_info.pDynamicStates    = &dynamic_states;
             }
 
             // Set up the push constant
@@ -1080,7 +1125,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                 while (push_constant_struct[++push_constant_property_count]);
                 
-                i_shader->push_constant_properties = calloc(push_constant_property_count + 1, sizeof(char*));
+                i_shader->graphics.push_constant_properties = calloc(push_constant_property_count + 1, sizeof(char*));
                 
                 for (size_t i = 0; i < push_constant_property_count; i++)
                 {
@@ -1119,10 +1164,10 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         size_t property_name_len              = strlen(property_name);
 
                         // Allocate the property name
-                        i_shader->push_constant_properties[i] = calloc(property_name_len + 1, sizeof(char));
+                        i_shader->graphics.push_constant_properties[i] = calloc(property_name_len + 1, sizeof(char));
 
                         // Copy the propery name
-                        strncpy(i_shader->push_constant_properties[i], property_name, property_name_len);
+                        strncpy(i_shader->graphics.push_constant_properties[i], property_name, property_name_len);
 
                     }
 
@@ -1134,9 +1179,9 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 if (push_constant_size > 128)
                     goto push_constant_is_too_large;
 
-                i_shader->push_constant_size = push_constant_size;
+                i_shader->graphics.push_constant_size = push_constant_size;
 
-                i_shader->push_constant_data = calloc(128, sizeof(u8));
+                i_shader->graphics.push_constant_data = calloc(128, sizeof(u8));
 
                 push_constant->offset     = 0;
                 push_constant->size       = push_constant_size;
@@ -1146,135 +1191,132 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
             // Set up the pipeline layout
             {
 
-                pipeline_layout_create_info->sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                pipeline_layout_create_info->setLayoutCount = set_count;
+                pipeline_layout_create_info.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+                pipeline_layout_create_info.setLayoutCount = set_count;
 
                 if (push_constant_text)
                 {
-                    pipeline_layout_create_info->pPushConstantRanges = push_constant;
-                    pipeline_layout_create_info->pushConstantRangeCount = 1;
+                    pipeline_layout_create_info.pPushConstantRanges = push_constant;
+                    pipeline_layout_create_info.pushConstantRangeCount = 1;
                 }
 
-                pipeline_layout_create_info->pSetLayouts    = i_shader->descriptor_set_layouts;
+                pipeline_layout_create_info.pSetLayouts    = i_shader->graphics.descriptor_set_layouts;
                 
             }
 
             // Construct the pipeline layout
-            if (vkCreatePipelineLayout(instance->device, pipeline_layout_create_info, 0, &i_shader->pipeline_layout) != VK_SUCCESS)
+            if (vkCreatePipelineLayout(instance->vulkan.device, &pipeline_layout_create_info, 0, &i_shader->graphics.pipeline_layout) != VK_SUCCESS)
                 g_print_error("[G10] [Shader] Failed to create pipeline layout");
 
             // Set up the graphics pipeline
             {
-                graphics_pipeline_create_info->sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                graphics_pipeline_create_info->stageCount          = shader_stage_iterator;
-                graphics_pipeline_create_info->pStages             = shader_stages;
-                graphics_pipeline_create_info->pVertexInputState   = vertex_input_info_create_info;
-                graphics_pipeline_create_info->pInputAssemblyState = input_assembly_create_info;
+                graphics_pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+                graphics_pipeline_create_info.stageCount = shader_stage_iterator;
+                graphics_pipeline_create_info.pStages = shader_stages;
+                graphics_pipeline_create_info.pVertexInputState = &vertex_input_info_create_info;
+                graphics_pipeline_create_info.pInputAssemblyState = &input_assembly_create_info;
 
                 // TODO: 
-                graphics_pipeline_create_info->pTessellationState  = 0;
-                graphics_pipeline_create_info->pViewportState      = viewport_state_create_info;
-                graphics_pipeline_create_info->pRasterizationState = rasterizer_create_info;
-                graphics_pipeline_create_info->pMultisampleState   = multisampling_create_info;
+                graphics_pipeline_create_info.pTessellationState = 0;
+                graphics_pipeline_create_info.pViewportState = &viewport_state_create_info;
+                graphics_pipeline_create_info.pRasterizationState = &rasterizer_create_info;
+                graphics_pipeline_create_info.pMultisampleState = &multisampling_create_info;
 
                 // TODO: 
-                graphics_pipeline_create_info->pDepthStencilState  = 0;
-                graphics_pipeline_create_info->pColorBlendState    = color_blend_create_info;
-                graphics_pipeline_create_info->pDynamicState       = dynamic_state_create_info;
-                graphics_pipeline_create_info->layout              = pipeline_layout_create_info;
-                graphics_pipeline_create_info->layout              = i_shader->pipeline_layout;
-                graphics_pipeline_create_info->renderPass          = instance->render_pass;
-                graphics_pipeline_create_info->basePipelineHandle  = VK_NULL_HANDLE;
-                graphics_pipeline_create_info->basePipelineIndex   = -1;
+                graphics_pipeline_create_info.pDepthStencilState = &depth_stencil_state_create_info;
+                graphics_pipeline_create_info.pColorBlendState = &color_blend_create_info;
+                graphics_pipeline_create_info.pDynamicState = &dynamic_state_create_info;
+                graphics_pipeline_create_info.layout = &pipeline_layout_create_info;
+                graphics_pipeline_create_info.layout = i_shader->graphics.pipeline_layout;
+                graphics_pipeline_create_info.renderPass = instance->context.renderer->render_passes_data[0]->render_pass;
+                graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
+                graphics_pipeline_create_info.basePipelineIndex = -1;
             }
 
             // Construct the graphics pipeline
-            if (vkCreateGraphicsPipelines(instance->device, VK_NULL_HANDLE, 1, graphics_pipeline_create_info, 0, &i_shader->pipeline) != VK_SUCCESS)
+            if (vkCreateGraphicsPipelines(instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &i_shader->graphics.pipeline) != VK_SUCCESS)
                 g_print_error("failed to create graphics pipeline!\n");
 
             // Clean up 
             {
                 free(shader_stages);
-                free(vertex_input_info_create_info);
-                free(input_assembly_create_info);
-                free(viewport_state_create_info);
-                free(rasterizer_create_info);
-                free(multisampling_create_info);
                 free(color_blend_attachment_create_info);
-                free(color_blend_create_info);
-                free(dynamic_state_create_info);
-                free(pipeline_layout_create_info);
-                free(dynamic_states);
-                free(graphics_pipeline_create_info);
                 free(binding_description);
-                free(viewport);
-                free(scissor);
                 free(vertex_input_attribute_descriptions);
             }
 
-        }
-
-        // 
-        {
-
-            // Create uniform buffers
+            // 
             {
-                // Iterate over each uniform
-            // Iterate over each frame
-            // Create a buffer for each uniform for each frame
 
-                VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
-        
-                i_shader->uniform_buffers        = calloc(sizeof(void *), 2);
-                i_shader->uniform_buffers_memory = calloc(sizeof(void *), 2);
-
-                for (size_t i = 0; i < 2; i++)
-                    create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->uniform_buffers[i], &i_shader->uniform_buffers_memory[i]);
-            }
-
-            // Create descriptor sets
-            {
-                VkDescriptorSetLayout       *layouts    = calloc(2, sizeof(VkDescriptorSetLayout));
-                VkDescriptorSetAllocateInfo *alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
-
-                for (size_t i = 0; i < 2; i++)
-                    memcpy(&layouts[i], &i_shader->descriptor_set_layouts[0], sizeof(VkDescriptorSetLayout));
-
+                // Create uniform buffers
                 {
-                    alloc_info->sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-                    alloc_info->descriptorPool     = i_shader->sets_data[0].descriptor_pool;
-                    alloc_info->descriptorSetCount = 2;
-                    alloc_info->pSetLayouts        = layouts;
+                    // Iterate over each uniform
+                // Iterate over each frame
+                // Create a buffer for each uniform for each frame
+
+                    VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
+
+                    i_shader->graphics.uniform_buffers = calloc(sizeof(void*), 2);
+                    i_shader->graphics.uniform_buffers_memory = calloc(sizeof(void*), 2);
+
+                    for (size_t i = 0; i < 2; i++)
+                        create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->graphics.uniform_buffers[i], &i_shader->graphics.uniform_buffers_memory[i]);
                 }
 
-                i_shader->sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
-
-                if ( vkAllocateDescriptorSets(instance->device, alloc_info, i_shader->sets_data[0].descriptor_sets ) != VK_SUCCESS) {
-                    g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCSIG__);
-                }
-
-                for (size_t i = 0; i < 2; i++)
+                // Create descriptor sets
                 {
-                    VkDescriptorBufferInfo *buffer_info      = calloc(1, sizeof(VkDescriptorBufferInfo));
-                    VkWriteDescriptorSet   *descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
+                    VkDescriptorSetLayout* layouts = calloc(2, sizeof(VkDescriptorSetLayout));
+                    VkDescriptorSetAllocateInfo* alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
 
-                    buffer_info->buffer = i_shader->uniform_buffers[i];
-                    buffer_info->offset = 0;
-                    buffer_info->range  = 3*sizeof(mat4) + sizeof(vec3);
+                    for (size_t i = 0; i < 2; i++)
+                        memcpy(&layouts[i], &i_shader->graphics.descriptor_set_layouts[0], sizeof(VkDescriptorSetLayout));
 
-                    descriptor_write->sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptor_write->dstSet          = i_shader->sets_data[0].descriptor_sets[i];
-                    descriptor_write->dstBinding      = 0;
-                    descriptor_write->dstArrayElement = 0;
-                    descriptor_write->descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    descriptor_write->descriptorCount = 1;
-                    descriptor_write->pBufferInfo     = buffer_info;
-        
-                    vkUpdateDescriptorSets(instance->device, 1, descriptor_write, 0, 0);
+                    {
+                        alloc_info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+                        alloc_info->descriptorPool = i_shader->graphics.sets_data[0].descriptor_pool;
+                        alloc_info->descriptorSetCount = 2;
+                        alloc_info->pSetLayouts = layouts;
+                    }
+
+                    i_shader->graphics.sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
+
+                    if (vkAllocateDescriptorSets(instance->vulkan.device, alloc_info, i_shader->graphics.sets_data[0].descriptor_sets) != VK_SUCCESS) {
+                        g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCSIG__);
+                    }
+
+                    for (size_t i = 0; i < 2; i++)
+                    {
+                        VkDescriptorBufferInfo* buffer_info = calloc(1, sizeof(VkDescriptorBufferInfo));
+                        VkWriteDescriptorSet* descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
+
+                        buffer_info->buffer = i_shader->graphics.uniform_buffers[i];
+                        buffer_info->offset = 0;
+                        buffer_info->range = 3 * sizeof(mat4) + sizeof(vec3);
+
+                        descriptor_write->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                        descriptor_write->dstSet = i_shader->graphics.sets_data[0].descriptor_sets[i];
+                        descriptor_write->dstBinding = 0;
+                        descriptor_write->dstArrayElement = 0;
+                        descriptor_write->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                        descriptor_write->descriptorCount = 1;
+                        descriptor_write->pBufferInfo = buffer_info;
+
+                        vkUpdateDescriptorSets(instance->vulkan.device, 1, descriptor_write, 0, 0);
+                    }
                 }
             }
-        }
     }
+
+    }
+
+    // Construct the compute shader
+    else if ( compute_shader_path ) 
+    {
+
+    }
+
+    // TODO: Construct the raytracing shader
+    // else if ( ray_generation_shader ) ...
 
     // Cache the shader
     g_cache_shader(instance, i_shader);
@@ -1296,18 +1338,18 @@ int use_shader                      ( GXShader_t   *shader )
     VkRect2D     *scissor  = calloc(1, sizeof(VkRect2D));
 
     // Use the shader
-    vkCmdBindPipeline(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipeline);
+    vkCmdBindPipeline(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
     
     // Set the viewport
     {
         viewport->x        = 0.f;
         viewport->y        = 0.f;
-        viewport->width    = instance->swap_chain_extent.width;
-        viewport->height   = instance->swap_chain_extent.height;
+        viewport->width    = instance->vulkan.swap_chain_extent.width;
+        viewport->height   = instance->vulkan.swap_chain_extent.height;
         viewport->minDepth = 0.f;
         viewport->maxDepth = 1.f;
 
-        vkCmdSetViewport(instance->command_buffers[instance->current_frame], 0, 1, viewport);
+        vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, viewport);
     }
     
     // Set the scissor
@@ -1315,9 +1357,9 @@ int use_shader                      ( GXShader_t   *shader )
         scissor->offset.x = 0;
         scissor->offset.y = 0;
 
-        scissor->extent   = instance->swap_chain_extent;
+        scissor->extent   = instance->vulkan.swap_chain_extent;
 
-        vkCmdSetScissor(instance->command_buffers[instance->current_frame], 0, 1, scissor);
+        vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, scissor);
     }
 
     // Clean up
@@ -1332,13 +1374,13 @@ int use_shader                      ( GXShader_t   *shader )
 int update_shader_push_constant     ( GXShader_t   *shader )
 {
     size_t offset = 0;
-    for (size_t i = 0; i < shader->push_constant_properties[i]; i++)
+    for (size_t i = 0; i < shader->graphics.push_constant_properties[i]; i++)
     {
-        char   *push_constant_property_name = shader->push_constant_properties[i];
+        char   *push_constant_property_name = shader->graphics.push_constant_properties[i];
         int   (*getter) ( void * )          = dict_get(push_constant_getters, push_constant_property_name);
 
         if (getter)
-            offset = getter((u8*)shader->push_constant_data + offset);
+            offset = getter((u8*)shader->graphics.push_constant_data + offset);
 
     }
     return 1;
@@ -1404,7 +1446,7 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
 
     // Initialized data
     GXInstance_t  *instance  = g_get_active_instance();
-    GXCamera_t    *camera    = instance->active_scene->active_camera;
+    GXCamera_t    *camera    = instance->context.scene->active_camera;
     GXTransform_t *transform = p_entity->transform;
 
     mat4 uniform_buffer[4];
@@ -1432,9 +1474,9 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     
     void *data;
 
-    vkMapMemory(instance->device, p_entity->shader->uniform_buffers_memory[instance->current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
+    vkMapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
     memcpy(data, uniform_buffer, sizeof(vec3) + 3*sizeof(mat4));
-    vkUnmapMemory(instance->device, p_entity->shader->uniform_buffers_memory[instance->current_frame]);
+    vkUnmapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame]);
 
     return 1;
 
@@ -1458,11 +1500,11 @@ int destroy_shader                  ( GXShader_t   *shader )
     // TODO: Cache destruction
     GXInstance_t* instance = g_get_active_instance();
 
-    vkDestroyPipeline(instance->device, shader->pipeline, 0);
-    vkDestroyPipelineLayout(instance->device, shader->pipeline_layout, 0);
+    vkDestroyPipeline(instance->vulkan.device, shader->graphics.pipeline, 0);
+    vkDestroyPipelineLayout(instance->vulkan.device, shader->graphics.pipeline_layout, 0);
 
-    vkDestroyShaderModule(instance->device, shader->vertex_shader_module, 0);
-    vkDestroyShaderModule(instance->device, shader->fragment_shader_module, 0);
+    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
+    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
 
     //free(shader->name);
     free(shader);

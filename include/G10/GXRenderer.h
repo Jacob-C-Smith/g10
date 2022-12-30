@@ -18,7 +18,8 @@ struct GXRenderer_s
 	GXRenderPass_t **render_passes_data;
 	size_t           render_pass_count;
 	
-	VkClearValue    *clear_color;
+	size_t           clear_color_count;
+	VkClearValue    *clear_colors;
 };
 
 struct GXRenderPass_s
@@ -31,15 +32,15 @@ struct GXRenderPass_s
 	GXSubpass_t    **subpasses_data;
 	size_t           subpasses_count;
 
-	VkFramebuffer    framebuffer;
+	GXFramebuffer_t *framebuffers;
 
 	dict            *attachments;
+	VkImageView     *image_attachments;
 };
 
 struct GXSubpass_s
 {
 	char *name;
-	int i;
 };
 
 struct GXAttachment_s
@@ -48,9 +49,11 @@ struct GXAttachment_s
 	GXTexture_t *texture;
 };
 
-struct GXFramebuffer
+struct GXFramebuffer_s
 {
-	char* name;
+	char          *name;
+	VkFramebuffer  framebuffer;
+
 };
 
 // Allocators
@@ -75,7 +78,7 @@ DLLEXPORT int create_renderer          ( GXRenderer_t   **pp_renderer );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create__render_pass      ( GXRenderPass_t **pp_render_pass );
+DLLEXPORT int create_render_pass       ( GXRenderPass_t **pp_render_pass );
 
 /* !
  *  Allocate memory for a subpass
@@ -158,9 +161,31 @@ DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *
  */
 DLLEXPORT int load_subpass             ( GXSubpass_t    **pp_subpass    , char *path );
 
+/* !
+ *  Load a subpass from JSON text
+ *
+ * @param pp_subpass : return
+ * @param token_text : The subpass JSON object text
+ * @param len        : The length of the subpass JSON object text
+ *
+ * @sa load_subpass_as_json
+ * @sa create_subpass
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int load_subpass_as_json     ( GXSubpass_t    **pp_subpass    , char *token_text, size_t len );
 
 // Logging
+
+/* !
+ *  Print info about a renderer
+ *
+ * @param p_renderer : the renderer
+ *
+ * @sa load_renderer
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int renderer_info            ( GXRenderer_t    *p_renderer );
 
 // Add subpass callback
@@ -186,8 +211,9 @@ DLLEXPORT int render_frame             ( GXInstance_t    *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int present_frame            ( GXInstance_t* instance );
+DLLEXPORT int present_frame            ( GXInstance_t    *instance );
 
+// Renderer operations
 
 // Destructors
 DLLEXPORT int destroy_renderer         ( GXRenderer_t    *p_renderer );

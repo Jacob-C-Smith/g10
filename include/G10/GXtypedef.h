@@ -218,6 +218,9 @@ typedef struct GXSubpass_s    GXSubpass_t;
 struct GXAttachment_s;
 typedef struct GXAttachment_s GXAttachment_t;
 
+struct GXFramebuffer_s;
+typedef struct GXFramebuffer_s GXFramebuffer_t;
+
 // Scheduler
 struct GXScheduler_s;
 

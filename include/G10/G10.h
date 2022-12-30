@@ -32,142 +32,155 @@
 
 struct GXInstance_s
 {
+
     // Name 
     char                     *name;
     
-    // Ticks
-    size_t                    ticks;
+    // SDL2 
+    struct {
+        SDL_Window               *window;
+        SDL_Event                 event;
+        SDL_AudioDeviceID         audio_device;
+    }           sdl2;
 
-    // SDL2 data
-    SDL_Window               *window;
-    SDL_Event                 event;
-    SDL_AudioDeviceID         audio_device;
+    // Vulkan 
+    struct {
+        VkInstance                instance;
+        VkDebugUtilsMessengerEXT  debug_messenger;
+        VkSurfaceKHR              surface;
+        VkPhysicalDevice          physical_device;
+        VkDevice                  device;
+        VkQueue                   graphics_queue;
+        VkQueue                   present_queue;
 
-    // Vulkan data
-    VkInstance                instance;
-    VkDebugUtilsMessengerEXT  debug_messenger;
-    VkSurfaceKHR              surface;
-    VkPhysicalDevice          physical_device;
-    VkDevice                  device;
-    VkQueue                   graphics_queue;
-    VkQueue                   present_queue;
-    VkSwapchainKHR            swap_chain;
-    VkImage                  *swap_chain_images;
+        VkSwapchainKHR            swap_chain;
+        VkImage                  *swap_chain_images;
     
-    VkFormat                  swap_chain_image_format;
-    VkExtent2D                swap_chain_extent;
-    VkImageView              *swap_chain_image_views;
-    VkFramebuffer            *swap_chain_framebuffers;
-    VkRenderPass              render_pass;
-    VkCommandPool             command_pool;
-    VkCommandBuffer          *command_buffers;
-    VkSemaphore              *image_available_semaphores;
-    VkSemaphore              *render_finished_semaphores;
-    VkFence                  *in_flight_fences;
+        VkFormat                  swap_chain_image_format;
+        VkExtent2D                swap_chain_extent;
+        VkImageView              *swap_chain_image_views;
+        VkFramebuffer            *swap_chain_framebuffers;
+        VkRenderPass              render_pass;
+        VkCommandPool             command_pool;
+        VkCommandBuffer          *command_buffers;
+        VkSemaphore              *image_available_semaphores;
+        VkSemaphore              *render_finished_semaphores;
+        VkFence                  *in_flight_fences;
 
-    i32                       max_buffered_frames;
-    u32                       current_frame,
-                              image_count,
-                              image_index;
-    float                     priority;
+        i32                       max_buffered_frames;
+        u32                       current_frame,
+                                  image_count,
+                                  image_index;
+        float                     priority;
 
-    #pragma pack(push)
-    #pragma pack (4)
-    struct { int g, p; }      queue_family_indices;
-    #pragma pack(pop)
+        #pragma pack(push)
+        #pragma pack (4)
+        struct { int g, p; }      queue_family_indices;
+        #pragma pack(pop)
 
-    struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
+        struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
+    }           vulkan;
 
-    // G10 
+    // Window parameters
+    struct {
+        u32 width,
+            height;
+    }           window;
 
-    // Context data
+    // Context
+    struct {
+        GXSchedule_t  *schedule;
+        GXScene_t     *scene,
+                      *loading_scene;
+        GXRenderer_t  *renderer;
+        int          (*user_code_callback) (GXInstance_t *instance);
+    }           context;
+
+    // Data
+    struct {
+        dict *schedules,
+             *scenes;
+    }           data;
+
+    // Networking
+    struct {
+        GXServer_t *server;
+        GXClient_t *client;
+    }           networking;
+
+    // Cache
+    struct {
+        dict *parts,
+             *materials,
+             *shaders,
+             *ais;
+    }           cache;
+
+    // Queues
+    struct {
+        queue *load_entity,
+              *actor_move,
+              *actor_collision,
+              *actor_force,
+              *ai_preupdate,
+              *ai_update;
+    }           queues;
+    
+    // Mutexes
+    struct {
+        SDL_mutex *load_entity,
+                  *shader_cache,
+                  *part_cache,
+                  *ai_cache,
+                  *material_cache,
+                  *move_object,
+                  *update_force,
+                  *resolve_collision,
+                  *ai_preupdate,
+                  *ai_update;
+    }           mutexes;
+
+    // Time
+    struct {
+        size_t ticks;
+        u32    d, 
+               last_time;
+        u64    clock_div;
+        float  delta_time;
+    }           time;
 
     // Input 
     GXInput_t                *input;
 
-    GXSchedule_t             *active_schedule;
-    GXScene_t                *active_scene;
-    GXRenderer_t             *active_renderer;
-
-    // Schedules
-    dict                     *schedules;
-
-    // Loaded scenes
-    dict                     *scenes;
-    GXScene_t                *loading_scene;
-
-    // Server 
-    GXServer_t               *server;
-    GXClient_t               *client;
-
-    // Cache
-    dict                     *cached_parts,
-                             *cached_materials,
-                             *cached_shaders,
-                             *cached_ais;
-    
-    // G10 queues
-    queue                    *load_entity_queue,
-                             *actor_move_queue,
-                             *actor_collision_queue,
-                             *actor_force_queue,
-                             *ai_preupdate_queue,
-                             *ai_update_queue;
-
-    int                     (*user_code_callback)(GXInstance_t* instance);
-
-    // Mutexes
-    SDL_mutex                *load_entity_mutex,
-                             *shader_cache_mutex,
-                             *part_cache_mutex,
-                             *ai_cache_mutex,
-                             *material_cache_mutex,
-                             *move_object_mutex,
-                             *update_force_mutex,
-                             *resolve_collision_mutex,
-                             *ai_preupdate_mutex,
-                             *ai_update_mutex;
-    
-    // UI
-    //UIInstance_t             *ui_instance;
-
-    // Delta time
-    u32                       d, 
-                              last_time;
-    u64                       clock_div;
-    float                     delta_time;
-
-    // Window parameters
-    u32 	                  window_width,
-                              window_height;
-
-    // How many threads should be assigned to load a scene
+    // How many threads should be used to load a scene
     size_t                    loading_thread_count;
 
     bool                      running;
 };
-
 
 // Allocators
 
 /* !
  *  Construct a G10 instance from a JSON file
  *
- * @param pp_instance : Pointer to pointer to instance
+ * @param pp_instance : return
  * @param path        : Path to instance JSON file
  * 
  * @sa g_exit
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int           g_init                ( GXInstance_t     **pp_instance, const char *path);
+DLLEXPORT int           g_init                ( GXInstance_t     **pp_instance, const char *path );
 
 /* !
+ * TODO: DOCUMENT
  *  Create a Vulkan buffer
  *
- * @param pp_instance : Double pointer to instance
- * @param path        : Path to instance JSON file
- *
+ * @param size          : Double pointer to instance
+ * @param usage         : Path to instance JSON 
+ * @param properties    :
+ * @param buffer        :
+ * @param buffer_memory :
  * @return 1 on success, 0 on error
  */
 DLLEXPORT void          create_buffer         ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
@@ -183,7 +196,7 @@ DLLEXPORT void          create_buffer         ( VkDeviceSize size, VkBufferUsage
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT size_t        g_load_file           ( const char        *path    , void       *buffer, bool binaryMode);
+DLLEXPORT size_t        g_load_file           ( const char        *path    , void       *buffer, bool binaryMode );
 
 // Window operations
 /* !
@@ -232,8 +245,18 @@ DLLEXPORT int           g_print_warning       ( const char *const  format  , ...
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int           g_print_log           ( const char *const  format  , ... );
-DLLEXPORT int           g_assertion_failed    ( const char        *format  );
 
+/* !
+ *  Set an instances active schedule, and start running said schedule
+ * 
+ *  @param instance : the instance
+ *  @param name     : the name of the schedule to start running
+ * 
+ *  @sa g_stop_schedule
+ *  @sa g_user_exit
+ * 
+ *  @return 1 on success, 0 on error
+ */
 DLLEXPORT int           g_start_schedule      ( GXInstance_t *instance, char *name );
 
 // State copy
@@ -301,8 +324,7 @@ DLLEXPORT int           g_cache_shader        ( GXInstance_t        *instance, G
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int           g_cache_ai            ( GXInstance_t        *instance, GXAI_t       *ai);
-
+DLLEXPORT int           g_cache_ai            ( GXInstance_t        *instance, GXAI_t       *ai );
 
 DLLEXPORT GXMaterial_t *g_find_material       ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXPart_t     *g_find_part           ( GXInstance_t        *instance, char         *name );
@@ -310,14 +332,34 @@ DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, c
 DLLEXPORT GXAI_t       *g_find_ai             ( GXInstance_t        *instance, char         *name );
 
 // User opertations
-DLLEXPORT void          g_user_exit           ( callback_parameter_t input, GXInstance_t    *instance);
-DLLEXPORT void          g_toggle_mouse_lock   ( callback_parameter_t state, GXInstance_t    *instance);
+DLLEXPORT void          g_user_exit           ( callback_parameter_t input, GXInstance_t    *instance );
+DLLEXPORT void          g_toggle_mouse_lock   ( callback_parameter_t state, GXInstance_t    *instance );
 
 // Conversions
+
+/* !
+ * Convert radians to degrees
+ *
+ * @param radians : Radians
+ *
+ * @sa to_radians
+ *
+ * @return degrees
+ */
 inline float            to_degrees            ( float radians )
 {
     return radians * (180.f / (float)3.141593);
 }
+
+/* !
+ * Convert degrees to radians
+ *
+ * @param degrees : Degrees
+ *
+ * @sa to_degrees
+ *
+ * @return Radians
+ */
 inline float            to_radians            ( float degrees )
 {
     return  degrees * ((float)3.141593 / 180.f);

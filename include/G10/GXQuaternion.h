@@ -7,7 +7,12 @@
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
 
-DLLEXPORT quaternion    identity_quaternion                 ( void );                      // ✅ Creates quaternion (1,0,0,0)
+/* !
+ *  Returns identity quaternion
+ *  
+ *  @return 1 + 0i + 0j + 0k
+ */
+DLLEXPORT quaternion    identity_quaternion                 ( void );
 
 DLLEXPORT quaternion    quaternion_from_euler_angle         ( vec3       v );// ✅ Creates a quaternion from a vector in euler angles
 

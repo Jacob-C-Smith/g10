@@ -25,6 +25,7 @@ int create_part       ( GXPart_t **pp_part )
 	// Write the return
 	*pp_part = i_part;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -84,6 +85,10 @@ int load_part         ( GXPart_t **pp_part, char* path)
 	if ( load_part_as_json(pp_part, token_text, len) == 0 )
 		goto failed_to_load_part;
 
+	// Free the token text
+	free(token_text);
+
+	// Success
 	return 1;
 
 	// Error handling
@@ -200,10 +205,10 @@ int draw_part         ( GXPart_t  *part)
 	VkBuffer vertex_buffers[] = { part->vertex_buffer };
 	VkDeviceSize offsets[] = { 0 };
 
-	vkCmdBindVertexBuffers(instance->command_buffers[instance->current_frame], 0, 1, vertex_buffers, offsets);
-	vkCmdBindIndexBuffer(instance->command_buffers[instance->current_frame], part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindVertexBuffers(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, vertex_buffers, offsets);
+	vkCmdBindIndexBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
 
-	vkCmdDrawIndexed(instance->command_buffers[instance->current_frame], (u32)part->index_count*3, 1, 0, 0, 0);
+	vkCmdDrawIndexed(instance->vulkan.command_buffers[instance->vulkan.current_frame], (u32)part->index_count*3, 1, 0, 0, 0);
 
 	return 1;
 }
@@ -266,10 +271,10 @@ int destroy_part      ( GXPart_t  *part)
 	GXInstance_t *instance = g_get_active_instance();
 	
 	// Remove the part from the cache
-	if (dict_get(instance->cached_parts, part->name) == part)
+	if (dict_get(instance->cache.parts, part->name) == part)
 	{
 		if (--part->users > 1)
-			dict_pop(instance->cached_parts, part->name, 0);
+			dict_pop(instance->cache.parts, part->name, 0);
 	}
 	else
 		return 1;
@@ -281,12 +286,12 @@ int destroy_part      ( GXPart_t  *part)
 	{
 
 		// Free the vertex buffer
-		vkDestroyBuffer(instance->device, part->vertex_buffer, 0);
-		vkFreeMemory(instance->device, part->vertex_buffer_memory, 0);
+		vkDestroyBuffer(instance->vulkan.device, part->vertex_buffer, 0);
+		vkFreeMemory(instance->vulkan.device, part->vertex_buffer_memory, 0);
 
 		// Free the index buffer
-		vkDestroyBuffer(instance->device, part->element_buffer, 0);
-		vkFreeMemory(instance->device, part->element_buffer_memory, 0);
+		vkDestroyBuffer(instance->vulkan.device, part->element_buffer, 0);
+		vkFreeMemory(instance->vulkan.device, part->element_buffer_memory, 0);
 	}
 
 	// Free the part itself

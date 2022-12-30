@@ -515,27 +515,29 @@ int          create_bind               ( GXBind_t    **bind )
 	}
 }
 
-int          create_input              ( GXInput_t   **input )
+int          create_input              ( GXInput_t   **pp_input )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(input == (void *)0)
+			if(pp_input == (void *)0)
 				goto no_input;
 		#endif
 	}
 
-	GXInput_t *ret = calloc(1, sizeof(GXInput_t));
+    // Initialized data
+	GXInput_t *p_input = calloc(1, sizeof(GXInput_t));
 
 	// Error checking
 	{
 		#ifndef NDEBUG
-			if(ret == (void *)0)
+			if( p_input == (void *) 0 )
 				goto no_mem;
 		#endif
 	}
 
-    *input = ret;
+    *pp_input = p_input;
 
 	return 1;
 
@@ -545,19 +547,19 @@ int          create_input              ( GXInput_t   **input )
 		// Argument errors
 		{
 			no_input:
-			#ifndef NDEBUG
-				printf("[G10] [Input] Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCSIG__);
-			#endif
-			return 0;
+			    #ifndef NDEBUG
+			    	printf("[G10] [Input] Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCSIG__);
+			    #endif
+			    return 0;
 		}
 
 		// Standard library errors
 		{
 			no_mem:
-			#ifndef NDEBUG
-				printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
-			#endif
-			return 0;
+			    #ifndef NDEBUG
+			    	printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+			    #endif
+			    return 0;
 		}
 	}
 }
@@ -588,7 +590,7 @@ int          load_input                ( GXInput_t   **input, const char    path
     }
 
     // Construct the input
-    load_input_as_json_n(&ret, data, i);
+    load_input_as_json(&ret, data, i);
 
     // Error checking
     {
@@ -626,60 +628,7 @@ int          load_input                ( GXInput_t   **input, const char    path
     }
 }
 
-int          load_input_as_json        ( GXInput_t   **input, char         *token )
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if (token == (void*)0)
-                goto no_token;
-        #endif
-    }
-
-    // Initialized data
-    size_t     len = strlen(token);
-    GXInput_t* ret = 0;
-    load_input_as_json_n(&ret, token, len);
-
-    // Error checking
-    {
-        #ifndef NDEBUG
-            if ( ret == (void*)0 )
-                goto no_ret;
-        #endif
-    }
-
-    *input = ret;
-
-    return 1;
-
-    // Error handling
-    {
-
-        // Debug only branches
-        {
-            #ifndef NDEBUG
-
-                // Argument errors
-                {
-                    no_token:
-                            g_print_error("[G10] [Input] Null pointer provided for \"token\" in call to function \"%s\"\n", __FUNCSIG__);
-                        return 0;
-                }
-
-                // G10 errors
-                {
-                    no_ret:
-                            g_print_error("[G10] [Input] Failed to parse \"token\" in call to function \"%s\"\n", __FUNCSIG__);
-                        return 0;
-                }
-            #endif
-        }
-    }
-}
- 
-int          load_input_as_json_n      ( GXInput_t   **input, char         *token_text   , size_t len )
+int          load_input_as_json        ( GXInput_t   **input, char         *token_text   , size_t len )
 {
     
     // Argument check
@@ -696,8 +645,8 @@ int          load_input_as_json_n      ( GXInput_t   **input, char         *toke
     JSONToken_t *token             = 0;
 
     // JSON results
-    char        *name        = 0;
-    char       **bind_tokens = 0;
+    char        *name              = 0;
+    char       **bind_tokens       = 0;
 
     char        *mouse_sensitivity = 0;
 
@@ -838,10 +787,15 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
 
     // Argument check
     {
-        if (token == (void*)0)
-            goto no_token;
+        #ifndef NDEBUG
+            if ( bind  == (void *) 0 )
+                goto no_bind;
+            if ( token == (void *) 0 )
+                goto no_token;
+        #endif
     }
-
+    
+    // Initialized data
     GXBind_t    *ret         = 0;
     dict        *json_tokens = 0;
     JSONToken_t *t           = 0;
@@ -869,8 +823,10 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
 
     }
 
-    construct_bind(bind, name, keys);
+    if ( construct_bind(bind, name, keys) == 0)
+        goto failed_to_construct_bind;
 
+    // Success
     return 1;
 
     // Error handling
@@ -894,11 +850,19 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
 
         }
 
+        // TODO: Implement
         no_name:
             return 0;
+        
+        // G10 errors
+        {
+            // TODO: Implement
+            failed_to_construct_bind:
+            no_bind:
+                return 0;
+        }
 
-
-        // Argument handling
+        // Argument errors
         {
             no_token:
             #ifndef NDEBUG
@@ -949,6 +913,7 @@ int          construct_bind            ( GXBind_t** bind, char* name, char** key
         
     }
 
+    // Success
     return 1;
 
     // Error handling
@@ -986,6 +951,7 @@ int          construct_bind            ( GXBind_t** bind, char* name, char** key
 
 int          register_bind_callback    ( GXBind_t     *bind    , void                *function_pointer )
 {
+
     // Argument check
     {
         if (bind == (void*)0)
@@ -1014,7 +980,8 @@ int          register_bind_callback    ( GXBind_t     *bind    , void           
 
     bind->callbacks[bind->callback_count++] = function_pointer;
 
-    return 0;
+    // Success
+    return 1;
 
     // Error handling
     {
@@ -1082,8 +1049,8 @@ int          process_input             ( GXInstance_t *instance )
     // TODO: Reimplement for other libraries?
 
     // Poll for events 
-    while (SDL_PollEvent(&instance->event)) {
-        switch (instance->event.type)
+    while (SDL_PollEvent(&instance->sdl2.event)) {
+        switch (instance->sdl2.event.type)
         {
             // Mouse events
             case SDL_MOUSEMOTION:
@@ -1095,8 +1062,8 @@ int          process_input             ( GXInstance_t *instance )
                 u8 button = 0;
 
                 callback_parameter_t input;
-                int                  x_rel = instance->event.motion.xrel,
-                    y_rel = instance->event.motion.yrel;
+                int                  x_rel = instance->sdl2.event.motion.xrel,
+                    y_rel = instance->sdl2.event.motion.yrel;
                 {
                     input.input_state = MOUSE;
                     input.inputs.mouse_state.xrel = x_rel * instance->input->mouse_sensitivity;
@@ -1127,8 +1094,8 @@ int          process_input             ( GXInstance_t *instance )
                 u8 button = 0;
 
                 callback_parameter_t input;
-                int                  x_rel = instance->event.motion.xrel,
-                                     y_rel = instance->event.motion.yrel;
+                int                  x_rel = instance->sdl2.event.motion.xrel,
+                                     y_rel = instance->sdl2.event.motion.yrel;
                 {
                     input.input_state               = MOUSE;
                     input.inputs.mouse_state.xrel   = x_rel * instance->input->mouse_sensitivity;
@@ -1150,7 +1117,7 @@ int          process_input             ( GXInstance_t *instance )
             }
             // Window resize
             case SDL_WINDOWEVENT:
-                switch (instance->event.window.event)
+                switch (instance->sdl2.event.window.event)
                 {
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                 {

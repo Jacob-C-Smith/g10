@@ -1,6 +1,8 @@
 #include <G10/GXCollider.h>
 
-char* collider_type_names[8] = {
+#define COLLIDER_TYPE_COUNT 8
+
+char* collider_type_names[COLLIDER_TYPE_COUNT] = {
     "invalid",
     "quad",
     "box",
@@ -11,7 +13,7 @@ char* collider_type_names[8] = {
     "convexhull"
 };
 
-collider_type_t collider_type_enums[8] = {
+collider_type_t collider_type_enums[COLLIDER_TYPE_COUNT] = {
     collider_invalid,
     collider_quad,
     collider_box,
@@ -26,19 +28,26 @@ dict* collider_type_dict = 0;
 
 void init_collider ( void )
 {
-    dict_construct(&collider_type_dict, 8);
+    dict_construct(&collider_type_dict, COLLIDER_TYPE_COUNT);
 
-    for (size_t i = 0; i < 8; i++)
+    for (size_t i = 0; i < COLLIDER_TYPE_COUNT; i++)
         dict_add(collider_type_dict, collider_type_names[i], (void*)collider_type_enums[i]);
 }
 
-int create_collider(GXCollider_t** collider)
+int create_collider ( GXCollider_t **pp_collider )
 {
-    GXCollider_t *ret = calloc(1, sizeof(GXCollider_t ));
-    
-    *collider = ret;
+    // TODO: Argument check
 
-    return 0;
+    // Initialized data
+    GXCollider_t * p_collider = calloc(1, sizeof(GXCollider_t));
+    
+    // Write the return value
+    *pp_collider = p_collider;
+
+    // Success
+    return 1;
+
+    // Error handling
 }
 
 int load_collider(GXCollider_t** collider, const char* path)
@@ -52,7 +61,7 @@ int load_collider(GXCollider_t** collider, const char* path)
 
     free(token);
 
-    return 0;
+    return 1;
 }
 
 int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
@@ -94,11 +103,11 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
     // TODO: Change 16 to something smarter
     dict_construct(&i_collider->collisions, 16);
 
-    return 0;
+    return 1;
 }
 
 int add_aabb_start_collision_callback(GXCollider_t* collider, void* function_pointer)
 {
-    return 0;
+    return 1;
 }
 

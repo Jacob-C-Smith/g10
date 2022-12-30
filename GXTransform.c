@@ -25,6 +25,7 @@ int  create_transform        ( GXTransform_t **pp_transform )
 	// Assign the transform pointer
 	*pp_transform = ret;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -81,7 +82,7 @@ int  construct_transform     ( GXTransform_t **pp_transform, vec3        locatio
 	// Compute a model matrix
 	transform_model_matrix(p_transform, &p_transform->model_matrix);
 
-
+	// Success
 	return 1;
 
 	// Error handling
@@ -137,6 +138,7 @@ int  load_transform          ( GXTransform_t **pp_transform, const char *path)
 	// Free up the memory
 	free(buffer);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -352,6 +354,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_
 	// Free the dictionary
 	dict_destroy(d);
 
+	// Success
 	return 1;
 
 	// Error handling 
@@ -488,6 +491,7 @@ void transform_model_matrix  ( GXTransform_t  *p_transform , mat4       *r )
     r->i = M.i, r->j = M.j, r->k = M.k, r->l = M.l,
     r->m = M.m, r->n = M.n, r->o = M.o, r->p = M.p;
 
+	// Done
     return;
 
     // Error handling
@@ -534,6 +538,7 @@ int  rotate_about_quaternion ( GXTransform_t  *p_transform , quaternion  axis,  
     rotate_vec3_by_quaternion(&newIJK, newIJK, axis);
 	p_transform->rotation = (quaternion){ cosHalf, sinHalf * newIJK.x, sinHalf * newIJK.y, sinHalf * newIJK.z };
 
+	// Success
     return 1;
 
     // Error handling
@@ -559,6 +564,7 @@ int  destroy_transform       ( GXTransform_t  *p_transform )
     // Free the transform
     free(p_transform);
 
+	// Success
     return 1;
 
     //  Error handling

@@ -6,9 +6,9 @@ void init_physics(void)
     // Initialized data
     GXInstance_t* instance = g_get_active_instance();
 
-    instance->move_object_mutex       = SDL_CreateMutex();
-    instance->update_force_mutex      = SDL_CreateMutex();
-    instance->resolve_collision_mutex = SDL_CreateMutex();
+    instance->mutexes.move_object       = SDL_CreateMutex();
+    instance->mutexes.update_force      = SDL_CreateMutex();
+    instance->mutexes.resolve_collision = SDL_CreateMutex();
     // TODO: Add rig mutex
 
     return;
@@ -33,20 +33,20 @@ int detect_collisions  ( GXInstance_t *instance )
     {
 
         // Lock the mutex 
-        SDL_LockMutex(instance->resolve_collision_mutex);
+        SDL_LockMutex(instance->mutexes.resolve_collision);
 
         // Is there anything left to move?
-        if (queue_empty(instance->actor_collision_queue))
+        if (queue_empty(instance->queues.actor_collision))
         {
 
             // If not, unlock and return
-            SDL_UnlockMutex(instance->resolve_collision_mutex);
+            SDL_UnlockMutex(instance->mutexes.resolve_collision);
             return 1;
         }
 
-        entity = queue_dequeue(instance->actor_collision_queue);
+        entity = queue_dequeue(instance->queues.actor_collision);
 
-        SDL_UnlockMutex(instance->resolve_collision_mutex);
+        SDL_UnlockMutex(instance->mutexes.resolve_collision);
     }
 
     // Test for collisions
@@ -102,7 +102,7 @@ int detect_collisions  ( GXInstance_t *instance )
                     if (aabb_intersect(a->collider->bv, b->collider->bv)) continue;
                     
                     // Set the end tick 
-                    collision->end_tick = instance->ticks;
+                    collision->end_tick = instance->time.ticks;
 
                     // Flip the AABB collision flag
                     collision->aabb_colliding = false;
@@ -120,18 +120,18 @@ int detect_collisions  ( GXInstance_t *instance )
 
                     dict_item trash = { 0 };
 
-                    SDL_LockMutex(instance->resolve_collision_mutex);
+                    SDL_LockMutex(instance->mutexes.resolve_collision);
 
                     if (dict_get(collisions_dict, b->name) == 0)
                     {
-                        SDL_UnlockMutex(instance->resolve_collision_mutex);
+                        SDL_UnlockMutex(instance->mutexes.resolve_collision);
                         goto exit;
                     }
 
                     // Remove the entity
                     dict_pop_item(collisions_dict, collision->b->name, &trash);
 
-                    SDL_UnlockMutex(instance->resolve_collision_mutex);
+                    SDL_UnlockMutex(instance->mutexes.resolve_collision);
 
                     continue;
                 }
@@ -157,7 +157,7 @@ int detect_collisions  ( GXInstance_t *instance )
                 find_neighbors:
                 // Initialized data
                 GXBV_t     *bv            = collider->bv,
-                           *parent        = find_parent_bv(instance->active_scene->bvh, bv);
+                           *parent        = find_parent_bv(instance->context.scene->bvh, bv);
                 GXEntity_t *entity        = collider->bv->entity;
                 vec3        velocity      = entity->rigidbody->velocity;
                 float       search_radius = length(velocity);
@@ -174,7 +174,7 @@ int detect_collisions  ( GXInstance_t *instance )
                             break;
 
                         // Expand the search radius
-                        parent = find_parent_bv(instance->active_scene->bvh, bv);
+                        parent = find_parent_bv(instance->context.scene->bvh, bv);
 
                     }
 
@@ -189,15 +189,15 @@ int detect_collisions  ( GXInstance_t *instance )
                 {
 
 
-                    SDL_LockMutex(instance->resolve_collision_mutex);
+                    SDL_LockMutex(instance->mutexes.resolve_collision);
 
                     // Reinsert the entity
-                    GXBV_t* epbv = find_parent_bv(instance->active_scene->bvh, entity->collider->bv);
+                    GXBV_t* epbv = find_parent_bv(instance->context.scene->bvh, entity->collider->bv);
     
                     if (epbv == 0)
                     {
                         printf("ERROR\n"); 
-                        print_bv(stdout, instance->active_scene->bvh, 0);
+                        bv_info(stdout, instance->context.scene->bvh, 0);
                         while (1);
                     }
                     if (epbv->left == entity->collider->bv)
@@ -205,9 +205,9 @@ int detect_collisions  ( GXInstance_t *instance )
                     else if (epbv->right == entity->collider->bv)
                         epbv->right = 0;
                     
-                    insert_bv(instance->active_scene->bvh, bv);
+                    insert_bv(instance->context.scene->bvh, bv);
 
-                    SDL_UnlockMutex(instance->resolve_collision_mutex);
+                    SDL_UnlockMutex(instance->mutexes.resolve_collision);
 
                     goto find_neighbors;
                 }
@@ -234,7 +234,7 @@ int detect_collisions  ( GXInstance_t *instance )
                     if (aabb_intersect(entity->collider->bv, e->collider->bv))
                     {
 
-                        SDL_LockMutex(instance->resolve_collision_mutex);
+                        SDL_LockMutex(instance->mutexes.resolve_collision);
 
                         // Thread safe
                         {
@@ -243,7 +243,7 @@ int detect_collisions  ( GXInstance_t *instance )
 
                             if (dict_get(entity->collider->collisions, e->name))
                             {
-                                SDL_UnlockMutex(instance->resolve_collision_mutex);
+                                SDL_UnlockMutex(instance->mutexes.resolve_collision);
                                 goto exit;
                             }
 
@@ -254,7 +254,7 @@ int detect_collisions  ( GXInstance_t *instance )
                             dict_add(entity->collider->collisions, e->name, collision);
                         }
 
-                        SDL_UnlockMutex(instance->resolve_collision_mutex);
+                        SDL_UnlockMutex(instance->mutexes.resolve_collision);
                     }
 
                 }
@@ -315,20 +315,20 @@ int move_objects       ( GXInstance_t* instance )
     // Get an entity to move
     {
         // Lock the mutex 
-        SDL_LockMutex(instance->move_object_mutex);
+        SDL_LockMutex(instance->mutexes.move_object);
 
         // Is there anything left to move?
-        if (queue_empty(instance->actor_move_queue))
+        if (queue_empty(instance->queues.actor_move))
         {
 
             // If not, unlock and return
-            SDL_UnlockMutex(instance->move_object_mutex);
+            SDL_UnlockMutex(instance->mutexes.move_object);
             return 1;
         }
 
-        entity = queue_dequeue(instance->actor_move_queue);
+        entity = queue_dequeue(instance->queues.actor_move);
 
-        SDL_UnlockMutex(instance->move_object_mutex);
+        SDL_UnlockMutex(instance->mutexes.move_object);
     }
 
     // Move the entity
@@ -368,20 +368,20 @@ int update_forces      ( GXInstance_t *instance )
     // Get an entity to compute forces for
     {
         // Lock the mutex 
-        SDL_LockMutex(instance->update_force_mutex);
+        SDL_LockMutex(instance->mutexes.update_force);
 
         // Is there anything left to move?
-        if (queue_empty(instance->actor_force_queue))
+        if (queue_empty(instance->queues.actor_force))
         {
 
             // If not, unlock and return
-            SDL_UnlockMutex(instance->update_force_mutex);
+            SDL_UnlockMutex(instance->mutexes.update_force);
             return 1;
         }
 
-        entity = queue_dequeue(instance->actor_force_queue);
+        entity = queue_dequeue(instance->queues.actor_force);
 
-        SDL_UnlockMutex(instance->update_force_mutex);
+        SDL_UnlockMutex(instance->mutexes.update_force);
     }
 
     // Move the entity

@@ -38,24 +38,120 @@ struct GXScene_s
 };
 
 // Allocators
-DLLEXPORT int            create_scene                ( GXScene_t  **scene );
+
+/* !
+ *  Allocate memory for a scene
+ *
+ * @param pp_scene : return
+ *
+ * @sa destroy_scene
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int            create_scene                ( GXScene_t  **pp_scene );
 
 // Constructors
-DLLEXPORT int            load_scene                  ( GXScene_t  **scene, const char   path[] );
-DLLEXPORT int            load_scene_as_json          ( GXScene_t  **scene, char*        token_text, size_t len );
-DLLEXPORT int            construct_scene             ( GXScene_t  **scene, char*        name      , char **entities, char  **cameras, char **lights, char *skybox );
+
+/* !
+ *  Load a scene from a JSON file
+ *
+ * @param pp_scene : return
+ * @param path     : The path to a JSON file containing a scene object
+ *
+ * @sa load_scene_as_json
+ * @sa create_scene
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int            load_scene                  ( GXScene_t  **pp_scene, const char   path[] );
+
+/* !
+ *  Load a scene from JSON text
+ *
+ * @param pp_scene   : return
+ * @param token_text : The scene JSON object text
+ * @param len        : The length of the scene JSON object text
+ *
+ * @sa load_scene_as_json
+ * @sa create_scene
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int            load_scene_as_json          ( GXScene_t  **pp_scene, char*        token_text, size_t len );
 
 // Appenders
+
+/* !
+ *  Append an entity to a scene
+ *
+ * @param p_scene  : The scene
+ * @param p_entity : The entity to append
+ *
+ * @sa append_camera
+ * @sa append_light
+ * @sa append_collision
+ * 
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int            append_entity               ( GXScene_t   *scene, GXEntity_t    *entity );
+
+/* !
+ *  Append a camera to a scene
+ *
+ * @param p_scene  : The scene
+ * @param p_camera : The camera to append
+ *
+ * @sa append_entity
+ * @sa append_light
+ * @sa append_collision
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int            append_camera               ( GXScene_t   *scene, GXCamera_t    *camera );
+
+/* !
+ *  Append a light to a scene
+ *
+ * @param p_scene : The scene
+ * @param p_light : The light to append
+ *
+ * @sa append_entity
+ * @sa append_camera
+ * @sa append_collision
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int            append_light                ( GXScene_t   *scene, GXLight_t     *light );
+
+/* !
+ *  Append a collision to a scene
+ *
+ * @param p_scene     : The scene
+ * @param p_collision : The collision to append
+ *
+ * @sa append_entity
+ * @sa append_camera
+ * @sa append_light
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int            append_collision            ( GXScene_t   *scene, GXCollision_t *collision );
 
 // Drawing 
 DLLEXPORT int            draw_scene                  ( GXScene_t   *scene );
 DLLEXPORT int            draw_lights                 ( GXScene_t   *scene, GXPart_t      *light_part, GXShader_t *shader );
 
-// Logging
+// Info
+
+/* !
+ *  Print info about a scene
+ *
+ * @param p_scene  : pointer to scene to log
+ *
+ * @sa load_scene
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int            scene_info                  ( GXScene_t   *p_scene );
 
 // Getters

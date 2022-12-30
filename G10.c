@@ -16,7 +16,7 @@ void create_swap_chain      ( void );
 void recreate_swap_chain    ( void );
 void cleanup_swap_chain     ( void );
 void create_image_views     ( void );
-void create_render_pass     ( void );
+void create__render_pass     ( void );
 void create_framebuffers    ( void );
 void create_command_pool    ( void );
 void create_command_buffers ( void );
@@ -25,7 +25,6 @@ void create_sync_objects    ( void );
 void create_buffer          ( VkDeviceSize  size       , VkBufferUsageFlags    usage     , VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
 u32  find_memory_type       ( u32           type_filter, VkMemoryPropertyFlags properties );
 int  check_vulkan_device    ( GXInstance_t *instance, VkPhysicalDevice physical_device, char** required_extension_names);
-
 
 VKAPI_ATTR 
 VkBool32
@@ -265,9 +264,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
         // Window initialization
         {
-            ret->window_width        = window_width;
-            ret->window_height       = window_height;
-            ret->max_buffered_frames = (long)atoi(max_buffered_frames);
+            ret->window.width        = window_width;
+            ret->window.height       = window_height;
+            ret->vulkan.max_buffered_frames = (long)atoi(max_buffered_frames);
         }
 
         // SDL initialization
@@ -290,20 +289,20 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 goto noSDL;
 
             // Create the window
-            ret->window = SDL_CreateWindow(window_title,
+            ret->sdl2.window = SDL_CreateWindow(window_title,
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
                 (int)window_width, (int)window_height,
                 SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((fullscreen) ? SDL_WINDOW_FULLSCREEN : 0));
 
             // Check the window
-            if (!ret->window)
+            if (!ret->sdl2.window)
                 goto noWindow;
             
             // Display the window
-            SDL_ShowWindow(ret->window);
+            SDL_ShowWindow(ret->sdl2.window);
             
-            ret->clock_div = SDL_GetPerformanceFrequency();
+            ret->time.clock_div = SDL_GetPerformanceFrequency();
 
         }
 
@@ -347,9 +346,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
                     // Get a list of the required instance extensions from SDL
                     {
-                        SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, (void*)0);
+                        SDL_Vulkan_GetInstanceExtensions(instance->sdl2.window, &required_extension_count, (void*)0);
                         required_extensions = calloc(required_extension_count + 1, sizeof(char*));
-                        SDL_Vulkan_GetInstanceExtensions(instance->window, &required_extension_count, required_extensions);
+                        SDL_Vulkan_GetInstanceExtensions(instance->sdl2.window, &required_extension_count, required_extensions);
                     }
         
                     // Construct a dictionary from the required extensions
@@ -374,13 +373,14 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     setup_debug_messenger(&t->pNext);
                 }
     
-                if ( vkCreateInstance(&instance_create_info, (void*)0, &instance->instance) != VK_SUCCESS )
+                if ( vkCreateInstance(&instance_create_info, (void*)0, &instance->vulkan.instance) != VK_SUCCESS )
                     goto failed_to_create_vulkan_instance;
     
             }
 
             // Create a surface with SDL2
-            SDL_Vulkan_CreateSurface(ret->window, ret->instance, &ret->surface);
+            if ( SDL_Vulkan_CreateSurface(ret->sdl2.window, ret->vulkan.instance, &ret->vulkan.surface) == SDL_FALSE )
+                goto failed_to_create_sdl2_surface;
 
             // Get a physical device to use
             pick_physical_device(device_extensions);
@@ -389,7 +389,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             create_swap_chain();
             create_image_views();
 
-            create_render_pass();
+            create__render_pass();
             create_framebuffers();
 
             create_command_pool();
@@ -420,8 +420,8 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             {
 
                 // TODO: Create mutexes in subsystem initializers
-                ret->part_cache_mutex        = SDL_CreateMutex();
-                ret->material_cache_mutex    = SDL_CreateMutex();
+                ret->mutexes.part_cache        = SDL_CreateMutex();
+                ret->mutexes.material_cache    = SDL_CreateMutex();
             }
 
             // Subsystem initialization
@@ -528,23 +528,23 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     load_renderer(&p_renderer, renderer);
 
                 // Set the active renderer
-                ret->active_renderer = p_renderer;
+                ret->context.renderer = p_renderer;
             }
 
             // Construct dictionaries to cache materials, parts, and shaders.
             {
 
                 // If no count is specified by the JSON object. Default to 128.
-                dict_construct(&ret->cached_materials, ((material_cache_count) ? (material_cache_count) : 128));
+                dict_construct(&ret->cache.materials, ((material_cache_count) ? (material_cache_count) : 128));
 
                 // Default to 128 cached parts.
-                dict_construct(&ret->cached_parts    , ((material_cache_count) ? (material_cache_count) : 128));
+                dict_construct(&ret->cache.parts    , ((material_cache_count) ? (material_cache_count) : 128));
 
                 // Default to 32 cached shaders.
-                dict_construct(&ret->cached_shaders  , ((shader_cache_count)   ? (shader_cache_count)   : 32));
+                dict_construct(&ret->cache.shaders  , ((shader_cache_count)   ? (shader_cache_count)   : 32));
 
                 // Default to 16 cached ais
-                dict_construct(&ret->cached_ais      , ((ai_cache_count)       ? (ai_cache_count)       : 16));
+                dict_construct(&ret->cache.ais      , ((ai_cache_count)       ? (ai_cache_count)       : 16));
 
             }
 
@@ -556,7 +556,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             if(schedules) {
 
                 // Construct a dictionary for schedules
-                dict_construct(&ret->schedules, 8);
+                dict_construct(&ret->data.schedules, 8);
 
                 // Iterate over each schedule in the schedules array
                 for (size_t i = 0; schedules[i]; i++)
@@ -574,13 +574,13 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                         load_schedule(&schedule, schedules[i]);
 
                     // Add the schedule into the schedule dictionary
-                    dict_add(ret->schedules, schedule->name, schedule);
+                    dict_add(ret->data.schedules, schedule->name, schedule);
                 }
                 
             }
 
             // Scene dictionary
-            dict_construct(&ret->scenes, 16);
+            dict_construct(&ret->data.scenes, 16);
 
             // Load the initial scene
             if (initial_scene) {
@@ -595,7 +595,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 if (scene)
 
                     // Add the scene to the instance
-                    dict_add(ret->scenes, scene->name, scene);
+                    dict_add(ret->data.scenes, scene->name, scene);
 
                 // Error
                 else
@@ -603,7 +603,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     goto no_initial_scene;
 
                 // Set the active scene
-                ret->active_scene = scene;
+                ret->context.scene = scene;
             }
 
             // Set up the server
@@ -612,24 +612,24 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
                 // Load the server as a JSON object
                 if (server[0] == '{')
-                    load_server_as_json(&ret->server, server, strlen(server));
+                    load_server_as_json(&ret->networking.server, server, strlen(server));
                 
                 // Load the server from the filesystem
                 else
-                    load_server(&ret->server, server);
+                    load_server(&ret->networking.server, server);
 
             }
 
             // This prevents divide by zero errors when the game loop starts
-            ret->delta_time = 0.001;
+            ret->time.delta_time = 0.001;
         }
     }
 
-    SDL_SetWindowInputFocus(ret->window);
+    SDL_SetWindowInputFocus(ret->sdl2.window);
 
     return 1;
 
-    // DEBUG: Error handling
+    // Error handling
     {
         
         // Argument errors
@@ -706,6 +706,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         no_debug_messenger:
         no_device:
         no_surface:
+        failed_to_create_sdl2_surface:
             return 0;
         no_initial_scene:
             g_print_error("[G10] Failed to load scene \"%s\" in call to function \"%s\"\n", initial_scene, __FUNCSIG__);
@@ -747,7 +748,7 @@ void          pick_physical_device         ( char **required_extension_names )
 
     u32 device_count = 0;
     VkPhysicalDevice *devices = 0;
-    vkEnumeratePhysicalDevices(instance->instance, &device_count, (void*)0);
+    vkEnumeratePhysicalDevices(instance->vulkan.instance, &device_count, (void*)0);
 
     // Error check
     if (device_count == 0)
@@ -755,12 +756,12 @@ void          pick_physical_device         ( char **required_extension_names )
 
     devices = calloc(device_count + 1, sizeof(VkPhysicalDevice));
 
-    vkEnumeratePhysicalDevices(instance->instance, &device_count, devices);
+    vkEnumeratePhysicalDevices(instance->vulkan.instance, &device_count, devices);
 
     for (size_t i = 0; i < device_count; i++)
     {
         if (check_vulkan_device(instance, devices[i], required_extension_names))
-            instance->physical_device = devices[i];
+            instance->vulkan.physical_device = devices[i];
     }
 
     no_devices:;
@@ -771,37 +772,37 @@ void          create_logical_device        ( char **required_extension_names )
 {
     GXInstance_t             *instance                 = g_get_active_instance();
     VkDeviceQueueCreateInfo  *queue_create_infos       = calloc(2, sizeof(VkDeviceQueueCreateInfo));
-    VkPhysicalDeviceFeatures *device_features          = calloc(1, sizeof(VkPhysicalDeviceFeatures));
-    VkDeviceCreateInfo       *device_create_info       = calloc(1, sizeof(VkDeviceCreateInfo));
+    VkPhysicalDeviceFeatures  device_features          = { 0 };
+    VkDeviceCreateInfo        device_create_info       = { 0 };
     VkBool32                  result                   = 0;
-    u32                       unique_queue_families[2] = { instance->queue_family_indices.g, instance->queue_family_indices.p };
+    u32                       unique_queue_families[2] = { instance->vulkan.queue_family_indices.g, instance->vulkan.queue_family_indices.p };
 
-    instance->priority = 1.f;
+    instance->vulkan.priority = 1.f;
 
     for (size_t i = 0; i < 2; i++)
     {
         queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queue_create_infos[i].queueFamilyIndex = i;
         queue_create_infos[i].queueCount = 1;
-        queue_create_infos[i].pQueuePriorities = &instance->priority;
+        queue_create_infos[i].pQueuePriorities = &instance->vulkan.priority;
     }
 
-    device_create_info->sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    device_create_info->queueCreateInfoCount = 2;
-    device_create_info->pQueueCreateInfos = queue_create_infos;
-    device_create_info->enabledExtensionCount = 1;
-    device_create_info->pEnabledFeatures = device_features;
+    device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    device_create_info.queueCreateInfoCount = 2;
+    device_create_info.pQueueCreateInfos = queue_create_infos;
+    device_create_info.enabledExtensionCount = 1;
+    device_create_info.pEnabledFeatures = &device_features;
 
-    device_create_info->ppEnabledExtensionNames = required_extension_names;
+    device_create_info.ppEnabledExtensionNames = required_extension_names;
     
-    result = vkCreateDevice(instance->physical_device, device_create_info, 0, &instance->device);
+    result = vkCreateDevice(instance->vulkan.physical_device, &device_create_info, 0, &instance->vulkan.device);
 
     if (result != VK_SUCCESS) {
         printf("failed to create logical device!");
     }
 
-    vkGetDeviceQueue(instance->device, unique_queue_families[0], 0, &instance->graphics_queue);
-    vkGetDeviceQueue(instance->device, unique_queue_families[1], 0, &instance->present_queue);
+    vkGetDeviceQueue(instance->vulkan.device, unique_queue_families[0], 0, &instance->vulkan.graphics_queue);
+    vkGetDeviceQueue(instance->vulkan.device, unique_queue_families[1], 0, &instance->vulkan.present_queue);
 
 } 
 
@@ -819,21 +820,21 @@ void          create_swap_chain            ( void )
 
     u32                       qfi[2]                 = { 0, 0 };
     
-    qfi[0] = instance->queue_family_indices.g;
-    qfi[1] = instance->queue_family_indices.p;
+    qfi[0] = instance->vulkan.queue_family_indices.g;
+    qfi[1] = instance->vulkan.queue_family_indices.p;
 
-    surface_format = instance->swap_chain_details.formats[0];
+    surface_format = instance->vulkan.swap_chain_details.formats[0];
 
     for (size_t i = 0; i < 2; i++)
-        if (instance->swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            surface_format = instance->swap_chain_details.formats[i];
+        if (instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            surface_format = instance->vulkan.swap_chain_details.formats[i];
     
-    extent.width  = instance->window_width;
-    extent.height = instance->window_height;
+    extent.width  = instance->window.width;
+    extent.height = instance->window.height;
 
     // TODO: Check memory
     swapchain_create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapchain_create_info.surface          = instance->surface;
+    swapchain_create_info.surface          = instance->vulkan.surface;
     swapchain_create_info.minImageCount    = 2;
     swapchain_create_info.imageFormat      = surface_format.format;
     swapchain_create_info.imageColorSpace  = surface_format.colorSpace;
@@ -841,7 +842,7 @@ void          create_swap_chain            ( void )
     swapchain_create_info.imageArrayLayers = 1;
     swapchain_create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     
-    if (instance->queue_family_indices.g != instance->queue_family_indices.p)
+    if (instance->vulkan.queue_family_indices.g != instance->vulkan.queue_family_indices.p)
     {
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         swapchain_create_info.queueFamilyIndexCount = 2;
@@ -851,7 +852,7 @@ void          create_swap_chain            ( void )
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 
-    swapchain_create_info.preTransform   = instance->swap_chain_details.capabilities.currentTransform;
+    swapchain_create_info.preTransform   = instance->vulkan.swap_chain_details.capabilities.currentTransform;
     swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchain_create_info.presentMode    = present_mode;
     swapchain_create_info.clipped        = VK_TRUE;
@@ -859,18 +860,18 @@ void          create_swap_chain            ( void )
     swapchain_create_info.oldSwapchain   = VK_NULL_HANDLE;
 
 
-    if (vkCreateSwapchainKHR(instance->device, &swapchain_create_info, 0, &instance->swap_chain))
+    if (vkCreateSwapchainKHR(instance->vulkan.device, &swapchain_create_info, 0, &instance->vulkan.swap_chain))
         // TODO: Replace with goto
         printf("FAILED TO CREATE SWAPCHAIN");
 
-    vkGetSwapchainImagesKHR(instance->device, instance->swap_chain, &instance->image_count, 0);
+    vkGetSwapchainImagesKHR(instance->vulkan.device, instance->vulkan.swap_chain, &instance->vulkan.image_count, 0);
 
-    instance->swap_chain_images = calloc(instance->image_count, sizeof(VkImage));
+    instance->vulkan.swap_chain_images = calloc(instance->vulkan.image_count, sizeof(VkImage));
 
-    vkGetSwapchainImagesKHR(instance->device, instance->swap_chain, &instance->image_count, instance->swap_chain_images);
+    vkGetSwapchainImagesKHR(instance->vulkan.device, instance->vulkan.swap_chain, &instance->vulkan.image_count, instance->vulkan.swap_chain_images);
 
-    instance->swap_chain_image_format = surface_format.format;
-    instance->swap_chain_extent       = extent;
+    instance->vulkan.swap_chain_image_format = surface_format.format;
+    instance->vulkan.swap_chain_extent       = extent;
 }
 
 void          recreate_swap_chain          ( void )
@@ -880,15 +881,15 @@ void          recreate_swap_chain          ( void )
 
     GXInstance_t *instance = g_get_active_instance();
 
-    SDL_GetWindowSize(instance->window, &w, &h);
+    SDL_GetWindowSize(instance->sdl2.window, &w, &h);
     while (w == 0 || h == 0)
     {
         SDL_Event e;
-        SDL_GetWindowSize(instance->window, &w, &h);
+        SDL_GetWindowSize(instance->sdl2.window, &w, &h);
         SDL_PollEvent(&e);
     }
 
-    vkDeviceWaitIdle(instance->device);
+    vkDeviceWaitIdle(instance->vulkan.device);
 
     cleanup_swap_chain();
 
@@ -903,28 +904,28 @@ void          cleanup_swap_chain           ( void )
     GXInstance_t *instance = g_get_active_instance();
 
     for (size_t i = 0; i < 2; i++)
-        vkDestroyFramebuffer(instance->device, instance->swap_chain_framebuffers[i], 0);
+        vkDestroyFramebuffer(instance->vulkan.device, instance->vulkan.swap_chain_framebuffers[i], 0);
 
     for (size_t i = 0; i < 2; i++)
-        vkDestroyImageView(instance->device, instance->swap_chain_image_views[i], 0);
+        vkDestroyImageView(instance->vulkan.device, instance->vulkan.swap_chain_image_views[i], 0);
 
-    vkDestroySwapchainKHR(instance->device, instance->swap_chain, (void *)0);
+    vkDestroySwapchainKHR(instance->vulkan.device, instance->vulkan.swap_chain, (void *)0);
 
 }
 
 void          create_image_views           ( void ) {
     GXInstance_t          *instance = g_get_active_instance();
     
-    instance->swap_chain_image_views = calloc(instance->image_count, sizeof(VkImageView));
+    instance->vulkan.swap_chain_image_views = calloc(instance->vulkan.image_count, sizeof(VkImageView));
     
-    for (size_t i = 0; i < instance->image_count; i++)
+    for (size_t i = 0; i < instance->vulkan.image_count; i++)
     {
         VkImageViewCreateInfo  image_view_create_info = { 0 };
 
         image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        image_view_create_info.image = instance->swap_chain_images[i];
+        image_view_create_info.image = instance->vulkan.swap_chain_images[i];
         image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        image_view_create_info.format = instance->swap_chain_image_format;
+        image_view_create_info.format = instance->vulkan.swap_chain_image_format;
 
         image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -941,27 +942,28 @@ void          create_image_views           ( void ) {
 
         image_view_create_info.pNext = 0;
 
-        if (vkCreateImageView(instance->device, &image_view_create_info, 0, &instance->swap_chain_image_views[i]) != VK_SUCCESS) {
+        if (vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS) {
             g_print_error("failed to create image views!\n");
         }
         
     }
 }
 
-void          create_render_pass           ( void )
+void          create__render_pass           ( void )
 {
 
     // Initialized data
     GXInstance_t            *instance                   = g_get_active_instance();
     VkAttachmentDescription *color_attachment           = calloc(1, sizeof(VkAttachmentDescription));
     VkAttachmentReference   *color_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
+    VkAttachmentReference   *depth_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
     VkSubpassDescription    *subpass                    = calloc(1, sizeof(VkSubpassDescription));
     VkRenderPassCreateInfo   render_pass_create_info    = { 0 };
 
     {
 
         {
-            color_attachment->format = instance->swap_chain_image_format;
+            color_attachment->format = instance->vulkan.swap_chain_image_format;
             color_attachment->samples = VK_SAMPLE_COUNT_1_BIT;
             color_attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
             color_attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -971,11 +973,16 @@ void          create_render_pass           ( void )
             color_attachment->finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         }
 
-        // The index of the attachment in this array is directly referenced from the fragment shader with the layout(location = 0) out vec4 outColor directive!
+        // The index of the attachment in this array is directly referenced from the fragment shader with the layout(location = 0) out vec4 color directive!
         {
             {
                 color_attachment_reference->attachment = 0;
                 color_attachment_reference->layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            }
+
+            {
+                depth_attachment_reference->attachment = 1;
+                depth_attachment_reference->layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
             }
 
             subpass->pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -990,48 +997,49 @@ void          create_render_pass           ( void )
         render_pass_create_info.pSubpasses      = subpass;
     }
 
-    if (vkCreateRenderPass(instance->device, &render_pass_create_info, 0, &instance->render_pass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(instance->vulkan.device, &render_pass_create_info, 0, &instance->vulkan.render_pass) != VK_SUCCESS) {
         g_print_error("failed to create render pass!\n");
     }
 }
 
 void          create_framebuffers          ( void )
 {
-    GXInstance_t* instance = g_get_active_instance();
+    //GXInstance_t* instance = g_get_active_instance();
 
-    instance->swap_chain_framebuffers = calloc(instance->image_count, sizeof(VkFramebuffer));
+    //instance->vulkan.swap_chain_framebuffers = calloc(instance->vulkan.image_count, sizeof(VkFramebuffer));
 
-    for (size_t i = 0; i < instance->image_count; i++)
-    {
+    //for (size_t i = 0; i < instance->vulkan.image_count; i++)
+    //{
 
-        VkImageView attachments[1] = {
-            instance->swap_chain_image_views[i]
-        };
+    //    VkImageView attachments[1] = {
+    //        instance->vulkan.swap_chain_image_views[i]
+    //    };
 
-        VkFramebufferCreateInfo* framebuffer_create_info = calloc(1, sizeof(VkFramebufferCreateInfo));
-        framebuffer_create_info->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebuffer_create_info->renderPass = instance->render_pass;
-        framebuffer_create_info->attachmentCount = 1;
-        framebuffer_create_info->pAttachments = attachments;
-        framebuffer_create_info->width = instance->swap_chain_extent.width;
-        framebuffer_create_info->height = instance->swap_chain_extent.height;
-        framebuffer_create_info->layers = 1;
+    //    VkFramebufferCreateInfo framebuffer_create_info = { 0 };
 
-        if (vkCreateFramebuffer(instance->device, framebuffer_create_info, 0, &instance->swap_chain_framebuffers[i]) != VK_SUCCESS)
-            g_print_error("Failed to create framebuffer!\n");
-    }
+    //    framebuffer_create_info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    //    framebuffer_create_info.renderPass      = instance->vulkan.render_pass;
+    //    framebuffer_create_info.attachmentCount = 1;
+    //    framebuffer_create_info.pAttachments    = attachments;
+    //    framebuffer_create_info.width           = instance->vulkan.swap_chain_extent.width;
+    //    framebuffer_create_info.height          = instance->vulkan.swap_chain_extent.height;
+    //    framebuffer_create_info.layers          = 1;
+
+    //    if (vkCreateFramebuffer(instance->vulkan.device, &framebuffer_create_info, 0, &instance->vulkan.swap_chain_framebuffers[i]) != VK_SUCCESS)
+    //        g_print_error("Failed to create framebuffer!\n");
+    //}
 }
 
 void          create_command_pool          ( void )
 {
     GXInstance_t* instance = g_get_active_instance();
-    VkCommandPoolCreateInfo* pool_create_info = calloc(1, sizeof(VkCommandPoolCreateInfo));
+    VkCommandPoolCreateInfo  pool_create_info = { 0 };
 
-    pool_create_info->sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_create_info->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    pool_create_info->queueFamilyIndex = instance->queue_family_indices.g;
+    pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_create_info.queueFamilyIndex = instance->vulkan.queue_family_indices.g;
 
-    if (vkCreateCommandPool(instance->device, pool_create_info, 0, &instance->command_pool)!=VK_SUCCESS)
+    if ( vkCreateCommandPool(instance->vulkan.device, &pool_create_info, 0, &instance->vulkan.command_pool) != VK_SUCCESS )
         g_print_error("Failed to create command pool!\n");
 }
 
@@ -1040,14 +1048,14 @@ void          create_command_buffers       ( void )
     GXInstance_t *instance = g_get_active_instance();
 
     VkCommandBufferAllocateInfo* alloc_info = calloc(1, sizeof(VkCommandBufferAllocateInfo));
-    instance->command_buffers = calloc(instance->max_buffered_frames, sizeof(VkCommandBuffer));
+    instance->vulkan.command_buffers = calloc(instance->vulkan.max_buffered_frames, sizeof(VkCommandBuffer));
 
     alloc_info->sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info->commandPool        = instance->command_pool;
+    alloc_info->commandPool        = instance->vulkan.command_pool;
     alloc_info->level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info->commandBufferCount = instance->max_buffered_frames;
+    alloc_info->commandBufferCount = instance->vulkan.max_buffered_frames;
 
-    if (vkAllocateCommandBuffers(instance->device, alloc_info, instance->command_buffers) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(instance->vulkan.device, alloc_info, instance->vulkan.command_buffers) != VK_SUCCESS) {
         g_print_error("failed to allocate command buffers!\n");
     }
 }
@@ -1056,23 +1064,23 @@ void          create_sync_objects          ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
 
-    VkSemaphoreCreateInfo *semaphore_create_info = calloc(instance->max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
-    VkFenceCreateInfo     *fence_create_info     = calloc(instance->max_buffered_frames, sizeof(VkFenceCreateInfo));
+    VkSemaphoreCreateInfo *semaphore_create_info = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
+    VkFenceCreateInfo     *fence_create_info     = calloc(instance->vulkan.max_buffered_frames, sizeof(VkFenceCreateInfo));
     
     semaphore_create_info->sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     fence_create_info->sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info->flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    instance->image_available_semaphores = calloc(instance->max_buffered_frames, sizeof(VkSemaphore));
-    instance->render_finished_semaphores = calloc(instance->max_buffered_frames, sizeof(VkSemaphore));
-    instance->in_flight_fences           = calloc(instance->max_buffered_frames, sizeof(VkFence));
+    instance->vulkan.image_available_semaphores = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
+    instance->vulkan.render_finished_semaphores = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
+    instance->vulkan.in_flight_fences           = calloc(instance->vulkan.max_buffered_frames, sizeof(VkFence));
 
-    for (size_t i = 0; i < instance->max_buffered_frames; i++)
+    for (size_t i = 0; i < instance->vulkan.max_buffered_frames; i++)
     {
-        if (vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->image_available_semaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(instance->device, semaphore_create_info, 0, &instance->render_finished_semaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(instance->device, fence_create_info, 0, &instance->in_flight_fences[i]) != VK_SUCCESS) {
+        if (vkCreateSemaphore(instance->vulkan.device, semaphore_create_info, 0, &instance->vulkan.image_available_semaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(instance->vulkan.device, semaphore_create_info, 0, &instance->vulkan.render_finished_semaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(instance->vulkan.device, fence_create_info, 0, &instance->vulkan.in_flight_fences[i]) != VK_SUCCESS) {
             g_print_error("failed to create semaphores!\n");
         }
     }
@@ -1083,7 +1091,7 @@ u32           find_memory_type             ( u32                   type_filter, 
 {
     GXInstance_t *instance = g_get_active_instance();
     VkPhysicalDeviceMemoryProperties mem_properties;
-    vkGetPhysicalDeviceMemoryProperties(instance->physical_device, &mem_properties);
+    vkGetPhysicalDeviceMemoryProperties(instance->vulkan.physical_device, &mem_properties);
 
     for (u32 i = 0; i < mem_properties.memoryTypeCount; i++) {
         if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -1125,7 +1133,7 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
             else
                 passes_queue = false;
             
-            vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, instance->surface, &present_support);
+            vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, instance->vulkan.surface, &present_support);
 
             if (present_support)
                 indices.p = i;
@@ -1136,8 +1144,8 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
                 break;
         }
 
-        instance->queue_family_indices.g = indices.g;
-        instance->queue_family_indices.p = indices.p;
+        instance->vulkan.queue_family_indices.g = indices.g;
+        instance->vulkan.queue_family_indices.p = indices.p;
     }
 
     // Check device extensions
@@ -1188,19 +1196,19 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
             u32 format_count       = 0,
                 present_mode_count = 0;
 
-            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, instance->surface, &instance->swap_chain_details.capabilities);
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, instance->vulkan.surface, &instance->vulkan.swap_chain_details.capabilities);
 
-            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, instance->surface, &format_count, (void*)0);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, instance->vulkan.surface, &format_count, (void*)0);
 
-            instance->swap_chain_details.formats = calloc(format_count + 1, sizeof(VkSurfaceFormatKHR));
+            instance->vulkan.swap_chain_details.formats = calloc(format_count + 1, sizeof(VkSurfaceFormatKHR));
 
-            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, instance->surface, &format_count, instance->swap_chain_details.formats);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, instance->vulkan.surface, &format_count, instance->vulkan.swap_chain_details.formats);
 
-            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->surface, &present_mode_count, (void *)0);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->vulkan.surface, &present_mode_count, (void *)0);
 
-            instance->swap_chain_details.present_modes = calloc(present_mode_count + 1, sizeof(VkPresentModeKHR));
+            instance->vulkan.swap_chain_details.present_modes = calloc(present_mode_count + 1, sizeof(VkPresentModeKHR));
 
-            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->surface, &present_mode_count, instance->swap_chain_details.present_modes);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->vulkan.surface, &present_mode_count, instance->vulkan.swap_chain_details.present_modes);
             
             if ((bool)(present_mode_count) & (bool)(format_count)==true)
             {
@@ -1217,23 +1225,23 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 {
     VkMemoryRequirements  mem_requirements;
     GXInstance_t         *instance         = g_get_active_instance();
-    VkBufferCreateInfo   *buffer_info      = calloc(1, sizeof(VkBufferCreateInfo));
-    VkMemoryAllocateInfo  *alloc_info      = calloc(1, sizeof(VkMemoryAllocateInfo));
+    VkBufferCreateInfo    buffer_info      = { 0 };
+    VkMemoryAllocateInfo  alloc_info       = { 0 };
     
     // Create a buffer
     {
 
         // Populate the create info struct
-        buffer_info->sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffer_info->size        = size;
-        buffer_info->usage       = usage;
-        buffer_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        buffer_info.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        buffer_info.size        = size;
+        buffer_info.usage       = usage;
+        buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         // Create a buffer
-        if ( vkCreateBuffer( instance->device, buffer_info, 0, buffer ) != VK_SUCCESS )
+        if ( vkCreateBuffer( instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
             g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCSIG__);
 
-        vkGetBufferMemoryRequirements(instance->device, *buffer, &mem_requirements);
+        vkGetBufferMemoryRequirements(instance->vulkan.device, *buffer, &mem_requirements);
     }
     
 
@@ -1241,16 +1249,16 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
     {
 
         // Populate the allocation struct
-        alloc_info->sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        alloc_info->allocationSize  = mem_requirements.size;
-        alloc_info->memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties);
+        alloc_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc_info.allocationSize  = mem_requirements.size;
+        alloc_info.memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties);
 
         // Allocate memory for the buffer
-        if (vkAllocateMemory(instance->device, alloc_info, 0, buffer_memory) != VK_SUCCESS)
+        if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
             g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCSIG__);
 
         // Bind the buffer to the device
-        vkBindBufferMemory(instance->device, *buffer, *buffer_memory, 0);
+        vkBindBufferMemory(instance->vulkan.device, *buffer, *buffer_memory, 0);
     }
 }
 
@@ -1313,22 +1321,22 @@ size_t        g_load_file                  ( const char           *path,     voi
 void          clear_swap_chain             ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
-    for (size_t i = 0; i < instance->image_count; i++) {
-        vkDestroyFramebuffer(instance->device, instance->swap_chain_framebuffers[i], 0);
-        vkDestroyImageView(instance->device, instance->swap_chain_image_views[i], 0);
+    for (size_t i = 0; i < instance->vulkan.image_count; i++) {
+        vkDestroyFramebuffer(instance->vulkan.device, instance->vulkan.swap_chain_framebuffers[i], 0);
+        vkDestroyImageView(instance->vulkan.device, instance->vulkan.swap_chain_image_views[i], 0);
     }
 
-    vkDestroySwapchainKHR(instance->device, instance->swap_chain, 0);
+    vkDestroySwapchainKHR(instance->vulkan.device, instance->vulkan.swap_chain, 0);
 }
 
 int           g_window_resize              ( GXInstance_t         *instance)
 {
-    SDL_GetWindowSize(instance->window, &instance->window_width, &instance->window_height);
+    SDL_GetWindowSize(instance->sdl2.window, &instance->window.width, &instance->window.height);
 
-    while (instance->window_height == 0 || instance->window_width == 0 )
-        SDL_GetWindowSize(instance->window, &instance->window_width, &instance->window_height);
+    while (instance->window.height == 0 || instance->window.width == 0 )
+        SDL_GetWindowSize(instance->sdl2.window, &instance->window.width, &instance->window.height);
 
-    vkDeviceWaitIdle(instance->device);
+    vkDeviceWaitIdle(instance->vulkan.device);
 
     clear_swap_chain();
 
@@ -1469,7 +1477,7 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
     }
 
     // Initialized data
-    GXSchedule_t* schedule = dict_get(instance->schedules, name);
+    GXSchedule_t* schedule = dict_get(instance->data.schedules, name);
 
     // Error checking
     {
@@ -1524,63 +1532,65 @@ int           copy_state                   ( GXInstance_t         *instance )
     {
 
         // Physics
-        SDL_LockMutex(instance->move_object_mutex);
-        SDL_LockMutex(instance->update_force_mutex);
-        SDL_LockMutex(instance->resolve_collision_mutex);
+        SDL_LockMutex(instance->mutexes.move_object);
+        SDL_LockMutex(instance->mutexes.update_force);
+        SDL_LockMutex(instance->mutexes.resolve_collision);
 
         // AI
-        SDL_LockMutex(instance->ai_preupdate_mutex);
-        SDL_LockMutex(instance->ai_update_mutex);
+        SDL_LockMutex(instance->mutexes.ai_preupdate);
+        SDL_LockMutex(instance->mutexes.ai_update);
     }
 
     // Get a list of actors and ais
     {
-        actor_count = dict_keys(instance->active_scene->actors, 0);
-        ai_count    = dict_keys(instance->active_scene->ais, 0);
+        actor_count = dict_keys(instance->context.scene->actors, 0);
+        ai_count    = dict_keys(instance->context.scene->ais, 0);
 
         actors      = calloc(actor_count+1, sizeof(void *));
         ais         = calloc(ai_count+1, sizeof(void *));
 
-        dict_values(instance->active_scene->actors, actors);
-        dict_values(instance->active_scene->ais, ais);
+        dict_values(instance->context.scene->actors, actors);
+        dict_values(instance->context.scene->ais, ais);
     }
 
-    // Destroy the old queues
-    {
 
-        // Physics
-        {
-            if (instance->actor_move_queue)
-                queue_destroy(instance->actor_move_queue);
-
-            if (instance->actor_force_queue)
-                queue_destroy(instance->actor_force_queue);
-
-            if (instance->actor_collision_queue)
-                queue_destroy(instance->actor_collision_queue);
-        }
-
-        // AI
-        {
-            if (instance->ai_preupdate_queue)
-                queue_destroy(instance->ai_preupdate_queue);
-
-            if (instance->ai_update_queue)
-                queue_destroy(instance->ai_update_queue);
-        }
-    }
 
     // Reconstruct the queues
     {
-        
+
+        // Destroy the old queues
+        {
+
+            // Physics
+            {
+                if (instance->queues.actor_move)
+                    queue_destroy(instance->queues.actor_move);
+
+                if (instance->queues.actor_force)
+                    queue_destroy(instance->queues.actor_force);
+
+                if (instance->queues.actor_collision)
+                    queue_destroy(instance->queues.actor_collision);
+            }
+
+            // AI
+            {
+                if (instance->queues.ai_preupdate)
+                    queue_destroy(instance->queues.ai_preupdate);
+
+                if (instance->queues.ai_update)
+                    queue_destroy(instance->queues.ai_update);
+            }
+        }
+
         // Physics
-        queue_construct(&instance->actor_move_queue     , actor_count + 1);
-        queue_construct(&instance->actor_force_queue    , actor_count + 1);
-        queue_construct(&instance->actor_collision_queue, actor_count + 1);
+        queue_construct(&instance->queues.actor_move     , actor_count + 1);
+        queue_construct(&instance->queues.actor_force    , actor_count + 1);
+        queue_construct(&instance->queues.actor_collision, actor_count + 1);
 
         // AI
-        queue_construct(&instance->ai_preupdate_queue   , ai_count + 1 );
-        queue_construct(&instance->ai_update_queue      , ai_count + 1 );
+        queue_construct(&instance->queues.ai_preupdate   , ai_count + 1 );
+        queue_construct(&instance->queues.ai_update      , ai_count + 1 );
     }
 
     // Populate the new queues
@@ -1589,16 +1599,16 @@ int           copy_state                   ( GXInstance_t         *instance )
         // Physics
         for (size_t i = 0; i < actor_count; i++)
         {
-            queue_enqueue(instance->actor_move_queue, actors[i]);
-            queue_enqueue(instance->actor_force_queue, actors[i]);
-            queue_enqueue(instance->actor_collision_queue, actors[i]);
+            queue_enqueue(instance->queues.actor_move     , actors[i]);
+            queue_enqueue(instance->queues.actor_force    , actors[i]);
+            queue_enqueue(instance->queues.actor_collision, actors[i]);
         }
 
         // AI
         for (size_t i = 0; i < ai_count; i++)
         {
-            queue_enqueue(instance->ai_preupdate_queue, ais[i]);
-            queue_enqueue(instance->ai_update_queue, ais[i]);
+            queue_enqueue(instance->queues.ai_preupdate, ais[i]);
+            queue_enqueue(instance->queues.ai_update   , ais[i]);
         }
     }
 
@@ -1610,16 +1620,16 @@ int           copy_state                   ( GXInstance_t         *instance )
     {
         
         // Physics
-        SDL_UnlockMutex(instance->move_object_mutex);
-        SDL_UnlockMutex(instance->update_force_mutex);
-        SDL_UnlockMutex(instance->resolve_collision_mutex);
+        SDL_UnlockMutex(instance->mutexes.move_object);
+        SDL_UnlockMutex(instance->mutexes.update_force);
+        SDL_UnlockMutex(instance->mutexes.resolve_collision);
 
         // AI
-        SDL_UnlockMutex(instance->ai_preupdate_mutex);
-        SDL_UnlockMutex(instance->ai_update_mutex);
+        SDL_UnlockMutex(instance->mutexes.ai_preupdate);
+        SDL_UnlockMutex(instance->mutexes.ai_update);
     }
 
-    return 0;
+    return 1;
 }
 
 GXInstance_t *g_get_active_instance        ( void )
@@ -1639,7 +1649,7 @@ int           g_cache_material             ( GXInstance_t         *instance, GXM
         #endif
     }
 
-    dict_add(instance->cached_materials, material->name, material);
+    dict_add(instance->cache.materials, material->name, material);
 
     return 1;
 
@@ -1715,7 +1725,7 @@ int           g_cache_shader               ( GXInstance_t         *instance, GXS
         #endif
     }
     
-    dict_add(instance->cached_shaders, shader->name, shader);
+    dict_add(instance->cache.shaders, shader->name, shader);
 
     return 1;
 
@@ -1752,7 +1762,7 @@ int           g_cache_ai                   ( GXInstance_t         *instance, GXA
         #endif
     }
     
-    dict_add(instance->cached_ais, ai->name, ai);
+    dict_add(instance->cache.ais, ai->name, ai);
 
     return 1;
 
@@ -1780,10 +1790,11 @@ int           g_cache_ai                   ( GXInstance_t         *instance, GXA
 void          g_user_exit                  ( callback_parameter_t input, GXInstance_t* instance)
 {
     instance->running = false;
-    if (instance->active_schedule)
+    if (instance->context.schedule)
     {
-        GXThread_t *main_thread = dict_get(instance->active_schedule->threads, "Main Thread");
-        main_thread->running = false;
+        GXThread_t *main_thread = dict_get(instance->context.schedule->threads, "Main Thread");
+
+        main_thread->running    = false;
     }
 }
   
@@ -1813,7 +1824,7 @@ GXMaterial_t *g_find_material              ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cached_materials, name);
+    return dict_get(instance->cache.materials, name);
 
     // Error handling
     {
@@ -1849,7 +1860,7 @@ GXPart_t     *g_find_part                  ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cached_parts, name);
+    return dict_get(instance->cache.parts, name);
 
     // Error handling
     {
@@ -1887,7 +1898,7 @@ GXShader_t   *g_find_shader                ( GXInstance_t         *instance, cha
 
     GXShader_t* ret = 0;
 
-    ret = dict_get(instance->cached_shaders, name);
+    ret = dict_get(instance->cache.shaders, name);
 
     return ret;
 
@@ -1927,7 +1938,7 @@ GXAI_t       *g_find_ai                    ( GXInstance_t         *instance, cha
 
     GXAI_t* ret = 0;
 
-    ret = dict_get(instance->cached_ais, name);
+    ret = dict_get(instance->cache.ais, name);
 
     return ret;
 
@@ -1962,35 +1973,35 @@ int           g_exit                       ( GXInstance_t         *instance )
     }
 
     // Wait for the GPU to finish whatever its doing
-    vkDeviceWaitIdle(instance->device);
+    vkDeviceWaitIdle(instance->vulkan.device);
 
     // G10 Cleanup
     {
 
         // Free scenes
         {
-            size_t scene_count = dict_keys(instance->scenes, 0);
+            size_t scene_count = dict_keys(instance->data.scenes, 0);
             GXScene_t **scenes = calloc(scene_count, sizeof(void *));
 
-            dict_values(instance->scenes, scenes);
+            dict_values(instance->data.scenes, scenes);
 
             for (size_t i = 0; i < scene_count; i++)
                 destroy_scene(scenes[i]);
 
             free(scenes);
 
-            dict_destroy(instance->scenes);
+            dict_destroy(instance->data.scenes);
         }
 
         // Free shaders
         {
 
             // Initialized data
-            size_t        shader_count = dict_values(instance->cached_shaders, 0);
+            size_t        shader_count = dict_values(instance->cache.shaders, 0);
             GXShader_t  **shaders      = calloc(shader_count, sizeof(GXShader_t*));
 
             // Get a list of orphan shaders
-            dict_values(instance->cached_shaders, shaders);
+            dict_values(instance->cache.shaders, shaders);
 
             // Iterate over each shader
             for (size_t i = 0; i < shader_count; i++)
@@ -2022,24 +2033,24 @@ int           g_exit                       ( GXInstance_t         *instance )
     {
         clear_swap_chain();
 
-        for (size_t i = 0; i < instance->max_buffered_frames; i++)
+        for (size_t i = 0; i < instance->vulkan.max_buffered_frames; i++)
         {
-            vkDestroySemaphore(instance->device, instance->render_finished_semaphores[i], 0);
-            vkDestroySemaphore(instance->device, instance->image_available_semaphores[i], 0);
-            vkDestroyFence(instance->device, instance->in_flight_fences[i], 0);
+            vkDestroySemaphore(instance->vulkan.device, instance->vulkan.render_finished_semaphores[i], 0);
+            vkDestroySemaphore(instance->vulkan.device, instance->vulkan.image_available_semaphores[i], 0);
+            vkDestroyFence(instance->vulkan.device, instance->vulkan.in_flight_fences[i], 0);
 
         }
 
-        vkDestroyCommandPool(instance->device, instance->command_pool, 0);
+        vkDestroyCommandPool(instance->vulkan.device, instance->vulkan.command_pool, 0);
 
-        vkDestroyDevice(instance->device, (void*)0);
-        vkDestroySurfaceKHR(instance->instance, instance->surface, (void*)0);
-        vkDestroyInstance(instance->instance, (void*)0);
+        vkDestroyDevice(instance->vulkan.device, (void*)0);
+        vkDestroySurfaceKHR(instance->vulkan.instance, instance->vulkan.surface, (void*)0);
+        vkDestroyInstance(instance->vulkan.instance, (void*)0);
     }
 
     // SDL Cleanup
     {
-        SDL_DestroyWindow(instance->window);
+        SDL_DestroyWindow(instance->sdl2.window);
         SDL_Quit();
     }
     

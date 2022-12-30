@@ -33,7 +33,7 @@ int get_camera_position(void* ret)
 
 	// Initialized data
 	GXInstance_t *instance        = g_get_active_instance();
-	vec3          camera_position = instance->active_scene->active_camera->location;
+	vec3          camera_position = instance->context.scene->active_camera->location;
 
 	// Write the camera position to the return
 	*(vec3 *)ret = camera_position;
@@ -250,4 +250,10 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 	}
 
 	return 0;
+}
+
+int destroy_camera ( GXCamera_t *p_camera )
+{
+	// TODO: 
+	return 1;
 }

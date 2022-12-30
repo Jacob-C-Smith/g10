@@ -73,6 +73,9 @@
     <Filter Include="Header Files\G10\User Code">
       <UniqueIdentifier>{50ac2c5c-384b-45d0-87ee-1676e4d4628e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\G10\Shader">
+      <UniqueIdentifier>{b53e3556-8f0b-4387-9e92-353e0b6f8b70}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -153,11 +156,11 @@
     <ClCompile Include="APS_3rdPersonCtrl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GXMaterial.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\G10\G10.h">
-      <Filter>Header Files\G10</Filter>
-    </ClInclude>
     <ClInclude Include="include\G10\GXPart.h">
       <Filter>Header Files\G10\Scene\Entity</Filter>
     </ClInclude>
@@ -177,9 +180,6 @@
       <Filter>Header Files\G10\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXTransform.h">
-      <Filter>Header Files\G10\Scene\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="include\G10\GXShader.h">
       <Filter>Header Files\G10\Scene\Entity</Filter>
     </ClInclude>
     <ClInclude Include="include\G10\GXRigidbody.h">
@@ -244,6 +244,12 @@
     </ClInclude>
     <ClInclude Include="include\G10\APS_3rdPersonCtrl.h">
       <Filter>Header Files\G10\Scene\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXShader.h">
+      <Filter>Header Files\G10\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\G10.h">
+      <Filter>Header Files\G10</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -55,6 +55,7 @@
     <ClCompile Include="GXEntity.c" />
     <ClCompile Include="GXInput.c" />
     <ClCompile Include="GXLinear.c" />
+    <ClCompile Include="GXMaterial.c" />
     <ClCompile Include="GXPart.c" />
     <ClCompile Include="GXPhysics.c" />
     <ClCompile Include="GXPLY.c" />

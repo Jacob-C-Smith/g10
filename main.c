@@ -11,7 +11,7 @@ int user_code_callback(GXInstance_t* instance)
 {
 
     // Update the camera controller
-    update_controlee_camera(instance->delta_time);
+    update_controlee_camera(instance->time.delta_time);
 
     return 0;
 }
@@ -59,8 +59,7 @@ int main ( int argc, const char *argv[] )
     if (instance_path)
         g_init(&instance, instance_path);
 
-    load_camera(&instance->active_scene->active_camera, "G10/camera.json");
-    load_texture(&abc_texture, "G10/t.json");
+    load_camera(&instance->context.scene->active_camera, "G10/camera.json");
     
     // Game setup
     {
@@ -83,9 +82,9 @@ int main ( int argc, const char *argv[] )
             {
 
                 // First person controller
-                camera_controller_from_camera(instance, instance->active_scene->active_camera);
+                camera_controller_from_camera(instance, instance->context.scene->active_camera);
 
-                // Third person controller
+                // Third person controller. Thanks Aiden :)
                 //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
             }
 
@@ -104,21 +103,23 @@ int main ( int argc, const char *argv[] )
     }
 
     // Log a lot of stuff
-    if(0){
-        scene_info(instance->active_scene);
+    if(1){
+        scene_info(instance->context.scene);
 
-        renderer_info(instance->active_renderer);
+        bv_info(instance->context.scene->bvh, 0);
+
+        renderer_info(instance->context.renderer);
 
         input_info(instance->input);
     }
 
     instance->running = true;
 
-    // Start the game loop
+    // Start the game 
     g_start_schedule(instance, schedule_name);
 
     // Stop execution
-    stop_schedule(instance->active_schedule);
+    stop_schedule(instance->context.schedule);
     return 0;
 
     // Exit 

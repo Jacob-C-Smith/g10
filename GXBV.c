@@ -25,6 +25,7 @@ int     create_bv                ( GXBV_t **pp_bv )
     // Write the return value
     *pp_bv = ret;
 
+    // Success
     return 1;
 
     // Error handling
@@ -45,7 +46,7 @@ int     create_bv                ( GXBV_t **pp_bv )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
                 #endif
-            return 0;
+                return 0;
         }
     }
 }
@@ -99,22 +100,22 @@ int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
     }
 }
 
-int     construct_bv_from_bvs    ( GXBV_t **bv   , GXBV_t    *a    , GXBV_t* b )
+int     construct_bv_from_bvs    ( GXBV_t **pp_bv, GXBV_t    *a    , GXBV_t* b )
 {
 
 
-    GXBV_t* i_bv = 0;
+    GXBV_t* p_bv = 0;
 
-    create_bv(bv);
+    create_bv(pp_bv);
 
-    i_bv = *bv;
+    p_bv = *pp_bv;
 
-    i_bv->left  = a,
-    i_bv->right = b;
+    p_bv->left  = a,
+    p_bv->right = b;
 
-    resize_bv(i_bv);
+    resize_bv(p_bv);
 
-    return 0;
+    return 1;
 }
 
 int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
@@ -125,7 +126,7 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
         /*
          * This function constructs a bounding volume hierarchy from a scene. The algorithm is
          * relatively simple, and constructs the tree on O(n^3) time. The algorithm creates the
-         * tree in a bottum up fashion.
+         * tree in a bottom up fashion.
          *
          * The algorithm starts by generating a list of bounding volume heierarchies from the list
          * of entities from the scene. The algorithm then compute which two bounding volumes are
@@ -157,6 +158,9 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
                  best_i                = 0,                           // Best indicies  ...
                  best_j                = 0;                           //                ...
     GXBV_t      *ret                   = 0;
+
+    if (actors_in_scene == 0)
+        goto no_actors;
 
     // Allocate a double pointer list
     actor_list       = calloc(actors_in_scene, sizeof(void*));
@@ -260,11 +264,16 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
         // Argument errors
         {
             no_scene:
-            #ifndef NDEBUG
-                g_print_error("[G10] [BV] Null pointer provided for \"scene\" in call to function %s\n", __FUNCSIG__);
-            #endif
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] Null pointer provided for \"scene\" in call to function %s\n", __FUNCSIG__);
+                #endif
+                return 0;
 
-            return 0;
+            no_actors:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [BV] No actors in \"scene\" in call to function %s\n", __FUNCSIG__);
+                #endif
+                return 0;
         }
     }
 }
@@ -692,51 +701,53 @@ int     resize_bv                ( GXBV_t  *bv )
     }
 }
 
-int     print_bv                 ( FILE    *f    , GXBV_t    *bv,    size_t d )
+int     bv_info                 ( GXBV_t    *p_bv,    size_t d )
 {
 
     // Argument check
     {
-        if (bv == (void*)0)
+        if (p_bv == (void*)0)
             goto no_bv;
     }
 
     // Base case, print out a header
     if (d == 0)
-        fprintf(f, "[G10] [BV] Bounding volume hierarchy\n[ entity name ] - < location > - < dimension >\n\n");
+        printf("[G10] [BV] Bounding volume hierarchy\n[ entity name ] - < location > - < dimension >\n\n");
         
     // Indent proportional to the deapth of the BVH
     for (size_t i = 0; i < d * 4; i++)
-        putc(' ', f);
+        putchar(' ');
 
     // If the bounding volume is an entity, print the entities name
-    if (bv->entity)
+    if (p_bv->entity)
     {
-        fprintf(f, "\"%s\"", bv->entity->name);
-        fprintf(f, " - < %.2f %.2f %.2f > - < %.2f %.2f %.2f >\n",  bv->maximum.x, bv->maximum.y, bv->maximum.z, bv->minimum.x, bv->minimum.y, bv->minimum.z );
+        printf("\"%s\"", p_bv->entity->name);
+        printf(" - < %.2f %.2f %.2f > - < %.2f %.2f %.2f >\n", p_bv->maximum.x, p_bv->maximum.y, p_bv->maximum.z, p_bv->minimum.x, p_bv->minimum.y, p_bv->minimum.z );
     }
     else
 
         // Print the location and scale of the bounding volume
-        fprintf(f, "%s - < %.2f %.2f %.2f > - < %.2f %.2f %.2f >\n", "Volume", bv->maximum.x, bv->maximum.y, bv->maximum.z, bv->minimum.x, bv->minimum.y, bv->minimum.z);
+        printf("%s - < %.2f %.2f %.2f > - < %.2f %.2f %.2f >\n", "Volume", p_bv->maximum.x, p_bv->maximum.y, p_bv->maximum.z, p_bv->minimum.x, p_bv->minimum.y, p_bv->minimum.z);
 
     // Print the left node
-    if (bv->left)
+    if (p_bv->left)
     {
-        fprintf(f, "L");
-        print_bv(f, bv->left, d + 1);
+        printf("L");
+        bv_info(p_bv->left, d + 1);
     }
+
     // Print the right node
-    if (bv->right)
+    if (p_bv->right)
     {
-        fprintf(f, "R");
-        print_bv(f, bv->right, d + 1);
+        printf("R");
+        bv_info(p_bv->right, d + 1);
     }
+
     // If there is nothing else to print, print a few newlines
     if (d == 0)
-        fprintf(f,"\n\n");
+        printf("\n\n");
 
-    return 0;
+    return 1;
 
     // Error handling
     {

@@ -606,44 +606,39 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
         extern u32 find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
 
 
-        VkMemoryRequirements* memory_requirements = calloc(1, sizeof(VkMemoryRequirements));
-        VkBufferCreateInfo* buffer_create_info = calloc(1, sizeof(VkBufferCreateInfo));
-        VkMemoryAllocateInfo* allocate_info = calloc(1, sizeof(VkMemoryAllocateInfo));
+        VkMemoryRequirements memory_requirements = { 0 };
+        VkBufferCreateInfo   buffer_create_info  = { 0 };
+        VkMemoryAllocateInfo allocate_info       = { 0 };
         void *data = vertex_array;
 
         {
-            buffer_create_info->sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            buffer_create_info->size = ply_file->elements[0].s_stride * vertices_in_buffer;
-            buffer_create_info->usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-            buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+            buffer_create_info.size = ply_file->elements[0].s_stride * vertices_in_buffer;
+            buffer_create_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
 
-        if (vkCreateBuffer(instance->device, buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
+        if (vkCreateBuffer(instance->vulkan.device, &buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
             g_print_error("[G10] [PLY] Failed to create vertex buffer");
 
-        vkGetBufferMemoryRequirements(instance->device, part->vertex_buffer, memory_requirements);
+        vkGetBufferMemoryRequirements(instance->vulkan.device, part->vertex_buffer, &memory_requirements);
 
-        allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocate_info->allocationSize = memory_requirements->size;
-        allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocate_info.allocationSize = memory_requirements.size;
+        allocate_info.memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         
-        if (vkAllocateMemory(instance->device, allocate_info, 0, &part->vertex_buffer_memory))
+        if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
 
-        vkBindBufferMemory(instance->device, part->vertex_buffer, part->vertex_buffer_memory, 0);
+        vkBindBufferMemory(instance->vulkan.device, part->vertex_buffer, part->vertex_buffer_memory, 0);
 
-        vkMapMemory(instance->device, part->vertex_buffer_memory, 0, buffer_create_info->size, 0, &data);
+        vkMapMemory(instance->vulkan.device, part->vertex_buffer_memory, 0, buffer_create_info.size, 0, &data);
 
         // TODO: Replace w staging
-        memcpy(data, vertex_array, buffer_create_info->size);
+        memcpy(data, vertex_array, buffer_create_info.size);
 
-        vkUnmapMemory(instance->device, part->vertex_buffer_memory);
-
-        free(memory_requirements);
-        free(buffer_create_info);
-        free(allocate_info);
-
+        vkUnmapMemory(instance->vulkan.device, part->vertex_buffer_memory);
     }
 
     {
@@ -664,27 +659,27 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
 
-        if (vkCreateBuffer(instance->device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
+        if (vkCreateBuffer(instance->vulkan.device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
             g_print_error("[G10] [PLY] Failed to create element buffer");
 
-        vkGetBufferMemoryRequirements(instance->device, part->element_buffer, memory_requirements);
+        vkGetBufferMemoryRequirements(instance->vulkan.device, part->element_buffer, memory_requirements);
 
         allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocate_info->allocationSize = memory_requirements->size;
         allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 
-        if (vkAllocateMemory(instance->device, allocate_info, 0, &part->element_buffer_memory))
+        if (vkAllocateMemory(instance->vulkan.device, allocate_info, 0, &part->element_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate element buffer memory");
 
-        vkBindBufferMemory(instance->device, part->element_buffer, part->element_buffer_memory, 0);
+        vkBindBufferMemory(instance->vulkan.device, part->element_buffer, part->element_buffer_memory, 0);
 
-        vkMapMemory(instance->device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
+        vkMapMemory(instance->vulkan.device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
 
         // TODO: Replace w staging
         memcpy(data, corrected_indicies, buffer_create_info->size);
 
-        vkUnmapMemory(instance->device, part->element_buffer_memory);
+        vkUnmapMemory(instance->vulkan.device, part->element_buffer_memory);
 
         free(memory_requirements);
         free(buffer_create_info);

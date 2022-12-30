@@ -2,11 +2,14 @@
 
 void init_ai                   ( void )
 {
+
+	// Initialized data
 	GXInstance_t *instance       = g_get_active_instance();
 
-	instance->ai_cache_mutex     = SDL_CreateMutex();
-	instance->ai_preupdate_mutex = SDL_CreateMutex();
-	instance->ai_update_mutex    = SDL_CreateMutex();
+	// Create instance mutexes for AI tasks
+	instance->mutexes.ai_cache     = SDL_CreateMutex();
+	instance->mutexes.ai_preupdate = SDL_CreateMutex();
+	instance->mutexes.ai_update    = SDL_CreateMutex();
 }
 
 int create_ai                  ( GXAI_t       **pp_ai )
@@ -30,6 +33,7 @@ int create_ai                  ( GXAI_t       **pp_ai )
 		#endif
 	}
 
+	// Write the return value
 	*pp_ai = p_ai;
 
 	return 1;
@@ -60,6 +64,7 @@ int create_ai                  ( GXAI_t       **pp_ai )
 
 int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -121,6 +126,7 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
 				#endif	
 				return 0;
+
 			failed_to_construct_ai_from_file_json:
 				#ifndef NDEBUG
 					free(file_data);
@@ -133,6 +139,7 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 
 int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, size_t   len )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -192,7 +199,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		// Check the cache
 		{
 			// Lock the AI cache mutex
-			SDL_LockMutex(instance->ai_cache_mutex);
+			SDL_LockMutex(instance->mutexes.ai_cache);
 
 			// Initialized data
 			GXAI_t* c_ai = g_find_ai(instance, name);
@@ -303,7 +310,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 
 		}
 
-		SDL_UnlockMutex(instance->ai_cache_mutex);
+		SDL_UnlockMutex(instance->mutexes.ai_cache);
 	}
 
 	free_memory:
@@ -474,20 +481,20 @@ int pre_update_ai              ( GXInstance_t  *instance )
 	// Get an ai entity
 	{
 		// Lock the mutex 
-		SDL_LockMutex(instance->ai_preupdate_mutex);
+		SDL_LockMutex(instance->mutexes.ai_preupdate);
 
 		// Is there anything left to move?
-		if (queue_empty(instance->ai_preupdate_queue))
+		if (queue_empty(instance->queues.ai_preupdate))
 		{
 
 			// If not, unlock and return
-			SDL_UnlockMutex(instance->ai_preupdate_mutex);
+			SDL_UnlockMutex(instance->mutexes.ai_preupdate);
 			return 1;
 		}
 
-		entity = queue_dequeue(instance->ai_preupdate_queue);
+		entity = queue_dequeue(instance->queues.ai_preupdate);
 
-		SDL_UnlockMutex(instance->ai_preupdate_mutex);
+		SDL_UnlockMutex(instance->mutexes.ai_preupdate);
 	}
 
     // Update the AI
@@ -638,20 +645,20 @@ int update_ai                  ( GXInstance_t* instance )
 	// Get an ai entity
 	{
 		// Lock the mutex 
-		SDL_LockMutex(instance->ai_update_mutex);
+		SDL_LockMutex(instance->mutexes.ai_update);
 
 		// Is there anything left to move?
-		if (queue_empty(instance->ai_update_queue))
+		if (queue_empty(instance->queues.ai_update))
 		{
 
 			// If not, unlock and return
-			SDL_UnlockMutex(instance->ai_update_mutex);
+			SDL_UnlockMutex(instance->mutexes.ai_update);
 			return 1;
 		}
 
-		entity = queue_dequeue(instance->ai_update_queue);
+		entity = queue_dequeue(instance->queues.ai_update);
 
-		SDL_UnlockMutex(instance->ai_update_mutex);
+		SDL_UnlockMutex(instance->mutexes.ai_update);
 	}
 
     // Update the AI

@@ -73,16 +73,18 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len+1, sizeof(char));
 	
+	// Load the entity file
 	if ( g_load_file(path, token_text, false) == 0 )
 		goto failed_to_load_entity;
 
+	// Load the entity as JSON text
 	if ( load_entity_as_json(pp_entity, token_text, len) == 0 )
 		goto failed_to_load_entity_as_json;
 
+	// Free the object text
 	free(token_text);
 
 	return 1;
-	
 	
 	// Error handling
 	{
@@ -196,7 +198,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 
 	// Is there enough information to construct an entity?
 	{
-
+		// TODO: 
 	}
 
 	// Construct the entity
@@ -216,12 +218,12 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 			size_t name_len = strlen(name);
 
 			// Allocate memory for the name
-			i_entity->name = calloc(name_len + 1, sizeof(char));
+			i_entity->name  = calloc(name_len + 1, sizeof(char));
 
 			// Error checking
 			{
 				#ifndef NDEBUG
-					if (i_entity->name == (void *)0)
+					if ( i_entity->name == (void *)0 )
 						goto no_mem;
 				#endif
 			}
@@ -267,6 +269,39 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		}
 
 		// Material
+		if (materials)
+		{
+
+			// Initialized data
+			size_t materail_count = 0;
+
+			// Count up materials
+			while (materials[++materail_count]);
+
+			// Construct a list of materials
+			dict_construct(&i_entity->materials, materail_count);
+
+			// Iterate over materials
+			for (size_t i = 0; i < materail_count; i++)
+			{
+
+				// Initialized data
+				GXMaterial_t *m = 0;
+
+				// Differentiate objects from paths
+
+				// Object branch
+				if (*materials[i] == '{')
+					load_material_as_json(&m, materials[i], strlen(materials[i]));
+
+				// Path branch
+				else
+					load_material(&m, materials[i]);
+
+				// Add the material to the list
+				dict_add(i_entity->materials, m->name, m);
+			}
+		}
 
 		// Shader
 		if (shader) {
@@ -481,7 +516,7 @@ int get_model_matrix(void* ret)
 
 	// Initialized data
 	GXInstance_t *instance        = g_get_active_instance();
-	mat4          model_matrix    = instance->active_scene->active_entity->transform->model_matrix;
+	mat4          model_matrix    = instance->context.scene->active_entity->transform->model_matrix;
 
 	// Write the camera position to the return
 	*(mat4 *)ret = model_matrix;
@@ -607,35 +642,45 @@ int load_entity_from_queue(GXInstance_t *instance)
 	size_t        i        = 0;
 	char         *text     = 0;
 	GXEntity_t   *entity   = 0;
-	GXScene_t    *scene    = instance->loading_scene;
+	GXScene_t    *scene    = instance->context.loading_scene;
 
-	while (queue_empty(instance->load_entity_queue)==false)
+	while ( queue_empty(instance->queues.load_entity) == false )
 	{
-		// Lock the loading mutex while we find an entity to load
-		SDL_LockMutex(instance->load_entity_mutex);
 
-		if (queue_empty(instance->load_entity_queue))
+		// Lock the loading mutex while we find an entity to load
+		SDL_LockMutex(instance->mutexes.load_entity);
+
+		// If the queue is empty, unlock the mutex and exit
+		if (queue_empty(instance->queues.load_entity))
 		{
-			SDL_UnlockMutex(instance->load_entity_mutex);
+
+			// Unlock the mutex
+			SDL_UnlockMutex(instance->mutexes.load_entity);
+
+			// Success
 			return 0;
 		}
 
-		text = queue_dequeue(instance->load_entity_queue);
+		// text is either a path -OR- a JSON object
+		text = queue_dequeue(instance->queues.load_entity);
 
 		// Unlock the mutex
-		SDL_UnlockMutex(instance->load_entity_mutex);
+		SDL_UnlockMutex(instance->mutexes.load_entity);
 
-		// Load the entity
-		if (*text == '{')
+		// Load the entity as JSON object text
+		if ( *text == '{' )
 		{
 			if ( load_entity_as_json(&entity, text, strlen(text)) == 0 )
 				goto failed_to_load_entity_as_json;
 		}
+
+		// Load the entity as a path
 		else
 		{
 			if ( load_entity(&entity, text) == 0 )
 				goto failed_to_load_entity;
 		}
+
 		// Add the entity to the active scene
 		append_entity(scene, entity);
 	}
@@ -683,8 +728,9 @@ int draw_entity(GXEntity_t* p_entity)
 
 	if (p_entity->parts == 0)
 		return 0;
+
 	GXInstance_t* instance = g_get_active_instance();
-	instance->active_scene->active_entity = p_entity;
+	instance->context.scene->active_entity = p_entity;
 
 	// Draw the thing
 	size_t part_count = dict_values(p_entity->parts, 0);
@@ -700,17 +746,18 @@ int draw_entity(GXEntity_t* p_entity)
 		// Update descriptor sets
 		{
 			// TODO: Uncomment when shader sets are done
-			set_shader_camera(p_entity, instance->active_scene->active_camera);
-		}
-		if (p_entity->shader->push_constant_data)
-		{
-			update_shader_push_constant(p_entity->shader);
-			vkCmdPushConstants(instance->command_buffers[instance->current_frame], p_entity->shader->pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->push_constant_size, p_entity->shader->push_constant_data);
+			set_shader_camera(p_entity, instance->context.scene->active_camera);
 		}
 
-		for (size_t i = 0; i < p_entity->shader->set_count; i++)
+		if (p_entity->shader->graphics.push_constant_data)
 		{
-			vkCmdBindDescriptorSets(instance->command_buffers[instance->current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->pipeline_layout, 0, 1, &p_entity->shader->sets_data[i].descriptor_sets[instance->current_frame], 0, 0);
+			update_shader_push_constant(p_entity->shader);
+			vkCmdPushConstants(instance->vulkan.command_buffers[instance->vulkan.current_frame], p_entity->shader->graphics.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->graphics.push_constant_size, p_entity->shader->graphics.push_constant_data);
+		}
+
+		for (size_t i = 0; i < p_entity->shader->graphics.set_count; i++)
+		{
+			vkCmdBindDescriptorSets(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->graphics.pipeline_layout, 0, 1, &p_entity->shader->graphics.sets_data[i].descriptor_sets[instance->vulkan.current_frame], 0, 0);
 		}
 
 		draw_part(parts[i]);
@@ -792,7 +839,7 @@ int move_entity ( GXEntity_t* p_entity )
 		return 0;
 	GXInstance_t* instance = g_get_active_instance();
 
-	float delta_time = instance->delta_time;
+	float delta_time = instance->time.delta_time;
 
 	GXRigidbody_t* rigidbody = p_entity->rigidbody;
 	GXTransform_t* transform = p_entity->transform;

@@ -32,34 +32,34 @@ void aps_3rdpersonctrl_strafe_right(callback_parameter_t state, GXInstance_t* in
 void aps_3rdpersonctrl_up(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angY += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        angY += instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
 }
 void aps_3rdpersonctrl_down(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angY -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        angY -= instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
 }
 void aps_3rdpersonctrl_left(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angX -= instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        angX -= instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
 }
 void aps_3rdpersonctrl_right(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angX += instance->delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        angX += instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
 }
 
 void aps_3rdpersonctrl_zoom_out(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD && !state.inputs.key.depressed)
-        zoom += 5.0 * instance->delta_time;
+        zoom += 5.0 * instance->time.delta_time;
 }
 
 void aps_3rdpersonctrl_zoom_in(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD && !state.inputs.key.depressed)
-        zoom -= 5.0 * instance->delta_time;
+        zoom -= 5.0 * instance->time.delta_time;
 }
 
 APS_3rdPersonCtrl_t* create_aps_3rdpersonctrl()
