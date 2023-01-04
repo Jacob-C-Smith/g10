@@ -223,6 +223,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Client|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.exe</TargetExt>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Server|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -292,7 +293,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../JSON/include;../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PrecompiledHeaderFile />
