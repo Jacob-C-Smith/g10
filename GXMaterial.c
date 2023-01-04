@@ -32,7 +32,7 @@ int create_material ( GXMaterial_t** material)
 		{
 			no_material:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
 			#endif
 			return 0;
 		}
@@ -41,7 +41,7 @@ int create_material ( GXMaterial_t** material)
 		{
 			no_mem:
 			#ifndef NDEBUG
-				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCSIG__);
+				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
 			#endif
 			return 0;
 		}
@@ -86,13 +86,13 @@ int load_material ( GXMaterial_t **material, const char path[])
 		{
 			no_material:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
 			#endif
 			return 0;
 
 			no_path:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Material] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 			#endif
 			return 0;
 		}
@@ -101,7 +101,7 @@ int load_material ( GXMaterial_t **material, const char path[])
 		{
 			no_mem:
 			#ifndef NDEBUG
-				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCSIG__);
+				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
 			#endif
 			return 0;
 		}
@@ -193,13 +193,13 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 		{
 			no_material:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
 			#endif
 			return 0;
 
 			no_token_text:
 			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+				g_print_error("[G10] [Material] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
 			#endif
 			return 0;
 		}
@@ -208,7 +208,7 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 		{
 			no_mem:
 			#ifndef NDEBUG
-				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCSIG__);
+				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
 			#endif
 			return 0;
 		}

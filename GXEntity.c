@@ -40,7 +40,7 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -49,7 +49,7 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -93,13 +93,13 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -109,7 +109,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -118,12 +118,12 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 		{
 			failed_to_load_entity_as_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Failed to open file \"%s\" text in call to function \"%s\"\n", path, __FUNCSIG__);
+					g_print_error("[G10] [Entity] Failed to open file \"%s\" text in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 				return 0;
 			failed_to_load_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Failed to load entity from \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+					g_print_error("[G10] [Entity] Failed to load entity from \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -396,13 +396,13 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_token:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -411,7 +411,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -420,7 +420,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		{
 			not_enough_info:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Not enough information to construct entity in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Not enough information to construct entity in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -433,13 +433,13 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 			{
 				failed_to_load_transform_as_json:
 					#ifndef NDEBUG
-						g_print_error("[G10] [Entity] Failed to load transform as JSON text in call to function \"%s\"\n", __FUNCSIG__);
+						g_print_error("[G10] [Entity] Failed to load transform as JSON text in call to function \"%s\"\n", __FUNCTION__);
 					#endif
 					return 0;
 
 				failed_to_load_transform:
 					#ifndef NDEBUG
-						g_print_error("[G10] [Entity] Failed to load transform in call to function \"%s\"\n", __FUNCSIG__);
+						g_print_error("[G10] [Entity] Failed to load transform in call to function \"%s\"\n", __FUNCTION__);
 					#endif
 					return 0;
 			}
@@ -516,7 +516,9 @@ int get_model_matrix(void* ret)
 
 	// Initialized data
 	GXInstance_t *instance        = g_get_active_instance();
-	mat4          model_matrix    = instance->context.scene->active_entity->transform->model_matrix;
+	mat4          model_matrix    = { 0 };
+	
+	transform_model_matrix(instance->context.scene->active_entity->transform, &model_matrix);
 
 	// Write the camera position to the return
 	*(mat4 *)ret = model_matrix;
@@ -530,7 +532,7 @@ int get_model_matrix(void* ret)
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -694,12 +696,12 @@ int load_entity_from_queue(GXInstance_t *instance)
 		{
 			failed_to_load_entity_as_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			failed_to_load_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -774,7 +776,7 @@ int draw_entity(GXEntity_t* p_entity)
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -819,7 +821,7 @@ int destroy_entity(GXEntity_t* p_entity)
 	}
 
 	if (p_entity->shader)
-		destroy_shader(p_entity->shader);
+		p_entity->shader = (void *)0;
 
 	if (p_entity->transform)
 		destroy_transform(p_entity->transform);
@@ -913,7 +915,7 @@ int entity_info(GXEntity_t* p_entity)
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}

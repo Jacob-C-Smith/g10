@@ -5,6 +5,9 @@
 #include <G10/GXScene.h>
 #include <G10/GXEntity.h>
 #include <G10/GXUserCode.h>
+#include <G10/GXDiscordIntegration.h>
+
+static float n = 0.01f;
 
 // This gets called once a frame
 int user_code_callback(GXInstance_t* instance)
@@ -12,7 +15,12 @@ int user_code_callback(GXInstance_t* instance)
 
     // Update the camera controller
     update_controlee_camera(instance->time.delta_time);
-
+    //vec3 r = { 0.f, n, 90.0f };
+    //GXEntity_t* e = get_entity(instance->context.scene, "backpack");
+    //n += 0.1f * instance->time.delta_time;
+    //if (n >= 360.f)
+    //    n = 0;
+    //e->transform->rotation = quaternion_from_euler_angle(r);
     return 0;
 }
 
@@ -56,8 +64,8 @@ int main ( int argc, const char *argv[] )
     }
 
     // Create an instance
-    if (instance_path)
-        g_init(&instance, instance_path);
+    if ( g_init(&instance, instance_path) == 0 )
+        goto failed_to_initialize_g10;
 
     load_camera(&instance->context.scene->active_camera, "G10/camera.json");
     
@@ -103,7 +111,7 @@ int main ( int argc, const char *argv[] )
     }
 
     // Log a lot of stuff
-    if(1){
+    {
         scene_info(instance->context.scene);
 
         bv_info(instance->context.scene->bvh, 0);
@@ -113,6 +121,9 @@ int main ( int argc, const char *argv[] )
         input_info(instance->input);
     }
 
+    extern void init_discord_integration(void);
+    init_discord_integration();
+
     instance->running = true;
 
     // Start the game 
@@ -120,10 +131,22 @@ int main ( int argc, const char *argv[] )
 
     // Stop execution
     stop_schedule(instance->context.schedule);
-    return 0;
 
     // Exit 
     g_exit(instance);
 
     return 1;
+
+    // Error handling
+    {
+
+        // G10 Errors
+        {
+            failed_to_initialize_g10:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                return 0;
+        }
+    }
 }

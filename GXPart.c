@@ -35,7 +35,7 @@ int create_part       ( GXPart_t **pp_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -44,7 +44,7 @@ int create_part       ( GXPart_t **pp_part )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -98,13 +98,13 @@ int load_part         ( GXPart_t **pp_part, char* path)
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Part] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -113,7 +113,7 @@ int load_part         ( GXPart_t **pp_part, char* path)
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -122,13 +122,13 @@ int load_part         ( GXPart_t **pp_part, char* path)
 		{
 			failed_to_load_file:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+					g_print_error("[G10] [Part] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 				return 0;
 
 			failed_to_load_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Failed to load part in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Part] Failed to load part in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -257,7 +257,7 @@ int part_info         ( GXPart_t *p_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}

@@ -68,7 +68,7 @@ APS_3rdPersonCtrl_t* create_aps_3rdpersonctrl()
 
     #ifndef NDEBUG
         if (!ret) {
-            g_print_error("[%s] Unable to allocate memory for 3rd person controller\n", __FUNCSIG__);
+            g_print_error("[%s] Unable to allocate memory for 3rd person controller\n", __FUNCTION__);
             return NULL;
         }
     #endif
@@ -82,15 +82,15 @@ int aps_3rdpersonctrl_from_camera_and_entity(GXInstance_t* instance, GXCamera_t*
     {
     #ifndef NDEBUG
         if (instance == (void*)0) {
-            g_print_error("[%s] Null pointer passed as 'instance' argument\n", __FUNCSIG__);
+            g_print_error("[%s] Null pointer passed as 'instance' argument\n", __FUNCTION__);
             return 0;
         }
         if (camera == (void*)0) {
-            g_print_error("[%s] Null pointer passed as 'camera' argument\n", __FUNCSIG__);
+            g_print_error("[%s] Null pointer passed as 'camera' argument\n", __FUNCTION__);
             return 0;
         }
         if (entity == (void*)0) {
-            g_print_error("[%s] Null pointer passed as 'entity' argument\n", __FUNCSIG__);
+            g_print_error("[%s] Null pointer passed as 'entity' argument\n", __FUNCTION__);
             return 0;
         }
 
@@ -116,7 +116,7 @@ int aps_3rdpersonctrl_from_camera_and_entity(GXInstance_t* instance, GXCamera_t*
     //Missing binds error check
     #ifndef NDEBUG
     if (!(forward && backward && left && right && up && down && left && right && zoomOut && zoomIn)) {
-        g_print_error("[%s] Missing input binds\n", __FUNCSIG__);
+        g_print_error("[%s] Missing input binds\n", __FUNCTION__);
         return 0;
     }
     #endif
@@ -151,7 +151,7 @@ int update_aps_3rdpersonctrl(float delta_time)
 {
 #ifndef NDEBUG
     if (!thirdpersonctrl) {
-        g_print_warning("[%s] No active 3rd person controller, use aps_3rdpersonctrl_from_camera_and_entity() to set one\n", __FUNCSIG__);
+        g_print_warning("[%s] No active 3rd person controller, use aps_3rdpersonctrl_from_camera_and_entity() to set one\n", __FUNCTION__);
         return 0;
     }
 #endif

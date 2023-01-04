@@ -291,7 +291,7 @@ exit:;
         {   
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -344,7 +344,7 @@ int move_objects       ( GXInstance_t* instance )
         {   
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -397,7 +397,7 @@ int update_forces      ( GXInstance_t *instance )
         {   
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Physics] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }

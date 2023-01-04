@@ -143,7 +143,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         #endif
     }
 
-    ret->spdlim = 0.00025;
+    ret->spdlim = 0.0025;
 
     // Assign displacement callbacks
     register_bind_callback(forward     , &camera_controller_forward);
@@ -170,12 +170,12 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         {
             no_instance:
             #ifndef NDEBUG
-                g_print_error("[G10] [Camera Controller] Null pointer provided for \"instance\" in call to \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Camera Controller] Null pointer provided for \"instance\" in call to \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
             no_camera:
             #ifndef NDEBUG
-                g_print_error("[G10] [Camera Controller] Null pointer provided for \"camera\" in call to \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Camera Controller] Null pointer provided for \"camera\" in call to \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }

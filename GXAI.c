@@ -36,6 +36,7 @@ int create_ai                  ( GXAI_t       **pp_ai )
 	// Write the return value
 	*pp_ai = p_ai;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -45,7 +46,7 @@ int create_ai                  ( GXAI_t       **pp_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -55,7 +56,7 @@ int create_ai                  ( GXAI_t       **pp_ai )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -90,6 +91,7 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 	// Free the file data
 	free(file_data);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -99,12 +101,12 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -113,7 +115,7 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -123,14 +125,14 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 			failed_to_load_file:
 				#ifndef NDEBUG
 					free(file_data);
-					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif	
 				return 0;
 
 			failed_to_construct_ai_from_file_json:
 				#ifndef NDEBUG
 					free(file_data);
-					g_print_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+					g_print_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif	
 				return 0;
 		}
@@ -202,14 +204,14 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 			SDL_LockMutex(instance->mutexes.ai_cache);
 
 			// Initialized data
-			GXAI_t* c_ai = g_find_ai(instance, name);
+			GXAI_t* p_cache_ai = g_find_ai(instance, name);
 			
-			// If the ai was in the cache, copy it
-			if ( c_ai )
+			// If the AI is in the cache, copy it
+			if (p_cache_ai)
 			{
 
 				// Make a copy of the cached ai
-				copy_ai(pp_ai, c_ai);
+				copy_ai(pp_ai, p_cache_ai);
 
 				// Write the return
 				p_ai = *pp_ai;
@@ -219,12 +221,11 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 			}
 		}
 
-		// Allocate an AI
-		{
-			create_ai(pp_ai);
+		// Allocate memory for an AI
+		create_ai(pp_ai);
 
-			p_ai = *pp_ai;
-		}
+		// Get a pointer to the allocated memory
+		p_ai = *pp_ai;
 
 		// Set the name
 		{
@@ -287,8 +288,8 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		// Cache the AI
 		g_cache_ai(instance, p_ai);
 
-		set_initial_state:
 		// Set the initial state
+		set_initial_state:
 		{
 			
 			// Initialized data
@@ -300,7 +301,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 			// Error checking
 			{
 				#ifndef NDEBUG
-					if(p_ai->current_state == (void *)0)
+					if( p_ai->current_state == (void *) 0 )
 						goto no_mem;
 				#endif
 			}
@@ -313,7 +314,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		SDL_UnlockMutex(instance->mutexes.ai_cache);
 	}
 
-	free_memory:
+	free_memory:;
 	exit:
 	return ret;
 
@@ -324,13 +325,13 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				ret = 0;
 				goto free_memory;
 			no_token_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				ret = 0;
 				goto free_memory;
@@ -340,7 +341,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -374,17 +375,17 @@ int add_ai_state_callback      ( GXAI_t        *p_ai , char        *state_name, 
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_state_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_function_pointer:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			return 0;
@@ -418,12 +419,12 @@ int set_ai_state               ( GXAI_t        *p_ai , const char  *state_name )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_state_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -454,12 +455,12 @@ int set_ai_pre_update_callback ( GXAI_t        *p_ai , int        (*function_poi
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_function_pointer:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -510,7 +511,7 @@ int pre_update_ai              ( GXInstance_t  *instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -556,12 +557,12 @@ int copy_ai                    ( GXAI_t       **pp_ai, GXAI_t *p_ai )
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -623,7 +624,7 @@ int ai_info ( GXAI_t *p_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -674,7 +675,7 @@ int update_ai                  ( GXInstance_t* instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCSIG__);
+					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to funciton \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -708,7 +709,7 @@ int destroy_ai                 ( GXAI_t  *p_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}

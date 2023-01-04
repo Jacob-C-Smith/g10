@@ -46,7 +46,7 @@ int         create_scene       ( GXScene_t **pp_scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCSIG__);
+                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -55,7 +55,7 @@ int         create_scene       ( GXScene_t **pp_scene )
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
                 #endif
                 return 0;
         }
@@ -103,7 +103,7 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCSIG__);
+                    g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -112,13 +112,13 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
         {
             failed_to_load_file:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to load file in call to function \"%s\"\n",__FUNCSIG__);
+                    g_print_error("[G10] Failed to load file in call to function \"%s\"\n",__FUNCTION__);
                 #endif
                 return 0;
 
             failed_to_load_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to load scene in call to function \"%s\"\n",__FUNCSIG__);
+                    g_print_error("[G10] Failed to load scene in call to function \"%s\"\n",__FUNCTION__);
                 #endif
                 return 0;
         }
@@ -127,7 +127,7 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
                 #endif
                 return 0;
         }
@@ -306,19 +306,19 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"pp_scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 
             no_token_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"no_token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"no_token_text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 
             no_len:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 
@@ -328,7 +328,7 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
                 #endif
                 return 0;
         }
@@ -373,21 +373,21 @@ int         append_entity      ( GXScene_t  *p_scene, GXEntity_t    *entity)
         {
             no_scene:
                 #ifndef NDEBUG 
-                    g_print_error("[G10] [Scene] Null pointer provided for \"p_scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_entities:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No entity dictionary in \"p_scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] No entity dictionary in \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_entity:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_name:
-                g_print_error("[G10] [Scene] \"entity\" has no name in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] \"entity\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 return 0;
         }
     }
@@ -424,21 +424,21 @@ int         append_camera      ( GXScene_t  *scene, GXCamera_t    *camera)
         {
             no_scene:
                 #ifndef NDEBUG 
-                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_cameras:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No camera dictionary in scene, in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] No camera dictionary in scene, in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_camera:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"camera\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"camera\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_name:
-                    g_print_error("[G10] [Scene] \"camera\" has no name in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] \"camera\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 return 0;
         }
     }
@@ -473,21 +473,21 @@ int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
         {
             no_scene:
                 #ifndef NDEBUG 
-                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_lights:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No light dictionary in scene, in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] No light dictionary in scene, in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_light:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"light\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"light\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_name:
-                g_print_error("[G10] [Scene] \"light\" has no name in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] \"light\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 return 0;
         }
     }
@@ -617,12 +617,12 @@ GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[] )
     {
         no_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
     }
@@ -647,12 +647,12 @@ GXCamera_t *get_camera         ( GXScene_t  *scene, const char     name[])
     {
         no_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
     }
@@ -677,12 +677,12 @@ GXLight_t  *get_light          ( GXScene_t  *scene, const char     name[])
     {
         no_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
     }
@@ -724,12 +724,12 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -738,7 +738,7 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
         {
             failed_to_find_camera:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Failed to find camera \"%s\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                    g_print_error("[G10] [Scene] Failed to find camera \"%s\" in call to function \"%s\"\n", name, __FUNCTION__);
                 #endif
                 return 0;
         }
