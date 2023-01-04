@@ -1,4 +1,5 @@
 #include <G10/GXAudio.h>
+#include <FMOD-core/fmod.h>
 
 dict *sounds          = 0;
 int  *channels        = 0;
@@ -48,5 +49,5 @@ int create_sound ( GXSound_t **pp_sound )
 
 int load_sound ( GXSound_t** sound, const char* path )
 {
-
+	//
 }
