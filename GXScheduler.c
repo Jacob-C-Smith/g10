@@ -1,6 +1,10 @@
 #include <G10/GXScheduler.h>
 
-#define TASK_COUNT 21
+#define TASK_COUNT 23
+
+#ifdef BUILD_G10_WITH_DISCORD
+#include <G10/GXDiscordIntegration.h>
+#endif
 
 dict* scheduler_tasks = 0;
 
@@ -25,7 +29,13 @@ char* task_names[TASK_COUNT] = {
 	"Server Serialize",
 	"Server Process",
 	"Server Wait",
-	"Audio"
+	"Audio",
+	#ifdef BUILD_G10_WITH_DISCORD
+	"Discord Callbacks",
+	#else
+	0,
+	#endif
+	0
 };
 
 void* task_function_pointers[TASK_COUNT] = {
@@ -49,7 +59,13 @@ void* task_function_pointers[TASK_COUNT] = {
 	&server_serialize,
 	&server_process,
 	&server_wait, 
-	0  // process_audio
+	0,	// process_audio
+	#ifdef BUILD_G10_WITH_DISCORD
+	&discord_callbacks,
+	#else
+	0,
+	#endif,
+	0
 };
 
 void init_scheduler        ( void )
@@ -69,73 +85,87 @@ void init_scheduler        ( void )
 
 }
 
-int create_task            ( GXTask_t     **task )
+int create_task            ( GXTask_t     **pp_task )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(task == (void *)0)
+			if(pp_task == (void *)0)
 				goto no_task;
 		#endif
 	}
 
-	GXTask_t *i_task = calloc(1, sizeof(GXTask_t));
+	// Initialized data
+	GXTask_t *p_task = calloc(1, sizeof(GXTask_t));
 
-	*task = i_task;
+	// Error check
+	{
+		#ifndef NDEBUG
+			if ( p_task == (void *)0 )
+				goto no_mem;
+		#endif
+	}
 
+	// Return a pointer to the allocated memory
+	*pp_task = p_task;
+
+	// Success
 	return 1;
-	// TODO: Error handling
-	no_task:
-	return 0;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_task:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+	}
 }
 
 int create_schedule        ( GXSchedule_t **pp_schedule )
 {
-	// TODO: Argument check
-
-	GXSchedule_t *i_scheduler = calloc(1, sizeof(GXSchedule_t));
-
-	// TODO: Memory check
-	*pp_schedule = i_scheduler;
-
-	// TODO: Error handling
-	return 1;
-}
-
-int create_thread          ( GXThread_t   **pp_thread )
-{
-	// TODO: Argument check
-
-	GXThread_t *i_thread = calloc(1, sizeof(GXThread_t));
-
-	// TODO: Memory check
-	*pp_thread = i_thread;
-
-	// TODO: Error handling
-	return 1;
-}
-
-int load_schedule          ( GXSchedule_t **schedule, char* path)
-{
 
 	// Argument check
 	{
-		if ( schedule == (void*)0 )
-			goto no_schedule;
-		if ( path == (void *)0 )
-			goto no_path;
+		#ifndef NDEBUG
+			if ( pp_schedule == (void *) 0 )
+				goto no_schedule;
+		#endif
 	}
 
 	// Initialized data
-	size_t  len        = g_load_file(path, 0, false);
-	char   *token_text = calloc(len+1, sizeof(char));
-	
-	g_load_file(path, token_text, false);
+	GXSchedule_t *p_scheduler = calloc(1, sizeof(GXSchedule_t));
 
-	load_schedule_as_json(schedule, token_text, len);
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if (p_scheduler == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
 
-	free(token_text);
+	// Return a pointer to the allocated memory
+	*pp_schedule = p_scheduler;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -145,25 +175,175 @@ int load_schedule          ( GXSchedule_t **schedule, char* path)
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+	}
+}
+
+int create_thread          ( GXThread_t   **pp_thread )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_thread == (void *) 0 )
+				goto no_thread;
+		#endif
+	}
+
+	// Initialized data
+	GXThread_t *p_thread = calloc(1, sizeof(GXThread_t));
+
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if (p_thread == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
+
+	// Return a pointer to the allocated memory
+	*pp_thread = p_thread;
+
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_thread:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+	}
+}
+
+int load_schedule          ( GXSchedule_t **schedule, char* path)
+{
+
+	// Argument check
+	{
+		if ( schedule == (void *) 0 )
+			goto no_schedule;
+		if ( path     == (void *) 0 )
+			goto no_path;
+	}
+
+	// Initialized data
+	size_t  len        = g_load_file(path, 0, false);
+	char   *token_text = calloc(len+1, sizeof(char));
+	
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if (token_text == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
+
+	// Load the file
+	if ( g_load_file(path, token_text, false) == 0)
+		goto failed_to_load_file;
+
+	// Construct the schedule from the file contents
+	if ( load_schedule_as_json(schedule, token_text, len) == 0 )
+		goto failed_to_load_schedule;
+
+	// Free the file contents
+	free(token_text);
+
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_schedule:
+				#ifndef NDEBUG
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+
+		// G10 Errors
+		{
+			failed_to_load_file:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+
+			failed_to_load_schedule:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to load scheduler from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
 		}
 	}
 }
 
-int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t len )
+int load_schedule_as_json  ( GXSchedule_t **pp_schedule, char *token_text, size_t len )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (schedule == (void*)0)
+			if (pp_schedule == (void*)0)
 				goto no_scheduler;
 			if(token_text == (void *)0)
 				goto no_token_text;
@@ -199,12 +379,14 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 	{
 
 		// Initialized data
-		GXSchedule_t *i_scheduler = 0;
+		GXSchedule_t *p_scheduler = 0;
 
 		// Allocate a schedule
-		create_schedule(schedule);
+		if ( create_schedule(pp_schedule) == 0 )
+			goto failed_to_create_schedule;
 
-		i_scheduler = *schedule;
+		// Return a pointer to the allocated memory
+		p_scheduler = *pp_schedule;
 
 		// Set the name
 		{
@@ -213,10 +395,18 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 			size_t name_len = strlen(name);
 
 			// Allocate for name
-			i_scheduler->name = calloc(name_len + 1, sizeof(char));
+			p_scheduler->name = calloc(name_len + 1, sizeof(char));
 			
+			// Error checking
+			{
+				#ifndef NDEBUG
+					if ( p_scheduler->name == (void *) 0 )
+						goto no_mem;
+				#endif
+			}
+
 			// Copy name
-			strncpy(i_scheduler->name, name, name_len);
+			strncpy(p_scheduler->name, name, name_len);
 		}
 
 		// Construct each thread
@@ -225,9 +415,10 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 			// Count up the blocks
 			while (thread_json_objects[++thread_count]);
 
-			dict_construct(&i_scheduler->threads, 16);
+			// Construct a dictionary for the threads
+			dict_construct(&p_scheduler->threads, 16);
 
-			// Iterate over each block JSON object
+			// Iterate over each JSON object
 			for (size_t i = 0; i < thread_count; i++)
 			{
 
@@ -235,15 +426,18 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 				GXThread_t *thread = 0;
 
 				// Load the thread from the JSON
-				load_thread_as_json(&thread, thread_json_objects[i], strlen(thread_json_objects[i]));
+				if ( load_thread_as_json(&thread, thread_json_objects[i], strlen(thread_json_objects[i])) == 0 )
+					goto failed_to_load_thread;
 
-				dict_add(i_scheduler->threads, thread->name, thread);
+				// Add the thread to the dictionary
+				dict_add(p_scheduler->threads, thread->name, thread);
 
 			}
 		}
 	}
 
-	return 0;
+	// Success
+	return 1;
 
 	// Error handling
 	{
@@ -252,30 +446,74 @@ int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t l
 		{
 			no_scheduler:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 			no_token_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+		}
+
+		// G10 Errors
+		{
+			failed_to_create_schedule:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to create schedule in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+
+			failed_to_load_thread:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to load thread in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+			
+			// Error
+			return 0;
+
 		}
 	}
 }
 
-
-int client_work                   ( GXClient_t    *client )
+int client_work            ( GXClient_t    *p_client )
 {
-	GXThread_t* thread = client->thread;
-	GXTask_t **tasks = thread->tasks;
-	GXInstance_t* instance = g_get_active_instance();
 
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if (p_client == (void *)0 )
+				goto no_client;
+		#endif
+	}
+
+	// Initialized data
+	GXThread_t    *thread   = p_client->thread;
+	GXTask_t     **tasks    = thread->tasks;
+	GXInstance_t  *instance = g_get_active_instance();
+
+	// Run until told otherwise
 	while (thread->running)
 	{
+
+		// Iterate over each task in the thread
 		for (size_t i = 0; i < thread->task_count; i++)
 		{
-			// Are we waiting on anything else to finish?
+
+			// Wait on other things to finish?
 			if (thread->tasks[i]->wait_thread)
 			{
 
@@ -296,33 +534,46 @@ int client_work                   ( GXClient_t    *client )
 
 			}
 
+			// Declare the task function
 			int (*function_pointer)(GXClient_t*) = thread->tasks[i]->function_pointer;
 
 			// Run the function
 			if(function_pointer)
-				function_pointer(client);
+				function_pointer(p_client);
 
 			// Update the task
-			thread->complete_tasks[i]=1;
+			thread->complete_tasks[i] = 1;
 		}
 
-		// Reset
+		// Reset each frame
 		for (size_t i = 0; i < thread->task_count; i++)
 			thread->complete_tasks[i] = 0;
 	}
+
+	// Success
+	return 1;
+
+	no_client:
 	return 0;
 }
 
-
 int work                   ( GXThread_t    *thread )
 {
+
+	// TODO: Argument check
+
+	// Initialized data
 	GXTask_t **tasks = thread->tasks;
 	GXInstance_t* instance = g_get_active_instance();
 
+	// Run until told otherwise
 	while (thread->running)
 	{
+
+		// Iterate over each task
 		for (size_t i = 0; i < thread->task_count; i++)
 		{
+
 			// Are we waiting on anything else to finish?
 			if (thread->tasks[i]->wait_thread)
 			{
@@ -358,15 +609,18 @@ int work                   ( GXThread_t    *thread )
 		for (size_t i = 0; i < thread->task_count; i++)
 			thread->complete_tasks[i] = 0;
 	}
-	return 0;
+
+	return 1;
 }
 
 int main_work              ( GXThread_t    *thread )
 {
 
+	// TODO: Argument check
+
+	// Initialized data
 	GXTask_t **tasks = thread->tasks;
 	GXInstance_t* instance = g_get_active_instance();
-
 
 	while (thread->running)
 	{
@@ -410,24 +664,35 @@ int main_work              ( GXThread_t    *thread )
 			thread->complete_tasks[i] = 0;
 
 	}
-	return 0;
+	return 1;
+
+	// TODO: Error handling
 }
 
-int start_schedule         ( GXSchedule_t  *schedule )
+int start_schedule         ( GXSchedule_t  *p_schedule)
 {
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( p_schedule == (void *) 0 )
+				goto no_schedule;
+		#endif
+	}
+
 	// Initialized data
 	GXInstance_t *instance              = g_get_active_instance();
-	size_t        schedule_thread_count = dict_values(schedule->threads, 0);
+	size_t        schedule_thread_count = dict_values(p_schedule->threads, 0);
 	GXThread_t  **schedule_threads      = malloc(schedule_thread_count * sizeof(void *));
 
 	// Set the active schedule
-	instance->context.schedule = schedule;
+	instance->context.schedule = p_schedule;
 
 	// Copy the state
 	copy_state(instance);
 
 	// Get a list of threads
-	dict_values(schedule->threads, schedule_threads);
+	dict_values(p_schedule->threads, schedule_threads);
 
 	// Iterate over each thread
 	for (size_t i = 0; i < schedule_thread_count; i++)
@@ -450,7 +715,7 @@ int start_schedule         ( GXSchedule_t  *schedule )
 	}
 
 	// Get the main thread
-	GXThread_t* main_thread = dict_get(schedule->threads, "Main Thread");
+	GXThread_t* main_thread = dict_get(p_schedule->threads, "Main Thread");
 
 	// Set the thread to run
 	main_thread->running = true;
@@ -458,12 +723,18 @@ int start_schedule         ( GXSchedule_t  *schedule )
 	// Call the thread worker function (on the main thread...)
 	main_work(main_thread);
 
+	// Success
+	return 1;
+
+	// TODO: Error handling
+	no_schedule:
 	return 0;
 }
 
 int stop_schedule          ( GXSchedule_t  *schedule )
 {
-
+	// TODO: Argument check
+	
 	// Initialized data
 	GXInstance_t *instance              = g_get_active_instance();
 	size_t        schedule_thread_count = dict_values(schedule->threads, 0),
@@ -494,9 +765,13 @@ int stop_schedule          ( GXSchedule_t  *schedule )
 		// Wait for each thread to finish
 		SDL_WaitThread(schedule_threads[i]->thread, &r_stat);
 
+	// Success
+	return 1;
+
+	return 0;
 }
 
-int load_thread            ( GXThread_t **thread, char* path )
+int load_thread            ( GXThread_t   **thread, char* path )
 {
 
 	// Argument check
@@ -511,12 +786,16 @@ int load_thread            ( GXThread_t **thread, char* path )
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len+1, sizeof(char));
 	
+	// TODO: Error checking
 	g_load_file(path, token_text, false);
-
+	
+	// TODO: Error checking
 	load_thread_as_json(thread, token_text, len);
 
+	// Free the buffer
 	free(token_text);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -526,24 +805,25 @@ int load_thread            ( GXThread_t **thread, char* path )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"thread\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"thread\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
 	}
 }
 
-int load_thread_as_json    ( GXThread_t   **thread   , char *token_text, size_t len )
+int load_thread_as_json    ( GXThread_t   **pp_thread   , char *token_text, size_t len )
 {
 	// TODO: Argument check
 
 	// Initialized data
+	GXThread_t *p_thread = 0;
 	dict    *thread_json = 0;
 	char    *name        = 0;
 	size_t   task_count  = 0;
@@ -551,16 +831,6 @@ int load_thread_as_json    ( GXThread_t   **thread   , char *token_text, size_t 
 
 	// Parse the JSON
 	{
-		/*
-		{
-            "name"        : "Game loop",
-            "description" : "Single threaded solution",
-            "tasks"       : [
-                "Input",
-                "Render"
-            ]
-        }
-		*/
 
 		// Initiaized data
 		JSONToken_t *token = 0;
@@ -581,13 +851,12 @@ int load_thread_as_json    ( GXThread_t   **thread   , char *token_text, size_t 
 	// Construct the thread
 	{
 
-		// Initialized data
-		GXThread_t *i_thread = 0;
-
 		// Allocate a thread
-		create_thread(thread);
+		if ( create_thread(pp_thread) == 0 )
+			goto failed_to_create_thread;
 
-		i_thread = *thread;
+		// Get a pointer to the allocated memory
+		p_thread = *pp_thread;
 
 		// Set the name
 		{
@@ -596,84 +865,145 @@ int load_thread_as_json    ( GXThread_t   **thread   , char *token_text, size_t 
 			size_t name_len = strlen(name);
 
 			// Allocate for name
-			i_thread->name = calloc(name_len + 1, sizeof(char));
+			p_thread->name = calloc(name_len + 1, sizeof(char));
+			
+			// TODO: Error checking
 			
 			// Copy name
-			strncpy(i_thread->name, name, name_len);
+			strncpy(p_thread->name, name, name_len);
 		}
 
-		// Construct each task
+		// Construct tasks
 		{
 			
 			// Count up the tasks
 			while (tasks[++task_count]);
 
-			i_thread->tasks          = calloc(task_count + 1, sizeof(GXTask_t*));
-			i_thread->task_count     = task_count;
-			i_thread->complete_tasks = calloc(task_count + 1, sizeof(size_t));
+			p_thread->task_count = task_count;
 
-			// Iterate over each block JSON object
+			// Allocate memory for task lists
+			p_thread->tasks          = calloc(task_count + 1, sizeof(GXTask_t*));
+			
+			// TODO: Error checking
+			
+			// Allocate memory for task lists
+			p_thread->complete_tasks = calloc(task_count + 1, sizeof(size_t));
+
+			// TODO: Error checking
+			
+			// Iterate over each JSON object
 			for (size_t i = 0; i < task_count; i++)
 			{
-				load_task_as_json(&i_thread->tasks[i], tasks[i], strlen(tasks[i]));
+				if ( load_task_as_json(&p_thread->tasks[i], tasks[i], strlen(tasks[i])) == 0 )
+					goto failed_to_construct_task;
 			}
 		}
 	}
 
-	return 0;
+	return 1;
 
 	// TODO: Error handling
+	failed_to_create_thread:
+	failed_to_construct_task:
+	return 0;
 }
 
-int load_task_as_json      ( GXTask_t     **task     , char *token_text, size_t len )
+int load_task_as_json      ( GXTask_t     **pp_task     , char *token_text, size_t len )
 {
-	GXTask_t *i_task      = 0;
+	// TODO: Argument check
+	
+	// Initialized data
+	GXTask_t *p_task      = 0;
 	dict     *task_json   = 0;
 	char     *task_name   = 0,
 		     *wait_thread = 0,
 		     *wait_task   = 0;
 
-	create_task(task);
+	// Allocate memory for the task struct
+	if ( create_task(pp_task) == 0 )
+		goto failed_to_create_task;
 
-	i_task = *task;
+	// Get a pointer to the allocated memory
+	p_task = *pp_task;
 
+	// Parse the JSON into a dictionary
+	parse_json(token_text, len, &task_json);
+
+	// Parse the dictionary into constructor parameters
 	{
+
+		// Initialized data
 		JSONToken_t* token = 0;
 		
-		parse_json(token_text, len, &task_json);
-
-		token     = dict_get(task_json, "task");
-		task_name = JSON_VALUE(token, JSONstring);
+		token       = dict_get(task_json, "task");
+		task_name   = JSON_VALUE(token, JSONstring);
 
 		token       = dict_get(task_json, "wait thread");
 		wait_thread = JSON_VALUE(token, JSONstring);
 
-		token     = dict_get(task_json, "wait task");
-		wait_task = JSON_VALUE(token, JSONstring);
+		token       = dict_get(task_json, "wait task");
+		wait_task   = JSON_VALUE(token, JSONstring);
 	}
 
+	// Construct the task
 	{
+
+		// Copy the name
 		{
+
+			// Initialized data
 			size_t task_name_len = strlen(task_name);
-			i_task->name = calloc(task_name_len+1, sizeof(char));
-			strncpy(i_task->name, task_name, task_name_len);
+
+			// Allocate memory for the name
+			p_task->name = calloc(task_name_len+1, sizeof(char));
+
+			// TODO: Error handling
+
+			// Copy the name
+			strncpy(p_task->name, task_name, task_name_len);
 		}
+
+		// Copy the name of the thread that this task waits on 
 		if(wait_thread)
 		{
+
+			// Initialized data
 			size_t wait_thread_len = strlen(wait_thread);
-			i_task->wait_thread = calloc(wait_thread_len + 1, sizeof(char));
-			strncpy(i_task->wait_thread, wait_thread, wait_thread_len);
+			
+			// Allocate memory for the name
+			p_task->wait_thread = calloc(wait_thread_len + 1, sizeof(char));
+			
+			// TODO: Error handling
+
+			// Copy the name
+			strncpy(p_task->wait_thread, wait_thread, wait_thread_len);
 		}
+
+		// Copy the name of the task that this task waits on 
 		if(wait_task)
 		{
+
+			// Initialized data
 			size_t wait_task_len = strlen(wait_task);
-			i_task->wait_task = calloc(wait_task_len + 1, sizeof(char));
-			strncpy(i_task->wait_task, wait_task, wait_task_len);
+
+			// Allocate memory for the name
+			p_task->wait_task = calloc(wait_task_len + 1, sizeof(char));
+
+			// TODO: Error handling
+
+			// Copy the name
+			strncpy(p_task->wait_task, wait_task, wait_task_len);
 		}
 
 	}
 	
-	i_task->function_pointer = dict_get(scheduler_tasks, i_task->name);
+	// Get a function pointer from the list
+	p_task->function_pointer = dict_get(scheduler_tasks, p_task->name);
 
+	// Success
+	return 1;
+
+	// TODO: Error handling
+	failed_to_create_task:
 	return 0;
 }

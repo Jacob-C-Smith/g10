@@ -76,6 +76,9 @@
     <Filter Include="Header Files\G10\Shader">
       <UniqueIdentifier>{b53e3556-8f0b-4387-9e92-353e0b6f8b70}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\3rd party integration">
+      <UniqueIdentifier>{0fc7259b-3d6e-4956-b1e3-76edfa4ec20a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -157,6 +160,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GXMaterial.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GXDiscordIntegration.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -250,6 +256,9 @@
     </ClInclude>
     <ClInclude Include="include\G10\G10.h">
       <Filter>Header Files\G10</Filter>
+    </ClInclude>
+    <ClInclude Include="include\G10\GXDiscordIntegration.h">
+      <Filter>Header Files\3rd party integration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

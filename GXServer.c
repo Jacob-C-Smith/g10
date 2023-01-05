@@ -34,7 +34,7 @@ int create_server(GXServer_t** pp_server)
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -44,7 +44,7 @@ int create_server(GXServer_t** pp_server)
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -95,13 +95,13 @@ int load_server ( GXServer_t **pp_server, char *path )
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -111,7 +111,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -232,7 +232,7 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 
@@ -242,7 +242,7 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -405,7 +405,7 @@ int server_recv(GXClient_t *client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -435,7 +435,7 @@ int server_send(GXClient_t* client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -608,7 +608,7 @@ int server_wait    ( GXInstance_t* instance )
 		command_from_data(&connect_command, client->recv_data);
 
 		// Make sure it's a connect command
-		if(connect_command->type == connect)
+		if(connect_command->type == connect_CMD)
 			printf("%s connected\n", connect_command->connect.name);
 
 		client_name_len = strlen(connect_command->connect.name);
@@ -695,7 +695,7 @@ int server_wait    ( GXInstance_t* instance )
 
 	// TODO: 
 no_instance:
-	g_print_error("[G10] [Server] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+	g_print_error("[G10] [Server] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
 
 	return 0;
 no_socket:
@@ -785,7 +785,7 @@ int connect_client(char* name)
 
 		// Set up the connect command
 		{
-			connect_command->type         = connect;
+			connect_command->type         = connect_CMD;
 			connect_command->connect.name = name;
 		}
 
@@ -838,7 +838,7 @@ int connect_client(char* name)
 		{
 			no_client_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Client] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Client] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -878,7 +878,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 
 			break;
 
-		case connect:
+		case connect_CMD:
 			
 			// Construct the connection command
 			{
@@ -995,14 +995,14 @@ int data_from_command(void** ret, GXCommand_t* command)
 			ret_len = 2;
 			
 			break;
-		case connect:
+		case connect_CMD:
 		{
 			
 			size_t name_len = strlen(command->connect.name);
 			ret_len += name_len;
 			ret_len += 2 + 1;
 
-			*(u16*)retn = connect;
+			*(u16*)retn = connect_CMD;
 			strncpy(&retn[2], command->connect.name, name_len);
 
 		}
@@ -1096,7 +1096,7 @@ int destroy_command(GXCommand_t* command)
 		case disconnect:
 		break;
 
-		case connect:
+		case connect_CMD:
 		{
 			free(command->connect.name);
 		}

@@ -218,7 +218,7 @@ int create_texture       ( GXTexture_t **pp_texture )
 		{
 			no_texture:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -227,7 +227,7 @@ int create_texture       ( GXTexture_t **pp_texture )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -566,12 +566,12 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 no_token:
     return 0;
     failed_to_create_image:
-    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCSIG__);
+    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCTION__);
     return 0;
     failed_to_construct_image_view:
     return 0;
     not_enough_swizzle:
-    g_print_error("[G10] [Texture] Failed to create image view in call to function \"%s\"\n", __FUNCSIG__);
+    g_print_error("[G10] [Texture] Failed to create image view in call to function \"%s\"\n", __FUNCTION__);
     return 0;
 
 
@@ -644,7 +644,7 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
         {
             failed_to_create_image:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }

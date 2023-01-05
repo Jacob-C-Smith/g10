@@ -1039,7 +1039,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     // Create a descriptor set layout
                     if (vkCreateDescriptorSetLayout(instance->vulkan.device, layout_info, 0, &i_shader->graphics.descriptor_set_layouts[i]) != VK_SUCCESS) {
                         
-                        g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCSIG__);
+                        g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCTION__);
                         return -1;
                     }
 
@@ -1082,7 +1082,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         }
 
                         if (vkCreateDescriptorPool(instance->vulkan.device, pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
-                            g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCSIG__);
+                            g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCTION__);
                             return 0;
                         }
                     }
@@ -1281,7 +1281,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     i_shader->graphics.sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
 
                     if (vkAllocateDescriptorSets(instance->vulkan.device, alloc_info, i_shader->graphics.sets_data[0].descriptor_sets) != VK_SUCCESS) {
-                        g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCSIG__);
+                        g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCTION__);
                     }
 
                     for (size_t i = 0; i < 2; i++)
@@ -1312,6 +1312,32 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
     // Construct the compute shader
     else if ( compute_shader_path ) 
     {
+
+        // Load the compute shader binary
+        {
+            size_t compute_shader_data_len = g_load_file(compute_shader_path, 0, true);
+            char* compute_shader_data = calloc(compute_shader_data_len + 1, sizeof(char));
+
+            g_load_file(compute_shader_path, compute_shader_data, true);
+
+            // Create a shader module
+            create_shader_module(compute_shader_data, compute_shader_data_len, &i_shader->compute.compute_shader_module);
+
+            free(compute_shader_data);
+
+        }
+
+        // Set up the compute shader pipeline
+        {
+            VkComputePipelineCreateInfo compute_pipeline_create_info = { 0 };
+
+            compute_pipeline_create_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            compute_pipeline_create_info.flags = 0;
+            compute_pipeline_create_info.stage;
+            compute_pipeline_create_info.layout = 0;
+            compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
+            compute_pipeline_create_info.basePipelineIndex = 0;
+        }
 
     }
 
@@ -1418,12 +1444,12 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
         {
             no_getter_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_getter_function:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1432,7 +1458,7 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
         {
             already_has_getter:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to add getter in call to function \"%s\". There is already a getter called \"%s\"\n", __FUNCSIG__, getter_name);
+                    g_print_error("[G10] [Shader] Failed to add getter in call to function \"%s\". There is already a getter called \"%s\"\n", __FUNCTION__, getter_name);
                 #endif
                 return 0;
         }
@@ -1487,7 +1513,7 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
         {
             #ifndef NDEBUG
                 no_shader:
-                    g_print_log("[G10] [Shader] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_log("[G10] [Shader] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCTION__);
                     return 0;
             #endif
         }
@@ -1506,7 +1532,7 @@ int destroy_shader                  ( GXShader_t   *shader )
     vkDestroyShaderModule(instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
     vkDestroyShaderModule(instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
 
-    //free(shader->name);
+    free(shader->name);
     free(shader);
-    return 0;
+    return 1;
 }

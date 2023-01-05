@@ -1,4 +1,5 @@
 ﻿ #pragma once
+#define BUILD_G10_WITH_DISCORD
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -23,6 +24,11 @@
 #include <G10/GXMaterial.h>
 #include <G10/GXCollider.h>
 #include <G10/GXServer.h>
+
+#ifdef BUILD_G10_WITH_DISCORD
+#include <G10/GXDiscordIntegration.h>
+#include <discord_game_sdk.h>
+#endif
 
 //#include <UI/UI.h>
 
@@ -148,6 +154,23 @@ struct GXInstance_s
         u64    clock_div;
         float  delta_time;
     }           time;
+    
+    // Discord integration
+    #ifdef BUILD_G10_WITH_DISCORD
+    
+    struct {
+        struct IDiscordCore                *core;
+        struct IDiscordUserManager         *users;
+        struct IDiscordAchievementManager  *achievements;
+        struct IDiscordActivityManager     *activities;
+        struct IDiscordRelationshipManager *relationships;
+        struct IDiscordApplicationManager  *application;
+        struct IDiscordLobbyManager        *lobbies;
+        struct DiscordUser                  user;
+        DiscordUserId                       user_id;
+    }           discord_integration;
+
+    #endif
 
     // Input 
     GXInput_t                *input;

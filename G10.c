@@ -1,23 +1,17 @@
-﻿ #include <G10/G10.h>
-
-// Initialized data
-FILE* log_file;
+﻿#include <G10/G10.h>
 
 // Uninitialized data
+FILE* log_file;
+
+// Initialized data
 static GXInstance_t *active_instance = 0;
 
-// Vulkan 
-
-void create_surface         ( void );
-void setup_debug_messenger  ( void );
+// Forward declared functions
 void pick_physical_device   ( char        **required_extension_names );
 void create_logical_device  ( char        **required_extension_names );
 void create_swap_chain      ( void );
-void recreate_swap_chain    ( void );
 void cleanup_swap_chain     ( void );
 void create_image_views     ( void );
-void create__render_pass     ( void );
-void create_framebuffers    ( void );
 void create_command_pool    ( void );
 void create_command_buffers ( void );
 void create_sync_objects    ( void );
@@ -48,7 +42,7 @@ VKAPI_CALL    debug_callback               ( VkDebugUtilsMessageSeverityFlagBits
 
     return VK_FALSE;
 }
-
+void          setup_debug_messenger(VkDebugUtilsMessengerCreateInfoEXT** debug_messenger_create_info);
 VkResult      CreateDebugUtilsMessengerEXT ( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
     PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != 0) {
@@ -105,13 +99,13 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
     if ( g_load_file(path, token_text, false) == 0 )
         goto no_file;
 
-    // Parse the JSON
+    // Parse the instance JSON into a dictionary
+    parse_json(token_text, token_text_len, &instance_json_object);
+
+    // Parse the dictionary into instance construction parameters
     {
         
-        // Turn the JSON text into a dictionary
-        int x = parse_json(token_text, token_text_len, &instance_json_object);
-
-        // A JSON token
+        // Initialized data
         JSONToken_t* token = 0;
         
         // Name. Default to "Instance"
@@ -239,7 +233,6 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
     }
 
-
     // Allocate the instance
     {
 
@@ -309,9 +302,6 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Vulkan initialization
         {   
 
-            // Initialized data
-            VkResult result = 0;
-
             // Create an instance
             {
 
@@ -368,7 +358,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                         instance_create_info.ppEnabledLayerNames     = requested_validation_layers;
                     }
                     
-                    // Create the debug mestsenger
+                    // Create the debug messenger
                     VkInstanceCreateInfo *t = &instance_create_info;
                     setup_debug_messenger(&t->pNext);
                 }
@@ -388,9 +378,6 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             create_swap_chain();
             create_image_views();
-
-            create__render_pass();
-            create_framebuffers();
 
             create_command_pool();
             create_command_buffers();
@@ -589,7 +576,8 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 GXScene_t* scene = 0;
 
                 // Load the scene from the path
-                load_scene(&scene, initial_scene);
+                if ( load_scene(&scene, initial_scene) == 0 )
+                    goto failed_to_load_scene;
 
                 // Did the scene load?
                 if (scene)
@@ -636,7 +624,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         {
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -688,7 +676,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         {
             no_file:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to open file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+                    g_print_error("[G10] Failed to open file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif 
                 return 0;
         }
@@ -703,13 +691,19 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         no_swap_chain:
         no_instance:
         missing_layer:
-        no_debug_messenger:
+        no_debug_messenger: 
+        failed_to_load_scene:
+            #ifndef NDEBUG
+                g_print_error("[G10] Failed to open initial scene in call to function \"%s\"\n", __FUNCTION__);
+            #endif 
+            return 0;
+
         no_device:
         no_surface:
         failed_to_create_sdl2_surface:
             return 0;
         no_initial_scene:
-            g_print_error("[G10] Failed to load scene \"%s\" in call to function \"%s\"\n", initial_scene, __FUNCSIG__);
+            g_print_error("[G10] in call to function \"%s\"\n", initial_scene, __FUNCTION__);
             return 0;
     }
 
@@ -874,31 +868,6 @@ void          create_swap_chain            ( void )
     instance->vulkan.swap_chain_extent       = extent;
 }
 
-void          recreate_swap_chain          ( void )
-{
-    int w = 0,
-        h = 0;
-
-    GXInstance_t *instance = g_get_active_instance();
-
-    SDL_GetWindowSize(instance->sdl2.window, &w, &h);
-    while (w == 0 || h == 0)
-    {
-        SDL_Event e;
-        SDL_GetWindowSize(instance->sdl2.window, &w, &h);
-        SDL_PollEvent(&e);
-    }
-
-    vkDeviceWaitIdle(instance->vulkan.device);
-
-    cleanup_swap_chain();
-
-    create_swap_chain();
-    create_image_views();
-    create_framebuffers();
-
-}
-
 void          cleanup_swap_chain           ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
@@ -947,87 +916,6 @@ void          create_image_views           ( void ) {
         }
         
     }
-}
-
-void          create__render_pass           ( void )
-{
-
-    // Initialized data
-    GXInstance_t            *instance                   = g_get_active_instance();
-    VkAttachmentDescription *color_attachment           = calloc(1, sizeof(VkAttachmentDescription));
-    VkAttachmentReference   *color_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
-    VkAttachmentReference   *depth_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
-    VkSubpassDescription    *subpass                    = calloc(1, sizeof(VkSubpassDescription));
-    VkRenderPassCreateInfo   render_pass_create_info    = { 0 };
-
-    {
-
-        {
-            color_attachment->format = instance->vulkan.swap_chain_image_format;
-            color_attachment->samples = VK_SAMPLE_COUNT_1_BIT;
-            color_attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            color_attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            color_attachment->stencilLoadOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            color_attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            color_attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            color_attachment->finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        }
-
-        // The index of the attachment in this array is directly referenced from the fragment shader with the layout(location = 0) out vec4 color directive!
-        {
-            {
-                color_attachment_reference->attachment = 0;
-                color_attachment_reference->layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            }
-
-            {
-                depth_attachment_reference->attachment = 1;
-                depth_attachment_reference->layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-            }
-
-            subpass->pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
-            subpass->colorAttachmentCount = 1;
-            subpass->pColorAttachments    = color_attachment_reference;
-        }
-
-        render_pass_create_info.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        render_pass_create_info.attachmentCount = 1;
-        render_pass_create_info.pAttachments    = color_attachment;
-        render_pass_create_info.subpassCount    = 1;
-        render_pass_create_info.pSubpasses      = subpass;
-    }
-
-    if (vkCreateRenderPass(instance->vulkan.device, &render_pass_create_info, 0, &instance->vulkan.render_pass) != VK_SUCCESS) {
-        g_print_error("failed to create render pass!\n");
-    }
-}
-
-void          create_framebuffers          ( void )
-{
-    //GXInstance_t* instance = g_get_active_instance();
-
-    //instance->vulkan.swap_chain_framebuffers = calloc(instance->vulkan.image_count, sizeof(VkFramebuffer));
-
-    //for (size_t i = 0; i < instance->vulkan.image_count; i++)
-    //{
-
-    //    VkImageView attachments[1] = {
-    //        instance->vulkan.swap_chain_image_views[i]
-    //    };
-
-    //    VkFramebufferCreateInfo framebuffer_create_info = { 0 };
-
-    //    framebuffer_create_info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    //    framebuffer_create_info.renderPass      = instance->vulkan.render_pass;
-    //    framebuffer_create_info.attachmentCount = 1;
-    //    framebuffer_create_info.pAttachments    = attachments;
-    //    framebuffer_create_info.width           = instance->vulkan.swap_chain_extent.width;
-    //    framebuffer_create_info.height          = instance->vulkan.swap_chain_extent.height;
-    //    framebuffer_create_info.layers          = 1;
-
-    //    if (vkCreateFramebuffer(instance->vulkan.device, &framebuffer_create_info, 0, &instance->vulkan.swap_chain_framebuffers[i]) != VK_SUCCESS)
-    //        g_print_error("Failed to create framebuffer!\n");
-    //}
 }
 
 void          create_command_pool          ( void )
@@ -1239,7 +1127,7 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         // Create a buffer
         if ( vkCreateBuffer( instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
-            g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCSIG__);
+            g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCTION__);
 
         vkGetBufferMemoryRequirements(instance->vulkan.device, *buffer, &mem_requirements);
     }
@@ -1255,7 +1143,7 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         // Allocate memory for the buffer
         if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
-            g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCSIG__);
+            g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCTION__);
 
         // Bind the buffer to the device
         vkBindBufferMemory(instance->vulkan.device, *buffer, *buffer_memory, 0);
@@ -1302,7 +1190,7 @@ size_t        g_load_file                  ( const char           *path,     voi
         {
             noPath:
             #ifndef NDEBUG
-                g_print_error("[G10] Null path provided to funciton \"%s\n",__FUNCSIG__);
+                g_print_error("[G10] Null path provided to funciton \"%s\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1311,7 +1199,7 @@ size_t        g_load_file                  ( const char           *path,     voi
         {
             invalid_file:
             #ifndef NDEBUG
-                g_print_error("[G10] Failed to load file \"%s\"\n[Standard library] %s\n",path, strerror(errno));
+                g_print_error("[Standard library] Failed to load file \"%s\". %s\n",path, strerror(errno));
             #endif
             return 0;
         }
@@ -1322,7 +1210,6 @@ void          clear_swap_chain             ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
     for (size_t i = 0; i < instance->vulkan.image_count; i++) {
-        vkDestroyFramebuffer(instance->vulkan.device, instance->vulkan.swap_chain_framebuffers[i], 0);
         vkDestroyImageView(instance->vulkan.device, instance->vulkan.swap_chain_image_views[i], 0);
     }
 
@@ -1331,18 +1218,10 @@ void          clear_swap_chain             ( void )
 
 int           g_window_resize              ( GXInstance_t         *instance)
 {
+
+    // TODO: 
     SDL_GetWindowSize(instance->sdl2.window, &instance->window.width, &instance->window.height);
 
-    while (instance->window.height == 0 || instance->window.width == 0 )
-        SDL_GetWindowSize(instance->sdl2.window, &instance->window.width, &instance->window.height);
-
-    vkDeviceWaitIdle(instance->vulkan.device);
-
-    clear_swap_chain();
-
-    create_swap_chain();
-    create_image_views();
-    create_framebuffers();
     return 0;
 }
 
@@ -1378,7 +1257,7 @@ int           g_print_error                ( const char *const     format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1417,7 +1296,7 @@ int           g_print_warning              ( const char *const     format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1455,7 +1334,7 @@ int           g_print_log                  ( const char *const     format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1490,7 +1369,7 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
     // Start the schedule
     start_schedule(schedule);
 
-    return 0;
+    return 1;
 
     // Error handling
     {
@@ -1499,20 +1378,20 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scheduler] Null pointer provided for \"instance\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                    g_print_error("[G10] [Scheduler] Null pointer provided for \"instance\" in call to function \"%s\"\n", name, __FUNCTION__);
                 #endif  
                 return 0;
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scheduler] Null pointer provided for \"name\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                    g_print_error("[G10] [Scheduler] Null pointer provided for \"name\" in call to function \"%s\"\n", name, __FUNCTION__);
                 #endif  
                 return 0;
         }
 
         no_schedule:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scheduler] Failed to find a schedule named \"%s\" in call to function \"%s\"\n", name, __FUNCSIG__);
+                g_print_error("[G10] [Scheduler] Failed to find a schedule named \"%s\" in call to function \"%s\"\n", name, __FUNCTION__);
             #endif  
             return 0;
     }
@@ -1660,13 +1539,13 @@ int           g_cache_material             ( GXInstance_t         *instance, GXM
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_material:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1698,13 +1577,13 @@ int           g_cache_part                 ( GXInstance_t         *instance, GXP
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_part:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"part\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"part\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1736,13 +1615,13 @@ int           g_cache_shader               ( GXInstance_t         *instance, GXS
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_shader:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1773,13 +1652,13 @@ int           g_cache_ai                   ( GXInstance_t         *instance, GXA
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_ai:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"ai\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"ai\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1833,13 +1712,13 @@ GXMaterial_t *g_find_material              ( GXInstance_t         *instance, cha
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_name:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1869,13 +1748,13 @@ GXPart_t     *g_find_part                  ( GXInstance_t         *instance, cha
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_name:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1909,13 +1788,13 @@ GXShader_t   *g_find_shader                ( GXInstance_t         *instance, cha
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_name:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1949,13 +1828,13 @@ GXAI_t       *g_find_ai                    ( GXInstance_t         *instance, cha
         {
             no_instance:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
 
             no_name:
             #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1975,8 +1854,16 @@ int           g_exit                       ( GXInstance_t         *instance )
     // Wait for the GPU to finish whatever its doing
     vkDeviceWaitIdle(instance->vulkan.device);
 
-    // G10 Cleanup
+    // Cleanup
     {
+
+        // Free instance data
+        {
+            
+            // Free the instance name
+            free(instance->name);
+        }
+
 
         // Free scenes
         {
@@ -2067,7 +1954,7 @@ int           g_exit                       ( GXInstance_t         *instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }

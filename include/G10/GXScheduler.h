@@ -66,7 +66,7 @@ DLLEXPORT int create_schedule        ( GXSchedule_t **pp_schedule );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_thread          ( GXThread_t    **pp_thread );
+DLLEXPORT int create_thread          ( GXThread_t   **pp_thread );
 
 // Constructors
 
@@ -81,7 +81,7 @@ DLLEXPORT int create_thread          ( GXThread_t    **pp_thread );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
+DLLEXPORT int load_schedule          ( GXSchedule_t **pp_schedule, char *path );
 
 /* !
  *  Load a schedule from JSON text
@@ -95,7 +95,7 @@ DLLEXPORT int load_schedule          ( GXSchedule_t **schedule, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text, size_t len );
+DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **pp_schedule, char *token_text, size_t len );
 
 /* !
  *  Load a thread from a JSON file
@@ -108,7 +108,7 @@ DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **schedule, char *token_text
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_thread            ( GXThread_t   **thread, char *path );
+DLLEXPORT int load_thread            ( GXThread_t   **pp_thread, char *path );
 
 /* !
  *  Load a thread from a JSON file
@@ -122,9 +122,9 @@ DLLEXPORT int load_thread            ( GXThread_t   **thread, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_thread_as_json    ( GXThread_t    **thread , char *token_text, size_t len );
+DLLEXPORT int load_thread_as_json    ( GXThread_t   **pp_thread , char *token_text, size_t len );
 
-// Schedule
+// Scheduling
 
 /* !
  *  Start running a schedule
@@ -135,7 +135,7 @@ DLLEXPORT int load_thread_as_json    ( GXThread_t    **thread , char *token_text
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int start_schedule         ( GXSchedule_t  *schedule );
+DLLEXPORT int start_schedule         ( GXSchedule_t  *p_schedule );
 
 /* !
  *  Stop running a schedule
@@ -146,8 +146,8 @@ DLLEXPORT int start_schedule         ( GXSchedule_t  *schedule );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int stop_schedule          ( GXSchedule_t  *schedule );
+DLLEXPORT int stop_schedule          ( GXSchedule_t  *p_schedule );
 
 // Destructors
-DLLEXPORT int destroy_schedule       ( GXSchedule_t **schedule );
-DLLEXPORT int destroy_thread         ( GXThread_t    **thread );
+DLLEXPORT int destroy_schedule       ( GXSchedule_t **p_schedule );
+DLLEXPORT int destroy_thread         ( GXThread_t   **p_thread );

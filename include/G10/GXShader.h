@@ -61,11 +61,10 @@ struct GXShader_s
         } graphics;
 
         struct {
-            int i;
+            VkShaderModule          compute_shader_module;
         } compute;
     };
 };
-
 
 DLLEXPORT int create_shader_module            ( char        *code, size_t code_len, VkShaderModule* shader_module);
 
