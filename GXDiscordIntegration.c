@@ -1,10 +1,11 @@
+#ifdef BUILD_G10_WITH_DISCORD
 #include <G10/GXDiscordIntegration.h>
 
 #include <discord_game_sdk.h>
 #include <time.h>
 
 void DISCORD_CALLBACK OnUserUpdated(void* data)
-{
+{   
     GXInstance_t* p_instance = g_get_active_instance();
 
     struct DiscordUser user;
@@ -94,3 +95,4 @@ int discord_callbacks ( GXInstance_t *instance )
 		}
 	}
 }
+#endif

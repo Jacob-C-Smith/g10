@@ -90,6 +90,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                   *initial_scene                 = 0,
                   *log_file_i                    = 0,
                   *input                         = 0,
+                  *audio                         = 0,
                   *server                        = 0,
                   *renderer                      = 0,
                  **schedules                     = 0;
@@ -261,6 +262,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             ret->window.height       = window_height;
             ret->vulkan.max_buffered_frames = (long)atoi(max_buffered_frames);
         }
+
+        // FMOD initialization
+        
 
         // SDL initialization
         {
@@ -538,6 +542,10 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             // Load an input set
             if (input)
                 load_input(&ret->input, input);
+
+            //Load audio
+            if (audio) {} //Coming soon...
+                
 
             // Load schedules
             if(schedules) {
@@ -1690,6 +1698,15 @@ void          g_toggle_mouse_lock          ( callback_parameter_t state, GXInsta
 
     SDL_Delay(333);
 }
+
+void          g_play_sound                 ( callback_parameter_t state, GXInstance_t *instance )
+{
+    GXSound_t** sampleSound = NULL;
+    load_sound(sampleSound, )
+
+
+}
+
  
 GXMaterial_t *g_find_material              ( GXInstance_t         *instance, char         *name )
 {
@@ -1933,6 +1950,14 @@ int           g_exit                       ( GXInstance_t         *instance )
         vkDestroyDevice(instance->vulkan.device, (void*)0);
         vkDestroySurfaceKHR(instance->vulkan.instance, instance->vulkan.surface, (void*)0);
         vkDestroyInstance(instance->vulkan.instance, (void*)0);
+    }
+
+    //FMOD Cleanup
+    {
+        //Replace this with a struct member later?
+        //Not thread-safe
+        FMOD_RESULT fmodResult = FMOD_System_Release(instance->fmod.system);
+
     }
 
     // SDL Cleanup

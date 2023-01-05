@@ -1,53 +1,46 @@
 #include <G10/GXAudio.h>
-#include <FMOD-core/fmod.h>
 
-dict *sounds          = 0;
-int  *channels        = 0;
-int   current_channel = 0;
+#ifdef BUILD_G10_WITH_FMOD
 
-void init_audio ( void )
+dict* sounds = 0;
+int* channels = 0;
+int	current_channel = 0;
+
+void init_audio(void)
 {
-	dict_construct(&sounds, 64);
-	channels = calloc(64, sizeof(int));
+	//Error checking
+	FMOD_RESULT r;
+	r = FMOD_System_init(g_get_active_instance()->fmod.system, 64, FMOD_INIT_NORMAL, FMOD_OUTPUTTYPE_AUTODETECT);
+
 }
 
-int create_sound ( GXSound_t **pp_sound )
+int load_sound(GXSound_t** pp_sound, const char* path)
 {
+	//Fix pointer and wrapping stuff
 
-	// Argument check
-	{
-		#ifndef NDEBUG
-			if ( pp_sound == (void *) 0)
-				goto no_sound;
-		#endif
-	}
+	//Error checking
+	//Does null work?
+	FMOD_RESULT r;
 
-	return 1;
+	GXSound_t* p_sound = *pp_sound;
+	p_sound = calloc(1, sizeof(GXSound_t));
 
-	// Error handling
-	{
-
-		// Argument errors
-		{
-			no_sound:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Audio] Null pointer provided for \"pp_sound\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-				return 0;
-		}
-
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-				return 0;
-		}
-	}
+	r = FMOD_System_CreateSound(g_get_active_instance()->fmod.system, path, FMOD_DEFAULT, NULL, p_sound->sound);
 }
 
-int load_sound ( GXSound_t** sound, const char* path )
+int destroy_sound(GXSound_t* p_sound)
 {
-	//
+	FMOD_RESULT r;
+	r = FMOD_Sound_Release(p_sound->sound);
+	free(p_sound);
+
 }
+
+//Where's the function signature for this?
+void free_audio(void)
+{
+	FMOD_RESULT r;
+	r = FMOD_System_Release(g_get_active_instance()->fmod.system);
+}
+
+#endif

@@ -76,8 +76,9 @@ int main ( int argc, const char *argv[] )
         {
 
             // Add an exit bind
-            GXBind_t *exit_bind  = find_bind(instance->input, "QUIT"),
-                     *lock_mouse = find_bind(instance->input, "TOGGLE LOCK MOUSE");
+            GXBind_t *exit_bind = find_bind(instance->input, "QUIT"),
+                     *lock_mouse = find_bind(instance->input, "TOGGLE LOCK MOUSE"),
+                     *play_sound = find_bind(instance->input, "PLAY SOUND");
 
             
             // If quit is fired, exit the game loop
@@ -85,6 +86,9 @@ int main ( int argc, const char *argv[] )
 
             // Toggle mouse locking
             register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
+
+            //Sound play test
+            register_bind_callback(play_sound, &g_play_sound);
 
             // Set up the camera controller
             {
@@ -121,8 +125,10 @@ int main ( int argc, const char *argv[] )
         input_info(instance->input);
     }
 
+#ifdef BUILD_G10_WITH_DISCORD
     extern void init_discord_integration(void);
     init_discord_integration();
+#endif
 
     instance->running = true;
 
