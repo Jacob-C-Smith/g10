@@ -162,7 +162,7 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -171,7 +171,7 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -212,7 +212,7 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -221,7 +221,7 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -262,7 +262,7 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -271,7 +271,7 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -324,12 +324,12 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
         {
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -338,13 +338,13 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
         {
             failed_to_read_file:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
                 return 0;
 
             failed_to_load_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -353,7 +353,7 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -500,7 +500,7 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
         {
             failed_to_parse_json:
                     #ifndef NDEBUG
-                        g_print_error("[G10] [Renderer] Failed to parse JSON in call to function \"%s\"\n", __FUNCSIG__);
+                        g_print_error("[G10] [Renderer] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
                     #endif  
                 return 0;
         }
@@ -510,17 +510,17 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
             
             no_return:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_token_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_len:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Zero provided for \"len\" in in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Zero provided for \"len\" in in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -529,7 +529,7 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
         {
             failed_to_allocate_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -538,7 +538,7 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -590,12 +590,12 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
         {
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -604,13 +604,13 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
         {
             failed_to_read_file:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
                 return 0;
 
             failed_to_load_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load render pass from file \"%s\" in call to function \"%s\"\n", path, __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to load render pass from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -619,7 +619,7 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1074,17 +1074,17 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
 
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_token_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_len: 
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Parameter \"len\" was zero in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Parameter \"len\" was zero in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1093,13 +1093,13 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
         {
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] No \"name\" property in render pass JSON, in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] No \"name\" property in render pass JSON, in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 
             no_attachments:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] No \"attachments\" property in render pass JSON, in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] No \"attachments\" property in render pass JSON, in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             
@@ -1114,7 +1114,7 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
 
             failed_to_create_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to create render pass in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Failed to create render pass in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1178,7 +1178,7 @@ int           renderer_info                ( GXRenderer_t    *p_renderer)
         {
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1205,12 +1205,12 @@ int           add_subpass_callback         ( char            *name          , vo
         {
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
             no_function_pointer:
                     #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -1263,98 +1263,63 @@ int           render_frame                 ( GXInstance_t    *instance )
 
     // Draw the frame
     {
-        if (1)
+        // Initialized data
+        GXRenderer_t             *active_renderer   = instance->context.renderer;
+        VkCommandBufferBeginInfo  begin_info        = { 0 };
+
+        // Set up the command buffer begin info struct
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        // Begin the command buffer
+        vkBeginCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], &begin_info);
+
+        // Iterate over each render pass
+        for (size_t i = 0; i < active_renderer->render_pass_count; i++)
         {
 
             // Initialized data
-            GXRenderer_t             *active_renderer   = instance->context.renderer;
-            VkCommandBufferBeginInfo  begin_info        = { 0 };
+            GXRenderPass_t           *rp                     = active_renderer->render_passes_data[i];
+            VkRenderPassBeginInfo     render_pass_begin_info = { 0 };
+            size_t                    subpass_count          = 0;
 
-            // Set up the command buffer begin info struct
-            begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            // Begin the command buffer
-            vkBeginCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], &begin_info);
-
-            // Iterate over each render pass
-            for (size_t i = 0; i < active_renderer->render_pass_count; i++)
+            // Start the render pass
             {
-
-                // Initialized data
-                GXRenderPass_t           *rp                     = active_renderer->render_passes_data[i];
-                VkRenderPassBeginInfo     render_pass_begin_info = { 0 };
-                size_t                    subpass_count          = 0;
+                    
+                // Set up the render pass
+                {
+                    render_pass_begin_info.sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+                    render_pass_begin_info.renderPass          = rp->render_pass;
+                    render_pass_begin_info.framebuffer         = rp->framebuffers[instance->vulkan.current_frame].framebuffer;
+                    render_pass_begin_info.renderArea.offset.x = 0;
+                    render_pass_begin_info.renderArea.offset.y = 0;
+                    render_pass_begin_info.renderArea.extent   = instance->vulkan.swap_chain_extent;
+                    render_pass_begin_info.clearValueCount     = 2;
+                    render_pass_begin_info.pClearValues        = active_renderer->clear_colors;
+                }
 
                 // Start the render pass
-                {
-                    
-                    // Set up the render pass
-                    {
-                        render_pass_begin_info.sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                        render_pass_begin_info.renderPass          = rp->render_pass;
-                        render_pass_begin_info.framebuffer         = rp->framebuffers[instance->vulkan.current_frame].framebuffer;
-                        render_pass_begin_info.renderArea.offset.x = 0;
-                        render_pass_begin_info.renderArea.offset.y = 0;
-                        render_pass_begin_info.renderArea.extent   = instance->vulkan.swap_chain_extent;
-                        render_pass_begin_info.clearValueCount     = 2;
-                        render_pass_begin_info.pClearValues        = active_renderer->clear_colors;
-                    }
-
-                    // Start the render pass
-                    vkCmdBeginRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-                }
-
-                /*// Iterate over each subpass
-                for (size_t j = 0; j < subpass_count; j++)
-                {
-
-                    // Initialized data
-                    GXSubpass_t *s = active_renderer->render_passes_data[i]->subpasses_data[j];
-                    int (*subpass_function_callback)(GXSubpass_t *) = dict_get(subpass_functions, s->name);
-
-                    // Call the function
-                    subpass_function_callback(s);
-
-                    // Next subpass
-                    vkCmdNextSubpass(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_SUBPASS_CONTENTS_INLINE);
-                }
-                */
-
-                // Get a list of entities
-                size_t       entity_count = dict_values(instance->context.scene->entities, 0);
-                GXEntity_t** entities = calloc(entity_count, sizeof(void*));
-
-                dict_values(instance->context.scene->entities, entities);
-
-                // Draw each entity
-                for (size_t i = 0; i < entity_count; i++)
-                    draw_entity(entities[i]);
-
-                free(entities);
-
-
-
-                // End the render pass
-                {
-
-                    // End the render pass
-                    vkCmdEndRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
-
-                    // End the command buffer
-                    vkEndCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
-
-                }
-
+                vkCmdBeginRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
             }
+
+            // Get a list of entities
+            size_t       entity_count = dict_values(instance->context.scene->entities, 0);
+            GXEntity_t** entities     = calloc(entity_count, sizeof(void*));
+
+            dict_values(instance->context.scene->entities, entities);
+
+            // Draw each entity
+            for (size_t i = 0; i < entity_count; i++)
+                draw_entity(entities[i]);
+
+            free(entities);
+            
+            // End the render pass
+            vkCmdEndRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
         }
-        else {
-            // TODO: Make draw functions for each 
-            // draw_scene_shadows(instance->active_scene)
-            draw_scene(instance->context.scene);
-            // draw_scene_bv()
-            // draw_scene_composite(instance->active_scene)
-            // draw_scene_bloom(instance->active_scene)
-        }
+        
+        // End the command buffer
+        vkEndCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
+
     }
 
     // Submit the commands

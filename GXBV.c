@@ -35,7 +35,7 @@ int     create_bv                ( GXBV_t **pp_bv )
         {
             no_bv:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -44,7 +44,7 @@ int     create_bv                ( GXBV_t **pp_bv )
         {
             no_mem:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -84,7 +84,7 @@ int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
         {
             no_bv:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -254,7 +254,7 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
         {
             no_mem:
             #ifndef NDEBUG
-                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             return 0;
@@ -265,13 +265,13 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for \"scene\" in call to function %s\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] Null pointer provided for \"scene\" in call to function %s\n", __FUNCTION__);
                 #endif
                 return 0;
 
             no_actors:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] No actors in \"scene\" in call to function %s\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] No actors in \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -408,7 +408,7 @@ int     insert_bv                ( GXBV_t  *bvh  , GXBV_t    *bv )
     {
         no_bvh:
             #ifndef NDEBUG
-                g_print_error("[G10] [BV] Null pointer provided for \"bvh\" in call to function \"%s\"\n", __FUNCSIG__);
+                g_print_error("[G10] [BV] Null pointer provided for \"bvh\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
     }
@@ -695,7 +695,7 @@ int     resize_bv                ( GXBV_t  *bv )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCSIG__);
+            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -753,7 +753,7 @@ int     bv_info                 ( GXBV_t    *p_bv,    size_t d )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCSIG__);
+            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -786,7 +786,7 @@ size_t  get_entities_from_bv     ( GXBV_t  *bv   , queue     *entity_queue )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCSIG__);
+            g_print_error("[G10] [BVH] Null pointer provided for \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -823,12 +823,12 @@ bool    aabb_intersect           ( GXBV_t  *a    , GXBV_t    *b )
         {
             no_a:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for \"a\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] Null pointer provided for \"a\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return false;
             no_b:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for \"b\" in call to function \"%s\"\n", __FUNCSIG__);
+                    g_print_error("[G10] [BV] Null pointer provided for \"b\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return false;
         }

@@ -27,7 +27,7 @@ int user_code              ( GXInstance_t *instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_error("[G10] [User code] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [User code] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif	
 				return 0;
 		}
@@ -60,12 +60,12 @@ int add_user_code_callback ( GXInstance_t *instance, int ( *user_code_callback )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_error("[G10] [User code] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [User code] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif	
 				return 0;
 			no_user_code_callback:
 				#ifndef NDEBUG
-					g_print_error("[G10] [User code] Null pointer provided for \"user_code_callback\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [User code] Null pointer provided for \"user_code_callback\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}

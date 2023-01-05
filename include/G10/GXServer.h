@@ -9,7 +9,7 @@
 
 enum   command_type_e  {
 	no_op                 = 0,
-	connect               = 1,
+	connect_CMD           = 1,
 	actor_initialize      = 2,
 	actor_displace_rotate = 3,
 	actor_detach          = 4,

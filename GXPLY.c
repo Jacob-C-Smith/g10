@@ -739,10 +739,10 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             g_print_error("[G10] [PLY] Failed to load file %s\n", path);
             return 0;
         noPart:
-            g_print_error("[G10] [PLY] Null pointer provided for parameter \"part\" in call to %s\n", __FUNCSIG__);
+            g_print_error("[G10] [PLY] Null pointer provided for parameter \"part\" in call to %s\n", __FUNCTION__);
             return 0;
         noPath:
-            g_print_error("[G10] [PLY] Null pointer provided for parameter \"path\" in call to %s\n", __FUNCSIG__);
+            g_print_error("[G10] [PLY] Null pointer provided for parameter \"path\" in call to %s\n", __FUNCTION__);
             return 0;
         invalidHeader:
             g_print_error("[G10] [PLY] Invalid header detected in file \"%s\"\n",path);

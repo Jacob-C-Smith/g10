@@ -52,6 +52,7 @@
     <ClCompile Include="GXCameraController.c" />
     <ClCompile Include="GXCollider.c" />
     <ClCompile Include="GXCollision.c" />
+    <ClCompile Include="GXDiscordIntegration.c" />
     <ClCompile Include="GXEntity.c" />
     <ClCompile Include="GXInput.c" />
     <ClCompile Include="GXLinear.c" />
@@ -81,6 +82,7 @@
     <ClInclude Include="include\G10\GXCameraController.h" />
     <ClInclude Include="include\G10\GXCollider.h" />
     <ClInclude Include="include\G10\GXCollision.h" />
+    <ClInclude Include="include\G10\GXDiscordIntegration.h" />
     <ClInclude Include="include\G10\GXEntity.h" />
     <ClInclude Include="include\G10\GXEPA.h" />
     <ClInclude Include="include\G10\GXGJK.h" />
@@ -293,7 +295,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../JSON/include;../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
+
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PrecompiledHeaderFile />
@@ -305,8 +308,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)/Lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_net.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;Queue.lib;Stack.lib;UI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Server|x64'">
@@ -315,7 +318,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;../JSON/include;./include/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PrecompiledHeaderFile>
@@ -328,8 +331,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>./lib/;$(VULKAN_SDK)/Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_net.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;Queue.lib;Stack.lib;UI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic Library|x64'">
@@ -338,7 +341,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -351,8 +354,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)/Lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_net.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;Queue.lib;Stack.lib;UI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -363,7 +366,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.216.0\Include;C:\Users\j\Desktop\C Projects\G10 Vulkan\include;../Dictionary/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -371,18 +374,18 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;C:\Users\j\Desktop\C Projects\G10 Vulkan\lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic Library|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.216.0\Include;C:\Users\j\Desktop\C Projects\G10 Vulkan\include;../Dictionary/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;C:\Users\j\Desktop\C Projects\G10 Vulkan\lib;./lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;vulkan-1.lib;JSON.lib;Dictionary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

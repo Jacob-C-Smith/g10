@@ -16,7 +16,7 @@ There are three main components of G10
 >
 > [G10 Schema (JSON Schema)](https://github.com/Jacob-C-Smith/G10-Schema)
 
-G10 Schema is a set of JSON schemas descring valid nontemporal game data. In other words, anything stored on the disk, such as scenes, game and server configuration, models, textures, animation, shaderes, etc. 
+G10 Schema is a set of JSON schemas descring valid nontemporal game data. In other words, anything stored on the disk, such as scenes, game and server configuration, models, textures, animation, shaders, etc. 
 
 ## A primer on G10
 ##### Making an application with G10, generating assets

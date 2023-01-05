@@ -47,7 +47,7 @@ int get_camera_position(void* ret)
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCSIG__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -111,7 +111,7 @@ int  create_camera    ( GXCamera_t **pp_camera )
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"", __FUNCSIG__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -120,7 +120,7 @@ int  create_camera    ( GXCamera_t **pp_camera )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCSIG__);
+					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -153,7 +153,7 @@ int  construct_camera ( GXCamera_t **camera, vec3 location, vec3 front, vec3 up,
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"camera\" in call to function \"%s\"\n",__FUNCSIG__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"camera\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 				return 0;
 		}
