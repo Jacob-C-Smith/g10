@@ -1078,7 +1078,7 @@ int          process_input             ( GXInstance_t *instance )
 
                 // Fire mouse motion binds
                 {
-                    if (y_rel < 0)
+                    if (y_rel != 0 || x_rel != 0)
                         fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
                     if (y_rel > 0)
                         fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);

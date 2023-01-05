@@ -1,10 +1,10 @@
 #include <G10/GXCameraController.h>
 
-float x_orient,
+double x_orient,
       y_orient,
       h_ang,
       v_ang,
-      camera_acceleration = 0.25;
+      camera_acceleration = 1.0f;
 
 GXCameraController_t* camera_controller = 0;
 
@@ -36,8 +36,6 @@ void                  camera_controller_forward      ( callback_parameter_t stat
 {
     if (state.input_state == KEYBOARD)
         y_orient = (state.inputs.key.depressed) ? 1 : 0;
-
-
 }
 void                  camera_controller_backward     ( callback_parameter_t state, GXInstance_t* instance )
 {
@@ -55,28 +53,15 @@ void                  camera_controller_strafe_right ( callback_parameter_t stat
         x_orient = (state.inputs.key.depressed) ? 1 : 0;
 }
 
-void                  camera_controller_up           ( callback_parameter_t state, GXInstance_t* instance ) 
+void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* instance ) 
 {
     if (state.input_state == MOUSE)
-        v_ang += camera_acceleration * fabsf(state.inputs.mouse_state.yrel);
-
-}
-void                  camera_controller_down         ( callback_parameter_t state, GXInstance_t* instance )
-{
-    if (state.input_state == MOUSE)
-        v_ang -= camera_acceleration * fabsf(state.inputs.mouse_state.yrel);
-
-}
-void                  camera_controller_left         ( callback_parameter_t state, GXInstance_t* instance )
-{
-    if (state.input_state == MOUSE)
-        h_ang -= camera_acceleration * fabsf(state.inputs.mouse_state.xrel);
-
-}
-void                  camera_controller_right        ( callback_parameter_t state, GXInstance_t* instance )
-{
-    if (state.input_state == MOUSE)
-        h_ang += camera_acceleration * fabsf(state.inputs.mouse_state.xrel);
+    {
+        v_ang -= camera_acceleration * 20 * (state.inputs.mouse_state.yrel / 720.0f);
+        h_ang += camera_acceleration * 20 * (state.inputs.mouse_state.xrel / 1280.0f);
+        g_print_warning("[G10] state.inputs.mouse_state.yrel = %d\n", state.inputs.mouse_state.yrel);
+        g_print_warning("[G10] state.inputs.mouse_state.xrel = %d\n", state.inputs.mouse_state.xrel);
+    }
 
 }
 
@@ -97,16 +82,13 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
     ret->camera = camera;
 
     // Displacement binds
-    GXBind_t *forward      = find_bind(instance->input, "FORWARD"),
-             *backward     = find_bind(instance->input, "BACKWARD"),
-             *left         = find_bind(instance->input, "STRAFE LEFT"),
-             *right        = find_bind(instance->input, "STRAFE RIGHT"),
+    GXBind_t* forward = find_bind(instance->input, "FORWARD"),
+        * backward = find_bind(instance->input, "BACKWARD"),
+        * left = find_bind(instance->input, "STRAFE LEFT"),
+        * right = find_bind(instance->input, "STRAFE RIGHT"),
 
-    // Orientation binds
-             *orient_up    = find_bind(instance->input, "UP"),
-             *orient_down  = find_bind(instance->input, "DOWN"),
-             *orient_left  = find_bind(instance->input, "LEFT"),
-             *orient_right = find_bind(instance->input, "RIGHT");
+        // Orientation binds
+        * mouse = find_bind(instance->input, "MOUSE");
     
     // Error checking
     {
@@ -127,14 +109,8 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
             errors |= 0x4;
         if (right        == (void*)0)
             errors |= 0x8;
-        if (orient_up    == (void*)0)
+        if (mouse    == (void*)0)
             errors |= 0x10;
-        if (orient_down  == (void*)0)
-            errors |= 0x20;
-        if (orient_left  == (void*)0)
-            errors |= 0x40;
-        if (orient_right == (void*)0)
-            errors |= 0x80;
 
 
         if (errors)
@@ -152,10 +128,8 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
     register_bind_callback(right       , &camera_controller_strafe_right);
 
     // Assign orientation callbacks
-    register_bind_callback(orient_up   , &camera_controller_up);
-    register_bind_callback(orient_down , &camera_controller_down);
-    register_bind_callback(orient_left , &camera_controller_left);
-    register_bind_callback(orient_right, &camera_controller_right);
+    register_bind_callback(mouse   , &camera_controller_mouse);
+
 
     ret->camera = camera;
 
@@ -192,13 +166,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
             if ( errors & 0x8  )
                 g_print_error("[G10] [Camera controller] Missing \"STRAFE RIGHT\" input bind to set up camera controller\n");
             if ( errors & 0x10 )
-                g_print_error("[G10] [Camera controller] Missing \"UP\" input bind to set up camera controller\n");
-            if ( errors & 0x20 )
-                g_print_error("[G10] [Camera controller] Missing \"DOWN\" input bind to set up camera controller\n");
-            if ( errors & 0x40 )
-                g_print_error("[G10] [Camera controller] Missing \"LEFT\" input bind to set up camera controller\n");
-            if ( errors & 0x80 )
-                g_print_error("[G10] [Camera controller] Missing \"RIGHT\" input bind to set up camera controller\n");
+                g_print_error("[G10] [Camera controller] Missing \"MOUSE\" input bind to set up camera controller\n");
             
             // TODO: Free camera controller
 
