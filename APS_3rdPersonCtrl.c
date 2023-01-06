@@ -8,58 +8,58 @@ float zoom;
 void aps_3rdpersonctrl_forward(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD)
-        moveY = (state.inputs.key.depressed) ? 1 : 0;
+        moveY = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
 void aps_3rdpersonctrl_backward(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD)
-        moveY = (state.inputs.key.depressed) ? -1 : 0;
+        moveY = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
 
 void aps_3rdpersonctrl_strafe_left(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD)
-        moveX = (state.inputs.key.depressed) ? -1 : 0;
+        moveX = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
 
 void aps_3rdpersonctrl_strafe_right(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD)
-        moveX = (state.inputs.key.depressed) ? 1 : 0;
+        moveX = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
 void aps_3rdpersonctrl_up(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angY += instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        angY += instance->time.delta_time * 100.f * (float)abs(state.inputs.mouse_state.yrel);
 }
 void aps_3rdpersonctrl_down(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angY -= instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.yrel);
+        angY -= instance->time.delta_time * 100.f * (float)abs(state.inputs.mouse_state.yrel);
 }
 void aps_3rdpersonctrl_left(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angX -= instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        angX -= instance->time.delta_time * 100.f * (float)abs(state.inputs.mouse_state.xrel);
 }
 void aps_3rdpersonctrl_right(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == MOUSE)
-        angX += instance->time.delta_time * 100.f * fabsf(state.inputs.mouse_state.xrel);
+        angX += instance->time.delta_time * 100.f * (float)abs(state.inputs.mouse_state.xrel);
 }
 
 void aps_3rdpersonctrl_zoom_out(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD && !state.inputs.key.depressed)
-        zoom += 5.0 * instance->time.delta_time;
+        zoom += 5.f * instance->time.delta_time;
 }
 
 void aps_3rdpersonctrl_zoom_in(callback_parameter_t state, GXInstance_t* instance)
 {
     if (state.input_state == KEYBOARD && !state.inputs.key.depressed)
-        zoom -= 5.0 * instance->time.delta_time;
+        zoom -= 5.f * instance->time.delta_time;
 }
 
 APS_3rdPersonCtrl_t* create_aps_3rdpersonctrl()
@@ -182,8 +182,8 @@ int update_aps_3rdpersonctrl(float delta_time)
 
     //Move character in direction of camera angle
     GXTransform_t* characterPos = thirdpersonctrl->character->transform;
-    characterPos->location.x += ((cosf(to_radians(angX)) * moveY) + (sin(to_radians(angX)) * -moveX)) * delta_time;
-    characterPos->location.y += ((sinf(to_radians(angX)) * moveY) + (cos(to_radians(angX)) * moveX)) * delta_time;
+    characterPos->location.x += (float) ((cosf(to_radians(angX)) * moveY) + (sin(to_radians(angX)) * -moveX)) * delta_time;
+    characterPos->location.y += (float) ((sinf(to_radians(angX)) * moveY) + (cos(to_radians(angX)) * moveX)) * delta_time;
 
     //Make camera follow player and zoom out camera
     float elevation = 2.5;

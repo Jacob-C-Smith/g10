@@ -20,7 +20,7 @@ mat4 perspective_matrix      ( float       fov,    float       aspect       , fl
 	};
 }
 
-int get_camera_position(void* ret)
+int get_camera_position ( void *ret )
 {
 
 	// Argument errors
@@ -54,7 +54,7 @@ int get_camera_position(void* ret)
 	}
 }
 
-mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up )                                        // ✅ Computes a view matrix from eye, target, and up vectors
+mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up ) 
 { 
     // Compute forward direction
     vec3 f = normalize((vec3) {
@@ -95,13 +95,15 @@ int  create_camera    ( GXCamera_t **pp_camera )
 	// Error checking
 	{
 		#ifndef NDEBUG
-			if(p_camera == (void*)0)
+			if ( p_camera == (void *) 0 )
 				goto no_mem;
 		#endif
 	}
 
+	// Write the return value
 	*pp_camera = p_camera;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -127,54 +129,97 @@ int  create_camera    ( GXCamera_t **pp_camera )
 	}
 }
 
-int  construct_camera ( GXCamera_t **camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov)
+int  load_camera ( GXCamera_t **pp_camera, const char *path )
 {
-
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(camera == (void *)0)
+			if ( pp_camera == (void *) 0 )
 				goto no_camera;
+
+			if ( path == (void *) 0 )
+				goto no_path;
+
+
 		#endif
 	}
 
 	// Initialized data
-	GXCamera_t *c = 0;
+	size_t  file_len  = g_load_file(path, 0, false);
+	char   *file_text = calloc(file_len + 1, sizeof(char));
 
+	// Load the file
+	if ( g_load_file(path, file_text, false) == 0 )
+		goto failed_to_load_file;
 
+	if ( load_camera_as_json(pp_camera, file_text, file_len) == 0 )
+		goto failed_to_load_camera_as_json;
 
-
+	// Success
 	return 1;
 
 	// Error handling
 	{
 
-		// Argument errors
+		// Arugment check
 		{
+
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"camera\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+			
+			no_path:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+		// G10 Errors
+		{
+			failed_to_load_file:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			failed_to_load_camera_as_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to construct camera from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
 		}
 	}
 }
 
-int  load_camera(GXCamera_t** camera, const char* path)
-{
-	size_t  file_len  = g_load_file(path, 0, false);
-	char* file_text = calloc(file_len + 1, sizeof(char));
-	g_load_file(path, file_text, false);
-
-	load_camera_as_json(camera, file_text, file_len);
-
-	return 0;
-}
-
-int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
+int  load_camera_as_json ( GXCamera_t **pp_camera, char *token_text, size_t len )
 {
 
-	GXCamera_t  *i_camera     = 0;
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_camera == (void *) 0 )
+				goto no_camera;
+			if (token_text == (void *) 0 )
+				goto no_object_text;
+			if (len == 0)
+				goto no_len;
+		#endif
+	}
+
+	// Initialized data
+	GXCamera_t  *p_camera     = 0;
 	char        *name         = 0,
 		       **location     = 0,
 		       **front        = 0,
@@ -183,73 +228,132 @@ int  load_camera_as_json(GXCamera_t** camera, char* object_text, size_t len)
 		        *far_clip     = 0,
 		        *aspect_ratio = 0,
 		        *fov          = 0;
+	dict        *camera_json  = 0;
 
-	dict *camera_json = 0;
+	// Parse the JSON into a dictionary
+	parse_json(token_text, len, &camera_json);
 
+	// Parse the dictionary into constructor parameters
 	{
+
+		// Initialized dat
 		JSONToken_t *token = 0;
 
-		parse_json(object_text, len, &camera_json);
+		token     = (JSONToken_t *) dict_get(camera_json, "name");
+		name      = JSON_VALUE(token, JSONstring);
 
-		token = dict_get(camera_json, "name");
-		name  = JSON_VALUE(token, JSONstring);
+		token     = (JSONToken_t *) dict_get(camera_json, "location");
+		location  = JSON_VALUE(token, JSONarray);
 
-		token    = dict_get(camera_json, "location");
-		location = JSON_VALUE(token, JSONarray);
+		token     = (JSONToken_t *) dict_get(camera_json, "front");
+		front     = JSON_VALUE(token, JSONarray);
 
-		token = dict_get(camera_json, "front");
-		front = JSON_VALUE(token, JSONarray);
+		token     = (JSONToken_t *) dict_get(camera_json, "up");
+		up        = JSON_VALUE(token, JSONarray);
 
-		token = dict_get(camera_json, "up");
-		up    = JSON_VALUE(token, JSONarray);
-
-		token = dict_get(camera_json, "near");
+		token     = (JSONToken_t *) dict_get(camera_json, "near");
 		near_clip = JSON_VALUE(token, JSONprimative);
 
-		token = dict_get(camera_json, "far");
-		far_clip = JSON_VALUE(token, JSONprimative);
+		token     = (JSONToken_t *) dict_get(camera_json, "far");
+		far_clip  = JSON_VALUE(token, JSONprimative);
 
-		token = dict_get(camera_json, "fov");
-		fov = JSON_VALUE(token, JSONprimative);
+		token     = (JSONToken_t *) dict_get(camera_json, "fov");
+		fov       = JSON_VALUE(token, JSONprimative);
 
 	}
 
-	// Allocate the camera
-	{
-		create_camera(camera);
+	// Allocate memory for the camera
+	if ( create_camera(pp_camera) == 0 )
+		goto failed_to_allocate_camera;
 
-		i_camera = *camera;
-	}
+	// Get a pointer to the camera
+	p_camera = *pp_camera;
 
 	// Construct the camera
 	{
 
-		{
-			size_t name_len = strlen(name);
-			i_camera->name = calloc(name_len + 1, sizeof(char));
-			strncpy(i_camera->name, name, name_len);
-		}
-
+		// Initialized data		
 		vec3 a_location = { (float)atof(location[0]), (float)atof(location[1]), (float)atof(location[2]) };
 		vec3 a_front    = { (float)atof(front[0])   , (float)atof(front[1])   , (float)atof(front[2]) };
 		vec3 a_up       = { -(float)atof(up[0])      , -(float)atof(up[1])      , -(float)atof(up[2]) };
 
-		i_camera->location = a_location;
-		i_camera->target   = a_front;
-		i_camera->up       = a_up;
+		// Copy the name
+		{
+
+			// Initialized data
+			size_t name_len = strlen(name);
+			
+			// Allocate memory for the name
+			p_camera->name = calloc(name_len + 1, sizeof(char));
+
+			// Copy the name
+			strncpy(p_camera->name, name, name_len);
+		}
+
+		// Set the view matrix parameters
+		p_camera->location = a_location;
+		p_camera->target   = a_front;
+		p_camera->up       = a_up;
 		
-		i_camera->near_clip    = (float)atof(near_clip);
-		i_camera->far_clip     = (float)atof(far_clip);
-		i_camera->aspect_ratio = 16.f / 9.f;
-		i_camera->fov          = (float)atof(fov);
+		// Set the model matrix parameters
+		p_camera->near_clip    = (float)atof(near_clip);
+		p_camera->far_clip     = (float)atof(far_clip);
+		p_camera->aspect_ratio = 16.f / 9.f;
+		p_camera->fov          = (float)atof(fov);
 		
-		// Set the matricies
-		i_camera->view       = look_at(i_camera->location, i_camera->target, i_camera->up);
-		i_camera->projection = perspective_matrix(i_camera->fov, i_camera->aspect_ratio, i_camera->near_clip, i_camera->far_clip);
+		// Set the view and projection matricies
+		p_camera->view       = look_at(p_camera->location, p_camera->target, p_camera->up);
+		p_camera->projection = perspective_matrix(p_camera->fov, p_camera->aspect_ratio, p_camera->near_clip, p_camera->far_clip);
 
 	}
 
-	return 0;
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// Arugment check
+		{
+
+			no_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+			
+			no_object_text:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			no_len:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+		}
+
+		// G10 Errors
+		{
+			failed_to_allocate_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to allocate memory for camera in call to function \"%s\"\n",  __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+		}
+	}
 }
 
 int destroy_camera ( GXCamera_t *p_camera )

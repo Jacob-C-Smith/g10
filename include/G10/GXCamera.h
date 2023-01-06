@@ -56,7 +56,7 @@ DLLEXPORT int  create_camera       ( GXCamera_t **pp_camera );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  construct_camera    ( GXCamera_t** camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
+DLLEXPORT int  construct_camera    ( GXCamera_t **pp_camera, vec3 location, vec3 front, vec3 up, float near_clip, float far_clip, float aspect_ratio, float fov);
 
 /* !
  *  Load a camera from a JSON file
@@ -69,7 +69,7 @@ DLLEXPORT int  construct_camera    ( GXCamera_t** camera, vec3 location, vec3 fr
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  load_camera         ( GXCamera_t **camera, const char *path );
+DLLEXPORT int  load_camera         ( GXCamera_t **pp_camera, const char *path );
 
 /* !
  *  Load a camera from JSON text
@@ -83,7 +83,7 @@ DLLEXPORT int  load_camera         ( GXCamera_t **camera, const char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  load_camera_as_json ( GXCamera_t **camera, char       *object_text, size_t len);
+DLLEXPORT int  load_camera_as_json ( GXCamera_t **pp_camera, char       *object_text, size_t len);
 
 /* !
  *  Construct a 4x4 view matrix from it's parameters
@@ -96,7 +96,7 @@ DLLEXPORT int  load_camera_as_json ( GXCamera_t **camera, char       *object_tex
  *
  * @return a view mat4 
  */
-DLLEXPORT mat4 look_at             ( vec3        eye,    vec3        target       , vec3  up );
+DLLEXPORT mat4 look_at             ( vec3         eye,    vec3        target       , vec3  up );
 
 /* !
  *  Construct a 4x4 perspective matrix from it's parameters
@@ -110,7 +110,7 @@ DLLEXPORT mat4 look_at             ( vec3        eye,    vec3        target     
  *
  * @return a projection mat4 
  */
-DLLEXPORT mat4 perspective_matrix  ( float       fov,    float       aspect       , float near_clip , float far_clip);
+DLLEXPORT mat4 perspective_matrix  ( float        fov,    float       aspect       , float near_clip , float far_clip);
 
 /* !
  *  Get the position of the active instance's active scene's active camera
@@ -119,7 +119,7 @@ DLLEXPORT mat4 perspective_matrix  ( float       fov,    float       aspect     
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  get_camera_position ( void       *ret );
+DLLEXPORT int  get_camera_position ( void        *ret );
 
 // Deallocators
 
@@ -132,4 +132,4 @@ DLLEXPORT int  get_camera_position ( void       *ret );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  destroy_camera      ( GXCamera_t* camera );
+DLLEXPORT int  destroy_camera      ( GXCamera_t  *p_camera );

@@ -53,7 +53,7 @@ DLLEXPORT int load_ai                    ( GXAI_t       **pp_ai   , char        
  * @param token_text : The AI JSON object text
  * @param len        : The length of the AI JSON object text
  *
- * @sa load_ai_as_json
+ * @sa load_ai
  * @sa create_ai
  *
  * @return 1 on success, 0 on error

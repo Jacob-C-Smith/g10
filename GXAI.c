@@ -80,6 +80,14 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 	size_t  file_len  = g_load_file(path, 0, false);
 	char   *file_data = calloc(file_len+1, sizeof(char));
 
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if (file_data == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
+
 	// Load the file contents into memory
 	if ( g_load_file(path, file_data, false) == 0 )
 		goto failed_to_load_file;
@@ -179,15 +187,15 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		}
 
 		// Get the name 
-		token         = dict_get(ai_dict, "name");
+		token         = (JSONToken_t *) dict_get(ai_dict, "name");
 		name          = JSON_VALUE(token, JSONstring);
 
 		// Get the states
-		token         = dict_get(ai_dict, "states");
+		token         = (JSONToken_t *) dict_get(ai_dict, "states");
 		states        = JSON_VALUE(token, JSONarray);
 
 		// Get the initial state
-		token         = dict_get(ai_dict, "initial state");
+		token         = (JSONToken_t *) dict_get(ai_dict, "initial state");
 		initial_state = JSON_VALUE(token, JSONstring);
 
 	}
@@ -314,8 +322,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		SDL_UnlockMutex(instance->mutexes.ai_cache);
 	}
 
-	free_memory:;
-	exit:
+	free_memory:
 	return ret;
 
 	// Error handling
@@ -407,8 +414,8 @@ int set_ai_state               ( GXAI_t        *p_ai , const char  *state_name )
 	}
 
 	// Set the state, if it is a valid state
-	if(dict_get(p_ai->states, state_name))
-		p_ai->current_state = state_name;
+	if(dict_get(p_ai->states, (char *) state_name))
+		p_ai->current_state = (char *) state_name;
 
 	return 1;
 

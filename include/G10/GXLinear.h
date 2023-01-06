@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <math.h>
-
 // TODO: Phase out all of these functions in favor of SIMD accelerated funcitons.
 
 #include <G10/GXtypedef.h>

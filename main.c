@@ -14,7 +14,7 @@ int user_code_callback(GXInstance_t* instance)
 {
 
     // Update the camera controller
-    update_controlee_camera(instance->time.delta_time);
+    update_controlee_camera();
     //vec3 r = { 0.f, n, 90.0f };
     //GXEntity_t* e = get_entity(instance->context.scene, "backpack");
     //n += 0.1f * instance->time.delta_time;
@@ -31,7 +31,7 @@ int main ( int argc, const char *argv[] )
     // Initialized data
     GXInstance_t  *instance               = 0;
     GXScene_t     *scene                  = 0;
-    char          *instance_path          = "G10/debug client instance.json",
+    const char    *instance_path          = "G10/debug client instance.json",
                   *schedule_name          = "Client Schedule",
                   *client_name            = 0;
     bool           connect_to_server      = false;
@@ -120,9 +120,6 @@ int main ( int argc, const char *argv[] )
 
         input_info(instance->input);
     }
-
-    extern void init_discord_integration(void);
-    init_discord_integration();
 
     instance->running = true;
 

@@ -472,7 +472,7 @@ int calculate_entity_force ( GXEntity_t *p_entity )
 	return 1;
 }
 
-int preupdate_entity_ai ( GXEntity_t* p_entity)
+int preupdate_entity_ai ( GXEntity_t  *p_entity )
 {
 	// Initialized data
 	GXAI_t* p_ai = p_entity->ai;
@@ -481,8 +481,11 @@ int preupdate_entity_ai ( GXEntity_t* p_entity)
 	void (*preupdate_ai)(GXEntity_t * p_entity) = p_ai->pre_ai;
 
 	// Pre update
-	if(preupdate_ai)
+	if (preupdate_ai)
 		preupdate_ai(p_entity);
+
+	// Success
+	return 1;
 }
 
 int update_entity_ai ( GXEntity_t* p_entity)

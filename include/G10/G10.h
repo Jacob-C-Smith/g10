@@ -1,9 +1,9 @@
 ﻿ #pragma once
-#define BUILD_G10_WITH_DISCORD
+//#define BUILD_G10_WITH_DISCORD
+#define BUILD_G10_WITH_ANSI_COLOR
 
 #include <stdio.h>
 #include <stdbool.h>
-#define HAVE_M_PI
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_sdk_platform.h>

@@ -1,10 +1,10 @@
 #include <G10/GXCameraController.h>
 
 double x_orient,
-      y_orient,
-      h_ang,
-      v_ang,
-      camera_acceleration = 1.0f;
+       y_orient,
+       h_ang,
+       v_ang,
+       camera_acceleration = 1.0f;
 
 GXCameraController_t* camera_controller = 0;
 
@@ -57,10 +57,8 @@ void                  camera_controller_mouse           ( callback_parameter_t s
 {
     if (state.input_state == MOUSE)
     {
-        v_ang -= camera_acceleration * 20 * (state.inputs.mouse_state.yrel / 720.0f);
-        h_ang += camera_acceleration * 20 * (state.inputs.mouse_state.xrel / 1280.0f);
-        g_print_warning("[G10] state.inputs.mouse_state.yrel = %d\n", state.inputs.mouse_state.yrel);
-        g_print_warning("[G10] state.inputs.mouse_state.xrel = %d\n", state.inputs.mouse_state.xrel);
+        v_ang -= camera_acceleration * instance->input->mouse_sensitivity * (state.inputs.mouse_state.yrel / 720.0f);
+        h_ang += camera_acceleration * instance->input->mouse_sensitivity * (state.inputs.mouse_state.xrel / 1280.0f);
     }
 
 }
