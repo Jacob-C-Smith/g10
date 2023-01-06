@@ -102,7 +102,7 @@ DLLEXPORT int     resize_bv                ( GXBV_t     *bv );
 DLLEXPORT int     bv_info                  ( GXBV_t     *p_bv       , size_t      d );
 
 // Getters
-DLLEXPORT size_t  get_entities_from_bv     ( GXBV_t     *bv, queue **entity_queue );
+DLLEXPORT size_t  get_entities_from_bv     ( GXBV_t     *bv, queue  *entity_queue );
 
 // Collision detection
 /* !

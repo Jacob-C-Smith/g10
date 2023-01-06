@@ -392,15 +392,15 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
         JSONToken_t *token = 0;
 
         // Get the name
-        token  = dict_get(renderer_dict, "name");
+        token  = (JSONToken_t *) dict_get(renderer_dict, "name");
         name   = JSON_VALUE(token, JSONstring);
 
         // Get the list of render passes
-        token  = dict_get(renderer_dict, "passes");
+        token  = (JSONToken_t *) dict_get(renderer_dict, "passes");
         passes = JSON_VALUE(token, JSONarray);
 
         // Get the clear color
-        token              = dict_get(renderer_dict, "clear color");
+        token              = (JSONToken_t *) dict_get(renderer_dict, "clear color");
         clear_color        = JSON_VALUE(token, JSONarray);
 
     }
@@ -431,10 +431,10 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
 
         // Set the clear color
         if(clear_color){
-            clear_c[0].color.float32[0] = atof(clear_color[0]);
-            clear_c[0].color.float32[1] = atof(clear_color[1]);
-            clear_c[0].color.float32[2] = atof(clear_color[2]);
-            clear_c[0].color.float32[3] = atof(clear_color[3]);
+            clear_c[0].color.float32[0] = (float)atof(clear_color[0]);
+            clear_c[0].color.float32[1] = (float)atof(clear_color[1]);
+            clear_c[0].color.float32[2] = (float)atof(clear_color[2]);
+            clear_c[0].color.float32[3] = (float)atof(clear_color[3]);
 
             clear_c[1].depthStencil.depth = 1.f;
             clear_c[1].depthStencil.stencil = 0;
@@ -484,7 +484,7 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
 
                 // Load a render pass JSON file
                 else
-                    load_render_pass(&p_renderer->render_passes_data[i], passes[i], strlen(passes[i]));
+                    load_render_pass(&p_renderer->render_passes_data[i], passes[i]);
 
             }
 
@@ -495,15 +495,6 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
 
     // Error handling
     {
-
-        // JSON errors
-        {
-            failed_to_parse_json:
-                    #ifndef NDEBUG
-                        g_print_error("[G10] [Renderer] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
-                    #endif  
-                return 0;
-        }
 
         // Argument errors
         {
@@ -664,15 +655,15 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
         JSONToken_t *token = 0;
 
         // Get the name of the render pass
-        token            = dict_get(render_pass_dict, "name");
+        token            = (JSONToken_t *) dict_get(render_pass_dict, "name");
         name             = JSON_VALUE(token, JSONstring);
 
         // Get the attachments list
-        token            = dict_get(render_pass_dict, "attachments");
+        token            = (JSONToken_t *) dict_get(render_pass_dict, "attachments");
         attachments_text = JSON_VALUE(token, JSONarray);
 
         // Get the subpasses list
-        token              = dict_get(render_pass_dict, "subpasses");
+        token              = (JSONToken_t *) dict_get(render_pass_dict, "subpasses");
         subpasses_text     = JSON_VALUE(token, JSONarray);
 
     }
@@ -758,35 +749,35 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     JSONToken_t* token = 0;
 
                     // Get the samples for this attachment
-                    token = dict_get(attachment_dict, "name");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "name");
                     name = JSON_VALUE(token, JSONstring);
 
                     // Get the samples for this attachment
-                    token = dict_get(attachment_dict, "samples");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "samples");
                     samples = JSON_VALUE(token, JSONprimative);
 
                     // Get the load operation
-                    token = dict_get(attachment_dict, "load operation");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "load operation");
                     load_operation = JSON_VALUE(token, JSONstring);
 
                     // Get the store operation
-                    token = dict_get(attachment_dict, "store operation");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "store operation");
                     store_operation = JSON_VALUE(token, JSONstring);
 
                     // Get the stencil load operation
-                    token = dict_get(attachment_dict, "stencil load operation");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "stencil load operation");
                     stencil_load_operation = JSON_VALUE(token, JSONstring);
 
                     // Get the stencil store operation
-                    token = dict_get(attachment_dict, "stencil store operation");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "stencil store operation");
                     stencil_store_operation = JSON_VALUE(token, JSONstring);
 
                     // Get the initial layout
-                    token = dict_get(attachment_dict, "initial layout");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "initial layout");
                     initial_layout = JSON_VALUE(token, JSONstring);
 
                     // Get the final layout
-                    token = dict_get(attachment_dict, "final layout");
+                    token = (JSONToken_t *) dict_get(attachment_dict, "final layout");
                     final_layout = JSON_VALUE(token, JSONstring);
                 
                 }
@@ -865,7 +856,7 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                                 p_render_pass->image_attachments[i] = instance->vulkan.swap_chain_image_views[instance->vulkan.image_index];
                         }
 
-                        dict_add(p_render_pass->attachments, name, i);
+                        dict_add(p_render_pass->attachments, name, (void *)i);
                     }
                 }
             }
@@ -911,23 +902,23 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     JSONToken_t* token = 0;
 
                     // Get the name of this subpass
-                    token = dict_get(subpass_dict, "name");
+                    token = (JSONToken_t *) dict_get(subpass_dict, "name");
                     name = JSON_VALUE(token, JSONstring);
 
                     // Get the input attachments
-                    token = dict_get(subpass_dict, "input attachments");
+                    token = (JSONToken_t *) dict_get(subpass_dict, "input attachments");
                     input_attachments = JSON_VALUE(token, JSONarray);
 
                     // Get the color attachments
-                    token = dict_get(subpass_dict, "color attachments");
+                    token = (JSONToken_t *) dict_get(subpass_dict, "color attachments");
                     color_attachments = JSON_VALUE(token, JSONarray);
 
                     // Get the depth attachments
-                    token = dict_get(subpass_dict, "depth attachments");
+                    token = (JSONToken_t *) dict_get(subpass_dict, "depth attachments");
                     depth_attachment = JSON_VALUE(token, JSONstring);
 
                     // Get the preserved attachments
-                    token = dict_get(subpass_dict, "preserved attachments");
+                    token = (JSONToken_t *) dict_get(subpass_dict, "preserved attachments");
                     preserved_attachments = JSON_VALUE(token, JSONarray);
 
                 }
@@ -946,9 +937,9 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                         if (*preserved_attachments)
                             while (preserved_attachments[++preserved_attachment_count]);
                         
-                    subpasses[i].inputAttachmentCount = input_attachment_count;
-                    subpasses[i].colorAttachmentCount = color_attachment_count;
-                    subpasses[i].preserveAttachmentCount = preserved_attachment_count;
+                    subpasses[i].inputAttachmentCount = (u32)input_attachment_count;
+                    subpasses[i].colorAttachmentCount = (u32)color_attachment_count;
+                    subpasses[i].preserveAttachmentCount = (u32)preserved_attachment_count;
                 }
 
                 // Set each attachment
@@ -958,7 +949,7 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     // Iterate over each input attachment
                     for (size_t j = 0; j < input_attachment_count; j++)
                     {
-                        input_attachment_references[j].attachment = dict_get(p_render_pass->attachments, input_attachments[j]);
+                        input_attachment_references[j].attachment = (u32)(size_t) dict_get(p_render_pass->attachments, input_attachments[j]);
                         input_attachment_references[j].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
                     }
@@ -966,15 +957,15 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     // Iterate over each color attachment
                     for (size_t j = 0; j < color_attachment_count; j++)
                     {
-                        color_attachment_references[j].attachment = dict_get(p_render_pass->attachments, color_attachments[j]);
+                        color_attachment_references[j].attachment = (u32)(size_t)dict_get(p_render_pass->attachments, color_attachments[j]);
                         color_attachment_references[j].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     }
 
                     // Iterate over each preserved attachment
                     for (size_t j = 0; j < preserved_attachment_count; j++)
-                        preserved_attachment_references[j].attachment = dict_get(p_render_pass->attachments, preserved_attachments[j]);
+                        preserved_attachment_references[j].attachment = (u32)(size_t)dict_get(p_render_pass->attachments, preserved_attachments[j]);
 
-                    depth_attachment_reference->attachment = dict_get(p_render_pass->attachments, "depth");
+                    depth_attachment_reference->attachment = (u32)(size_t)dict_get(p_render_pass->attachments, "depth");
                     depth_attachment_reference->layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
                 }
@@ -992,22 +983,22 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     // Initialized data
                     subpasses[i].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
-                    subpasses[i].inputAttachmentCount = input_attachment_count;
+                    subpasses[i].inputAttachmentCount = (u32)input_attachment_count;
 
                     if (input_attachment_count)
                         subpasses[i].pInputAttachments = input_attachment_references;
 
-                    subpasses[i].colorAttachmentCount = color_attachment_count;
+                    subpasses[i].colorAttachmentCount = (u32)color_attachment_count;
 
                     if (color_attachment_count)
                         subpasses[i].pColorAttachments = color_attachment_references;
 
                     subpasses[i].pDepthStencilAttachment = depth_attachment_reference;
 
-                    subpasses[i].preserveAttachmentCount = preserved_attachment_count;
+                    subpasses[i].preserveAttachmentCount = (u32)preserved_attachment_count;
 
                     if (preserved_attachment_count)
-                        subpasses[i].pPreserveAttachments = preserved_attachments;
+                        subpasses[i].pPreserveAttachments = (u32*) preserved_attachments;
 
 
                 }
@@ -1027,9 +1018,9 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
         // Populate render pass create info struct
         {
             render_pass_create_info->sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-            render_pass_create_info->attachmentCount = attachment_count;
+            render_pass_create_info->attachmentCount = (u32)attachment_count;
             render_pass_create_info->pAttachments    = attachments;
-            render_pass_create_info->subpassCount    = subpass_count;
+            render_pass_create_info->subpassCount    = (u32)subpass_count;
             render_pass_create_info->pSubpasses      = subpasses;
             render_pass_create_info->dependencyCount = 1;
             render_pass_create_info->pDependencies   = &dependency;
@@ -1061,7 +1052,7 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
         framebuffer_create_info.layers          = 1;
 
         if (vkCreateFramebuffer(instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS)
-            g_print_error("Failed to create framebuffer!\n");
+            goto failed_to_create_render_pass;
     }
 
     return 1;
@@ -1102,11 +1093,6 @@ int           load_render_pass_as_json     ( GXRenderPass_t **pp_render_pass, ch
                     g_print_error("[G10] [Renderer] No \"attachments\" property in render pass JSON, in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
-            
-            // TODO: Categorize
-            no_samples:
-            no_load_operation:
-            no_store_operation:return 0;
         }
 
         // Vulkan errors

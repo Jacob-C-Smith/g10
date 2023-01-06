@@ -2,6 +2,8 @@
 # G10 Engine
 NOTE: This is a hobby project. Please do not use in commercial code until such time as this warning is removed. Thank you.
 
+![Nitric acid plant scene](Nitric%20acid%20plant.png)
+
 ## Intro
 
 Howdy! I'm Jake. This is my project, the G10 game engine. 

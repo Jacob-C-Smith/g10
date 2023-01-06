@@ -260,6 +260,9 @@
     <ClInclude Include="include\G10\GXDiscordIntegration.h">
       <Filter>Header Files\3rd party integration</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO">
@@ -270,5 +273,15 @@
     <None Include="GXLinearA.asm">
       <Filter>Source Files\asm\x64\avx2</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="G10.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -124,7 +124,7 @@ int main ( int argc, const char *argv[] )
     instance->running = true;
 
     // Start the game 
-    g_start_schedule(instance, schedule_name);
+    g_start_schedule(instance, (char *) schedule_name);
 
     // Stop execution
     stop_schedule(instance->context.schedule);

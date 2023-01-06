@@ -170,8 +170,10 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
     // Error checking 
     {
         #ifndef NDEBUG
-            //if(bv_list == (void *)0)
-                //goto no_mem;
+            if ( actor_list        == (void *) 0 )
+                goto no_mem;
+            if ( bounding_volumes  == (void *) 0 )
+                goto no_mem;
         #endif
     }
 
@@ -425,6 +427,9 @@ int     resize_bv                ( GXBV_t  *bv )
         #endif
     }
 
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+
     // Flow control
     {
 
@@ -573,11 +578,11 @@ int     resize_bv                ( GXBV_t  *bv )
 
         // Copy the left node into the parent bounding volume
         {
-            bv->entity = left->entity;
-            bv->left   = left->left;
-            bv->right  = left->right;
-            bv->maximum    = left->maximum;
-            bv->minimum    = left->minimum;
+            bv->entity  = left->entity;
+            bv->left    = left->left;
+            bv->right   = left->right;
+            bv->maximum = left->maximum;
+            bv->minimum = left->minimum;
         }
 
         // Reparent the entity
@@ -687,7 +692,7 @@ int     resize_bv                ( GXBV_t  *bv )
         return 0;
     }
 
-    resize_bv(find_parent_bv(g_get_active_instance(), bv));
+    resize_bv(find_parent_bv(p_instance->context.scene->bvh, bv));
 
     return 0;
 

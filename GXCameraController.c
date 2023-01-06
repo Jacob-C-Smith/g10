@@ -1,6 +1,6 @@
 #include <G10/GXCameraController.h>
 
-double x_orient,
+float  x_orient,
        y_orient,
        h_ang,
        v_ang,
@@ -15,42 +15,43 @@ GXCameraController_t* create_camera_controller       ( void )
     // Check allocaated memory
     {
         #ifndef NDEBUG
-            if(ret==(void *)0)
-                goto noMem;
+            if( ret == (void *) 0 )
+                goto no_mem;
         #endif
     }
 
+    // Success
     return ret;
 
     // Error handling
     {
-        noMem:
-        #ifndef NDEBUG
-            g_print_error("[G10] [Camera controller] Unable to allocate memory for camera controller\n");
-        #endif
-        return 0;
+        no_mem:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Camera controller] Unable to allocate memory for camera controller\n");
+            #endif
+            return 0;
     }
 }
 
 void                  camera_controller_forward      ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == KEYBOARD)
-        y_orient = (state.inputs.key.depressed) ? 1 : 0;
+        y_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 void                  camera_controller_backward     ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == KEYBOARD)
-        y_orient = (state.inputs.key.depressed) ? -1 : 0;
+        y_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
 void                  camera_controller_strafe_left  ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == KEYBOARD)
-        x_orient = (state.inputs.key.depressed) ? -1 : 0;
+        x_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
 void                  camera_controller_strafe_right ( callback_parameter_t state, GXInstance_t* instance )
 {
     if (state.input_state == KEYBOARD)
-        x_orient = (state.inputs.key.depressed) ? 1 : 0;
+        x_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
 void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* instance ) 
@@ -117,7 +118,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         #endif
     }
 
-    ret->spdlim = 0.0025;
+    ret->spdlim = 0.0025f;
 
     // Assign displacement callbacks
     register_bind_callback(forward     , &camera_controller_forward);
@@ -186,14 +187,13 @@ int                   update_controlee_camera        ( void )
 
     // Initialized data
     vec2                  l_orient     = { 0 };
-    vec3                  target       = (vec3){ 0.f, 0.f, 0.f };
     GXCamera_t           *camera       = camera_controller->camera;
 
     camera_controller->orientation = (vec2) { x_orient, y_orient };
 
     l_orient = camera_controller->orientation;
 
-    const float camera_speed = 0.006;
+    const float camera_speed = 0.006f;
 
     if (v_ang > 89.0f)
         v_ang = 89.0f;

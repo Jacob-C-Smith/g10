@@ -73,6 +73,14 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len+1, sizeof(char));
 	
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if ( token_text == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
+
 	// Load the entity file
 	if ( g_load_file(path, token_text, false) == 0 )
 		goto failed_to_load_entity;
@@ -84,6 +92,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 	// Free the object text
 	free(token_text);
 
+	// Success
 	return 1;
 	
 	// Error handling
@@ -167,38 +176,40 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* token_text, size_t len)
 		parse_json(token_text, len, &entity_json);
 
 		// Name
-		token      = dict_get(entity_json, "name");
+		token      = (JSONToken_t *) dict_get(entity_json, "name");
 		name       = JSON_VALUE(token, JSONstring);
 
 		// Part 
-		token      = dict_get(entity_json, "parts");
+		token      = (JSONToken_t *) dict_get(entity_json, "parts");
 		parts      = JSON_VALUE(token, JSONarray);
 
 		// Shader path
-		token      = dict_get(entity_json, "shader");
+		token      = (JSONToken_t *) dict_get(entity_json, "shader");
 		shader     = JSON_VALUE(token, JSONstring);
 
 		// Transform
-		token      = dict_get(entity_json, "transform");
+		token      = (JSONToken_t *) dict_get(entity_json, "transform");
 		transform  = JSON_VALUE(token, JSONobject);
 
 		// Rigidbody
-		token      = dict_get(entity_json, "rigidbody");
+		token      = (JSONToken_t *) dict_get(entity_json, "rigidbody");
 		rigid_body = JSON_VALUE(token, JSONobject);
 
 		// Collider
-		token      = dict_get(entity_json, "collider");
+		token      = (JSONToken_t *) dict_get(entity_json, "collider");
 		collider   = JSON_VALUE(token, JSONobject);
 
 		// AI
-		token      = dict_get(entity_json, "ai");
+		token      = (JSONToken_t *) dict_get(entity_json, "ai");
 		ai         = JSON_VALUE(token, JSONobject);
 
 	}
 
 	// Is there enough information to construct an entity?
 	{
-		// TODO: 
+		// TODO: Fix
+		if ( 0 )
+			goto not_enough_info;
 	}
 
 	// Construct the entity
@@ -488,7 +499,7 @@ int preupdate_entity_ai ( GXEntity_t  *p_entity )
 	return 1;
 }
 
-int update_entity_ai ( GXEntity_t* p_entity)
+int update_entity_ai ( GXEntity_t* p_entity )
 {
 	// Initialized data
 	GXAI_t *p_ai = p_entity->ai;
@@ -497,7 +508,7 @@ int update_entity_ai ( GXEntity_t* p_entity)
 	{
 
 		// Get the callback function associated with the current state 
-		void (*update_ai_function)(GXEntity_t * p_entity) = dict_get(p_ai->states, p_ai->current_state);
+		void (*update_ai_function)(GXEntity_t *) = ( void (*)(GXEntity_t*) ) dict_get(p_ai->states, p_ai->current_state);
 	
 		// Update
 		update_ai_function(p_entity);
@@ -544,7 +555,7 @@ int get_model_matrix(void* ret)
 
 vec3 calculate_force_gravitational ( GXEntity_t * p_entity )
 {
-	vec3 ret = { 0.f, 0.f, -9.8, 0 };
+	vec3 ret = { 0.f, 0.f, -9.8f, 0.f };
 
 	// -50 m / s terminal velocity
 	if (p_entity->rigidbody->velocity.z < -0.55f)
@@ -606,8 +617,8 @@ vec3 calculate_force_normal ( GXEntity_t * p_entity )
 
         float mA = a_min.z,
               MA = a_max.z,
-              mB = b_min.z + ( ( b_max.z - b_min.z ) / 2 ),
-              MB = b_max.z + entity->rigidbody->velocity.z - 0.01;
+              mB = b_min.z + ( ( b_max.z - b_min.z ) / 2.f ),
+              MB = b_max.z + entity->rigidbody->velocity.z - 0.01f;
 
         if ( mA > MB  )
         {
@@ -751,13 +762,13 @@ int draw_entity(GXEntity_t* p_entity)
 		// Update descriptor sets
 		{
 			// TODO: Uncomment when shader sets are done
-			set_shader_camera(p_entity, instance->context.scene->active_camera);
+			set_shader_camera(p_entity);
 		}
 
 		if (p_entity->shader->graphics.push_constant_data)
 		{
 			update_shader_push_constant(p_entity->shader);
-			vkCmdPushConstants(instance->vulkan.command_buffers[instance->vulkan.current_frame], p_entity->shader->graphics.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, p_entity->shader->graphics.push_constant_size, p_entity->shader->graphics.push_constant_data);
+			vkCmdPushConstants(instance->vulkan.command_buffers[instance->vulkan.current_frame], p_entity->shader->graphics.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, (u32) p_entity->shader->graphics.push_constant_size, p_entity->shader->graphics.push_constant_data);
 		}
 
 		for (size_t i = 0; i < p_entity->shader->graphics.set_count; i++)

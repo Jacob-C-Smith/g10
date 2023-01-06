@@ -80,13 +80,13 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
     dict          *instance_json_object          = 0;
     bool           fullscreen                    = false;
     char          *token_text                    = calloc(token_text_len, sizeof(u8)),
-                  *name                          = "Instance",
+                  *name                          = 0,
                   *window_title                  = "G10",
                  **requested_validation_layers   = 0,
                  **requested_instance_extensions = 0,
                  **device_extensions             = 0,
                   *requested_physical_device     = 0,
-                  *max_buffered_frames           = 2,
+                  *max_buffered_frames           = 0,
                   *initial_scene                 = 0,
                   *log_file_i                    = 0,
                   *input                         = 0,
@@ -111,18 +111,19 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Name. Default to "Instance"
         token                 = (JSONToken_t *)dict_get(instance_json_object, "name");
         name                  = JSON_VALUE(token, JSONstring);
+        name                  = (name) ? name : "Instance";
 
         // Window 
         {
             // Set the window width. Default to 800
             token         = (JSONToken_t *)dict_get(instance_json_object, "window width");
-            window_width  = (char *)JSON_VALUE(token, JSONprimative);
-            window_width  = (long) (window_width) ? atol((char*)window_width) : 1280;
+            window_width  = (size_t) (char *)JSON_VALUE(token, JSONprimative);
+            window_width  = (size_t) (window_width) ? atol((char*)window_width) : 1280;
 
             // Set the window height. Default to 600
             token         = (JSONToken_t *)dict_get(instance_json_object, "window height");
-            window_height = (char *)JSON_VALUE(token, JSONprimative);
-            window_height = (size_t) (window_height) ? atol(window_height) : 720;
+            window_height = (size_t)(char *)JSON_VALUE(token, JSONprimative);
+            window_height = (size_t) (window_height) ? atol((char *)window_height) : 720;
 
             // Set the window title. Default to "G10"
             token         = (JSONToken_t *)dict_get(instance_json_object, "window title");
@@ -154,30 +155,30 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             // Set the part cache limit
             token                = (JSONToken_t *)dict_get(instance_json_object, "cache part count");
-            part_cache_count     = JSON_VALUE(token, JSONprimative);
-            part_cache_count     = (part_cache_count) ? atol(part_cache_count) : 128;
+            part_cache_count     = (size_t)(char *)JSON_VALUE(token, JSONprimative);
+            part_cache_count     = (size_t)(part_cache_count) ? atoll((char *)part_cache_count) : 128;
 
             // Set the material cache limit
             token                = (JSONToken_t *)dict_get(instance_json_object, "cache material count");
-            material_cache_count = JSON_VALUE(token, JSONprimative);
-            material_cache_count = (material_cache_count) ? atol(material_cache_count) : 128;
+            material_cache_count = (size_t)(char*)JSON_VALUE(token, JSONprimative);
+            material_cache_count = (size_t)(material_cache_count) ? atoll((char*)material_cache_count) : 128;
 
             // Set the shader cache limit
             token                = (JSONToken_t *)dict_get(instance_json_object, "cache shader count");
-            shader_cache_count   = JSON_VALUE(token, JSONprimative);
-            shader_cache_count   = (shader_cache_count) ? atol(shader_cache_count) : 32;
+            shader_cache_count   = (size_t)(char*)JSON_VALUE(token, JSONprimative);
+            shader_cache_count   = (size_t)(shader_cache_count) ? atoll((char*)shader_cache_count) : 32;
 
             // Set the shader cache limit
             token                = (JSONToken_t *)dict_get(instance_json_object, "cache ai count");
-            ai_cache_count       = JSON_VALUE(token, JSONprimative);
-            ai_cache_count       = (ai_cache_count) ? atol(ai_cache_count) : 16;
+            ai_cache_count       = (size_t)(char*)JSON_VALUE(token, JSONprimative);
+            ai_cache_count       = (size_t)(ai_cache_count) ? atoll((char*)ai_cache_count) : 16;
 
         }
 
         // Loading thread count
         token                = (JSONToken_t *)dict_get(instance_json_object, "loading thread count");
-        loading_thread_count = JSON_VALUE(token, JSONprimative);
-        loading_thread_count = (loading_thread_count) ? atol(loading_thread_count) : 4;
+        loading_thread_count = (size_t)(void *)JSON_VALUE(token, JSONprimative);
+        loading_thread_count = (size_t)(loading_thread_count) ? atoll((const char*)loading_thread_count) : 4;
 
         // Vulkan
         {
@@ -208,15 +209,15 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             // Max buffered frames
             {
-                token                     = (JSONToken_t *)dict_get(instance_json_object, "max buffered frames");
-                max_buffered_frames       = JSON_VALUE(token, JSONprimative);
+                token               = (JSONToken_t *)dict_get(instance_json_object, "max buffered frames");
+                max_buffered_frames = JSON_VALUE(token, JSONprimative);
             }
         }
 
         // Renderer
         {
             token    = (JSONToken_t *)dict_get(instance_json_object, "renderer");
-            renderer = JSON_VALUE(token, JSONstring | JSONobject);
+            renderer = JSON_VALUE(token, (JSONstring | JSONobject));
         }
 
         // Server
@@ -242,6 +243,14 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Get a pointer to the instance
         ret             = *pp_instance;
 
+        // Error check
+        {
+            #ifndef NDEBUG
+                if ( ret == (void *) 0 )
+                    goto no_mem;
+            #endif
+        }
+
         // Set the active instance
         active_instance = ret;
     }
@@ -257,9 +266,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
         // Window initialization
         {
-            ret->window.width        = window_width;
-            ret->window.height       = window_height;
-            ret->vulkan.max_buffered_frames = (long)atoi(max_buffered_frames);
+            ret->window.width               = (u32) window_width;
+            ret->window.height              = (u32) window_height;
+            ret->vulkan.max_buffered_frames = (max_buffered_frames) ? atol(max_buffered_frames) : 2;
         }
 
         // SDL initialization
@@ -267,19 +276,15 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             // Initialize SDL
             if (SDL_Init(SDL_INIT_EVERYTHING))
-                goto noSDL;
+                goto no_sdl2;
 
             // Initialize SDL Image
-            //if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ))
-                
-                // TODO: this needs to be more specific
-                //goto noSDL;
+            if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ))
+                goto no_sdl_image;
 
             // Initialize SDL Networking
             if (SDLNet_Init())
-
-                // TODO: this needs to be more specific
-                goto noSDL;
+                goto no_sdl_network;
 
             // Create the window
             ret->sdl2.window = SDL_CreateWindow(window_title,
@@ -290,7 +295,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             // Check the window
             if (!ret->sdl2.window)
-                goto noWindow;
+                goto no_window;
             
             // Display the window
             SDL_ShowWindow(ret->sdl2.window);
@@ -621,7 +626,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             }
 
             // This prevents divide by zero errors when the game loop starts
-            ret->time.delta_time = 0.001;
+            ret->time.delta_time = 0.001f;
         }
     }
 
@@ -645,28 +650,28 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         {
 
             // SDL failed to initialize
-            noSDL:
+            no_sdl2:
             #ifndef NDEBUG
-                g_print_error("[SDL2] Failed to initialize SDL\n");
+                g_print_error("[SDL2] Failed to initialize SDL\nSDL Says: %s\n", SDL_GetError());
             #endif
             return 0;
 
             // SDL Image failed to initialize
-            noSDLImage:
+            no_sdl_image:
             #ifndef NDEBUG
-                g_print_error("[SDL Image] Failed to initialize SDL Image\n");
+                g_print_error("[SDL Image] Failed to initialize SDL Image\nSDL Says: %s\n", SDL_GetError());
             #endif
             return 0;
 
             // SDL Networking failed to initialize
-            noSDLNetwork:
+            no_sdl_network:
             #ifndef NDEBUG
-                g_print_error("[SDL Networking] Failed to initialize SDL Networking\n");
+                g_print_error("[SDL Networking] Failed to initialize SDL Networking\nSDL Says: %s\n", SDL_GetError());
             #endif
             return 0;
 
             // The SDL window failed to initialize
-            noWindow:
+            no_window:
             #ifndef NDEBUG
                 g_print_error("[SDL2] Failed to create a window\nSDL Says: %s\n", SDL_GetError());
             #endif
@@ -674,6 +679,14 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         
         }
 
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				return 0;
+		}
         // Vulkan errors
         {
             
@@ -694,24 +707,13 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         }
 
         // TOOD: Categorize
-        requested_validation_layers_type_error:
-        requested_physical_device_type_error:
-        failed_to_create_device:
-        requested_load_thread_count_type_error:
-        requested_material_count_type_error:
-        requested_shader_count_type_error:
-        no_swap_chain:
         no_instance:
-        missing_layer:
-        no_debug_messenger: 
         failed_to_load_scene:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to open initial scene in call to function \"%s\"\n", __FUNCTION__);
             #endif 
             return 0;
 
-        no_device:
-        no_surface:
         failed_to_create_sdl2_surface:
             return 0;
         no_initial_scene:
@@ -788,7 +790,7 @@ void          create_logical_device        ( char **required_extension_names )
     for (size_t i = 0; i < 2; i++)
     {
         queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_create_infos[i].queueFamilyIndex = i;
+        queue_create_infos[i].queueFamilyIndex = (u32) i;
         queue_create_infos[i].queueCount = 1;
         queue_create_infos[i].pQueuePriorities = &instance->vulkan.priority;
     }
@@ -832,7 +834,7 @@ void          create_swap_chain            ( void )
     surface_format = instance->vulkan.swap_chain_details.formats[0];
 
     for (size_t i = 0; i < 2; i++)
-        if (instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        if ((instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB) && (instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR))
             surface_format = instance->vulkan.swap_chain_details.formats[i];
     
     extent.width  = instance->window.width;
@@ -1029,14 +1031,14 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
             passes_queue = true;
 
             if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                indices.g = i;
+                indices.g = (u32)i;
             else
                 passes_queue = false;
             
-            vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, instance->vulkan.surface, &present_support);
+            vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, (u32)i, instance->vulkan.surface, &present_support);
 
             if (present_support)
-                indices.p = i;
+                indices.p = (u32)i;
             else
                 passes_queue = false;
 
@@ -1069,14 +1071,14 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
 
         dict_keys(device_extension_name_dict, available_device_extension_names);
 
-        for (size_t i = 0; i < required_extension_names[i]; i++)
+        for (size_t i = 0; required_extension_names[i]; i++)
         {
             for (size_t j = 0; j < device_extension_count; j++)
             {
                 if (strcmp(required_extension_names[i], available_device_extension_names[j]) == 0)
                 {
                     char *t = 0;
-                    dict_pop(device_extension_name_dict, required_extension_names[i], &t);
+                    dict_pop(device_extension_name_dict, required_extension_names[i]);
                     break;
                 }
             }
@@ -1110,7 +1112,7 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
 
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->vulkan.surface, &present_mode_count, instance->vulkan.swap_chain_details.present_modes);
             
-            if ((bool)(present_mode_count) & (bool)(format_count)==true)
+            if ((bool)(present_mode_count) & (bool)((format_count) == true))
             {
                 has_swap_chain = true;
             }
@@ -1139,7 +1141,7 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         // Create a buffer
         if ( vkCreateBuffer( instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
-            g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCTION__);
+            g_print_error("[G10] Failed to create buffer in call to function \"%s\"\n", __FUNCTION__);
 
         vkGetBufferMemoryRequirements(instance->vulkan.device, *buffer, &mem_requirements);
     }
@@ -1371,7 +1373,7 @@ int           g_print_log                  ( const char *const     format, ... )
 
 }
 
-int           g_start_schedule             ( GXInstance_t* instance, const char* name )
+int           g_start_schedule             ( GXInstance_t* instance, char* name )
 {
 
     // Argument check
@@ -1385,7 +1387,7 @@ int           g_start_schedule             ( GXInstance_t* instance, const char*
     }
 
     // Initialized data
-    GXSchedule_t* schedule = dict_get(instance->data.schedules, name);
+    GXSchedule_t* schedule = (GXSchedule_t *) dict_get(instance->data.schedules, (char *)name);
 
     // Error checking
     {
@@ -1700,7 +1702,7 @@ void          g_user_exit                  ( callback_parameter_t input, GXInsta
     instance->running = false;
     if (instance->context.schedule)
     {
-        GXThread_t *main_thread = dict_get(instance->context.schedule->threads, "Main Thread");
+        GXThread_t *main_thread = (GXThread_t *)dict_get(instance->context.schedule->threads, "Main Thread");
 
         main_thread->running    = false;
     }
@@ -1732,7 +1734,7 @@ GXMaterial_t *g_find_material              ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cache.materials, name);
+    return (GXMaterial_t *) dict_get(instance->cache.materials, (char *)name);
 
     // Error handling
     {
@@ -1768,7 +1770,7 @@ GXPart_t     *g_find_part                  ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cache.parts, name);
+    return (GXPart_t *) dict_get(instance->cache.parts, (char *)name);
 
     // Error handling
     {
@@ -1806,7 +1808,7 @@ GXShader_t   *g_find_shader                ( GXInstance_t         *instance, cha
 
     GXShader_t* ret = 0;
 
-    ret = dict_get(instance->cache.shaders, name);
+    ret = (GXShader_t *) dict_get(instance->cache.shaders, (char *)name);
 
     return ret;
 
@@ -1846,7 +1848,7 @@ GXAI_t       *g_find_ai                    ( GXInstance_t         *instance, cha
 
     GXAI_t* ret = 0;
 
-    ret = dict_get(instance->cache.ais, name);
+    ret = (GXAI_t *)dict_get(instance->cache.ais, (char *)name);
 
     return ret;
 

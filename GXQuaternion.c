@@ -9,12 +9,12 @@ quaternion    identity_quaternion()
 // ✅ Creates a quaternion from a vector in euler angles
 quaternion    quaternion_from_euler_angle(vec3       v)
 {
-    float sx = sinf(to_radians(v.x) * 0.5),
-          sy = sinf(to_radians(v.y) * 0.5),
-          sz = sinf(to_radians(v.z) * 0.5),
-          cx = cosf(to_radians(v.x) * 0.5),
-          cy = cosf(to_radians(v.y) * 0.5),
-          cz = cosf(to_radians(v.z) * 0.5);
+    float sx = sinf(to_radians(v.x) * 0.5f),
+          sy = sinf(to_radians(v.y) * 0.5f),
+          sz = sinf(to_radians(v.z) * 0.5f),
+          cx = cosf(to_radians(v.x) * 0.5f),
+          cy = cosf(to_radians(v.y) * 0.5f),
+          cz = cosf(to_radians(v.z) * 0.5f);
 
     return (quaternion) {
         (cz * cx * cy + sz * sx * sy),
@@ -27,9 +27,9 @@ quaternion    quaternion_from_euler_angle(vec3       v)
 vec3          euler_angle_from_quaternion(quaternion q)
 {
     float wD = acosf(q.u / 2),
-          iD = sin(q.i / wD),
-          jD = sin(q.j / wD),
-          kD = sin(q.k / wD);
+          iD = sinf(q.i / wD),
+          jD = sinf(q.j / wD),
+          kD = sinf(q.k / wD);
     return (vec3) { iD, jD, kD };
 }
 

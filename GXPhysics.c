@@ -129,7 +129,7 @@ int detect_collisions  ( GXInstance_t *instance )
                     }
 
                     // Remove the entity
-                    dict_pop_item(collisions_dict, collision->b->name, &trash);
+                    dict_pop(collisions_dict, collision->b->name);
 
                     SDL_UnlockMutex(instance->mutexes.resolve_collision);
 
@@ -197,7 +197,7 @@ int detect_collisions  ( GXInstance_t *instance )
                     if (epbv == 0)
                     {
                         printf("ERROR\n"); 
-                        bv_info(stdout, instance->context.scene->bvh, 0);
+                        bv_info(instance->context.scene->bvh, 0);
                         while (1);
                     }
                     if (epbv->left == entity->collider->bv)

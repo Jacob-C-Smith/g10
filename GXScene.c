@@ -178,23 +178,23 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         parse_json(token_text, len+1, &scene_json_object);
 
         // Set the name
-        token           = dict_get(scene_json_object, "name");
+        token           = (JSONToken_t *) dict_get(scene_json_object, "name");
         name            = JSON_VALUE(token, JSONstring);
 
         // Get array of entity objects and paths
-        token           = dict_get(scene_json_object, "entities");
+        token           = (JSONToken_t *) dict_get(scene_json_object, "entities");
         entities        = JSON_VALUE(token, JSONarray);
 
         // Get an array of camera objects and paths
-        token           = dict_get(scene_json_object, "cameras");
+        token           = (JSONToken_t *) dict_get(scene_json_object, "cameras");
         cameras         = JSON_VALUE(token, JSONarray);
 
         // Get an array of light objects and paths
-        token           = dict_get(scene_json_object, "lights");
+        token           = (JSONToken_t *) dict_get(scene_json_object, "lights");
         lights          = JSON_VALUE(token, JSONarray);
 
         // Get a skybox for the scene
-        token           = dict_get(scene_json_object, "skybox");
+        token           = (JSONToken_t *) dict_get(scene_json_object, "skybox");
         //i_scene->skybox = 0;//TODO: 
     }
 
@@ -240,7 +240,7 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         dict_construct(&p_scene->actors, len);
         dict_construct(&p_scene->ais, len);
 
-        extern int load_entity_from_queue(GXScene_t * scene);
+        extern int load_entity_from_queue(GXInstance_t *instance);
 
         instance->context.loading_scene = p_scene;
 
@@ -258,7 +258,7 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
 
         for (size_t i = 0; i < instance->loading_thread_count; i++)
         {
-            size_t r_stat = 0;
+            int r_stat = 0;
 
             SDL_WaitThread(entity_loading_threads[i]->thread, &r_stat);
         }
@@ -563,7 +563,7 @@ int         scene_info         ( GXScene_t *p_scene )
                  re              = entity_count,
                  fs              = 1,
                  le              = 0;
-    GXEntity_t **entity_names    = calloc(entity_count, sizeof(void *));
+    char       **entity_names    = calloc(entity_count, sizeof(void *));
     GXEntity_t **entity_pointers = calloc(entity_count, sizeof(void *));
 
     while (re >= 10)
@@ -611,7 +611,7 @@ GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[] )
     }
 
     // Success OR null pointer if name is not in scene->entities
-    return dict_get(scene->entities, name);
+    return (GXEntity_t *) dict_get(scene->entities, (char *)name);
 
     // Error handling
     {
@@ -641,7 +641,7 @@ GXCamera_t *get_camera         ( GXScene_t  *scene, const char     name[])
         #endif
     }
 
-    return dict_get(scene->cameras, name);
+    return (GXCamera_t *) dict_get(scene->cameras, (char *)name);
 
     // Error handling
     {
@@ -671,7 +671,7 @@ GXLight_t  *get_light          ( GXScene_t  *scene, const char     name[])
         #endif
     }
 
-    return dict_get(scene->lights, name);
+    return (GXLight_t *) dict_get(scene->lights, (char *) name);
 
     // Error handling
     {
@@ -702,7 +702,7 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
     }
 
     // Initialized data
-    GXCamera_t *c = dict_get(scene->cameras, name);
+    GXCamera_t *c = (GXCamera_t *) dict_get(scene->cameras, (char *) name);
 
     // Is the requested camera real?
     if (c)
