@@ -7,7 +7,7 @@
 #include <time.h>
 
 void DISCORD_CALLBACK OnUserUpdated(void* data)
-{
+{   
     GXInstance_t* p_instance = g_get_active_instance();
 
     struct DiscordUser user;
@@ -97,5 +97,4 @@ int discord_callbacks ( GXInstance_t *instance )
 		}
 	}
 }
-
 #endif

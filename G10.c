@@ -90,6 +90,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                   *initial_scene                 = 0,
                   *log_file_i                    = 0,
                   *input                         = 0,
+                  *audio                         = 0,
                   *server                        = 0,
                   *renderer                      = 0,
                  **schedules                     = 0;
@@ -261,6 +262,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             ret->window.height       = window_height;
             ret->vulkan.max_buffered_frames = (long)atoi(max_buffered_frames);
         }
+
+        // FMOD initialization
+        
 
         // SDL initialization
         {
@@ -550,6 +554,10 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             // Load an input set
             if (input)
                 load_input(&ret->input, input);
+
+            //Load audio
+            if (audio) {} //Coming soon...
+                
 
             // Load schedules
             if(schedules) {
@@ -1147,7 +1155,7 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         // Allocate memory for the buffer
         if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
-            g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCTION__);
+            g_print_error("[G10] Failed to allocate memory to buffer in call to function \"%s\"\n", __FUNCTION__);
 
         // Bind the buffer to the device
         vkBindBufferMemory(instance->vulkan.device, *buffer, *buffer_memory, 0);
@@ -1194,7 +1202,7 @@ size_t        g_load_file                  ( const char           *path,     voi
         {
             noPath:
             #ifndef NDEBUG
-                g_print_error("[G10] Null path provided to funciton \"%s\n", __FUNCTION__);
+                g_print_error("[G10] Null path provided to function \"%s\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1711,6 +1719,22 @@ void          g_toggle_mouse_lock          ( callback_parameter_t state, GXInsta
 
     SDL_Delay(333);
 }
+
+void          g_play_sound                 ( callback_parameter_t state, GXInstance_t *instance )
+{
+    GXSound_t* sampleSound = NULL;
+    static bool played = false;
+    if (played == false)
+    {
+        load_sound(&sampleSound, "G10/ding.mp3");
+        play_sound(sampleSound, false);
+        played = true;
+    }
+
+
+
+}
+
  
 GXMaterial_t *g_find_material              ( GXInstance_t         *instance, char         *name )
 {
@@ -1954,6 +1978,14 @@ int           g_exit                       ( GXInstance_t         *instance )
         vkDestroyDevice(instance->vulkan.device, (void*)0);
         vkDestroySurfaceKHR(instance->vulkan.instance, instance->vulkan.surface, (void*)0);
         vkDestroyInstance(instance->vulkan.instance, (void*)0);
+    }
+
+    //FMOD Cleanup
+    {
+        //Replace this with a struct member later?
+        //Not thread-safe
+        FMOD_RESULT fmodResult = FMOD_System_Release(instance->fmod.system);
+
     }
 
     // SDL Cleanup

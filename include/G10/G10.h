@@ -1,9 +1,14 @@
 ﻿ #pragma once
 //#define BUILD_G10_WITH_DISCORD
+#define BUILD_G10_WITH_FMOD
 #define BUILD_G10_WITH_ANSI_COLOR
 
 #include <stdio.h>
 #include <stdbool.h>
+
+#ifdef BUILD_G10_WITH_FMOD
+#include <FMOD-core/fmod.h>
+#endif
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_sdk_platform.h>
@@ -24,6 +29,7 @@
 #include <G10/GXMaterial.h>
 #include <G10/GXCollider.h>
 #include <G10/GXServer.h>
+#include <G10/GXAudio.h>
 
 #ifdef BUILD_G10_WITH_DISCORD
 #include <G10/GXDiscordIntegration.h>
@@ -42,6 +48,7 @@ struct GXInstance_s
     // Name 
     char                     *name;
     
+
     // SDL2 
     struct {
         SDL_Window               *window;
@@ -171,6 +178,18 @@ struct GXInstance_s
     }           discord_integration;
 
     #endif
+
+
+    // FMOD Integratdion
+#ifdef BUILD_G10_WITH_FMOD
+
+    struct {
+        FMOD_SYSTEM* system;
+
+
+    }           fmod;
+
+#endif
 
     // Input 
     GXInput_t                *input;
@@ -354,9 +373,10 @@ DLLEXPORT GXPart_t     *g_find_part           ( GXInstance_t        *instance, c
 DLLEXPORT GXShader_t   *g_find_shader         ( GXInstance_t        *instance, char         *name );
 DLLEXPORT GXAI_t       *g_find_ai             ( GXInstance_t        *instance, char         *name );
 
-// User opertations
+// User operations
 DLLEXPORT void          g_user_exit           ( callback_parameter_t input, GXInstance_t    *instance );
 DLLEXPORT void          g_toggle_mouse_lock   ( callback_parameter_t state, GXInstance_t    *instance );
+DLLEXPORT void          g_play_sound          ( callback_parameter_t state, GXInstance_t    *instance );
 
 // Conversions
 

@@ -302,7 +302,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../JSON/include;../Dictionary/include;../Queue/include;../Stack/include;$(VK_SDK_PATH)/Include;./include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)/Include;./include;../Dictionary/include;../discord_game_sdk/include;../queue/include/</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PrecompiledHeaderFile />
@@ -315,7 +315,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;fmod_vc.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Server|x64'">

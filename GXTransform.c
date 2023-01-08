@@ -44,7 +44,7 @@ int  create_transform        ( GXTransform_t **pp_transform )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to funciton \"%s\"\n", __FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				return 0;
 		}
@@ -545,7 +545,7 @@ int  rotate_about_quaternion ( GXTransform_t  *p_transform , quaternion  axis,  
     {
         no_transform:
         #ifndef NDEBUG
-            g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to funciton \"%s\"\n",__FUNCTION__);
+            g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n",__FUNCTION__);
         #endif
         return 0;
     }

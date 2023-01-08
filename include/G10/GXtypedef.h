@@ -181,6 +181,11 @@ typedef struct GXParticle_s GXParticle_t;
 struct GXAI_s;
 typedef struct GXAI_s GXAI_t;
 
+// Audio
+
+struct GXAudio_s;
+typedef struct GXAudio_s GXAudio_t;
+
 // Sound
 struct GXSound_s;
 typedef struct GXSound_s GXSound_t;

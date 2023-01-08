@@ -62,7 +62,7 @@ void* task_function_pointers[TASK_COUNT] = {
 	&server_serialize,
 	&server_process,
 	&server_wait, 
-	0,	// process_audio
+	&process_audio,
 	#ifdef BUILD_G10_WITH_DISCORD
 	&discord_callbacks,
 	#else
