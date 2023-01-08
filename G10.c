@@ -1151,7 +1151,7 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         // Allocate memory for the buffer
         if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
-            g_print_error("[G10] Failed to allocate memory to buffer in call to funciton \"%s\"\n", __FUNCTION__);
+            g_print_error("[G10] Failed to allocate memory to buffer in call to function \"%s\"\n", __FUNCTION__);
 
         // Bind the buffer to the device
         vkBindBufferMemory(instance->vulkan.device, *buffer, *buffer_memory, 0);
@@ -1198,7 +1198,7 @@ size_t        g_load_file                  ( const char           *path,     voi
         {
             noPath:
             #ifndef NDEBUG
-                g_print_error("[G10] Null path provided to funciton \"%s\n", __FUNCTION__);
+                g_print_error("[G10] Null path provided to function \"%s\n", __FUNCTION__);
             #endif
             return 0;
         }
@@ -1701,8 +1701,15 @@ void          g_toggle_mouse_lock          ( callback_parameter_t state, GXInsta
 
 void          g_play_sound                 ( callback_parameter_t state, GXInstance_t *instance )
 {
-    GXSound_t** sampleSound = NULL;
-    load_sound(sampleSound, )
+    GXSound_t* sampleSound = NULL;
+    static bool played = false;
+    if (played == false)
+    {
+        load_sound(&sampleSound, "G10/ding.mp3");
+        play_sound(sampleSound, false);
+        played = true;
+    }
+
 
 
 }

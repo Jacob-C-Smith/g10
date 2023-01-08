@@ -308,7 +308,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VK_SDK_PATH)/Lib;./lib/;../discord_game_sdk/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;SDL2_net.lib;SDL2_image.lib;SDL2_mixer.lib;discord_game_sdk.dll.lib;JSON.lib;Dictionary.lib;Queue.lib;fmod_vc.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Server|x64'">

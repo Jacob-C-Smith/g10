@@ -992,13 +992,13 @@ int          register_bind_callback    ( GXBind_t     *bind    , void           
     {
         no_bind:
         #ifndef NDEBUG
-            g_print_error("[G10] [Input] Null pointer provided for \"bind\" in call to funciton \"%s\"\n",__FUNCTION__);
+            g_print_error("[G10] [Input] Null pointer provided for \"bind\" in call to function \"%s\"\n",__FUNCTION__);
         #endif
         return 0;
 
         no_function_pointer:
         #ifndef NDEBUG
-            g_print_warning("[G10] [Input] Null pointer provided for \"function_pointer\" in call to funciton \"%s\"\n",__FUNCTION__);
+            g_print_warning("[G10] [Input] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n",__FUNCTION__);
         #endif
         return 0;
     }
@@ -1406,7 +1406,7 @@ int input_info ( GXInput_t *input )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for \"input\" in call to funciton \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }

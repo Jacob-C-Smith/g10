@@ -48,16 +48,6 @@ struct GXInstance_s
     // Name 
     char                     *name;
     
-#ifdef BUILD_G10_WITH_FMOD
-
-    // FMOD
-    struct {
-        FMOD_SYSTEM*             *system;
-
-
-    }           fmod;
-
-#endif
 
     // SDL2 
     struct {
@@ -188,6 +178,18 @@ struct GXInstance_s
     }           discord_integration;
 
     #endif
+
+
+    // FMOD Integratdion
+#ifdef BUILD_G10_WITH_FMOD
+
+    struct {
+        FMOD_SYSTEM* system;
+
+
+    }           fmod;
+
+#endif
 
     // Input 
     GXInput_t                *input;

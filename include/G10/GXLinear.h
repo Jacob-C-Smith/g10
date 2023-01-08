@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-// TODO: Phase out all of these functions in favor of SIMD accelerated funcitons.
+// TODO: Phase out all of these functions in favor of SIMD accelerated functions.
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
