@@ -7,6 +7,7 @@ int* channels = 0;
 int	current_channel = 0;
 
 int init_audio(void)
+
 {
 	GXInstance_t* instance = g_get_active_instance();
 	FMOD_RESULT r = FMOD_System_Create(&(instance->fmod.system), FMOD_VERSION);
@@ -159,6 +160,4 @@ int destroy_sound(GXSound_t* p_sound)
 
 	}
 }
-
-
 #endif

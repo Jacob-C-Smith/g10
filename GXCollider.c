@@ -72,18 +72,18 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
                  **max           = 0,
                  **min           = 0;
 
+    parse_json(token_text, len, &collider_json);
+
     {
         JSONToken_t *token = 0;
 
-        parse_json(token_text, len, &collider_json);
-
-        token = dict_get(collider_json, "type");
+        token = (JSONToken_t *) dict_get(collider_json, "type");
         type  = JSON_VALUE(token, JSONstring);
 
-        token = dict_get(collider_json, "max");
+        token = (JSONToken_t *) dict_get(collider_json, "max");
         max   = JSON_VALUE(token, JSONarray);
 
-        token = dict_get(collider_json, "min");
+        token = (JSONToken_t *) dict_get(collider_json, "min");
         min   = JSON_VALUE(token, JSONarray);
 
     }
@@ -92,8 +92,8 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
 
     i_collider = *collider;
 
-    i_collider->aabb_max = (vec3){ atof(max[0]), atof(max[1]), atof(max[2]), 0 };
-    i_collider->aabb_min = (vec3){ atof(min[0]), atof(min[1]), atof(min[2]), 0 };
+    i_collider->aabb_max = (vec3){ (float) atof(max[0]), (float) atof(max[1]), (float) atof(max[2]) };
+    i_collider->aabb_min = (vec3){ (float) atof(min[0]), (float) atof(min[1]), (float) atof(min[2]) };
 
     i_collider->type = (collider_type_t)dict_get(collider_type_dict, type);
 

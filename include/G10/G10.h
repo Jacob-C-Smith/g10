@@ -1,10 +1,10 @@
 ﻿ #pragma once
 //#define BUILD_G10_WITH_DISCORD
 #define BUILD_G10_WITH_FMOD
+#define BUILD_G10_WITH_ANSI_COLOR
 
 #include <stdio.h>
 #include <stdbool.h>
-#define HAVE_M_PI
 
 #ifdef BUILD_G10_WITH_FMOD
 #include <FMOD-core/fmod.h>

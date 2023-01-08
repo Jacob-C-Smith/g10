@@ -110,73 +110,73 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         JSONToken_t* token = 0;
         
         // Name. Default to "Instance"
-        token                 = dict_get(instance_json_object, "name");
+        token                 = (JSONToken_t *)dict_get(instance_json_object, "name");
         name                  = JSON_VALUE(token, JSONstring);
 
         // Window 
         {
             // Set the window width. Default to 800
-            token         = dict_get(instance_json_object, "window width");
-            window_width  = JSON_VALUE(token, JSONprimative);
+            token         = (JSONToken_t *)dict_get(instance_json_object, "window width");
+            window_width  = (char *)JSON_VALUE(token, JSONprimative);
             window_width  = (long) (window_width) ? atol((char*)window_width) : 1280;
 
             // Set the window height. Default to 600
-            token         = dict_get(instance_json_object, "window height");
-            window_height = JSON_VALUE(token, JSONprimative);
-            window_height = (long) (window_height) ? atol(window_height) : 720;
+            token         = (JSONToken_t *)dict_get(instance_json_object, "window height");
+            window_height = (char *)JSON_VALUE(token, JSONprimative);
+            window_height = (size_t) (window_height) ? atol(window_height) : 720;
 
             // Set the window title. Default to "G10"
-            token         = dict_get(instance_json_object, "window title");
-            window_title  = JSON_VALUE(token, JSONstring);
+            token         = (JSONToken_t *)dict_get(instance_json_object, "window title");
+            window_title  = (char *)JSON_VALUE(token, JSONstring);
             window_title  = (window_title) ? window_title : "G10";
 
             // Fullscreen? Default to false
-            token         = dict_get(instance_json_object, "fullscreen");
-            fullscreen    = JSON_VALUE(token, JSONprimative);
+            token         = (JSONToken_t *)dict_get(instance_json_object, "fullscreen");
+            fullscreen    = (bool)JSON_VALUE(token, JSONprimative);
 
         }
         
         // Input
         {
-            token = dict_get(instance_json_object, "input");
+            token = (JSONToken_t *)dict_get(instance_json_object, "input");
             input = (token) ? token->value.n_where : 0;
         }
 
         // Log file
-        token                = dict_get(instance_json_object, "log file");
+        token                = (JSONToken_t *)dict_get(instance_json_object, "log file");
         log_file_i           = JSON_VALUE(token, JSONstring);
 
         // Initial scene path
-        token                = dict_get(instance_json_object, "initial scene");
+        token                = (JSONToken_t *)dict_get(instance_json_object, "initial scene");
         initial_scene        = JSON_VALUE(token, JSONstring);
 
         // Caches
         {
 
             // Set the part cache limit
-            token                = dict_get(instance_json_object, "cache part count");
+            token                = (JSONToken_t *)dict_get(instance_json_object, "cache part count");
             part_cache_count     = JSON_VALUE(token, JSONprimative);
             part_cache_count     = (part_cache_count) ? atol(part_cache_count) : 128;
 
             // Set the material cache limit
-            token                = dict_get(instance_json_object, "cache material count");
+            token                = (JSONToken_t *)dict_get(instance_json_object, "cache material count");
             material_cache_count = JSON_VALUE(token, JSONprimative);
             material_cache_count = (material_cache_count) ? atol(material_cache_count) : 128;
 
             // Set the shader cache limit
-            token                = dict_get(instance_json_object, "cache shader count");
+            token                = (JSONToken_t *)dict_get(instance_json_object, "cache shader count");
             shader_cache_count   = JSON_VALUE(token, JSONprimative);
             shader_cache_count   = (shader_cache_count) ? atol(shader_cache_count) : 32;
 
             // Set the shader cache limit
-            token                = dict_get(instance_json_object, "cache ai count");
+            token                = (JSONToken_t *)dict_get(instance_json_object, "cache ai count");
             ai_cache_count       = JSON_VALUE(token, JSONprimative);
             ai_cache_count       = (ai_cache_count) ? atol(ai_cache_count) : 16;
 
         }
 
         // Loading thread count
-        token                = dict_get(instance_json_object, "loading thread count");
+        token                = (JSONToken_t *)dict_get(instance_json_object, "loading thread count");
         loading_thread_count = JSON_VALUE(token, JSONprimative);
         loading_thread_count = (loading_thread_count) ? atol(loading_thread_count) : 4;
 
@@ -185,50 +185,50 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
             // Validation layers
             {
-                token                       = dict_get(instance_json_object, "vulkan validation layers");
+                token                       = (JSONToken_t *)dict_get(instance_json_object, "vulkan validation layers");
                 requested_validation_layers = JSON_VALUE(token, JSONarray);
             }
 
             // Requested instance extensions
             {
-                token                         = dict_get(instance_json_object, "vulkan instance extensions");
+                token                         = (JSONToken_t *)dict_get(instance_json_object, "vulkan instance extensions");
                 requested_instance_extensions = JSON_VALUE(token, JSONarray);
             }
 
             // Requested device extensions
             {
-                token             = dict_get(instance_json_object, "vulkan device extensions");
+                token             = (JSONToken_t *)dict_get(instance_json_object, "vulkan device extensions");
                 device_extensions = JSON_VALUE(token, JSONarray);
             }
 
             // Physical device
             {
-                token                     = dict_get(instance_json_object, "vulkan physical device");
+                token                     = (JSONToken_t *)dict_get(instance_json_object, "vulkan physical device");
                 requested_physical_device = JSON_VALUE(token, JSONstring);
             }
 
             // Max buffered frames
             {
-                token                     = dict_get(instance_json_object, "max buffered frames");
+                token                     = (JSONToken_t *)dict_get(instance_json_object, "max buffered frames");
                 max_buffered_frames       = JSON_VALUE(token, JSONprimative);
             }
         }
 
         // Renderer
         {
-            token    = dict_get(instance_json_object, "renderer");
+            token    = (JSONToken_t *)dict_get(instance_json_object, "renderer");
             renderer = JSON_VALUE(token, JSONstring | JSONobject);
         }
 
         // Server
         {
-            token  = dict_get(instance_json_object, "server");
+            token  = (JSONToken_t *)dict_get(instance_json_object, "server");
             server = JSON_VALUE(token, JSONobject);
         }
 
         // Schedules
         {
-            token     = dict_get(instance_json_object, "schedules");
+            token     = (JSONToken_t *)dict_get(instance_json_object, "schedules");
             schedules = JSON_VALUE(token, JSONarray);
         }
 
@@ -505,6 +505,18 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 }
             }
 
+            // 3rd party subsystem integration
+            {
+
+                // Discord
+                #ifdef BUILD_G10_WITH_DISCORD
+                {
+                    extern void init_discord_integration(void);
+                    init_discord_integration();
+                }
+                #endif
+            }
+
             // Load a renderer
             if (renderer)
             {
@@ -690,16 +702,11 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         }
 
         // TOOD: Categorize
-        requested_validation_layers_type_error:
-        requested_physical_device_type_error:
-        failed_to_create_device:
-        requested_load_thread_count_type_error:
-        requested_material_count_type_error:
-        requested_shader_count_type_error:
-        no_swap_chain:
-        no_instance:
-        missing_layer:
-        no_debug_messenger: 
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to allocate an instance in call to function \"%s\"\n", __FUNCTION__);
+                #endif 
+                return 0;
         failed_to_load_scene:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to open initial scene in call to function \"%s\"\n", __FUNCTION__);
@@ -1107,10 +1114,7 @@ int           check_vulkan_device          ( GXInstance_t         *instance, VkP
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, instance->vulkan.surface, &present_mode_count, instance->vulkan.swap_chain_details.present_modes);
             
             if ((bool)(present_mode_count) & (bool)(format_count)==true)
-            {
                 has_swap_chain = true;
-            }
-
         }
     }
 
@@ -1246,13 +1250,18 @@ int           g_print_error                ( const char *const     format, ... )
     va_list aList;
     va_start(aList, format);
 
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     // Uses ANSI terminal escapes to set the color to red, 
     // print the message, and restore the color.
     printf("\033[91m");
+    #endif
 
     // TODO: Configure error messages to write to other files?
     vfprintf(log_file, format, aList);
+    
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     printf("\033[0m");
+    #endif
 
     va_end(aList);
 
@@ -1287,11 +1296,17 @@ int           g_print_warning              ( const char *const     format, ... )
     va_list aList;
     va_start(aList, format);
 
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     // Uses ANSI terminal escapes to set the color to yellow, 
     // print the message, and restore the color.
     printf("\033[93m");
+    #endif
+
     vfprintf(log_file, format, aList);
+
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     printf("\033[0m");
+    #endif
 
     va_end(aList);
 
@@ -1324,11 +1339,17 @@ int           g_print_log                  ( const char *const     format, ... )
     va_list aList;
     va_start(aList, format);
 
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     // Uses ANSI terminal escapes to set the color to light blue, 
     // print the message, and restore the color.
     printf("\033[94m");
+    #endif
+
     vfprintf(log_file, format, aList);
+    
+    #ifdef BUILD_G10_WITH_ANSI_COLOR
     printf("\033[0m");
+    #endif
 
     va_end(aList);
     va_end(aList);
@@ -1364,7 +1385,7 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
     }
 
     // Initialized data
-    GXSchedule_t* schedule = dict_get(instance->data.schedules, name);
+    GXSchedule_t* schedule = (GXSchedule_t *) dict_get(instance->data.schedules, (char *)name);
 
     // Error checking
     {
@@ -1679,7 +1700,7 @@ void          g_user_exit                  ( callback_parameter_t input, GXInsta
     instance->running = false;
     if (instance->context.schedule)
     {
-        GXThread_t *main_thread = dict_get(instance->context.schedule->threads, "Main Thread");
+        GXThread_t *main_thread = (GXThread_t *)dict_get(instance->context.schedule->threads, "Main Thread");
 
         main_thread->running    = false;
     }
@@ -1727,7 +1748,7 @@ GXMaterial_t *g_find_material              ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cache.materials, name);
+    return (GXMaterial_t *) dict_get(instance->cache.materials, (char *)name);
 
     // Error handling
     {
@@ -1763,7 +1784,7 @@ GXPart_t     *g_find_part                  ( GXInstance_t         *instance, cha
         #endif
     }
 
-    return dict_get(instance->cache.parts, name);
+    return (GXPart_t *) dict_get(instance->cache.parts, (char *)name);
 
     // Error handling
     {
@@ -1801,7 +1822,7 @@ GXShader_t   *g_find_shader                ( GXInstance_t         *instance, cha
 
     GXShader_t* ret = 0;
 
-    ret = dict_get(instance->cache.shaders, name);
+    ret = (GXShader_t *) dict_get(instance->cache.shaders, (char *)name);
 
     return ret;
 
@@ -1841,7 +1862,7 @@ GXAI_t       *g_find_ai                    ( GXInstance_t         *instance, cha
 
     GXAI_t* ret = 0;
 
-    ret = dict_get(instance->cache.ais, name);
+    ret = (GXAI_t *)dict_get(instance->cache.ais, (char *)name);
 
     return ret;
 

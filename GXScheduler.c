@@ -6,6 +6,9 @@
 #include <G10/GXDiscordIntegration.h>
 #endif
 
+// Forward declarations
+int load_task_as_json ( GXTask_t **pp_task, char *token_text, size_t len );
+
 dict* scheduler_tasks = 0;
 
 char* task_names[TASK_COUNT] = {
@@ -356,21 +359,21 @@ int load_schedule_as_json  ( GXSchedule_t **pp_schedule, char *token_text, size_
 	size_t   thread_count        = 0;
 	char   **thread_json_objects = 0;
 
+	// Parse the JSON into a dictionary
+	parse_json(token_text, len, &scheduler_json);
+
 	// Parse the JSON
 	{
 
 		// Initiaized data
 		JSONToken_t *token = 0;
 
-		// Parse the JSON into a dictionary
-		parse_json(token_text, len, &scheduler_json);
-
 		// Get the name
-		token               = dict_get(scheduler_json, "name");
+		token               = (JSONToken_t *) dict_get(scheduler_json, "name");
 		name                = JSON_VALUE(token, JSONstring);
 
 		// Get the threads
-		token               = dict_get(scheduler_json, "threads");
+		token               = (JSONToken_t *) dict_get(scheduler_json, "threads");
 		thread_json_objects = JSON_VALUE(token, JSONarray);
 
 	}
@@ -518,7 +521,7 @@ int client_work            ( GXClient_t    *p_client )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = (GXThread_t *) dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -535,7 +538,7 @@ int client_work            ( GXClient_t    *p_client )
 			}
 
 			// Declare the task function
-			int (*function_pointer)(GXClient_t*) = thread->tasks[i]->function_pointer;
+			int (*function_pointer)(GXClient_t*) = (int (*)(GXClient_t*))thread->tasks[i]->function_pointer;
 
 			// Run the function
 			if(function_pointer)
@@ -579,7 +582,7 @@ int work                   ( GXThread_t    *thread )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = (GXThread_t *) dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -633,7 +636,7 @@ int main_work              ( GXThread_t    *thread )
 			{
 
 				// Initialized data
-				GXThread_t *wait_thread = dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
+				GXThread_t *wait_thread = (GXThread_t *) dict_get(instance->context.schedule->threads, thread->tasks[i]->wait_thread);
 				GXTask_t   *wait_task   = 0;
 				size_t      v           = 0;
 
@@ -715,7 +718,7 @@ int start_schedule         ( GXSchedule_t  *p_schedule)
 	}
 
 	// Get the main thread
-	GXThread_t* main_thread = dict_get(p_schedule->threads, "Main Thread");
+	GXThread_t* main_thread = (GXThread_t *) dict_get(p_schedule->threads, "Main Thread");
 
 	// Set the thread to run
 	main_thread->running = true;
@@ -737,8 +740,8 @@ int stop_schedule          ( GXSchedule_t  *schedule )
 	
 	// Initialized data
 	GXInstance_t *instance              = g_get_active_instance();
-	size_t        schedule_thread_count = dict_values(schedule->threads, 0),
-		          r_stat                = 0;
+	size_t        schedule_thread_count = dict_values(schedule->threads, 0);
+	int           r_stat                = 0;
 	GXThread_t  **schedule_threads      = calloc(schedule_thread_count+1, sizeof(void *));
 
 	// Get a list of threads
@@ -829,21 +832,21 @@ int load_thread_as_json    ( GXThread_t   **pp_thread   , char *token_text, size
 	size_t   task_count  = 0;
 	char   **tasks       = 0;
 
+	// Parse the JSON into a dictionary
+	parse_json(token_text, len, &thread_json);
+
 	// Parse the JSON
 	{
 
 		// Initiaized data
 		JSONToken_t *token = 0;
 
-		// Parse the JSON into a dictionary
-		parse_json(token_text, len, &thread_json);
-
 		// Get the name
-		token = dict_get(thread_json, "name");
+		token = (JSONToken_t *) dict_get(thread_json, "name");
 		name  = JSON_VALUE(token, JSONstring);
 
 		// Get the tasks
-		token = dict_get(thread_json, "tasks");
+		token = (JSONToken_t *) dict_get(thread_json, "tasks");
 		tasks = JSON_VALUE(token, JSONarray);
 
 	}
@@ -935,13 +938,13 @@ int load_task_as_json      ( GXTask_t     **pp_task     , char *token_text, size
 		// Initialized data
 		JSONToken_t* token = 0;
 		
-		token       = dict_get(task_json, "task");
+		token       = (JSONToken_t *) dict_get(task_json, "task");
 		task_name   = JSON_VALUE(token, JSONstring);
 
-		token       = dict_get(task_json, "wait thread");
+		token       = (JSONToken_t *) dict_get(task_json, "wait thread");
 		wait_thread = JSON_VALUE(token, JSONstring);
 
-		token       = dict_get(task_json, "wait task");
+		token       = (JSONToken_t *) dict_get(task_json, "wait task");
 		wait_task   = JSON_VALUE(token, JSONstring);
 	}
 
@@ -998,7 +1001,7 @@ int load_task_as_json      ( GXTask_t     **pp_task     , char *token_text, size
 	}
 	
 	// Get a function pointer from the list
-	p_task->function_pointer = dict_get(scheduler_tasks, p_task->name);
+	p_task->function_pointer = (int (*)(GXInstance_t *)) dict_get(scheduler_tasks, p_task->name);
 
 	// Success
 	return 1;

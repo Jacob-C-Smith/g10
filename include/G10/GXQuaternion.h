@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <stdio.h>
-#include <math.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>

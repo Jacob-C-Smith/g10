@@ -137,7 +137,7 @@ size_t            format_type_sizes              [FORMATS_COUNT] = {
     32,
     32
 };
-void            **push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] = {
+void             *push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] = {
     &get_camera_position,
     &get_model_matrix
 };
@@ -355,34 +355,34 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
         parse_json(token_text, token_text_len, &json_data);
 
-        token                = dict_get(json_data, "name");
+        token                = (JSONToken_t *) dict_get(json_data, "name");
         name                 = JSON_VALUE(token, JSONstring);
 
-        token                = dict_get(json_data, "vertex shader path");
+        token                = (JSONToken_t *) dict_get(json_data, "vertex shader path");
         vertex_shader_path   = JSON_VALUE(token, JSONstring);
 
-        token                = dict_get(json_data, "geometry shader path");
+        token                = (JSONToken_t *) dict_get(json_data, "geometry shader path");
         geometry_shader_path = JSON_VALUE(token, JSONstring);
 
-        token                = dict_get(json_data, "fragment shader path");
+        token                = (JSONToken_t *) dict_get(json_data, "fragment shader path");
         fragment_shader_path = JSON_VALUE(token, JSONstring);
 
-        token                = dict_get(json_data, "compute shader path");
+        token                = (JSONToken_t *) dict_get(json_data, "compute shader path");
         compute_shader_path = JSON_VALUE(token, JSONstring);
 
-        token                = dict_get(json_data, "in");
+        token                = (JSONToken_t *) dict_get(json_data, "in");
         vertex_groups        = JSON_VALUE(token, JSONarray);
 
-        token                = dict_get(json_data, "attachments");
+        token                = (JSONToken_t *) dict_get(json_data, "attachments");
         attachments          = JSON_VALUE(token, JSONarray);
 
-        token                = dict_get(json_data, "sets");
+        token                = (JSONToken_t *) dict_get(json_data, "sets");
         sets                 = JSON_VALUE(token, JSONarray);
 
-        token                = dict_get(json_data, "push constant");
+        token                = (JSONToken_t *) dict_get(json_data, "push constant");
         push_constant_text   = JSON_VALUE(token, JSONobject);
 
-        token                = dict_get(json_data, "rasterizer");
+        token                = (JSONToken_t *) dict_get(json_data, "rasterizer");
         rasterizer_json      = JSON_VALUE(token, JSONobject);
     }
     
@@ -598,10 +598,10 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         // Parse the JSON objects into a dictionary
                         parse_json(vertex_groups[i], strlen(vertex_groups[i]), &vertex_group);
 
-                        token    = dict_get(vertex_group, "type");
+                        token    = (JSONToken_t *) dict_get(vertex_group, "type");
                         type     = JSON_VALUE(token, JSONstring);
 
-                        token    = dict_get(vertex_group, "location");
+                        token    = (JSONToken_t *) dict_get(vertex_group, "location");
                         location = JSON_VALUE(token, JSONprimative);
 
                         // Construct a vertex input attribute
@@ -609,7 +609,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             vertex_input_attribute_descriptions[i].binding  = 0;
                             vertex_input_attribute_descriptions[i].location = atoi(location);
                             vertex_input_attribute_descriptions[i].format   = (VkFormat)dict_get(format_types, type);
-                            vertex_input_attribute_descriptions[i].offset   = stride;
+                            vertex_input_attribute_descriptions[i].offset   = (u32)stride;
                         }
 
                         stride += (size_t) dict_get(format_sizes, type);
@@ -620,7 +620,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     {
                         binding_description->binding   = 0;
                         binding_description->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-                        binding_description->stride    = stride;
+                        binding_description->stride    = (u32)stride;
                         binding_description_count      = 1;
                     }
                 }
@@ -628,7 +628,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 // Set up the vertex input 
                 {
                     vertex_input_info_create_info.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                    vertex_input_info_create_info.vertexBindingDescriptionCount   = binding_description_count;
+                    vertex_input_info_create_info.vertexBindingDescriptionCount   = (u32)binding_description_count;
                     vertex_input_info_create_info.pVertexBindingDescriptions      = binding_description;
                     vertex_input_info_create_info.vertexAttributeDescriptionCount = vertex_group_count;
                     vertex_input_info_create_info.pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
@@ -647,10 +647,10 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                 // Set up the viewport
                 {
-                    viewport.x = 0.f;
-                    viewport.y = 0.f;
-                    viewport.width = instance->vulkan.swap_chain_extent.width;
-                    viewport.height = instance->vulkan.swap_chain_extent.height;
+                    viewport.x        = 0.f;
+                    viewport.y        = 0.f;
+                    viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
+                    viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
                     viewport.minDepth = 0.0f;
                     viewport.maxDepth = 1.0f;
                 }
@@ -704,34 +704,34 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     {
                         JSONToken_t *token                = 0;
 
-                        token                             = dict_get(rasterizer_json_dict, "depth clamp enable");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth clamp enable");
                         depth_clamp_enable                = JSON_VALUE(token, JSONprimative);
 
-                        token                             = dict_get(rasterizer_json_dict, "rasterizer discard enable");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "rasterizer discard enable");
                         rasterizer_discard_enable         = JSON_VALUE(token, JSONprimative);
                         
-                        token                             = dict_get(rasterizer_json_dict, "polygon mode");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "polygon mode");
                         polygon_mode_string               = JSON_VALUE(token, JSONstring);
                         
-                        token                             = dict_get(rasterizer_json_dict, "cull mode");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "cull mode");
                         rasterizer_discard_enable         = JSON_VALUE(token, JSONarray);
                                                 
-                        token                             = dict_get(rasterizer_json_dict, "clockwise");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "clockwise");
                         clockwise                         = JSON_VALUE(token, JSONprimative);
                                                 
-                        token                             = dict_get(rasterizer_json_dict, "depth bias enable");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias enable");
                         depth_bias_enable                 = JSON_VALUE(token, JSONprimative);
 
-                        token                             = dict_get(rasterizer_json_dict, "depth bias constant factor");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias constant factor");
                         depth_bias_constant_factor_string = JSON_VALUE(token, JSONprimative);
 
-                        token                             = dict_get(rasterizer_json_dict, "depth bias clamp");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias clamp");
                         depth_bias_clamp_string           = JSON_VALUE(token, JSONprimative);
 
-                        token                             = dict_get(rasterizer_json_dict, "depth bias slope factor");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias slope factor");
                         depth_bias_slope_factor_string    = JSON_VALUE(token, JSONprimative);
 
-                        token                             = dict_get(rasterizer_json_dict, "line width");
+                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "line width");
                         line_width_string                 = JSON_VALUE(token, JSONprimative);
 
                     }
@@ -742,17 +742,17 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             polygon_mode = (VkPolygonMode)dict_get(polygon_modes, polygon_mode_string);
 
                         if(depth_bias_constant_factor_string)
-                            depth_bias_constant_factor = atof(depth_bias_constant_factor_string);
+                            depth_bias_constant_factor = (float)atof(depth_bias_constant_factor_string);
 
                         if (depth_bias_clamp_string)
-                            depth_bias_clamp = atof(depth_bias_clamp_string);
+                            depth_bias_clamp = (float)atof(depth_bias_clamp_string);
 
                         if (depth_bias_slope_factor_string)
-                            depth_bias_slope_factor = atof(depth_bias_slope_factor_string);
+                            depth_bias_slope_factor = (float)atof(depth_bias_slope_factor_string);
 
                         if (line_width_string)
                             if (polygon_mode == VK_POLYGON_MODE_LINE)
-                            line_width = atof(line_width_string);
+                            line_width = (float)atof(line_width_string);
 
                     }
 
@@ -822,28 +822,28 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             // Initialized data
                             JSONToken_t *token = 0;
 
-                            token                          = dict_get(a, "name");
+                            token                          = (JSONToken_t *) dict_get(a, "name");
                             name                           = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "blend enable");
+                            token                          = (JSONToken_t *) dict_get(a, "blend enable");
                             blend_enable                   = JSON_VALUE(token, JSONprimative);
 
-                            token                          = dict_get(a, "source color blend factor");
+                            token                          = (JSONToken_t *) dict_get(a, "source color blend factor");
                             source_color_blend_factor      = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "destination color blend factor");
+                            token                          = (JSONToken_t *) dict_get(a, "destination color blend factor");
                             destination_color_blend_factor = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "color blend operation");
+                            token                          = (JSONToken_t *) dict_get(a, "color blend operation");
                             color_blend_operation          = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "source alpha blend factor");
+                            token                          = (JSONToken_t *) dict_get(a, "source alpha blend factor");
                             source_alpha_blend_factor      = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "destination alpha blend factor");
+                            token                          = (JSONToken_t *) dict_get(a, "destination alpha blend factor");
                             destination_alpha_blend_factor = JSON_VALUE(token, JSONstring);
 
-                            token                          = dict_get(a, "alpha blend operation");
+                            token                          = (JSONToken_t *) dict_get(a, "alpha blend operation");
                             alpha_blend_operation          = JSON_VALUE(token, JSONstring);
 
                         }
@@ -887,7 +887,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 color_blend_create_info.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 color_blend_create_info.logicOpEnable   = VK_FALSE;
                 color_blend_create_info.logicOp         = VK_LOGIC_OP_COPY;
-                color_blend_create_info.attachmentCount = attachment_count;
+                color_blend_create_info.attachmentCount = (u32)attachment_count;
                 color_blend_create_info.pAttachments    = color_blend_attachment_create_info;
             }
 
@@ -930,10 +930,10 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             // Initialized data
                             JSONToken_t *token = 0;
 
-                            token       = dict_get(set_json, "name");
+                            token       = (JSONToken_t *) dict_get(set_json, "name");
                             set_name    = JSON_VALUE(token, JSONstring);
 
-                            token       = dict_get(set_json, "descriptors");
+                            token       = (JSONToken_t *) dict_get(set_json, "descriptors");
                             descriptors = JSON_VALUE(token, JSONarray);
 
                         }
@@ -975,13 +975,13 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                                 // Initialized data
                                 JSONToken_t *token = 0;
 
-                                token           = dict_get(descriptor_json, "name");
+                                token           = (JSONToken_t *) dict_get(descriptor_json, "name");
                                 descriptor_name = JSON_VALUE(token, JSONstring);
 
-                                token           = dict_get(descriptor_json, "type");
+                                token           = (JSONToken_t *) dict_get(descriptor_json, "type");
                                 type            = JSON_VALUE(token, JSONstring);
 
-                                token           = dict_get(descriptor_json, "stages");
+                                token           = (JSONToken_t *) dict_get(descriptor_json, "stages");
                                 stages          = JSON_VALUE(token, JSONarray);
 
                             }
@@ -1007,7 +1007,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                                 for (size_t i = 0; stages[i]; i++)
                                     f |= (VkShaderStageFlagBits) dict_get(shader_stagesD, stages[i]);
 
-                                ubo_layout_bindings[j].binding            = j;
+                                ubo_layout_bindings[j].binding            = (u32)j;
 
                                 // > 1 if array
                                 ubo_layout_bindings[j].descriptorCount    = 1;
@@ -1032,7 +1032,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     // Populate descriptor set layout info struct
                     {
                         layout_info->sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-                        layout_info->bindingCount = descriptor_count;
+                        layout_info->bindingCount = (u32)descriptor_count;
                         layout_info->pBindings    = ubo_layout_bindings;
                     }
 
@@ -1074,7 +1074,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         {
                             pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
                             pool_info->flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-                            pool_info->poolSizeCount = descriptor_count;
+                            pool_info->poolSizeCount = (u32)descriptor_count;
                             pool_info->pPoolSizes    = pool_size;
 
                             // TODO: Figure out what to do here
@@ -1119,7 +1119,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     JSONToken_t  *token                = 0;
 
                     // Get the push constant struct
-                    token                = dict_get(push_constant_dict, "struct");
+                    token                = (JSONToken_t *) dict_get(push_constant_dict, "struct");
                     push_constant_struct = JSON_VALUE(token, JSONarray);
                 }
 
@@ -1146,14 +1146,14 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         // Initialized data
                         JSONToken_t *token = 0;
                         
-                        token = dict_get(property_dict, "name");
+                        token = (JSONToken_t *) dict_get(property_dict, "name");
                         property_name = JSON_VALUE(token, JSONstring);
 
-                        token = dict_get(property_dict, "type");
+                        token = (JSONToken_t *) dict_get(property_dict, "type");
                         char* property_type = JSON_VALUE(token, JSONstring);
 
                         // TODO: Check property_type?
-                        property_size = dict_get(format_sizes, property_type);
+                        property_size = (size_t) dict_get(format_sizes, property_type);
 
                     }
 
@@ -1184,7 +1184,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 i_shader->graphics.push_constant_data = calloc(128, sizeof(u8));
 
                 push_constant->offset     = 0;
-                push_constant->size       = push_constant_size;
+                push_constant->size       = (u32)push_constant_size;
                 push_constant->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
             }
 
@@ -1192,7 +1192,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
             {
 
                 pipeline_layout_create_info.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                pipeline_layout_create_info.setLayoutCount = set_count;
+                pipeline_layout_create_info.setLayoutCount = (u32)set_count;
 
                 if (push_constant_text)
                 {
@@ -1211,7 +1211,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
             // Set up the graphics pipeline
             {
                 graphics_pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                graphics_pipeline_create_info.stageCount = shader_stage_iterator;
+                graphics_pipeline_create_info.stageCount = (u32)shader_stage_iterator;
                 graphics_pipeline_create_info.pStages = shader_stages;
                 graphics_pipeline_create_info.pVertexInputState = &vertex_input_info_create_info;
                 graphics_pipeline_create_info.pInputAssemblyState = &input_assembly_create_info;
@@ -1360,38 +1360,32 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 int use_shader                      ( GXShader_t   *shader )
 {
     GXInstance_t *instance = g_get_active_instance();
-    VkViewport   *viewport = calloc(1, sizeof(VkViewport));
-    VkRect2D     *scissor  = calloc(1, sizeof(VkRect2D));
+    VkViewport    viewport = { 0 };
+    VkRect2D      scissor  = { 0 };
 
     // Use the shader
     vkCmdBindPipeline(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
     
     // Set the viewport
     {
-        viewport->x        = 0.f;
-        viewport->y        = 0.f;
-        viewport->width    = instance->vulkan.swap_chain_extent.width;
-        viewport->height   = instance->vulkan.swap_chain_extent.height;
-        viewport->minDepth = 0.f;
-        viewport->maxDepth = 1.f;
+        viewport.x        = 0.f;
+        viewport.y        = 0.f;
+        viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
+        viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
 
-        vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, viewport);
+        vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &viewport);
     }
     
     // Set the scissor
     {
-        scissor->offset.x = 0;
-        scissor->offset.y = 0;
+        scissor.offset.x = 0;
+        scissor.offset.y = 0;
 
-        scissor->extent   = instance->vulkan.swap_chain_extent;
+        scissor.extent   = instance->vulkan.swap_chain_extent;
 
-        vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, scissor);
-    }
-
-    // Clean up
-    {
-        free(viewport);
-        free(scissor);
+        vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &scissor);
     }
 
     return 0;
@@ -1400,10 +1394,11 @@ int use_shader                      ( GXShader_t   *shader )
 int update_shader_push_constant     ( GXShader_t   *shader )
 {
     size_t offset = 0;
-    for (size_t i = 0; i < shader->graphics.push_constant_properties[i]; i++)
+
+    for (size_t i = 0; shader->graphics.push_constant_properties[i]; i++)
     {
         char   *push_constant_property_name = shader->graphics.push_constant_properties[i];
-        int   (*getter) ( void * )          = dict_get(push_constant_getters, push_constant_property_name);
+        int   (*getter) ( void * )          = (int (*)( void * )) dict_get(push_constant_getters, push_constant_property_name);
 
         if (getter)
             offset = getter((u8*)shader->graphics.push_constant_data + offset);
@@ -1468,7 +1463,13 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
 int set_shader_camera               ( GXEntity_t   *p_entity )
 {
      
-    // TODO: Argument check
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_entity == (void *) 0 )
+                goto no_shader;
+        #endif
+    }
 
     // Initialized data
     GXInstance_t  *instance  = g_get_active_instance();

@@ -153,27 +153,27 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 		parse_json(token_text, len, &json);
 		
 		// Get the name
-		token       = dict_get(json, "name");
+		token       = (JSONToken_t *) dict_get(json, "name");
 		name        = JSON_VALUE(token, JSONstring);
 
 		// Get the host
-		token       = dict_get(json, "host");
+		token       = (JSONToken_t *) dict_get(json, "host");
 		host        = JSON_VALUE(token, JSONstring);
 
 		// Get the port
-		token       = dict_get(json, "port");
+		token       = (JSONToken_t *) dict_get(json, "port");
 		port        = JSON_VALUE(token, JSONprimative);
 
 		// Get the player max
-		token       = dict_get(json, "max players");
+		token       = (JSONToken_t *) dict_get(json, "max players");
 		max_players = JSON_VALUE(token, JSONprimative);
 
 		// Get the password
-		token       = dict_get(json, "password");
+		token       = (JSONToken_t *) dict_get(json, "password");
 		password    = JSON_VALUE(token, JSONstring);
 
 		// Get the tick rate
-		token       = dict_get(json, "tick rate");
+		token       = (JSONToken_t *) dict_get(json, "tick rate");
 		tick_rate   = JSON_VALUE(token, JSONprimative);
 	}
 	
@@ -195,6 +195,14 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 
 		// Allocate memory for the name
 		server->name = calloc(name_len + 1, sizeof(char));
+
+		// Error check
+		{
+			#ifndef NDEBUG
+				if ( server->name == (void *) 0 )
+					goto no_mem;
+			#endif
+		}
 
 		// Copy the name into the allocated memory
 		strncpy(server->name, name, name_len);
@@ -223,7 +231,7 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 		goto retry_connection;
 	}
 
-	return 0;
+	return 1;
 
 	// Error handling
 	{
@@ -396,6 +404,7 @@ int server_recv(GXClient_t *client)
 	// TODO: Error handling
 	client->recv_len = SDLNet_TCP_Recv(client->socket, client->recv_data, 4096);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -424,7 +433,7 @@ int server_send(GXClient_t* client)
 	}
 
 	// TODO: Error handling
-	SDLNet_TCP_Send(client->socket, client->send_data, client->send_len);
+	SDLNet_TCP_Send(client->socket, client->send_data, (int) client->send_len);
 
 	return 1;
 
@@ -533,7 +542,7 @@ int server_process   ( GXClient_t *client )
 			{
 				adr->type                             = actor_displace_rotate;
 
-				adr->actor_displace_rotate.index      = i;
+				adr->actor_displace_rotate.index      = (u16)i;
 				adr->actor_displace_rotate.location   = actor->transform->location;
 				adr->actor_displace_rotate.quaternion = actor->transform->rotation;
 				adr->actor_displace_rotate.velocity   = actor->rigidbody->velocity;
@@ -616,7 +625,7 @@ int server_wait    ( GXInstance_t* instance )
 		// Load a player thread
 		load_thread(&server_thread, "G10/client thread.json");
 
-		sprintf(server_thread->name, "%.*s thread\0", (client_name_len > 31) ? 32 : client_name_len, connect_command->connect.name);
+		sprintf(server_thread->name, "%.*s thread\0", (client_name_len > 31) ? 32 : (int)client_name_len, connect_command->connect.name);
 
 		// Set the thread in the client
 		client->thread = server_thread;
@@ -656,7 +665,7 @@ int server_wait    ( GXInstance_t* instance )
 				actor_init_command->actor_initialize.location   = entity->transform->location;
 				actor_init_command->actor_initialize.quaternion = entity->transform->rotation;
 				actor_init_command->actor_initialize.scale      = entity->transform->scale;
-				actor_init_command->actor_initialize.index      = i;
+				actor_init_command->actor_initialize.index      = (u16) i;
 
 				client->actors[i] = entity;
 
@@ -790,11 +799,11 @@ int connect_client(char* name)
 		}
 
 		// Write the command to the send buffer
-		connect_command_len = data_from_command(&i_client->send_data, connect_command);
+		connect_command_len = (size_t) data_from_command(&i_client->send_data, connect_command);
 	}
 
 	// Send the connect command to the server
-	SDLNet_TCP_Send(i_client->socket, i_client->send_data, connect_command_len);
+	SDLNet_TCP_Send(i_client->socket, i_client->send_data, (int) connect_command_len);
 
 	free(connect_command);
 
@@ -982,7 +991,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 	}
 
 	*ret = i_ret;
-	return ret_len;
+	return (int)ret_len;
 }
 
 int data_from_command(void** ret, GXCommand_t* command)
@@ -1060,7 +1069,7 @@ int data_from_command(void** ret, GXCommand_t* command)
 			break;
 	}
 
-	return ret_len;
+	return (int) ret_len;
 }
 
 int destroy_client ( GXClient_t *client )

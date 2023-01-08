@@ -210,7 +210,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_
 
 		// Set the location
 		{
-			token = dict_get(d, "location");
+			token = (JSONToken_t *) dict_get(d, "location");
 
 			// Error handling
 			{
@@ -243,7 +243,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_
 		{
 			
 			// Get rotation in euler angle
-			token = dict_get(d, "rotation");
+			token = (JSONToken_t *)dict_get(d, "rotation");
 
 			// Parse as an euler angle
 			if (token)
@@ -282,7 +282,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_
 			// Parse as a quaternion
 			else
 			{
-				token = dict_get(d, "quaternion");
+				token = (JSONToken_t *)dict_get(d, "quaternion");
 
 				// Error checking
 				{
@@ -316,7 +316,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char       *object_
 
 		// Set the scale
 		{
-			token = dict_get(d, "scale");
+			token = (JSONToken_t *)dict_get(d, "scale");
 
 			// Error handling
 			{

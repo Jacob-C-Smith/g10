@@ -65,6 +65,14 @@ int load_material ( GXMaterial_t **material, const char path[])
 	size_t  len        = g_load_file(path, 0, false);
 	char   *token_text = calloc(len + 1, sizeof(char));
 	
+	// Error checking
+	{
+		#ifndef NDEBUG
+			if ( token_text == (void *) 0 )
+				goto no_mem;
+		#endif
+	}
+
 	// Load the file
 	if ( g_load_file(path, token_text, false) == 0 )
 
@@ -157,10 +165,10 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 		// Initialized data
 		JSONToken_t *t = 0;
 
-		t        = dict_get(material_object_json, "name");
+		t        = (JSONToken_t *)dict_get(material_object_json, "name");
 		name     = JSON_VALUE(t, JSONstring);
 
-		t        = dict_get(material_object_json, "textures");
+		t        = (JSONToken_t *)dict_get(material_object_json, "textures");
 		textures = JSON_VALUE(t, JSONarray);
 	}
 
@@ -206,7 +214,7 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 
 		// Standard library errors
 		{
-			no_mem:
+			//no_mem:
 			#ifndef NDEBUG
 				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
 			#endif

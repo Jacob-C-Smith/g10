@@ -324,18 +324,18 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
         {
 
             // Get the image
-            t = dict_get(json_data, "image");
+            t = (JSONToken_t *) dict_get(json_data, "image");
             image_json_object = JSON_VALUE(t, JSONobject);
 
             // Get the image
-            t = dict_get(json_data, "image view");
+            t = (JSONToken_t *) dict_get(json_data, "image view");
             image_view_json_object = JSON_VALUE(t, JSONobject);
 
-            t = dict_get(json_data, "sampler");
+            t = (JSONToken_t *) dict_get(json_data, "sampler");
             sampler_json_object = JSON_VALUE(t, JSONobject);
 
             // Get the path
-            t = dict_get(json_data, "path");
+            t = (JSONToken_t *) dict_get(json_data, "path");
             path  = JSON_VALUE(t, JSONstring);
     }
     }
@@ -378,7 +378,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
         // Popultate image create info struct
         {
-            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, width, height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
+            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
         }
 
     }
@@ -392,7 +392,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
                 *format          = 0,
                 *view_type       = 0,
                **extent          = 0,
-                *mip_levels      = 9,
+                *mip_levels      = (char *)9,
                 *array_layers    = 0,
                 *samples         = 0,
                 *tiling          = 0,
@@ -408,34 +408,34 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
             // Initialized data
             JSONToken_t *t = 0;
 
-            t               = dict_get(image_json, "flags");
+            t               = (JSONToken_t *) dict_get(image_json, "flags");
             flags           = JSON_VALUE(t, JSONarray);
 
-            t               = dict_get(image_json, "view type");
+            t               = (JSONToken_t *) dict_get(image_json, "view type");
             view_type       = JSON_VALUE(t, JSONstring);
 
-            t               = dict_get(image_json, "format");
+            t               = (JSONToken_t *) dict_get(image_json, "format");
             format          = JSON_VALUE(t, JSONstring);
 
-            t               = dict_get(image_json, "extent");
+            t               = (JSONToken_t *) dict_get(image_json, "extent");
             extent          = JSON_VALUE(t, JSONarray);
 
-            t               = dict_get(image_json, "mip levels");
+            t               = (JSONToken_t *) dict_get(image_json, "mip levels");
             mip_levels      = JSON_VALUE(t, JSONprimative);
 
-            t               = dict_get(image_json, "array layers");
+            t               = (JSONToken_t *) dict_get(image_json, "array layers");
             array_layers    = JSON_VALUE(t, JSONprimative);
 
-            t               = dict_get(image_json, "samples");
+            t               = (JSONToken_t *) dict_get(image_json, "samples");
             samples         = JSON_VALUE(t, JSONprimative);
             
-            t               = dict_get(image_json, "tiling");
+            t               = (JSONToken_t *) dict_get(image_json, "tiling");
             tiling          = JSON_VALUE(t, JSONstring);
 
-            t               = dict_get(image_json, "usage");
+            t               = (JSONToken_t *) dict_get(image_json, "usage");
             usage           = JSON_VALUE(t, JSONarray);
 
-            t               = dict_get(image_json, "atomic sharing");
+            t               = (JSONToken_t *) dict_get(image_json, "atomic sharing");
             atomic_sharing  = JSON_VALUE(t, JSONprimative);
 
         }
@@ -446,20 +446,20 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
         while (usage[++usage_flags]);
         
         for (size_t i = 0; i < usage_flags; i++)
-            usage_flag |= (VkImageUsageFlags)dict_get(usage_lut, usage[i]);
+            usage_flag |= (VkImageUsageFlags)(size_t)dict_get(usage_lut, usage[i]);
 
         construct_image(
             p_texture, 
             0, 
-            (view_type)    ? (VkImageType)dict_get(view_type_lut, view_type) : VK_IMAGE_TYPE_2D,
-            (format)       ? (VkFormat)dict_get(format_types, format) : VK_FORMAT_B8G8R8A8_UNORM,
+            (view_type)    ? (VkImageType)(size_t)dict_get(view_type_lut, view_type) : VK_IMAGE_TYPE_2D,
+            (format)       ? (VkFormat)(size_t)dict_get(format_types, format) : VK_FORMAT_B8G8R8A8_UNORM,
             (extent[0])    ? atoi(extent[0])    : 1, 
             (extent[1])    ? atoi(extent[1])    : 1, 
             (extent[2])    ? atoi(extent[2])    : 1,
             (mip_levels)   ? atoi(mip_levels)   : 1,
             (array_layers) ? atoi(array_layers) : 1,
             (samples)      ? atoi(samples)      : 1,
-            (tiling)       ? (VkImageTiling)dict_get(tiling_lut, tiling) : VK_IMAGE_TILING_OPTIMAL,
+            (tiling)       ? (VkImageTiling)(size_t)dict_get(tiling_lut, tiling) : VK_IMAGE_TILING_OPTIMAL,
             usage_flag,
             VK_SHARING_MODE_EXCLUSIVE,
             VK_IMAGE_LAYOUT_UNDEFINED
@@ -500,19 +500,19 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
             // Initialized data
             JSONToken_t *t = 0;
 
-            t             = dict_get(image_json, "view type");
+            t             = (JSONToken_t *) dict_get(image_json, "view type");
             view_type     = JSON_VALUE(t, JSONstring);
 
-            t             = dict_get(image_json, "format");
+            t             = (JSONToken_t *) dict_get(image_json, "format");
             format        = JSON_VALUE(t, JSONstring);
 
-            t             = dict_get(image_json, "swizzle");
+            t             = (JSONToken_t *) dict_get(image_json, "swizzle");
             swizzle       = JSON_VALUE(t, JSONarray);
 
-            t             = dict_get(image_json, "image aspects");
+            t             = (JSONToken_t *) dict_get(image_json, "image aspects");
             image_aspects = JSON_VALUE(t, JSONarray);
 
-            t             = dict_get(image_json, "generate mips");
+            t             = (JSONToken_t *) dict_get(image_json, "generate mips");
             generate_mips = JSON_VALUE(t, JSONprimative);
             
         }
@@ -548,7 +548,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
                 while (image_aspects[++image_aspect_count]);
 
                 for (size_t i = 0; i < image_aspect_count; i++)
-                    image_aspect_flag |= (VkImageAspectFlags)dict_get(aspect_lut, image_aspects[i]);
+                    image_aspect_flag |= (VkImageAspectFlags)(size_t)dict_get(aspect_lut, image_aspects[i]);
 
             }
         }
@@ -563,10 +563,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
     return 1;
 
     no_texture:
-no_token:
-    return 0;
-    failed_to_create_image:
-    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCTION__);
+    no_token:
     return 0;
     failed_to_construct_image_view:
     return 0;
@@ -595,11 +592,11 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
         image_create_info.flags         = 0;
         image_create_info.imageType     = image_type;
         image_create_info.format        = format;
-        image_create_info.extent.width  = width;
-        image_create_info.extent.height = height;
-        image_create_info.extent.depth  = depth;
-        image_create_info.mipLevels     = mip_levels;
-        image_create_info.arrayLayers   = array_layers;
+        image_create_info.extent.width  = (u32)width;
+        image_create_info.extent.height = (u32)height;
+        image_create_info.extent.depth  = (u32)depth;
+        image_create_info.mipLevels     = (u32)mip_levels;
+        image_create_info.arrayLayers   = (u32)array_layers;
         image_create_info.tiling        = tiling;
         image_create_info.usage         = usage;
         image_create_info.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;

@@ -458,7 +458,7 @@ int          init_input ( void )
 
     // Construct the hash table
     for (size_t i = 0; keys[i].code; i++)
-        dict_add(key_dict, keys[i].name, 0);
+        dict_add(key_dict, (char *)keys[i].name, 0);
 
     // Is there a controller?
     if (SDL_IsGameController(0)) 
@@ -662,15 +662,15 @@ int          load_input_as_json        ( GXInput_t   **input, char         *toke
         JSONToken_t* token = 0;
 
         // Set the name
-        token = dict_get(input_json_object, "name");
+        token = (JSONToken_t *)dict_get(input_json_object, "name");
         name = JSON_VALUE(token, JSONstring);
 
         // Set the binds
-        token = dict_get(input_json_object, "binds");
+        token       = (JSONToken_t *)dict_get(input_json_object, "binds");
         bind_tokens = JSON_VALUE(token, JSONarray);
 
         //Set mouse sensitivity
-        token = dict_get(input_json_object, "mouse sensitivity");
+        token = (JSONToken_t *)dict_get(input_json_object, "mouse sensitivity");
         mouse_sensitivity = JSON_VALUE(token, JSONprimative);
     }
 
@@ -724,7 +724,7 @@ int          load_input_as_json        ( GXInput_t   **input, char         *toke
         //Set mouse sensitivity
         {
             if (mouse_sensitivity)
-                ret->mouse_sensitivity = atof(mouse_sensitivity);
+                ret->mouse_sensitivity = (float) atof(mouse_sensitivity);
             else
                 ret->mouse_sensitivity = 1.f;
         }
@@ -740,7 +740,8 @@ int          load_input_as_json        ( GXInput_t   **input, char         *toke
 
     *input = ret;
 
-    return ret;
+    // Success
+    return 1;
 
     // Error handling
     {
@@ -750,22 +751,6 @@ int          load_input_as_json        ( GXInput_t   **input, char         *toke
             no_token:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Input] Null pointer provided for \"token\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                return 0;
-        }
-
-        // JSON type errors
-        {
-            name_type_error:
-            binds_type_error:
-            return 0;
-        }
-
-        // Parsing errors
-        {
-            no_name:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Input] No \"name\" token provided in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -803,22 +788,15 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
     char        *name        = 0,
                **keys        = 0;
 
-    // Error checking
-    {
-        #ifndef NDEBUG
-
-        #endif
-    }
-
     // Construct the bind
     {
         // TODO: Improve
         parse_json(token, strlen(token), &json_tokens);
             
-        t    = dict_get(json_tokens, "name");
+        t    = (JSONToken_t *) dict_get(json_tokens, "name");
         name = JSON_VALUE(t, JSONstring);
 
-        t = dict_get(json_tokens, "keys");
+        t    = (JSONToken_t *) dict_get(json_tokens, "keys");
         keys = JSON_VALUE(t, JSONarray);
 
     }
@@ -831,28 +809,6 @@ int          load_bind_as_json         ( GXBind_t    **bind, char          *toke
 
     // Error handling
     {
-        
-        // Standard library errors
-        {
-            no_mem:
-            #ifndef NDEBUG
-                g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n", __FUNCTION__);
-                return 0;
-            #endif
-                return 0;
-        }
-
-        // JSON type errors
-        {
-        name_type_error:
-        keys_type_error:
-            return 0;
-
-        }
-
-        // TODO: Implement
-        no_name:
-            return 0;
         
         // G10 errors
         {
@@ -1024,7 +980,7 @@ SDL_Scancode find_key                  ( const char   *name )
     }
 
 
-    return (SDL_Scancode)dict_get(key_dict, name);
+    return (SDL_Scancode)(size_t)dict_get(key_dict, (char *)name);
 
     // Error handling
     {
@@ -1071,21 +1027,21 @@ int          process_input             ( GXInstance_t *instance )
                     y_rel = instance->sdl2.event.motion.yrel;
                 {
                     input.input_state = MOUSE;
-                    input.inputs.mouse_state.xrel = x_rel * instance->input->mouse_sensitivity;
-                    input.inputs.mouse_state.yrel = y_rel * instance->input->mouse_sensitivity;
+                    input.inputs.mouse_state.xrel = (s32) (x_rel * instance->input->mouse_sensitivity);
+                    input.inputs.mouse_state.yrel = (s32) (y_rel * instance->input->mouse_sensitivity);
                     input.inputs.mouse_state.button = 0;
                 }
 
                 // Fire mouse motion binds
                 {
                     if (y_rel != 0 || x_rel != 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
+                        fire_bind((GXBind_t *)dict_get(instance->input->bind_lut, "MOUSE UP"), input, instance);
                     if (y_rel > 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
+                        fire_bind((GXBind_t *)dict_get(instance->input->bind_lut, "MOUSE DOWN"), input, instance);
                     if (x_rel < 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
+                        fire_bind((GXBind_t *)dict_get(instance->input->bind_lut, "MOUSE LEFT"), input, instance);
                     if (x_rel > 0)
-                        fire_bind(dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
+                        fire_bind((GXBind_t *)dict_get(instance->input->bind_lut, "MOUSE RIGHT"), input, instance);
                 }
 
             }
@@ -1103,8 +1059,8 @@ int          process_input             ( GXInstance_t *instance )
                                      y_rel = instance->sdl2.event.motion.yrel;
                 {
                     input.input_state               = MOUSE;
-                    input.inputs.mouse_state.xrel   = x_rel * instance->input->mouse_sensitivity;
-                    input.inputs.mouse_state.yrel   = y_rel * instance->input->mouse_sensitivity;
+                    input.inputs.mouse_state.xrel   = (s32) (x_rel * instance->input->mouse_sensitivity);
+                    input.inputs.mouse_state.yrel   = (s32) (y_rel * instance->input->mouse_sensitivity);
                     input.inputs.mouse_state.button = button;
                 }
 
@@ -1145,12 +1101,14 @@ int          process_input             ( GXInstance_t *instance )
 
     }
 
-    GXBind_t* iter = instance->input->binds;
     callback_parameter_t input = { KEYBOARD, {0}};
 
     
         size_t     l = dict_values(instance->input->binds, 0);
         GXBind_t **b = calloc(l, sizeof(void *));
+
+        // TODO: Error check
+
         dict_values(instance->input->binds, b);
 
         for (size_t i = 0; i < l; i++)
@@ -1166,13 +1124,13 @@ int          process_input             ( GXInstance_t *instance )
         free(b);
 
     {
-        u8* keyboard_state = SDL_GetKeyboardState(NULL);
+        const u8* keyboard_state = SDL_GetKeyboardState(NULL);
 
         for (size_t i = 0; i < 110; i++)
         {
             if (keyboard_state[i])
             {
-                GXBind_t* bind = dict_get(instance->input->bind_lut, keys[i].name);
+                GXBind_t* bind = (GXBind_t *) dict_get(instance->input->bind_lut, (char*)keys[i].name);
                 if (bind)
                 {
                     bind->active = true;
@@ -1328,7 +1286,7 @@ int          append_bind               ( GXInput_t *input, GXBind_t *bind )
 {
     for (size_t i = 0; i < bind->key_count; i++)
     {
-        GXBind_t* b = dict_get(input->bind_lut, bind->keys[i]);
+        GXBind_t* b = (GXBind_t *) dict_get(input->bind_lut, bind->keys[i]);
         if (b)
         {
             while (b->next)
@@ -1454,7 +1412,7 @@ GXBind_t    *find_bind                 ( GXInput_t    *input   , char           
         #endif
     }
 
-    GXBind_t* i = dict_get(input->binds, name);
+    GXBind_t* i = (GXBind_t *) dict_get(input->binds, name);
 
     return i;
 

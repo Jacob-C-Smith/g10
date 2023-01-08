@@ -414,7 +414,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
         // Pass 4
         {
             // Build faces
-            GXPLYindex_t *indices =  c_data+11+ply_file->elements[0].n_count * ply_file->elements[0].s_stride;
+            GXPLYindex_t *indices =  (GXPLYindex_t *)(c_data+11+ply_file->elements[0].n_count * ply_file->elements[0].s_stride);
             corrected_indicies = calloc(12, ply_file->elements[1].n_count);
 
             for (size_t i = 0; i < ply_file->elements[1].n_count; i++)
@@ -595,7 +595,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
     vertex_array = (float*)c_data;
     vertices_in_buffer = ply_file->elements[0].n_count;
-    indices = corrected_indicies;
+    indices = (GXPLYindex_t *)corrected_indicies;
     indices_in_buffer = ply_file->elements[1].n_count;
     part->index_count = indices_in_buffer;
 
@@ -735,7 +735,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
     // Error handling
     {
-        noFile:
+        //noFile:
             g_print_error("[G10] [PLY] Failed to load file %s\n", path);
             return 0;
         noPart:
@@ -753,7 +753,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
         unrecognizedPropertyType:
             g_print_error("[G10] [PLY] Unrecognized property type detected in file \"%s\"\n", path);
             return 0;
-        nonTriangulated:
+        //nonTriangulated:
             g_print_error("[G10] [PLY] Detected non triangulated faces in file \"%s\"\n", path);
             return 0;
     }
