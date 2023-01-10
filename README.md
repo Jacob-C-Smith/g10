@@ -20,6 +20,4 @@ There are three main components of G10
 
 G10 Schema is a set of JSON schemas descring valid nontemporal game data. In other words, anything stored on the disk, such as scenes, game and server configuration, models, textures, animation, shaders, etc. 
 
-## A primer on G10
-##### Making an application with G10, generating assets
-To start working with the engine, download the latest build of G10 for Visual C. Place the DLL files where you plan to build your executable. Be sure to set up your compiler options correctly. Create a JSON file, and use the [instance schema](https://github.com/Jacob-C-Smith/G10-Schema) to 
+TODO: Finish README
