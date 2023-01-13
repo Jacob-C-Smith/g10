@@ -1,6 +1,6 @@
 
-# G10 Engine
-NOTE: This is a hobby project. Please do not use in commercial code until such time as this warning is removed. Thank you.
+# G10
+NOTE: This is a hobby project. This code may not be the most performant, secure, or stable. Please refrain from using this project in commercial code until such time as this warning is removed.
 
 ![Nitric acid plant scene](Nitric%20acid%20plant.png)
 
@@ -8,7 +8,6 @@ NOTE: This is a hobby project. Please do not use in commercial code until such t
 
 Howdy! I'm Jake. This is my project, the G10 game engine. 
 
-You can use the G10 game engine to create 3D games. Examples of other game engines include, Unreal®, Unity®, or Source®. These are often very large projects that manage gigabytes of assets on the filesystem and require auxiliary programs, like map editors, to be useful. This project is no exception.
 
 There are three main components of G10
 
@@ -18,6 +17,10 @@ There are three main components of G10
 >
 > [G10 Schema (JSON Schema)](https://github.com/Jacob-C-Smith/G10-Schema)
 
-G10 Schema is a set of JSON schemas descring valid nontemporal game data. In other words, anything stored on the disk, such as scenes, game and server configuration, models, textures, animation, shaders, etc. 
+G10 is a multithreaded game engine. Examples of other game engines include, Unreal®, Unity®, or Source®. 
 
-TODO: Finish README
+GPort is a Blender Addon, and a tool for creating, managing, and editing digital assets for G10.
+
+G10 Schema is a set of JSON schemas descring valid nontemporal game data. In other words, anything stored on the file system, such as scenes, game and server configuration, 3D models, textures, animation, shaders, etc. 
+
+To get started with G10, please refer to the [G10 Wiki](https://github.com/Jacob-C-Smith/G10-Vulkan/wiki).
