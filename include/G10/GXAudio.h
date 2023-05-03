@@ -19,7 +19,10 @@
 
 struct GXSound_s
 {
-	FMOD_SOUND				**sound;
+	#ifdef BUILD_G10_WITH_FMOD
+		FMOD_SOUND **sound;
+	#endif
+	int i;
 };
 
 
@@ -39,5 +42,7 @@ DLLEXPORT void				set_channel_volume(int          channel, float       dB);
 DLLEXPORT bool				is_playing(int          channel);
 DLLEXPORT int				destroy_sound(GXSound_t* sound);
 
+#ifdef BUILD_G10_WITH_FMOD
 //TODO: May implement this, gotta talk to Jake about it
 DLLEXPORT const char*		get_fmod_error_code(FMOD_RESULT r);
+#endif

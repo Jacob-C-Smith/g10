@@ -1,5 +1,4 @@
 #pragma once
-#ifdef BUILD_G10_WITH_DISCORD
 #include <G10/G10.h>
 
 #ifdef BUILD_G10_WITH_DISCORD

@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>

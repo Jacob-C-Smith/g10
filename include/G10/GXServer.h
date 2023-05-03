@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include <SDL2/SDL_net.h>
+#include <SDL_net.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>

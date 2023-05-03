@@ -11,6 +11,7 @@
 
 #include <vulkan/vulkan.h>
 
+
 struct GXPart_s
 {
 	char           *name;

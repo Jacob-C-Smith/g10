@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 // Vulkan
-#include <vulkan/vulkan.h>
+#include <vulkan.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/GXPart.h>

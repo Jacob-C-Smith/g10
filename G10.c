@@ -67,185 +67,93 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
     }
 
     // Initialized data
-    GXInstance_t  *ret                           = 0;
-    size_t         token_text_len                = g_load_file(path, 0, false),
-                   token_count                   = 0,
-                   part_cache_count              = 0,
-                   material_cache_count          = 0,
-                   shader_cache_count            = 0,
-                   ai_cache_count                = 0,
-                   loading_thread_count          = 4,
-                   window_width                  = 0,
-                   window_height                 = 0;
-    dict          *instance_json_object          = 0;
-    bool           fullscreen                    = false;
-    char          *token_text                    = calloc(token_text_len, sizeof(u8)),
-                  *name                          = "Instance",
-                  *window_title                  = "G10",
-                 **requested_validation_layers   = 0,
-                 **requested_instance_extensions = 0,
-                 **device_extensions             = 0,
-                  *requested_physical_device     = 0,
-                  *max_buffered_frames           = 2,
-                  *initial_scene                 = 0,
-                  *log_file_i                    = 0,
-                  *input                         = 0,
-                  *audio                         = 0,
-                  *server                        = 0,
-                  *renderer                      = 0,
-                 **schedules                     = 0;
-
+    GXInstance_t  *p_instance                      = 0;
+    size_t         text_len                        = g_load_file(path, 0, false),
+                   part_cache_count                = 128,
+                   material_cache_count            = 128,
+                   shader_cache_count              = 32,
+                   ai_cache_count                  = 16,
+                   loading_thread_count            = 4;
+    signed         window_width                    = 1280,
+                   window_height                   = 720;
+    JSONValue_t   *p_value                         = 0;
+    bool           fullscreen                      = false;
+    char          *text                            = calloc(text_len, sizeof(u8)),
+                  *name                            = "Instance",
+                  *window_title                    = "G10",
+                  *requested_physical_device       = 0,
+                  *max_buffered_frames             = 2,
+                  *initial_scene                   = 0,
+                  *log_file_i                      = 0,
+                  *input                           = 0,
+                  *audio                           = 0,
+                  *server                          = 0,
+                  *renderer                        = 0;
+    array         *p_requested_validation_layers   = 0,
+                  *p_requested_instance_extensions = 0,
+                  *p_device_extensions             = 0,
+                  *p_schedules                     = 0;
 
     // Load the file
-    if ( g_load_file(path, token_text, false) == 0 )
+    if ( g_load_file(path, text, false) == 0 )
         goto no_file;
 
-    // Parse the instance JSON into a dictionary
-    parse_json(token_text, token_text_len, &instance_json_object);
+    // Parse the instance JSON
+    if ( parse_json_value(text, 0, &p_value) == 0 )
+        goto failed_to_parse_json;
 
-    // Parse the dictionary into instance construction parameters
+    // Is the JSONValue the right type?
+    if (p_value->type == JSONobject)
     {
-        
+	
         // Initialized data
-        JSONToken_t* token = 0;
-        
-        // Name. Default to "Instance"
-        token                 = (JSONToken_t *)dict_get(instance_json_object, "name");
-        name                  = JSON_VALUE(token, JSONstring);
+		dict *p_dict = p_value->object;
+
+        // Parse the name of the game
+        name = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "name")), JSONstring);
 
         // Window 
-        {
-            // Set the window width. Default to 800
-            token         = (JSONToken_t *)dict_get(instance_json_object, "window width");
-            window_width  = (char *)JSON_VALUE(token, JSONprimative);
-            window_width  = (long) (window_width) ? atol((char*)window_width) : 1280;
+        window_width  = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window width")) , JSONinteger);
+        window_height = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window height")), JSONinteger);
+        window_title  = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window title")) , JSONstring);
+        fullscreen    = (bool)   JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "fullscreen"))   , JSONboolean);
 
-            // Set the window height. Default to 600
-            token         = (JSONToken_t *)dict_get(instance_json_object, "window height");
-            window_height = (char *)JSON_VALUE(token, JSONprimative);
-            window_height = (size_t) (window_height) ? atol(window_height) : 720;
-
-            // Set the window title. Default to "G10"
-            token         = (JSONToken_t *)dict_get(instance_json_object, "window title");
-            window_title  = (char *)JSON_VALUE(token, JSONstring);
-            window_title  = (window_title) ? window_title : "G10";
-
-            // Fullscreen? Default to false
-            token         = (JSONToken_t *)dict_get(instance_json_object, "fullscreen");
-            fullscreen    = (bool)JSON_VALUE(token, JSONprimative);
-
-        }
-        
         // Input
-        {
-            token = (JSONToken_t *)dict_get(instance_json_object, "input");
-            input = (token) ? token->value.n_where : 0;
-        }
+        input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "fullscreen")), JSONboolean);
 
         // Log file
-        token                = (JSONToken_t *)dict_get(instance_json_object, "log file");
-        log_file_i           = JSON_VALUE(token, JSONstring);
+        log_file_i = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "log file")), JSONstring);
 
-        // Initial scene path
-        token                = (JSONToken_t *)dict_get(instance_json_object, "initial scene");
-        initial_scene        = JSON_VALUE(token, JSONstring);
+        // Path to initial scene 
+        initial_scene = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "initial scene")), JSONstring);
 
         // Caches
-        {
-
-            // Set the part cache limit
-            token                = (JSONToken_t *)dict_get(instance_json_object, "cache part count");
-            part_cache_count     = JSON_VALUE(token, JSONprimative);
-            part_cache_count     = (part_cache_count) ? atol(part_cache_count) : 128;
-
-            // Set the material cache limit
-            token                = (JSONToken_t *)dict_get(instance_json_object, "cache material count");
-            material_cache_count = JSON_VALUE(token, JSONprimative);
-            material_cache_count = (material_cache_count) ? atol(material_cache_count) : 128;
-
-            // Set the shader cache limit
-            token                = (JSONToken_t *)dict_get(instance_json_object, "cache shader count");
-            shader_cache_count   = JSON_VALUE(token, JSONprimative);
-            shader_cache_count   = (shader_cache_count) ? atol(shader_cache_count) : 32;
-
-            // Set the shader cache limit
-            token                = (JSONToken_t *)dict_get(instance_json_object, "cache ai count");
-            ai_cache_count       = JSON_VALUE(token, JSONprimative);
-            ai_cache_count       = (ai_cache_count) ? atol(ai_cache_count) : 16;
-
-        }
+        part_cache_count     = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache part count"))    , JSONinteger);
+        material_cache_count = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache material count")), JSONinteger);
+        shader_cache_count   = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache shader count"))  , JSONinteger);
+        ai_cache_count       = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache ai count"))      , JSONinteger);
 
         // Loading thread count
-        token                = (JSONToken_t *)dict_get(instance_json_object, "loading thread count");
-        loading_thread_count = JSON_VALUE(token, JSONprimative);
-        loading_thread_count = (loading_thread_count) ? atol(loading_thread_count) : 4;
+        loading_thread_count = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "loading thread count"))      , JSONinteger);
+
 
         // Vulkan
-        {
-
-            // Validation layers
-            {
-                token                       = (JSONToken_t *)dict_get(instance_json_object, "vulkan validation layers");
-                requested_validation_layers = JSON_VALUE(token, JSONarray);
-            }
-
-            // Requested instance extensions
-            {
-                token                         = (JSONToken_t *)dict_get(instance_json_object, "vulkan instance extensions");
-                requested_instance_extensions = JSON_VALUE(token, JSONarray);
-            }
-
-            // Requested device extensions
-            {
-                token             = (JSONToken_t *)dict_get(instance_json_object, "vulkan device extensions");
-                device_extensions = JSON_VALUE(token, JSONarray);
-            }
-
-            // Physical device
-            {
-                token                     = (JSONToken_t *)dict_get(instance_json_object, "vulkan physical device");
-                requested_physical_device = JSON_VALUE(token, JSONstring);
-            }
-
-            // Max buffered frames
-            {
-                token                     = (JSONToken_t *)dict_get(instance_json_object, "max buffered frames");
-                max_buffered_frames       = JSON_VALUE(token, JSONprimative);
-            }
-        }
-
-        // Renderer
-        {
-            token    = (JSONToken_t *)dict_get(instance_json_object, "renderer");
-            renderer = JSON_VALUE(token, JSONstring | JSONobject);
-        }
-
-        // Server
-        {
-            token  = (JSONToken_t *)dict_get(instance_json_object, "server");
-            server = JSON_VALUE(token, JSONobject);
-        }
-
-        // Schedules
-        {
-            token     = (JSONToken_t *)dict_get(instance_json_object, "schedules");
-            schedules = JSON_VALUE(token, JSONarray);
-        }
+        p_requested_validation_layers   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan validation layers"))  , JSONarray);
+        p_requested_instance_extensions = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan instance extensions")), JSONarray);
+        p_device_extensions             = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan device extensions"))  , JSONarray);
+        requested_physical_device       = (char  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan physical device"))    , JSONstring);
+        max_buffered_frames             = (signed)  JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "max buffered frames"))       , JSONinteger);
+        //renderer                      = (char  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "renderer")                   , JSONstring);
+        server                          = (dict  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "server"))                    , JSONobject);
+        p_schedules                     = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "schedules"))                 , JSONarray);
 
     }
 
-    // Allocate the instance
-    {
-
-        // Allocate memory for the instance
-        *pp_instance    = calloc(1, sizeof(GXInstance_t));
+    // Allocate memory for the instance
+    p_instance = calloc(1, sizeof(GXInstance_t));
         
-        // Get a pointer to the instance
-        ret             = *pp_instance;
-
-        // Set the active instance
-        active_instance = ret;
-    }
+    // Set the active instance
+    active_instance = p_instance;
 
     // Global initialization
     {
@@ -257,14 +165,11 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         }
 
         // Window initialization
-        {
-            ret->window.width        = window_width;
-            ret->window.height       = window_height;
-            ret->vulkan.max_buffered_frames = (long)atoi(max_buffered_frames);
-        }
+        p_instance->window.width = window_width;
+        p_instance->window.height = window_height;
 
         // FMOD initialization
-        
+        // TODO:
 
         // SDL initialization
         {
@@ -286,106 +191,143 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 goto noSDL;
 
             // Create the window
-            ret->sdl2.window = SDL_CreateWindow(window_title,
+            p_instance->sdl2.window = SDL_CreateWindow(window_title,
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
                 (int)window_width, (int)window_height,
                 SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((fullscreen) ? SDL_WINDOW_FULLSCREEN : 0));
 
             // Check the window
-            if (!ret->sdl2.window)
+            if (!p_instance->sdl2.window)
                 goto noWindow;
             
             // Display the window
-            SDL_ShowWindow(ret->sdl2.window);
+            SDL_ShowWindow(p_instance->sdl2.window);
             
-            ret->time.clock_div = SDL_GetPerformanceFrequency();
+            p_instance->time.clock_div = SDL_GetPerformanceFrequency();
 
         }
 
         // Vulkan initialization
-        {   
+        {
 
             // Create an instance
             {
 
                 // Initialized data
-                GXInstance_t                        *instance                  = ret;
-                VkApplicationInfo                    application_info          = { 0 };
-                VkInstanceCreateInfo                 instance_create_info      = { 0 };
-                char                               **required_extensions       = 0,
-                                                   **requested_extensions      = 0;
-                dict                                *extensions                = 0;
-                u32                                  required_extension_count  = 0,
-                                                     requested_extension_count = 0,
-                                                     requested_layers_count    = 0;
+                VkApplicationInfo                    application_info            = { 0 };
+                VkInstanceCreateInfo                 instance_create_info        = { 0 };
+                char                               **required_extensions         = 0,
+                                                   **requested_extensions        = 0,
+                                                   **requested_validation_layers = 0;
+                dict                                *extensions                  = 0;
+                size_t                               required_extension_count    = 0,
+                                                     requested_extension_count   = 0,
+                                                     requested_layers_count      = 0;
     
-                VkResult                             result                    = 0;
-    
-                if(requested_instance_extensions)
-                    while (requested_instance_extensions[++requested_extension_count]);
+                VkResult                             result                      = 0;
 
-                // Populate application info struct
-                {
-                    application_info.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-                    application_info.pApplicationName   = "G10";
-                    application_info.pEngineName        = "G10";
-                    application_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-                    application_info.engineVersion      = VK_MAKE_VERSION(0, 0, 1);
-                    application_info.apiVersion         = VK_API_VERSION_1_3;
+                // Get the extensions
+                if(p_requested_instance_extensions) {
+
+                    // Get the number of extensions    
+                    array_get(p_requested_instance_extensions, 0, &requested_extension_count);
+
+                    // Allocate for each extension
+                    requested_extensions = calloc(requested_extension_count, sizeof(char *));
+
+                    // Get each extension
+                    array_get(p_requested_instance_extensions, requested_extensions, 0);
                 }
 
+                // Populate application info struct
+                application_info = (VkApplicationInfo) { 
+                    .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                    .pApplicationName   = "G10",
+                    .pEngineName        = "G10",
+                    .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+                    .engineVersion      = VK_MAKE_VERSION(0, 0, 1),
+                    .apiVersion         = VK_API_VERSION_1_3
+                };
+                
                 // Populate instance create info struct
                 {
 
+                    // Initialized data
+                    VkInstanceCreateInfo *t = 0;
+
                     // Get a list of the required instance extensions from SDL
                     {
-                        SDL_Vulkan_GetInstanceExtensions(instance->sdl2.window, &required_extension_count, (void*)0);
+                        
+                        // Get the quantity of required instance extensions
+                        SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, (void*)0);
+
+                        // Allocate memory for the extensions
                         required_extensions = calloc(required_extension_count + 1, sizeof(char*));
-                        SDL_Vulkan_GetInstanceExtensions(instance->sdl2.window, &required_extension_count, required_extensions);
+
+                        // Get the required instance extensions
+                        SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, required_extensions);
                     }
         
                     // Construct a dictionary from the required extensions
                     dict_from_keys(&extensions, required_extensions, required_extension_count);
 
-                    // Count requested validation layers
-                    if(requested_validation_layers)
-                        while (requested_validation_layers[++requested_layers_count]);
+                    if(p_requested_validation_layers)
+                    {
+                        
+                        // Get the number requested validation layers
+                        if(p_requested_validation_layers)
+                            array_get(p_requested_validation_layers, 0, &requested_layers_count);
+
+                        // Allocate for each extension
+                        requested_validation_layers = calloc(requested_extension_count, sizeof(char *));
+
+                        // Get each extension
+                        array_get(p_requested_validation_layers, &requested_validation_layers, 0);
+                    }
 
                     // TODO: Add support for user defined extensions
-                    {
-                        instance_create_info.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-                        instance_create_info.pApplicationInfo        = &application_info;
-                        instance_create_info.enabledExtensionCount   = required_extension_count;
-                        instance_create_info.ppEnabledExtensionNames = required_extensions;
-                        instance_create_info.enabledLayerCount       = requested_layers_count;
-                        instance_create_info.ppEnabledLayerNames     = requested_validation_layers;
-                    }
+                    instance_create_info  = (VkInstanceCreateInfo) { 
+                        .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+                        .pApplicationInfo        = &application_info,
+                        .enabledExtensionCount   = required_extension_count,
+                        .ppEnabledExtensionNames = required_extensions,
+                        .enabledLayerCount       = requested_layers_count,
+                        .ppEnabledLayerNames     = requested_validation_layers
+                    };
                     
                     // Create the debug messenger
-                    VkInstanceCreateInfo *t = &instance_create_info;
+                    t = &instance_create_info;
                     setup_debug_messenger(&t->pNext);
                 }
     
-                if ( vkCreateInstance(&instance_create_info, (void*)0, &instance->vulkan.instance) != VK_SUCCESS )
+                // Create the vulkan instance
+                if ( vkCreateInstance(&instance_create_info, (void*)0, &p_instance->vulkan.instance) != VK_SUCCESS )
                     goto failed_to_create_vulkan_instance;
     
             }
+            
+            // Set the maximum number of buffered frames
+            p_instance->vulkan.max_buffered_frames = max_buffered_frames;
 
             // Create a surface with SDL2
-            if ( SDL_Vulkan_CreateSurface(ret->sdl2.window, ret->vulkan.instance, &ret->vulkan.surface) == SDL_FALSE )
+            if ( SDL_Vulkan_CreateSurface(p_instance->sdl2.window, p_instance->vulkan.instance, &p_instance->vulkan.surface) == SDL_FALSE )
                 goto failed_to_create_sdl2_surface;
 
             // Get a physical device to use
-            pick_physical_device(device_extensions);
-            create_logical_device(device_extensions);
+            //pick_physical_device(device_extensions);
 
-            create_swap_chain();
-            create_image_views();
+            // Create a logical device from the physical device
+            //create_logical_device(device_extensions);
 
-            create_command_pool();
-            create_command_buffers();
-            create_sync_objects();
+            // Create a swap chain
+            //create_swap_chain();
+            //create_image_views();
+
+            // Create other stuff
+            //create_command_pool();
+            //create_command_buffers();
+            //create_sync_objects();
         }
 
         // G10 Initialization
@@ -398,24 +340,22 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 size_t name_len = strlen(name);
 
                 // Allocate memory for the name
-                ret->name = calloc(name_len+1, sizeof(u8));
+                p_instance->name = calloc(name_len+1, sizeof(u8));
 
                 // Copy the name to the instance
-                strncpy(ret->name, name, name_len);
+                strncpy(p_instance->name, name, name_len);
             }
 
             // Set the loading thread limit
-            ret->loading_thread_count = loading_thread_count;
+            p_instance->loading_thread_count = loading_thread_count;
 
             // Initialize mutexes
-            {
-
-                // TODO: Create mutexes in subsystem initializers
-                ret->mutexes.part_cache        = SDL_CreateMutex();
-                ret->mutexes.material_cache    = SDL_CreateMutex();
-            }
+            // TODO: Create mutexes in subsystem initializers
+            p_instance->mutexes.part_cache     = SDL_CreateMutex();
+            p_instance->mutexes.material_cache = SDL_CreateMutex();
 
             // Subsystem initialization
+            /*
             {
 
                 // Renderer initialization
@@ -504,137 +444,138 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     init_ai();
                 }
             }
-
-            // 3rd party subsystem integration
-            {
-
-                // Discord
-                #ifdef BUILD_G10_WITH_DISCORD
-                {
-                    extern void init_discord_integration(void);
-                    init_discord_integration();
-                }
-                #endif
-            }
-
+            */
             // Load a renderer
             if (renderer)
             {
 
                 // Initialized data
-                GXRenderer_t *p_renderer = 0;
+               //GXRenderer_t *p_renderer = 0;
 
-                // Differerntiate objects from paths
-                if   ( *renderer == '{' ) 
-                    load_renderer_as_json(&p_renderer, renderer, strlen(renderer));
-                else
-                    load_renderer(&p_renderer, renderer);
+               //// Differerntiate objects from paths
+               //if   ( *renderer == '{' ) 
+               //    load_renderer_as_json(&p_renderer, renderer, strlen(renderer));
+               //else
+               //    load_renderer(&p_renderer, renderer);
 
-                // Set the active renderer
-                ret->context.renderer = p_renderer;
+               //// Set the active renderer
+               //p_instance->context.renderer = p_renderer;
             }
 
             // Construct dictionaries to cache materials, parts, and shaders.
             {
 
                 // If no count is specified by the JSON object. Default to 128.
-                dict_construct(&ret->cache.materials, ((material_cache_count) ? (material_cache_count) : 128));
+                dict_construct(&p_instance->cache.materials, material_cache_count);
 
                 // Default to 128 cached parts.
-                dict_construct(&ret->cache.parts    , ((material_cache_count) ? (material_cache_count) : 128));
+                dict_construct(&p_instance->cache.parts    , part_cache_count);
 
                 // Default to 32 cached shaders.
-                dict_construct(&ret->cache.shaders  , ((shader_cache_count)   ? (shader_cache_count)   : 32));
+                dict_construct(&p_instance->cache.shaders  , shader_cache_count);
 
                 // Default to 16 cached ais
-                dict_construct(&ret->cache.ais      , ((ai_cache_count)       ? (ai_cache_count)       : 16));
+                dict_construct(&p_instance->cache.ais      , ai_cache_count);
 
             }
 
             // Load an input set
-            if (input)
-                load_input(&ret->input, input);
+            //if (input)
+            //    load_input(&p_instance->input, input);
 
             //Load audio
             if (audio) {} //Coming soon...
                 
-
             // Load schedules
-            if(schedules) {
-
-                // Construct a dictionary for schedules
-                dict_construct(&ret->data.schedules, 8);
-
-                // Iterate over each schedule in the schedules array
-                for (size_t i = 0; schedules[i]; i++)
-                {
-                    
-                    // Initialized data
-                    GXSchedule_t *schedule = 0;
-
-                    // Parse the schedule as an object
-                    if (schedules[i][0] == '{')
-                        load_schedule_as_json(&schedule, schedules[i], strlen(schedules[i]));
-
-                    // Load the schedule as a path
-                    else
-                        load_schedule(&schedule, schedules[i]);
-
-                    // Add the schedule into the schedule dictionary
-                    dict_add(ret->data.schedules, schedule->name, schedule);
-                }
-                
-            }
+            //if(schedules) {
+  
+            //    // Construct a dictionary for schedules
+            //    dict_construct(&p_instance->data.schedules, 8);
+  
+            //    // Iterate over each schedule in the schedules array
+            //    for (size_t i = 0; schedules[i]; i++)
+            //    {
+            //        
+            //        // Initialized data
+            //        GXSchedule_t *schedule = 0;
+  
+            //        // Parse the schedule as an object
+            //        if (schedules[i][0] == '{')
+            //            load_schedule_as_json(&schedule, schedules[i], strlen(schedules[i]));
+  
+            //        // Load the schedule as a path
+            //        else
+            //            load_schedule(&schedule, schedules[i]);
+  
+            //        // Add the schedule into the schedule dictionary
+            //        dict_add(p_instance->data.schedules, schedule->name, schedule);
+            //    }
+            //    
+            //}
 
             // Scene dictionary
-            dict_construct(&ret->data.scenes, 16);
+            dict_construct(&p_instance->data.scenes, 16);
 
             // Load the initial scene
             if (initial_scene) {
 
                 // Scene pointer
-                GXScene_t* scene = 0;
+                //GXScene_t* p_scene = 0;
 
                 // Load the scene from the path
-                if ( load_scene(&scene, initial_scene) == 0 )
-                    goto failed_to_load_scene;
+                //if ( load_scene(&p_scene, initial_scene) == 0 )
+                //    goto failed_to_load_scene;
 
                 // Did the scene load?
-                if (scene)
+                //if (p_scene)
 
                     // Add the scene to the instance
-                    dict_add(ret->data.scenes, scene->name, scene);
+                //    dict_add(p_instance->data.scenes, p_scene->name, p_scene);
 
                 // Error
-                else
+                //else
 
-                    goto no_initial_scene;
+                //    goto no_initial_scene;
 
                 // Set the active scene
-                ret->context.scene = scene;
+                //p_instance->context.scene = p_scene;
             }
 
             // Set up the server
-            if (server)
-            {
-
-                // Load the server as a JSON object
-                if (server[0] == '{')
-                    load_server_as_json(&ret->networking.server, server, strlen(server));
-                
-                // Load the server from the filesystem
-                else
-                    load_server(&ret->networking.server, server);
-
-            }
+            //if (server)
+            //{
+//
+            //    // Load the server as a JSON object
+            //    if (server[0] == '{')
+            //        load_server_as_json(&p_instance->networking.server, server, strlen(server));
+            //    
+            //    // Load the server from the filesystem
+            //    else
+            //        load_server(&p_instance->networking.server, server);
+//
+            //}
 
             // This prevents divide by zero errors when the game loop starts
-            ret->time.delta_time = 0.001;
+            p_instance->time.delta_time = 0.001;
         }
+        
+        // 3rd party subsystem integration
+        
+        // Discord
+        #ifdef BUILD_G10_WITH_DISCORD
+            extern void init_discord_integration(void);
+            init_discord_integration();
+        #endif
+        
+        
     }
 
-    SDL_SetWindowInputFocus(ret->sdl2.window);
+    // Focus the game window
+    SDL_SetWindowInputFocus(p_instance->sdl2.window);
 
+    *pp_instance = p_instance;
+    
+    // Success
     return 1;
 
     // Error handling
@@ -649,6 +590,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                 return 0;
         }
 
+        // TODO:
+        failed_to_parse_json:
+            return 0;
         // SDL Errors
         {
 
@@ -1396,8 +1340,9 @@ int           g_start_schedule             ( GXInstance_t* instance, char* name 
     }
 
     // Start the schedule
-    start_schedule(schedule);
+    //start_schedule(schedule);
 
+    // Success
     return 1;
 
     // Error handling
@@ -1472,33 +1417,33 @@ int           copy_state                   ( GXInstance_t         *instance )
             // Physics
             {
                 if (instance->queues.actor_move)
-                    queue_destroy(instance->queues.actor_move);
+                    queue_destroy(&(queue *)instance->queues.actor_move);
 
                 if (instance->queues.actor_force)
-                    queue_destroy(instance->queues.actor_force);
+                    queue_destroy(&(queue *)instance->queues.actor_force);
 
                 if (instance->queues.actor_collision)
-                    queue_destroy(instance->queues.actor_collision);
+                    queue_destroy(&(queue *)instance->queues.actor_collision);
             }
 
             // AI
             {
                 if (instance->queues.ai_preupdate)
-                    queue_destroy(instance->queues.ai_preupdate);
+                    queue_destroy(&(queue *)instance->queues.ai_preupdate);
 
                 if (instance->queues.ai_update)
-                    queue_destroy(instance->queues.ai_update);
+                    queue_destroy(&(queue *)instance->queues.ai_update);
             }
         }
 
         // Physics
-        queue_construct(&instance->queues.actor_move     , actor_count + 1);
-        queue_construct(&instance->queues.actor_force    , actor_count + 1);
-        queue_construct(&instance->queues.actor_collision, actor_count + 1);
+        queue_construct(&instance->queues.actor_move);
+        queue_construct(&instance->queues.actor_force);
+        queue_construct(&instance->queues.actor_collision);
 
         // AI
-        queue_construct(&instance->queues.ai_preupdate   , ai_count + 1 );
-        queue_construct(&instance->queues.ai_update      , ai_count + 1 );
+        queue_construct(&instance->queues.ai_preupdate);
+        queue_construct(&instance->queues.ai_update);
     }
 
     // Populate the new queues
@@ -1722,14 +1667,14 @@ void          g_toggle_mouse_lock          ( callback_parameter_t state, GXInsta
 
 void          g_play_sound                 ( callback_parameter_t state, GXInstance_t *instance )
 {
-    GXSound_t* sampleSound = NULL;
-    static bool played = false;
-    if (played == false)
-    {
-        load_sound(&sampleSound, "G10/ding.mp3");
-        play_sound(sampleSound, false);
-        played = true;
-    }
+    // GXSound_t* sampleSound = NULL;
+    // static bool played = false;
+    // if (played == false)
+    // {
+    //     load_sound(&sampleSound, "G10/ding.mp3");
+    //     play_sound(sampleSound, false);
+    //     played = true;
+    // }
 
 
 
@@ -1917,8 +1862,8 @@ int           g_exit                       ( GXInstance_t         *instance )
 
             dict_values(instance->data.scenes, scenes);
 
-            for (size_t i = 0; i < scene_count; i++)
-                destroy_scene(scenes[i]);
+            //for (size_t i = 0; i < scene_count; i++)
+            //    destroy_scene(scenes[i]);
 
             free(scenes);
 
@@ -1980,13 +1925,15 @@ int           g_exit                       ( GXInstance_t         *instance )
         vkDestroyInstance(instance->vulkan.instance, (void*)0);
     }
 
-    //FMOD Cleanup
-    {
+    #ifdef BUILD_G10_WITH_FMOD
+        
+        //FMOD Cleanup
+
         //Replace this with a struct member later?
         //Not thread-safe
         FMOD_RESULT fmodResult = FMOD_System_Release(instance->fmod.system);
 
-    }
+    #endif
 
     // SDL Cleanup
     {

@@ -1,6 +1,6 @@
 ﻿ #pragma once
 //#define BUILD_G10_WITH_DISCORD
-#define BUILD_G10_WITH_FMOD
+//#define BUILD_G10_WITH_FMOD
 #define BUILD_G10_WITH_ANSI_COLOR
 
 #include <stdio.h>
@@ -13,13 +13,13 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_sdk_platform.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
+#include <SDL.h>
+#include <SDL_vulkan.h>
 
 #include <dict/dict.h>
 #include <queue/queue.h>
-
-#include <JSON/JSON.h>
+#include <array/array.h>
+#include <json/json.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/GXScene.h>

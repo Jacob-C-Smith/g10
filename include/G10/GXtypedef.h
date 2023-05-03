@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 // Here are a few useful typedefs used throughout the engine
 typedef unsigned char      u8;
