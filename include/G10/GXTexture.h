@@ -4,7 +4,7 @@
 #include <SDL_image.h>
 
 #include <dict/dict.h>
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>

@@ -9,27 +9,25 @@ int draw_material();
 #define IMAGE_LAYOUTS_COUNT              18
 #define SUBPASS_FUNCTION_COUNT           11
 
-VkAttachmentLoadOp   attachment_load_operation_enums[ATTACHMENT_LOAD_OPERATION_COUNT]   = {
+VkAttachmentLoadOp attachment_load_operation_enums[ATTACHMENT_LOAD_OPERATION_COUNT]   = {
     VK_ATTACHMENT_LOAD_OP_LOAD,
     VK_ATTACHMENT_LOAD_OP_CLEAR,
 };
-char                *attachment_load_operation_names[ATTACHMENT_LOAD_OPERATION_COUNT]   = {
+char *attachment_load_operation_names[ATTACHMENT_LOAD_OPERATION_COUNT]   = {
     "load",
     "clear",
 };
-dict                *attachment_load_operations                                         = 0;
 
 VkAttachmentStoreOp  attachment_store_operation_enums[ATTACHMENT_STORE_OPERATION_COUNT] = {
     VK_ATTACHMENT_STORE_OP_STORE,
     VK_ATTACHMENT_STORE_OP_NONE,
 };
-char                *attachment_store_operation_names[ATTACHMENT_STORE_OPERATION_COUNT] = {
+char *attachment_store_operation_names[ATTACHMENT_STORE_OPERATION_COUNT] = {
     "store",
     "none",
 };
-dict                *attachment_store_operations                                        = 0;
 
-VkImageLayout        image_layout_enums[IMAGE_LAYOUTS_COUNT]                            = {
+VkImageLayout image_layout_enums[IMAGE_LAYOUTS_COUNT] = {
     VK_IMAGE_LAYOUT_UNDEFINED,
     VK_IMAGE_LAYOUT_GENERAL,
     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -49,7 +47,7 @@ VkImageLayout        image_layout_enums[IMAGE_LAYOUTS_COUNT]                    
     VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
     VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 };
-char                *image_layout_names[IMAGE_LAYOUTS_COUNT]                            = {
+char *image_layout_names[IMAGE_LAYOUTS_COUNT] = {
     "undefined",
     "general",
     "color attachment",
@@ -69,9 +67,8 @@ char                *image_layout_names[IMAGE_LAYOUTS_COUNT]                    
     "attachment",
     "present source"
 };
-dict                *image_layouts                                                      = 0;
 
-void                *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT]                 = {
+void *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT] = {
     &draw_scene,
     &draw_material,
     0,//&draw_depth_pass,
@@ -84,7 +81,7 @@ void                *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT]         
     0,//&draw_bloom_blur,
     0,//&draw_tone_map_gamma_correct
 };
-char                *subpass_function_names[SUBPASS_FUNCTION_COUNT]                     = {
+char *subpass_function_names[SUBPASS_FUNCTION_COUNT] = {
     "draw scene",
     "material output",
     "depth pass",
@@ -97,9 +94,12 @@ char                *subpass_function_names[SUBPASS_FUNCTION_COUNT]             
     "bloom blur",
     "tone map gamma correct"
 };
-dict                *subpass_functions                                                  = 0;
 
-void          init_renderer                ( void )
+dict *image_layouts               = 0,
+     *subpass_functions           = 0,
+     *attachment_store_operations = 0;
+
+void init_renderer ( void )
 {
 
     // Construct lookup tables
@@ -151,8 +151,10 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
         #endif
     }
     
+    // Return a pointer to the renderer
     *pp_renderer = p_renderer;
 
+    // Successs
     return 1;
 
     // Error handling
@@ -164,6 +166,8 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -173,6 +177,8 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
                 #ifndef NDEBUG
                     g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -201,8 +207,10 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
         #endif
     }
 
+    // Return a pointer to the render pass
     *pp_render_pass = p_render_pass;
 
+    // Success
     return 1;
 
     // Error handling
@@ -251,8 +259,10 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
         #endif
     }
 
+    // Return a pointer to the subpass
     *pp_subpass = p_subpass;
 
+    // Success
     return 1;
 
     // Error handling
@@ -315,6 +325,7 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
     // Free resources
     free(buffer);
 
+    // Success
     return 1;
 
     // Error handling
@@ -326,11 +337,15 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
             no_path:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -340,12 +355,16 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
 
             failed_to_load_renderer:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -355,6 +374,8 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }

@@ -49,7 +49,7 @@ DLLEXPORT int  create_camera       ( GXCamera_t **pp_camera );
  * @param near_clip    : The near clipping plane
  * @param far_clip     : The far clipping plane
  * @param aspect_ratio : Window width divided by window height
- * @param fov          : The camera's field of view, in degreesº
+ * @param fov          : The camera's field of view, in degreesï¿½
  *
  * @sa load_camera_as_json
  * @sa create_camera
@@ -83,7 +83,7 @@ DLLEXPORT int  load_camera         ( GXCamera_t **pp_camera, const char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  load_camera_as_json ( GXCamera_t **pp_camera, char       *object_text, size_t len);
+DLLEXPORT int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len);
 
 /* !
  *  Construct a 4x4 view matrix from it's parameters

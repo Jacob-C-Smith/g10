@@ -7,7 +7,7 @@
 #include <G10/G10.h>
 
 #include <dict/dict.h>
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 #include <vulkan/vulkan.h>
 

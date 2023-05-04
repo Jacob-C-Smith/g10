@@ -31,10 +31,10 @@ int main ( int argc, const char *argv[] )
     // Initialized data
     GXInstance_t  *p_instance               = 0;
     //GXScene_t     *scene                  = 0;
-    const char    *instance_path          = "G10/debug client instance.json",
-                  *schedule_name          = "Client Schedule",
-                  *client_name            = 0;
-    bool           connect_to_server      = false;
+    const char    *instance_path            = "G10/debug client instance.json",
+                  *schedule_name            = "Client Schedule",
+                  *client_name              = 0;
+    bool           connect_to_server        = false;
     //GXAI_t        *p_ai                   = 0;
     //GXTexture_t   *abc_texture            = 0;
     
@@ -131,9 +131,12 @@ int main ( int argc, const char *argv[] )
     //// Stop execution
     //stop_schedule(instance->context.schedule);
 
-    //// Exit 
-    //g_exit(instance);
-    return 1;
+    
+    // Exit 
+    g_exit(p_instance);
+
+    // Return
+    return EXIT_SUCCESS;
 
     // Error handling
     {

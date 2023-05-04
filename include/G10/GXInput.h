@@ -9,7 +9,7 @@
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 #define UI_M1     0x01
 #define UI_M2     0x02

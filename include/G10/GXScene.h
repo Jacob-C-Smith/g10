@@ -1,5 +1,13 @@
 #pragma once
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <dict/dict.h>
+#include <array/array.h>
+#include <json/json.h>
+
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXEntity.h>
@@ -48,7 +56,7 @@ struct GXScene_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int            create_scene                ( GXScene_t  **pp_scene );
+DLLEXPORT int create_scene ( GXScene_t  **pp_scene );
 
 // Constructors
 
@@ -63,7 +71,7 @@ DLLEXPORT int            create_scene                ( GXScene_t  **pp_scene );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int            load_scene                  ( GXScene_t  **pp_scene, const char   path[] );
+DLLEXPORT int load_scene ( GXScene_t **pp_scene, const char *path );
 
 /* !
  *  Load a scene from JSON text
@@ -77,7 +85,7 @@ DLLEXPORT int            load_scene                  ( GXScene_t  **pp_scene, co
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int            load_scene_as_json          ( GXScene_t  **pp_scene, char*        token_text, size_t len );
+DLLEXPORT int load_scene_as_json ( GXScene_t **pp_scene, char *text, size_t len );
 
 // Appenders
 

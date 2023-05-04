@@ -7,7 +7,7 @@
 
 // JSON parsing
 #include <dict/dict.h>
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 // G10 includes
 #include <G10/GXtypedef.h>

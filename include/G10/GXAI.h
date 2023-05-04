@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include <dict/dict.h>
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
@@ -29,7 +29,7 @@ struct GXAI_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_ai                  ( GXAI_t       **pp_ai );
+DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
 
 // Constructors
 
@@ -44,13 +44,13 @@ DLLEXPORT int create_ai                  ( GXAI_t       **pp_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai                    ( GXAI_t       **pp_ai   , char        *path );
+DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char *path );
 
 /* !
  *  Load an AI from JSON text
  *
  * @param pp_ai      : return
- * @param token_text : The AI JSON object text
+ * @param text : The AI JSON object text
  * @param len        : The length of the AI JSON object text
  *
  * @sa load_ai
@@ -58,7 +58,7 @@ DLLEXPORT int load_ai                    ( GXAI_t       **pp_ai   , char        
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai_as_json            ( GXAI_t       **pp_ai   , char        *token_text                           , size_t len );
+DLLEXPORT int load_ai_as_json            ( GXAI_t **pp_ai, char *text, size_t len );
 
 /* !
  *  Load an AI from JSON text
@@ -72,7 +72,7 @@ DLLEXPORT int load_ai_as_json            ( GXAI_t       **pp_ai   , char        
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int copy_ai                    ( GXAI_t       **pp_ai   , GXAI_t      *p_ai );
+DLLEXPORT int copy_ai                    ( GXAI_t **pp_ai, GXAI_t *p_ai );
 
 // Info
 
@@ -85,7 +85,7 @@ DLLEXPORT int copy_ai                    ( GXAI_t       **pp_ai   , GXAI_t      
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int ai_info                    ( GXAI_t        *p_ai );
+DLLEXPORT int ai_info                    ( GXAI_t *p_ai );
 
 // Tasks
 
@@ -98,7 +98,7 @@ DLLEXPORT int ai_info                    ( GXAI_t        *p_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int update_ai                  ( GXInstance_t  *instance );
+DLLEXPORT int update_ai                  ( GXInstance_t *instance );
 
 /* !
  *  Preupdate each AI entity in the instances active scene
@@ -109,7 +109,7 @@ DLLEXPORT int update_ai                  ( GXInstance_t  *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int pre_update_ai              ( GXInstance_t  *instance );
+DLLEXPORT int pre_update_ai              ( GXInstance_t *instance );
 
 // User callbacks
 
@@ -125,7 +125,7 @@ DLLEXPORT int pre_update_ai              ( GXInstance_t  *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int add_ai_state_callback      ( GXAI_t        *p_ai    , char        *state_name                           , int (*function_pointer)(GXEntity_t *entity));
+DLLEXPORT int add_ai_state_callback      ( GXAI_t *p_ai, char *state_name, int (*function_pointer)(GXEntity_t *entity));
 
 /* !
  *  Changes the state of the AI
@@ -138,7 +138,7 @@ DLLEXPORT int add_ai_state_callback      ( GXAI_t        *p_ai    , char        
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int set_ai_state               ( GXAI_t        *p_ai    , const char  *state_name );
+DLLEXPORT int set_ai_state               ( GXAI_t *p_ai    , const char *state_name );
 
 /* !
  *  Changes the AI preupdate function
@@ -151,7 +151,7 @@ DLLEXPORT int set_ai_state               ( GXAI_t        *p_ai    , const char  
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int set_ai_pre_update_callback ( GXAI_t        *p_ai    , int        (*function_pointer)(GXEntity_t *entity) );
+DLLEXPORT int set_ai_pre_update_callback ( GXAI_t *p_ai, int (*function_pointer)(GXEntity_t *entity) );
 
 // Deallocators
 
@@ -164,4 +164,4 @@ DLLEXPORT int set_ai_pre_update_callback ( GXAI_t        *p_ai    , int        (
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_ai                 ( GXAI_t        *p_ai );
+DLLEXPORT int destroy_ai                 ( GXAI_t *p_ai );

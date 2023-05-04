@@ -3,7 +3,7 @@
 #include <G10/G10.h>
 #include <G10/GXTexture.h>
 
-#include <JSON/JSON.h>
+#include <json/json.h>
 
 struct GXMaterial_s {
     char   *name;

@@ -271,14 +271,16 @@ void init_shader                    ( void )
 
 }
 
-int create_shader_module            ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
+int create_shader_module            ( char *code, size_t code_len, VkShaderModule *shader_module )
 {
-    GXInstance_t* instance = g_get_active_instance();
 
-    VkShaderModuleCreateInfo shader_module_create_info = { 0 };
-    shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shader_module_create_info.codeSize = code_len;
-    shader_module_create_info.pCode = code;
+    // Initialized data
+    GXInstance_t             *instance                  = g_get_active_instance();
+    VkShaderModuleCreateInfo  shader_module_create_info = { 
+        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = code_len,
+        .pCode    = code
+    }
 
     if (vkCreateShaderModule(instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module))
 
@@ -626,50 +628,50 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 }
 
                 // Set up the vertex input 
-                {
-                    vertex_input_info_create_info.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                    vertex_input_info_create_info.vertexBindingDescriptionCount   = (u32)binding_description_count;
-                    vertex_input_info_create_info.pVertexBindingDescriptions      = binding_description;
-                    vertex_input_info_create_info.vertexAttributeDescriptionCount = vertex_group_count;
-                    vertex_input_info_create_info.pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
-                }
+                vertex_input_info_create_info = (VkPipelineVertexInputStateCreateInfo) {
+                    .sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+                    .vertexBindingDescriptionCount   = (u32)binding_description_count,
+                    .pVertexBindingDescriptions      = binding_description,
+                    .vertexAttributeDescriptionCount = vertex_group_count,
+                    .pVertexAttributeDescriptions    = vertex_input_attribute_descriptions
+                };
             }
 
             // Set up the input assembly
-            {
-                input_assembly_create_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                input_assembly_create_info.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                input_assembly_create_info.primitiveRestartEnable = VK_FALSE;
-            }
+            input_assembly_create_info = (VkPipelineInputAssemblyStateCreateInfo) {
+                .sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                .primitiveRestartEnable = VK_FALSE
+            };
 
             // Set up the viewport state
             {
 
                 // Set up the viewport
-                {
-                    viewport.x        = 0.f;
-                    viewport.y        = 0.f;
-                    viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
-                    viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
-                    viewport.minDepth = 0.0f;
-                    viewport.maxDepth = 1.0f;
-                }
+                viewport = (VkViewport) {
+                    .x        = 0.f,
+                    .y        = 0.f,
+                    .width    = (float)instance->vulkan.swap_chain_extent.width,
+                    .height   = (float)instance->vulkan.swap_chain_extent.height,
+                    .minDepth = 0.0f,
+                    .maxDepth = 1.0f
+                };
 
                 // Set up the scissor
-                {
-                    scissor.offset.x = 0;
-                    scissor.offset.y = 0;
-                    scissor.extent = instance->vulkan.swap_chain_extent;
-                }
+                scissor = (VkRect2D) {
+                    .offset.x = 0,
+                    .offset.y = 0,
+                    .extent = instance->vulkan.swap_chain_extent
+                };
 
                 // Populate the viewport state create struct
-                {
-                    viewport_state_create_info.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                    viewport_state_create_info.viewportCount = 1;
-                    viewport_state_create_info.pViewports    = &viewport;
-                    viewport_state_create_info.scissorCount  = 1;
-                    viewport_state_create_info.pScissors     = &scissor;
-                }
+                viewport_state_create_info = (VkPipelineViewportStateCreateInfo){ 
+                    .sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+                    .viewportCount = 1,
+                    .pViewports    = &viewport,
+                    .scissorCount  = 1,
+                    .pScissors     = &scissor
+                };
             }
 
             // Set up the rasterizer 
@@ -761,29 +763,28 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 }
 
                 // Populate the rasterizer create struct
-                {
-                    rasterizer_create_info.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                    rasterizer_create_info.depthClampEnable        = depth_clamp_enable;
-                    rasterizer_create_info.rasterizerDiscardEnable = rasterizer_discard_enable;
-                    rasterizer_create_info.polygonMode             = polygon_mode;
-                    rasterizer_create_info.cullMode                = VK_CULL_MODE_FRONT_BIT;
-                    rasterizer_create_info.frontFace               = clockwise;
-                    rasterizer_create_info.depthBiasEnable         = depth_bias_enable;
-                    rasterizer_create_info.depthBiasConstantFactor = depth_bias_constant_factor;
-                    rasterizer_create_info.depthBiasClamp          = depth_bias_clamp;
-                    rasterizer_create_info.depthBiasSlopeFactor    = depth_bias_slope_factor;
-                    rasterizer_create_info.lineWidth               = line_width;
-                }
-
+                rasterizer_create_info = (VkPipelineRasterizationStateCreateInfo){
+                    .sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+                    .depthClampEnable        = depth_clamp_enable,
+                    .rasterizerDiscardEnable = rasterizer_discard_enable,
+                    .polygonMode             = polygon_mode,
+                    .cullMode                = VK_CULL_MODE_FRONT_BIT,
+                    .frontFace               = clockwise,
+                    .depthBiasEnable         = depth_bias_enable,
+                    .depthBiasConstantFactor = depth_bias_constant_factor,
+                    .depthBiasClamp          = depth_bias_clamp,
+                    .depthBiasSlopeFactor    = depth_bias_slope_factor,
+                    .lineWidth               = line_width
+                };
             }
 
             // Set up the multisampler
-            {
-                multisampling_create_info.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-                multisampling_create_info.sampleShadingEnable  = VK_FALSE;
-                multisampling_create_info.minSampleShading     = 1.f;
-            }
+            multisampling_create_info = (VkPipelineMultisampleStateCreateInfo) {
+                .sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+                .sampleShadingEnable  = VK_FALSE,
+                .minSampleShading     = 1.f
+            };
 
             // Set up the color blend attachment
             if(attachments){
@@ -1069,19 +1070,16 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     
                     // Create descriptor pool
                     {
-                        VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
-
-                        {
-                            pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-                            pool_info->flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-                            pool_info->poolSizeCount = (u32)descriptor_count;
-                            pool_info->pPoolSizes    = pool_size;
-
+                        VkDescriptorPoolCreateInfo pool_info = (VkDescriptorPoolCreateInfo) {
+                            .sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+                            .flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+                            .poolSizeCount = (u32)descriptor_count,
+                            .pPoolSizes    = pool_size,
                             // TODO: Figure out what to do here
-                            pool_info->maxSets       = (u32)64;
-                        }
+                            .maxSets       = (u32)64
+                        };
 
-                        if (vkCreateDescriptorPool(instance->vulkan.device, pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
+                        if (vkCreateDescriptorPool(instance->vulkan.device, &pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
                             g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCTION__);
                             return 0;
                         }
@@ -1209,29 +1207,29 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 g_print_error("[G10] [Shader] Failed to create pipeline layout");
 
             // Set up the graphics pipeline
-            {
-                graphics_pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                graphics_pipeline_create_info.stageCount = (u32)shader_stage_iterator;
-                graphics_pipeline_create_info.pStages = shader_stages;
-                graphics_pipeline_create_info.pVertexInputState = &vertex_input_info_create_info;
-                graphics_pipeline_create_info.pInputAssemblyState = &input_assembly_create_info;
+            graphics_pipeline_create_info = (VkGraphicsPipelineCreateInfo) {
+                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+                .stageCount = (u32)shader_stage_iterator,
+                .pStages = shader_stages,
+                .pVertexInputState = &vertex_input_info_create_info,
+                .pInputAssemblyState = &input_assembly_create_info,
 
                 // TODO: 
-                graphics_pipeline_create_info.pTessellationState = 0;
-                graphics_pipeline_create_info.pViewportState = &viewport_state_create_info;
-                graphics_pipeline_create_info.pRasterizationState = &rasterizer_create_info;
-                graphics_pipeline_create_info.pMultisampleState = &multisampling_create_info;
+                .pTessellationState = 0,
+                .pViewportState = &viewport_state_create_info,
+                .pRasterizationState = &rasterizer_create_info,
+                .pMultisampleState = &multisampling_create_info,
 
                 // TODO: 
-                graphics_pipeline_create_info.pDepthStencilState = &depth_stencil_state_create_info;
-                graphics_pipeline_create_info.pColorBlendState = &color_blend_create_info;
-                graphics_pipeline_create_info.pDynamicState = &dynamic_state_create_info;
-                graphics_pipeline_create_info.layout = &pipeline_layout_create_info;
-                graphics_pipeline_create_info.layout = i_shader->graphics.pipeline_layout;
-                graphics_pipeline_create_info.renderPass = instance->context.renderer->render_passes_data[0]->render_pass;
-                graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
-                graphics_pipeline_create_info.basePipelineIndex = -1;
-            }
+                .pDepthStencilState = &depth_stencil_state_create_info,
+                .pColorBlendState = &color_blend_create_info,
+                .pDynamicState = &dynamic_state_create_info,
+                .layout = &pipeline_layout_create_info,
+                .layout = i_shader->graphics.pipeline_layout,
+                .renderPass = instance->context.renderer->render_passes_data[0]->render_pass,
+                .basePipelineHandle = VK_NULL_HANDLE,
+                .basePipelineIndex = -1
+            };
 
             // Construct the graphics pipeline
             if (vkCreateGraphicsPipelines(instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &i_shader->graphics.pipeline) != VK_SUCCESS)
@@ -1360,34 +1358,36 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 int use_shader                      ( GXShader_t   *shader )
 {
     GXInstance_t *instance = g_get_active_instance();
-    VkViewport    viewport = { 0 };
     VkRect2D      scissor  = { 0 };
+    VkViewport    viewport = { 0 };
 
     // Use the shader
     vkCmdBindPipeline(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
     
     // Set the viewport
-    {
-        viewport.x        = 0.f;
-        viewport.y        = 0.f;
-        viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
-        viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
-        viewport.minDepth = 0.f;
-        viewport.maxDepth = 1.f;
-
-        vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &viewport);
-    }
+    viewport = (VkViewport) {
+        .x        = 0.f,
+        .y        = 0.f,
+        .width    = (float)instance->vulkan.swap_chain_extent.width,
+        .height   = (float)instance->vulkan.swap_chain_extent.height,
+        .minDepth = 0.f,
+        .maxDepth = 1.f
+    };
+    
+    // Set the viewport
+    vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &viewport);
     
     // Set the scissor
-    {
-        scissor.offset.x = 0;
-        scissor.offset.y = 0;
+    scissor = (VkRect2D) {
+        .offset.x = 0,
+        .offset.y = 0,
+        .extent   = instance->vulkan.swap_chain_extent
+    };
+    
+    // Set the scissors
+    vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &scissor);
 
-        scissor.extent   = instance->vulkan.swap_chain_extent;
-
-        vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &scissor);
-    }
-
+    // Success
     return 0;
 }
 

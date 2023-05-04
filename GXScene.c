@@ -1,6 +1,5 @@
 #include <G10/GXScene.h>
 
-
 void init_scene(void)
 {
 
@@ -10,7 +9,7 @@ void init_scene(void)
     instance->mutexes.load_entity = SDL_CreateMutex();
 }
 
-int         create_scene       ( GXScene_t **pp_scene )
+int create_scene ( GXScene_t **pp_scene )
 {
 
     // Argument check
@@ -25,13 +24,8 @@ int         create_scene       ( GXScene_t **pp_scene )
     GXScene_t *p_scene = calloc(1, sizeof(GXScene_t));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if(p_scene == (void*)0)
-                goto no_mem;
-        #endif
-
-    }
+    if( p_scene == (void *) 0 )
+        goto no_mem;
 
     // Return the allocated memory
     *pp_scene = p_scene;
@@ -48,6 +42,8 @@ int         create_scene       ( GXScene_t **pp_scene )
                 #ifndef NDEBUG
                     g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -57,18 +53,20 @@ int         create_scene       ( GXScene_t **pp_scene )
                 #ifndef NDEBUG
                     g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 }
 
-int         load_scene         ( GXScene_t **pp_scene, const char     path[])
+int load_scene ( GXScene_t **pp_scene, const char *path )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_scene == (void *) 0 )
+            if ( pp_scene == (void *) 0 )
                 goto no_scene;
         #endif
     }
@@ -105,6 +103,8 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
                 #ifndef NDEBUG
                     g_print_error("Null pointer provided for \"pp_scene\" in call to function \"%s\"", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -114,12 +114,16 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
                 #ifndef NDEBUG
                     g_print_error("[G10] Failed to load file in call to function \"%s\"\n",__FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
 
             failed_to_load_scene:
                 #ifndef NDEBUG
                     g_print_error("[G10] Failed to load scene in call to function \"%s\"\n",__FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -134,7 +138,7 @@ int         load_scene         ( GXScene_t **pp_scene, const char     path[])
     }
 }
 
-int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text, size_t len)
+int load_scene_as_json ( GXScene_t **pp_scene, char *text, size_t len )
 {
     
     // Argument checking
@@ -142,7 +146,7 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         #ifndef NDEBUG
             if (pp_scene == (void *)0)
                 goto no_scene;
-            if (token_text == (void *)0)
+            if (text == (void *)0)
                 goto no_token_text;
             if (len == 0)
                 goto no_len;
@@ -153,14 +157,15 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
     GXInstance_t *instance          = g_get_active_instance();
     GXScene_t    *p_scene           = 0;
     dict         *scene_json_object = 0;
+    JSONValue_t  *p_value           = 0;
 
     // JSON array of object text
-    char         *name              = 0,
-                **entities          = 0,
-                **cameras           = 0,
-                **lights            = 0,
-                **skyboxes          = 0,
-                **light_probes      = 0;
+    char  *name           = 0;
+    array *p_entities     = 0,
+          *p_cameras      = 0,
+          *p_lights       = 0,
+          *p_skyboxes     = 0,
+          *p_light_probes = 0;
 
     // Allocate a scene
     create_scene(pp_scene);
@@ -168,34 +173,22 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
     // Get a pointer to the scene
     p_scene = *pp_scene;
 
+    // Parse the text into a value
+    parse_json_value(text, len, &p_value);
+
     // Parse the JSON
-    {
+    if(p_value->type == JSONobject) {
 
         // Initialized data
-        JSONToken_t* token = 0;
-
-        // Parse the JSON text into a dictionary
-        parse_json(token_text, len+1, &scene_json_object);
+        dict *p_dict = p_value->object;
 
         // Set the name
-        token           = (JSONToken_t *) dict_get(scene_json_object, "name");
-        name            = JSON_VALUE(token, JSONstring);
+        name = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "name")), JSONstring);
 
         // Get array of entity objects and paths
-        token           = (JSONToken_t *) dict_get(scene_json_object, "entities");
-        entities        = JSON_VALUE(token, JSONarray);
-
-        // Get an array of camera objects and paths
-        token           = (JSONToken_t *) dict_get(scene_json_object, "cameras");
-        cameras         = JSON_VALUE(token, JSONarray);
-
-        // Get an array of light objects and paths
-        token           = (JSONToken_t *) dict_get(scene_json_object, "lights");
-        lights          = JSON_VALUE(token, JSONarray);
-
-        // Get a skybox for the scene
-        token           = (JSONToken_t *) dict_get(scene_json_object, "skybox");
-        //i_scene->skybox = 0;//TODO: 
+        p_entities = (array *) JSON_VALUE(((JSONValue_t *) dict_get(p_dict, "entities")), JSONarray);
+        p_cameras  = (array *) JSON_VALUE(((JSONValue_t *) dict_get(p_dict, "cameras")) , JSONarray);
+        p_lights   = (array *) JSON_VALUE(((JSONValue_t *) dict_get(p_dict, "lights"))  , JSONarray);
     }
 
     // Set the name
@@ -220,13 +213,16 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
     }
 
     // Load entities
-    if ( entities ) 
+    if ( p_entities ) 
     {
         GXThread_t  **entity_loading_threads = calloc(instance->loading_thread_count, sizeof(void *));
 
-        size_t len = 0;
-        
-        for (; entities[len]; len++);
+        size_t        len         = 0;
+        JSONValue_t **pp_entities = 0;
+         
+        array_get(p_entities, 0, &len);
+        pp_entities = calloc(len+1, sizeof(JSONValue_t *));
+        array_get(p_entities, pp_entities, 0);
 
         if (instance->queues.load_entity)
             queue_destroy(instance->queues.load_entity);
@@ -234,7 +230,7 @@ int         load_scene_as_json ( GXScene_t **pp_scene, char          *token_text
         queue_construct(&instance->queues.load_entity, len+1);
 
         for (size_t i = 0; i < len; i++)
-            queue_enqueue(instance->queues.load_entity, entities[i]);
+            queue_enqueue(instance->queues.load_entity, pp_entities[i]->string);
         
         dict_construct(&p_scene->entities, len);
         dict_construct(&p_scene->actors, len);

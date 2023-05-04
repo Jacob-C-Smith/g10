@@ -4,15 +4,18 @@ void init_ai                   ( void )
 {
 
 	// Initialized data
-	GXInstance_t *instance       = g_get_active_instance();
+	GXInstance_t *p_instance = g_get_active_instance();
 
 	// Create instance mutexes for AI tasks
-	instance->mutexes.ai_cache     = SDL_CreateMutex();
-	instance->mutexes.ai_preupdate = SDL_CreateMutex();
-	instance->mutexes.ai_update    = SDL_CreateMutex();
+	p_instance->mutexes.ai_cache     = SDL_CreateMutex();
+	p_instance->mutexes.ai_preupdate = SDL_CreateMutex();
+	p_instance->mutexes.ai_update    = SDL_CreateMutex();
+
+	// Exit
+	return;
 }
 
-int create_ai                  ( GXAI_t       **pp_ai )
+int create_ai ( GXAI_t **pp_ai )
 {
 	// Argument check
 	{
@@ -48,6 +51,8 @@ int create_ai                  ( GXAI_t       **pp_ai )
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -58,12 +63,14 @@ int create_ai                  ( GXAI_t       **pp_ai )
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int load_ai                    ( GXAI_t       **pp_ai, char        *path )
+int load_ai ( GXAI_t **pp_ai, char *path )
 {
 
 	// Argument check
@@ -147,7 +154,7 @@ int load_ai                    ( GXAI_t       **pp_ai, char        *path )
 	}
 }
 
-int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, size_t   len )
+int load_ai_as_json ( GXAI_t **pp_ai, char *text, size_t len )
 {
 
 	// Argument check
@@ -155,7 +162,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		#ifndef NDEBUG
 			if ( pp_ai == (void *)0 )
 				goto no_ai;
-			if ( token_text == (void *)0 )
+			if ( text == (void *)0 )
 				goto no_token_text;
 		#endif
 	}
@@ -164,8 +171,8 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 	GXInstance_t *instance      = g_get_active_instance();
 	size_t        state_count   = 0;
 	char         *name          = 0,
-		        **states        = 0,
-		         *initial_state = 0;
+			     *initial_state = 0;
+	array        *p_states      = 0;
 	dict         *ai_dict       = 0;
 	int           ret           = 1;
 
@@ -173,30 +180,20 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 	{
 
 		// Initialized data
-		JSONToken_t *token = 0;
+		JSONValue_t *p_value = 0;
 
 		// Parse the JSON text into a dictionary
-		parse_json(token_text, len, &ai_dict);
-
-		// Error checking
-		{
-			if (ai_dict == 0)
-
-				// TODO: Error handling
-				return 0;
-		}
+		if ( parse_json_value(text, len, &p_value) ) 
+			goto failed_to_parse_json;
 
 		// Get the name 
-		token         = (JSONToken_t *) dict_get(ai_dict, "name");
-		name          = JSON_VALUE(token, JSONstring);
+		name = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "name")), JSONstring);
 
 		// Get the states
-		token         = (JSONToken_t *) dict_get(ai_dict, "states");
-		states        = JSON_VALUE(token, JSONarray);
+		p_states = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "states")), JSONarray);
 
 		// Get the initial state
-		token         = (JSONToken_t *) dict_get(ai_dict, "initial state");
-		initial_state = JSON_VALUE(token, JSONstring);
+		initial_state = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "initial state")), JSONstring);
 
 	}
 
@@ -260,10 +257,16 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 		{
 
 			// Initialized data
-			size_t state_count = 0;
+			size_t        state_count = 0;
+			JSONValue_t **states      = 0;
 
-			// Count up states
-			while (states[++state_count]);			
+			// Get the states
+			if(p_states)
+			{
+				array_get(p_states, 0, &state_count );
+				states = calloc(state_count+1, sizeof(JSONValue_t *));
+				array_get(p_states, states, 0 );
+			}
 
 			// Construct a dictionary for the states
 			dict_construct(&p_ai->states, state_count);
@@ -342,6 +345,8 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 				#endif
 				ret = 0;
 				goto free_memory;
+			failed_to_parse_json:
+				return 0;
 		}
 
 		// Standard library errors
@@ -355,7 +360,7 @@ int load_ai_as_json            ( GXAI_t       **pp_ai, char        *token_text, 
 	}
 }
 
-int add_ai_state_callback      ( GXAI_t        *p_ai , char        *state_name, int    (*function_pointer) ( GXEntity_t *entity ) )
+int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_pointer) ( GXEntity_t *entity ) )
 {
 
 	// Argument errors
@@ -400,7 +405,7 @@ int add_ai_state_callback      ( GXAI_t        *p_ai , char        *state_name, 
 	}
 }
 
-int set_ai_state               ( GXAI_t        *p_ai , const char  *state_name )
+int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 {
 
 	// Argument errors
@@ -438,7 +443,7 @@ int set_ai_state               ( GXAI_t        *p_ai , const char  *state_name )
 	}
 }
 
-int set_ai_pre_update_callback ( GXAI_t        *p_ai , int        (*function_pointer) ( GXEntity_t *entity ) )
+int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEntity_t *entity ) )
 {
 	
 	// Argument errors
@@ -474,7 +479,7 @@ int set_ai_pre_update_callback ( GXAI_t        *p_ai , int        (*function_poi
 	}
 }
 
-int pre_update_ai              ( GXInstance_t  *instance )
+int pre_update_ai ( GXInstance_t *instance )
 {
 
 	// Argument check
@@ -500,14 +505,16 @@ int pre_update_ai              ( GXInstance_t  *instance )
 			return 1;
 		}
 
-		entity = queue_dequeue(instance->queues.ai_preupdate);
+		queue_dequeue(instance->queues.ai_preupdate,&entity);
 
 		SDL_UnlockMutex(instance->mutexes.ai_preupdate);
 	}
 
     // Update the AI
-    if(entity)
-        preupdate_entity_ai(entity);
+    if ( entity )
+		
+		// Uncomment
+		;//preupdate_entity_ai(entity);
 
     return 1;
 
@@ -525,7 +532,7 @@ int pre_update_ai              ( GXInstance_t  *instance )
 	}
 }
 
-int copy_ai                    ( GXAI_t       **pp_ai, GXAI_t *p_ai )
+int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
 {
 
 	// Argument errors
@@ -575,7 +582,7 @@ int copy_ai                    ( GXAI_t       **pp_ai, GXAI_t *p_ai )
 		}
 	}
 }
-
+ 
 int ai_info ( GXAI_t *p_ai )
 {
 
@@ -638,7 +645,7 @@ int ai_info ( GXAI_t *p_ai )
 	}
 }
 
-int update_ai                  ( GXInstance_t* instance )
+int update_ai ( GXInstance_t* instance )
 {
 
 	// Argument check
@@ -664,15 +671,17 @@ int update_ai                  ( GXInstance_t* instance )
 			return 1;
 		}
 
-		entity = queue_dequeue(instance->queues.ai_update);
+		queue_dequeue(instance->queues.ai_update, &entity);
 
 		SDL_UnlockMutex(instance->mutexes.ai_update);
 	}
 
     // Update the AI
     if (entity)
-        update_entity_ai(entity);
+        // Uncomment
+		;//update_entity_ai(entity);
 
+	// Success
     return 1;
 	
 	// Error handling
@@ -684,12 +693,14 @@ int update_ai                  ( GXInstance_t* instance )
 				#ifndef NDEBUG
 					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int destroy_ai                 ( GXAI_t  *p_ai )
+int destroy_ai ( GXAI_t *p_ai )
 {
 	
 	// Argument check
@@ -700,13 +711,16 @@ int destroy_ai                 ( GXAI_t  *p_ai )
 		#endif
 	}
 
+	// Free the AI name
 	free(p_ai->name);
-	p_ai->pre_ai = 0;
 
 	// TODO: Free each key from the dictionary
 	dict_destroy(p_ai->states);
+
+	// Free the AI
 	free(p_ai);
 
+	// Success
 	return 1;
 
 	// Error handling

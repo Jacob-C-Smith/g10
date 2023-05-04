@@ -7,8 +7,8 @@ FILE* log_file;
 static GXInstance_t *active_instance = 0;
 
 // Forward declared functions
-void pick_physical_device   ( char        **required_extension_names );
-void create_logical_device  ( char        **required_extension_names );
+void pick_physical_device   ( char **required_extension_names );
+void create_logical_device  ( char **required_extension_names );
 void create_swap_chain      ( void );
 void cleanup_swap_chain     ( void );
 void create_image_views     ( void );
@@ -16,9 +16,9 @@ void create_command_pool    ( void );
 void create_command_buffers ( void );
 void create_sync_objects    ( void );
 
-void create_buffer          ( VkDeviceSize  size       , VkBufferUsageFlags    usage     , VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
+void create_buffer          ( VkDeviceSize  size       , VkBufferUsageFlags    usage          , VkMemoryPropertyFlags   properties              , VkBuffer *buffer, VkDeviceMemory *buffer_memory );
 u32  find_memory_type       ( u32           type_filter, VkMemoryPropertyFlags properties );
-int  check_vulkan_device    ( GXInstance_t *instance, VkPhysicalDevice physical_device, char** required_extension_names);
+int  check_vulkan_device    ( GXInstance_t *instance   , VkPhysicalDevice      physical_device, char                  **required_extension_names);
 
 VKAPI_ATTR 
 VkBool32
@@ -136,7 +136,6 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Loading thread count
         loading_thread_count = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "loading thread count"))      , JSONinteger);
 
-
         // Vulkan
         p_requested_validation_layers   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan validation layers"))  , JSONarray);
         p_requested_instance_extensions = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan instance extensions")), JSONarray);
@@ -159,10 +158,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
     {
 
         // Set the log file before doing anything else
-        {
-            if   (log_file_i) { log_file = fopen(log_file_i, "w"); }
-            else              { log_file = stdout; }
-        }
+        log_file = (log_file_i) ?  fopen(log_file_i, "w") : stdout;
 
         // Window initialization
         p_instance->window.width = window_width;
@@ -175,17 +171,17 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         {
 
             // Initialize SDL
-            if (SDL_Init(SDL_INIT_EVERYTHING))
+            if ( SDL_Init(SDL_INIT_EVERYTHING) )
                 goto noSDL;
 
             // Initialize SDL Image
-            //if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ))
+            // if ( IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ) )
                 
                 // TODO: this needs to be more specific
                 //goto noSDL;
 
             // Initialize SDL Networking
-            if (SDLNet_Init())
+            if ( SDLNet_Init() )
 
                 // TODO: this needs to be more specific
                 goto noSDL;
@@ -211,21 +207,24 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
         // Vulkan initialization
         {
 
+            // Initialized data
+            char   **device_extensions      = 0;
+            size_t   device_extension_count = 0;
+
             // Create an instance
             {
 
                 // Initialized data
-                VkApplicationInfo                    application_info            = { 0 };
-                VkInstanceCreateInfo                 instance_create_info        = { 0 };
-                char                               **required_extensions         = 0,
-                                                   **requested_extensions        = 0,
-                                                   **requested_validation_layers = 0;
-                dict                                *extensions                  = 0;
-                size_t                               required_extension_count    = 0,
-                                                     requested_extension_count   = 0,
-                                                     requested_layers_count      = 0;
-    
-                VkResult                             result                      = 0;
+                VkApplicationInfo      application_info            = { 0 };
+                VkInstanceCreateInfo   instance_create_info        = { 0 };
+                char                 **required_extensions         = 0,
+                                     **requested_extensions        = 0,
+                                     **requested_validation_layers = 0;                                     
+                dict                  *extensions                  = 0;
+                size_t                 required_extension_count    = 0,
+                                       requested_extension_count   = 0,
+                                       requested_layers_count      = 0;
+                VkResult               result                      = 0;
 
                 // Get the extensions
                 if(p_requested_instance_extensions) {
@@ -276,14 +275,17 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     {
                         
                         // Get the number requested validation layers
-                        if(p_requested_validation_layers)
-                            array_get(p_requested_validation_layers, 0, &requested_layers_count);
+                        array_get(p_requested_validation_layers, 0, &requested_layers_count);
 
                         // Allocate for each extension
-                        requested_validation_layers = calloc(requested_extension_count, sizeof(char *));
+                        requested_validation_layers = calloc(requested_extension_count, sizeof(JSONValue_t *));
 
                         // Get each extension
-                        array_get(p_requested_validation_layers, &requested_validation_layers, 0);
+                        array_get(p_requested_validation_layers, requested_validation_layers, 0);
+
+                        for (size_t i = 0; i < requested_layers_count; i++)
+                            requested_validation_layers[i] = JSON_VALUE(((JSONValue_t *)requested_validation_layers[i]), JSONstring);
+                        
                     }
 
                     // TODO: Add support for user defined extensions
@@ -314,20 +316,30 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             if ( SDL_Vulkan_CreateSurface(p_instance->sdl2.window, p_instance->vulkan.instance, &p_instance->vulkan.surface) == SDL_FALSE )
                 goto failed_to_create_sdl2_surface;
 
+            array_get(p_device_extensions, 0, &device_extension_count);
+            device_extensions = calloc(device_extension_count+1, sizeof(char *));
+            array_get(p_device_extensions, device_extensions, 0);
+            
+            // Iterate over each vulkan device extension
+            for (size_t i = 0; i < device_extension_count; i++)
+
+                // JSONValue_t * ---> char *
+                device_extensions[i] = JSON_VALUE(((JSONValue_t *)device_extensions[i]), JSONstring);
+
             // Get a physical device to use
-            //pick_physical_device(device_extensions);
+            pick_physical_device(device_extensions);
 
             // Create a logical device from the physical device
-            //create_logical_device(device_extensions);
+            create_logical_device(device_extensions);
 
             // Create a swap chain
-            //create_swap_chain();
-            //create_image_views();
+            create_swap_chain();
+            create_image_views();
 
             // Create other stuff
-            //create_command_pool();
-            //create_command_buffers();
-            //create_sync_objects();
+            create_command_pool();
+            create_command_buffers();
+            create_sync_objects();
         }
 
         // G10 Initialization
@@ -355,9 +367,9 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
             p_instance->mutexes.material_cache = SDL_CreateMutex();
 
             // Subsystem initialization
-            /*
             {
-
+                
+                /*
                 // Renderer initialization
                 {
                     extern void init_renderer ( void );
@@ -436,7 +448,8 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
 
                     init_physics();
                 }
-
+                */
+               
                 // AI initialization
                 {
                     extern void init_ai(void);
@@ -444,7 +457,7 @@ int           g_init                       ( GXInstance_t      **pp_instance, co
                     init_ai();
                 }
             }
-            */
+            
             // Load a renderer
             if (renderer)
             {
@@ -697,11 +710,12 @@ void          pick_physical_device         ( char **required_extension_names )
         #endif
     }
 
-    GXInstance_t* instance = g_get_active_instance();
+    // Initialized data
+    GXInstance_t     *p_instance   = g_get_active_instance();
+    u32               device_count = 0;
+    VkPhysicalDevice *devices      = 0;
 
-    u32 device_count = 0;
-    VkPhysicalDevice *devices = 0;
-    vkEnumeratePhysicalDevices(instance->vulkan.instance, &device_count, (void*)0);
+    vkEnumeratePhysicalDevices(p_instance->vulkan.instance, &device_count, (void*)0);
 
     // Error check
     if (device_count == 0)
@@ -709,12 +723,12 @@ void          pick_physical_device         ( char **required_extension_names )
 
     devices = calloc(device_count + 1, sizeof(VkPhysicalDevice));
 
-    vkEnumeratePhysicalDevices(instance->vulkan.instance, &device_count, devices);
+    vkEnumeratePhysicalDevices(p_instance->vulkan.instance, &device_count, devices);
 
     for (size_t i = 0; i < device_count; i++)
     {
-        if (check_vulkan_device(instance, devices[i], required_extension_names))
-            instance->vulkan.physical_device = devices[i];
+        if (check_vulkan_device(p_instance, devices[i], required_extension_names))
+            p_instance->vulkan.physical_device = devices[i];
     }
 
     no_devices:;
@@ -740,14 +754,15 @@ void          create_logical_device        ( char **required_extension_names )
         queue_create_infos[i].pQueuePriorities = &instance->vulkan.priority;
     }
 
-    device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    device_create_info.queueCreateInfoCount = 2;
-    device_create_info.pQueueCreateInfos = queue_create_infos;
-    device_create_info.enabledExtensionCount = 1;
-    device_create_info.pEnabledFeatures = &device_features;
+    device_create_info = (VkDeviceCreateInfo) {
+        .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .queueCreateInfoCount    = 2,
+        .pQueueCreateInfos       = queue_create_infos,
+        .enabledExtensionCount   = 1,
+        .pEnabledFeatures        = &device_features,
+        .ppEnabledExtensionNames = required_extension_names
+    };
 
-    device_create_info.ppEnabledExtensionNames = required_extension_names;
-    
     result = vkCreateDevice(instance->vulkan.physical_device, &device_create_info, 0, &instance->vulkan.device);
 
     if (result != VK_SUCCESS) {
@@ -782,18 +797,25 @@ void          create_swap_chain            ( void )
         if (instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             surface_format = instance->vulkan.swap_chain_details.formats[i];
     
-    extent.width  = instance->window.width;
-    extent.height = instance->window.height;
+    extent = (VkExtent2D) {
+        .width  = instance->window.width,
+        .height = instance->window.height
+    };
 
-    // TODO: Check memory
-    swapchain_create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapchain_create_info.surface          = instance->vulkan.surface;
-    swapchain_create_info.minImageCount    = 2;
-    swapchain_create_info.imageFormat      = surface_format.format;
-    swapchain_create_info.imageColorSpace  = surface_format.colorSpace;
-    swapchain_create_info.imageExtent      = extent;
-    swapchain_create_info.imageArrayLayers = 1;
-    swapchain_create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    swapchain_create_info = (VkSwapchainCreateInfoKHR) { 
+        .sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        .surface          = instance->vulkan.surface,
+        .minImageCount    = 2,
+        .imageFormat      = surface_format.format,
+        .imageColorSpace  = surface_format.colorSpace,
+        .imageExtent      = extent,
+        .imageArrayLayers = 1,
+        .imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        .presentMode    = present_mode,
+        .clipped        = VK_TRUE,
+        .oldSwapchain   = VK_NULL_HANDLE
+    };
     
     if (instance->vulkan.queue_family_indices.g != instance->vulkan.queue_family_indices.p)
     {
@@ -804,14 +826,7 @@ void          create_swap_chain            ( void )
     else
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-
     swapchain_create_info.preTransform   = instance->vulkan.swap_chain_details.capabilities.currentTransform;
-    swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    swapchain_create_info.presentMode    = present_mode;
-    swapchain_create_info.clipped        = VK_TRUE;
-
-    swapchain_create_info.oldSwapchain   = VK_NULL_HANDLE;
-
 
     if (vkCreateSwapchainKHR(instance->vulkan.device, &swapchain_create_info, 0, &instance->vulkan.swap_chain))
         // TODO: Replace with goto
@@ -848,29 +863,25 @@ void          create_image_views           ( void ) {
     
     for (size_t i = 0; i < instance->vulkan.image_count; i++)
     {
-        VkImageViewCreateInfo  image_view_create_info = { 0 };
+        VkImageViewCreateInfo  image_view_create_info = { 
+            .sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image                           = instance->vulkan.swap_chain_images[i],
+            .viewType                        = VK_IMAGE_VIEW_TYPE_2D,
+            .format                          = instance->vulkan.swap_chain_image_format,
+            .components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+            .subresourceRange.baseMipLevel   = 0,
+            .subresourceRange.levelCount     = 1,
+            .subresourceRange.baseArrayLayer = 0,
+            .subresourceRange.layerCount     = 1,
+            .flags                           = 0,
+            .pNext                           = 0
+        };
 
-        image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        image_view_create_info.image = instance->vulkan.swap_chain_images[i];
-        image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        image_view_create_info.format = instance->vulkan.swap_chain_image_format;
-
-        image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-        image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        image_view_create_info.subresourceRange.baseMipLevel = 0;
-        image_view_create_info.subresourceRange.levelCount = 1;
-        image_view_create_info.subresourceRange.baseArrayLayer = 0;
-        image_view_create_info.subresourceRange.layerCount = 1;
-
-        image_view_create_info.flags = 0;
-
-        image_view_create_info.pNext = 0;
-
-        if (vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS) {
+        if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS ) {
             g_print_error("failed to create image views!\n");
         }
         
@@ -879,12 +890,14 @@ void          create_image_views           ( void ) {
 
 void          create_command_pool          ( void )
 {
-    GXInstance_t* instance = g_get_active_instance();
-    VkCommandPoolCreateInfo  pool_create_info = { 0 };
 
-    pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    pool_create_info.queueFamilyIndex = instance->vulkan.queue_family_indices.g;
+    // Initialized data
+    GXInstance_t            *instance = g_get_active_instance();
+    VkCommandPoolCreateInfo  pool_create_info = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .queueFamilyIndex = instance->vulkan.queue_family_indices.g
+    };
 
     if ( vkCreateCommandPool(instance->vulkan.device, &pool_create_info, 0, &instance->vulkan.command_pool) != VK_SUCCESS )
         g_print_error("Failed to create command pool!\n");
@@ -894,15 +907,16 @@ void          create_command_buffers       ( void )
 {
     GXInstance_t *instance = g_get_active_instance();
 
-    VkCommandBufferAllocateInfo* alloc_info = calloc(1, sizeof(VkCommandBufferAllocateInfo));
+    VkCommandBufferAllocateInfo alloc_info = {
+        .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .commandPool        = instance->vulkan.command_pool,
+        .level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = instance->vulkan.max_buffered_frames
+    };
+
     instance->vulkan.command_buffers = calloc(instance->vulkan.max_buffered_frames, sizeof(VkCommandBuffer));
 
-    alloc_info->sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info->commandPool        = instance->vulkan.command_pool;
-    alloc_info->level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info->commandBufferCount = instance->vulkan.max_buffered_frames;
-
-    if (vkAllocateCommandBuffers(instance->vulkan.device, alloc_info, instance->vulkan.command_buffers) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(instance->vulkan.device, &alloc_info, instance->vulkan.command_buffers) != VK_SUCCESS) {
         g_print_error("failed to allocate command buffers!\n");
     }
 }
@@ -1076,10 +1090,12 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
     {
 
         // Populate the create info struct
-        buffer_info.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffer_info.size        = size;
-        buffer_info.usage       = usage;
-        buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        buffer_info = (VkBufferCreateInfo) {
+            .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size        = size,
+            .usage       = usage,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+        };
 
         // Create a buffer
         if ( vkCreateBuffer( instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
@@ -1087,15 +1103,16 @@ void          create_buffer                ( VkDeviceSize          size, VkBuffe
 
         vkGetBufferMemoryRequirements(instance->vulkan.device, *buffer, &mem_requirements);
     }
-    
 
     // Allocate memory for the buffer
     {
 
         // Populate the allocation struct
-        alloc_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        alloc_info.allocationSize  = mem_requirements.size;
-        alloc_info.memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties);
+        alloc_info = (VkMemoryAllocateInfo) {
+            .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize  = mem_requirements.size,
+            .memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties)
+        };
 
         // Allocate memory for the buffer
         if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
