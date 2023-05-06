@@ -13,7 +13,6 @@
 #define BUILD_G10_WITH_ANSI_COLOR
 
 // Standard library
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -258,62 +257,64 @@ DLLEXPORT void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMe
 /** !
  *  Load a file. If buffer is null pointer, returns size of file
  *
- * @param path       : Path to file
- * @param buffer     : Buffer to read file
- * @param binaryMode : "r" if false else "rb"
+ * @param path        : Path to file
+ * @param buffer      : Buffer to read file
+ * @param binary_mode : "r" if false else "rb"
  * @sa g_exit
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT size_t g_load_file ( const char *path, void *buffer, bool binaryMode );
+DLLEXPORT size_t g_load_file ( const char *path, void *buffer, bool binary_mode );
 
 // Window operations
 /** !
  *  Resize the window using instance->window_width and instance->window_height
  *
- * @param instance : The active instance
+ * @param p_instance : The active instance
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int   g_window_resize ( GXInstance_t *instance );
-
-DLLEXPORT int   g_delta ( GXInstance_t *instance );
-DLLEXPORT float g_time  ( GXInstance_t *instance );
+DLLEXPORT int   g_window_resize ( GXInstance_t *p_instance );
 
 // Debug logging
-
 /** !
  *  printf in ANSI red
  *
- * @param format : printf formatted text
- * @param ...    : Additional parameters
- * @sa g_exit
+ * @param format : printf format parameter
+ * @param ...    : Additional arguments
+ * 
+ * @sa g_print_warning
+ * @sa g_print_log
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_print_error ( const char *const  format  , ... );
+DLLEXPORT int g_print_error ( const char *const format, ... );
 
 /** !
  *  printf in ANSI yellow
  *
- * @param format : printf formatted text
- * @param ...    : Additional parameters
- * @sa g_exit
- *
+ * @param format : printf format parameter
+ * @param ...    : Additional arguments
+ * 
+ * @sa g_print_error
+ * @sa g_print_log
+ * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_print_warning ( const char *const  format  , ... );
+DLLEXPORT int g_print_warning ( const char *const format, ... );
 
 /** !
  *  printf in ANSI blue
  *
- * @param format : printf formatted text
- * @param ...    : Additional parameters
- * @sa g_exit
+ * @param format : printf format parameter
+ * @param ...    : Additional arguments
+ * 
+ * @sa g_print_error
+ * @sa g_print_warning
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_print_log ( const char *const  format  , ... );
+DLLEXPORT int g_print_log ( const char *const format, ... );
 
 /** !
  *  Set an instances active schedule, and start running said schedule
@@ -368,7 +369,7 @@ DLLEXPORT GXInstance_t* g_get_active_instance ( void );
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_material ( GXInstance_t *instance, GXMaterial_t *material );
+DLLEXPORT int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material );
 
 /** !
  * Cache a part. Caching a part adds it to the garbage collector.
@@ -380,7 +381,7 @@ DLLEXPORT int g_cache_material ( GXInstance_t *instance, GXMaterial_t *material 
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_part ( GXInstance_t *instance, GXPart_t *part );
+DLLEXPORT int g_cache_part ( GXInstance_t *p_instance, GXPart_t *part );
 
 /** !
  * Cache a shader. Caching a shader adds it to the garbage collector.
@@ -392,7 +393,7 @@ DLLEXPORT int g_cache_part ( GXInstance_t *instance, GXPart_t *part );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_shader ( GXInstance_t *instance, GXShader_t *shader );
+DLLEXPORT int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *shader );
 
 /** !
  * Cache an ai. Caching an ai adds it to the garbage collector.
@@ -404,17 +405,17 @@ DLLEXPORT int g_cache_shader ( GXInstance_t *instance, GXShader_t *shader );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_ai ( GXInstance_t *instance, GXAI_t *ai );
+DLLEXPORT int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *ai );
 
-DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *instance  , char *name );
-DLLEXPORT GXPart_t     *g_find_part     ( GXInstance_t *instance  , char *name );
-DLLEXPORT GXShader_t   *g_find_shader   ( GXInstance_t *instance  , char *name );
+DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *p_instance  , char *name );
+DLLEXPORT GXPart_t     *g_find_part     ( GXInstance_t *p_instance  , char *name );
+DLLEXPORT GXShader_t   *g_find_shader   ( GXInstance_t *p_instance  , char *name );
 DLLEXPORT GXAI_t       *g_find_ai       ( GXInstance_t *p_instance, char *name );
 
 // User operations
-DLLEXPORT void          g_user_exit         ( callback_parameter_t state, GXInstance_t    *instance );
-DLLEXPORT void          g_toggle_mouse_lock ( callback_parameter_t state, GXInstance_t    *instance );
-DLLEXPORT void          g_play_sound        ( callback_parameter_t state, GXInstance_t    *instance );
+DLLEXPORT void g_user_exit         ( callback_parameter_t state, GXInstance_t *p_instance );
+DLLEXPORT void g_toggle_mouse_lock ( callback_parameter_t state, GXInstance_t *p_instance );
+DLLEXPORT void g_play_sound        ( callback_parameter_t state, GXInstance_t *p_instance );
 
 // Conversions
 /** !
@@ -446,4 +447,13 @@ inline float to_radians ( float degrees )
 }
 
 // Destructors
-DLLEXPORT int g_exit ( GXInstance_t *instance );
+/** !
+ * Destroy a G10 instance
+ *
+ * @param p_instance : pointer to the instance pointer
+ *
+ * @sa g_init
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int g_exit ( GXInstance_t **pp_instance );

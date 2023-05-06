@@ -1,9 +1,19 @@
+/** !
+ * @file G10/GXEntity.h
+ * @author Jacob Smith
+ * 
+ * Entity
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXPart.h>

@@ -157,6 +157,9 @@ int  load_camera ( GXCamera_t **pp_camera, const char *path )
 	if ( load_camera_as_json(pp_camera, file_text, file_len) == 0 )
 		goto failed_to_load_camera_as_json;
 
+	// Clean up the scope
+	free(file_text);
+
 	// Success
 	return 1;
 
@@ -235,8 +238,8 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 	if ( parse_json_value(text, 0, &p_value) == 0 ) 
 		goto failed_to_parse_json;
 
-	// Parse the AI JSON
-	if (p_value->type == JSONobject)
+	// Parse the camera JSON
+	if ( p_value->type == JSONobject )
 	{
 
 		// Initialized data
@@ -449,7 +452,7 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 		{
 			failed_to_parse_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				
 				// Error
@@ -457,7 +460,7 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 
 			wrong_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 				
 				// Error
@@ -465,7 +468,7 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Failed to construct Camera in call to function \"%s\". Missing properties!\n", __FUNCTION__);
 				#endif
 				
 				// Error

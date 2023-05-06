@@ -41,21 +41,21 @@ struct GXTransform_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  create_transform          ( GXTransform_t **pp_transform );
+DLLEXPORT int create_transform ( GXTransform_t **pp_transform );
 
 // Constructors
 /** !
- *  Load a transform from the filesystem
+ *  Load a transform from a file
  *
  * @param pp_transform : return
- * @param path         : The path to a JSON file containing a transform object
+ * @param path         : The path to a transform JSON object
  *
  * @sa load_transform_as_json
  * @sa create_transform
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int  load_transform            ( GXTransform_t** pp_transform, const char* path );
+DLLEXPORT int  load_transform ( GXTransform_t **pp_transform, const char* path );
 
 /** !
  *  Load a transform from JSON text

@@ -1,7 +1,17 @@
+/** !
+ * @file G10/GXTypedef.h
+ * @author Jacob Smith
+ * 
+ * Type definitions for G10
+ */
+
+// Include guard
 #pragma once
+
+// SDL2
 #include <SDL.h>
 
-// Here are a few useful typedefs used throughout the engine
+// Integers
 typedef unsigned char      u8;
 typedef signed   char      s8;
 typedef          char      i8;
@@ -14,6 +24,8 @@ typedef          long      i32;
 typedef unsigned long long u64;
 typedef signed   long long s64;
 typedef          long long i64;
+
+// Floats
 typedef float              f32;
 typedef double             f64;
 

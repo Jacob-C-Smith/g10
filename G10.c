@@ -119,7 +119,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         fullscreen    = (bool)   JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "fullscreen"))   , JSONboolean);
 
         // Input
-        input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "fullscreen")), JSONboolean);
+        input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "input")), JSONstring);
 
         // Log file
         log_file_i = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "log file")), JSONstring);
@@ -161,12 +161,11 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         log_file = (log_file_i) ?  fopen(log_file_i, "w") : stdout;
 
         // Window initialization
-        p_instance->window.width = window_width;
-        p_instance->window.height = window_height;
-
-        // FMOD initialization
-        // TODO:
-
+        {
+            p_instance->window.width = window_width;
+            p_instance->window.height = window_height;
+        }
+        
         // SDL initialization
         {
 
@@ -363,7 +362,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Initialize mutexes
             // TODO: Create mutexes in subsystem initializers
-            p_instance->mutexes.part_cache     = SDL_CreateMutex();
+            p_instance->mutexes.part_cache = SDL_CreateMutex();
 
             // Subsystem initialization
             {
@@ -380,6 +379,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 {
                     extern void init_shader ( void );
 
+                    // Run the shader system initializer
                     init_shader();
                 }
 
@@ -436,8 +436,11 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 //Scheduler initialization
                 {
+                    
+                    // Get an external function
                     extern void init_scheduler( void );
                         
+                    // Run the scheduler system initializer
                     init_scheduler();
                 }
 
@@ -508,8 +511,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             }
 
             // Load an input set
-            //if (input)
-            //    load_input(&p_instance->input, input);
+            if (input)
+            {
+                load_input(&p_instance->input, input);
+            }
 
             //Load audio
             if (audio) {} // Coming soon...
@@ -622,7 +627,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
     // Focus the game window
     SDL_SetWindowInputFocus(p_instance->sdl2.window);
-
+    
+    // The instance is running
+    p_instance->running = true;
+    
     // Return an instance pointer to the caller
     *pp_instance = p_instance;
     
@@ -1983,99 +1991,154 @@ GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name )
     }
 }
 
-int g_exit ( GXInstance_t *p_instance )
+int g_exit ( GXInstance_t **pp_instance )
 {
 
     // Argument check
     {
-        if (p_instance == (void*)0)
-            goto no_instance;
+        #ifndef NDEBUG
+            if ( pp_instance == (void *) 0 )
+                goto no_instance;
+        #endif
     }
+
+    // Initialized data
+    GXInstance_t *p_instance = *pp_instance;
+
+    // No more instance for caller
+    *pp_instance = 0;
 
     // Wait for the GPU to finish whatever its doing
     vkDeviceWaitIdle(p_instance->vulkan.device);
 
-    // Cleanup
+    // Cleanup the instance
     {
+        
+        // Free the instance name
+        free(p_instance->name);
 
-        // Free instance data
+        // TODO: Free scenes
+        //dict_free_clear(p_instance->data.scenes, &destroy_scene);
+
+        // Cleanup the context
+        {
+
+            // Clear the active schedule...
+            p_instance->context.schedule = 0;
+
+            // ... the active scene ...
+            p_instance->context.scene = 0;
+
+            // ... any loading scene ...
+            p_instance->context.loading_scene = 0;
+
+            // ... and the active renderer ...
+            p_instance->context.renderer = 0;
+
+            // ... and the user code callback 
+            p_instance->context.user_code_callback = 0;
+        }
+
+        // Cleanup the data
+        {
+
+            // TODO: Cleanup the scenes...
+            //dict_free_clear(p_instance->data.scenes, destroy_scene);
+
+            // TODO: ... and the schedules
+            //dict_free_clear(p_instance->data.schedules, destroy_schedule);
+        }
+
+        // Cleanup the cache
+        {        
+            
+            // TODO: Free the shaders...
+            //dict_free_clear(p_instance->cache.shaders, &destroy_shader);
+        
+            // TODO: Free materials
+            //dict_free_clear(p_instance->cache.materials, &destroy_material);
+
+            // ... and the parts...
+            dict_free_clear(p_instance->cache.parts, &destroy_part);
+        }
+
+        // Cleanup mutexes
         {
             
-            // Free the instance name
-            free(p_instance->name);
+            // Destroy the entity loading mutex...
+            SDL_DestroyMutex(p_instance->mutexes.load_entity);
+
+            // ... and the cache mutexes...
+            SDL_DestroyMutex(p_instance->mutexes.shader_cache);
+            SDL_DestroyMutex(p_instance->mutexes.part_cache);
+            SDL_DestroyMutex(p_instance->mutexes.ai_cache);
+            SDL_DestroyMutex(p_instance->mutexes.material_cache);
+
+            // ... and the physics mutexes...
+            SDL_DestroyMutex(p_instance->mutexes.move_object);
+            SDL_DestroyMutex(p_instance->mutexes.update_force);
+            SDL_DestroyMutex(p_instance->mutexes.resolve_collision);
+
+            // ... and the AI mutexes
+            SDL_DestroyMutex(p_instance->mutexes.ai_preupdate);
+            SDL_DestroyMutex(p_instance->mutexes.ai_update);
         }
 
-
-        // Free scenes
+        // Cleanup queues
         {
-            size_t scene_count = dict_keys(p_instance->data.scenes, 0);
-            GXScene_t **scenes = calloc(scene_count, sizeof(void *));
 
-            dict_values(p_instance->data.scenes, scenes);
+            // Destroy the entity loading queue
+            queue_destroy(&p_instance->queues.load_entity);
 
-            //for (size_t i = 0; i < scene_count; i++)
-            //    destroy_scene(scenes[i]);
+            // Destroy the light probe loading queue
+            //queue_destroy(&p_instance->queues.load_light_probe);
 
-            free(scenes);
+            // Destroy the physics queues
+            queue_destroy(&p_instance->queues.actor_move);
+            queue_destroy(&p_instance->queues.actor_collision);
+            queue_destroy(&p_instance->queues.actor_force);
 
-            dict_destroy(p_instance->data.scenes);
+            // Destroy the AI queues
+            queue_destroy(&p_instance->queues.ai_preupdate);
+            queue_destroy(&p_instance->queues.ai_update);
         }
 
-        // Free shaders
-        {
-
-            // Initialized data
-            size_t        shader_count = dict_values(p_instance->cache.shaders, 0);
-            GXShader_t  **shaders      = calloc(shader_count, sizeof(GXShader_t*));
-
-            // Get a list of orphan shaders
-            dict_values(p_instance->cache.shaders, shaders);
-
-            // Iterate over each shader
-            for (size_t i = 0; i < shader_count; i++)
-            {
-
-                // Destroy the shader
-                shaders[i]->users = 1;
-                // TODO: Fix
-                //destroy_shader(shaders[i]);
-
-            }
-
-            // Free the list
-            free(shaders);
-        }
-
-        // Free materials
-        {
-            ;
-        }
-
-        // Free parts
-        {
-            ;
-        }
+        // Cleanup input
+        destroy_input(p_instance->input);
     }
 
-    // Vulkan cleanup
+    // Cleanup vulkan
     {
+
+        // Clear the swapchain
         clear_swap_chain();
 
+        // Destroy synchronization primatives
         for (size_t i = 0; i < p_instance->vulkan.max_buffered_frames; i++)
         {
+
+            // Destroy semaphores
             vkDestroySemaphore(p_instance->vulkan.device, p_instance->vulkan.render_finished_semaphores[i], 0);
             vkDestroySemaphore(p_instance->vulkan.device, p_instance->vulkan.image_available_semaphores[i], 0);
-            vkDestroyFence(p_instance->vulkan.device, p_instance->vulkan.in_flight_fences[i], 0);
 
+            // Destroy fences
+            vkDestroyFence(p_instance->vulkan.device, p_instance->vulkan.in_flight_fences[i], 0);
         }
 
+        // Destroy the command pool
         vkDestroyCommandPool(p_instance->vulkan.device, p_instance->vulkan.command_pool, 0);
 
+        // Destroy the logical device
         vkDestroyDevice(p_instance->vulkan.device, (void*)0);
-        vkDestroySurfaceKHR(p_instance->vulkan.instance, p_instance->vulkan.surface, (void*)0);
-        vkDestroyInstance(p_instance->vulkan.instance, (void*)0);
+
+        // Destroy the surface
+        vkDestroySurfaceKHR(p_instance->vulkan.instance, p_instance->vulkan.surface, (void*) 0);
+
+        // Destroy the instance
+        vkDestroyInstance(p_instance->vulkan.instance, (void*) 0) ;
     }
 
+    // Clean up FMOD
     #ifdef BUILD_G10_WITH_FMOD
         
         //FMOD Cleanup
@@ -2086,18 +2149,21 @@ int g_exit ( GXInstance_t *p_instance )
 
     #endif
 
+    // Clean up discord
+    #ifdef BUILD_G10_WITH_DISCORD
+    #endif
+
     // SDL Cleanup
-    {
-        SDL_DestroyWindow(p_instance->sdl2.window);
-        SDL_Quit();
-    }
+    SDL_DestroyWindow(p_instance->sdl2.window);
+    SDL_Quit();
     
+    // Free the instance data
     free(p_instance);
     
     g_print_log("[G10] Exit successful\n");
 
     // Success
-    return 0;
+    return 1;
 
     // Error handling
     {

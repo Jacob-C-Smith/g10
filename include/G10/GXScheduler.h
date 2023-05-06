@@ -16,13 +16,13 @@
 // SDL
 #include <SDL.h>
 
-// Dict submodule
+// dict submodule
 #include <dict/dict.h>
 
-// JSON submodule
+// json submodule
 #include <json/json.h>
 
-// Array submodule
+// array submodule
 #include <array/array.h>
 
 // G10 

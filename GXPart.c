@@ -21,18 +21,14 @@ int create_part ( GXPart_t **pp_part )
 	}
 
 	// Initialized data
-	GXPart_t *i_part = calloc(1, sizeof(GXPart_t));
+	GXPart_t *p_part = calloc(1, sizeof(GXPart_t));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if (i_part == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	if ( p_part == (void *) 0 )
+		goto no_mem;
 
-	// Write the return
-	*pp_part = i_part;
+	// Return a pointer to the caller
+	*pp_part = p_part;
 
 	// Success
 	return 1;
@@ -46,6 +42,8 @@ int create_part ( GXPart_t **pp_part )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error 
 				return 0;
 		}
 
@@ -55,13 +53,15 @@ int create_part ( GXPart_t **pp_part )
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 
 }
 
-int load_part         ( GXPart_t **pp_part, char* path)
+int load_part ( GXPart_t **pp_part, char* path)
 {
 
 	// Argument error
@@ -79,12 +79,8 @@ int load_part         ( GXPart_t **pp_part, char* path)
 	char   *token_text = calloc(len + 1, sizeof(char));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if (token_text == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	if ( token_text == (void *)0 )
+		goto no_mem;
 
 	// Load the file into the buffer
 	if ( g_load_file(path, token_text, false) == 0 )
@@ -109,12 +105,16 @@ int load_part         ( GXPart_t **pp_part, char* path)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -124,6 +124,8 @@ int load_part         ( GXPart_t **pp_part, char* path)
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -133,12 +135,16 @@ int load_part         ( GXPart_t **pp_part, char* path)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 			failed_to_load_part:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Failed to load part in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -164,10 +170,8 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	// Initialized data
 	GXInstance_t *instance  = g_get_active_instance();
 	GXPart_t     *p_part    = 0; 
-
 	char         *name      = 0,
 		         *path      = 0;
-
 	dict         *part_json = 0;
 
 	// Allocate for a part
@@ -282,7 +286,7 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	}
 }
 
-int draw_part         ( GXPart_t  *p_part )
+int draw_part ( GXPart_t *p_part )
 {
 
 	// Argument check
@@ -324,7 +328,7 @@ int draw_part         ( GXPart_t  *p_part )
 	}
 }
 
-int part_info         ( GXPart_t *p_part )
+int part_info ( GXPart_t *p_part )
 {
 
 	// Argument check
@@ -375,7 +379,7 @@ int part_info         ( GXPart_t *p_part )
 	}
 }
 
-int destroy_part      ( GXPart_t  *p_part ) 
+int destroy_part ( GXPart_t *p_part ) 
 {
 	
 	// Argument chack

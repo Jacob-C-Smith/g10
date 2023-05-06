@@ -1,9 +1,24 @@
+/** !
+ * @file G10/GXCamera.h
+ * @author Jacob Smith
+ * 
+ * Camera 
+ */
+
+// Include guard
 #pragma once
+
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
+
+// array submodule
 #include <array/array.h>
+// dict submodule
 #include <dict/dict.h>
+
+// json submodule
 #include <json/json.h>
 
 struct GXCamera_s {

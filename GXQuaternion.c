@@ -38,14 +38,13 @@ quaternion    quaternion_inverse(quaternion q)
     return (quaternion) { q.u, -q.i, -q.j, -q.k };
 }
 
-// ✅ Multiplies two quaternions as vectors
 quaternion    multiply_quaternion_quaternion_vec4(quaternion q1, quaternion q2)
 {
     return (quaternion) {
         (-q1.i * q2.i - q1.j * q2.j - q1.k * q2.k),
-            (q1.j * q2.k - q1.k * q2.j),
-            (q1.k * q2.i - q1.i * q2.k),
-            (q1.i * q2.j - q1.j * q2.i)
+        (q1.j * q2.k - q1.k * q2.j),
+        (q1.k * q2.i - q1.i * q2.k),
+        (q1.i * q2.j - q1.j * q2.i)
     };
 }
 
@@ -93,7 +92,7 @@ void          rotate_vec3_by_quaternion(vec3* r, vec3 v, quaternion q)
     r->z = pP.k;
 }
 
-quaternion    normalize_quaternion(quaternion q)
+quaternion normalize_quaternion(quaternion q)
 {
     quaternion ret = { 0.f, 0.f, 0.f, 0.f };
     float vl = sqrtf((q.i * q.i) + (q.j * q.j) + (q.k * q.k));

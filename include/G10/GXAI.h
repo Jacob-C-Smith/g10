@@ -1,12 +1,25 @@
+/** !
+ * @file G10/GXAI.h
+ * @author Jacob Smith
+ * 
+ * Simple finite state automaton
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+// dict submodule
 #include <dict/dict.h>
+
+// json submodule
 #include <json/json.h>
 
+// G10 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 
@@ -19,8 +32,7 @@ struct GXAI_s
 };
 
 // Allocators
-
-/* !
+/** !
  *  Allocate memory for an AI
  *
  * @param pp_ai : return
@@ -29,11 +41,10 @@ struct GXAI_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
+DLLEXPORT int create_ai ( GXAI_t **pp_ai );
 
 // Constructors
-
-/* !
+/** !
  *  Load an AI from a JSON file
  *
  * @param pp_ai : return
@@ -44,23 +55,22 @@ DLLEXPORT int create_ai                  ( GXAI_t **pp_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai                    ( GXAI_t **pp_ai, char *path );
+DLLEXPORT int load_ai ( GXAI_t **pp_ai, char *path );
 
-/* !
+/** !
  *  Load an AI from JSON text
  *
- * @param pp_ai      : return
- * @param text : The AI JSON object text
- * @param len        : The length of the AI JSON object text
+ * @param pp_ai : return
+ * @param text  : The AI JSON object text
  *
  * @sa load_ai
  * @sa create_ai
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai_as_json            ( GXAI_t **pp_ai, char *text, size_t len );
+DLLEXPORT int load_ai_as_json ( GXAI_t **pp_ai, char *text );
 
-/* !
+/** !
  *  Load an AI from JSON text
  *
  * @param pp_ai : return
@@ -72,11 +82,10 @@ DLLEXPORT int load_ai_as_json            ( GXAI_t **pp_ai, char *text, size_t le
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int copy_ai                    ( GXAI_t **pp_ai, GXAI_t *p_ai );
+DLLEXPORT int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai );
 
 // Info
-
-/* !
+/** !
  *  Print info about an AI
  *
  * @param p_ai  : pointer to ai to log
@@ -85,35 +94,33 @@ DLLEXPORT int copy_ai                    ( GXAI_t **pp_ai, GXAI_t *p_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int ai_info                    ( GXAI_t *p_ai );
+DLLEXPORT int ai_info ( GXAI_t *p_ai );
 
 // Tasks
-
-/* !
+/** !
  *  Update each AI entity in the instances active scene
  *
- * @param instance         : Pointer to instance
+ * @param instance : Pointer to instance
  *
  * @sa pre_update_ai
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int update_ai                  ( GXInstance_t *instance );
+DLLEXPORT int update_ai ( GXInstance_t *instance );
 
-/* !
+/** !
  *  Preupdate each AI entity in the instances active scene
  *
- * @param instance         : Pointer to instance
+ * @param instance : Pointer to instance
  *
  * @sa update_ai
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int pre_update_ai              ( GXInstance_t *instance );
+DLLEXPORT int pre_update_ai ( GXInstance_t *instance );
 
 // User callbacks
-
-/* !
+/** !
  *  Add a callback function for a state
  *
  * @param p_ai             : Pointer to AI
@@ -125,9 +132,9 @@ DLLEXPORT int pre_update_ai              ( GXInstance_t *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int add_ai_state_callback      ( GXAI_t *p_ai, char *state_name, int (*function_pointer)(GXEntity_t *entity));
+DLLEXPORT int add_ai_state_callback ( GXAI_t *p_ai, char *state_name, int (*function_pointer)(GXEntity_t *entity));
 
-/* !
+/** !
  *  Changes the state of the AI
  *
  * @param p_ai             : Pointer to AI
@@ -138,9 +145,9 @@ DLLEXPORT int add_ai_state_callback      ( GXAI_t *p_ai, char *state_name, int (
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int set_ai_state               ( GXAI_t *p_ai    , const char *state_name );
+DLLEXPORT int set_ai_state ( GXAI_t *p_ai    , const char *state_name );
 
-/* !
+/** !
  *  Changes the AI preupdate function
  *
  * @param p_ai             : Pointer to AI
@@ -154,8 +161,7 @@ DLLEXPORT int set_ai_state               ( GXAI_t *p_ai    , const char *state_n
 DLLEXPORT int set_ai_pre_update_callback ( GXAI_t *p_ai, int (*function_pointer)(GXEntity_t *entity) );
 
 // Deallocators
-
-/* !
+/** !
  *  Free an AI and all its contents
  *
  * @param p_ai : Pointer to AI
@@ -164,4 +170,4 @@ DLLEXPORT int set_ai_pre_update_callback ( GXAI_t *p_ai, int (*function_pointer)
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_ai                 ( GXAI_t *p_ai );
+DLLEXPORT int destroy_ai ( GXAI_t *p_ai );

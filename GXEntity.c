@@ -18,19 +18,16 @@ int create_entity ( GXEntity_t **pp_entity )
 	}
 
 	// Initialized data
-	GXEntity_t *ret = calloc(1,sizeof(GXEntity_t));
+	GXEntity_t *p_entity = calloc(1,sizeof(GXEntity_t));
 	
-	// Memory check
-	{
-		#ifndef NDEBUG
-			if(ret == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	// Error checking
+	if(p_entity == (void *)0)
+		goto no_mem;
 
 	// Return the allocated memory
-	*pp_entity = ret;
+	*pp_entity = p_entity;
 
+	// Success
 	return 1;
 	
 	// Error handling
@@ -40,8 +37,10 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -51,12 +50,14 @@ int create_entity ( GXEntity_t **pp_entity )
 				#ifndef NDEBUG
 					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int load_entity ( GXEntity_t** pp_entity, char* path)
+int load_entity ( GXEntity_t** pp_entity, char* path )
 {
 
 	// Argument check
@@ -64,33 +65,29 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 		#ifndef NDEBUG
 			if ( pp_entity == (void *) 0 )
 				goto no_entity;
-			if ( path      == (void *) 0 )
+			if ( path == (void *) 0 )
 				goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  len        = g_load_file(path, 0, false);
-	char   *token_text = calloc(len+1, sizeof(char));
+	size_t  len  = g_load_file(path, 0, false);
+	char   *text = calloc(len+1, sizeof(char));
 	
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if ( token_text == (void *) 0 )
-				goto no_mem;
-		#endif
-	}
+	if ( text == (void *) 0 )
+		goto no_mem;
 
 	// Load the entity file
-	if ( g_load_file(path, token_text, false) == 0 )
+	if ( g_load_file(path, text, false) == 0 )
 		goto failed_to_load_entity;
 
 	// Load the entity as JSON text
-	if ( load_entity_as_json(pp_entity, token_text, len) == 0 )
+	if ( load_entity_as_json(pp_entity, text, len) == 0 )
 		goto failed_to_load_entity_as_json;
 
-	// Free the object text
-	free(token_text);
+	// Free the text
+	free(text);
 
 	// Success
 	return 1;
@@ -104,12 +101,16 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -120,6 +121,8 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 				#ifndef NDEBUG
 					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -129,11 +132,16 @@ int load_entity ( GXEntity_t** pp_entity, char* path)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Failed to open file \"%s\" text in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+				
 			failed_to_load_entity:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Failed to load entity from \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
+				
+				// Error
 				return 0;
 		}
 	}

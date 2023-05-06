@@ -1,7 +1,17 @@
+/** !
+ * @file G10/GXBV.h
+ * @author Jacob Smith
+ * 
+ * Bounding volume heierarchy
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <float.h>
 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXBV.h>
@@ -16,7 +26,7 @@ struct GXBV_s {
 
 // Allocators
 
-/* !
+/** !
  *  Allocate memory for a bounding volume
  *
  * @param pp_bv : return
@@ -29,7 +39,7 @@ DLLEXPORT int     create_bv                ( GXBV_t   **pp_bv );
 
 // Constructors
 
-/* !
+/** !
  *  Construct a bounding volume from a minimum and a maximum
  *
  * @param pp_bv : return
@@ -43,7 +53,7 @@ DLLEXPORT int     create_bv                ( GXBV_t   **pp_bv );
  */
 DLLEXPORT int     construct_bv             ( GXBV_t   **pp_bv, vec3       min,     vec3        max);
 
-/* !
+/** !
  *  Construct a bounding volume from two bounding volumes
  *
  * @param pp_bv : return
@@ -57,7 +67,7 @@ DLLEXPORT int     construct_bv             ( GXBV_t   **pp_bv, vec3       min,  
  */
 DLLEXPORT int     construct_bv_from_bvs    ( GXBV_t   **pp_bv, GXBV_t     *a     , GXBV_t      *b );
 
-/* !
+/** !
  *  Construct a bounding volume heierarchy from a scene
  *
  * @param pp_bv : return
@@ -70,7 +80,7 @@ DLLEXPORT int     construct_bv_from_bvs    ( GXBV_t   **pp_bv, GXBV_t     *a    
  */
 DLLEXPORT int     construct_bvh_from_scene ( GXBV_t   **bv, GXScene_t  *scene );
 
-/* !
+/** !
  *  Compute the distance between two bounding volumes
  *
  * @param a : The first bounding volume
@@ -90,7 +100,7 @@ DLLEXPORT int     insert_bv                ( GXBV_t     *bvh   , GXBV_t      *bv
 DLLEXPORT int     resize_bv                ( GXBV_t     *bv );
 
 // Logging
-/* !
+/** !
  *  Print info about a bounding volume
  *
  * @param p_ai  : pointer to ai to log
@@ -105,7 +115,7 @@ DLLEXPORT int     bv_info                  ( GXBV_t     *p_bv       , size_t    
 DLLEXPORT size_t  get_entities_from_bv     ( GXBV_t     *bv, queue  *entity_queue );
 
 // Collision detection
-/* !
+/** !
  *  Compute if two bounding volumes are colliding
  *
  * @param a : The first bounding volume

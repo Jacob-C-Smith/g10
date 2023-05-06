@@ -1,13 +1,22 @@
+/** !
+ * @file G10/GXRenderer.h
+ * @author Jacob Smith
+ * 
+ * Renderer
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// Vulkan
 #include <vulkan/vulkan.h>
 
-
-
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXCameraController.h>
@@ -59,8 +68,7 @@ struct GXFramebuffer_s
 };
 
 // Allocators
-
-/* !
+/** !
  *  Allocate memory for a renderer
  *
  * @param pp_renderer : return
@@ -69,9 +77,9 @@ struct GXFramebuffer_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_renderer          ( GXRenderer_t   **pp_renderer );
+DLLEXPORT int create_renderer ( GXRenderer_t **pp_renderer );
 
-/* !
+/** !
  *  Allocate memory for a render pass
  *
  * @param pp_render_pass : return
@@ -80,9 +88,9 @@ DLLEXPORT int create_renderer          ( GXRenderer_t   **pp_renderer );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_render_pass       ( GXRenderPass_t **pp_render_pass );
+DLLEXPORT int create_render_pass ( GXRenderPass_t **pp_render_pass );
 
-/* !
+/** !
  *  Allocate memory for a subpass
  *
  * @param pp_subpass : return
@@ -91,11 +99,10 @@ DLLEXPORT int create_render_pass       ( GXRenderPass_t **pp_render_pass );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_subpass           ( GXSubpass_t    **pp_subpass );
+DLLEXPORT int create_subpass ( GXSubpass_t **pp_subpass );
 
 // Constructors
-
-/* !
+/** !
  *  Load a renderer from a JSON file
  *
  * @param pp_renderer : return
@@ -106,23 +113,22 @@ DLLEXPORT int create_subpass           ( GXSubpass_t    **pp_subpass );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_renderer            ( GXRenderer_t   **pp_renderer   , char *path );
+DLLEXPORT int load_renderer ( GXRenderer_t **pp_renderer, char *path );
 
-/* !
- *  Load an renderer from JSON text
+/** !
+ *  Load a renderer from JSON text
  *
  * @param pp_renderer : return
- * @param token_text  : The renderer JSON object text
- * @param len         : The length of the renderer JSON object text
+ * @param text        : The text
  *
  * @sa load_renderer_as_json
  * @sa create_renderer
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer   , char *token_text, size_t len );
+DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer   , char *token_text );
 
-/* !
+/** !
  *  Load a render pass from a JSON file
  *
  * @param pp_render_pass : return
@@ -135,7 +141,7 @@ DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer   , char *
  */
 DLLEXPORT int load_render_pass         ( GXRenderPass_t **pp_render_pass, char *path );
 
-/* !
+/** !
  *  Load a render pass from JSON text
  *
  * @param pp_render_pass : return
@@ -149,7 +155,7 @@ DLLEXPORT int load_render_pass         ( GXRenderPass_t **pp_render_pass, char *
  */
 DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *token_text, size_t len );
 
-/* !
+/** !
  *  Load a subpass from JSON text
  *
  * @param pp_subpass : return
@@ -163,7 +169,7 @@ DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *
  */
 DLLEXPORT int load_subpass             ( GXSubpass_t    **pp_subpass    , char *path );
 
-/* !
+/** !
  *  Load a subpass from JSON text
  *
  * @param pp_subpass : return
@@ -179,7 +185,7 @@ DLLEXPORT int load_subpass_as_json     ( GXSubpass_t    **pp_subpass    , char *
 
 // Logging
 
-/* !
+/** !
  *  Print info about a renderer
  *
  * @param p_renderer : the renderer
@@ -195,7 +201,7 @@ DLLEXPORT int add_subpass_callback     ( char *name, void (*function_pointer)())
 
 // Scheduler operations
 
-/* !
+/** !
  *  Called once a frame by the scheduler to draw the game to the window. 
  * 
  * Draws every render pass in the instances active renderer to a swapchain, presents the last frame. 
@@ -206,7 +212,7 @@ DLLEXPORT int add_subpass_callback     ( char *name, void (*function_pointer)())
  */
 DLLEXPORT int render_frame             ( GXInstance_t    *instance );
 
-/* !
+/** !
  *  Presents the last frame, after the current frame is done drawing
  *
  * @param instance         : Pointer to instance

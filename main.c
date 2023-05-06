@@ -1,13 +1,10 @@
+// Standard library
 #include <stdio.h>
 
+// G10
 #include <G10/G10.h>
 #include <G10/GXScheduler.h>
-#include <G10/GXScene.h>
-#include <G10/GXEntity.h>
 #include <G10/GXUserCode.h>
-#include <G10/GXDiscordIntegration.h>
-
-static float n = 0.01f;
 
 // This gets called once a frame
 int user_code_callback ( GXInstance_t *p_instance )
@@ -20,16 +17,28 @@ int user_code_callback ( GXInstance_t *p_instance )
     return 1;
 }
 
+int mu()
+{
+    printf("UPUPUP\n");
+    return 0;
+}
+
+int md()
+{
+    printf("DOWNDOWN\n");
+    return 0;
+}
+
 // Entry point 
 int main ( int argc, const char *argv[] )
 {
 
     // Initialized data
-    GXInstance_t  *p_instance        = 0;
-    const char    *instance_path     = "G10/debug client instance.json",
-                  *schedule_name     = "Client Schedule",
-                  *client_name       = 0;
-    bool           connect_to_server = false;
+    GXInstance_t *p_instance        = 0;
+    const char   *instance_path     = "G10/debug client instance.json",
+                 *schedule_name     = "Client Schedule",
+                 *client_name       = 0;
+    bool          connect_to_server = false;
 
     // Parse command line arguments
     for (size_t i = 0; i < argc; i++)
@@ -59,58 +68,34 @@ int main ( int argc, const char *argv[] )
     // Game setup
     {
 
-        // Set up binds                                                 
+        // Set up input 
         {
 
-            // // Add an exit bind
-            // GXBind_t *exit_bind = find_bind(instance->input, "QUIT"),
-            //          *lock_mouse = find_bind(instance->input, "TOGGLE LOCK MOUSE"),
-            //          *play_sound = find_bind(instance->input, "PLAY SOUND");
-            // 
-            // 
-            // // If quit is fired, exit the game loop
-            // register_bind_callback(exit_bind, &g_user_exit);
-            // 
-            // // Toggle mouse locking
-            // register_bind_callback(lock_mouse, &g_toggle_mouse_lock);
-            // 
-            // //Sound play test
-            // register_bind_callback(play_sound, &g_play_sound);
-            // 
-            // // Set up the camera controller
-            // {
+            // Initialized data
+            GXBind_t *exit_bind  = find_bind(p_instance->input, "QUIT"),
+                     *lock_mouse = find_bind(p_instance->input, "TOGGLE LOCK MOUSE"),
+                     *play_sound = find_bind(p_instance->input, "PLAY SOUND"),
+                     *mouse_up   = find_bind(p_instance->input, "MOUSE UP"),
+                     *mouse_down = find_bind(p_instance->input, "MOUSE DOWN");
+
+            // If quit is fired, exit the game loop
+            register_bind_callback(exit_bind, &g_user_exit);
+            
+            // Set up the camera controller
+            {
             // 
             //     // First person controller
             //     camera_controller_from_camera(instance, instance->context.scene->active_camera);
             // 
             //     // Third person controller. Thanks Aiden :)
             //     //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
-            // }
-            // 
-            // // Chat test bind
-            // {
-            //     // chat_bind = 
-            //     //register_bind_callback((GXBind_t *)find_bind(instance->input, "TEXT CHAT"), &chat_callback);
-            // }
+            }
+             
         }
 
         // Set up user code
         add_user_code_callback(p_instance, &user_code_callback);
-
     }
-
-    // Log a lot of stuff
-    {
-        //scene_info(p_instance->context.scene);
-    
-        //bv_info(p_instance->context.scene->bvh, 0);
-    
-        //renderer_info(p_instance->context.renderer);
-    
-        //input_info(p_instance->input);
-    }
-
-    p_instance->running = true;
     
     // Start the game 
     g_start_schedule(p_instance, schedule_name);
@@ -119,7 +104,7 @@ int main ( int argc, const char *argv[] )
     g_stop_schedule(p_instance);
 
     // Exit 
-    g_exit(p_instance);
+    g_exit(&p_instance);
 
     // Return
     return EXIT_SUCCESS;

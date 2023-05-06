@@ -1,50 +1,47 @@
 #include <G10/GXTexture.h>
 
-dict *texturing_modes                                = (void *) 0;
-dict *filtering_modes                                = (void *) 0;
-dict *tiling_lut                                     = (void *) 0;
-dict *usage_lut                                      = (void *) 0;
-dict *view_type_lut                                  = (void *) 0;
-dict *swizzle_lut                                    = (void *) 0;
-dict *aspect_lut                                     = (void *) 0;
+dict *texturing_modes = (void *) 0;
+     *filtering_modes = (void *) 0;
+     *tiling_lut      = (void *) 0;
+     *usage_lut       = (void *) 0;
+     *view_type_lut   = (void *) 0;
+     *swizzle_lut     = (void *) 0;
+     *aspect_lut      = (void *) 0;
 
-char                      *texturing_addressing_keys   [ ] = {
-                                                              "repeat",
-                                                              "mirror repeat",
-                                                              "clamp edge",
-                                                              "clamp border",
-                                                              "mirror clamp edge"
-                                                            };
-
+char *texturing_addressing_keys [ ] = {
+    "repeat",
+    "mirror repeat",
+    "clamp edge",
+    "clamp border",
+    "mirror clamp edge"
+};
 enum VkSamplerAddressMode  texturing_addressing_values [ ] = {
-                                                              VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                                              VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
-                                                              VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                                                              VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-                                                              VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
-                                                            };
+    VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+    VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
+};
 
-char                      *texture_filtering_keys      [ ] = {
-                                                              "linear",
-                                                              "nearest"
-                                                            };
+char *texture_filtering_keys [ ] = {
+    "linear",
+    "nearest"
+};
+enum VkFilter  texture_filtering_values [ ] = {
+    VK_FILTER_LINEAR,
+    VK_FILTER_NEAREST
+};
 
-enum VkFilter              texture_filtering_values    [ ] = {
-                                                              VK_FILTER_LINEAR,
-                                                              VK_FILTER_NEAREST
-                                                            };
-
-char                      *tiling_keys                 [ ] = {
+char *tiling_keys [ ] = {
     "optimal",
     "linear"
 };
-
-enum VkImageTiling         tiling_enum                 [ ] = {
+enum VkImageTiling  tiling_enum [ ] = {
     VK_IMAGE_TILING_OPTIMAL,
     VK_IMAGE_TILING_LINEAR
 };
 
-char                      *usage_keys                  [ ] = {
+char *usage_keys [ ] = {
     "transfer source",
     "transfer destination",
     "sampled",
@@ -55,7 +52,7 @@ char                      *usage_keys                  [ ] = {
     "input attachment"
 };
 
-enum VkImageUsageFlagBits  usage_enum                  [ ] = {
+enum VkImageUsageFlagBits usage_enum [ ] = {
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
     VK_IMAGE_USAGE_TRANSFER_DST_BIT,
     VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -66,7 +63,7 @@ enum VkImageUsageFlagBits  usage_enum                  [ ] = {
     VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
 };
 
-char                      *view_type_names             [ ] = {
+char *view_type_names [ ] = {
     "1D",
     "2D",
     "3D",
@@ -76,7 +73,7 @@ char                      *view_type_names             [ ] = {
     "cube array"
 };
 
-enum VkImageViewType       view_type_enums             [ ] = {
+enum VkImageViewType view_type_enums [ ] = {
     VK_IMAGE_VIEW_TYPE_1D,
     VK_IMAGE_VIEW_TYPE_2D,
     VK_IMAGE_VIEW_TYPE_3D,
@@ -86,7 +83,7 @@ enum VkImageViewType       view_type_enums             [ ] = {
     VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
 };
 
-char                      *swizzle_names               [ ] = {
+char *swizzle_names [ ] = {
     "identity",
     "zero",
     "one",
@@ -96,7 +93,7 @@ char                      *swizzle_names               [ ] = {
     "a"
 };
 
-enum VkComponentSwizzle    swizzle_enums               [ ] = {
+enum VkComponentSwizzle swizzle_enums [ ] = {
     VK_COMPONENT_SWIZZLE_IDENTITY,
     VK_COMPONENT_SWIZZLE_ZERO,
     VK_COMPONENT_SWIZZLE_ONE,
@@ -106,14 +103,14 @@ enum VkComponentSwizzle    swizzle_enums               [ ] = {
     VK_COMPONENT_SWIZZLE_A
 };
 
-char                      *aspect_names                [ ] = {
+char *aspect_names [ ] = {
     "color",
     "depth",
     "stencil",
     "metadata"
 };
 
-enum VkImageAspectFlagBits aspect_enums                [ ] = {
+enum VkImageAspectFlagBits aspect_enums [ ] = {
     VK_IMAGE_ASPECT_COLOR_BIT,
     VK_IMAGE_ASPECT_DEPTH_BIT,
     VK_IMAGE_ASPECT_STENCIL_BIT,
@@ -175,12 +172,15 @@ int init_texture         ( void )
 
         // Constructor errors
         {
+            // TODO
             no_texturing_modes:
             no_filtering_modes:
             no_tiling_lut:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Texture] Failed to initialize texture system");
                 #endif
+
+                // Error
                 return 0;
         }
     }

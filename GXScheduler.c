@@ -43,7 +43,7 @@ char *task_names[TASK_COUNT] = {
 };
 
 void *task_function_pointers[TASK_COUNT] = {
-	0,//&process_input,
+	&process_input,
 	(void*) 0,
 	0,//&update_ai, 
 	0,//&pre_update_ai,

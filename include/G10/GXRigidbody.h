@@ -1,8 +1,18 @@
+/** !
+ * @file G10/GXRigidbody.h
+ * @author Jacob Smith
+ * 
+ * Rigidbody
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <stdio.h>
 #include <stdlib.h>
 
+// G10 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
@@ -30,8 +40,7 @@ struct GXRigidbody_s
 };
 
 // Allocators
-
-/* !
+/** !
  *  Allocate memory for a rigidbody
  *
  * @param pp_rigidbody : return
@@ -43,8 +52,7 @@ struct GXRigidbody_s
 DLLEXPORT int create_rigidbody       ( GXRigidbody_t **pp_rigidbody );
 
 // Constructors
-
-/* !
+/** !
  *  Load a rigidbody from a JSON file
  *
  * @param pp_rigidbody : return
@@ -57,29 +65,27 @@ DLLEXPORT int create_rigidbody       ( GXRigidbody_t **pp_rigidbody );
  */
 DLLEXPORT int load_rigidbody         ( GXRigidbody_t **pp_rigidbody, const char *path );
 
-/* !
+/** !
  *  Load a rigidbody from JSON text
  *
  * @param pp_rigidbody : return
- * @param token_text   : The rigidbody JSON object text
- * @param len          : The length of the rigidbody JSON object text
+ * @param token_text   : The JSON text
  *
  * @sa load_rigidbody
  * @sa create_rigidbody
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_rigidbody_as_json ( GXRigidbody_t **pp_rigidbody, char *token_text, size_t token_text_len );
+DLLEXPORT int load_rigidbody_as_json ( GXRigidbody_t **pp_rigidbody, char *token_text );
 
 // Deallocators
-
-/* !
- *  Free a rigidbody and all its contents
+/** !
+ *  Destroy a rigidbody
  *
- * @param p_rigidbody : Pointer to rigidbody
+ * @param pp_rigidbody : Pointer to rigidbody pointer
  *
  * @sa create_rigidbody
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_rigidbody      ( GXRigidbody_t  *p_rigidbody );
+DLLEXPORT int destroy_rigidbody ( GXRigidbody_t **pp_rigidbody );

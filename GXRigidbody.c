@@ -146,7 +146,7 @@ int load_rigidbody(GXRigidbody_t** pp_rigidbody, const char* path)
 	}
 }
 
-int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text, size_t len )
+int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text )
 {
 
 	// Argument check
