@@ -1,25 +1,32 @@
 #include <G10/GXMaterial.h>
 
+void init_material ( void )
+{
+
+	// Initialized data
+	GXInstance_t *p_instance = g_get_active_instance();
+
+	// Create a material cache mutex
+	p_instance->mutexes.material_cache = SDL_CreateMutex();
+}
+
 int create_material ( GXMaterial_t** material)
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-		if (material == (void*)0)
-			goto no_material;
+			if (material == (void*)0)
+				goto no_material;
 		#endif
 	}
 
+	// Initialized data
 	GXMaterial_t *ret = calloc(1, sizeof(GXMaterial_t));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if(ret == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	if ( ret == (void *) 0 )
+		goto no_mem;
 
 	*material = ret;
 
@@ -31,19 +38,23 @@ int create_material ( GXMaterial_t** material)
 		// Argument checking
 		{
 			no_material:
-			#ifndef NDEBUG
-				g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
-			#endif
-			return 0;
+				#ifndef NDEBUG
+					g_print_error("[G10] [Material] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 		}
 
 		// Standard library errors
 		{
 			no_mem:
-			#ifndef NDEBUG
-				g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
-			#endif
-			return 0;
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 		}
 	}
 }
@@ -137,12 +148,11 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 	GXInstance_t  *instance             = g_get_active_instance();
 	GXMaterial_t  *p_material           = 0;
 	dict          *material_object_json = 0;
-	JSONToken_t   *token                = 0;
 	char          *name                 = 0,
 		         **textures             = 0;
 
 	// Parse the JSON into a dictionary
-	parse_json(token_text, len, &material_object_json);
+	//parse_json(token_text, len, &material_object_json);
 
 	/*
 	{
@@ -158,19 +168,6 @@ int load_material_as_json(GXMaterial_t** material, char* token_text, size_t len)
 		]
 	}
 	*/
-
-	// Parse the dictionary
-	{
-
-		// Initialized data
-		JSONToken_t *t = 0;
-
-		t        = (JSONToken_t *)dict_get(material_object_json, "name");
-		name     = JSON_VALUE(t, JSONstring);
-
-		t        = (JSONToken_t *)dict_get(material_object_json, "textures");
-		textures = JSON_VALUE(t, JSONarray);
-	}
 
 	// Construct the material
 	{

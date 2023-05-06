@@ -1,6 +1,15 @@
 #include <G10/GXPart.h>
 
-int create_part       ( GXPart_t **pp_part )
+void init_part ( void ) 
+{
+	// Initialized data
+	GXInstance_t *p_instance = g_get_active_instance();
+
+	// Create a material cache mutex
+	p_instance->mutexes.part_cache = SDL_CreateMutex();
+}
+
+int create_part ( GXPart_t **pp_part )
 {
 
 	// Initialized data
@@ -139,15 +148,14 @@ int load_part         ( GXPart_t **pp_part, char* path)
 
 int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
 			if ( pp_part == (void *) 0 )
 				goto no_part;
-
 			if ( token_text == (void *) 0 ) 
 				goto no_token_text;
-
 			if ( len == 0 )
 				goto no_len;
 		#endif
@@ -169,19 +177,19 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	p_part = *pp_part;
 
 	// Parse the JSON
-	parse_json(token_text, len, &part_json);
+	//parse_json(token_text, len, &part_json);
 
 	// Parse the dictionary into constructor parameters
 	{
 		
 		// Initiailzed data
-		JSONToken_t *token = 0;
+		//JSONToken_t *token = 0;
 
-		token = (JSONToken_t *) dict_get(part_json, "name");
-		name  = JSON_VALUE(token, JSONstring);
+ 		//token = (JSONToken_t *) dict_get(part_json, "name");
+		//name  = JSON_VALUE(token, JSONstring);
 
-		token = (JSONToken_t *) dict_get(part_json, "path");
-		path  = JSON_VALUE(token, JSONstring);
+ 		//token = (JSONToken_t *) dict_get(part_json, "path");
+		//path  = JSON_VALUE(token, JSONstring);
 	}
 
 	// TODO: FIX CACHING. its busted. 
@@ -190,43 +198,42 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	{
 
 		// Initialized data
-		GXPart_t *cached_part = g_find_part(instance, name);
-
-		// Is there a cached part?
-		if ( cached_part )
-			
-			// 
-			*pp_part = cached_part;
+		//GXPart_t *cached_part = g_find_part(instance, name);
+ 		//// Is there a cached part?
+		//if ( cached_part )
+		//	
+		//	// 
+		//	*pp_part = cached_part;
 	}
 
 	// Construct the part
 	{
 
-		// Copy the name
-		{
-			// Initilaized data
-			size_t name_len = strlen(name);
+		// // Copy the name
+		// {
+		// 	// Initilaized data
+		// 	size_t name_len = strlen(name);
+ 
+		// 	// Allocate memory for the string
+		// 	p_part->name = calloc(name_len + 1, sizeof(char));
+		// 	
+		// 	// Error handling
+		// 	{
+		// 		#ifndef NDEBUG
+		// 			if (p_part->name == (void *) 0 )
+		// 				goto no_mem;
+		// 		#endif
+		// 	}
+ 
+		// 	// Copy the string 
+		// 	strncpy(p_part->name, name, name_len);
+		// }
 
-			// Allocate memory for the string
-			p_part->name = calloc(name_len + 1, sizeof(char));
-			
-			// Error handling
-			{
-				#ifndef NDEBUG
-					if (p_part->name == (void *) 0 )
-						goto no_mem;
-				#endif
-			}
+		// // Get a pointer to the PLY loader
+		// extern GXPart_t* load_ply(GXPart_t * part, const char* path);
 
-			// Copy the string 
-			strncpy(p_part->name, name, name_len);
-		}
-
-		// Get a pointer to the PLY loader
-		extern GXPart_t* load_ply(GXPart_t * part, const char* path);
-
-		// Call the ply loader with the part
-		load_ply(p_part, path);
+		// // Call the ply loader with the part
+		// load_ply(p_part, path);
 	}
 
 	// Success
@@ -242,24 +249,24 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif 
 
-			// Error 
-			return 0;
+				// Error 
+				return 0;
 
 			no_token_text:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif 
 
-			// Error 
-			return 0;
+				// Error 
+				return 0;
 
 			no_len:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"len\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif 
 
-			// Error 
-			return 0;
+				// Error 
+				return 0;
 		}
 		
 		// Standard library errors
@@ -386,7 +393,7 @@ int destroy_part      ( GXPart_t  *p_part )
 	if ( (GXPart_t *) dict_get(instance->cache.parts, p_part->name) == p_part )
 	{
 		if (--p_part->users > 1)
-			dict_pop(instance->cache.parts, p_part->name);
+			dict_pop(instance->cache.parts, p_part->name, 0);
 	}
 	else
 

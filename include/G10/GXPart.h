@@ -6,6 +6,8 @@
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 
+#include <SDL.h>
+
 #include <dict/dict.h>
 #include <json/json.h>
 

@@ -21,7 +21,6 @@
 
 // Vulkan
 #include <vulkan/vulkan.h>
-#include <vulkan/vk_sdk_platform.h>
 
 // SDL 2
 #include <SDL.h>
@@ -230,7 +229,7 @@ struct GXInstance_s
 
 // Allocators
 
-/* !
+/** !
  *  Construct a G10 instance from a JSON file
  *
  * @param pp_instance : return
@@ -242,7 +241,7 @@ struct GXInstance_s
  */
 DLLEXPORT int g_init ( GXInstance_t **pp_instance, const char *path );
 
-/* !
+/** !
  * TODO: DOCUMENT
  *  Create a Vulkan buffer
  *
@@ -256,7 +255,7 @@ DLLEXPORT int g_init ( GXInstance_t **pp_instance, const char *path );
 DLLEXPORT void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
 
 // File operations
-/* !
+/** !
  *  Load a file. If buffer is null pointer, returns size of file
  *
  * @param path       : Path to file
@@ -269,7 +268,7 @@ DLLEXPORT void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMe
 DLLEXPORT size_t g_load_file ( const char *path, void *buffer, bool binaryMode );
 
 // Window operations
-/* !
+/** !
  *  Resize the window using instance->window_width and instance->window_height
  *
  * @param instance : The active instance
@@ -283,7 +282,7 @@ DLLEXPORT float g_time  ( GXInstance_t *instance );
 
 // Debug logging
 
-/* !
+/** !
  *  printf in ANSI red
  *
  * @param format : printf formatted text
@@ -294,7 +293,7 @@ DLLEXPORT float g_time  ( GXInstance_t *instance );
  */
 DLLEXPORT int g_print_error ( const char *const  format  , ... );
 
-/* !
+/** !
  *  printf in ANSI yellow
  *
  * @param format : printf formatted text
@@ -305,7 +304,7 @@ DLLEXPORT int g_print_error ( const char *const  format  , ... );
  */
 DLLEXPORT int g_print_warning ( const char *const  format  , ... );
 
-/* !
+/** !
  *  printf in ANSI blue
  *
  * @param format : printf formatted text
@@ -316,21 +315,32 @@ DLLEXPORT int g_print_warning ( const char *const  format  , ... );
  */
 DLLEXPORT int g_print_log ( const char *const  format  , ... );
 
-/* !
+/** !
  *  Set an instances active schedule, and start running said schedule
  * 
  *  @param instance : the instance
  *  @param name     : the name of the schedule to start running
  * 
  *  @sa g_stop_schedule
+ * 
+ *  @return 1 on success, 0 on error
+ */
+DLLEXPORT int g_start_schedule ( GXInstance_t *p_instance, char *name );
+
+/** !
+ *  Stop the instances active schedule
+ * 
+ *  @param p_instance : the instance
+ * 
+ *  @sa g_stop_schedule
  *  @sa g_user_exit
  * 
  *  @return 1 on success, 0 on error
  */
-DLLEXPORT int g_start_schedule ( GXInstance_t *instance, char *name );
+DLLEXPORT int g_stop_schedule ( GXInstance_t *p_instance );
 
 // State copy
-/* !
+/** !
  *  Copies state from context data into instance
  *
  * @param instance: The active instance
@@ -340,7 +350,7 @@ DLLEXPORT int g_start_schedule ( GXInstance_t *instance, char *name );
 DLLEXPORT int copy_state ( GXInstance_t *instance );
 
 // Getters
-/* !
+/** !
  *  Returns the active instance
  * 
  *  @return pointer to active instance on success, 0 on error
@@ -348,7 +358,7 @@ DLLEXPORT int copy_state ( GXInstance_t *instance );
 DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 
 // Cache operations
-/* !
+/** !
  * Cache a material. Caching a material adds it to the garbage collector.
  * 
  * @param instance: The active instance
@@ -360,7 +370,7 @@ DLLEXPORT GXInstance_t* g_get_active_instance ( void );
  */
 DLLEXPORT int g_cache_material ( GXInstance_t *instance, GXMaterial_t *material );
 
-/* !
+/** !
  * Cache a part. Caching a part adds it to the garbage collector.
  *
  * @param instance: The active instance
@@ -372,7 +382,7 @@ DLLEXPORT int g_cache_material ( GXInstance_t *instance, GXMaterial_t *material 
  */
 DLLEXPORT int g_cache_part ( GXInstance_t *instance, GXPart_t *part );
 
-/* !
+/** !
  * Cache a shader. Caching a shader adds it to the garbage collector.
  *
  * @param instance: The active instance
@@ -384,7 +394,7 @@ DLLEXPORT int g_cache_part ( GXInstance_t *instance, GXPart_t *part );
  */
 DLLEXPORT int g_cache_shader ( GXInstance_t *instance, GXShader_t *shader );
 
-/* !
+/** !
  * Cache an ai. Caching an ai adds it to the garbage collector.
  *
  * @param instance : The active instance
@@ -396,10 +406,10 @@ DLLEXPORT int g_cache_shader ( GXInstance_t *instance, GXShader_t *shader );
  */
 DLLEXPORT int g_cache_ai ( GXInstance_t *instance, GXAI_t *ai );
 
-DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *instance, char *name );
-DLLEXPORT GXPart_t     *g_find_part     ( GXInstance_t *instance, char *name );
-DLLEXPORT GXShader_t   *g_find_shader   ( GXInstance_t *instance, char *name );
-DLLEXPORT GXAI_t       *g_find_ai       ( GXInstance_t *instance, char *name );
+DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *instance  , char *name );
+DLLEXPORT GXPart_t     *g_find_part     ( GXInstance_t *instance  , char *name );
+DLLEXPORT GXShader_t   *g_find_shader   ( GXInstance_t *instance  , char *name );
+DLLEXPORT GXAI_t       *g_find_ai       ( GXInstance_t *p_instance, char *name );
 
 // User operations
 DLLEXPORT void          g_user_exit         ( callback_parameter_t state, GXInstance_t    *instance );
@@ -407,7 +417,7 @@ DLLEXPORT void          g_toggle_mouse_lock ( callback_parameter_t state, GXInst
 DLLEXPORT void          g_play_sound        ( callback_parameter_t state, GXInstance_t    *instance );
 
 // Conversions
-/* !
+/** !
  * Convert radians to degrees
  *
  * @param radians : Radians
@@ -421,7 +431,7 @@ inline float to_degrees ( float radians )
     return radians * (180.f / (float)3.141593);
 }
 
-/* !
+/** !
  * Convert degrees to radians
  *
  * @param degrees : Degrees

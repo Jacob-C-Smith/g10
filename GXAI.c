@@ -118,11 +118,15 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+				
+				// Error
 				return 0;
 			no_path:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -132,6 +136,8 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -142,13 +148,17 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 					free(file_data);
 					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif	
+
+				// Error
 				return 0;
 
 			failed_to_construct_ai_from_file_json:
 				#ifndef NDEBUG
 					free(file_data);
 					g_print_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-				#endif	
+				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -168,106 +178,103 @@ int load_ai_as_json ( GXAI_t **pp_ai, char *text, size_t len )
 	}
 
 	// Initialized data
-	GXInstance_t *instance      = g_get_active_instance();
-	size_t        state_count   = 0;
-	char         *name          = 0,
-			     *initial_state = 0;
-	array        *p_states      = 0;
-	dict         *ai_dict       = 0;
-	int           ret           = 1;
+	GXInstance_t  *p_instance    = g_get_active_instance();
+	char          *name          = 0,
+			      *initial_state = 0,
+				 **states        = 0;
+	size_t         state_count   = 0;
+	array         *p_states      = 0;
+	JSONValue_t   *p_value       = 0;
+	
+	// Parse the text into a JSON value
+	if ( parse_json_value(text, 0, &p_value) == 0 ) 
+		goto failed_to_parse_json;
 
-	// Parse the JSON
+	// Parse the AI JSON
+	if ( p_value->type == JSONobject )
 	{
 
 		// Initialized data
-		JSONValue_t *p_value = 0;
-
-		// Parse the JSON text into a dictionary
-		if ( parse_json_value(text, len, &p_value) ) 
-			goto failed_to_parse_json;
-
-		// Get the name 
-		name = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "name")), JSONstring);
-
-		// Get the states
-		p_states = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "states")), JSONarray);
-
-		// Get the initial state
-		initial_state = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_value->object, "initial state")), JSONstring);
-
+		dict *p_dict = p_value->object;
+		
+		// Parse the JSON values into constructor parameters
+		name          = ((JSONValue_t *)dict_get(p_dict, "name"))->string;
+		p_states      = ((JSONValue_t *)dict_get(p_dict, "states"))->list;
+		initial_state = ((JSONValue_t *)dict_get(p_dict, "initial state"))->string;
+		
+		// Error checking
+		if ( ( name && p_states && initial_state ) == 0 )
+			goto missing_properties;
 	}
+	else
+		goto wrong_type;
 
 	// Construct the AI
 	{
 
 		// Initialized data
 		GXAI_t* p_ai = 0;
+		GXAI_t* p_cache_ai = 0;
 
-		// Check the cache
+		// Lock the AI cache mutex
+		SDL_LockMutex(p_instance->mutexes.ai_cache);
+
+		// Search the cache for the AI
+		p_cache_ai = g_find_ai(p_instance, name);
+		
+		// If the AI is in the cache ...
+		if (p_cache_ai)
 		{
-			// Lock the AI cache mutex
-			SDL_LockMutex(instance->mutexes.ai_cache);
 
-			// Initialized data
-			GXAI_t* p_cache_ai = g_find_ai(instance, name);
-			
-			// If the AI is in the cache, copy it
-			if (p_cache_ai)
-			{
+			// ... make a copy of the cached AI
+			copy_ai(pp_ai, p_cache_ai);
 
-				// Make a copy of the cached ai
-				copy_ai(pp_ai, p_cache_ai);
+			// Write the return
+			p_ai = *pp_ai;
 
-				// Write the return
-				p_ai = *pp_ai;
-
-				// Set the initial state
-				goto set_initial_state;
-			}
+			// Set the initial state
+			goto set_initial_state;
 		}
-
+		
+		// ... the AI is not in the cache
+		
 		// Allocate memory for an AI
-		create_ai(pp_ai);
+		if ( create_ai(&p_ai) == 0 )
+			goto failed_to_allocate_ai;
 
-		// Get a pointer to the allocated memory
-		p_ai = *pp_ai;
-
-		// Set the name
+		// Copy the AI name
 		{
 
 			// Initialized data
 			size_t name_len = strlen(name);
 
 			// Allocate for the name
-			p_ai->name      = calloc(name_len+1, sizeof(char));
+			p_ai->name = calloc(name_len+1, sizeof(char));
 
 			// Error checking
-			{
-				#ifndef NDEBUG
-					if(p_ai->name == (void *)0)
-						goto no_mem;
-				#endif
-			}
+			if ( p_ai->name == (void *)0 )
+				goto no_mem;
 
 			// Copy the name 
 			strncpy(p_ai->name, name, name_len);
+
 		}
 
-		// Initialize each state
+		// Initialize each AI state, and set the initial state
 		{
 
 			// Initialized data
-			size_t        state_count = 0;
-			JSONValue_t **states      = 0;
+			size_t state_count = 0;
+			
+			// Get the quantity of states
+			array_get(p_states, 0, &state_count );
 
-			// Get the states
-			if(p_states)
-			{
-				array_get(p_states, 0, &state_count );
-				states = calloc(state_count+1, sizeof(JSONValue_t *));
-				array_get(p_states, states, 0 );
-			}
+			// Allocate an array for the states
+			states = calloc(state_count+1, sizeof(JSONValue_t *));
 
+			// Populate the states array
+			array_get(p_states, states, 0 );			
+			
 			// Construct a dictionary for the states
 			dict_construct(&p_ai->states, state_count);
 
@@ -276,85 +283,116 @@ int load_ai_as_json ( GXAI_t **pp_ai, char *text, size_t len )
 			{
 
 				// Initialized data
-				size_t  state_len   = strlen(states[i]);
-
-				// Allocate for the state name
+				size_t  state_len  = strlen(((JSONValue_t *)states[i])->string);
 				char   *state_name = calloc(state_len + 1, sizeof(char));
 				
 				// Error checking
-				{
-					#ifndef NDEBUG
-						if(state_name == (void *)0)
-							goto no_mem;
-					#endif
-				}
+				if ( state_name == (void *) 0 )
+					goto no_mem;
 
-				strncpy(state_name, states[i], state_len);
+				// Copy the name of the state from the array
+				strncpy(state_name, ((JSONValue_t *)states[i])->string, state_len);
+
+				// Copy the initial state
+				if ( strcmp(state_name, initial_state) == 0 )
+					initial_state = state_name;
 
 				// Add the state name to the state dictionary
 				dict_add(p_ai->states, state_name, 0);
 			}
-		}
 
+			// Clean the scope
+			free(states);
+		}
+		
 		// Cache the AI
-		g_cache_ai(instance, p_ai);
+		g_cache_ai(p_instance, p_ai);
+
+		// Unlock the AI caching mutex
+		SDL_UnlockMutex(p_instance->mutexes.ai_cache);
 
 		// Set the initial state
 		set_initial_state:
-		{
-			
-			// Initialized data
-			size_t current_state_len = strlen(initial_state);
+			p_ai->current_state = initial_state; // Same char * stored in the states dict
 
-			// Allocate for the initial state name
-			p_ai->current_state = calloc(current_state_len + 1, sizeof(char));
-
-			// Error checking
-			{
-				#ifndef NDEBUG
-					if( p_ai->current_state == (void *) 0 )
-						goto no_mem;
-				#endif
-			}
-
-			// Copy the initial state name
-			strncpy(p_ai->current_state, initial_state, current_state_len);
-
-		}
-
-		SDL_UnlockMutex(instance->mutexes.ai_cache);
+		// Return the AI to the caller
+		*pp_ai = p_ai;
 	}
 
-	free_memory:
-	return ret;
+	// Deallocate the JSON value
+	FREE_VALUE(p_value);
+
+	// Success
+	return 1;
 
 	// Error handling
 	{
+		
+		// JSON parsing errors
+		{
+			failed_to_parse_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
 
+			wrong_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+			missing_properties:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+		}
+
+		// G10 Errors
+		{
+			failed_to_allocate_ai:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Failed to allocate AI in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+		}
 		// Argument errors
 		{
 			no_ai:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
-				ret = 0;
-				goto free_memory;
+				
+				// Error
+				return 0;
+
 			no_token_text:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
-				ret = 0;
-				goto free_memory;
-			failed_to_parse_json:
+				
+				// Error
 				return 0;
+			
 		}
-
+				
 		// Standard library errors
 		{
 			no_mem:
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -366,9 +404,9 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 	// Argument errors
 	{
 		#ifndef NDEBUG
-			if ( p_ai             == (void *) 0 )
+			if ( p_ai == (void *) 0 )
 				goto no_ai;
-			if ( state_name       == (void *) 0 )
+			if ( state_name == (void *) 0 )
 				goto no_state_name;
 			if ( function_pointer == (void *) 0 )
 				goto no_function_pointer;
@@ -378,6 +416,7 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 	// Update the state callback
 	dict_add(p_ai->states, state_name, function_pointer);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -389,18 +428,25 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+				
+				// Error
 				return 0;
+
 			no_state_name:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+
 			no_function_pointer:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
-			return 0;
 		}
 	}
 }
@@ -411,17 +457,18 @@ int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 	// Argument errors
 	{
 		#ifndef NDEBUG
-			if ( p_ai             == (void *) 0 )
+			if ( p_ai == (void *) 0 )
 				goto no_ai;
-			if ( state_name       == (void *) 0 )
+			if ( state_name == (void *) 0 )
 				goto no_state_name;
 		#endif
 	}
 
 	// Set the state, if it is a valid state
-	if(dict_get(p_ai->states, (char *) state_name))
+	if ( dict_get(p_ai->states, (char *) state_name) )
 		p_ai->current_state = (char *) state_name;
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -433,11 +480,16 @@ int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+
 			no_state_name:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -449,15 +501,17 @@ int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEnti
 	// Argument errors
 	{
 		#ifndef NDEBUG
-			if ( p_ai             == (void *) 0 )
+			if ( p_ai == (void *) 0 )
 				goto no_ai;
 			if ( function_pointer == (void *) 0 )
 				goto no_function_pointer;
 		#endif
 	}
 
+	// Set the AI preupdate callback
 	p_ai->pre_ai = function_pointer;
 
+	// Success
 	return 1;
 	
 	// Error handling
@@ -469,11 +523,16 @@ int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEnti
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+
 			no_function_pointer:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -489,33 +548,38 @@ int pre_update_ai ( GXInstance_t *instance )
 	}
 
     // Initialized data
-	GXEntity_t* entity = 0;
+	GXEntity_t* p_entity = 0;
 
-	// Get an ai entity
+	// Get an entity with an AI
 	{
+
 		// Lock the mutex 
 		SDL_LockMutex(instance->mutexes.ai_preupdate);
 
-		// Is there anything left to move?
-		if (queue_empty(instance->queues.ai_preupdate))
+		// Are there any AIs left to preupdate?
+		if ( queue_empty(instance->queues.ai_preupdate) )
 		{
 
 			// If not, unlock and return
 			SDL_UnlockMutex(instance->mutexes.ai_preupdate);
+
+			// Success
 			return 1;
 		}
 
-		queue_dequeue(instance->queues.ai_preupdate,&entity);
+		// Get a pointer to an entity 
+		queue_dequeue(instance->queues.ai_preupdate, &p_entity);
 
+		// Unlock the mutex
 		SDL_UnlockMutex(instance->mutexes.ai_preupdate);
 	}
 
     // Update the AI
-    if ( entity )
+    if ( p_entity )
 		
-		// Uncomment
-		;//preupdate_entity_ai(entity);
+		;//preupdate_entity_ai(p_entity);
 
+	// Success
     return 1;
 
 	// Error handling
@@ -527,6 +591,8 @@ int pre_update_ai ( GXInstance_t *instance )
 				#ifndef NDEBUG
 					g_print_log("[G10] [AI] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error handling
 				return 0;
 		}
 	}
@@ -546,22 +612,21 @@ int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
 	}
 
 	// Initialized data
-	GXAI_t *ai = 0;
+	GXAI_t *dest_ai = 0;
 
 	// Allocate a new AI
+	if ( create_ai(&dest_ai) == 0 )
+		goto failed_to_allocate_ai;
+	
+	// Return the copy to the caller
+	*dest_ai = (GXAI_t)
 	{
-		create_ai(pp_ai);
-		ai = *pp_ai;
-	}
+		.name = p_ai->name,
+		.states = p_ai->states,
+		.pre_ai = p_ai->pre_ai
+	};
 
-	// Copy the AI
-	{
-		ai->name          = p_ai->name;
-		ai->current_state = p_ai->current_state;
-		ai->pre_ai        = p_ai->pre_ai;
-		ai->states        = p_ai->states;
-	}
-
+	// Success
 	return 1;
 
 	// Error handling
@@ -573,11 +638,27 @@ int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
+
 			no_ai:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
+				return 0;
+		}
+	
+		// G10 Errors
+		{
+			failed_to_allocate_ai:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Failed to create AI in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -607,7 +688,6 @@ int ai_info ( GXAI_t *p_ai )
 	// Print the active state
 	g_print_log("active state: \"%s\"\n", p_ai->current_state);
 
-
     // Formatting 
     g_print_log("states      : \n");
 
@@ -629,6 +709,7 @@ int ai_info ( GXAI_t *p_ai )
 	// Free the list of state names
 	free(state_names);
 
+	// Success
     return 1;
 	
 	// Error handling
@@ -640,6 +721,8 @@ int ai_info ( GXAI_t *p_ai )
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+				
+				// Error
 				return 0;
 		}
 	}

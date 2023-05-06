@@ -1,13 +1,31 @@
+/** !
+ * @file G10/GXScheduler.h
+ * @author Jacob Smith
+ * 
+ * The scheduler specifies and coordinates work over time. 
+ */
+
+// Include guard
 #pragma once
 
+// Standard library
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+// SDL
 #include <SDL.h>
 
+// Dict submodule
 #include <dict/dict.h>
 
+// JSON submodule
+#include <json/json.h>
+
+// Array submodule
+#include <array/array.h>
+
+// G10 
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXScene.h>
@@ -45,8 +63,7 @@ struct GXThread_s
 
 
 // Allocators
-
-/* !
+/** !
  *  Allocate memory for a schedule
  *
  * @param pp_schedule : return
@@ -55,9 +72,9 @@ struct GXThread_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_schedule        ( GXSchedule_t **pp_schedule );
+DLLEXPORT int create_schedule ( GXSchedule_t **pp_schedule );
 
-/* !
+/** !
  *  Allocate memory for a thread
  *
  * @param pp_thread : return
@@ -66,11 +83,10 @@ DLLEXPORT int create_schedule        ( GXSchedule_t **pp_schedule );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_thread          ( GXThread_t   **pp_thread );
+DLLEXPORT int create_thread ( GXThread_t **pp_thread );
 
 // Constructors
-
-/* !
+/** !
  *  Load a schedule from a JSON file
  *
  * @param pp_schedule : return
@@ -81,9 +97,9 @@ DLLEXPORT int create_thread          ( GXThread_t   **pp_thread );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_schedule          ( GXSchedule_t **pp_schedule, char *path );
+DLLEXPORT int load_schedule ( GXSchedule_t **pp_schedule, char *path );
 
-/* !
+/** !
  *  Load a schedule from JSON text
  *
  * @param pp_schedule : return
@@ -95,9 +111,23 @@ DLLEXPORT int load_schedule          ( GXSchedule_t **pp_schedule, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **pp_schedule, char *token_text, size_t len );
+DLLEXPORT int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text, size_t len );
 
-/* !
+/** !
+ *  Load a schedule from a JSON value
+ *
+ * @param pp_schedule : return
+ * @param p_value     : The schedule JSON object value
+ *
+ * @sa load_schedule
+ * @sa load_schedule_as_json
+ * @sa create_schedule
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_value );
+
+/** !
  *  Load a thread from a JSON file
  *
  * @param pp_thread : return
@@ -108,9 +138,9 @@ DLLEXPORT int load_schedule_as_json  ( GXSchedule_t **pp_schedule, char *token_t
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_thread            ( GXThread_t   **pp_thread, char *path );
+DLLEXPORT int load_thread ( GXThread_t **pp_thread, char *path );
 
-/* !
+/** !
  *  Load a thread from a JSON file
  *
  * @param pp_thread   : Double pointer to a thread
@@ -122,11 +152,10 @@ DLLEXPORT int load_thread            ( GXThread_t   **pp_thread, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_thread_as_json    ( GXThread_t   **pp_thread , char *token_text, size_t len );
+DLLEXPORT int load_thread_as_json ( GXThread_t **pp_thread , char *token_text, size_t len );
 
 // Scheduling
-
-/* !
+/** !
  *  Start running a schedule
  *
  * @param p_schedule  : Pointer to a schedule
@@ -135,9 +164,9 @@ DLLEXPORT int load_thread_as_json    ( GXThread_t   **pp_thread , char *token_te
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int start_schedule         ( GXSchedule_t  *p_schedule );
+DLLEXPORT int start_schedule ( GXSchedule_t *p_schedule );
 
-/* !
+/** !
  *  Stop running a schedule
  *
  * @param p_schedule  : Pointer to a schedule
@@ -146,8 +175,27 @@ DLLEXPORT int start_schedule         ( GXSchedule_t  *p_schedule );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int stop_schedule          ( GXSchedule_t  *p_schedule );
+DLLEXPORT int stop_schedule ( GXSchedule_t *p_schedule );
 
 // Destructors
-DLLEXPORT int destroy_schedule       ( GXSchedule_t **p_schedule );
-DLLEXPORT int destroy_thread         ( GXThread_t   **p_thread );
+/** !
+ *  Destroy a schedule
+ *
+ * @param pp_schedule : Pointer to a schedule
+ *
+ * @sa create_schedule
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int destroy_schedule ( GXSchedule_t **pp_schedule );
+
+/** !
+ *  Destroy a thread
+ *
+ * @param pp_thread : Pointer to a thread
+ *
+ * @sa create_thread
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int destroy_thread ( GXThread_t **pp_thread );
