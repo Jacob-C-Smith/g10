@@ -1,12 +1,10 @@
 ﻿#include <G10/GXQuaternion.h>
 
-// ✅ Creates quaternion (1,0,0,0)
 quaternion    identity_quaternion()
 {
     return (quaternion) { 1.f, 0.f, 0.f, 0.f };
 }
 
-// ✅ Creates a quaternion from a vector in euler angles
 quaternion    quaternion_from_euler_angle(vec3       v)
 {
     float sx = sinf(to_radians(v.x) * 0.5f),
@@ -48,7 +46,6 @@ quaternion    multiply_quaternion_quaternion_vec4(quaternion q1, quaternion q2)
     };
 }
 
-// ✅ Multiplies two quaternions
 quaternion    multiply_quaternion_quaternion(quaternion q1, quaternion q2)
 {
     return (quaternion) {
@@ -59,7 +56,6 @@ quaternion    multiply_quaternion_quaternion(quaternion q1, quaternion q2)
     };
 }
 
-// ✅ Creates a rotation matrix from a quaternion
 mat4          rotation_mat4_from_quaternion(quaternion q)
 {
     /*

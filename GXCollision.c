@@ -23,7 +23,8 @@ int construct_collision_from_entities(GXCollision_t **pp_collision, GXEntity_t* 
 {
 
 	// TODO: Argument check
-	GXInstance_t  *instance    = g_get_active_instance();
+	
+	// Initialized data
 	GXCollision_t *p_collision = 0;
 
 	create_collision(pp_collision);
@@ -33,7 +34,7 @@ int construct_collision_from_entities(GXCollision_t **pp_collision, GXEntity_t* 
 	p_collision->a = a;
 	p_collision->b = b;
 
-	p_collision->begin_tick = instance->time.ticks;
+	p_collision->begin_tick = p_instance->time.ticks;
 	p_collision->aabb_colliding = true;
 
 	// Success

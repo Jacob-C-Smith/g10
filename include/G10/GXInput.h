@@ -51,10 +51,11 @@ struct GXBind_s
 
 struct GXInput_s
 {
-	char *name;
-	dict *bind_lut,
-		 *binds;
-	float mouse_sensitivity;
+	char  *name;
+	dict  *bind_lut,
+		  *binds;
+	queue *p_key_queue;
+	float  mouse_sensitivity;
 };
 
 struct callback_parameter_s
@@ -245,8 +246,7 @@ DLLEXPORT int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstan
 DLLEXPORT GXBind_t *find_bind ( GXInput_t *p_input, char *name );
 DLLEXPORT int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind );
 
-// Deallocators
-
+// Destructors
 /** !
  *  Free a bind and all its contents
  *

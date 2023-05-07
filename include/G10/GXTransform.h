@@ -62,14 +62,27 @@ DLLEXPORT int  load_transform ( GXTransform_t **pp_transform, const char* path )
  *
  * @param pp_transform : return
  * @param text         : Transform JSON text
- * @param len          : The length of the transform JSON object text
  *
  * @sa load_transform_as_json
  * @sa create_transform
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_transform_as_json ( GXTransform_t **pp_transform, char *text, size_t len );
+DLLEXPORT int load_transform_as_json ( GXTransform_t **pp_transform, char *text );
+
+/** !
+ *  Load a transform from a JSON value
+ *
+ * @param pp_transform : return
+ * @param p_value      : Transform JSON value
+ *
+ * @sa load_transform
+ * @sa load_transform_as_json
+ * @sa create_transform
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_value );
 
 /** !
  *  Construct a transform from a location vector, a rotation quaternion, and a scale vector
@@ -97,7 +110,7 @@ DLLEXPORT int construct_transform ( GXTransform_t **pp_transform, vec3 location,
  */
 DLLEXPORT void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r );
 
-// Deallocators
+// Destructors
 /** !
  *  Free a transform and all its contents
  *
@@ -107,5 +120,5 @@ DLLEXPORT void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_transform ( GXTransform_t *p_transform );
+DLLEXPORT int destroy_transform ( GXTransform_t **pp_transform );
 

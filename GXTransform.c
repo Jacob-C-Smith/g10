@@ -187,7 +187,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 	}
 }
 
-int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t len)
+int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 {
 
 	// Argument check
@@ -202,14 +202,104 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 
 	// Initialized data
 	JSONValue_t *p_value    = 0;
-	array       *p_location = 0,
-	            *p_rotation = 0,
-				*p_scale    = 0;
 	
 	// Parse the transform JSON
 	if ( parse_json_value(text, 0, &p_value) == 0 ) 
 		goto failed_to_parse_json;
 	
+
+	// Deallocate the JSON value
+	FREE_VALUE(p_value);
+
+	// Success
+	return 1;
+
+	// Error handling 
+	{
+
+		// Argument errors
+		{
+			no_transform:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n",__FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			no_text:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Null pointer provided for \"text\" in call to function \"%s\"\n",__FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+		}
+
+		// JSON errors
+		{
+
+			failed_to_parse_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to parse JSON in call to function \"%s\"\n",__FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+			missing_properties:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+
+			
+		}
+
+
+	
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+	}
+}
+
+int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_value )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_transform == (void *) 0 )
+				goto no_transform;
+			if ( p_value == (void *) 0 )
+				goto no_value;
+		#endif
+	}
+
+	// Initialized data
+	array *p_location = 0,
+  		  *p_rotation = 0,
+		  *p_scale    = 0;
+
 	// Parse the transform JSON
     if (p_value->type == JSONobject)
     {
@@ -237,7 +327,6 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 	{
 
 		// Initialized data
-		GXTransform_t *p_transform = 0;
 		vec3           location    = { 0, 0, 0 },
 	                   scale       = { 1, 1, 1 };
 		quaternion     rotation    = { 0, 0, 0, 0 };
@@ -268,8 +357,8 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 			// Set the location
 			location = (vec3) {
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
-				.y = (float) ((JSONValue_t *)pp_elements[0])->floating,
-				.z = (float) ((JSONValue_t *)pp_elements[0])->floating
+				.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
+				.z = (float) ((JSONValue_t *)pp_elements[2])->floating
 			};
 				
 			// Clean the scope
@@ -288,7 +377,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 			array_get(p_rotation, 0, &vector_element_count );
 
 			// Error checking
-			if ( !( vector_element_count == 3 && vector_element_count == 4 )  )
+			if ( !( vector_element_count == 3 || vector_element_count == 4 )  )
 				goto rotation_len_error;
 
 			// Allocate an array for the elements
@@ -370,22 +459,17 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 		}
 	
 		// Construct the transform
-		if ( construct_transform(&p_transform, location, rotation, scale) == 0 )
+		if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
 			goto failed_to_create_transform;
 
-		// Return the transform to the caller
-		*pp_transform = p_transform;
 	}
-
-	// Deallocate the JSON value
-	FREE_VALUE(p_value);
 
 	// Success
 	return 1;
 
-	// Error handling 
+	// Error handling
 	{
-
+		
 		// Argument errors
 		{
 			no_transform:
@@ -396,26 +480,17 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 				// Error
 				return 0;
 
-			no_text:
+			no_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for \"text\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for \"p_value\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 				
 				// Error
 				return 0;
 		}
-
-		// JSON errors
+	
+		// G10 Errors
 		{
-
-			failed_to_parse_json:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Failed to parse JSON in call to function \"%s\"\n",__FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
 			wrong_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
@@ -426,7 +501,7 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
 				#endif
 				
 				// Error
@@ -455,7 +530,17 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 
 				// Error
 				return 0;
-			
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 		}
 
 		// G10 errors
@@ -468,21 +553,11 @@ int  load_transform_as_json  ( GXTransform_t **pp_transform, char *text, size_t 
 				// Error
 				return 0;
 		}
-	
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
 	}
+
 }
 
-void transform_model_matrix  ( GXTransform_t  *p_transform , mat4       *r )
+void transform_model_matrix  ( GXTransform_t  *p_transform , mat4 *r )
 {
 
     // Argument check
@@ -566,14 +641,22 @@ int  rotate_about_quaternion ( GXTransform_t  *p_transform , quaternion  axis,  
 
 }
 
-int  destroy_transform       ( GXTransform_t  *p_transform )
+int destroy_transform ( GXTransform_t **pp_transform )
 {
 
     // Argument check
     {
-        if (p_transform == (void*)0)
-            goto no_transform;
+		#ifndef NDEBUG
+        	if ( pp_transform == (void *) 0 )
+            	goto no_transform;
+		#endif
     }
+
+	// Initialized data
+	GXTransform_t *p_transform = *pp_transform;
+
+	// No more pointer for caller
+	*pp_transform = 0;
 
     // Free the transform
     free(p_transform);
@@ -587,10 +670,12 @@ int  destroy_transform       ( GXTransform_t  *p_transform )
 		// Argument error
 		{
 	        no_transform:
-		    #ifndef NDEBUG
-			    g_print_error("[G10] [Transform] Null pointer provided for \"transform\" in call to function \"%s\"\n", __FUNCTION__);
-		    #endif
-	        return 0;
+		    	#ifndef NDEBUG
+				    g_print_error("[G10] [Transform] Null pointer provided for \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+		    	#endif
+
+				// Error
+	        	return 0;
 		}
     }
 }

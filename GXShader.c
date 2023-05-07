@@ -231,7 +231,7 @@ typedef struct {
 void init_shader                    ( void )
 {
 
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
 
     dict_construct(&format_types         , FORMATS_COUNT);
     dict_construct(&format_sizes         , FORMATS_COUNT);
@@ -267,7 +267,7 @@ void init_shader                    ( void )
     for (size_t i = 0; i < BLEND_FACTORS_COUNT; i++)
         dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
 
-    instance->mutexes.shader_cache = SDL_CreateMutex();
+    p_instance->mutexes.shader_cache = SDL_CreateMutex();
 
 }
 
@@ -275,14 +275,14 @@ int create_shader_module            ( char *code, size_t code_len, VkShaderModul
 {
 
     // Initialized data
-    GXInstance_t             *instance                  = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
     VkShaderModuleCreateInfo  shader_module_create_info = { 
         .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = code_len,
         .pCode    = code
     }
 
-    if (vkCreateShaderModule(instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module))
+    if (vkCreateShaderModule(p_instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module))
 
         // TODO: Replace with a goto
         printf("Failed to create a shader module");
@@ -311,28 +311,33 @@ int create_shader                   ( GXShader_t  **shader )
     }
 }
 
-int load_shader                     ( GXShader_t  **shader, const char *path )
+int load_shader ( GXShader_t **pp_shader, const char *path )
 {
     // TODO: Argument check
 
-    char   *token_text     = 0;
-    size_t  token_text_len = g_load_file(path, (void*)0, false);
-        
-    token_text = calloc(token_text_len + 1, sizeof(char));
+    // Initialized data
+    char   *text = 0;
+    size_t  len  = g_load_file(path, (void*)0, false);
+    
+    // TODO: Check result
+    text = calloc(len + 1, sizeof(char));
 
-    g_load_file(path, token_text, false);
+    // TODO: Check result
+    g_load_file(path, text, false);
+    
+    // TODO: Check result
+    load_shader_as_json(shader, text);
 
-    load_shader_as_json(shader, token_text, token_text_len);
-
+    // Success
     return 1;
 
     // TODO: Error handling
 }
 
-int load_shader_as_json             ( GXShader_t  **shader, char       *token_text, size_t          token_text_len )
+int load_shader_as_json             ( GXShader_t  **shader, char *text )
 {
     // TODO: Argument check
-    GXInstance_t  *instance                  = g_get_active_instance();
+    GXInstance_t  *p_instance                  = g_get_active_instance();
     GXShader_t    *i_shader                  = 0;
     char          *name                      = 0,
                   *vertex_shader_path        = 0,
@@ -355,7 +360,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
     // Parse JSON data
     {
 
-        parse_json(token_text, token_text_len, &json_data);
+        //parse_json(text, 0, &json_data);
 
         token                = (JSONToken_t *) dict_get(json_data, "name");
         name                 = JSON_VALUE(token, JSONstring);
@@ -390,7 +395,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
     
     // Check the cache
     {
-        GXShader_t *r = g_find_shader(instance, name);
+        GXShader_t *r = g_find_shader(p_instance, name);
         
         if (r != (void*)0)
         {
@@ -651,8 +656,8 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 viewport = (VkViewport) {
                     .x        = 0.f,
                     .y        = 0.f,
-                    .width    = (float)instance->vulkan.swap_chain_extent.width,
-                    .height   = (float)instance->vulkan.swap_chain_extent.height,
+                    .width    = (float)p_instance->vulkan.swap_chain_extent.width,
+                    .height   = (float)p_instance->vulkan.swap_chain_extent.height,
                     .minDepth = 0.0f,
                     .maxDepth = 1.0f
                 };
@@ -661,7 +666,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 scissor = (VkRect2D) {
                     .offset.x = 0,
                     .offset.y = 0,
-                    .extent = instance->vulkan.swap_chain_extent
+                    .extent = p_instance->vulkan.swap_chain_extent
                 };
 
                 // Populate the viewport state create struct
@@ -1038,7 +1043,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                     }
 
                     // Create a descriptor set layout
-                    if (vkCreateDescriptorSetLayout(instance->vulkan.device, layout_info, 0, &i_shader->graphics.descriptor_set_layouts[i]) != VK_SUCCESS) {
+                    if (vkCreateDescriptorSetLayout(p_instance->vulkan.device, layout_info, 0, &i_shader->graphics.descriptor_set_layouts[i]) != VK_SUCCESS) {
                         
                         g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCTION__);
                         return -1;
@@ -1079,7 +1084,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                             .maxSets       = (u32)64
                         };
 
-                        if (vkCreateDescriptorPool(instance->vulkan.device, &pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
+                        if (vkCreateDescriptorPool(p_instance->vulkan.device, &pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
                             g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCTION__);
                             return 0;
                         }
@@ -1203,7 +1208,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
             }
 
             // Construct the pipeline layout
-            if (vkCreatePipelineLayout(instance->vulkan.device, &pipeline_layout_create_info, 0, &i_shader->graphics.pipeline_layout) != VK_SUCCESS)
+            if (vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &i_shader->graphics.pipeline_layout) != VK_SUCCESS)
                 g_print_error("[G10] [Shader] Failed to create pipeline layout");
 
             // Set up the graphics pipeline
@@ -1226,13 +1231,13 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                 .pDynamicState = &dynamic_state_create_info,
                 .layout = &pipeline_layout_create_info,
                 .layout = i_shader->graphics.pipeline_layout,
-                .renderPass = instance->context.renderer->render_passes_data[0]->render_pass,
+                .renderPass = p_instance->context.renderer->render_passes_data[0]->render_pass,
                 .basePipelineHandle = VK_NULL_HANDLE,
                 .basePipelineIndex = -1
             };
 
             // Construct the graphics pipeline
-            if (vkCreateGraphicsPipelines(instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &i_shader->graphics.pipeline) != VK_SUCCESS)
+            if (vkCreateGraphicsPipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &i_shader->graphics.pipeline) != VK_SUCCESS)
                 g_print_error("failed to create graphics pipeline!\n");
 
             // Clean up 
@@ -1278,7 +1283,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
 
                     i_shader->graphics.sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
 
-                    if (vkAllocateDescriptorSets(instance->vulkan.device, alloc_info, i_shader->graphics.sets_data[0].descriptor_sets) != VK_SUCCESS) {
+                    if (vkAllocateDescriptorSets(p_instance->vulkan.device, alloc_info, i_shader->graphics.sets_data[0].descriptor_sets) != VK_SUCCESS) {
                         g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCTION__);
                     }
 
@@ -1299,7 +1304,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
                         descriptor_write->descriptorCount = 1;
                         descriptor_write->pBufferInfo = buffer_info;
 
-                        vkUpdateDescriptorSets(instance->vulkan.device, 1, descriptor_write, 0, 0);
+                        vkUpdateDescriptorSets(p_instance->vulkan.device, 1, descriptor_write, 0, 0);
                     }
                 }
             }
@@ -1343,7 +1348,7 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
     // else if ( ray_generation_shader ) ...
 
     // Cache the shader
-    g_cache_shader(instance, i_shader);
+    g_cache_shader(p_instance, i_shader);
 
     exit:
     return 1;
@@ -1355,43 +1360,43 @@ int load_shader_as_json             ( GXShader_t  **shader, char       *token_te
         
 }
 
-int use_shader                      ( GXShader_t   *shader )
+int use_shader ( GXShader_t *shader )
 {
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
     VkRect2D      scissor  = { 0 };
     VkViewport    viewport = { 0 };
 
     // Use the shader
-    vkCmdBindPipeline(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
+    vkCmdBindPipeline(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
     
     // Set the viewport
     viewport = (VkViewport) {
         .x        = 0.f,
         .y        = 0.f,
-        .width    = (float)instance->vulkan.swap_chain_extent.width,
-        .height   = (float)instance->vulkan.swap_chain_extent.height,
+        .width    = (float)p_instance->vulkan.swap_chain_extent.width,
+        .height   = (float)p_instance->vulkan.swap_chain_extent.height,
         .minDepth = 0.f,
         .maxDepth = 1.f
     };
     
     // Set the viewport
-    vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &viewport);
+    vkCmdSetViewport(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &viewport);
     
     // Set the scissor
     scissor = (VkRect2D) {
         .offset.x = 0,
         .offset.y = 0,
-        .extent   = instance->vulkan.swap_chain_extent
+        .extent   = p_instance->vulkan.swap_chain_extent
     };
     
     // Set the scissors
-    vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &scissor);
+    vkCmdSetScissor(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &scissor);
 
     // Success
     return 0;
 }
 
-int update_shader_push_constant     ( GXShader_t   *shader )
+int update_shader_push_constant ( GXShader_t *shader )
 {
     size_t offset = 0;
 
@@ -1407,7 +1412,7 @@ int update_shader_push_constant     ( GXShader_t   *shader )
     return 1;
 }
 
-int add_shader_push_constant_getter ( char         *getter_name, int(*getter_function)(void*) )
+int add_shader_push_constant_getter ( char *getter_name, int(*getter_function)(void*) )
 {
 
     // Argument errors
@@ -1441,11 +1446,15 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
             no_getter_function:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -1455,6 +1464,8 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to add getter in call to function \"%s\". There is already a getter called \"%s\"\n", __FUNCTION__, getter_name);
                 #endif
+
+                // Error
                 return 0;
         }
     }
@@ -1472,9 +1483,9 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     }
 
     // Initialized data
-    GXInstance_t  *instance  = g_get_active_instance();
-    GXCamera_t    *camera    = instance->context.scene->active_camera;
-    GXTransform_t *transform = p_entity->transform;
+    GXInstance_t  *p_instance = g_get_active_instance();
+    GXCamera_t    *camera     = p_instance->context.scene->active_camera;
+    GXTransform_t *transform  = p_entity->transform;
 
     mat4 uniform_buffer[4];
 
@@ -1501,9 +1512,9 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     
     void *data;
 
-    vkMapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
+    vkMapMemory(p_instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[p_instance->vulkan.current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
     memcpy(data, uniform_buffer, sizeof(vec3) + 3*sizeof(mat4));
-    vkUnmapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame]);
+    vkUnmapMemory(p_instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[p_instance->vulkan.current_frame]);
 
     return 1;
 
@@ -1525,13 +1536,13 @@ int destroy_shader                  ( GXShader_t   *shader )
 {
 
     // TODO: Cache destruction
-    GXInstance_t* instance = g_get_active_instance();
+    GXInstance_t* p_instance = g_get_active_instance();
 
-    vkDestroyPipeline(instance->vulkan.device, shader->graphics.pipeline, 0);
-    vkDestroyPipelineLayout(instance->vulkan.device, shader->graphics.pipeline_layout, 0);
+    vkDestroyPipeline(p_instance->vulkan.device, shader->graphics.pipeline, 0);
+    vkDestroyPipelineLayout(p_instance->vulkan.device, shader->graphics.pipeline_layout, 0);
 
-    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
-    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
+    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
+    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
 
     free(shader->name);
     free(shader);

@@ -65,20 +65,20 @@ void init_discord_integration(void)
     return 1;
 }
 
-int discord_callbacks ( GXInstance_t *instance )
+int discord_callbacks ( GXInstance_t *p_instance )
 {
 	
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(instance == (void *)0 )
+			if(p_instance == (void *)0 )
 				goto no_instance;
 		#endif
 	}
     
 
     // Run callbacks
-    if ( instance->discord_integration.core->run_callbacks(instance->discord_integration.core) != DiscordResult_Ok )
+    if ( p_instance->discord_integration.core->run_callbacks(p_instance->discord_integration.core) != DiscordResult_Ok )
         return 0;
 
 	// Success
@@ -91,8 +91,10 @@ int discord_callbacks ( GXInstance_t *instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_error("[G10] [User code] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [User code] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif	
+
+                // Error
 				return 0;
 		}
 	}

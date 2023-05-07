@@ -71,6 +71,20 @@ DLLEXPORT int load_ai ( GXAI_t **pp_ai, char *path );
 DLLEXPORT int load_ai_as_json ( GXAI_t **pp_ai, char *text );
 
 /** !
+ *  Load an AI from a JSON value
+ *
+ * @param pp_ai   : return
+ * @param p_value : The JSON value
+ *
+ * @sa load_ai
+ * @sa load_ai_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value );
+
+
+/** !
  *  Load an AI from JSON text
  *
  * @param pp_ai : return
@@ -106,7 +120,7 @@ DLLEXPORT int ai_info ( GXAI_t *p_ai );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int update_ai ( GXInstance_t *instance );
+DLLEXPORT int update_ai ( GXInstance_t *p_instance );
 
 /** !
  *  Preupdate each AI entity in the instances active scene
@@ -117,7 +131,7 @@ DLLEXPORT int update_ai ( GXInstance_t *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int pre_update_ai ( GXInstance_t *instance );
+DLLEXPORT int pre_update_ai ( GXInstance_t *p_instance );
 
 // User callbacks
 /** !
@@ -160,14 +174,14 @@ DLLEXPORT int set_ai_state ( GXAI_t *p_ai    , const char *state_name );
  */
 DLLEXPORT int set_ai_pre_update_callback ( GXAI_t *p_ai, int (*function_pointer)(GXEntity_t *entity) );
 
-// Deallocators
+// Destructors
 /** !
  *  Free an AI and all its contents
  *
- * @param p_ai : Pointer to AI
+ * @param pp_ai : Pointer to AI pointer
  *
  * @sa create_ai
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_ai ( GXAI_t *p_ai );
+DLLEXPORT int destroy_ai ( GXAI_t **pp_ai );

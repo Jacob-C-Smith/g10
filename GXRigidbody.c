@@ -66,7 +66,7 @@ int update_force(GXRigidbody_t* rigidbody)
 	return 1;
 }
 
-int load_rigidbody(GXRigidbody_t** pp_rigidbody, const char* path)
+int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 {
 
 	// Argument check
@@ -74,27 +74,25 @@ int load_rigidbody(GXRigidbody_t** pp_rigidbody, const char* path)
 		#ifndef NDEBUG
 			if ( pp_rigidbody == (void *) 0 )
 				goto no_rigidbody;
+			if ( path == (void *) 0 )
+				goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  token_text_len = g_load_file(path, 0, false);
-	char   *token_text     = calloc(token_text_len+1, sizeof(char));
+	size_t  len  = g_load_file(path, 0, false);
+	char   *text = calloc(len+1, sizeof(char));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if ( token_text == (void *) 0 )
-				goto no_mem;
-		#endif
-	}
+	if ( text == (void *) 0 )
+		goto no_mem;
 
 	// Load the file
-	if ( g_load_file(path, token_text, false) == 0 )
+	if ( g_load_file(path, text, false) == 0 )
 		goto failed_to_load_file;
 
 	// Load the rigidbody from the JSON text
-	if ( load_rigidbody_as_json(pp_rigidbody, token_text, token_text_len) == 0 )
+	if ( load_rigidbody_as_json(pp_rigidbody, text) == 0 )
 		goto failed_to_load_rigidbody_as_json;
 
 	// Success
@@ -146,7 +144,7 @@ int load_rigidbody(GXRigidbody_t** pp_rigidbody, const char* path)
 	}
 }
 
-int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text )
+int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *text )
 {
 
 	// Argument check
@@ -154,12 +152,9 @@ int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text )
 		#ifndef NDEBUG
 			if ( pp_rigidbody == (void *) 0 )
 				goto no_rigidbody;
-			if ( token_text == (void *) 0 )
-				goto no_token_text;
+			if ( text == (void *) 0 )
+				goto no_text;
 		#endif
-
-		if ( len == 0 )
-			goto no_len;
 	}
 
 	// Initialized data
@@ -169,7 +164,7 @@ int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text )
 		          *active      = 0;
 
 	// Parse the JSON into a dictionary
-	parse_json(token_text, len, &json_object);
+	parse_json(text, len, &json_object);
 
 	// Parse the dictionary into constructor parameters
 	{
@@ -236,9 +231,9 @@ int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *token_text )
 				// Error
 				return 0;
 
-			no_token_text:
+			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for \"token_text\" in call to function \"%s\"\n", token_text, __FUNCTION__);
+					g_print_error("[G10] [Rigidbody] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error 

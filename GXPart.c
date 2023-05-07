@@ -75,23 +75,23 @@ int load_part ( GXPart_t **pp_part, char* path)
 	}
 
 	// Initialized data
-	size_t  len        = g_load_file(path, 0, false);
-	char   *token_text = calloc(len + 1, sizeof(char));
+	size_t  len  = g_load_file(path, 0, false);
+	char   *text = calloc(len + 1, sizeof(char));
 
 	// Error checking
-	if ( token_text == (void *)0 )
+	if ( text == (void *)0 )
 		goto no_mem;
 
 	// Load the file into the buffer
-	if ( g_load_file(path, token_text, false) == 0 )
+	if ( g_load_file(path, text, false) == 0 )
 		goto failed_to_load_file;
 
 	// Load the part as JSON text
-	if ( load_part_as_json(pp_part, token_text, len) == 0 )
+	if ( load_part_as_json(pp_part, text) == 0 )
 		goto failed_to_load_part;
 
 	// Free the token text
-	free(token_text);
+	free(text);
 
 	// Success
 	return 1;
@@ -152,7 +152,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 
 }
 
-int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
+int load_part_as_json ( GXPart_t **pp_part, char* text )
 {
 
 	// Argument check
@@ -160,15 +160,13 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 		#ifndef NDEBUG
 			if ( pp_part == (void *) 0 )
 				goto no_part;
-			if ( token_text == (void *) 0 ) 
-				goto no_token_text;
-			if ( len == 0 )
-				goto no_len;
+			if ( text == (void *) 0 ) 
+				goto no_text;
 		#endif
 	}
 
 	// Initialized data
-	GXInstance_t *instance  = g_get_active_instance();
+	GXInstance_t *p_instance  = g_get_active_instance();
 	GXPart_t     *p_part    = 0; 
 	char         *name      = 0,
 		         *path      = 0;
@@ -181,7 +179,7 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	p_part = *pp_part;
 
 	// Parse the JSON
-	//parse_json(token_text, len, &part_json);
+	//parse_json(text, len, &part_json);
 
 	// Parse the dictionary into constructor parameters
 	{
@@ -202,7 +200,7 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 	{
 
 		// Initialized data
-		//GXPart_t *cached_part = g_find_part(instance, name);
+		//GXPart_t *cached_part = g_find_part(p_instance, name);
  		//// Is there a cached part?
 		//if ( cached_part )
 		//	
@@ -256,9 +254,9 @@ int load_part_as_json ( GXPart_t **pp_part, char* token_text, size_t len )
 				// Error 
 				return 0;
 
-			no_token_text:
+			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif 
 
 				// Error 
@@ -296,18 +294,18 @@ int draw_part ( GXPart_t *p_part )
 	}
 
 	// Initialized data
-	GXInstance_t *instance         = g_get_active_instance();
+	GXInstance_t *p_instance         = g_get_active_instance();
 	VkBuffer      vertex_buffers[] = { p_part->vertex_buffer };
 	VkDeviceSize  offsets       [] = { 0 };
 
 	// Bind the vertex buffers for the draw call
-	vkCmdBindVertexBuffers(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, vertex_buffers, offsets);
+	vkCmdBindVertexBuffers(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, vertex_buffers, offsets);
 
 	// Bind the face buffers for the draw call
-	vkCmdBindIndexBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], p_part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], p_part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
 
 	// Draw the part
-	vkCmdDrawIndexed(instance->vulkan.command_buffers[instance->vulkan.current_frame], (u32)p_part->index_count*3, 1, 0, 0, 0);
+	vkCmdDrawIndexed(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], (u32)p_part->index_count*3, 1, 0, 0, 0);
 
 	// Success
 	return 1;
@@ -374,6 +372,8 @@ int part_info ( GXPart_t *p_part )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -391,13 +391,13 @@ int destroy_part ( GXPart_t *p_part )
 	}
 
 	// Initialized data
-	GXInstance_t *instance = g_get_active_instance();
+	GXInstance_t *p_instance = g_get_active_instance();
 	
 	// Remove the part from the cache
-	if ( (GXPart_t *) dict_get(instance->cache.parts, p_part->name) == p_part )
+	if ( (GXPart_t *) dict_get(p_instance->cache.parts, p_part->name) == p_part )
 	{
 		if (--p_part->users > 1)
-			dict_pop(instance->cache.parts, p_part->name, 0);
+			dict_pop(p_instance->cache.parts, p_part->name, 0);
 	}
 	else
 
@@ -411,12 +411,12 @@ int destroy_part ( GXPart_t *p_part )
 	{
 
 		// Free the vertex buffer
-		vkDestroyBuffer(instance->vulkan.device, p_part->vertex_buffer, 0);
-		vkFreeMemory(instance->vulkan.device, p_part->vertex_buffer_memory, 0);
+		vkDestroyBuffer(p_instance->vulkan.device, p_part->vertex_buffer, 0);
+		vkFreeMemory(p_instance->vulkan.device, p_part->vertex_buffer_memory, 0);
 
 		// Free the index buffer
-		vkDestroyBuffer(instance->vulkan.device, p_part->element_buffer, 0);
-		vkFreeMemory(instance->vulkan.device, p_part->element_buffer_memory, 0);
+		vkDestroyBuffer(p_instance->vulkan.device, p_part->element_buffer, 0);
+		vkFreeMemory(p_instance->vulkan.device, p_part->element_buffer_memory, 0);
 	}
 
 	// Free the part itself

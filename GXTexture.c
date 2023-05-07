@@ -220,6 +220,8 @@ int create_texture       ( GXTexture_t **pp_texture )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -229,17 +231,19 @@ int create_texture       ( GXTexture_t **pp_texture )
 				#ifndef NDEBUG
 					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int load_texture         ( GXTexture_t **texture, char *path)
+int load_texture ( GXTexture_t **pp_texture, char *path)
 {
     // Argument check
     {
         #ifndef NDEBUG
-            if(texture == (void *)0)
+            if(pp_texture == (void *)0)
                 goto no_texture;
             if (path == (void*)0)
                 goto no_path;
@@ -247,10 +251,10 @@ int load_texture         ( GXTexture_t **texture, char *path)
     }
 
     // Initialized data
-    GXInstance_t  *instance              = g_get_active_instance();
-    GXTexture_t   *i_texture             = 0;
-    size_t         json_len              = g_load_file(path, 0, false);
-    char          *json_text             = calloc(json_len+1, sizeof(char));
+    GXInstance_t  *p_instance  = g_get_active_instance();
+    GXTexture_t   *i_texture = 0;
+    size_t         json_len  = g_load_file(path, 0, false);
+    char          *json_text = calloc(json_len+1, sizeof(char));
     
     // TODO: Memory checking
 
@@ -262,14 +266,16 @@ int load_texture         ( GXTexture_t **texture, char *path)
     // TODO: Error checking
     load_texture_as_json(texture, json_text, json_len);
 
+    // Success
     return 1;
 
+    // TODO: Error handling
     no_texture:
     no_path:
     return 0;
 }
 
-int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
+int load_texture_as_json ( GXTexture_t **texture, char *text )
 {
 
     // Argument check
@@ -277,7 +283,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
         #ifndef NDEBUG
             if(texture == (void *)0)
                 goto no_texture;
-            if (token_text == (void*)0)
+            if (text == (void*)0)
                 goto no_token;
         #endif
     }
@@ -290,7 +296,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
                          *path                   = 0;
     VkSamplerAddressMode  sampler_address_mode   = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     VkFilter              filter                 = VK_FILTER_LINEAR;
-    GXInstance_t         *instance               = g_get_active_instance();
+    GXInstance_t         *p_instance             = g_get_active_instance();
     GXTexture_t          *p_texture              = 0;
     char                 *file_extension         = 0,
                          *image_json_object      = 0,
@@ -318,7 +324,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
         JSONToken_t *t = 0;
 
         // Parse the JSON text into a dictionary
-        parse_json(token_text, len, &json_data);
+        //parse_json(text, len, &json_data);
 
         // Parse the dictionary
         {
@@ -346,7 +352,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
     p_texture = *texture;
 
-    if      (path) {
+    if (path) {
 
         // Get the file extension
         file_extension = 1 + strrchr(path, '.');
@@ -370,16 +376,12 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
         create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging_buffer, &staging_buffer_memory);
 
         // Copy the image 
-        {
-            vkMapMemory(instance->vulkan.device, staging_buffer_memory, 0, image_size, 0, &data);
-            memcpy(data, image_data, image_size);
-            vkUnmapMemory(instance->vulkan.device, staging_buffer_memory);
-        }
+        vkMapMemory(p_instance->vulkan.device, staging_buffer_memory, 0, image_size, 0, &data);
+        memcpy(data, image_data, image_size);
+        vkUnmapMemory(p_instance->vulkan.device, staging_buffer_memory);
 
         // Popultate image create info struct
-        {
-            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
-        }
+        construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
 
     }
     else if (path == 0 && image_json_object)
@@ -576,7 +578,7 @@ int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
 
 int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, VkImageType image_type, VkFormat format, int width, int height, int depth, size_t mip_levels, size_t array_layers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, VkSharingMode sharing_mode, VkImageLayout initial_layout )
 {
-    GXInstance_t      *instance          = g_get_active_instance();
+    GXInstance_t      *p_instance          = g_get_active_instance();
     VkImageCreateInfo  image_create_info = { 0 };
     size_t             dim               = 0;
     VkMemoryAllocateInfo  allocate_info = { 0 };
@@ -605,11 +607,11 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
     }
        
     // Create the image
-    if ( vkCreateImage(instance->vulkan.device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
+    if ( vkCreateImage(p_instance->vulkan.device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
         goto failed_to_create_image;
 
     // Figure out how much memory the image will use
-    vkGetImageMemoryRequirements(instance->vulkan.device, p_texture->texture_image, &memory_requirements);
+    vkGetImageMemoryRequirements(p_instance->vulkan.device, p_texture->texture_image, &memory_requirements);
 
     // Popultate the allocate info struct
     {
@@ -619,13 +621,13 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
     }
 
     // Allocate memory for the image
-    if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS) {
+    if (vkAllocateMemory(p_instance->vulkan.device, &allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS) {
         // TODO: GOTO, error handling
         printf("failed to allocate image memory!");
     }
 
     // Bind the image to the image memory
-    vkBindImageMemory(instance->vulkan.device, p_texture->texture_image, p_texture->texture_image_memory, 0);
+    vkBindImageMemory(p_instance->vulkan.device, p_texture->texture_image, p_texture->texture_image_memory, 0);
 
     return 1;
 
@@ -650,7 +652,7 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
 
 int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, VkFormat format, VkComponentMapping swizzle, VkImageAspectFlags aspect_mask )
 {
-    GXInstance_t          *instance               = g_get_active_instance();
+    GXInstance_t          *p_instance               = g_get_active_instance();
     VkImageViewCreateInfo  image_view_create_info = { 0 };
 
     // Popultate image view create info struct
@@ -668,7 +670,7 @@ int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, V
         image_view_create_info.subresourceRange.layerCount     = 1;
     }
 
-    if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
+    if ( vkCreateImageView(p_instance->vulkan.device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
         ;// TODO: Throw an error
 
     return 1;

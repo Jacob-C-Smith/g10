@@ -44,15 +44,10 @@ struct GXCameraController_s
  * 
  *  @return 1 on success, 0 on error
  */
-DLLEXPORT int camera_controller_from_camera ( GXInstance_t *instance , GXCamera_t   *camera );
+DLLEXPORT int camera_controller_from_camera ( GXInstance_t *p_instance , GXCamera_t *p_camera );
 
 /** !
  *  This is called once per frame to update the controlee camera
- *
- *  @param instance : The instance
- *  @param camera   : The camera to control
- *
- *  @sa update_controlee_camera
  *
  *  @return 1 on success, 0 on error
  */

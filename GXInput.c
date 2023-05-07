@@ -759,6 +759,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
             // TODO: Check return
             // Allocate a dictionary
             dict_construct(&p_input->binds, vector_element_count);
+            dict_construct(&p_input->bind_lut, vector_element_count);
 
 			// Iterate over each element
             for (size_t i = 0; i < vector_element_count; i++)
@@ -774,8 +775,9 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 
                 // Add the bind to the input
                 dict_add(p_input->binds, p_bind->name, p_bind);
+                dict_add(p_input->bind_lut, p_bind->name, p_bind);
             }
-				
+			
 			// Clean the scope
 			free(pp_elements);
         }
@@ -844,9 +846,11 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     }
 
     // Initialized data
-    GXBind_t *p_bind = 0;
-    char     *name   = 0;
-    array    *p_keys = 0;
+    GXBind_t  *p_bind    = 0;
+    char      *name      = 0;
+    array     *p_keys    = 0;
+    size_t     key_count = 0;
+    char     **p_keys_array = 0;
 
     // Parse the bind as an object
     if ( p_value->type == JSONobject )
@@ -894,45 +898,73 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
             strncpy(p_bind->name, name, name_len);
         }
 
-        /*// Parse the binds
+        // Parse the keys
         {
 
 			// Initialized data
-			JSONValue_t **pp_elements          = 0;
-			size_t        vector_element_count = 0;
-			
+			JSONValue_t **pp_elements  = 0;
+			size_t        key_count    = 0;
+
 			// Get the quantity of elements
-			array_get(p_binds, 0, &vector_element_count );
+			array_get(p_keys, 0, &key_count );
 
 			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+			pp_elements = calloc(key_count+1, sizeof(JSONValue_t *));
 
 			// Error checking
 			if ( pp_elements == (void *) 0 )
 				goto no_mem;
 
 			// Populate the elements of the array
-			array_get(p_binds, pp_elements, 0 );			
+			array_get(p_keys, pp_elements, 0 );			
 			
+            // Allocate memory for an array of keys
+            p_keys_array = calloc(key_count+1, sizeof(char *));
+            
+            // Error checking
+			if ( keys == (void *) 0 )
+				goto no_mem;
+
 			// Iterate over each element
-            for (size_t i = 0; i < vector_element_count; i++)
+            for (size_t i = 0; i < key_count; i++)
             {
                 
                 // Initialized data
                 JSONValue_t *i_element = pp_elements[i];
-                GXBind_t    *p_bind    = 0;
+                size_t  key_len = 0;
+                char   *key     = 0;
 
-                // Load the bind from the JSON value
-                if ( load_bind_as_json_value(&p_bind, i_element) == 0 )
-                    goto failed_to_load_bind_as_json_value;
+                if ( i_element->type != JSONstring )
+                    goto failed_to_parse_key;
+
+                // Compute the length of the string
+                key_len = strlen(i_element->string);
+
+                // Allocate memory for a copy of the string
+                key = calloc(key_len+1, sizeof(char));
+
+                // Error checking
+			    if ( key == (void *) 0 )
+				    goto no_mem;
                 
-                printf("");
+                // Copy the string
+                strncpy(key, i_element->string, key_len);
+
+                // Store the key pointer in the list of keys
+                p_keys_array[i] = key;
             }
-				
+			
 			// Clean the scope
 			free(pp_elements);
         }
-        */
+
+        *p_bind = (GXBind_t) {
+            .name = name,
+            .keys = p_keys_array,
+            .key_count = key_count,
+            .callback_max = 2,
+            .callbacks    = calloc(2, sizeof(void *))
+        };
     }
 
     exit:
@@ -969,6 +1001,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
             missing_properties:
             failed_to_load_bind:
             failed_to_load_bind_as_json_value:
+            failed_to_parse_key:
                 return 0;
         }
     
@@ -1143,6 +1176,7 @@ int create_bind ( GXBind_t **pp_bind )
 		#endif
 	}
 
+    // Initialized data
 	GXBind_t *p_bind = calloc(1, sizeof(GXBind_t));
 
 	// Error checking
@@ -1285,11 +1319,12 @@ int process_input ( GXInstance_t *p_instance )
     }
 
     // TODO: Refactor bind fires into a queue. 
-
+    queue *p_update_binds_queue = 0;
+    
     // TODO: Reimplement for other libraries?
 
     // Poll for events 
-    while (SDL_PollEvent(&p_instance->sdl2.event))
+    while ( SDL_PollEvent(&p_instance->sdl2.event) )
     {
 
         // Switch on the event type
@@ -1300,30 +1335,40 @@ int process_input ( GXInstance_t *p_instance )
             case SDL_MOUSEMOTION:
             {
 
+                // TODO: Uncomment
                 // Don't fire binds if the mouse isn't lockced
-                if (!SDL_GetRelativeMouseMode())
-                    break;
+                //if (!SDL_GetRelativeMouseMode())
+                //    break;
 
                 // Initialized data
                 u8                   button = 0;
                 int                  x_rel  = p_instance->sdl2.event.motion.xrel,
                                      y_rel  = p_instance->sdl2.event.motion.yrel;
                 callback_parameter_t input  = (callback_parameter_t) {
-                    .input_state = MOUSE,
+                    .input_state               = MOUSE,
                     .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
                     .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
                     .inputs.mouse_state.button = 0
                 };
 
-                // Fire mouse motion binds
-                if ( y_rel != 0 || x_rel != 0 )
-                    fire_bind((GXBind_t *)dict_get(p_instance->input->bind_lut, "MOUSE UP"), input, p_instance);
-                if ( y_rel > 0 )
-                    fire_bind((GXBind_t *)dict_get(p_instance->input->bind_lut, "MOUSE DOWN"), input, p_instance);
+                // TODO: Fire binds
+                printf("%3d %3d \r", x_rel, y_rel);
+
+                // -X, mouse left
                 if ( x_rel < 0 )
-                    fire_bind((GXBind_t *)dict_get(p_instance->input->bind_lut, "MOUSE LEFT"), input, p_instance);
-                if ( x_rel > 0 )
-                    fire_bind((GXBind_t *)dict_get(p_instance->input->bind_lut, "MOUSE RIGHT"), input, p_instance);
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
+
+                // +X, mouse right
+                if ( 0 < x_rel )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
+
+                // -Y, mouse up
+                if ( y_rel < 0 )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
+
+                // +Y, mouse down
+                if ( 0 < y_rel )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
 
             }
             case SDL_MOUSEBUTTONDOWN:
@@ -1378,163 +1423,71 @@ int process_input ( GXInstance_t *p_instance )
             }
         }
     }
-
     /*
-    callback_parameter_t input = { KEYBOARD, {0}};
-
-    size_t     l = dict_values(p_instance->input->binds, 0);
-    GXBind_t **b = calloc(l, sizeof(void *));
-
-    // TODO: Error check
-
-    dict_values(p_instance->input->binds, b);
-
-    for (size_t i = 0; i < l; i++)
-    {
-        GXBind_t *it = b[i];
-        if (it->active)
-        {
-            it->active = false;
-            input.inputs.key.depressed = false;
-            fire_bind(it, input, p_instance);
-        }
-    }
-    free(b);
-
     const u8* keyboard_state = SDL_GetKeyboardState(NULL);
 
+    // Iterate over each key
     for (size_t i = 0; i < 110; i++)
     {
-        if (keyboard_state[i])
+
+        // If the key is down...
+        if ( keyboard_state[i] )
         {
+            
+            // Initialized data
             GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
-            if (bind)
+
+
+            if ( bind )
             {
                 bind->active = true;
-                input.inputs.key.depressed = true;
-                fire_bind(bind, input, p_instance);
+                p_instance.input.inputs.key.depressed = true;
+                fire_bind(bind, p_input, p_instance);
             }
         }
-    }
+    }*/
 
-    /*
+
     // Game controller
-    if(controller) {
-        callback_parameter_t input;
+    if ( controller ) {
+
+        // Initialized data
+        callback_parameter_t input = (callback_parameter_t) 
+        {
+            .input_state = GAMEPAD,
         
-        // Initialize input struct
-        {
-            input.input_state = GAMEPAD;
-        
-            input.inputs.gamepad_state.left_trigger  = false;
-            input.inputs.gamepad_state.right_trigger = false;
+            .inputs.gamepad_state.left_trigger  = (float)(SDL_GameControllerGetAxis(controller, 4) / (float)SHRT_MAX),
+            .inputs.gamepad_state.right_trigger = (float)(SDL_GameControllerGetAxis(controller, 5) / (float)SHRT_MAX),
 
-            input.inputs.gamepad_state.left_bumper   = false;
-            input.inputs.gamepad_state.right_bumper  = false;
+            .inputs.gamepad_state.left_bumper   = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER),
+            .inputs.gamepad_state.right_bumper  = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER),
 
-            input.inputs.gamepad_state.A             = false;
-            input.inputs.gamepad_state.B             = false;
-            input.inputs.gamepad_state.X             = false;
-            input.inputs.gamepad_state.Y             = false;
+            .inputs.gamepad_state.A = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A),
+            .inputs.gamepad_state.B = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B),
+            .inputs.gamepad_state.X = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X),
+            .inputs.gamepad_state.Y = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y),
 
-            input.inputs.gamepad_state.dpad_down     = false;
-            input.inputs.gamepad_state.dpad_left     = false;
-            input.inputs.gamepad_state.dpad_right    = false;
-            input.inputs.gamepad_state.dpad_up       = false;
+            .inputs.gamepad_state.dpad_down  = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN),
+            .inputs.gamepad_state.dpad_left  = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT),
+            .inputs.gamepad_state.dpad_right = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
+            .inputs.gamepad_state.dpad_up    = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP),
 
-            input.inputs.gamepad_state.start         = false;
-            input.inputs.gamepad_state.select        = false;
+            .inputs.gamepad_state.start  = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START),
+            .inputs.gamepad_state.select = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK),
 
-            input.inputs.gamepad_state.left_stick    = (vec2){0.f, 0.f};
-            input.inputs.gamepad_state.right_stick   = (vec2){0.f, 0.f};
-        }
-
-        // Set bumpers
-        {
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER))
-                input.inputs.gamepad_state.right_bumper = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))
-                input.inputs.gamepad_state.left_bumper = true;
-        }
-
-        // Set ABXY buttons
-        {
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A))
-                input.inputs.gamepad_state.A = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B))
-                input.inputs.gamepad_state.B = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X))
-                input.inputs.gamepad_state.X = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y))
-                input.inputs.gamepad_state.Y = true;
-        }
-   
-        // Set DPAD buttons
-        {
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP))
-                input.inputs.gamepad_state.A = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN))
-                input.inputs.gamepad_state.B = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT))
-                input.inputs.gamepad_state.X = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
-                input.inputs.gamepad_state.Y = true;
-        }
-
-        // Set start/select buttons
-        {
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START))
-                input.inputs.gamepad_state.start = true;
-            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK))
-                input.inputs.gamepad_state.select = true;
-        }
-
-        // Set joysticks and triggers
-        {
-
-            // Set joysticks
-            {
-
-                // Set left joystick
-                {
-                    // X
-                    input.inputs.gamepad_state.right_stick.x = (float)SDL_GameControllerGetAxis(controller, 0) / (float)SHRT_MAX;
-
-                    // Y
-                    input.inputs.gamepad_state.right_stick.y = (float)SDL_GameControllerGetAxis(controller, 1) / (float)SHRT_MAX;
-                }
-
-                // Set right joystick
-                {
-                    // X
-                    input.inputs.gamepad_state.right_stick.x = (float)SDL_GameControllerGetAxis(controller, 2) / (float)SHRT_MAX;
-                
-                    // Y
-                    input.inputs.gamepad_state.right_stick.y = (float)SDL_GameControllerGetAxis(controller, 3) / (float)SHRT_MAX;
-                }
+            .inputs.gamepad_state.left_stick = (vec2)
+            { 
+                .x = (float)(SDL_GameControllerGetAxis(controller, 2) / (float)SHRT_MAX),
+                .y = (float)(SDL_GameControllerGetAxis(controller, 3) / (float)SHRT_MAX)
+            },
+            .inputs.gamepad_state.right_stick = (vec2)
+            { 
+                .x = (float)(SDL_GameControllerGetAxis(controller, 0) / (float)SHRT_MAX),
+                .y = (float)(SDL_GameControllerGetAxis(controller, 1) / (float)SHRT_MAX)
             }
-            
-            // Set triggers
-            {
+        };
 
-                // Left trigger
-                input.inputs.gamepad_state.left_trigger = (float)SDL_GameControllerGetAxis(controller, 4) / (float)SHRT_MAX;
-                
-                // Right trigger
-                input.inputs.gamepad_state.right_trigger = (float)SDL_GameControllerGetAxis(controller, 5) / (float)SHRT_MAX;
-            }
-
-        }
-
-        // Fire binds
-        {
-            if (true)
-            {
-
-            }
-        }
     }
-    */
 
     // Success
     return 1;
@@ -1546,7 +1499,7 @@ int process_input ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"instance\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1554,7 +1507,7 @@ int process_input ( GXInstance_t *p_instance )
 
             no_inputs:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] No input in \"instance\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] No input in \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1566,6 +1519,9 @@ int process_input ( GXInstance_t *p_instance )
 
 int append_bind ( GXInput_t *p_input, GXBind_t *p_bind )
 {
+
+    // TODO: Argument check
+
     for (size_t i = 0; i < p_bind->key_count; i++)
     {
         GXBind_t* b = (GXBind_t *) dict_get(p_input->bind_lut, p_bind->keys[i]);
@@ -1582,7 +1538,10 @@ int append_bind ( GXInput_t *p_input, GXBind_t *p_bind )
 
     dict_add(p_input->binds, p_bind->name, p_bind);
     
+    // Success
     return 1;
+    
+    // TODO: Error handling
 }
 
 int input_info ( GXInput_t *p_input )
@@ -1668,7 +1627,7 @@ int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_in
 
     for (size_t i = 0; i < p_bind->callback_count; i++)
     {
-        void (*function)(input, instance) = p_bind->callbacks[i];
+        void (*function)(input, p_instance) = p_bind->callbacks[i];
         function(input, p_instance);
     }
 
@@ -1787,7 +1746,8 @@ int destroy_bind ( GXBind_t *p_bind )
 
     free(p_bind);
 
-    return 0;
+    // Success
+    return 1;
 
     // Error handling
     {

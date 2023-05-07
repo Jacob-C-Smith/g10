@@ -89,15 +89,14 @@ DLLEXPORT int load_scene ( GXScene_t **pp_scene, const char *path );
  *  Load a scene from JSON text
  *
  * @param pp_scene   : return
- * @param token_text : The scene JSON object text
- * @param len        : The length of the scene JSON object text
+ * @param text : The scene JSON object text
  *
  * @sa load_scene_as_json
  * @sa create_scene
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_scene_as_json ( GXScene_t **pp_scene, char *text, size_t len );
+DLLEXPORT int load_scene_as_json ( GXScene_t **pp_scene, char *text );
 
 // Appenders
 /** !
@@ -112,7 +111,7 @@ DLLEXPORT int load_scene_as_json ( GXScene_t **pp_scene, char *text, size_t len 
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int append_entity ( GXScene_t *scene, GXEntity_t *entity );
+DLLEXPORT int append_entity ( GXScene_t *p_scene, GXEntity_t *entity );
 
 /** !
  *  Append a camera to a scene
@@ -126,7 +125,7 @@ DLLEXPORT int append_entity ( GXScene_t *scene, GXEntity_t *entity );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int append_camera ( GXScene_t *scene, GXCamera_t *camera );
+DLLEXPORT int append_camera ( GXScene_t *p_scene, GXCamera_t *camera );
 
 /** !
  *  Append a light to a scene
@@ -140,7 +139,7 @@ DLLEXPORT int append_camera ( GXScene_t *scene, GXCamera_t *camera );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int append_light ( GXScene_t *scene, GXLight_t *light );
+DLLEXPORT int append_light ( GXScene_t *p_scene, GXLight_t *light );
 
 /** !
  *  Append a collision to a scene
@@ -154,11 +153,11 @@ DLLEXPORT int append_light ( GXScene_t *scene, GXLight_t *light );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int append_collision ( GXScene_t *scene, GXCollision_t *collision );
+DLLEXPORT int append_collision ( GXScene_t *p_scene, GXCollision_t *collision );
 
 // Drawing 
-DLLEXPORT int draw_scene ( GXScene_t *scene );
-DLLEXPORT int draw_lights ( GXScene_t *scene, GXPart_t *light_part, GXShader_t *shader );
+DLLEXPORT int draw_scene ( GXScene_t *p_scene );
+DLLEXPORT int draw_lights ( GXScene_t *p_scene, GXPart_t *light_part, GXShader_t *shader );
 
 // Info
 
@@ -192,7 +191,7 @@ DLLEXPORT GXEntity_t *get_entity ( GXScene_t *p_scene, const char* name );
  * 
  * @return a pointer to the camera, if the scene contains the camera, else 0
  */
-DLLEXPORT GXCamera_t *get_camera ( GXScene_t *scene, const char* name );
+DLLEXPORT GXCamera_t *get_camera ( GXScene_t *p_scene, const char* name );
 
 /** !
  *  Get an light from the scene by it's name
@@ -202,14 +201,44 @@ DLLEXPORT GXCamera_t *get_camera ( GXScene_t *scene, const char* name );
  * 
  * @return a pointer to the light, if the scene contains the light, else 0
  */
-DLLEXPORT GXLight_t *get_light ( GXScene_t *scene, const char* name );
+DLLEXPORT GXLight_t *get_light ( GXScene_t *p_scene, const char* name );
 
 // Mutators
+/** !
+ *  Changes the scene's active camera
+ *
+ * @param p_ai             : Pointer to AI
+ * @param state_name       : The name of the state
+ *
+ * @sa add_ai_state_callback
+ * @sa set_ai_pre_update_callback
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int set_active_camera ( GXScene_t   *scene, const char    name[] );
 
 // Scheduler tasks
-DLLEXPORT int load_entity_from_queue ( GXInstance_t *instance ); 
-DLLEXPORT int load_light_probe_from_queue ( GXInstance_t *instance );
+/** !
+ * Dequeue an entity from the load queue, parse it, and add it to the instance's active scene
+ * 
+ * @param p_instance : The active instance
+ * 
+ * @sa load_light_probe_from_queue
+ * 
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int load_entity_from_queue ( GXInstance_t *p_instance );
+
+/** !
+ * Dequeue a light probe from the load queue, parse it, and add it to the instance's active scene
+ * 
+ * @param p_instance : The active instance
+ * 
+ * @sa load_entity_from_queue
+ * 
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int load_light_probe_from_queue ( GXInstance_t *p_instance );
 
 // Removers
 /** !

@@ -57,14 +57,14 @@ int load_collider(GXCollider_t** collider, const char* path)
 
     g_load_file(path, token, false);
 
-    load_collider_as_json(collider, token, len);
+    load_collider_as_json(collider, token);
 
     free(token);
 
     return 1;
 }
 
-int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
+int load_collider_as_json(GXCollider_t** collider, char* text )
 {
     GXCollider_t  *i_collider    = 0;
     dict          *collider_json = 0;
@@ -72,7 +72,7 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
                  **max           = 0,
                  **min           = 0;
 
-    parse_json(token_text, len, &collider_json);
+    parse_json(text, len, &collider_json);
 
     {
         JSONToken_t *token = 0;

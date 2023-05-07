@@ -33,43 +33,43 @@ GXCameraController_t* create_camera_controller       ( void )
     }
 }
 
-void                  camera_controller_forward      ( callback_parameter_t state, GXInstance_t* instance )
+void                  camera_controller_forward      ( callback_parameter_t state, GXInstance_t* p_instance )
 {
     if (state.input_state == KEYBOARD)
         y_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
-void                  camera_controller_backward     ( callback_parameter_t state, GXInstance_t* instance )
+void                  camera_controller_backward     ( callback_parameter_t state, GXInstance_t* p_instance )
 {
     if (state.input_state == KEYBOARD)
         y_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
-void                  camera_controller_strafe_left  ( callback_parameter_t state, GXInstance_t* instance )
+void                  camera_controller_strafe_left  ( callback_parameter_t state, GXInstance_t* p_instance )
 {
     if (state.input_state == KEYBOARD)
         x_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
-void                  camera_controller_strafe_right ( callback_parameter_t state, GXInstance_t* instance )
+void                  camera_controller_strafe_right ( callback_parameter_t state, GXInstance_t* p_instance )
 {
     if (state.input_state == KEYBOARD)
         x_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
-void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* instance ) 
+void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* p_instance ) 
 {
     if (state.input_state == MOUSE)
     {
-        v_ang -= camera_acceleration * instance->input->mouse_sensitivity * (state.inputs.mouse_state.yrel / 720.0f);
-        h_ang += camera_acceleration * instance->input->mouse_sensitivity * (state.inputs.mouse_state.xrel / 1280.0f);
+        v_ang -= camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.yrel / 720.0f);
+        h_ang += camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.xrel / 1280.0f);
     }
 
 }
 
-int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera )
+int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camera )
 {
     // Argument check
     {
         #ifndef NDEBUG
-            if ( instance == (void *)0 )
+            if ( p_instance == (void *)0 )
                 goto no_instance;
             if (camera == (void *)0 )
                 goto no_camera;
@@ -81,13 +81,13 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
     ret->camera = camera;
 
     // Displacement binds
-    GXBind_t* forward = find_bind(instance->input, "FORWARD"),
-        * backward = find_bind(instance->input, "BACKWARD"),
-        * left = find_bind(instance->input, "STRAFE LEFT"),
-        * right = find_bind(instance->input, "STRAFE RIGHT"),
+    GXBind_t* forward = find_bind(p_instance->input, "FORWARD"),
+        * backward = find_bind(p_instance->input, "BACKWARD"),
+        * left = find_bind(p_instance->input, "STRAFE LEFT"),
+        * right = find_bind(p_instance->input, "STRAFE RIGHT"),
 
         // Orientation binds
-        * mouse = find_bind(instance->input, "MOUSE");
+        * mouse = find_bind(p_instance->input, "MOUSE");
     
     // Error checking
     {
@@ -143,7 +143,7 @@ int camera_controller_from_camera  ( GXInstance_t* instance, GXCamera_t *camera 
         {
             no_instance:
             #ifndef NDEBUG
-                g_print_error("[G10] [Camera Controller] Null pointer provided for \"instance\" in call to \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Camera Controller] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
             no_camera:

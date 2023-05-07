@@ -348,7 +348,7 @@ DLLEXPORT int g_stop_schedule ( GXInstance_t *p_instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int copy_state ( GXInstance_t *instance );
+DLLEXPORT int copy_state ( GXInstance_t *p_instance );
 
 // Getters
 /** !
@@ -369,52 +369,129 @@ DLLEXPORT GXInstance_t* g_get_active_instance ( void );
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material );
+DLLEXPORT int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *p_material );
 
 /** !
  * Cache a part. Caching a part adds it to the garbage collector.
  *
- * @param instance: The active instance
- * @param part    : A pointer to a part
+ * @param p_instance: The active instance
+ * @param p_part    : A pointer to a part
  *
  * @sa g_find_part
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_part ( GXInstance_t *p_instance, GXPart_t *part );
+DLLEXPORT int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part );
 
 /** !
  * Cache a shader. Caching a shader adds it to the garbage collector.
  *
- * @param instance: The active instance
- * @param shader  : A pointer to a shader
+ * @param p_instance: The active instance
+ * @param p_shader  : A pointer to a shader
  *
  * @sa g_find_shader
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *shader );
+DLLEXPORT int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader );
 
 /** !
  * Cache an ai. Caching an ai adds it to the garbage collector.
  *
- * @param instance : The active instance
- * @param ai       : A pointer to an ai
+ * @param p_instance : The active instance
+ * @param p_ai     : A pointer to an ai
  *
  * @sa g_find_shader
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *ai );
+DLLEXPORT int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai );
 
-DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *p_instance  , char *name );
-DLLEXPORT GXPart_t     *g_find_part     ( GXInstance_t *p_instance  , char *name );
-DLLEXPORT GXShader_t   *g_find_shader   ( GXInstance_t *p_instance  , char *name );
-DLLEXPORT GXAI_t       *g_find_ai       ( GXInstance_t *p_instance, char *name );
+/** !
+ * Search the cache for a material. Caching a material adds it to the garbage collector.
+ *
+ * @param p_instance : The active instance
+ * @param name       : The name of the ai
+ * 
+ * @sa g_find_ai
+ * @sa g_find_part  
+ * @sa g_find_shader    
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name );
+
+/** !
+ * Search the cache for a part. Caching a part adds it to the garbage collector.
+ *
+ * @param p_instance : The active instance
+ * @param name       : The name of the part
+ *
+ * @sa g_find_material  
+ * @sa g_find_shader
+ * @sa g_find_ai
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name );
+
+/** !
+ * Search the cache for a shader. Caching a shader adds it to the garbage collector.
+ *
+ * @param p_instance : The active instance
+ * @param name       : The name of the shader
+ *
+ * @sa g_find_material  
+ * @sa g_find_part
+ * @sa g_find_ai
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name );
+
+/** !
+ * Search the ai for a shader. Caching an ai adds it to the garbage collector.
+ *
+ * @param p_instance : The active instance
+ * @param name       : The name of the ai
+ *
+ * @sa g_find_material  
+ * @sa g_find_part
+ * @sa g_find_ai
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name );
 
 // User operations
+/** !
+ * The user calls this function to exit the game
+ *
+ * @param state      : Input state
+ * @param p_instance : The active instance
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT void g_user_exit         ( callback_parameter_t state, GXInstance_t *p_instance );
+
+/** !
+ * Toggle mouse lock
+ *
+ * @param state      : Input state
+ * @param p_instance : The active instance
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT void g_toggle_mouse_lock ( callback_parameter_t state, GXInstance_t *p_instance );
+
+/** !
+ * Play a sound 
+ *
+ * @param state      : Input state
+ * @param p_instance : The active instance
+ *
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT void g_play_sound        ( callback_parameter_t state, GXInstance_t *p_instance );
 
 // Conversions

@@ -105,8 +105,8 @@ DLLEXPORT int create_collider ( GXCollider_t **pp_collider );
 /** !
  *  Load a collider from a JSON file
  *
- * @param pp_ai : return
- * @param path  : The path to a JSON file containing a collider object
+ * @param pp_collider : return
+ * @param path        : The path to file containing collider JSON
  *
  * @sa load_collider_as_json
  * @sa create_collider
@@ -116,29 +116,60 @@ DLLEXPORT int create_collider ( GXCollider_t **pp_collider );
 DLLEXPORT int load_collider ( GXCollider_t **pp_collider, const char *path );
 
 /** !
- *  Load an AI from JSON text
+ *  Load a collider from JSON text
  *
- * @param pp_ai      : return
- * @param text : The AI JSON object text
+ * @param pp_collider : return
+ * @param text        : The collider JSON text
  *
- * @sa load_ai
- * @sa create_ai
+ * @sa load_collider
+ * @sa load_collider_as_json_value
+ * @sa create_collider
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_collider_as_json ( GXCollider_t **pp_collider, char *text );
 
 // Callbacks
+/** !
+  *  Add a callback for when collision start
+  *
+  *  @param p_collider : Pointer to collider
+  *  @param callback   : function pointer of type int (*function_pointer)(GXCollision_t *p_collision)
+  *
+  *  @sa add_aabb_collision_callback
+  *  @sa add_aabb_end_collision_callback
+  *
+  *  @return 1 on success, 0 on error.
+  */
+DLLEXPORT int add_aabb_start_collision_callback ( GXCollider_t *p_collider, int (*function_pointer)(GXCollision_t *p_collision) );
 
-DLLEXPORT int add_aabb_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
+/** !
+  *  Add a callback for when colliding
+  *
+  *  @param p_collider : Pointer to collider
+  *  @param callback   : function pointer of type int (*function_pointer)(GXCollision_t *p_collision)
+  *
+  *  @sa add_aabb_start_collision_callback
+  *  @sa add_aabb_end_collision_callback
+  *
+  *  @return 1 on success, 0 on error.
+  */
 DLLEXPORT int add_aabb_collision_callback ( GXCollider_t *collider, void* function_pointer );
+
+/** !
+  *  Add a callback for when collision ends
+  *
+  *  @param p_collider : Pointer to collider
+  *  @param callback   : function pointer of type int (*function_pointer)(GXCollision_t *p_collision)
+  *
+  *  @sa add_aabb_start_collision_callback
+  *  @sa add_aabb_collision_callback
+  *
+  *  @return 1 on success, 0 on error.
+  */
 DLLEXPORT int add_aabb_end_collision_callback ( GXCollider_t *collider, void* function_pointer );
 
-//DLLEXPORT int add_start_collision_callback ( GXCollider_t *collider, void* function_pointer );
-//DLLEXPORT int add_collision_callback ( GXCollider_t *collider, void* function_pointer );
-//DLLEXPORT int add_end_collision_callback ( GXCollider_t *collider, void* function_pointer );
-
-// Deallocators
+// Destructors
 /** !
  *  Destroy a collider
  *

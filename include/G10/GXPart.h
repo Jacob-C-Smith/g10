@@ -75,15 +75,14 @@ DLLEXPORT int load_part         ( GXPart_t   **pp_part, char *path );
 /** !
  *  Load a part from a JSON object
  *
- * @param pp_part    : return
- * @param token_text : The part JSON object text
- * @param len        : The length of the JSON object text
+ * @param pp_part : return
+ * @param text    : The part JSON text
  * 
  * @sa load_part
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_part_as_json ( GXPart_t **pp_part, char *token_text, size_t len );
+DLLEXPORT int load_part_as_json ( GXPart_t **pp_part, char *text );
 
 // Drawing
 

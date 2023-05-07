@@ -69,16 +69,16 @@ DLLEXPORT int load_rigidbody         ( GXRigidbody_t **pp_rigidbody, const char 
  *  Load a rigidbody from JSON text
  *
  * @param pp_rigidbody : return
- * @param token_text   : The JSON text
+ * @param text         : The JSON text
  *
  * @sa load_rigidbody
  * @sa create_rigidbody
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_rigidbody_as_json ( GXRigidbody_t **pp_rigidbody, char *token_text );
+DLLEXPORT int load_rigidbody_as_json ( GXRigidbody_t **pp_rigidbody, char *text );
 
-// Deallocators
+// Destructors
 /** !
  *  Destroy a rigidbody
  *

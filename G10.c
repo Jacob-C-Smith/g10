@@ -16,9 +16,9 @@ void create_command_pool    ( void );
 void create_command_buffers ( void );
 void create_sync_objects    ( void );
 
-void create_buffer          ( VkDeviceSize  size       , VkBufferUsageFlags    usage          , VkMemoryPropertyFlags   properties              , VkBuffer *buffer, VkDeviceMemory *buffer_memory );
-u32  find_memory_type       ( u32           type_filter, VkMemoryPropertyFlags properties );
-int  check_vulkan_device    ( GXInstance_t *instance   , VkPhysicalDevice      physical_device, char                  **required_extension_names);
+void create_buffer          ( VkDeviceSize  size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory );
+u32  find_memory_type       ( u32 type_filter, VkMemoryPropertyFlags properties );
+int  check_vulkan_device    ( GXInstance_t *p_instance , VkPhysicalDevice physical_device, char **required_extension_names);
 
 VKAPI_ATTR 
 VkBool32
@@ -392,6 +392,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     // Run the texture system initializer
                     init_texture();
                 }
+                */
 
                 // Input initialization
                 {
@@ -402,7 +403,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     // Run the input system initializer
                     init_input();
                 }
-
+                
+                /*
                 // Audio initialization
                 {
 
@@ -474,23 +476,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     init_ai();
                 }
             }
-            
-            // Load a renderer
-            if (renderer)
-            {
-
-                // Initialized data
-               //GXRenderer_t *p_renderer = 0;
-
-               //// Differerntiate objects from paths
-               //if   ( *renderer == '{' ) 
-               //    load_renderer_as_json(&p_renderer, renderer, strlen(renderer));
-               //else
-               //    load_renderer(&p_renderer, renderer);
-
-               //// Set the active renderer
-               //p_instance->context.renderer = p_renderer;
-            }
 
             // Construct dictionaries to cache materials, parts, and shaders.
             {
@@ -506,12 +491,32 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Default to 16 cached ais
                 // TODO: Fix
-                dict_construct(&p_instance->cache.ais      , 8 /*ai_cache_count*/);
+                dict_construct(&p_instance->cache.ais      , 16 /*ai_cache_count*/);
 
             }
 
+            // Load a renderer
+            if ( renderer )
+            {
+
+                // Initialized data
+                GXRenderer_t *p_renderer = 0;
+
+                // TODO: Fix
+                // Differerntiate objects from paths
+                //if   ( *renderer == '{' ) 
+                //    load_renderer_as_json(&p_renderer, renderer, strlen(renderer));
+                //else
+                //    load_renderer(&p_renderer, renderer);
+
+                // Set the active renderer
+                p_instance->context.renderer = p_renderer;
+            }
+
+            
+
             // Load an input set
-            if (input)
+            if ( input )
             {
                 load_input(&p_instance->input, input);
             }
@@ -520,10 +525,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             if (audio) {} // Coming soon...
                 
             // Load schedules
-            if(p_schedules) {
-  
-                // Construct a dictionary for schedules
-                dict_construct(&p_instance->data.schedules, 8);
+            if(p_schedules)
+            {
   
 		        // Initialized data
 		        size_t        schedule_count = 0;
@@ -532,6 +535,9 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 		        // Get the quantity of elements
 		        array_get(p_schedules, 0, &schedule_count );
 
+                // Construct a dictionary for schedules
+                dict_construct(&p_instance->data.schedules, 8);
+  
 		        // Allocate an array for the elements
 		        pp_elements = calloc(schedule_count+1, sizeof(JSONValue_t *));
 
@@ -600,7 +606,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             // Set up the server
             //if (server)
             //{
-//
             //    // Load the server as a JSON object
             //    if (server[0] == '{')
             //        load_server_as_json(&p_instance->networking.server, server, strlen(server));
@@ -608,7 +613,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             //    // Load the server from the filesystem
             //    else
             //        load_server(&p_instance->networking.server, server);
-//
             //}
 
             // This prevents divide by zero errors when the game loop starts
@@ -656,39 +660,39 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // SDL failed to initialize
             noSDL:
-            #ifndef NDEBUG
-                g_print_error("[SDL2] Failed to initialize SDL\n");
-            #endif
+                #ifndef NDEBUG
+                    g_print_error("[SDL2] Failed to initialize SDL\n");
+                #endif
 
-            // Error 
-            return 0;
+                // Error 
+                return 0;
 
             // SDL Image failed to initialize
             noSDLImage:
-            #ifndef NDEBUG
-                g_print_error("[SDL Image] Failed to initialize SDL Image\n");
-            #endif
+                #ifndef NDEBUG
+                    g_print_error("[SDL Image] Failed to initialize SDL Image\n");
+                #endif
 
-            // Error 
-            return 0;
+                // Error 
+                return 0;
 
             // SDL Networking failed to initialize
             noSDLNetwork:
-            #ifndef NDEBUG
-                g_print_error("[SDL Networking] Failed to initialize SDL Networking\n");
-            #endif
-            
-            // Error 
-            return 0;
+                #ifndef NDEBUG
+                    g_print_error("[SDL Networking] Failed to initialize SDL Networking\n");
+                #endif
+
+                // Error 
+                return 0;
 
             // The SDL window failed to initialize
             noWindow:
-            #ifndef NDEBUG
-                g_print_error("[SDL2] Failed to create a window\nSDL Says: %s\n", SDL_GetError());
-            #endif
-            
-            // Error 
-            return 0;
+                #ifndef NDEBUG
+                    g_print_error("[SDL2] Failed to create a window\nSDL Says: %s\n", SDL_GetError());
+                #endif
+                
+                // Error 
+                return 0;
         
         }
 
@@ -812,21 +816,21 @@ void pick_physical_device ( char **required_extension_names )
 
 void create_logical_device ( char **required_extension_names )
 {
-    GXInstance_t             *instance                 = g_get_active_instance();
+    GXInstance_t             *p_instance                 = g_get_active_instance();
     VkDeviceQueueCreateInfo  *queue_create_infos       = calloc(2, sizeof(VkDeviceQueueCreateInfo));
     VkPhysicalDeviceFeatures  device_features          = { 0 };
     VkDeviceCreateInfo        device_create_info       = { 0 };
     VkBool32                  result                   = 0;
-    u32                       unique_queue_families[2] = { instance->vulkan.queue_family_indices.g, instance->vulkan.queue_family_indices.p };
+    u32                       unique_queue_families[2] = { p_instance->vulkan.queue_family_indices.g, p_instance->vulkan.queue_family_indices.p };
 
-    instance->vulkan.priority = 1.f;
+    p_instance->vulkan.priority = 1.f;
 
     for (size_t i = 0; i < 2; i++)
     {
         queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queue_create_infos[i].queueFamilyIndex = i;
         queue_create_infos[i].queueCount = 1;
-        queue_create_infos[i].pQueuePriorities = &instance->vulkan.priority;
+        queue_create_infos[i].pQueuePriorities = &p_instance->vulkan.priority;
     }
 
     device_create_info = (VkDeviceCreateInfo) {
@@ -838,14 +842,14 @@ void create_logical_device ( char **required_extension_names )
         .ppEnabledExtensionNames = required_extension_names
     };
 
-    result = vkCreateDevice(instance->vulkan.physical_device, &device_create_info, 0, &instance->vulkan.device);
+    result = vkCreateDevice(p_instance->vulkan.physical_device, &device_create_info, 0, &p_instance->vulkan.device);
 
     if (result != VK_SUCCESS) {
         printf("failed to create logical device!");
     }
 
-    vkGetDeviceQueue(instance->vulkan.device, unique_queue_families[0], 0, &instance->vulkan.graphics_queue);
-    vkGetDeviceQueue(instance->vulkan.device, unique_queue_families[1], 0, &instance->vulkan.present_queue);
+    vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[0], 0, &p_instance->vulkan.graphics_queue);
+    vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[1], 0, &p_instance->vulkan.present_queue);
 
 } 
 
@@ -857,29 +861,29 @@ void create_swap_chain ( void )
     VkExtent2D                extent;
 
     // Initialized data
-    GXInstance_t             *instance               = g_get_active_instance();
+    GXInstance_t             *p_instance               = g_get_active_instance();
     VkSwapchainCreateInfoKHR  swapchain_create_info  = { 0 };
     VkPresentModeKHR          present_mode           = VK_PRESENT_MODE_MAILBOX_KHR;
 
     u32                       qfi[2]                 = { 0, 0 };
     
-    qfi[0] = instance->vulkan.queue_family_indices.g;
-    qfi[1] = instance->vulkan.queue_family_indices.p;
+    qfi[0] = p_instance->vulkan.queue_family_indices.g;
+    qfi[1] = p_instance->vulkan.queue_family_indices.p;
 
-    surface_format = instance->vulkan.swap_chain_details.formats[0];
+    surface_format = p_instance->vulkan.swap_chain_details.formats[0];
 
     for (size_t i = 0; i < 2; i++)
-        if (instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            surface_format = instance->vulkan.swap_chain_details.formats[i];
+        if (p_instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && p_instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            surface_format = p_instance->vulkan.swap_chain_details.formats[i];
     
     extent = (VkExtent2D) {
-        .width  = instance->window.width,
-        .height = instance->window.height
+        .width  = p_instance->window.width,
+        .height = p_instance->window.height
     };
 
     swapchain_create_info = (VkSwapchainCreateInfoKHR) { 
         .sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        .surface          = instance->vulkan.surface,
+        .surface          = p_instance->vulkan.surface,
         .minImageCount    = 2,
         .imageFormat      = surface_format.format,
         .imageColorSpace  = surface_format.colorSpace,
@@ -892,7 +896,7 @@ void create_swap_chain ( void )
         .oldSwapchain   = VK_NULL_HANDLE
     };
     
-    if (instance->vulkan.queue_family_indices.g != instance->vulkan.queue_family_indices.p)
+    if (p_instance->vulkan.queue_family_indices.g != p_instance->vulkan.queue_family_indices.p)
     {
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         swapchain_create_info.queueFamilyIndexCount = 2;
@@ -901,48 +905,48 @@ void create_swap_chain ( void )
     else
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    swapchain_create_info.preTransform   = instance->vulkan.swap_chain_details.capabilities.currentTransform;
+    swapchain_create_info.preTransform   = p_instance->vulkan.swap_chain_details.capabilities.currentTransform;
 
-    if (vkCreateSwapchainKHR(instance->vulkan.device, &swapchain_create_info, 0, &instance->vulkan.swap_chain))
+    if (vkCreateSwapchainKHR(p_instance->vulkan.device, &swapchain_create_info, 0, &p_instance->vulkan.swap_chain))
         // TODO: Replace with goto
         printf("FAILED TO CREATE SWAPCHAIN");
 
-    vkGetSwapchainImagesKHR(instance->vulkan.device, instance->vulkan.swap_chain, &instance->vulkan.image_count, 0);
+    vkGetSwapchainImagesKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, &p_instance->vulkan.image_count, 0);
 
-    instance->vulkan.swap_chain_images = calloc(instance->vulkan.image_count, sizeof(VkImage));
+    p_instance->vulkan.swap_chain_images = calloc(p_instance->vulkan.image_count, sizeof(VkImage));
 
-    vkGetSwapchainImagesKHR(instance->vulkan.device, instance->vulkan.swap_chain, &instance->vulkan.image_count, instance->vulkan.swap_chain_images);
+    vkGetSwapchainImagesKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, &p_instance->vulkan.image_count, p_instance->vulkan.swap_chain_images);
 
-    instance->vulkan.swap_chain_image_format = surface_format.format;
-    instance->vulkan.swap_chain_extent       = extent;
+    p_instance->vulkan.swap_chain_image_format = surface_format.format;
+    p_instance->vulkan.swap_chain_extent       = extent;
 }
 
 void cleanup_swap_chain ( void )
 {
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
 
     for (size_t i = 0; i < 2; i++)
-        vkDestroyFramebuffer(instance->vulkan.device, instance->vulkan.swap_chain_framebuffers[i], 0);
+        vkDestroyFramebuffer(p_instance->vulkan.device, p_instance->vulkan.swap_chain_framebuffers[i], 0);
 
     for (size_t i = 0; i < 2; i++)
-        vkDestroyImageView(instance->vulkan.device, instance->vulkan.swap_chain_image_views[i], 0);
+        vkDestroyImageView(p_instance->vulkan.device, p_instance->vulkan.swap_chain_image_views[i], 0);
 
-    vkDestroySwapchainKHR(instance->vulkan.device, instance->vulkan.swap_chain, (void *)0);
+    vkDestroySwapchainKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, (void *)0);
 
 }
 
 void create_image_views ( void ) {
-    GXInstance_t          *instance = g_get_active_instance();
+    GXInstance_t          *p_instance = g_get_active_instance();
     
-    instance->vulkan.swap_chain_image_views = calloc(instance->vulkan.image_count, sizeof(VkImageView));
+    p_instance->vulkan.swap_chain_image_views = calloc(p_instance->vulkan.image_count, sizeof(VkImageView));
     
-    for (size_t i = 0; i < instance->vulkan.image_count; i++)
+    for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
     {
         VkImageViewCreateInfo  image_view_create_info = { 
             .sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .image                           = instance->vulkan.swap_chain_images[i],
+            .image                           = p_instance->vulkan.swap_chain_images[i],
             .viewType                        = VK_IMAGE_VIEW_TYPE_2D,
-            .format                          = instance->vulkan.swap_chain_image_format,
+            .format                          = p_instance->vulkan.swap_chain_image_format,
             .components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY,
             .components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY,
             .components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -956,7 +960,7 @@ void create_image_views ( void ) {
             .pNext                           = 0
         };
 
-        if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS ) {
+        if ( vkCreateImageView(p_instance->vulkan.device, &image_view_create_info, 0, &p_instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS ) {
             g_print_error("failed to create image views!\n");
         }
         
@@ -967,56 +971,56 @@ void create_command_pool ( void )
 {
 
     // Initialized data
-    GXInstance_t            *instance = g_get_active_instance();
+    GXInstance_t            *p_instance = g_get_active_instance();
     VkCommandPoolCreateInfo  pool_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        .queueFamilyIndex = instance->vulkan.queue_family_indices.g
+        .queueFamilyIndex = p_instance->vulkan.queue_family_indices.g
     };
 
-    if ( vkCreateCommandPool(instance->vulkan.device, &pool_create_info, 0, &instance->vulkan.command_pool) != VK_SUCCESS )
+    if ( vkCreateCommandPool(p_instance->vulkan.device, &pool_create_info, 0, &p_instance->vulkan.command_pool) != VK_SUCCESS )
         g_print_error("Failed to create command pool!\n");
 }
 
 void create_command_buffers ( void )
 {
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
 
     VkCommandBufferAllocateInfo alloc_info = {
         .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .commandPool        = instance->vulkan.command_pool,
+        .commandPool        = p_instance->vulkan.command_pool,
         .level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = instance->vulkan.max_buffered_frames
+        .commandBufferCount = p_instance->vulkan.max_buffered_frames
     };
 
-    instance->vulkan.command_buffers = calloc(instance->vulkan.max_buffered_frames, sizeof(VkCommandBuffer));
+    p_instance->vulkan.command_buffers = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkCommandBuffer));
 
-    if (vkAllocateCommandBuffers(instance->vulkan.device, &alloc_info, instance->vulkan.command_buffers) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(p_instance->vulkan.device, &alloc_info, p_instance->vulkan.command_buffers) != VK_SUCCESS) {
         g_print_error("failed to allocate command buffers!\n");
     }
 }
 
 void create_sync_objects ( void )
 {
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
 
-    VkSemaphoreCreateInfo *semaphore_create_info = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
-    VkFenceCreateInfo     *fence_create_info     = calloc(instance->vulkan.max_buffered_frames, sizeof(VkFenceCreateInfo));
+    VkSemaphoreCreateInfo *semaphore_create_info = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
+    VkFenceCreateInfo     *fence_create_info     = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkFenceCreateInfo));
     
     semaphore_create_info->sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     fence_create_info->sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info->flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    instance->vulkan.image_available_semaphores = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
-    instance->vulkan.render_finished_semaphores = calloc(instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
-    instance->vulkan.in_flight_fences           = calloc(instance->vulkan.max_buffered_frames, sizeof(VkFence));
+    p_instance->vulkan.image_available_semaphores = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
+    p_instance->vulkan.render_finished_semaphores = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkSemaphore));
+    p_instance->vulkan.in_flight_fences           = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkFence));
 
-    for (size_t i = 0; i < instance->vulkan.max_buffered_frames; i++)
+    for (size_t i = 0; i < p_instance->vulkan.max_buffered_frames; i++)
     {
-        if (vkCreateSemaphore(instance->vulkan.device, semaphore_create_info, 0, &instance->vulkan.image_available_semaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(instance->vulkan.device, semaphore_create_info, 0, &instance->vulkan.render_finished_semaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(instance->vulkan.device, fence_create_info, 0, &instance->vulkan.in_flight_fences[i]) != VK_SUCCESS) {
+        if (vkCreateSemaphore(p_instance->vulkan.device, semaphore_create_info, 0, &p_instance->vulkan.image_available_semaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(p_instance->vulkan.device, semaphore_create_info, 0, &p_instance->vulkan.render_finished_semaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(p_instance->vulkan.device, fence_create_info, 0, &p_instance->vulkan.in_flight_fences[i]) != VK_SUCCESS) {
             g_print_error("failed to create semaphores!\n");
         }
     }
@@ -1025,9 +1029,9 @@ void create_sync_objects ( void )
 
 u32 find_memory_type ( u32 type_filter, VkMemoryPropertyFlags properties )
 {
-    GXInstance_t *instance = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
     VkPhysicalDeviceMemoryProperties mem_properties;
-    vkGetPhysicalDeviceMemoryProperties(instance->vulkan.physical_device, &mem_properties);
+    vkGetPhysicalDeviceMemoryProperties(p_instance->vulkan.physical_device, &mem_properties);
 
     for (u32 i = 0; i < mem_properties.memoryTypeCount; i++) {
         if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -1157,7 +1161,7 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
 void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer *buffer, VkDeviceMemory *buffer_memory )
 {
     VkMemoryRequirements  mem_requirements;
-    GXInstance_t         *instance         = g_get_active_instance();
+    GXInstance_t         *p_instance         = g_get_active_instance();
     VkBufferCreateInfo    buffer_info      = { 0 };
     VkMemoryAllocateInfo  alloc_info       = { 0 };
     
@@ -1173,10 +1177,10 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
         };
 
         // Create a buffer
-        if ( vkCreateBuffer( instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
+        if ( vkCreateBuffer( p_instance->vulkan.device, &buffer_info, 0, buffer ) != VK_SUCCESS )
             g_print_error("[G10] Failed to create buffer in call to function \"\s\"\n", __FUNCTION__);
 
-        vkGetBufferMemoryRequirements(instance->vulkan.device, *buffer, &mem_requirements);
+        vkGetBufferMemoryRequirements(p_instance->vulkan.device, *buffer, &mem_requirements);
     }
 
     // Allocate memory for the buffer
@@ -1190,11 +1194,11 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
         };
 
         // Allocate memory for the buffer
-        if (vkAllocateMemory(instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
+        if (vkAllocateMemory(p_instance->vulkan.device, &alloc_info, 0, buffer_memory) != VK_SUCCESS)
             g_print_error("[G10] Failed to allocate memory to buffer in call to function \"%s\"\n", __FUNCTION__);
 
         // Bind the buffer to the device
-        vkBindBufferMemory(instance->vulkan.device, *buffer, *buffer_memory, 0);
+        vkBindBufferMemory(p_instance->vulkan.device, *buffer, *buffer_memory, 0);
     }
 }
 
@@ -1261,12 +1265,12 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
 
 void clear_swap_chain ( void )
 {
-    GXInstance_t *instance = g_get_active_instance();
-    for (size_t i = 0; i < instance->vulkan.image_count; i++) {
-        vkDestroyImageView(instance->vulkan.device, instance->vulkan.swap_chain_image_views[i], 0);
+    GXInstance_t *p_instance = g_get_active_instance();
+    for (size_t i = 0; i < p_instance->vulkan.image_count; i++) {
+        vkDestroyImageView(p_instance->vulkan.device, p_instance->vulkan.swap_chain_image_views[i], 0);
     }
 
-    vkDestroySwapchainKHR(instance->vulkan.device, instance->vulkan.swap_chain, 0);
+    vkDestroySwapchainKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, 0);
 }
 
 int g_window_resize ( GXInstance_t *p_instance )
@@ -1534,6 +1538,16 @@ int g_stop_schedule ( GXInstance_t *p_instance )
 int copy_state ( GXInstance_t *p_instance )
 {
     
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_instance == (void *) 0 )
+                goto no_instance;
+            if ( p_instance->context.scene == (void *) 0 )
+                goto no_context_scene;
+        #endif
+    }
+
     // Initialized data
     size_t       actor_count = 0,
                  ai_count    = 0;
@@ -1542,17 +1556,15 @@ int copy_state ( GXInstance_t *p_instance )
                **ais         = 0;
 
     // Lock the mutexes
-    {
+    
+    // Physics
+    SDL_LockMutex(p_instance->mutexes.move_object);
+    SDL_LockMutex(p_instance->mutexes.update_force);
+    SDL_LockMutex(p_instance->mutexes.resolve_collision);
 
-        // Physics
-        SDL_LockMutex(p_instance->mutexes.move_object);
-        SDL_LockMutex(p_instance->mutexes.update_force);
-        SDL_LockMutex(p_instance->mutexes.resolve_collision);
-
-        // AI
-        SDL_LockMutex(p_instance->mutexes.ai_preupdate);
-        SDL_LockMutex(p_instance->mutexes.ai_update);
-    }
+    // AI
+    SDL_LockMutex(p_instance->mutexes.ai_preupdate);
+    SDL_LockMutex(p_instance->mutexes.ai_update);
 
     // Get a list of actors and ais
     {
@@ -1623,25 +1635,46 @@ int copy_state ( GXInstance_t *p_instance )
         }
     }
 
-    // Free the lists
+    // Clean the scope
     free(actors);
     free(ais);
 
     // Unlock the mutexes
-    {
         
-        // Physics
-        SDL_UnlockMutex(p_instance->mutexes.move_object);
-        SDL_UnlockMutex(p_instance->mutexes.update_force);
-        SDL_UnlockMutex(p_instance->mutexes.resolve_collision);
+    // Physics
+    SDL_UnlockMutex(p_instance->mutexes.move_object);
+    SDL_UnlockMutex(p_instance->mutexes.update_force);
+    SDL_UnlockMutex(p_instance->mutexes.resolve_collision);
 
-        // AI
-        SDL_UnlockMutex(p_instance->mutexes.ai_preupdate);
-        SDL_UnlockMutex(p_instance->mutexes.ai_update);
-    }
+    // AI
+    SDL_UnlockMutex(p_instance->mutexes.ai_preupdate);
+    SDL_UnlockMutex(p_instance->mutexes.ai_update);
 
     // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            no_context_scene:
+                #ifndef NDEBUG
+                    g_print_error("[G10] No active scene in instance in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 GXInstance_t *g_get_active_instance ( void )
@@ -1663,6 +1696,7 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
 
     dict_add(p_instance->cache.materials, material->name, material);
 
+    // Success
     return 1;
 
     // Error handling
@@ -1671,22 +1705,26 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_material:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
 }
 
-int g_cache_part ( GXInstance_t *p_instance, GXPart_t *part)
+int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part)
 {
 
     // Argument check
@@ -1694,13 +1732,14 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *part)
         #ifndef NDEBUG
             if(p_instance == (void *)0)
                 goto no_instance;
-            if (part == (void*)0)
+            if (p_part == (void*)0)
                 goto no_part;
         #endif
     }
 
-    //dict_add(p_instance->cached_parts, part->name, part);
+    //dict_add(p_instance->cached_parts, p_part->name, p_part);
 
+    // Success
     return 1;
 
     // Error handling
@@ -1709,22 +1748,26 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *part)
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_part:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"part\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
 }
 
-int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *shader )
+int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
 {
 
     // Argument check
@@ -1732,13 +1775,14 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *shader )
         #ifndef NDEBUG
             if(p_instance == (void *)0)
                 goto no_instance;
-            if (shader == (void*)0)
+            if (p_shader == (void*)0)
                 goto no_shader;
         #endif
     }
     
-    dict_add(p_instance->cache.shaders, shader->name, shader);
+    dict_add(p_instance->cache.shaders, p_shader->name, p_shader);
 
+    // Success
     return 1;
 
     // Error handling
@@ -1747,35 +1791,40 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *shader )
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_shader:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
 }
 
-int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *ai )
+int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
 {
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
+            if ( p_instance == (void *) 0 )
                 goto no_instance;
-            if (ai == (void*)0)
+            if ( p_ai == (void *) 0 )
                 goto no_ai;
         #endif
     }
     
-    dict_add(p_instance->cache.ais, ai->name, ai);
+    dict_add(p_instance->cache.ais, p_ai->name, p_ai);
 
+    // Success
     return 1;
 
     // Error handling
@@ -1784,16 +1833,20 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *ai )
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
 
             no_ai:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"ai\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
@@ -1851,6 +1904,7 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
         #endif
     }
 
+    // Success
     return (GXMaterial_t *) dict_get(p_instance->cache.materials, (char *)name);
 
     // Error handling
@@ -1859,16 +1913,20 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_name:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
@@ -1887,6 +1945,7 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name)
         #endif
     }
 
+    // Success
     return (GXPart_t *) dict_get(p_instance->cache.parts, (char *)name);
 
     // Error handling
@@ -1895,16 +1954,20 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name)
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_name:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }
@@ -1923,11 +1986,8 @@ GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name)
         #endif
     }
 
-    GXShader_t* ret = 0;
-
-    ret = (GXShader_t *) dict_get(p_instance->cache.shaders, (char *)name);
-
-    return ret;
+    // Success
+    return (GXShader_t *) dict_get(p_instance->cache.shaders, (char *)name);
 
     // Error handling
     {
@@ -1935,16 +1995,20 @@ GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name)
         // Argument errors
         {
             no_instance:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             no_name:
-            #ifndef NDEBUG
-                printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
     }

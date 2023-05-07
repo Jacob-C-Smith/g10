@@ -168,7 +168,6 @@ mat4 rotation_mat4_from_vec3 ( vec3 rotation )
     };
 }
 
-// ✅ Computes a model matrix from a location, rotation, and scale vector.
 mat4 model_mat4_from_vec3 ( vec3 location, vec3 rotation, vec3 scale )
 {
     return mul_mat4_mat4(mul_mat4_mat4(scale_mat4(scale), translation_mat4(location)), rotation_mat4_from_vec3(rotation));

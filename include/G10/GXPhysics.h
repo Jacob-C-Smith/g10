@@ -30,7 +30,7 @@
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int detect_collisions ( GXInstance_t *instance );
+DLLEXPORT int detect_collisions ( GXInstance_t *p_instance );
 
 /** !
  *  Updates location and rotation derivatives for each object in the instances active scene.
@@ -45,7 +45,7 @@ DLLEXPORT int detect_collisions ( GXInstance_t *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int move_objects      ( GXInstance_t *instance );
+DLLEXPORT int move_objects      ( GXInstance_t *p_instance );
 
 /** !
  *  Calculates forces and torque for each entity in the instances active scene. 
@@ -58,7 +58,7 @@ DLLEXPORT int move_objects      ( GXInstance_t *instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int update_forces ( GXInstance_t *instance );
+DLLEXPORT int update_forces ( GXInstance_t *p_instance );
 
 /** !
  *  Updates each rig in the instances active scene

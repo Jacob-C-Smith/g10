@@ -25,7 +25,6 @@ struct GXBV_s {
 };
 
 // Allocators
-
 /** !
  *  Allocate memory for a bounding volume
  *
@@ -35,10 +34,9 @@ struct GXBV_s {
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int     create_bv                ( GXBV_t   **pp_bv );
+DLLEXPORT int create_bv ( GXBV_t **pp_bv );
 
 // Constructors
-
 /** !
  *  Construct a bounding volume from a minimum and a maximum
  *
@@ -51,34 +49,34 @@ DLLEXPORT int     create_bv                ( GXBV_t   **pp_bv );
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int     construct_bv             ( GXBV_t   **pp_bv, vec3       min,     vec3        max);
+DLLEXPORT int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max );
 
 /** !
  *  Construct a bounding volume from two bounding volumes
  *
  * @param pp_bv : return
- * @param min   : The minimum axis aligned bounding vector
- * @param max   : The maximum axis aligned bounding vector
+ * @param p_a   : The first bounding volume
+ * @param p_a   : The second bounding volume
  *
  * @sa construct_bv
  * @sa construct_bvh_from_scene
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int     construct_bv_from_bvs    ( GXBV_t   **pp_bv, GXBV_t     *a     , GXBV_t      *b );
+DLLEXPORT int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *p_a, GXBV_t *p_b );
 
 /** !
  *  Construct a bounding volume heierarchy from a scene
  *
- * @param pp_bv : return
- * @param scene : The scene
+ * @param pp_bv   : return
+ * @param p_scene : The scene
  *
  * @sa construct_bv
  * @sa construct_bv_from_bvs
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int     construct_bvh_from_scene ( GXBV_t   **bv, GXScene_t  *scene );
+DLLEXPORT int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *p_scene );
 
 /** !
  *  Compute the distance between two bounding volumes
@@ -90,29 +88,27 @@ DLLEXPORT int     construct_bvh_from_scene ( GXBV_t   **bv, GXScene_t  *scene );
  *
  * @return distance on success, 0 on error
  */
-DLLEXPORT float   bv_distance               ( GXBV_t *a, GXBV_t *b );
+DLLEXPORT float bv_distance ( GXBV_t *p_a, GXBV_t *p_b );
 
 // Tree navigation
-DLLEXPORT GXBV_t *find_parent_bv           ( GXBV_t     *bvh   , GXBV_t      *bv );
-DLLEXPORT int     insert_bv                ( GXBV_t     *bvh   , GXBV_t      *bv );
+DLLEXPORT GXBV_t *find_parent_bv ( GXBV_t *p_bvh, GXBV_t *p_bv );
+DLLEXPORT int insert_bv ( GXBV_t *p_bvh, GXBV_t *p_bv );
 
 // Tree resizing
-DLLEXPORT int     resize_bv                ( GXBV_t     *bv );
+DLLEXPORT int resize_bv ( GXBV_t *p_bv );
 
 // Logging
 /** !
  *  Print info about a bounding volume
  *
- * @param p_ai  : pointer to ai to log
- *
- * @sa load_ai
+ * @param p_bv  : pointer to bounding volume to log
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int     bv_info                  ( GXBV_t     *p_bv       , size_t      d );
+DLLEXPORT int bv_info ( GXBV_t *p_bv, size_t d );
 
 // Getters
-DLLEXPORT size_t  get_entities_from_bv     ( GXBV_t     *bv, queue  *entity_queue );
+DLLEXPORT size_t get_entities_from_bv ( GXBV_t *p_bv, queue *p_entity_queue );
 
 // Collision detection
 /** !
@@ -125,7 +121,16 @@ DLLEXPORT size_t  get_entities_from_bv     ( GXBV_t     *bv, queue  *entity_queu
  *
  * @return true on collision, false otherwise
  */
-DLLEXPORT bool    aabb_intersect           ( GXBV_t      *a    , GXBV_t      *b );
+DLLEXPORT bool aabb_intersect ( GXBV_t *p_a , GXBV_t *p_b );
 
 // Destructors
-DLLEXPORT int     destroy_bv               ( GXBV_t      *bv ); // Destroyes a bounding volume and all its childern
+/** !
+ *  Recursively free a bounding volume
+ *
+ * @param pp_bv : Pointer to bounding volume
+ *
+ * @sa create_bv
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int destroy_bv ( GXBV_t **pp_bv );

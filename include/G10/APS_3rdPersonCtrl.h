@@ -1,11 +1,22 @@
+/** !
+ * @file G10/G10.h
+ * @author Jacob Smith
+ * 
+ * Include header for G10. 
+ */
+
+// Include guard
 #pragma once
 
+// Standard Library
 #include <stdio.h>
 #include <stdlib.h>
 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
+
 /* Aiden's third person character controller. 
 * Takes a reference to the character entity, 
 * and to the third person camera for the character.

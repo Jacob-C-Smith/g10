@@ -91,16 +91,15 @@ DLLEXPORT int load_camera ( GXCamera_t **pp_camera, const char *path );
 /** !
  *  Load a camera from JSON text
  *
- * @param pp_camera  : return
- * @param token_text : The camera JSON object text
- * @param len        : The length of the camera JSON object text
+ * @param pp_camera : return
+ * @param text      : The camera JSON text
  *
  * @sa load_camera_as_json
  * @sa create_camera
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len);
+DLLEXPORT int load_camera_as_json ( GXCamera_t **pp_camera, char *text );
 
 // Functions
 /** !
@@ -150,7 +149,7 @@ DLLEXPORT int get_camera_position ( void *ret );
  */
 DLLEXPORT int print_camera ( GXCamera_t *p_camera );
 
-// Deallocators
+// Destructors
 /** !
  *  Destroy a camera
  *

@@ -216,7 +216,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     }
 
     // Uninitialized data
-    GXInstance_t  *instance  = g_get_active_instance();
+    GXInstance_t  *p_instance  = g_get_active_instance();
     size_t         vertices_in_buffer = 0,
                    indices_in_buffer = 0;
     char          *data = 0;
@@ -618,27 +618,27 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
 
-        if (vkCreateBuffer(instance->vulkan.device, &buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
+        if (vkCreateBuffer(p_instance->vulkan.device, &buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
             g_print_error("[G10] [PLY] Failed to create vertex buffer");
 
-        vkGetBufferMemoryRequirements(instance->vulkan.device, part->vertex_buffer, &memory_requirements);
+        vkGetBufferMemoryRequirements(p_instance->vulkan.device, part->vertex_buffer, &memory_requirements);
 
         allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocate_info.allocationSize = memory_requirements.size;
         allocate_info.memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         
-        if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
+        if (vkAllocateMemory(p_instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
 
-        vkBindBufferMemory(instance->vulkan.device, part->vertex_buffer, part->vertex_buffer_memory, 0);
+        vkBindBufferMemory(p_instance->vulkan.device, part->vertex_buffer, part->vertex_buffer_memory, 0);
 
-        vkMapMemory(instance->vulkan.device, part->vertex_buffer_memory, 0, buffer_create_info.size, 0, &data);
+        vkMapMemory(p_instance->vulkan.device, part->vertex_buffer_memory, 0, buffer_create_info.size, 0, &data);
 
         // TODO: Replace w staging
         memcpy(data, vertex_array, buffer_create_info.size);
 
-        vkUnmapMemory(instance->vulkan.device, part->vertex_buffer_memory);
+        vkUnmapMemory(p_instance->vulkan.device, part->vertex_buffer_memory);
     }
 
     {
@@ -659,27 +659,27 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
 
-        if (vkCreateBuffer(instance->vulkan.device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
+        if (vkCreateBuffer(p_instance->vulkan.device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
             g_print_error("[G10] [PLY] Failed to create element buffer");
 
-        vkGetBufferMemoryRequirements(instance->vulkan.device, part->element_buffer, memory_requirements);
+        vkGetBufferMemoryRequirements(p_instance->vulkan.device, part->element_buffer, memory_requirements);
 
         allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocate_info->allocationSize = memory_requirements->size;
         allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 
-        if (vkAllocateMemory(instance->vulkan.device, allocate_info, 0, &part->element_buffer_memory))
+        if (vkAllocateMemory(p_instance->vulkan.device, allocate_info, 0, &part->element_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate element buffer memory");
 
-        vkBindBufferMemory(instance->vulkan.device, part->element_buffer, part->element_buffer_memory, 0);
+        vkBindBufferMemory(p_instance->vulkan.device, part->element_buffer, part->element_buffer_memory, 0);
 
-        vkMapMemory(instance->vulkan.device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
+        vkMapMemory(p_instance->vulkan.device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
 
         // TODO: Replace w staging
         memcpy(data, corrected_indicies, buffer_create_info->size);
 
-        vkUnmapMemory(instance->vulkan.device, part->element_buffer_memory);
+        vkUnmapMemory(p_instance->vulkan.device, part->element_buffer_memory);
 
         free(memory_requirements);
         free(buffer_create_info);

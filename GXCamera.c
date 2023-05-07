@@ -32,8 +32,8 @@ int get_camera_position ( void *ret )
 	}
 
 	// Initialized data
-	GXInstance_t *instance        = g_get_active_instance();
-	vec3          camera_position = instance->context.scene->active_camera->location;
+	GXInstance_t *p_instance        = g_get_active_instance();
+	vec3          camera_position = p_instance->context.scene->active_camera->location;
 
 	// Write the camera position to the return
 	*(vec3 *)ret = camera_position;
@@ -49,6 +49,8 @@ int get_camera_position ( void *ret )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Camera] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -208,7 +210,7 @@ int  load_camera ( GXCamera_t **pp_camera, const char *path )
 	}
 }
 
-int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
+int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 {
 
 	// Argument check
@@ -216,10 +218,8 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 		#ifndef NDEBUG
 			if ( pp_camera == (void *) 0 )
 				goto no_camera;
-			if (text == (void *) 0 )
+			if ( text == (void *) 0 )
 				goto no_object_text;
-			if (len == 0)
-				goto no_len;
 		#endif
 	}
 
@@ -432,7 +432,7 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text, size_t len )
 			
 			no_object_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"token_text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

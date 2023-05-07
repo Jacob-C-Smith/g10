@@ -72,7 +72,7 @@ DLLEXPORT int create_shader_module            ( char        *code, size_t code_l
 
 DLLEXPORT int create_shader                   ( GXShader_t **shader );
 DLLEXPORT int load_shader                     ( GXShader_t **shader, const char* path );
-DLLEXPORT int load_shader_as_json             ( GXShader_t **shader, char* token_text, size_t token_text_len );
+DLLEXPORT int load_shader_as_json             ( GXShader_t **shader, char* text );
 
 DLLEXPORT int use_shader                      ( GXShader_t  *shader );
 

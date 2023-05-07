@@ -35,11 +35,10 @@ struct GXEntity_s
 };
 
 // Allocators
-
-/* !
+/** !
  *  Allocate memory for an entity
  *
- * @param pp_entity : Double pointer to entity
+ * @param pp_entity : return
  *
  * @sa destroy_entity
  *
@@ -49,34 +48,46 @@ DLLEXPORT int create_entity          ( GXEntity_t **pp_entity );
 
 // Constructors
 
-/* !
+/** !
  *  Load an entity from a JSON file
  *
- * @param pp_entity : Double pointer to entity
- * @param path      : The path to a JSON file containing an entity object
+ * @param pp_entity : return
+ * @param path      : The path to a file containing a entity JSON
  *
  * @sa destroy_entity
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_entity            ( GXEntity_t **pp_entity, char* path );
+DLLEXPORT int load_entity ( GXEntity_t **pp_entity, char* path );
 
-/* !
+/** !
  *  Load an entity as JSON object text
  *
- * @param pp_entity  : Double pointer to entity
- * @param token_text : The entity JSON object text
- * @param len        : The length of the entity JSON object text
+ * @param pp_entity : return
+ * @param text      : The entity JSON text
  *
  * @sa destroy_entity
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_entity_as_json    ( GXEntity_t **pp_entity, char* token_text, size_t len );
+DLLEXPORT int load_entity_as_json ( GXEntity_t **pp_entity, char* text );
+
+/** !
+ *  Load an entity as JSON object text
+ *
+ * @param pp_entity : return
+ * @param p_value   : The entity JSON value
+ *
+ * @sa load_entity
+ * @sa load_entity_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value );
 
 // Physics
 
-/* !
+/** !
  * Calculate the net force on the object.
  * 6 Contact forces are summated Gravity,
  * Normal, Applied, Friction, Tension, Spring. 
@@ -90,7 +101,7 @@ DLLEXPORT int load_entity_as_json    ( GXEntity_t **pp_entity, char* token_text,
  */
 DLLEXPORT int calculate_entity_force ( GXEntity_t *p_entity );
 
-/* !
+/** !
  * Updates location, and rotation, and their first and second order derivatives from force and torque
  *
  * @param p_entity : Pointer to entity
@@ -106,8 +117,7 @@ DLLEXPORT int move_entity            ( GXEntity_t *p_entity );
 DLLEXPORT int entity_info            ( GXEntity_t  *p_entity );
 
 // AI
-
-/* !
+/** !
  * Updates AI State
  *
  * @param p_entity : Pointer to entity
@@ -118,7 +128,7 @@ DLLEXPORT int entity_info            ( GXEntity_t  *p_entity );
  */
 DLLEXPORT int preupdate_entity_ai    ( GXEntity_t *p_entity );
 
-/* !
+/** !
  * Run state update function
  *
  * @param p_entity : Pointer to entity
@@ -127,29 +137,29 @@ DLLEXPORT int preupdate_entity_ai    ( GXEntity_t *p_entity );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int update_entity_ai       ( GXEntity_t *p_entity );
+DLLEXPORT int update_entity_ai ( GXEntity_t *p_entity );
 
-DLLEXPORT int get_model_matrix       ( void *ret );
+DLLEXPORT int get_model_matrix ( void *ret );
 
 // Renderer
 
-/* !
+/** !
  * Draw each part with its respective shader and material
  *
  * @param p_entity : Pointer to entity
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int draw_entity            ( GXEntity_t *p_entity );
+DLLEXPORT int draw_entity ( GXEntity_t *p_entity );
 
 // Destructor
-/* !
+/** !
  * Frees an entity, and all its contents
  *
- * @param p_entity : Pointer to entity
+ * @param p_entity : Pointer to entity pointer
  *
  * @sa create_entity
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_entity         ( GXEntity_t *p_entity );
+DLLEXPORT int destroy_entity ( GXEntity_t **pp_entity );

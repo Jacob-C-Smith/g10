@@ -5,6 +5,7 @@
 #include <G10/G10.h>
 #include <G10/GXScheduler.h>
 #include <G10/GXUserCode.h>
+#include <G10/GXEntity.h>
 
 // This gets called once a frame
 int user_code_callback ( GXInstance_t *p_instance )
@@ -35,6 +36,7 @@ int main ( int argc, const char *argv[] )
 
     // Initialized data
     GXInstance_t *p_instance        = 0;
+    GXEntity_t   *p_entity          = 0;
     const char   *instance_path     = "G10/debug client instance.json",
                  *schedule_name     = "Client Schedule",
                  *client_name       = 0;
@@ -64,6 +66,9 @@ int main ( int argc, const char *argv[] )
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
         goto failed_to_initialize_g10;
+
+    if ( load_entity(&p_entity, "G10/entity.json") == 0 )
+        g_print_error("Failed to load entity\n");
 
     // Game setup
     {

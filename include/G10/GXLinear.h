@@ -106,8 +106,6 @@ DLLEXPORT vec3 mul_vec3_f ( vec3 v, float s );
  */
 DLLEXPORT vec3 normalize ( vec3 v );
 
-// ✅ 
-
 /** !
  * Multiplies a 2x2 matrix by a vector
  * 

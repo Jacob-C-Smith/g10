@@ -21,7 +21,7 @@
  *  
  *  @return 1 + 0i + 0j + 0k
  */
-DLLEXPORT quaternion    identity_quaternion                 ( void );
+DLLEXPORT quaternion identity_quaternion ( void );
 
 /** !
  * Returns a given euler angle's quaternion
@@ -30,7 +30,7 @@ DLLEXPORT quaternion    identity_quaternion                 ( void );
  * 
  * @return a quaternion, corresponding to the euler angle
  */
-DLLEXPORT quaternion quaternion_from_euler_angle ( vec3 v );// ✅ Creates a quaternion from a vector in euler angles
+DLLEXPORT quaternion quaternion_from_euler_angle ( vec3 v );
 
 /** !
  * Returns a given quaternion's euler angle
@@ -58,7 +58,7 @@ DLLEXPORT quaternion quaternion_inverse ( quaternion q );
  * 
  * @return TODO
  */
-DLLEXPORT quaternion multiply_quaternion_quaternion_vec4 ( quaternion q1, quaternion q2 ); // ✅ Multiplies two quaternions as vectors
+DLLEXPORT quaternion multiply_quaternion_quaternion_vec4 ( quaternion q1, quaternion q2 );
 
 /** !
  * Multiplies two quaternions
@@ -68,7 +68,7 @@ DLLEXPORT quaternion multiply_quaternion_quaternion_vec4 ( quaternion q1, quater
  * 
  * @return TODO
  */
-DLLEXPORT quaternion multiply_quaternion_quaternion ( quaternion q1, quaternion q2 );       // ✅ 
+DLLEXPORT quaternion multiply_quaternion_quaternion ( quaternion q1, quaternion q2 ); 
 
 /** !
  * Creates a rotation matrix from a quaternion
@@ -77,7 +77,7 @@ DLLEXPORT quaternion multiply_quaternion_quaternion ( quaternion q1, quaternion 
  * 
  * @return mat4
 */
-DLLEXPORT mat4 rotation_mat4_from_quaternion ( quaternion q );                       // ✅
+DLLEXPORT mat4 rotation_mat4_from_quaternion ( quaternion q ); 
 
 // TODO
 DLLEXPORT void rotate_vec3_by_quaternion ( vec3* r, vec3 v, quaternion q );
@@ -89,7 +89,7 @@ DLLEXPORT void rotate_vec3_by_quaternion ( vec3* r, vec3 v, quaternion q );
  * 
  * @return |q|
 */
-DLLEXPORT quaternion    normalize_quaternion                ( quaternion q );
+DLLEXPORT quaternion normalize_quaternion ( quaternion q );
 
 /** !
  * Spherical liner interpolation between two quaternions over some time
