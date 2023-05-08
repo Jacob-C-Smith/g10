@@ -744,8 +744,8 @@ int ai_info ( GXAI_t *p_ai )
 
 	// Print the active state
 	g_print_log("active state: \"%s\"\n", p_ai->current_state);
-
-    // Formatting 
+	
+	// Formatting 
     g_print_log("states      : \n");
 
 	// Get each AI state

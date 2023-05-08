@@ -37,6 +37,7 @@ int main ( int argc, const char *argv[] )
     // Initialized data
     GXInstance_t *p_instance        = 0;
     GXEntity_t   *p_entity          = 0;
+    GXAI_t       *p_ai              = 0;
     const char   *instance_path     = "G10/debug client instance.json",
                  *schedule_name     = "Client Schedule",
                  *client_name       = 0;
@@ -66,9 +67,6 @@ int main ( int argc, const char *argv[] )
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
         goto failed_to_initialize_g10;
-
-    if ( load_entity(&p_entity, "G10/entity.json") == 0 )
-        g_print_error("Failed to load entity\n");
 
     // Game setup
     {
@@ -102,6 +100,11 @@ int main ( int argc, const char *argv[] )
         add_user_code_callback(p_instance, &user_code_callback);
     }
     
+    // Log stuff
+    {
+        scene_info(p_instance->context.scene);
+    }
+
     // Start the game 
     g_start_schedule(p_instance, schedule_name);
     

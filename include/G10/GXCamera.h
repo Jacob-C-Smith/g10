@@ -82,7 +82,7 @@ DLLEXPORT int construct_camera ( GXCamera_t **pp_camera, vec3 location, vec3 fro
  * @param path      : The path to a JSON file containing a camera object
  *
  * @sa load_camera_as_json
- * @sa create_camera
+ * @sa load_camera_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -94,12 +94,26 @@ DLLEXPORT int load_camera ( GXCamera_t **pp_camera, const char *path );
  * @param pp_camera : return
  * @param text      : The camera JSON text
  *
- * @sa load_camera_as_json
- * @sa create_camera
+ * @sa load_camera
+ * @sa load_camera_as_json_value
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_camera_as_json ( GXCamera_t **pp_camera, char *text );
+
+/** !
+ *  Load a camera from a JSON value
+ *
+ * @param pp_camera : return
+ * @param p_value   : The camera JSON value
+ *
+ * @sa load_camera
+ * @sa load_camera_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value );
+
 
 // Functions
 /** !

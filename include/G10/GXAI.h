@@ -25,10 +25,11 @@
 
 struct GXAI_s
 {
-	char  *name;
+	char  *name,
+	      *current_state;
 	dict  *states;
-	char  *current_state;
 	void (*pre_ai)(GXEntity_t*);
+	size_t users;
 };
 
 // Allocators

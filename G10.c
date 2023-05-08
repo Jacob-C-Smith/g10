@@ -199,6 +199,9 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             // Display the window
             SDL_ShowWindow(p_instance->sdl2.window);
             
+            // Focus the game window
+            SDL_SetWindowInputFocus(p_instance->sdl2.window);
+    
             p_instance->time.clock_div = SDL_GetPerformanceFrequency();
 
         }
@@ -357,16 +360,12 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 strncpy(p_instance->name, name, name_len);
             }
 
-            // Set the loading thread limit
-            p_instance->loading_thread_count = loading_thread_count;
-
-            // Initialize mutexes
-            // TODO: Create mutexes in subsystem initializers
-            p_instance->mutexes.part_cache = SDL_CreateMutex();
-
             // Subsystem initialization
             {
-                
+
+                // Set the loading thread limit
+                p_instance->loading_thread_count = loading_thread_count;
+
                 /*
                 // Renderer initialization
                 {
@@ -436,7 +435,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     init_material();
                 }
 
-                //Scheduler initialization
+                // Scheduler initialization
                 {
                     
                     // Get an external function
@@ -444,6 +443,16 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                         
                     // Run the scheduler system initializer
                     init_scheduler();
+                }
+
+                // Scene initialization
+                {
+
+                    // Get an external function
+                    extern void init_scene(void);
+
+                    // Run the scene system initializer
+                    init_scene();
                 }
 
                 /*
@@ -454,12 +463,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     init_collider();
                 }
 
-                // Scene initialization
-                {
-                    extern void init_scene(void);
-
-                    init_scene();
-                }
+                
 
                 // Physics initialization
                 {
@@ -477,7 +481,17 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 }
             }
 
-            // Construct dictionaries to cache materials, parts, and shaders.
+            // Data
+            {
+
+                // Construct a dictionary for schedules
+                dict_construct(&p_instance->data.scenes, 16);
+
+                // Construct a dictionary for schedules
+                dict_construct(&p_instance->data.schedules, 8);
+            }
+
+            // Caches
             {
 
                 // If no count is specified by the JSON object. Default to 128.
@@ -493,6 +507,16 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // TODO: Fix
                 dict_construct(&p_instance->cache.ais      , 16 /*ai_cache_count*/);
 
+            }
+
+            // Queues
+            {
+                queue_construct(&p_instance->queues.actor_collision);
+                queue_construct(&p_instance->queues.actor_force);
+                queue_construct(&p_instance->queues.actor_move);
+                queue_construct(&p_instance->queues.ai_preupdate);
+                queue_construct(&p_instance->queues.ai_update);
+                queue_construct(&p_instance->queues.load_entity);
             }
 
             // Load a renderer
@@ -513,114 +537,101 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 p_instance->context.renderer = p_renderer;
             }
 
-            
-
             // Load an input set
             if ( input )
             {
-                load_input(&p_instance->input, input);
+                if ( load_input(&p_instance->input, input) == 0 )
+                    goto failed_to_load_input;
             }
 
-            //Load audio
-            if (audio) {} // Coming soon...
+            // Load audio
+            if ( audio ) {
+
+            } // Coming soon...
                 
             // Load schedules
-            if(p_schedules)
+            if ( p_schedules )
             {
   
 		        // Initialized data
 		        size_t        schedule_count = 0;
                 JSONValue_t **pp_elements    = 0;
 
-		        // Get the quantity of elements
-		        array_get(p_schedules, 0, &schedule_count );
+                // Get the contents of the array
+                {
 
-                // Construct a dictionary for schedules
-                dict_construct(&p_instance->data.schedules, 8);
-  
-		        // Allocate an array for the elements
-		        pp_elements = calloc(schedule_count+1, sizeof(JSONValue_t *));
+		            // Get the quantity of elements
+		            array_get(p_schedules, 0, &schedule_count );
 
-		        // Error check
-		        if ( pp_elements == (void *) 0 )
-		        	goto no_mem;
+                    
 
-		        // Populate the elements of the threads
-		        array_get(p_schedules, pp_elements, 0 );			
+		            // Allocate an array for the elements
+		            pp_elements = calloc(schedule_count+1, sizeof(JSONValue_t *));
 
-		        // Set up the threads
+		            // Error check
+		            if ( pp_elements == (void *) 0 )
+		            	goto no_mem;
+
+		            // Populate the elements of the threads
+		            array_get(p_schedules, pp_elements, 0 );			
+                }
+
+		        // Set up the schedules
 		        for (size_t i = 0; i < schedule_count; i++)
 		        {
 
                     // Initialized data
-                    JSONValue_t  *p_element = pp_elements[i];
+                    JSONValue_t  *p_element  = pp_elements[i];
 		        	GXSchedule_t *i_schedule = 0;
 
                     // Parse the schedule as an object
-                    if (p_element->type == JSONobject)
-                    {                        
-                        if ( load_schedule_as_json_value(&i_schedule, p_element) == 0 )
-                            goto failed_to_load_schedule;
-                    }
-
-                    // Parse the schedule as a file
-                    else if (p_element->type == JSONstring)
-                    {
-                        if ( load_schedule(&i_schedule, p_element->string) == 0 )
-                            goto failed_to_load_schedule;
-                    }
+                    if ( load_schedule_as_json_value(&i_schedule, p_element) == 0 )
+                        goto failed_to_load_schedule;
 
 		        	// Add the schedule into the schedule dictionary
                     dict_add(p_instance->data.schedules, i_schedule->name, i_schedule);
                 }
             }
 
-            // Scene dictionary
-            dict_construct(&p_instance->data.scenes, 16);
-
             // Load the initial scene
-            if (initial_scene) {
+            if ( initial_scene ) {
 
-                // Scene pointer
-                //GXScene_t* p_scene = 0;
+                // Initialized data
+                GXScene_t *p_scene = 0;
 
-                // Load the scene from the path
-                //if ( load_scene(&p_scene, initial_scene) == 0 )
-                //    goto failed_to_load_scene;
+                // Parse the schedule as an object
+                if ( load_scene(&p_scene, initial_scene) == 0 )
+                    goto failed_to_load_schedule;
 
-                // Did the scene load?
-                //if (p_scene)
+                // Set the initial scene
+                p_instance->context.scene = p_scene;
 
-                    // Add the scene to the instance
-                //    dict_add(p_instance->data.scenes, p_scene->name, p_scene);
+                // Add the initial scene to the scene dictionary
+                dict_add(p_instance->data.scenes, p_scene->name, p_scene);
 
-                // Error
-                //else
-
-                //    goto no_initial_scene;
-
-                // Set the active scene
-                //p_instance->context.scene = p_scene;
             }
 
+            /*
             // Set up the server
-            //if (server)
-            //{
-            //    // Load the server as a JSON object
-            //    if (server[0] == '{')
-            //        load_server_as_json(&p_instance->networking.server, server, strlen(server));
-            //    
-            //    // Load the server from the filesystem
-            //    else
-            //        load_server(&p_instance->networking.server, server);
-            //}
+            if (server)
+            {
+                // Load the server as a JSON object
+                if (server[0] == '{')
+                    load_server_as_json(&p_instance->networking.server, server, strlen(server));
+                
+                // Load the server from the filesystem
+                else
+                    load_server(&p_instance->networking.server, server);
+            }*/
 
             // This prevents divide by zero errors when the game loop starts
             p_instance->time.delta_time = 0.001;
+
+            // The instance is running
+            p_instance->running = true;
         }
         
         // 3rd party subsystem integration
-        
         // Discord
         #ifdef BUILD_G10_WITH_DISCORD
             extern void init_discord_integration(void);
@@ -629,12 +640,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         
     }
 
-    // Focus the game window
-    SDL_SetWindowInputFocus(p_instance->sdl2.window);
-    
-    // The instance is running
-    p_instance->running = true;
-    
     // Return an instance pointer to the caller
     *pp_instance = p_instance;
     
@@ -731,8 +736,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 		}
 
         // TOOD: Categorize
-        failed_to_parse_json:
-            return 0;
         no_instance:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to allocate an instance in call to function \"%s\"\n", __FUNCTION__);
@@ -749,13 +752,19 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             // Error 
             return 0;
 
+        no_initial_scene:
+            #ifndef NDEBUG
+                g_print_error("[G10] in call to function \"%s\"\n", initial_scene, __FUNCTION__);
+            #endif 
+
+            // Error 
+            return 0;
+        failed_to_load_input:
+        failed_to_parse_json:
         no_device:
         no_surface:
         failed_to_load_schedule:
         failed_to_create_sdl2_surface:
-            return 0;
-        no_initial_scene:
-            g_print_error("[G10] in call to function \"%s\"\n", initial_scene, __FUNCTION__);
             return 0;
     }
 }
@@ -1242,23 +1251,23 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
         // Argument errors
         {
             noPath:
-            #ifndef NDEBUG
-                g_print_error("[G10] Null path provided to function \"%s\n", __FUNCTION__);
-            #endif
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null path provided to function \"%s\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // File errors
         {
             invalid_file:
-            #ifndef NDEBUG
-                g_print_error("[Standard library] Failed to load file \"%s\". %s\n",path, strerror(errno));
-            #endif
+                #ifndef NDEBUG
+                    g_print_error("[Standard library] Failed to load file \"%s\". %s\n",path, strerror(errno));
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
     }
 }

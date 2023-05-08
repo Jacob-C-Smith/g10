@@ -460,6 +460,14 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		if ( ( name && p_threads ) == 0 )
 			goto missing_properties;
 	}
+	else if (p_value->type == JSONstring)
+	{
+
+		if ( load_schedule(pp_schedule, p_value->string) == 0 )
+			goto failed_to_load_schedule;
+
+		return 1;
+	}
 	else
 		goto wrong_type;
 
@@ -557,6 +565,9 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 	// Success
 	return 1;
+
+	failed_to_load_schedule:
+		return 0;
 
 	// Error handling
 	{

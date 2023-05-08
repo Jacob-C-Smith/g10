@@ -87,10 +87,12 @@ find_library(json  NAMES json HINTS  ${PROJECT_SOURCE_DIR}/json/build/Debug/*)
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_INCLUDE_DIRS})
 
 # Add source to this project's executable.
-add_executable (g10_example "G10.c" "GXInput.c" "GXAI.c" "GXCamera.c" "GXEntity.c" "GXScheduler.c" "GXLinear.c" "GXPart.c" "GXMaterial.c" "GXQuaternion.c" "GXUserCode.c" "GXTransform.c" "main.c") # "GXAudio.c" "GXBV.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXDiscordIntegration.c"  "GXMaterial.c" "GXPLY.c" "GXPart.c" "GXPhysics.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c"  "GXScheduler.c" "GXServer.c" "GXTexture.c" "GXTransform.c" "APS_3rdPersonCtrl.c"
+add_executable (g10_example "G10.c" "GXScene.c" "GXInput.c" "GXPLY.c" "GXPart.c" "GXAI.c" "GXCamera.c" "GXEntity.c" "GXScheduler.c" "GXLinear.c" "GXPart.c" "GXMaterial.c" "GXQuaternion.c" "GXUserCode.c" "GXTransform.c" "main.c") 
+# "GXAudio.c" "GXBV.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXDiscordIntegration.c"  "GXMaterial.c"  "GXPhysics.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXServer.c" "GXTexture.c" "APS_3rdPersonCtrl.c"
 
 # Add source to this project's 
-add_library    (g10 SHARED  "G10.c" "GXInput.c" "GXAI.c" "GXCamera.c" "GXEntity.c" "GXScheduler.c" "GXLinear.c" "GXPart.c" "GXMaterial.c" "GXQuaternion.c" "GXUserCode.c" "GXTransform.c") # "GXAudio.c" "GXBV.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXDiscordIntegration.c"  "GXMaterial.c" "GXPLY.c" "GXPart.c" "GXPhysics.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c"  "GXScheduler.c" "GXServer.c" "GXTexture.c" "GXTransform.c" "APS_3rdPersonCtrl.c" 
+add_library    (g10 SHARED  "G10.c" "GXScene.c" "GXInput.c" "GXPLY.c" "GXPart.c" "GXAI.c" "GXCamera.c" "GXEntity.c" "GXScheduler.c" "GXLinear.c" "GXPart.c" "GXMaterial.c" "GXQuaternion.c" "GXUserCode.c" "GXTransform.c")
+# "GXAudio.c" "GXBV.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXDiscordIntegration.c"  "GXMaterial.c"  "GXPhysics.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXServer.c" "GXTexture.c" "APS_3rdPersonCtrl.c" 
 
 target_link_libraries(g10_example PUBLIC queue array dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
 target_link_libraries(g10 PUBLIC queue array dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})

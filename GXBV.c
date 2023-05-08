@@ -1,6 +1,6 @@
 ﻿#include <G10/GXBV.h>
 
-int     create_bv                ( GXBV_t **pp_bv )
+int create_bv ( GXBV_t **pp_bv )
 {
 
     // Argument check
@@ -12,18 +12,14 @@ int     create_bv                ( GXBV_t **pp_bv )
     }
 
     // Initialized data
-    GXBV_t *ret = calloc(1, sizeof(GXBV_t));
+    GXBV_t *p_bv = calloc(1, sizeof(GXBV_t));
 
     // Check if the memory was allocated 
-    {
-        #ifndef NDEBUG
-            if(ret == (void*)0)
-                goto no_mem;
-        #endif
-    }
+    if ( p_bv == (void *) 0 )
+        goto no_mem;
 
-    // Write the return value
-    *pp_bv = ret;
+    // Return a pointer to the caller
+    *pp_bv = p_bv;
 
     // Success
     return 1;
@@ -37,6 +33,8 @@ int     create_bv                ( GXBV_t **pp_bv )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -46,12 +44,14 @@ int     create_bv                ( GXBV_t **pp_bv )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 }
 
-int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
+int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max )
 {
     // Argument check
     {
@@ -86,6 +86,8 @@ int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BV] Null pointer provided for \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -95,12 +97,14 @@ int     construct_bv             ( GXBV_t **pp_bv, vec3       min  , vec3 max )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BVH] Out of memory\n");
                 #endif
-            return 0;
+
+                // Error
+                return 0;
         }
     }
 }
 
-int     construct_bv_from_bvs    ( GXBV_t **pp_bv, GXBV_t    *a    , GXBV_t* b )
+int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *a, GXBV_t* b )
 {
 
 

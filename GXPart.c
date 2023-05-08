@@ -167,82 +167,25 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 
 	// Initialized data
 	GXInstance_t *p_instance  = g_get_active_instance();
-	GXPart_t     *p_part    = 0; 
-	char         *name      = 0,
-		         *path      = 0;
-	dict         *part_json = 0;
+	JSONValue_t  *p_value = 0;
 
-	// Allocate for a part
-	create_part(pp_part);
+	// Parse the JSON text into a JSON value
+	if ( parse_json_value(text, 0, &p_value) == 0 )
+		goto failed_to_parse_json;
 
-	// Get a pointer to the part
-	p_part = *pp_part;
-
-	// Parse the JSON
-	//parse_json(text, len, &part_json);
-
-	// Parse the dictionary into constructor parameters
-	{
-		
-		// Initiailzed data
-		//JSONToken_t *token = 0;
-
- 		//token = (JSONToken_t *) dict_get(part_json, "name");
-		//name  = JSON_VALUE(token, JSONstring);
-
- 		//token = (JSONToken_t *) dict_get(part_json, "path");
-		//path  = JSON_VALUE(token, JSONstring);
-	}
-
-	// TODO: FIX CACHING. its busted. 
-
-	// Check the cache 
-	{
-
-		// Initialized data
-		//GXPart_t *cached_part = g_find_part(p_instance, name);
- 		//// Is there a cached part?
-		//if ( cached_part )
-		//	
-		//	// 
-		//	*pp_part = cached_part;
-	}
-
-	// Construct the part
-	{
-
-		// // Copy the name
-		// {
-		// 	// Initilaized data
-		// 	size_t name_len = strlen(name);
- 
-		// 	// Allocate memory for the string
-		// 	p_part->name = calloc(name_len + 1, sizeof(char));
-		// 	
-		// 	// Error handling
-		// 	{
-		// 		#ifndef NDEBUG
-		// 			if (p_part->name == (void *) 0 )
-		// 				goto no_mem;
-		// 		#endif
-		// 	}
- 
-		// 	// Copy the string 
-		// 	strncpy(p_part->name, name, name_len);
-		// }
-
-		// // Get a pointer to the PLY loader
-		// extern GXPart_t* load_ply(GXPart_t * part, const char* path);
-
-		// // Call the ply loader with the part
-		// load_ply(p_part, path);
-	}
+	// Parse the JSON value into a part
+	if ( load_part_as_json_value(pp_part, p_value) == 0 )
+		goto failed_to_load_part;
 
 	// Success
 	return 1;
 
 	// Error handling
 	{
+
+		failed_to_parse_json:
+		failed_to_load_part:
+			return 0;
 
 		// Argument errors
 		{
@@ -283,6 +226,171 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 		}
 	}
 }
+
+int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_part == (void *) 0 )
+				goto no_part;
+			if ( p_value == (void *) 0 ) 
+				goto no_value;
+		#endif
+	}
+
+	// Initialized data
+	GXInstance_t *p_instance = g_get_active_instance();
+	GXPart_t     *p_part     = 0; 
+	JSONValue_t  *name       = 0,
+		         *path       = 0;
+
+	// Parse the JSON as an object
+	if ( p_value->type == JSONobject )
+	{
+
+		// Initialized data
+		dict *part_json = p_value->object;
+
+		name = ((JSONValue_t *)dict_get(part_json, "name"));
+		path = ((JSONValue_t *)dict_get(part_json, "path"));
+
+		// Check for required data 
+		if ( !(name && path) )
+			goto not_enough_properties;
+	}
+
+	// Parse the JSON as a path
+	else if ( p_value->type == JSONstring )
+	{
+
+		// Load a part from a JSON file
+		if ( load_part(pp_part, p_value->string) == (void *)0 )
+			goto failed_to_load_part_from_file;
+		
+		// Success
+		return 1;
+	}
+
+	// Check the cache 
+	{
+
+		// Initialized data
+		GXPart_t* p_cache_part = 0;
+
+		// Lock the part cache mutex
+		SDL_LockMutex(p_instance->mutexes.part_cache);
+
+		// Search the cache for the part
+		p_cache_part = g_find_part(p_instance, name);
+		
+		// If the part is in the cache ...
+		if (p_cache_part)
+		{
+
+			// ... make a copy of the cached part
+			//copy_part(pp_part, p_cache_part);
+
+			// Write the return
+			p_part = *pp_part;
+			p_part->users++;
+
+			// TODO: Fix
+			return 1;
+			//	goto set_initial_state;
+		}
+		
+	}
+
+	// Construct the part
+	{
+
+		// Allocate a part
+		if ( create_part(pp_part) == 0 )
+			goto failed_to_create_part;
+		
+		p_part = *pp_part;
+		
+		// Copy the name
+		{
+
+			// Initilaized data
+			size_t name_len = strlen(name->string);
+ 
+			// Allocate memory for the string
+			p_part->name = calloc(name_len + 1, sizeof(char));
+			
+			// Error handling
+			if ( p_part->name == (void *) 0 )
+				goto no_mem;
+ 
+			// Copy the string 
+			strncpy(p_part->name, name->string, name_len);
+		}
+
+		// Get a pointer to the PLY loader
+		extern GXPart_t* load_ply(GXPart_t * part, const char* path);
+
+		// Call the ply loader with the part
+		load_ply(p_part, path->string);
+	}
+
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// TODO: 
+		failed_to_load_part_from_file:
+		failed_to_create_part:
+			return 0;
+
+		// Argument errors
+		{
+			no_part:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif 
+
+				// Error 
+				return 0;
+
+			no_value:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif 
+
+				// Error 
+				return 0;
+
+		}
+		
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error 
+				return 0;
+		}
+
+		// G10 errors
+		{
+			not_enough_properties:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Missing JSON properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+	}
+}
+
 
 int draw_part ( GXPart_t *p_part )
 {

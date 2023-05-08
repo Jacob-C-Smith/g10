@@ -315,12 +315,64 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			strncpy(p_entity->name, p_name_value->string, name_len);
 
 		}
-		
+		else
+			goto wrong_name_type;
+
 		// Parts
+		if ( p_parts_value->type == JSONarray )
+		{
+
+			// Initialized data
+			size_t        part_count = 0;
+			JSONValue_t **parts      = 0;
+
+			// Construct a dictionary
+			dict_construct(&p_entity->parts, 16);
+
+			// Get the array
+			{
+
+				// Get the size of the array
+				array_get(p_parts_value->list, 0, &part_count);
+
+				// Allocate memory for a list of parts
+				parts = calloc(part_count+1, sizeof(JSONValue_t *));
+
+				// Error check
+				if ( parts == (void *) 0 )
+					goto no_mem;
+
+				// Get each array element
+				array_get(p_parts_value->list, parts, &part_count);
+			}
+
+			// Iterate over each array element
+			for (size_t i = 0; i < part_count; i++)
+			{
+
+				// Initialized data
+				GXPart_t *p_part = 0;
+
+				// Load the part
+				if ( load_part_as_json_value(&p_part, parts[i]) == 0 )
+					goto failed_to_load_part;
+
+				// Add the part to the dictionary
+				dict_add(p_entity->parts, p_part->name, p_part);
+			}
+
+			// Clean the scope
+			free(parts);
+		}
+		else
+			goto wrong_parts_type;
 
 		// Materials
 
 		// Shader
+		if ( p_shader_value )
+			;//if ( load_shader_as_json_value(&p_entity->shader, p_shader_value) == 0 )
+				//goto failed_to_load_transform_as_json_value;
 
 		// Transform
 		if ( p_transform_value )
@@ -466,6 +518,12 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 	// Error handling
 	{
+
+		// TODO: 
+		wrong_name_type:
+		failed_to_load_part:
+		wrong_parts_type:
+		return 0;
 
 		// Argument errors
 		{
@@ -798,54 +856,44 @@ int load_entity_from_queue(GXInstance_t *p_instance)
 
 	// Initialized data
 	size_t        i        = 0;
-	char         *text     = 0;
-	GXEntity_t   *entity   = 0;
-	GXScene_t    *scene    = p_instance->context.loading_scene;
-
+	JSONValue_t  *p_value  = 0;
+	GXEntity_t   *p_entity = 0;
+	GXScene_t    *p_scene  = p_instance->context.loading_scene;
+	
+	// TODO: Fix 
 	while ( queue_empty(p_instance->queues.load_entity) == false )
 	{
 
 		// Lock the loading mutex while we find an entity to load
 		SDL_LockMutex(p_instance->mutexes.load_entity);
-
+		
 		// If the queue is empty, unlock the mutex and exit
 		if (queue_empty(p_instance->queues.load_entity))
 		{
-
+		
 			// Unlock the mutex
 			SDL_UnlockMutex(p_instance->mutexes.load_entity);
-
+		
 			// Success
 			return 0;
 		}
-
+		
 		// TODO: Fix 
 		// text is either a path -OR- a JSON object
-		queue_dequeue(p_instance->queues.load_entity,&text);
+		queue_dequeue(p_instance->queues.load_entity,&p_value);
 
 		// Unlock the mutex
 		SDL_UnlockMutex(p_instance->mutexes.load_entity);
 
-		// Load the entity as JSON object text
-		if ( *text == '{' )
-		{
-			if ( load_entity_as_json(&entity, text, strlen(text)) == 0 )
-				goto failed_to_load_entity_as_json;
-		}
+		if ( load_entity_as_json_value(&p_entity, p_value) == 0 )
+			goto failed_to_load_entity_as_json;
 
-		// Load the entity as a path
-		else
-		{
-			if ( load_entity(&entity, text) == 0 )
-				goto failed_to_load_entity;
-		}
-
-		// TODO: Uncomment
 		// Add the entity to the active scene
-		//append_entity(scene, entity);
+		append_entity(p_scene, p_entity);
 	}
 	
-	return 0;
+	// Success
+	return 1;
 
 	// Error handling
 	{
@@ -859,6 +907,7 @@ int load_entity_from_queue(GXInstance_t *p_instance)
 
 				// Error
 				return 0;
+
 			failed_to_load_entity:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCTION__);
@@ -1068,10 +1117,13 @@ int entity_info(GXEntity_t* p_entity)
     g_print_log(" - Entity info - \n");
     
     // Print the name
-    g_print_log("name          : \"%s\"\n", p_entity->name);
+    g_print_log("name: \"%s\"\n", p_entity->name);
 
-	// TODO: Print each struct field.
+	if ( p_entity->parts )
+		dict_foreach(p_entity->parts, &part_info);
 
+	if ( p_entity->ai )
+		ai_info(p_entity->ai);
 
     putchar('\n');
 

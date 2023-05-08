@@ -238,6 +238,153 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 	if ( parse_json_value(text, 0, &p_value) == 0 ) 
 		goto failed_to_parse_json;
 
+	// Parse the JSON value into a camera
+	if ( load_camera_as_json_value(pp_camera, p_value) == (void *) 0 )
+		goto failed_to_load_camera_as_json_value;
+
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// Arugment check
+		{
+
+			no_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+			
+			no_object_text:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			no_len:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+		}
+		
+		// JSON parsing errors
+		{
+			failed_to_parse_json:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+			failed_to_load_camera_as_json_value:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to construct camera in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+			wrong_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+
+			missing_properties:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to construct Camera in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+			
+			location_len_error:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to parse \"location\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+				#endif
+
+				// Error 
+				return 0;
+
+			target_len_error:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to parse \"target\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+				#endif
+
+				// Error 
+				return 0;
+
+			up_len_error:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to parse \"up\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+				#endif
+
+				// Error 
+				return 0;
+
+		}
+
+		// G10 Errors
+		{
+			failed_to_allocate_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to allocate memory for camera in call to function \"%s\"\n",  __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+		}
+	
+		// Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+	}
+}
+
+int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_camera == (void *) 0 )
+				goto no_camera;
+			if ( p_value == (void *) 0 )
+				goto no_value;
+		#endif
+	}
+
+	// Initialized data
+	char        *name         = 0;
+	array	    *p_location   = 0,
+		        *p_target     = 0,
+		        *p_up         = 0;
+	float        near_clip    = 0,
+		         far_clip     = 0,
+		         aspect_ratio = 0,
+		         fov          = 0;
+
 	// Parse the camera JSON
 	if ( p_value->type == JSONobject )
 	{
@@ -294,23 +441,27 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
 			
-			// Get the quantity of elements
-			array_get(p_location, 0, &vector_element_count );
+			// Get the contents of the array
+			{
 
-			// Error checking
-			if ( vector_element_count != 3 )
-				goto location_len_error;
+				// Get the quantity of elements
+				array_get(p_location, 0, &vector_element_count );
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+				// Error checking
+				if ( vector_element_count != 3 )
+					goto location_len_error;
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the vector
-			array_get(p_location, pp_elements, 0 );			
-			
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_location, pp_elements, 0 );			
+			}
+
 			// Set the location
 			location = (vec3) { 
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
@@ -329,23 +480,27 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
 			
-			// Get the quantity of elements
-			array_get(p_target, 0, &vector_element_count );
+			// Get the contents of the array
+			{
 
-			// Error checking
-			if ( vector_element_count != 3 )
-				goto target_len_error;
+				// Get the quantity of elements
+				array_get(p_target, 0, &vector_element_count );
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+				// Error checking
+				if ( vector_element_count != 3 )
+					goto target_len_error;
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the vector
-			array_get(p_target, pp_elements, 0 );			
-			
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_target, pp_elements, 0 );			
+			}
+
 			// Set the target
 			target = (vec3) { 
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
@@ -364,23 +519,27 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
 			
-			// Get the quantity of elements
-			array_get(p_up, 0, &vector_element_count );
+			// Get the contents of the array
+			{
 
-			// Error checking
-			if ( vector_element_count != 3 )
-				goto up_len_error;
+				// Get the quantity of elements
+				array_get(p_up, 0, &vector_element_count );
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+				// Error checking
+				if ( vector_element_count != 3 )
+					goto up_len_error;
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the vector
-			array_get(p_up, pp_elements, 0 );			
-			
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_up, pp_elements, 0 );			
+			}
+
 			// Set the up vector
 			up = (vec3) { 
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
@@ -410,9 +569,6 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 		*pp_camera = p_camera;
 	}
 
-	// Deallocate the JSON value
-	FREE_VALUE(p_value);
-
 	// Success
 	return 1;
 
@@ -430,9 +586,9 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 				// Error
 				return 0;
 			
-			no_object_text:
+			no_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -524,6 +680,7 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 		}
 	}
 }
+
 
 int print_camera ( GXCamera_t *p_camera )
 {
