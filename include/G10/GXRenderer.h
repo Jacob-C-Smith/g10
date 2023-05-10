@@ -109,7 +109,7 @@ DLLEXPORT int create_subpass ( GXSubpass_t **pp_subpass );
  * @param path        : The path to a JSON file containing a renderer object
  *
  * @sa load_renderer_as_json
- * @sa create_renderer
+ * @sa load_renderer_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -121,12 +121,26 @@ DLLEXPORT int load_renderer ( GXRenderer_t **pp_renderer, char *path );
  * @param pp_renderer : return
  * @param text        : The text
  *
- * @sa load_renderer_as_json
- * @sa create_renderer
+ * @sa load_renderer
+ * @sa load_renderer_as_json_value
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer, char *text );
+
+/** !
+ *  Load a renderer as a JSON value
+ *
+ * @param pp_renderer : return
+ * @param p_value     : The JSON value
+ *
+ * @sa load_renderer
+ * @sa load_renderer_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_value );
+
 
 /** !
  *  Load a render pass from a JSON file
@@ -135,7 +149,7 @@ DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer, char *tex
  * @param path           : The path to a JSON file containing a render pass object
  *
  * @sa load_render_pass_as_json
- * @sa create_render_pass
+ * @sa load_render_pass_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -147,12 +161,25 @@ DLLEXPORT int load_render_pass         ( GXRenderPass_t **pp_render_pass, char *
  * @param pp_render_pass : return
  * @param text           : The render pass JSON text
  *
- * @sa load_render_pass_as_json
- * @sa create_render_pass
+ * @sa load_render_pass
+ * @sa load_render_pass_as_json_value
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *text );
+
+/** !
+ *  Load a render pass from a JSON value
+ *
+ * @param pp_render_pass : return
+ * @param p_value        : The render pass JSON value
+ *
+ * @sa load_render_pass
+ * @sa load_render_pass_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_t *p_value );
 
 /** !
  *  Load a subpass from JSON text

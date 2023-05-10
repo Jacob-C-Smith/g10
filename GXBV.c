@@ -75,6 +75,7 @@ int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max )
     p_bv->maximum = max;
     p_bv->minimum = min;
 
+    // Success
     return 1;
 
     // Error handling

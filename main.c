@@ -30,6 +30,16 @@ int md()
     return 0;
 }
 
+int preup ( GXEntity_t *p_entity )
+{
+
+    // Print the name
+    printf("%s\n",p_entity->name);
+    
+    // Success
+    return 1;
+}
+
 // Entry point 
 int main ( int argc, const char *argv[] )
 {
@@ -102,8 +112,17 @@ int main ( int argc, const char *argv[] )
     
     // Log stuff
     {
+
+        p_ai = g_find_ai(p_instance, "AI 2");
+        
+        set_ai_pre_update_callback(p_ai,&preup);
         scene_info(p_instance->context.scene);
     }
+
+    GXShader_t *p_comp_shader = 0;
+
+    if ( load_shader(&p_comp_shader, "G10/Wireframe 2.json") == 0 )
+        g_print_error("Failed to load shader!\n");
 
     // Start the game 
     g_start_schedule(p_instance, schedule_name);

@@ -382,7 +382,7 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 		        *p_up         = 0;
 	float        near_clip    = 0,
 		         far_clip     = 0,
-		         aspect_ratio = 0,
+				 aspect_ratio = 16.f / 9.f,
 		         fov          = 0;
 
 	// Parse the camera JSON
@@ -404,6 +404,14 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 		// Error checking
 		if ( ( name && near_clip && far_clip && fov && p_location && p_target && p_up ) == 0 )
 			goto missing_properties;
+	}
+	else if (p_value->type == JSONstring)
+	{
+
+		if ( load_camera(pp_camera, p_value->string) == 0 )
+			goto failed_to_load_camera;
+
+		return 1;
 	}
 	else
 		goto wrong_type;
@@ -559,7 +567,7 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 			.up           = up,
 			.near_clip    = near_clip,
 			.far_clip     = far_clip,
-			.aspect_ratio = 16.f / 9.f,
+			.aspect_ratio = aspect_ratio,
 			.fov          = fov,
 			.view         = look_at(location, target, up),
 			.projection   = perspective_matrix(fov, aspect_ratio, near_clip, far_clip)
@@ -665,7 +673,15 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 				// Error
 				return 0;
+			
+			failed_to_load_camera:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Camera] Failed to load camera from path %s in call to function \"%s\"\n",p_value->string, __FUNCTION__);
+				#endif
 
+				// Error
+				return 0;
+			
 		}
 	
 		// Standard library errors

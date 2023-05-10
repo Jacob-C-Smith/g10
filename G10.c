@@ -61,24 +61,42 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         #ifndef NDEBUG
             if ( pp_instance == (void *) 0 )
                 goto no_instance;
-            if ( path        == (void *) 0 )
+            if ( path == (void *) 0 )
                 goto no_path;
         #endif
     }
 
     // Initialized data
     GXInstance_t  *p_instance                      = 0;
-    size_t         text_len                        = g_load_file(path, 0, false),
-                   part_cache_count                = 128,
-                   material_cache_count            = 128,
-                   shader_cache_count              = 32,
-                   ai_cache_count                  = 16,
-                   loading_thread_count            = 4;
-    signed         window_width                    = 1280,
-                   window_height                   = 720;
-    JSONValue_t   *p_value                         = 0;
+    size_t         text_len                        = g_load_file(path, 0, false);
+    char          *text                            = calloc(text_len, sizeof(u8));
+    JSONValue_t   *p_value                         = 0,
+                  *p_name                          = 0,
+                  *p_fullscreen                    = 0,
+                  *p_window_title                  = 0,
+                  *p_window_width                  = 0,
+                  *p_window_height                 = 0,
+                  *p_requested_physical_device     = 0,
+                  *p_max_buffered_frames           = 0,
+                  *p_initial_scene                 = 0,
+                  *p_part_cache_count              = 0,
+                  *p_material_cache_count          = 0,
+                  *p_shader_cache_count            = 0,
+                  *p_ai_cache_count                = 0,
+                  *p_loading_thread_count          = 0,
+                  *p_log_file_i                    = 0,
+                  *p_input                         = 0,
+                  *p_audio                         = 0,
+                  *p_server                        = 0,
+                  *p_renderer                      = 0,
+                  *p_requested_validation_layers   = 0,
+                  *p_requested_instance_extensions = 0,
+                  *p_device_extensions             = 0,
+                  *p_schedules                     = 0;
+
+    /*
     bool           fullscreen                      = false;
-    char          *text                            = calloc(text_len, sizeof(u8)),
+    char          *text                            = 
                   *name                            = "Instance",
                   *window_title                    = "G10",
                   *requested_physical_device       = 0,
@@ -93,7 +111,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                   *p_requested_instance_extensions = 0,
                   *p_device_extensions             = 0,
                   *p_schedules                     = 0;
-
+    */
+    
     // Load the file
     if ( g_load_file(path, text, false) == 0 )
         goto no_file;
@@ -110,41 +129,45 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 		dict *p_dict = p_value->object;
 
         // Parse the name of the game
-        name = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "name")), JSONstring);
+        p_name = dict_get(p_dict, "name");
 
         // Window 
-        window_width  = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window width")) , JSONinteger);
-        window_height = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window height")), JSONinteger);
-        window_title  = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "window title")) , JSONstring);
-        fullscreen    = (bool)   JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "fullscreen"))   , JSONboolean);
+        p_window_width  = dict_get(p_dict, "window width");
+        p_window_height = dict_get(p_dict, "window height");
+        p_window_title  = dict_get(p_dict, "window title");
+        p_fullscreen    = dict_get(p_dict, "fullscreen");
 
         // Input
-        input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "input")), JSONstring);
+        p_input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "input")), JSONstring);
 
         // Log file
-        log_file_i = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "log file")), JSONstring);
+        p_log_file_i = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "log file")), JSONstring);
 
         // Path to initial scene 
-        initial_scene = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "initial scene")), JSONstring);
+        p_initial_scene = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "initial scene")), JSONstring);
 
         // Caches
-        part_cache_count     = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache part count"))    , JSONinteger)+1;
-        material_cache_count = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache material count")), JSONinteger)+1;
-        shader_cache_count   = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache shader count"))  , JSONinteger)+1;
-        ai_cache_count       = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "cache ai count"))      , JSONinteger)+1;
+        p_part_cache_count     =  dict_get(p_dict, "cache part count");
+        p_material_cache_count =  dict_get(p_dict, "cache material count");
+        p_shader_cache_count   =  dict_get(p_dict, "cache shader count");
+        p_ai_cache_count       =  dict_get(p_dict, "cache ai count");
 
         // Loading thread count
-        loading_thread_count = (signed) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "loading thread count"))      , JSONinteger);
+        p_loading_thread_count = dict_get(p_dict, "loading thread count");
 
         // Vulkan
-        p_requested_validation_layers   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan validation layers"))  , JSONarray);
-        p_requested_instance_extensions = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan instance extensions")), JSONarray);
-        p_device_extensions             = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan device extensions"))  , JSONarray);
-        requested_physical_device       = (char  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "vulkan physical device"))    , JSONstring);
-        max_buffered_frames             = (signed)  JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "max buffered frames"))       , JSONinteger);
-        //renderer                      = (char  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "renderer")                   , JSONstring);
-        server                          = (dict  *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "server"))                    , JSONobject);
-        p_schedules                     = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "schedules"))                 , JSONarray);
+        p_requested_validation_layers   = dict_get(p_dict, "vulkan validation layers");
+        p_requested_instance_extensions = dict_get(p_dict, "vulkan instance extensions");
+        p_device_extensions             = dict_get(p_dict, "vulkan device extensions");
+        p_requested_physical_device     = dict_get(p_dict, "vulkan physical device");
+        p_max_buffered_frames           = dict_get(p_dict, "max buffered frames");
+        p_renderer                      = dict_get(p_dict, "renderer");
+        p_server                        = dict_get(p_dict, "server");
+        p_schedules                     = dict_get(p_dict, "schedules");
+
+        // Property check
+        if ( ! ( p_name /* && p_schedule, so on */ ) )
+            goto missing_properties;
 
     }
 
@@ -157,16 +180,45 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
     // Global initialization
     {
 
-        // Set the log file before doing anything else
-        log_file = (log_file_i) ?  fopen(log_file_i, "w") : stdout;
+        // Log file initialization
+        if ( p_log_file_i )
+        {
+            if ( p_log_file_i->type == JSONstring )
+                log_file = fopen(p_log_file_i->string,"w");
+            else
+                goto wrong_log_file_type;
+        }
+        
+        // Default
+        else
+            log_file = stdout;
 
         // Window initialization
+        if ( p_window_width && p_window_height ) {
+
+            // Set the window width
+            if ( p_window_width->type == JSONinteger )
+                p_instance->window.width = p_window_width->integer;
+            else
+                goto wrong_window_width_type;
+
+            // Set the window height
+            if ( p_window_height->type == JSONinteger )
+                p_instance->window.height = p_window_height->integer;
+            else
+                goto wrong_window_height_type;
+            
+        }
+
+        // Default
+        else
         {
-            p_instance->window.width = window_width;
-            p_instance->window.height = window_height;
+            p_instance->window.width  = 1280,
+            p_instance->window.height = 720;
         }
         
         // SDL initialization
+        if ( p_window_title->type == JSONstring )
         {
 
             // Initialize SDL
@@ -185,12 +237,13 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // TODO: this needs to be more specific
                 goto noSDL;
 
+            // TODO: Check boolean
             // Create the window
-            p_instance->sdl2.window = SDL_CreateWindow(window_title,
+            p_instance->sdl2.window = SDL_CreateWindow(p_window_title->string,
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
-                (int)window_width, (int)window_height,
-                SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((fullscreen) ? SDL_WINDOW_FULLSCREEN : 0));
+                (int)p_instance->window.width, (int)p_instance->window.height,
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((p_fullscreen->boolean) ? SDL_WINDOW_FULLSCREEN : 0));
 
             // Check the window
             if (!p_instance->sdl2.window)
@@ -229,17 +282,44 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 VkResult               result                      = 0;
 
                 // Get the extensions
-                if(p_requested_instance_extensions) {
+                if ( p_requested_instance_extensions ) {
 
-                    // Get the number of extensions    
-                    array_get(p_requested_instance_extensions, 0, &requested_extension_count);
+                    if ( p_requested_instance_extensions->type == JSONarray )
+                    {
+                        // Get the number of extensions    
+                        array_get(p_requested_instance_extensions->list, 0, &requested_extension_count);
 
-                    // Allocate for each extension
-                    requested_extensions = calloc(requested_extension_count, sizeof(char *));
+                        // Allocate for each extension
+                        requested_extensions = calloc(requested_extension_count, sizeof(char *));
 
-                    // Get each extension
-                    array_get(p_requested_instance_extensions, requested_extensions, 0);
+                        // Get each extension
+                        array_get(p_requested_instance_extensions->list, requested_extensions, 0);
+                    }
+                    else
+                        goto wrong_requested_instance_extensions_type;
                 }
+                else
+                    ; // Default
+
+                if ( p_requested_validation_layers )
+                {
+
+                    if ( p_requested_validation_layers->type == JSONarray )
+                    {
+                        // Get the number requested validation layers
+                        array_get(p_requested_validation_layers->list, 0, &requested_layers_count);
+
+                        // Allocate for each extension
+                        requested_validation_layers = calloc(requested_layers_count, sizeof(JSONValue_t *));
+
+                        // Get each extension
+                        array_get(p_requested_validation_layers->list, requested_validation_layers, 0);
+                    }
+                    else
+                        goto wrong_requested_validation_layers;
+                }
+                else
+                    ; // Default
 
                 // Populate application info struct
                 application_info = (VkApplicationInfo) { 
@@ -273,22 +353,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     // Construct a dictionary from the required extensions
                     dict_from_keys(&extensions, required_extensions, required_extension_count);
 
-                    if(p_requested_validation_layers)
-                    {
-                        
-                        // Get the number requested validation layers
-                        array_get(p_requested_validation_layers, 0, &requested_layers_count);
-
-                        // Allocate for each extension
-                        requested_validation_layers = calloc(requested_extension_count, sizeof(JSONValue_t *));
-
-                        // Get each extension
-                        array_get(p_requested_validation_layers, requested_validation_layers, 0);
-
-                        for (size_t i = 0; i < requested_layers_count; i++)
-                            requested_validation_layers[i] = JSON_VALUE(((JSONValue_t *)requested_validation_layers[i]), JSONstring);
-                        
-                    }
+                    for (size_t i = 0; i < requested_layers_count; i++)
+                        requested_validation_layers[i] = ((JSONValue_t **)requested_validation_layers)[i]->string;
 
                     // TODO: Add support for user defined extensions
                     instance_create_info  = (VkInstanceCreateInfo) { 
@@ -312,21 +378,21 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             }
             
             // Set the maximum number of buffered frames
-            p_instance->vulkan.max_buffered_frames = max_buffered_frames;
+            p_instance->vulkan.max_buffered_frames = p_max_buffered_frames->integer;
 
             // Create a surface with SDL2
             if ( SDL_Vulkan_CreateSurface(p_instance->sdl2.window, p_instance->vulkan.instance, &p_instance->vulkan.surface) == SDL_FALSE )
                 goto failed_to_create_sdl2_surface;
 
-            array_get(p_device_extensions, 0, &device_extension_count);
+            array_get(p_device_extensions->list, 0, &device_extension_count);
             device_extensions = calloc(device_extension_count+1, sizeof(char *));
-            array_get(p_device_extensions, device_extensions, 0);
+            array_get(p_device_extensions->list, device_extensions, 0);
             
             // Iterate over each vulkan device extension
             for (size_t i = 0; i < device_extension_count; i++)
 
                 // JSONValue_t * ---> char *
-                device_extensions[i] = JSON_VALUE(((JSONValue_t *)device_extensions[i]), JSONstring);
+                device_extensions[i] = ((JSONValue_t **)device_extensions)[i]->string;
 
             // Get a physical device to use
             pick_physical_device(device_extensions);
@@ -348,137 +414,85 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         {
 
             // Set the name
+            if (p_name->type == (void *) 0 )
             {
 
                 // Initialized data
-                size_t name_len = strlen(name);
+                size_t name_len = strlen(p_name->string);
 
                 // Allocate memory for the name
                 p_instance->name = calloc(name_len+1, sizeof(u8));
 
+                // Error check
+                if ( p_instance->name == (void *) 0 )
+                    goto no_mem;
+
                 // Copy the name to the instance
-                strncpy(p_instance->name, name, name_len);
+                strncpy(p_instance->name, p_name->string, name_len);
             }
 
             // Subsystem initialization
             {
 
+                // Initialized data
+                extern void init_renderer   ( void );
+                extern void init_shader     ( void );
+                extern void init_texture     ( void );
+                extern void init_input       ( void );
+                extern void init_part        ( void );
+                extern void init_material    ( void );
+                extern void init_scheduler  ( void );
+                extern void init_scene      ( void );
+                extern void init_collider   ( void );
+                extern void init_physics    ( void );
+                extern void init_ai         ( void );
+
                 // Set the loading thread limit
-                p_instance->loading_thread_count = loading_thread_count;
+                if ( p_loading_thread_count )
+                {
+                    if ( p_loading_thread_count->type == JSONinteger )
+                        p_instance->loading_thread_count = p_loading_thread_count->integer;
+                    else
+                        goto wrong_loading_thread_count_type;
+                }
+                else
+                    p_instance->loading_thread_count = 4;
 
-                /*
                 // Renderer initialization
-                {
-                    extern void init_renderer ( void );
-
-                    init_renderer();
-                }
-
+                init_renderer();
+               
                 // Shader initialization
-                {
-                    extern void init_shader ( void );
-
-                    // Run the shader system initializer
-                    init_shader();
-                }
+                init_shader();
 
                 // Texture initialization
-                {
-
-                    // Get an external function
-                    extern int init_texture(void);
-
-                    // Run the texture system initializer
-                    init_texture();
-                }
-                */
+                //init_texture();
 
                 // Input initialization
-                {
+                init_input();
 
-                    // Get an external function
-                    extern int init_input(void);
-
-                    // Run the input system initializer
-                    init_input();
-                }
-                
-                /*
                 // Audio initialization
-                {
-
-                    // Get an external function
-                    extern int init_audio(void);
-
-                    // Run the audio system initializer
-                    init_audio();
-                }
-                */
+                //init_audio();
 
                 // Part initialization
-                {
-
-                    // Get an external function
-                    extern int init_part(void);
-
-                    // Run the part system initializer
-                    init_part();
-                }
+                init_part();
                 
                 // Material initialization
-                {
-
-                    // Get an external function
-                    extern int init_material(void);
-
-                    // Run the material system initializer
-                    init_material();
-                }
+                init_material();
 
                 // Scheduler initialization
-                {
-                    
-                    // Get an external function
-                    extern void init_scheduler( void );
-                        
-                    // Run the scheduler system initializer
-                    init_scheduler();
-                }
+                init_scheduler();
 
                 // Scene initialization
-                {
+                init_scene();
 
-                    // Get an external function
-                    extern void init_scene(void);
-
-                    // Run the scene system initializer
-                    init_scene();
-                }
-
-                /*
                 // Collider initialization
-                {
-                    extern void init_collider( void );
-
-                    init_collider();
-                }
-
-                
+                //init_collider();
 
                 // Physics initialization
-                {
-                    extern void init_physics(void);
-
-                    init_physics();
-                }
-                */
+                //init_physics();
                
                 // AI initialization
-                {
-                    extern void init_ai(void);
-
-                    init_ai();
-                }
+                init_ai();
             }
 
             // Data
@@ -493,61 +507,110 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Caches
             {
+                
+                // Construct the material cache
+                if ( p_material_cache_count )
+                {
+                    if ( p_material_cache_count->type == JSONinteger )
+                        dict_construct(&p_instance->cache.materials, p_material_cache_count);
+                    else
+                        goto wrong_material_cache_count_type;
+                }
 
-                // If no count is specified by the JSON object. Default to 128.
-                dict_construct(&p_instance->cache.materials, material_cache_count);
+                // Default
+                else
+                    dict_construct(&p_instance->cache.materials, 128);
 
-                // Default to 128 cached parts.
-                dict_construct(&p_instance->cache.parts    , part_cache_count);
+                // Construct the part cache
+                if ( p_part_cache_count )
+                {
+                    if ( p_part_cache_count->type == JSONinteger )
+                        dict_construct(&p_instance->cache.parts, p_part_cache_count);
+                    else
+                        goto wrong_part_cache_count_type;
+                }
 
-                // Default to 32 cached shaders.
-                dict_construct(&p_instance->cache.shaders  , shader_cache_count);
+                // Default
+                else
+                    dict_construct(&p_instance->cache.parts, 128);
 
-                // Default to 16 cached ais
-                // TODO: Fix
-                dict_construct(&p_instance->cache.ais      , 16 /*ai_cache_count*/);
+                // Construct the shader cache
+                if ( p_shader_cache_count )
+                {
+                    if ( p_shader_cache_count->type == JSONinteger )
+                        dict_construct(&p_instance->cache.shaders, p_shader_cache_count);
+                    else
+                        goto wrong_shader_cache_count_type;
+                }
+
+                // Default
+                else
+                    dict_construct(&p_instance->cache.shaders, 32);
+
+                // Construct the AI cache
+                if ( p_ai_cache_count )
+                {
+                    if ( p_ai_cache_count->type == JSONinteger )
+                        dict_construct(&p_instance->cache.ais, p_ai_cache_count);
+                    else
+                        goto wrong_ai_cache_count_type;
+                }
+
+                // Default
+                else
+                    dict_construct(&p_instance->cache.ais, 16);
 
             }
 
             // Queues
             {
+
+                // Queue for entities with colliders
                 queue_construct(&p_instance->queues.actor_collision);
+
+                // Queues for entities with rigidbodies
                 queue_construct(&p_instance->queues.actor_force);
                 queue_construct(&p_instance->queues.actor_move);
+
+                // Queues for entities with AIs
                 queue_construct(&p_instance->queues.ai_preupdate);
                 queue_construct(&p_instance->queues.ai_update);
+
+                // Queue for entities to load
                 queue_construct(&p_instance->queues.load_entity);
             }
 
             // Load a renderer
-            if ( renderer )
+            if ( p_renderer )
             {
 
-                // Initialized data
-                GXRenderer_t *p_renderer = 0;
-
-                // TODO: Fix
-                // Differerntiate objects from paths
-                //if   ( *renderer == '{' ) 
-                //    load_renderer_as_json(&p_renderer, renderer, strlen(renderer));
-                //else
-                //    load_renderer(&p_renderer, renderer);
-
-                // Set the active renderer
-                p_instance->context.renderer = p_renderer;
+                // Parse the renderer as a JSON value
+                if ( load_renderer_as_json_value(&p_instance->context.renderer, p_renderer) == 0 )
+                    goto failed_to_load_schedule;
             }
 
+            // Default
+            else
+                ; // TODO: default?
+
+
             // Load an input set
-            if ( input )
+            if ( p_input )
             {
-                if ( load_input(&p_instance->input, input) == 0 )
+                if ( load_input(&p_instance->input, p_input) == 0 )
                     goto failed_to_load_input;
             }
 
-            // Load audio
-            if ( audio ) {
+            // Default
+            else
+                ; // TODO: default?
 
-            } // Coming soon...
+            // Load audio
+            if ( p_audio ) {
+
+            }
+            else
+                ; // TODO: default?
                 
             // Load schedules
             if ( p_schedules )
@@ -594,21 +657,19 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             }
 
             // Load the initial scene
-            if ( initial_scene ) {
+            if ( p_initial_scene ) {
 
-                // Initialized data
-                GXScene_t *p_scene = 0;
+                // Load the initial scene as a string
+                if ( p_initial_scene->type == JSONstring)
+                {
 
-                // Parse the schedule as an object
-                if ( load_scene(&p_scene, initial_scene) == 0 )
-                    goto failed_to_load_schedule;
+                    // Parse the schedule as an object
+                    if ( load_scene(&p_instance->context.scene, p_initial_scene->string) == 0 )
+                        goto failed_to_load_schedule;
 
-                // Set the initial scene
-                p_instance->context.scene = p_scene;
-
-                // Add the initial scene to the scene dictionary
-                dict_add(p_instance->data.scenes, p_scene->name, p_scene);
-
+                    // Add the initial scene to the scene dictionary
+                    dict_add(p_instance->data.scenes, p_instance->context.scene->name, p_instance->context.scene);
+                }
             }
 
             /*
@@ -646,6 +707,17 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
     // Success
     return 1;
 
+    wrong_log_file_type:
+    wrong_window_width_type:
+    wrong_window_height_type:
+    missing_properties:
+    wrong_material_cache_count_type:
+    wrong_part_cache_count_type:
+    wrong_shader_cache_count_type:
+    wrong_ai_cache_count_type:
+    wrong_loading_thread_count_type:
+    wrong_requested_instance_extensions_type:
+    wrong_requested_validation_layers:
     // Error handling
     {
         
@@ -754,7 +826,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
         no_initial_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] in call to function \"%s\"\n", initial_scene, __FUNCTION__);
+                g_print_error("[G10] Failed to load initial scene in call to function \"%s\"\n" __FUNCTION__);
             #endif 
 
             // Error 

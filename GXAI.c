@@ -29,7 +29,7 @@ int create_ai ( GXAI_t **pp_ai )
 	GXAI_t *p_ai = calloc(1, sizeof(GXAI_t));
 
 	// Error checking
-	if(p_ai == (void *)0)
+	if ( p_ai == (void *) 0 )
 		goto no_mem;
 
 	// Write the return value
@@ -84,7 +84,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 	char   *file_data = calloc(file_len+1, sizeof(char));
 
 	// Error checking
-	if (file_data == (void *) 0 )
+	if ( file_data == (void *) 0 )
 		goto no_mem;
 
 	// Load the file contents into memory
@@ -633,8 +633,7 @@ int pre_update_ai ( GXInstance_t *p_instance )
 
     // Update the AI
     if ( p_entity )
-		
-		;//preupdate_entity_ai(p_entity);
+		preupdate_entity_ai(p_entity);
 
 	// Success
     return 1;
@@ -801,6 +800,7 @@ int update_ai ( GXInstance_t *p_instance )
 
 	// Get an ai entity
 	{
+		
 		// Lock the mutex 
 		SDL_LockMutex(p_instance->mutexes.ai_update);
 
@@ -821,7 +821,7 @@ int update_ai ( GXInstance_t *p_instance )
     // Update the AI
     if ( entity )
         // Uncomment
-		//update_entity_ai(entity);
+		update_entity_ai(entity);
 
 	// Success
     return 1;

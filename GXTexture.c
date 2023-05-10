@@ -117,7 +117,7 @@ enum VkImageAspectFlagBits aspect_enums [ ] = {
     VK_IMAGE_ASPECT_METADATA_BIT
 };
 
-int init_texture         ( void )
+void init_texture         ( void )
 {
 
     // Construct dicts for texture addressing and filtering
@@ -165,7 +165,7 @@ int init_texture         ( void )
     }
     
     // Success
-    return 1;
+    return;
 
     // Error handling
     {
@@ -181,7 +181,7 @@ int init_texture         ( void )
                 #endif
 
                 // Error
-                return 0;
+                return;
         }
     }
 }

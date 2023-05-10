@@ -371,8 +371,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 		// Shader
 		if ( p_shader_value )
-			;//if ( load_shader_as_json_value(&p_entity->shader, p_shader_value) == 0 )
-				//goto failed_to_load_transform_as_json_value;
+			if ( load_shader_as_json_value(&p_entity->shader, p_shader_value) == 0 )
+				goto failed_to_load_shader_as_json_value;
 
 		// Transform
 		if ( p_transform_value )
@@ -523,6 +523,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		wrong_name_type:
 		failed_to_load_part:
 		wrong_parts_type:
+		failed_to_load_shader_as_json_value:
 		return 0;
 
 		// Argument errors

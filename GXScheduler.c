@@ -45,8 +45,8 @@ char *task_names[TASK_COUNT] = {
 void *task_function_pointers[TASK_COUNT] = {
 	&process_input,
 	(void*) 0,
-	0,//&update_ai, 
-	0,//&pre_update_ai,
+	&update_ai, 
+	&pre_update_ai,
 	&user_code,
 	0,//&detect_collisions,
 	0,//&update_forces,
@@ -356,7 +356,7 @@ int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text )
 		goto failed_to_create_schedule;
 	
 	// Deallocate the JSON value
-	//FREE_VALUE(p_value);
+	free_json_value(p_value);
 
 	// Success
 	return 1;

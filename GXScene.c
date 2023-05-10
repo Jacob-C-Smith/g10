@@ -363,8 +363,10 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         if ( p_cameras_value )
         {
             if ( p_cameras_value->type == JSONarray ) {
-                size_t        len                    = 0;
-                JSONValue_t **pp_cameras            = 0;
+
+                // Initialized data
+                size_t        len        = 0;
+                JSONValue_t **pp_cameras = 0;
 
                 // Get the array contents
                 {

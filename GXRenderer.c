@@ -95,7 +95,8 @@ char *subpass_function_names[SUBPASS_FUNCTION_COUNT] = {
     "tone map gamma correct"
 };
 
-dict *image_layouts               = 0,
+dict *attachment_load_operations  = 0,
+     *image_layouts               = 0,
      *subpass_functions           = 0,
      *attachment_store_operations = 0;
 
@@ -129,13 +130,13 @@ void init_renderer ( void )
     return;
 }
 
-int           create_renderer              ( GXRenderer_t   **pp_renderer )
+int create_renderer ( GXRenderer_t   **pp_renderer )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_renderer == (void *) 0)
+            if ( pp_renderer == (void *) 0 )
                 goto no_ret;
         #endif
     }
@@ -144,14 +145,10 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
     GXRenderer_t *p_renderer = calloc(1, sizeof(GXRenderer_t));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if (p_renderer == (void*)0)
-                goto no_mem;
-        #endif
-    }
+    if ( p_renderer == (void *) 0 )
+        goto no_mem;
     
-    // Return a pointer to the renderer
+    // Return a pointer to the caller
     *pp_renderer = p_renderer;
 
     // Successs
@@ -185,13 +182,13 @@ int           create_renderer              ( GXRenderer_t   **pp_renderer )
     }
 }
 
-int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
+int create_render_pass ( GXRenderPass_t **pp_render_pass )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_render_pass == (void *) 0)
+            if ( pp_render_pass == (void *) 0 )
                 goto no_ret;
         #endif
     }
@@ -200,14 +197,10 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
     GXRenderPass_t *p_render_pass = calloc(1, sizeof(GXRenderPass_t));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if (p_render_pass == (void*)0)
-                goto no_mem;
-        #endif
-    }
+    if ( p_render_pass == (void *) 0 )
+        goto no_mem;
 
-    // Return a pointer to the render pass
+    // Return a pointer to the caller
     *pp_render_pass = p_render_pass;
 
     // Success
@@ -222,6 +215,8 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -231,13 +226,15 @@ int           create_render_pass           ( GXRenderPass_t **pp_render_pass )
                 #ifndef NDEBUG
                     g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
     }
 }
 
-int           create_subpass               ( GXSubpass_t    **pp_subpass )
+int create_subpass ( GXSubpass_t **pp_subpass )
 {
 
     // Argument check
@@ -252,14 +249,10 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
     GXSubpass_t *p_subpass = calloc(1, sizeof(GXSubpass_t));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if (p_subpass == (void*)0)
-                goto no_mem;
-        #endif
-    }
+    if ( p_subpass == (void *) 0 )
+        goto no_mem;
 
-    // Return a pointer to the subpass
+    // Return a pointer to the caller
     *pp_subpass = p_subpass;
 
     // Success
@@ -274,6 +267,8 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -283,21 +278,22 @@ int           create_subpass               ( GXSubpass_t    **pp_subpass )
                 #ifndef NDEBUG
                     g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
-
     }
 }
 
-int           load_renderer                ( GXRenderer_t   **pp_renderer   , char* path )
+int load_renderer ( GXRenderer_t **pp_renderer, char* path )
 {
     
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_renderer == (void *)0)
+            if ( pp_renderer == (void *) 0 )
                 goto no_renderer;
-            if (path == (void *)0)
+            if ( path == (void *) 0 )
                 goto no_path;
         #endif
     }
@@ -307,12 +303,8 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
     char   *buffer = calloc(1+len, sizeof(char));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if (buffer == (void *)0)
-                goto no_mem;
-        #endif
-    }
+    if ( buffer == (void *) 0 )
+        goto no_mem;
 
     // Load the file
     if ( g_load_file(path, buffer, true) == 0 )
@@ -322,7 +314,7 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
     if ( load_renderer_as_json(pp_renderer, buffer) == 0 )
         goto failed_to_load_renderer;
 
-    // Free resources
+    // Clean the scope
     free(buffer);
 
     // Success
@@ -340,6 +332,7 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
 
                 // Error
                 return 0;
+
             no_path:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
@@ -381,138 +374,255 @@ int           load_renderer                ( GXRenderer_t   **pp_renderer   , ch
     }
 }
 
-int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , char* text )
+int load_renderer_as_json ( GXRenderer_t **pp_renderer, char *text )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_renderer == (void *)0 )
-                goto no_return;
-            if ( text  == (void *)0 )
+            if ( pp_renderer == (void *) 0 )
+                goto no_renderer;
+            if ( text == (void *) 0 )
                 goto no_text;
-            if (len == 0)
-                goto no_len;
         #endif
     }
 
     // Initialized data
-    GXRenderer_t  *p_renderer    = 0;
-    dict          *renderer_dict = 0;
-    char          *name          = 0,
-                 **passes        = 0, 
-                 **clear_color   = 0;
+    GXRenderer_t *p_renderer = 0;
+    JSONValue_t  *p_value    = 0;
 
-    // Parse the JSON text into a dictionary         
-    parse_json(text, len, &renderer_dict);
+    // Parse the JSON text into a JSON value      
+    if ( parse_json_value(text, 0, &p_value) == 0 )
+        goto failed_to_parse_json;
 
-    // Parse the JSON dictionary 
+    // Load the renderer from the JSON value
+    if ( load_renderer_as_json_value(pp_renderer, p_value) == 0 )
+        goto failed_to_construct_renderer_from_json_value;
+
+    // Clean the scope
+    free_json_value(p_value);
+
+    // Success
+    return 1;
+
+    // Error handling
     {
 
-        // Initialized data
-        JSONToken_t *token = 0;
+        // Argument errors
+        {
+            
+            no_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-        // Get the name
-        token  = (JSONToken_t *) dict_get(renderer_dict, "name");
-        name   = JSON_VALUE(token, JSONstring);
+                // Error
+                return 0;
 
-        // Get the list of render passes
-        token  = (JSONToken_t *) dict_get(renderer_dict, "passes");
-        passes = JSON_VALUE(token, JSONarray);
+            no_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+        }
 
-        // Get the clear color
-        token              = (JSONToken_t *) dict_get(renderer_dict, "clear color");
-        clear_color        = JSON_VALUE(token, JSONarray);
+        // G10 Errors
+        {
+            failed_to_construct_renderer_from_json_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to construct renderer in in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
+                // Error
+                return 0;
+        }
+
+        // JSON errors
+        {
+            failed_to_parse_json:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to parse JSON text in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
+}
+
+int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_renderer == (void *) 0 )
+                goto no_return;
+            if ( p_value  == (void *) 0 )
+                goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    GXRenderer_t *p_renderer    = 0;
+    JSONValue_t  *p_name        = 0,
+                 *p_passes      = 0,
+                 *p_clear_color = 0;
+
+    // Parse the value as an object
+    if ( p_value->type == JSONobject )
+    {
+
+        p_name        = dict_get(p_value->object, "name");
+        p_passes      = dict_get(p_value->object, "passes");
+        p_clear_color = dict_get(p_value->object, "clear color");
+
+        if ( !( p_name && p_passes && p_clear_color ) ) 
+            goto missing_parameters;
+    }
+
+    // Parse the value as a path
+    else if ( p_value->type == JSONstring )
+    {
+        if ( load_renderer(pp_renderer, p_value->string) == 0 )
+            goto faild_to_load_renderer;
+    }
+    
+    // Default
+    else
+        goto wrong_value_type;
 
     // Construct the renderer
     {
 
+        // Initialized data
+        VkClearValue* clear_color = calloc(2, sizeof(VkClearValue));
+
         // Allocate a renderer
-        if ( create_renderer(pp_renderer) == 0 )
+        if ( create_renderer(&p_renderer) == 0 )
             goto failed_to_allocate_renderer;
 
-        p_renderer = *pp_renderer;
-
         // Copy the name
-        {
+        if ( p_name->type == JSONstring ){
 
             // Initialized data
-            size_t len = strlen(name);
+            size_t len = strlen(p_name->string);
 
             // Allocate memory for the name
             p_renderer->name = calloc(len + 1, sizeof(char));
 
+            // Error checking
+            if ( p_renderer->name == (void *) 0 )
+                goto no_mem;
+
             // Copy the name to the renderer
-            strncpy(p_renderer->name, name, len);
+            strncpy(p_renderer->name, p_name->string, len);
         }
-
-        VkClearValue* clear_c = calloc(2, sizeof(VkClearValue));
-
-        // Set the clear color
-        if(clear_color){
-            clear_c[0].color.float32[0] = (float)atof(clear_color[0]);
-            clear_c[0].color.float32[1] = (float)atof(clear_color[1]);
-            clear_c[0].color.float32[2] = (float)atof(clear_color[2]);
-            clear_c[0].color.float32[3] = (float)atof(clear_color[3]);
-
-            clear_c[1].depthStencil.depth = 1.f;
-            clear_c[1].depthStencil.stencil = 0;
-
-
-            p_renderer->clear_colors = clear_c;
-        }
-        else
-        {
-            clear_c->color.float32[0] = 1.f,
-            clear_c->color.float32[1] = 1.f,
-            clear_c->color.float32[2] = 1.f,
-            clear_c->color.float32[3] = 1.f;
-
-            p_renderer->clear_colors = clear_c;
-        }
-
-        // Parse each render pass
+        
+        // Parse the clear color as an array
+        if ( p_clear_color->type == JSONarray )
         {
 
             // Initialized data
-            size_t render_passes_count = 0;
+            size_t        array_len         = 0;
+            JSONValue_t **pp_array_contents = 0;
 
-            // Count up the render passes
-            while (passes[++render_passes_count]);
+            // Get the array contents
+            {
 
-            p_renderer->render_pass_count = render_passes_count;
+                    // Get the array length
+                    array_get(p_clear_color->list, 0, &array_len);
+
+                    // Allocate memory for array
+                    pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+
+                    // Error checking
+                    if ( pp_array_contents == (void *) 0 )
+                        goto no_mem;
+
+                    // Dump array to memory
+                    array_get(p_clear_color->list, pp_array_contents, 0);
+                }
+
+            // Iterate over each array element
+            for (size_t i = 0; i < array_len; i++)
+
+                // Set the clear color
+                clear_color[0].color.float32[i] = (float) pp_array_contents[i]->floating;
+
+            // Set the depth stencil clear color
+            clear_color[1].depthStencil.depth = 1.f;
+            clear_color[1].depthStencil.stencil = 0;
+
+            // Store the clear color in the renderer
+            p_renderer->clear_colors = clear_color;
+        }
+        else
+            goto wrong_renderer_clear_color;
+        
+        // Parse each render pass
+        if ( p_passes->type == JSONarray )
+        {
+
+            // Initialized data
+            size_t        array_len         = 0;
+            JSONValue_t **pp_array_contents = 0;
+
+            // Get the array contents
+            {
+
+                // Get the array length
+                array_get(p_passes->list, 0, &array_len);
+
+                // Allocate memory for array
+                pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+
+                // Error checking
+                if ( pp_array_contents == (void *) 0 )
+                    goto no_mem;
+
+                // Dump array to memory
+                array_get(p_passes->list, pp_array_contents, 0);
+            }
+
+            p_renderer->render_pass_count = array_len;
 
             // Allocate a list of render passes
-            p_renderer->render_passes_data = calloc(render_passes_count, sizeof(void *));
+            p_renderer->render_passes_data = calloc(array_len, sizeof(void *));
             
             // Error checking
-            {
-                #ifndef NDEBUG
-                    if (p_renderer->render_passes_data == 0)
-                        goto no_mem;
-                #endif
-            }
+            if ( p_renderer->render_passes_data == 0 )
+                goto no_mem;
 
             // Iterate over each render pass
-            for (size_t i = 0; i < render_passes_count; i++)
-            {
-                
-                // Parse render pass JSON
-                if (*passes[i] == '{')
-                    load_render_pass_as_json(&p_renderer->render_passes_data[i], passes[i], strlen(passes[i]));
+            for (size_t i = 0; i < array_len; i++)
 
-                // Load a render pass JSON file
-                else
-                    load_render_pass(&p_renderer->render_passes_data[i], passes[i]);
-
-            }
-
+                // Load the render pass as a JSON value
+                if ( load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0 )
+                    goto failed_to_load_renderer_as_json_value;
+        
         }
+        else
+            goto wrong_passes_type;
+
+        // Return a pointer to the caller
+        *pp_renderer = p_renderer;
     }
 
+    // Success
     return 1;
+
+    // TODO:
+    missing_parameters:
+    wrong_passes_type:
+    failed_to_load_renderer_as_json_value:
+    wrong_renderer_clear_color:
+    wrong_value_type:
+    faild_to_load_renderer:
+        // Error
+        return 0;
 
     // Error handling
     {
@@ -524,16 +634,16 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
-            no_text:
+
+            no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                return 0;
-            no_len:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Zero provided for \"len\" in in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+                
+                // Error
                 return 0;
         }
 
@@ -543,6 +653,8 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -552,20 +664,22 @@ int           load_renderer_as_json        ( GXRenderer_t   **pp_renderer   , ch
                 #ifndef NDEBUG
                     g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 }
 
-int           load_render_pass             ( GXRenderPass_t **pp_render_pass, char* path )
+int load_render_pass ( GXRenderPass_t **pp_render_pass, char* path )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_render_pass == (void *)0)
+            if ( pp_render_pass == (void *) 0 )
                 goto no_render_pass;
-            if (path == (void *)0)
+            if ( path == (void *) 0 )
                 goto no_path;
         #endif
     }
@@ -575,12 +689,8 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
     char   *buffer = calloc(1+len, sizeof(char));
 
     // Error checking
-    {
-        #ifndef NDEBUG
-            if (buffer == (void *)0)
-                goto no_mem;
-        #endif
-    }
+    if (buffer == (void *)0)
+        goto no_mem;
 
     // Load the file
     if ( g_load_file(path, buffer, false) == 0 )
@@ -590,9 +700,10 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
     if ( load_render_pass_as_json(pp_render_pass, buffer) == 0 )
         goto failed_to_load_render_pass;
 
-    // Free resources
+    // Clean the scope
     free(buffer);
 
+    // Success
     return 1;
 
     // Error handling
@@ -604,11 +715,16 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
+
             no_path:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -618,12 +734,16 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
 
             failed_to_load_render_pass:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to load render pass from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -633,6 +753,8 @@ int           load_render_pass             ( GXRenderPass_t **pp_render_pass, ch
                 #ifndef NDEBUG
                     g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
@@ -644,85 +766,135 @@ int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char* text )
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_render_pass == (void *) 0)
+            if ( pp_render_pass == (void *) 0 )
                 goto no_render_pass;
-            if (text == (void*)0)
+            if ( text == (void *) 0 )
                 goto no_text;
         #endif
     }
 
     // Initialized data
-    GXInstance_t            *p_instance              = g_get_active_instance();
-    GXRenderPass_t          *p_render_pass           = 0;
-    VkAttachmentDescription *attachments             = 0;
-    VkAttachmentReference   *attachment_references   = 0;
-    VkSubpassDescription    *subpasses               = 0;
-    VkRenderPassCreateInfo  *render_pass_create_info = calloc(1, sizeof(VkRenderPassCreateInfo));
-    dict                    *render_pass_dict        = 0;
-    char                    *name                    = 0,
-                           **attachments_text        = 0,
-                           **subpasses_text          = 0;
+    GXInstance_t   *p_instance    = g_get_active_instance();
+    GXRenderPass_t *p_render_pass = 0;
+    JSONValue_t    *p_value       = 0;
 
-    // Parse the render pass JSON into a dictionary
-    parse_json(text, len, &render_pass_dict);
+    // Parse the JSON text into a JSON value
+    if ( parse_json_value(text, 0, &p_value) == 0 )
+        goto failed_to_parse_json_as_value;
 
-    // Parse the JSON dictionary
+    // Load the renderer as a JSON value
+    if ( load_render_pass_as_json_value(pp_render_pass, p_value) == 0 )
+        goto failed_to_load_renderer_as_json_value;
+
+    // Clean the scope
+    free_json_value(p_value);
+
+    // Success
+    return 1;
+
+    // TODO:
+    failed_to_parse_json_as_value:
+    failed_to_load_renderer_as_json_value:
+    
+        return 0;
+
+    // Error handling
     {
 
-        // Initialized data
-        JSONToken_t *token = 0;
+        // Argument errors
+        {
 
-        // Get the name of the render pass
-        token            = (JSONToken_t *) dict_get(render_pass_dict, "name");
-        name             = JSON_VALUE(token, JSONstring);
+            no_render_pass:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-        // Get the attachments list
-        token            = (JSONToken_t *) dict_get(render_pass_dict, "attachments");
-        attachments_text = JSON_VALUE(token, JSONarray);
+                // Error
+                return 0;
 
-        // Get the subpasses list
-        token              = (JSONToken_t *) dict_get(render_pass_dict, "subpasses");
-        subpasses_text     = JSON_VALUE(token, JSONarray);
+            no_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
+                // Error
+                return 0;
+
+        }
     }
+}
 
-    // Error checking
+int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_t *p_value )
+{
+ 
+    // Argument check
     {
-        #ifndef NDEBUG 
-            if (name == (void *)0)
-                goto no_name;
-            if (attachments_text == (void *)0)
-                goto no_attachments;
+        #ifndef NDEBUG
+            if ( pp_render_pass == (void *) 0 )
+                goto no_render_pass;
+            if ( p_value == (void *) 0 )
+                goto no_value;
         #endif
     }
+
+    // Initialized data
+    GXInstance_t   *p_instance    = g_get_active_instance();
+    GXRenderPass_t *p_render_pass = 0;
+    JSONValue_t    *p_name        = 0, 
+                   *p_attachments = 0,
+                   *p_subpasses   = 0;
+
+    // Parse the render pass JSON value
+    if ( p_value->type == JSONobject ) {
+
+        p_name        = dict_get(p_value->object, "name");
+        p_attachments = dict_get(p_value->object, "attachments");
+        p_subpasses   = dict_get(p_value->object, "subpasses");
+
+        // Check for missing parameters
+        if ( ! ( p_name && p_attachments && p_subpasses ) )
+            goto missing_parameters;
+    }
+    else
+        goto wrong_type;
 
     // Construct the render pass
     {
 
         // Initialized data
-        size_t attachment_count = 0,
-               subpass_count = 0;
+        VkRenderPassCreateInfo   render_pass_create_info = { 0 };
+        VkSubpassDependency      dependency              = { 0 };
+        size_t                   attachment_count        = 0,
+                                 subpass_count           = 0;
+        VkAttachmentDescription *attachments             = 0;
+        VkAttachmentReference   *attachment_references   = 0;
+        VkSubpassDescription    *subpasses               = 0;
 
-        create_render_pass(pp_render_pass);
-
-        p_render_pass = *pp_render_pass;
+        // Allocate memory for a render pass
+        if ( create_render_pass(&p_render_pass) == 0 )
+            goto failed_to_create_render_pass;
 
         // Set the name
-        {
+        if ( p_name->type == JSONstring ) {
 
             // Initialized data
-            size_t len = strlen(name);
+            size_t len = strlen(p_name->string);
 
             // Allocate memory for name
             p_render_pass->name = calloc(len + 1, sizeof(char));
 
+            // Error checking
+            if ( p_render_pass->name == (void *) 0 )
+                goto no_mem;
+
             // Copy the name
-            strncpy(p_render_pass->name, name, len);
+            strncpy(p_render_pass->name, p_name->string, len);
 
         }
-
+        
+        /*
         // Populate the attachments
-        if(attachments_text){
+        if( attachments_text ){
 
             // Check for zero attachments
             {
@@ -880,7 +1052,7 @@ int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char* text )
             }
         }
 
-        if(subpasses_text){
+        if( subpasses_text ){
             // Count up subpasses
             while (subpasses_text[++subpass_count]);
             p_render_pass->subpasses_count = subpass_count;
@@ -1024,56 +1196,70 @@ int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char* text )
             }
 
         }
-
-        VkSubpassDependency dependency = { 0 };
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        */
+        
+        dependency = (VkSubpassDependency) { 
+            .srcSubpass    = VK_SUBPASS_EXTERNAL,
+            .dstSubpass    = 0,
+            .srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+            .srcAccessMask = 0,
+            .dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+        };
 
         // Populate render pass create info struct
-        {
-            render_pass_create_info->sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-            render_pass_create_info->attachmentCount = (u32)attachment_count;
-            render_pass_create_info->pAttachments    = attachments;
-            render_pass_create_info->subpassCount    = (u32)subpass_count;
-            render_pass_create_info->pSubpasses      = subpasses;
-            render_pass_create_info->dependencyCount = 1;
-            render_pass_create_info->pDependencies   = &dependency;
-        }
+        render_pass_create_info = (VkRenderPassCreateInfo) {
+            .sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+            .attachmentCount = (u32)attachment_count,
+            .pAttachments    = attachments,
+            .subpassCount    = (u32)subpass_count,
+            .pSubpasses      = subpasses,
+            .dependencyCount = 1,
+            .pDependencies   = &dependency
+        };
 
+        if ( vkCreateRenderPass(p_instance->vulkan.device, &render_pass_create_info, 0, &p_render_pass->render_pass) != VK_SUCCESS ) {
+            g_print_error("failed to create render pass!\n");
+        }
     }
     
-    if ( vkCreateRenderPass(p_instance->vulkan.device, render_pass_create_info, 0, &p_render_pass->render_pass) != VK_SUCCESS ) {
-        g_print_error("failed to create render pass!\n");
-    }
-
     p_render_pass->framebuffers = calloc(p_instance->vulkan.image_count, sizeof(GXFramebuffer_t));
 
     for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
     {
+
+        // Initialized data
         VkImageView attachments[2] = {
             p_instance->vulkan.swap_chain_image_views[i],
             p_render_pass->image_attachments[1]
         };
 
-        VkFramebufferCreateInfo framebuffer_create_info = { 0 };
+        VkFramebufferCreateInfo framebuffer_create_info = { 
+            .sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .renderPass      = p_render_pass->render_pass,
+            .attachmentCount = 2,
+            .pAttachments    = attachments,
+            .width           = p_instance->vulkan.swap_chain_extent.width,
+            .height          = p_instance->vulkan.swap_chain_extent.height,
+            .layers          = 1
+        };
 
-        framebuffer_create_info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebuffer_create_info.renderPass      = p_render_pass->render_pass;
-        framebuffer_create_info.attachmentCount = 2;
-        framebuffer_create_info.pAttachments    = attachments;
-        framebuffer_create_info.width           = p_instance->vulkan.swap_chain_extent.width;
-        framebuffer_create_info.height          = p_instance->vulkan.swap_chain_extent.height;
-        framebuffer_create_info.layers          = 1;
-
-        if (vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS)
+        if ( vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS )
             goto failed_to_create_render_pass;
-    }
 
+    }
+    
+    // Return a pointer to the caller
+    *pp_render_pass = p_render_pass;
+
+    // Success
     return 1;
+
+    // TODO:
+    wrong_type:
+    missing_parameters:
+    no_mem:
+        return 0;
 
     // Error handling
     {
@@ -1089,37 +1275,14 @@ int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char* text )
                 // Error
                 return 0;
 
-            no_text:
+            no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
 
-            no_len: 
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Parameter \"len\" was zero in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-
-        }
-
-        // JSON errors
-        {
-            no_name:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] No \"name\" property in render pass JSON, in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                return 0;
-
-            no_attachments:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] No \"attachments\" property in render pass JSON, in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                return 0;
         }
 
         // Vulkan errors
@@ -1129,12 +1292,14 @@ int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char* text )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to create render pass in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 }
 
-int           renderer_info                ( GXRenderer_t    *p_renderer)
+int renderer_info ( GXRenderer_t *p_renderer)
 {
 
     // Argument check
@@ -1198,7 +1363,7 @@ int           renderer_info                ( GXRenderer_t    *p_renderer)
     }
 }
 
-int           add_subpass_callback         ( char            *name          , void(*function_pointer)( ) )
+int add_subpass_callback ( char *name, void(*function_pointer)( ) )
 {
 
     // Argument check
@@ -1236,12 +1401,11 @@ int render_frame ( GXInstance_t *p_instance )
 
 
     // Initialized data
-	VkSemaphore               wait_semaphores[]       = { instance->vulkan.image_available_semaphores[instance->vulkan.current_frame]};
-	VkSemaphore               signal_semaphores[]     = { instance->vulkan.render_finished_semaphores[instance->vulkan.current_frame]};
+	VkSemaphore               wait_semaphores[]       = { p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame]};
+	VkSemaphore               signal_semaphores[]     = { p_instance->vulkan.render_finished_semaphores[p_instance->vulkan.current_frame]};
 	VkPipelineStageFlags      wait_stages[]           = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	VkSubmitInfo              submit_info             = { 0 };
-    VkPresentInfoKHR          present_info            = { 0 };
-	VkSwapchainKHR            swap_chains[]           = { instance->vulkan.swap_chain };
+	
+	VkSwapchainKHR            swap_chains[]           = { p_instance->vulkan.swap_chain };
     VkResult                  result;
     u64                       start                   = 0,
                               end                     = 0;
@@ -1252,14 +1416,14 @@ int render_frame ( GXInstance_t *p_instance )
     {
 
         // Wait for the previous frame to finish rendering
-	    vkWaitForFences(instance->vulkan.device, 1, &instance->vulkan.in_flight_fences[instance->vulkan.current_frame], VK_TRUE, UINT64_MAX);
+	    vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, UINT64_MAX);
 	
         // Grab an image from the swapchain
-        result = vkAcquireNextImageKHR(instance->vulkan.device, instance->vulkan.swap_chain, UINT64_MAX, instance->vulkan.image_available_semaphores[instance->vulkan.current_frame], VK_NULL_HANDLE, &instance->vulkan.image_index);
+        result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, UINT64_MAX, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
 	
         // Make sure the image is usable
         if      ( result == VK_ERROR_OUT_OF_DATE_KHR ) {
-            g_window_resize(instance);
+            g_window_resize(p_instance);
             goto fail;
         }
         else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR ) {
@@ -1268,23 +1432,23 @@ int render_frame ( GXInstance_t *p_instance )
         }
 
         // Only reset the fence if we are submitting work
-        vkResetFences(instance->vulkan.device, 1, &instance->vulkan.in_flight_fences[instance->vulkan.current_frame]);
+        vkResetFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]);
 
         // Clear out the command buffer
-    	vkResetCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0);
+    	vkResetCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0);
 	}
 
     // Draw the frame
     {
         // Initialized data
-        GXRenderer_t             *active_renderer   = instance->context.renderer;
+        GXRenderer_t             *active_renderer   = p_instance->context.renderer;
         VkCommandBufferBeginInfo  begin_info        = { 0 };
 
         // Set up the command buffer begin info struct
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         // Begin the command buffer
-        vkBeginCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame], &begin_info);
+        vkBeginCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &begin_info);
 
         // Iterate over each render pass
         for (size_t i = 0; i < active_renderer->render_pass_count; i++)
@@ -1292,33 +1456,26 @@ int render_frame ( GXInstance_t *p_instance )
 
             // Initialized data
             GXRenderPass_t           *rp                     = active_renderer->render_passes_data[i];
-            VkRenderPassBeginInfo     render_pass_begin_info = { 0 };
             size_t                    subpass_count          = 0;
-
-            // Start the render pass
-            {
-                    
-                // Set up the render pass
-                {
-                    render_pass_begin_info.sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                    render_pass_begin_info.renderPass          = rp->render_pass;
-                    render_pass_begin_info.framebuffer         = rp->framebuffers[instance->vulkan.current_frame].framebuffer;
-                    render_pass_begin_info.renderArea.offset.x = 0;
-                    render_pass_begin_info.renderArea.offset.y = 0;
-                    render_pass_begin_info.renderArea.extent   = instance->vulkan.swap_chain_extent;
-                    render_pass_begin_info.clearValueCount     = 2;
-                    render_pass_begin_info.pClearValues        = active_renderer->clear_colors;
-                }
-
-                // Start the render pass
-                vkCmdBeginRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-            }
-
-            // Get a list of entities
-            size_t       entity_count = dict_values(instance->context.scene->entities, 0);
+            size_t       entity_count = dict_values(p_instance->context.scene->entities, 0);
             GXEntity_t** entities     = calloc(entity_count, sizeof(void*));
 
-            dict_values(instance->context.scene->entities, entities);
+            VkRenderPassBeginInfo     render_pass_begin_info = 
+            {
+                .sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+                .renderPass          = rp->render_pass,
+                .framebuffer         = rp->framebuffers[p_instance->vulkan.current_frame].framebuffer,
+                .renderArea.offset.x = 0,
+                .renderArea.offset.y = 0,
+                .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
+                .clearValueCount     = 2,
+                .pClearValues        = active_renderer->clear_colors
+            };
+
+            // Start the render pass
+            vkCmdBeginRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+            dict_values(p_instance->context.scene->entities, entities);
 
             // Draw each entity
             for (size_t i = 0; i < entity_count; i++)
@@ -1327,68 +1484,82 @@ int render_frame ( GXInstance_t *p_instance )
             free(entities);
             
             // End the render pass
-            vkCmdEndRenderPass(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
+            vkCmdEndRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
         }
         
         // End the command buffer
-        vkEndCommandBuffer(instance->vulkan.command_buffers[instance->vulkan.current_frame]);
+        vkEndCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
 
     }
 
     // Submit the commands
     {
-
-        // Populate the submit info struct
+        
+        // Initialized data
+        VkSubmitInfo submit_info = 
         {
-            submit_info.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            submit_info.waitSemaphoreCount   = 1;
-            submit_info.pWaitSemaphores      = &wait_semaphores;
-            submit_info.pWaitDstStageMask    = &wait_stages;
-            submit_info.commandBufferCount   = 1;
-            submit_info.pCommandBuffers      = &instance->vulkan.command_buffers[instance->vulkan.current_frame];
-            submit_info.signalSemaphoreCount = 1;
-            submit_info.pSignalSemaphores    = &signal_semaphores;
-        }
+            .sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .waitSemaphoreCount   = 1,
+            .pWaitSemaphores      = &wait_semaphores,
+            .pWaitDstStageMask    = &wait_stages,
+            .commandBufferCount   = 1,
+            .pCommandBuffers      = &p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
+            .signalSemaphoreCount = 1,
+            .pSignalSemaphores    = &signal_semaphores
+        };
+        VkPresentInfoKHR present_info = 
+        {
+            .sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores    = &signal_semaphores,
+            .swapchainCount     = 1,
+            .pSwapchains        = swap_chains,
+            .pImageIndices      = &p_instance->vulkan.image_index
+        };
 
         // Submit the draw commands
-        if (vkQueueSubmit(instance->vulkan.graphics_queue, 1, &submit_info, instance->vulkan.in_flight_fences[instance->vulkan.current_frame]))
+        if ( vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]) )
             g_print_error("Failed to submit draw command buffer!\n");
 
-        // Populate the present info struct
-        {
-            present_info.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-            present_info.waitSemaphoreCount = 1;
-            present_info.pWaitSemaphores    = &signal_semaphores;
-            present_info.swapchainCount     = 1;
-            present_info.pSwapchains        = swap_chains;
-            present_info.pImageIndices      = &instance->vulkan.image_index;
-        }
-
         // Present the image to the swapchain
-        result = vkQueuePresentKHR(instance->vulkan.present_queue, &present_info);
+        result = vkQueuePresentKHR(p_instance->vulkan.present_queue, &present_info);
 
         // Does the window need to be resized?
-        if      ( result == VK_ERROR_OUT_OF_DATE_KHR ||
-                  result == VK_SUBOPTIMAL_KHR ) {
-            g_window_resize(instance);
-        }
-        else if ( result != VK_SUCCESS ) {
-            printf("failed to present swap chain image!");
+        switch ( result )
+        {
+            case VK_ERROR_OUT_OF_DATE_KHR:
+            case VK_SUBOPTIMAL_KHR:
+                g_window_resize(p_instance);
+                break;
+            case VK_SUCCESS:
+                break;
+
+            default:
+                goto failed_to_queue_presentation;
         }
     }
 
-    instance->vulkan.current_frame = (instance->vulkan.current_frame + 1) % instance->vulkan.max_buffered_frames;
+    p_instance->vulkan.current_frame = (p_instance->vulkan.current_frame + 1) % p_instance->vulkan.max_buffered_frames;
 
     fail:
 
     end = SDL_GetPerformanceCounter();
-    instance->time.delta_time = (float)(((double)(end - start)) / (double)(instance->time.clock_div));
-    if(instance->time.ticks%144 == 1)
-        printf("Render time: %dms                           \r", (int)( instance->time.delta_time * 1000.f ));
-    instance->time.ticks += 1;
+    p_instance->time.delta_time = (float)(((double)(end - start)) / (double)(p_instance->time.clock_div));
+    if(p_instance->time.ticks%144 == 1)
+        printf("Render time: %dms                           \r", (int)( p_instance->time.delta_time * 1000.f ));
+    p_instance->time.ticks += 1;
 
-
+    // Success
 	return 1;
+
+    // TODO:
+    failed_to_queue_presentation:
+        return 0;
+    
+    // Error handling
+    {
+
+    }
 }
 
 int present_frame ( GXInstance_t *p_instance )
@@ -1408,7 +1579,7 @@ int present_frame ( GXInstance_t *p_instance )
     return 0;
 }
 
-int           draw_material                ( GXSubpass_t    **pp_subpass )
+int draw_material ( GXSubpass_t    **pp_subpass )
 {
 
     return 1;
