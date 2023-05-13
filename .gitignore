@@ -369,3 +369,8 @@ MigrationBackup/
 FodyWeavers.xsd
 *.gfxr
 time partitioning.txt
+
+build/
+extern/
+.vscode/
+*.lnk

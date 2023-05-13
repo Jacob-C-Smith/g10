@@ -1,50 +1,47 @@
 #include <G10/GXTexture.h>
 
-dict *texturing_modes                                = (void *) 0;
-dict *filtering_modes                                = (void *) 0;
-dict *tiling_lut                                     = (void *) 0;
-dict *usage_lut                                      = (void *) 0;
-dict *view_type_lut                                  = (void *) 0;
-dict *swizzle_lut                                    = (void *) 0;
-dict *aspect_lut                                     = (void *) 0;
+dict *texturing_modes = (void *) 0;
+     *filtering_modes = (void *) 0;
+     *tiling_lut      = (void *) 0;
+     *usage_lut       = (void *) 0;
+     *view_type_lut   = (void *) 0;
+     *swizzle_lut     = (void *) 0;
+     *aspect_lut      = (void *) 0;
 
-char                      *texturing_addressing_keys   [ ] = {
-                                                              "repeat",
-                                                              "mirror repeat",
-                                                              "clamp edge",
-                                                              "clamp border",
-                                                              "mirror clamp edge"
-                                                            };
-
+char *texturing_addressing_keys [ ] = {
+    "repeat",
+    "mirror repeat",
+    "clamp edge",
+    "clamp border",
+    "mirror clamp edge"
+};
 enum VkSamplerAddressMode  texturing_addressing_values [ ] = {
-                                                              VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                                              VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
-                                                              VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                                                              VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-                                                              VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
-                                                            };
+    VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+    VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
+};
 
-char                      *texture_filtering_keys      [ ] = {
-                                                              "linear",
-                                                              "nearest"
-                                                            };
+char *texture_filtering_keys [ ] = {
+    "linear",
+    "nearest"
+};
+enum VkFilter  texture_filtering_values [ ] = {
+    VK_FILTER_LINEAR,
+    VK_FILTER_NEAREST
+};
 
-enum VkFilter              texture_filtering_values    [ ] = {
-                                                              VK_FILTER_LINEAR,
-                                                              VK_FILTER_NEAREST
-                                                            };
-
-char                      *tiling_keys                 [ ] = {
+char *tiling_keys [ ] = {
     "optimal",
     "linear"
 };
-
-enum VkImageTiling         tiling_enum                 [ ] = {
+enum VkImageTiling  tiling_enum [ ] = {
     VK_IMAGE_TILING_OPTIMAL,
     VK_IMAGE_TILING_LINEAR
 };
 
-char                      *usage_keys                  [ ] = {
+char *usage_keys [ ] = {
     "transfer source",
     "transfer destination",
     "sampled",
@@ -54,8 +51,7 @@ char                      *usage_keys                  [ ] = {
     "transient attachment",
     "input attachment"
 };
-
-enum VkImageUsageFlagBits  usage_enum                  [ ] = {
+enum VkImageUsageFlagBits usage_enum [ ] = {
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
     VK_IMAGE_USAGE_TRANSFER_DST_BIT,
     VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -66,7 +62,7 @@ enum VkImageUsageFlagBits  usage_enum                  [ ] = {
     VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
 };
 
-char                      *view_type_names             [ ] = {
+char *view_type_names [ ] = {
     "1D",
     "2D",
     "3D",
@@ -75,8 +71,7 @@ char                      *view_type_names             [ ] = {
     "2D array",
     "cube array"
 };
-
-enum VkImageViewType       view_type_enums             [ ] = {
+enum VkImageViewType view_type_enums [ ] = {
     VK_IMAGE_VIEW_TYPE_1D,
     VK_IMAGE_VIEW_TYPE_2D,
     VK_IMAGE_VIEW_TYPE_3D,
@@ -86,7 +81,7 @@ enum VkImageViewType       view_type_enums             [ ] = {
     VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
 };
 
-char                      *swizzle_names               [ ] = {
+char *swizzle_names [ ] = {
     "identity",
     "zero",
     "one",
@@ -95,8 +90,7 @@ char                      *swizzle_names               [ ] = {
     "b",
     "a"
 };
-
-enum VkComponentSwizzle    swizzle_enums               [ ] = {
+enum VkComponentSwizzle swizzle_enums [ ] = {
     VK_COMPONENT_SWIZZLE_IDENTITY,
     VK_COMPONENT_SWIZZLE_ZERO,
     VK_COMPONENT_SWIZZLE_ONE,
@@ -106,21 +100,20 @@ enum VkComponentSwizzle    swizzle_enums               [ ] = {
     VK_COMPONENT_SWIZZLE_A
 };
 
-char                      *aspect_names                [ ] = {
+char *aspect_names [ ] = {
     "color",
     "depth",
     "stencil",
     "metadata"
 };
-
-enum VkImageAspectFlagBits aspect_enums                [ ] = {
+enum VkImageAspectFlagBits aspect_enums [ ] = {
     VK_IMAGE_ASPECT_COLOR_BIT,
     VK_IMAGE_ASPECT_DEPTH_BIT,
     VK_IMAGE_ASPECT_STENCIL_BIT,
     VK_IMAGE_ASPECT_METADATA_BIT
 };
 
-int init_texture         ( void )
+void init_texture ( void )
 {
 
     // Construct dicts for texture addressing and filtering
@@ -168,31 +161,34 @@ int init_texture         ( void )
     }
     
     // Success
-    return 1;
+    return;
 
     // Error handling
     {
 
         // Constructor errors
         {
+            // TODO
             no_texturing_modes:
             no_filtering_modes:
             no_tiling_lut:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Texture] Failed to initialize texture system");
                 #endif
-                return 0;
+
+                // Error
+                return;
         }
     }
 }
 
-int create_texture       ( GXTexture_t **pp_texture )
+int create_texture ( GXTexture_t **pp_texture )
 {
+
     // Argument check
 	{
 		#ifndef NDEBUG
-			if (pp_texture == (void *) 0 )
-				goto no_texture;
+			if ( pp_texture == (void *) 0 ) goto no_texture;
 		#endif
 	}
 
@@ -200,15 +196,13 @@ int create_texture       ( GXTexture_t **pp_texture )
 	GXTexture_t *p_texture = calloc(1, sizeof(GXTexture_t));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if(p_texture == (void*)0)
-				goto no_mem;
-		#endif
-	}
+    if ( p_texture == (void *) 0 )
+	    goto no_mem;
 
+    // Return a pointer to the caller
 	*pp_texture = p_texture;
 
+    // Success
 	return 1;
 
 	// Error handling
@@ -220,6 +214,8 @@ int create_texture       ( GXTexture_t **pp_texture )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -229,405 +225,571 @@ int create_texture       ( GXTexture_t **pp_texture )
 				#ifndef NDEBUG
 					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int load_texture         ( GXTexture_t **texture, char *path)
+int load_texture ( GXTexture_t **pp_texture, char *path )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
-            if(texture == (void *)0)
-                goto no_texture;
-            if (path == (void*)0)
-                goto no_path;
+            if ( pp_texture == (void *) 0 ) goto no_texture;
+            if ( path       == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Initialized data
-    GXInstance_t  *instance              = g_get_active_instance();
-    GXTexture_t   *i_texture             = 0;
-    size_t         json_len              = g_load_file(path, 0, false);
-    char          *json_text             = calloc(json_len+1, sizeof(char));
+    GXInstance_t  *p_instance  = g_get_active_instance();
+    size_t         len         = g_load_file(path, 0, true);
+    char          *text        = calloc(len+1, sizeof(char));
     
-    // TODO: Memory checking
+    // Memory checking
+    if ( text == (void *) 0 )
+        goto no_mem;
 
     // Load the file
-    // TODO: Error checking
-    g_load_file(path, json_text, false);
+    if ( g_load_file(path, text, true) == 0 ) 
+        goto failed_to_load_file;
 
     // Load the texture 
-    // TODO: Error checking
-    load_texture_as_json(texture, json_text, json_len);
+    if ( load_texture_as_json_text(pp_texture, text) == 0 )
+        goto failed_to_load_texture_as_json_text;
 
+    // Success
     return 1;
 
-    no_texture:
-    no_path:
-    return 0;
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_path:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+        // G10 Errors
+        {
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_load_texture_as_json_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Failed to load texture from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+    }
 }
 
-int load_texture_as_json ( GXTexture_t **texture, char *token_text, size_t len )
+int load_texture_as_json_text ( GXTexture_t **pp_texture, char *text )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if(texture == (void *)0)
-                goto no_texture;
-            if (token_text == (void*)0)
-                goto no_token;
+            if ( pp_texture == (void *) 0 ) goto no_texture;
+            if ( text       == (void *) 0 ) goto no_text;
         #endif
     }
 
+    // Initialized data
+    JSONValue_t *p_value = 0;
+
+    // Parse the JSON text into a JSON value
+    if ( parse_json_value(text, 0, &p_value) == 0 )
+        goto failed_to_parse_json;
+    
+    // Construct a texture
+    if ( load_texture_as_json_value(pp_texture, p_value) == 0 )
+        goto failed_to_load_texture;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10 Errors
+        {
+            failed_to_parse_json:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_load_texture:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Failed to load texture in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_texture == (void *) 0 ) goto no_texture;
+            if ( p_value    == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+    // External functions
     extern u32 find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
 
     // Initialized data
-    dict                 *json_data              = 0;
-    char                 *name                   = 0,
-                         *path                   = 0;
-    VkSamplerAddressMode  sampler_address_mode   = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    VkFilter              filter                 = VK_FILTER_LINEAR;
-    GXInstance_t         *instance               = g_get_active_instance();
-    GXTexture_t          *p_texture              = 0;
-    char                 *file_extension         = 0,
-                         *image_json_object      = 0,
-                         *image_view_json_object = 0,
-                         *sampler_json_object    = 0;
-    size_t                width                  = 0,
-                          height                 = 0,
-                          depth                  = 0;
-    i8                   *image_data             = 0;
-    SDL_Surface          *image                  = 0;
+    dict                 *json_data                = 0;
+    char                 *name                     = 0;
+    VkSamplerAddressMode  sampler_address_mode     = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    VkFilter              filter                   = VK_FILTER_LINEAR;
+    GXInstance_t         *p_instance               = g_get_active_instance();
+    GXTexture_t          *p_texture                = 0;
+    char                 *file_extension           = 0;
+    size_t                width                    = 0,
+                          height                   = 0,
+                          depth                    = 0;
+    i8                   *image_data               = 0;
+    SDL_Surface          *image                    = 0;
+    VkDeviceSize          image_size               = 0;
+    VkBuffer              buffer                   = 0;
+    VkDeviceMemory        staging_buffer_memory    = 0;
+    VkBuffer              staging_buffer           = 0;
+    VkImageCreateInfo     image_create_info        = { 0 };
+    void                 *data                     = 0;
+    JSONValue_t          *p_image_json_object      = 0,
+                         *p_image_view_json_object = 0,
+                         *p_sampler_json_object    = 0,
+                         *p_path                   = 0;
 
-    VkDeviceSize          image_size             = 0;
-    VkBuffer              buffer                 = 0;
-    VkDeviceMemory        staging_buffer_memory  = 0;
-
-    VkBuffer              staging_buffer         = 0;
-    VkImageCreateInfo     image_create_info      = { 0 };
-    void                 *data                   = 0;
-
-    
     // Parse the JSON
+    if ( p_value->type == JSONobject ) 
     {
 
-        // Initialized data
-        JSONToken_t *t = 0;
+        p_image_json_object      = ((JSONValue_t *)dict_get(json_data, "image"))->object;
+        p_image_view_json_object = ((JSONValue_t *)dict_get(json_data, "image view"))->object;
+        p_sampler_json_object    = ((JSONValue_t *)dict_get(json_data, "sampler"))->object;
+        p_path                   = ((JSONValue_t *)dict_get(json_data, "path"))->string;
 
-        // Parse the JSON text into a dictionary
-        parse_json(token_text, len, &json_data);
+        // Check properties
+        if ( p_image_json_object && p_image_view_json_object && p_sampler_json_object && p_path )
+            goto missing_properties;
+    }
+    else
+        goto wrong_type;
+    
+    // Construct a texture
+    {
 
-        // Parse the dictionary
+        // Allocate a texture
+        if ( create_texture(&p_texture) == 0 )
+            goto no_texture;
+        
+        // Load the texture
+        if ( p_path )
         {
 
-            // Get the image
-            t = (JSONToken_t *) dict_get(json_data, "image");
-            image_json_object = JSON_VALUE(t, JSONobject);
+            if ( p_path->type == JSONstring )
+            {
+                // Get the file extension
+                file_extension = 1 + strrchr(p_path->string, '.');
 
-            // Get the image
-            t = (JSONToken_t *) dict_get(json_data, "image view");
-            image_view_json_object = JSON_VALUE(t, JSONobject);
+                // Load an HDR
+                if (strcmp(file_extension, "hdr") == 0 || strcmp(file_extension, "HDR") == 0)
+                    ; // TODO
+                else
+                {
+                    image      = IMG_Load(p_path->string);
+                    image_data = image->pixels;
+                    width      = image->w;
+                    height     = image->h;
+                    depth      = image->format->BytesPerPixel;
+                }
 
-            t = (JSONToken_t *) dict_get(json_data, "sampler");
-            sampler_json_object = JSON_VALUE(t, JSONobject);
+                // Calculate the size of the image
+                image_size = width * height * depth;
 
-            // Get the path
-            t = (JSONToken_t *) dict_get(json_data, "path");
-            path  = JSON_VALUE(t, JSONstring);
-    }
-    }
+                // Create a buffer for the image
+                create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging_buffer, &staging_buffer_memory);
 
-    // Allocate a texture
-    if ( create_texture(texture) == 0 )
-        goto no_texture;
+                // Copy the image 
+                vkMapMemory(p_instance->vulkan.device, staging_buffer_memory, 0, image_size, 0, &data);
+                memcpy(data, image_data, image_size);
+                vkUnmapMemory(p_instance->vulkan.device, staging_buffer_memory);
 
-    p_texture = *texture;
+                // Popultate image create info struct
+                construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
+            }
+            else
+                goto failed_to_load_texture;
+        }
+        else if ( p_path == 0 && p_image_json_object )
+        {
 
-    if      (path) {
+            // Parse the image as a JSON object
+            if ( p_image_json_object->type == JSONobject)
+            {
 
-        // Get the file extension
-        file_extension = 1 + strrchr(path, '.');
+                // External data
+                extern dict *format_types;
 
-        // Load an HDR
-        if (strcmp(file_extension, "hdr") == 0 || strcmp(file_extension, "HDR") == 0)
-            ; // TODO
+                // Initialized data
+                JSONValue_t        *p_flags           = 0,
+                                   *p_format          = 0,
+                                   *p_view_type       = 0,
+                                   *p_extent          = 0,
+                                   *p_mip_levels      = 0,
+                                   *p_array_layers    = 0,
+                                   *p_samples         = 0,
+                                   *p_tiling          = 0,
+                                   *p_usage           = 0,
+                                   *p_atomic_sharing  = 0;
+                VkImageUsageFlags   usage_flag        = 0;
+                size_t              usage_flags       = 0,
+                                    extent_count      = 0;
+                JSONValue_t       **pp_extents        = 0;
+
+                // Parse the JSON value
+                {
+
+                    p_flags          = ((JSONValue_t *) dict_get(p_image_json_object->object, "flags"));
+                    p_format         = ((JSONValue_t *) dict_get(p_image_json_object->object, "format"));
+                    p_view_type      = ((JSONValue_t *) dict_get(p_image_json_object->object, "view type"));
+                    p_extent         = ((JSONValue_t *) dict_get(p_image_json_object->object, "extent"));
+                    p_mip_levels     = ((JSONValue_t *) dict_get(p_image_json_object->object, "mip levels"));
+                    p_array_layers   = ((JSONValue_t *) dict_get(p_image_json_object->object, "array layers"));
+                    p_samples        = ((JSONValue_t *) dict_get(p_image_json_object->object, "samples"));
+                    p_tiling         = ((JSONValue_t *) dict_get(p_image_json_object->object, "tiling"));
+                    p_usage          = ((JSONValue_t *) dict_get(p_image_json_object->object, "usage"));
+                    p_atomic_sharing = ((JSONValue_t *) dict_get(p_image_json_object->object, "atomic sharing"));
+
+                    // Check properties
+                    if (
+                        p_flags      && p_format       && 
+                        p_view_type  && p_extent       &&
+                        p_mip_levels && p_array_layers &&
+                        p_samples    && p_tiling       &&
+                        p_usage      && p_atomic_sharing
+                        )
+                        goto missing_properties;
+                }
+
+                // Construct the image
+
+                // Construct the usage flags
+                if ( p_usage->type == JSONarray ){
+
+                    // Initialzied data
+                    size_t       *usage_string_count = 0;
+                    JSONValue_t **pp_usage_strings   = 0;
+
+                    // Get the array contents
+                    {
+
+                        array_get(p_usage->list, 0, &usage_string_count);
+
+                        pp_usage_strings = calloc(usage_string_count+1, sizeof(JSONValue_t *));
+
+                        if ( pp_usage_strings == (void *) 0 )
+                            goto no_mem;
+
+                        array_get(p_usage->list, 0, &usage_string_count);
+                    }
+
+                    for (size_t i = 0; i < usage_string_count; i++)
+                        usage_flag |= (VkImageUsageFlags)(size_t)dict_get(usage_lut, pp_usage_strings[i]->string);
+                    
+                }
+
+                // Get the extents
+                {
+
+                    array_get(p_extent->list, 0, &extent_count);
+
+                    pp_extents = calloc(extent_count+1, sizeof(JSONValue_t *));
+
+                    if ( pp_extents == (void *) 0 )
+                        goto no_mem;
+
+                    array_get(p_extent->list, pp_extents, 0);
+                }
+
+                construct_image(
+                    p_texture, 
+                    0, 
+                    (p_view_type->string)    ? (VkImageType)(size_t)dict_get(view_type_lut, p_view_type->string) : VK_IMAGE_TYPE_2D,
+                    (p_format->string)       ? (VkFormat)(size_t)dict_get(format_types, p_format->string) : VK_FORMAT_B8G8R8A8_UNORM,
+                    (pp_extents[0]->integer) ? pp_extents[0]->integer  : 1, 
+                    (pp_extents[1]->integer) ? pp_extents[1]->integer  : 1, 
+                    (pp_extents[2]->integer) ? pp_extents[2]->integer  : 1,
+                    (p_mip_levels->integer)  ? p_mip_levels->integer   : 1,
+                    (p_array_layers)         ? p_array_layers->integer : 1,
+                    (p_samples)              ? p_samples->integer      : 1,
+                    (p_tiling->string)       ? (VkImageTiling)(size_t)dict_get(tiling_lut, p_tiling->string) : VK_IMAGE_TILING_OPTIMAL,
+                    usage_flag,
+                    VK_SHARING_MODE_EXCLUSIVE,
+                    VK_IMAGE_LAYOUT_UNDEFINED
+                );
+            }
+        }
+
+        // Default
         else
         {
-            image      = IMG_Load(path);
-            image_data = image->pixels;
-            width      = image->w;
-            height     = image->h;
-            depth      = image->format->BytesPerPixel;
-        }
-
-        // Calculate the size of the image
-        image_size = width * height * depth;
-
-        // Create a buffer for the image
-        create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging_buffer, &staging_buffer_memory);
-
-        // Copy the image 
-        {
-            vkMapMemory(instance->vulkan.device, staging_buffer_memory, 0, image_size, 0, &data);
-            memcpy(data, image_data, image_size);
-            vkUnmapMemory(instance->vulkan.device, staging_buffer_memory);
-        }
-
-        // Popultate image create info struct
-        {
-            construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
-        }
-
-    }
-    else if (path == 0 && image_json_object)
-    {
-        
-        // Initialized data
-        size_t   len             = strlen(image_json_object);
-        dict    *image_json      = 0;
-        char   **flags           = 0,
-                *format          = 0,
-                *view_type       = 0,
-               **extent          = 0,
-                *mip_levels      = (char *)9,
-                *array_layers    = 0,
-                *samples         = 0,
-                *tiling          = 0,
-               **usage           = 0,
-                *atomic_sharing  = 0;
-
-        // Parse the json text into a dictionary
-        parse_json(image_json_object, len, &image_json);
-
-        // Parse the dictionary
-        {
             
+        }
+
+        
+        /*
+        // Construct an image view
+        if (image_view_json_object)
+        {
+
+            // External data
+            extern dict         *format_types;
+
             // Initialized data
-            JSONToken_t *t = 0;
+            size_t               len               = strlen(image_view_json_object);
+            dict                *image_json        = 0;
+            char                *view_type         = 0,
+                               **swizzle           = 0,
+                               **image_aspects     = 0,
+                                *generate_mips     = 0,
+                                *format            = 0;
+            VkComponentMapping   swizzle_mapping   = {
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY
+            };
+            VkImageAspectFlags   image_aspect_flag = 0;
+            VkImageViewType      image_view_type   = 0;
+            VkFormat             image_view_format = 0;
 
-            t               = (JSONToken_t *) dict_get(image_json, "flags");
-            flags           = JSON_VALUE(t, JSONarray);
+            // Parse the json text into a dictionary
+            parse_json(image_view_json_object, len, &image_json);
 
-            t               = (JSONToken_t *) dict_get(image_json, "view type");
-            view_type       = JSON_VALUE(t, JSONstring);
-
-            t               = (JSONToken_t *) dict_get(image_json, "format");
-            format          = JSON_VALUE(t, JSONstring);
-
-            t               = (JSONToken_t *) dict_get(image_json, "extent");
-            extent          = JSON_VALUE(t, JSONarray);
-
-            t               = (JSONToken_t *) dict_get(image_json, "mip levels");
-            mip_levels      = JSON_VALUE(t, JSONprimative);
-
-            t               = (JSONToken_t *) dict_get(image_json, "array layers");
-            array_layers    = JSON_VALUE(t, JSONprimative);
-
-            t               = (JSONToken_t *) dict_get(image_json, "samples");
-            samples         = JSON_VALUE(t, JSONprimative);
-            
-            t               = (JSONToken_t *) dict_get(image_json, "tiling");
-            tiling          = JSON_VALUE(t, JSONstring);
-
-            t               = (JSONToken_t *) dict_get(image_json, "usage");
-            usage           = JSON_VALUE(t, JSONarray);
-
-            t               = (JSONToken_t *) dict_get(image_json, "atomic sharing");
-            atomic_sharing  = JSON_VALUE(t, JSONprimative);
-
-        }
-
-        extern dict *format_types;
-        VkImageUsageFlags usage_flag = 0;
-        size_t usage_flags = 0;
-        while (usage[++usage_flags]);
-        
-        for (size_t i = 0; i < usage_flags; i++)
-            usage_flag |= (VkImageUsageFlags)(size_t)dict_get(usage_lut, usage[i]);
-
-        construct_image(
-            p_texture, 
-            0, 
-            (view_type)    ? (VkImageType)(size_t)dict_get(view_type_lut, view_type) : VK_IMAGE_TYPE_2D,
-            (format)       ? (VkFormat)(size_t)dict_get(format_types, format) : VK_FORMAT_B8G8R8A8_UNORM,
-            (extent[0])    ? atoi(extent[0])    : 1, 
-            (extent[1])    ? atoi(extent[1])    : 1, 
-            (extent[2])    ? atoi(extent[2])    : 1,
-            (mip_levels)   ? atoi(mip_levels)   : 1,
-            (array_layers) ? atoi(array_layers) : 1,
-            (samples)      ? atoi(samples)      : 1,
-            (tiling)       ? (VkImageTiling)(size_t)dict_get(tiling_lut, tiling) : VK_IMAGE_TILING_OPTIMAL,
-            usage_flag,
-            VK_SHARING_MODE_EXCLUSIVE,
-            VK_IMAGE_LAYOUT_UNDEFINED
-        );
-    }
-
-    // Construct an image view
-    if (image_view_json_object)
-    {
-        
-        // External data
-        extern dict         *format_types;
-
-        // Initialized data
-        size_t               len               = strlen(image_view_json_object);
-        dict                *image_json        = 0;
-        char                *view_type         = 0,
-                           **swizzle           = 0,
-                           **image_aspects     = 0,
-                            *generate_mips     = 0,
-                            *format            = 0;
-        VkComponentMapping   swizzle_mapping   = {
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY
-        };
-        VkImageAspectFlags   image_aspect_flag = 0;
-        VkImageViewType      image_view_type   = 0;
-        VkFormat             image_view_format = 0;
-
-        // Parse the json text into a dictionary
-        parse_json(image_view_json_object, len, &image_json);
-
-        // Parse the dictionary
-        {
-            
-            // Initialized data
-            JSONToken_t *t = 0;
-
-            t             = (JSONToken_t *) dict_get(image_json, "view type");
-            view_type     = JSON_VALUE(t, JSONstring);
-
-            t             = (JSONToken_t *) dict_get(image_json, "format");
-            format        = JSON_VALUE(t, JSONstring);
-
-            t             = (JSONToken_t *) dict_get(image_json, "swizzle");
-            swizzle       = JSON_VALUE(t, JSONarray);
-
-            t             = (JSONToken_t *) dict_get(image_json, "image aspects");
-            image_aspects = JSON_VALUE(t, JSONarray);
-
-            t             = (JSONToken_t *) dict_get(image_json, "generate mips");
-            generate_mips = JSON_VALUE(t, JSONprimative);
-            
-        }
-
-        // Parse constructor parameters
-        {
-            if (swizzle)
+            // Parse the dictionary
             {
 
                 // Initialized data
-                size_t swizzle_count = 0;
+                JSONToken_t *t = 0;
 
-                // Count up swizzles
-                while (swizzle[++swizzle_count]);
+                t             = (JSONToken_t *) dict_get(image_json, "view type");
+                view_type     = JSON_VALUE(t, JSONstring);
 
-                // Do we have enough?
-                if (swizzle_count > 3)
-                {
-                    swizzle_mapping.r = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[0]),
-                    swizzle_mapping.g = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[1]),
-                    swizzle_mapping.b = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[2]),
-                    swizzle_mapping.a = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[3]);
-                }
-                else
-                    goto not_enough_swizzle;
+                t             = (JSONToken_t *) dict_get(image_json, "format");
+                format        = JSON_VALUE(t, JSONstring);
+
+                t             = (JSONToken_t *) dict_get(image_json, "swizzle");
+                swizzle       = JSON_VALUE(t, JSONarray);
+
+                t             = (JSONToken_t *) dict_get(image_json, "image aspects");
+                image_aspects = JSON_VALUE(t, JSONarray);
+
+                t             = (JSONToken_t *) dict_get(image_json, "generate mips");
+                generate_mips = JSON_VALUE(t, JSONprimative);
+
             }
 
-            if (image_aspects)
+            // Parse constructor parameters
             {
+                if (swizzle)
+                {
 
-                size_t image_aspect_count = 0;
+                    // Initialized data
+                    size_t swizzle_count = 0;
 
-                while (image_aspects[++image_aspect_count]);
+                    // Count up swizzles
+                    while (swizzle[++swizzle_count]);
 
-                for (size_t i = 0; i < image_aspect_count; i++)
-                    image_aspect_flag |= (VkImageAspectFlags)(size_t)dict_get(aspect_lut, image_aspects[i]);
+                    // Do we have enough?
+                    if (swizzle_count > 3)
+                    {
+                        swizzle_mapping.r = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[0]),
+                        swizzle_mapping.g = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[1]),
+                        swizzle_mapping.b = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[2]),
+                        swizzle_mapping.a = (VkComponentSwizzle)dict_get(swizzle_lut, swizzle[3]);
+                    }
+                    else
+                        goto not_enough_swizzle;
+                }
 
+                if (image_aspects)
+                {
+
+                    size_t image_aspect_count = 0;
+
+                    while (image_aspects[++image_aspect_count]);
+
+                    for (size_t i = 0; i < image_aspect_count; i++)
+                        image_aspect_flag |= (VkImageAspectFlags)(size_t)dict_get(aspect_lut, image_aspects[i]);
+
+                }
             }
+            image_view_type   = (VkImageViewType)dict_get(view_type_lut, view_type);
+            image_view_format = (VkFormat)dict_get(format_types, format);
+
+            // Construct the image view
+            if ( construct_image_view(p_texture, image_view_type, image_view_format, swizzle_mapping, image_aspect_flag) == 0)
+                goto failed_to_construct_image_view;
         }
-        image_view_type   = (VkImageViewType)dict_get(view_type_lut, view_type);
-        image_view_format = (VkFormat)dict_get(format_types, format);
-
-        // Construct the image view
-        if ( construct_image_view(p_texture, image_view_type, image_view_format, swizzle_mapping, image_aspect_flag) == 0)
-            goto failed_to_construct_image_view;
-    }
-
+        */
+       
+        // Return a pointer to the caller
+        *pp_texture = p_texture;
+    }   
+    
+    // Success
     return 1;
 
     no_texture:
-    no_token:
+    no_value:
+    failed_to_load_texture:
+    missing_properties:
+    wrong_type:
     return 0;
     failed_to_construct_image_view:
     return 0;
     not_enough_swizzle:
     g_print_error("[G10] [Texture] Failed to create image view in call to function \"%s\"\n", __FUNCTION__);
     return 0;
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
+				// Error
+				return 0;
+		}
 
 }
 
-int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, VkImageType image_type, VkFormat format, int width, int height, int depth, size_t mip_levels, size_t array_layers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, VkSharingMode sharing_mode, VkImageLayout initial_layout )
+int construct_image ( GXTexture_t *p_texture, VkImageCreateFlags flags, VkImageType image_type, VkFormat format, int width, int height, int depth, size_t mip_levels, size_t array_layers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, VkSharingMode sharing_mode, VkImageLayout initial_layout )
 {
-    GXInstance_t      *instance          = g_get_active_instance();
-    VkImageCreateInfo  image_create_info = { 0 };
-    size_t             dim               = 0;
-    VkMemoryAllocateInfo  allocate_info = { 0 };
-    // Uninitialized data
-    VkMemoryRequirements  memory_requirements;
 
-    if ( height > 1 ) dim++;
-    if ( depth  > 1 ) dim++;
-    
-    // Popultate image create info struct
+    // Argument check
     {
-        image_create_info.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        image_create_info.flags         = 0;
-        image_create_info.imageType     = image_type;
-        image_create_info.format        = format;
-        image_create_info.extent.width  = (u32)width;
-        image_create_info.extent.height = (u32)height;
-        image_create_info.extent.depth  = (u32)depth;
-        image_create_info.mipLevels     = (u32)mip_levels;
-        image_create_info.arrayLayers   = (u32)array_layers;
-        image_create_info.tiling        = tiling;
-        image_create_info.usage         = usage;
-        image_create_info.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
-        image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        image_create_info.samples       = samples;
+        #ifndef NDEBUG
+            if ( p_texture == (void *) 0 ) goto no_texture;
+        #endif 
     }
+
+    // Uninitialized data 
+    VkMemoryRequirements memory_requirements;
+
+    // Initialized data
+    GXInstance_t          *p_instance        = g_get_active_instance();
+    VkMemoryAllocateInfo   allocate_info     = { 0 };
+    VkImageCreateInfo      image_create_info =
+    {
+        .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .flags         = 0,
+        .imageType     = image_type,
+        .format        = format,
+        .extent.width  = (u32)width,
+        .extent.height = (u32)height,
+        .extent.depth  = (u32)depth,
+        .mipLevels     = (u32)mip_levels,
+        .arrayLayers   = (u32)array_layers,
+        .tiling        = tiling,
+        .usage         = usage,
+        .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .samples       = samples
+    };
        
     // Create the image
-    if ( vkCreateImage(instance->vulkan.device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
+    if ( vkCreateImage(p_instance->vulkan.device, &image_create_info, 0, &p_texture->texture_image) != VK_SUCCESS )
         goto failed_to_create_image;
 
     // Figure out how much memory the image will use
-    vkGetImageMemoryRequirements(instance->vulkan.device, p_texture->texture_image, &memory_requirements);
+    vkGetImageMemoryRequirements(p_instance->vulkan.device, p_texture->texture_image, &memory_requirements);
 
     // Popultate the allocate info struct
-    {
-        allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocate_info.allocationSize = memory_requirements.size;
-        allocate_info.memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    }
+    allocate_info = (VkMemoryAllocateInfo) {
+        .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize  = memory_requirements.size,
+        .memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+    };
 
     // Allocate memory for the image
-    if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS) {
-        // TODO: GOTO, error handling
-        printf("failed to allocate image memory!");
-    }
+    if ( vkAllocateMemory(p_instance->vulkan.device, &allocate_info, 0, &p_texture->texture_image_memory) != VK_SUCCESS)
+        goto failed_to_allocate_image_memory;
 
     // Bind the image to the image memory
-    vkBindImageMemory(instance->vulkan.device, p_texture->texture_image, p_texture->texture_image_memory, 0);
+    vkBindImageMemory(p_instance->vulkan.device, p_texture->texture_image, p_texture->texture_image_memory, 0);
 
+    // Syccess
     return 1;
+    
+    failed_to_allocate_image_memory:
+    no_texture:
+        return 0;
 
     // Error handling
     {
@@ -643,14 +805,16 @@ int construct_image      ( GXTexture_t  *p_texture, VkImageCreateFlags flags, Vk
                 #ifndef NDEBUG
                     g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+                
+                // Error
                 return 0;
         }
     }
 }
 
-int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, VkFormat format, VkComponentMapping swizzle, VkImageAspectFlags aspect_mask )
+int construct_image_view ( GXTexture_t *p_texture, VkImageViewType view_type, VkFormat format, VkComponentMapping swizzle, VkImageAspectFlags aspect_mask )
 {
-    GXInstance_t          *instance               = g_get_active_instance();
+    GXInstance_t          *p_instance               = g_get_active_instance();
     VkImageViewCreateInfo  image_view_create_info = { 0 };
 
     // Popultate image view create info struct
@@ -668,7 +832,7 @@ int construct_image_view ( GXTexture_t  *p_texture, VkImageViewType view_type, V
         image_view_create_info.subresourceRange.layerCount     = 1;
     }
 
-    if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
+    if ( vkCreateImageView(p_instance->vulkan.device, &image_view_create_info, 0, &p_texture->texture_image_view) != VK_SUCCESS )
         ;// TODO: Throw an error
 
     return 1;

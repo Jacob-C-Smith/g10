@@ -1,6 +1,6 @@
 #include <G10/GXCollision.h>
 
-int create_collision(GXCollision_t **pp_collision)
+int create_collision ( GXCollision_t **pp_collision )
 {
 
 	// TODO: Argument check
@@ -19,11 +19,12 @@ int create_collision(GXCollision_t **pp_collision)
 	// TODO: Error handling
 }
 
-int construct_collision_from_entities(GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b)
+int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b )
 {
 
 	// TODO: Argument check
-	GXInstance_t  *instance    = g_get_active_instance();
+	
+	// Initialized data
 	GXCollision_t *p_collision = 0;
 
 	create_collision(pp_collision);
@@ -33,7 +34,7 @@ int construct_collision_from_entities(GXCollision_t **pp_collision, GXEntity_t* 
 	p_collision->a = a;
 	p_collision->b = b;
 
-	p_collision->begin_tick = instance->time.ticks;
+	p_collision->begin_tick = p_instance->time.ticks;
 	p_collision->aabb_colliding = true;
 
 	// Success

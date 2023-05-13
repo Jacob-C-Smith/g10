@@ -12,7 +12,6 @@ char* collider_type_names[COLLIDER_TYPE_COUNT] = {
     "cone",
     "convexhull"
 };
-
 collider_type_t collider_type_enums[COLLIDER_TYPE_COUNT] = {
     collider_invalid,
     collider_quad,
@@ -50,21 +49,21 @@ int create_collider ( GXCollider_t **pp_collider )
     // Error handling
 }
 
-int load_collider(GXCollider_t** collider, const char* path)
+int load_collider ( GXCollider_t **collider, const char *path )
 {
-    size_t  len   = g_load_file(path, 0, false);
+    size_t  len   = g_load_file(path, 0, true);
     char   *token = calloc(len+1, sizeof(char));
 
-    g_load_file(path, token, false);
+    g_load_file(path, token, true);
 
-    load_collider_as_json(collider, token, len);
+    load_collider_as_json(collider, token);
 
     free(token);
 
     return 1;
 }
 
-int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
+int load_collider_as_json ( GXCollider_t **collider, char *text )
 {
     GXCollider_t  *i_collider    = 0;
     dict          *collider_json = 0;
@@ -72,7 +71,7 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
                  **max           = 0,
                  **min           = 0;
 
-    parse_json(token_text, len, &collider_json);
+    parse_json(text, len, &collider_json);
 
     {
         JSONToken_t *token = 0;
@@ -106,7 +105,7 @@ int load_collider_as_json(GXCollider_t** collider, char* token_text, size_t len)
     return 1;
 }
 
-int add_aabb_start_collision_callback(GXCollider_t* collider, void* function_pointer)
+int add_aabb_start_collision_callback ( GXCollider_t* collider, void* function_pointer )
 {
     return 1;
 }

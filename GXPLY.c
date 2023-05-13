@@ -208,62 +208,61 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     // Argument checking
     {
         #ifndef NDEBUG
-            if (part == 0)
-                goto noPart;
-            if (path == 0)
-                goto noPath;
+            if ( part == (void *) 0 ) goto no_part;
+            if ( path == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Uninitialized data
-    GXInstance_t  *instance  = g_get_active_instance();
+    GXInstance_t  *p_instance  = g_get_active_instance();
     size_t         vertices_in_buffer = 0,
                    indices_in_buffer = 0;
-    char          *data = 0;
+    
     char          *c_data = 0;
     float         *vertex_array = 0;
     GXPLYindex_t  *indices = 0;
     u32           *corrected_indicies = 0;
 
     // Initialized data
-    size_t         i                  = 0,
+    size_t         i                  = g_load_file(path, 0, true),
                    j                  = 0,
                    k                  = 0,
                    vertex_group_count   = 0,
                    vertex_attrib_offset = 0,
                    icount               = 0;
+    char          *data                 = calloc(i, sizeof(u8));
     GXply_file_t   *ply_file            = calloc(1, sizeof(GXply_file_t));
 
     // Load the file
-    i    = g_load_file(path, 0, true);
-    data = calloc(i, sizeof(u8));
-    g_load_file(path, data, true);
+    if ( g_load_file(path, data, true) == 0 )
+        goto failed_to_load_file;
 
-    i ^= i;
+    // Reset counter
+    i = 0;
 
     // Populate the PLY file
     {
+
         // Make sure the header isn't corrupted
-        if (*(u32*)data != GXPLY_HSignature)
+        if ( *(u32*)data != GXPLY_HSignature )
             goto invalidHeader;
 
         // Copy of data pointer
         c_data = data;
 
-
         // Pass 1
-        while (*(u32*)c_data != GXPLY_HEnd)
+        while ( *(u32*)c_data != GXPLY_HEnd )
         {
             // Check the first four bytes of the line
-            if(*(u32*)c_data == GXPLY_HElement)
+            if( *(u32*)c_data == GXPLY_HElement )
                 ply_file->n_elements++;
 
             // Here is as good a place as any to look for comments
             #ifndef NDEBUG
-                if(*(u32*)c_data == GXPLY_HComment)
+                if( *(u32*)c_data == GXPLY_HComment )
                 {
                     i = 0;
-                    while (c_data[++i] != '\n');
+                    while ( c_data[++i] != '\n' );
                 }
             #endif
 
@@ -426,6 +425,8 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
     // Create flags
     {
+
+        // Initialized data
         int tflags = 0;
 
         // Determine what properties are in the file
@@ -607,38 +608,37 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
 
         VkMemoryRequirements memory_requirements = { 0 };
-        VkBufferCreateInfo   buffer_create_info  = { 0 };
+        VkBufferCreateInfo   buffer_create_info  = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = ply_file->elements[0].s_stride * vertices_in_buffer,
+            .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+        };
         VkMemoryAllocateInfo allocate_info       = { 0 };
         void *data = vertex_array;
 
-        {
-            buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            buffer_create_info.size = ply_file->elements[0].s_stride * vertices_in_buffer;
-            buffer_create_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-            buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        }
-
-        if (vkCreateBuffer(instance->vulkan.device, &buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS)
+        if ( vkCreateBuffer(p_instance->vulkan.device, &buffer_create_info, 0, &part->vertex_buffer) != VK_SUCCESS )
             g_print_error("[G10] [PLY] Failed to create vertex buffer");
 
-        vkGetBufferMemoryRequirements(instance->vulkan.device, part->vertex_buffer, &memory_requirements);
+        vkGetBufferMemoryRequirements(p_instance->vulkan.device, part->vertex_buffer, &memory_requirements);
 
-        allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocate_info.allocationSize = memory_requirements.size;
-        allocate_info.memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
+        allocate_info = (VkMemoryAllocateInfo) { 
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize = memory_requirements.size,
+            .memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+        };
         
-        if (vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
+        if (vkAllocateMemory(p_instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
 
-        vkBindBufferMemory(instance->vulkan.device, part->vertex_buffer, part->vertex_buffer_memory, 0);
+        vkBindBufferMemory(p_instance->vulkan.device, part->vertex_buffer, part->vertex_buffer_memory, 0);
 
-        vkMapMemory(instance->vulkan.device, part->vertex_buffer_memory, 0, buffer_create_info.size, 0, &data);
+        vkMapMemory(p_instance->vulkan.device, part->vertex_buffer_memory, 0, buffer_create_info.size, 0, &data);
 
         // TODO: Replace w staging
         memcpy(data, vertex_array, buffer_create_info.size);
 
-        vkUnmapMemory(instance->vulkan.device, part->vertex_buffer_memory);
+        vkUnmapMemory(p_instance->vulkan.device, part->vertex_buffer_memory);
     }
 
     {
@@ -659,27 +659,27 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             buffer_create_info->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
 
-        if (vkCreateBuffer(instance->vulkan.device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
+        if (vkCreateBuffer(p_instance->vulkan.device, buffer_create_info, 0, &part->element_buffer) != VK_SUCCESS)
             g_print_error("[G10] [PLY] Failed to create element buffer");
 
-        vkGetBufferMemoryRequirements(instance->vulkan.device, part->element_buffer, memory_requirements);
+        vkGetBufferMemoryRequirements(p_instance->vulkan.device, part->element_buffer, memory_requirements);
 
         allocate_info->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocate_info->allocationSize = memory_requirements->size;
         allocate_info->memoryTypeIndex = find_memory_type(memory_requirements->memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 
-        if (vkAllocateMemory(instance->vulkan.device, allocate_info, 0, &part->element_buffer_memory))
+        if (vkAllocateMemory(p_instance->vulkan.device, allocate_info, 0, &part->element_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate element buffer memory");
 
-        vkBindBufferMemory(instance->vulkan.device, part->element_buffer, part->element_buffer_memory, 0);
+        vkBindBufferMemory(p_instance->vulkan.device, part->element_buffer, part->element_buffer_memory, 0);
 
-        vkMapMemory(instance->vulkan.device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
+        vkMapMemory(p_instance->vulkan.device, part->element_buffer_memory, 0, buffer_create_info->size, 0, &data);
 
         // TODO: Replace w staging
         memcpy(data, corrected_indicies, buffer_create_info->size);
 
-        vkUnmapMemory(instance->vulkan.device, part->element_buffer_memory);
+        vkUnmapMemory(p_instance->vulkan.device, part->element_buffer_memory);
 
         free(memory_requirements);
         free(buffer_create_info);
@@ -730,31 +730,64 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     //free(corrected_indicies);
     //free(data);
 
-    // Count up properties
     return part;
 
     // Error handling
     {
-        //noFile:
-            g_print_error("[G10] [PLY] Failed to load file %s\n", path);
+        failed_to_load_file:
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Failed to load file %s\n", path);
+            #endif
+
+            // Error
             return 0;
-        noPart:
-            g_print_error("[G10] [PLY] Null pointer provided for parameter \"part\" in call to %s\n", __FUNCTION__);
+
+        no_part:
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Null pointer provided for parameter \"part\" in call to %s\n", __FUNCTION__);
+            #endif
+
+            // Error
             return 0;
-        noPath:
-            g_print_error("[G10] [PLY] Null pointer provided for parameter \"path\" in call to %s\n", __FUNCTION__);
+
+        no_path:
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Null pointer provided for parameter \"path\" in call to %s\n", __FUNCTION__);
+            #endif
+
+            // Error
             return 0;
+
         invalidHeader:
-            g_print_error("[G10] [PLY] Invalid header detected in file \"%s\"\n",path);
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Invalid header detected in file \"%s\"\n",path);
+            #endif
+
+            // Error
             return 0;
+
         noDoubleSupport:
-            g_print_error("[G10] [PLY] Double detected in element \"%s\" in file \"%s\"\n", ply_file->elements[j].name, path);
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Double detected in element \"%s\" in file \"%s\"\n", ply_file->elements[j].name, path);
+            #endif
+
+            // Error
             return 0;
+
         unrecognizedPropertyType:
-            g_print_error("[G10] [PLY] Unrecognized property type detected in file \"%s\"\n", path);
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Unrecognized property type detected in file \"%s\"\n", path);
+            #endif
+
+            // Error
             return 0;
+
         //nonTriangulated:
-            g_print_error("[G10] [PLY] Detected non triangulated faces in file \"%s\"\n", path);
+            #ifndef NDEBUG
+                g_print_error("[G10] [PLY] Detected non triangulated faces in file \"%s\"\n", path);
+            #endif
+
+            // Error
             return 0;
     }
 }

@@ -36,6 +36,8 @@ int create_server(GXServer_t** pp_server)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -46,6 +48,8 @@ int create_server(GXServer_t** pp_server)
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -66,25 +70,21 @@ int load_server ( GXServer_t **pp_server, char *path )
 	}
 
 	// Initialized data
-	size_t  len        = g_load_file(path, 0, false);
-	char   *token_text = calloc(len+1, sizeof( char *));
+	size_t  len        = g_load_file(path, 0, true);
+	char   *text = calloc(len+1, sizeof( char *));
 
 	// Error checking
-	{
-		#ifndef NDEBUG
-			if (token_text == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	if (text == (void *)0)
+		goto no_mem;
 
 	// Load the file
-	g_load_file(path, token_text, false);
+	g_load_file(path, text, true);
 
 	// Parse the JSON into a GXServer
-	load_server_as_json(pp_server, token_text, len);
+	load_server_as_json(pp_server, text);
 
 	// Free the file text
-	free(token_text);
+	free(text);
 
 	return 0;
 
@@ -97,12 +97,16 @@ int load_server ( GXServer_t **pp_server, char *path )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 			no_path:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -113,12 +117,14 @@ int load_server ( GXServer_t **pp_server, char *path )
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
 }
 
-int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
+int load_server_as_json(GXServer_t** pp_server, char* text )
 {
 	
 	// Argument check
@@ -150,7 +156,7 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 		JSONToken_t* token = 0;
 
 		// Parse the JSON text into a dictionary
-		parse_json(token_text, len, &json);
+		//arse_json(text, len, &json);
 		
 		// Get the name
 		token       = (JSONToken_t *) dict_get(json, "name");
@@ -242,6 +248,8 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 
 		}
@@ -252,6 +260,8 @@ int load_server_as_json(GXServer_t** pp_server, char* token_text, size_t len)
 				#ifndef NDEBUG
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -262,8 +272,8 @@ int start_server()
 {
 
 	// Initialized data
-	GXInstance_t *instance = g_get_active_instance();
-	GXServer_t   *p_server = instance->networking.server;
+	GXInstance_t *p_instance = g_get_active_instance();
+	GXServer_t   *p_server = p_instance->networking.server;
 
 	// Open a TCP socket
 	p_server->sock = SDLNet_TCP_Open(&p_server->ip);
@@ -280,12 +290,12 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 {
 
 	// Initialized data
-	GXInstance_t* instance = g_get_active_instance();
+	GXInstance_t* p_instance = g_get_active_instance();
 
 	// Server processing
-	if (instance->networking.server)
+	if (p_instance->networking.server)
 	{
-		GXServer_t* server = instance->networking.server;
+		GXServer_t* server = p_instance->networking.server;
 
 		switch (p_command->type)
 		{
@@ -303,7 +313,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 	}
 
 	// Client processing
-	else if (instance->networking.client) {
+	else if (p_instance->networking.client) {
 		switch (p_command->type)
 		{
 			case actor_initialize:
@@ -313,7 +323,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 				quaternion  r     = p_command->actor_initialize.quaternion;
 				vec3        s     = p_command->actor_initialize.scale;
 
-				GXEntity_t *actor = get_entity(instance->context.scene, p_command->actor_initialize.name);
+				GXEntity_t *actor = get_entity(p_instance->context.scene, p_command->actor_initialize.name);
 
 				// Error checking
 				{
@@ -416,6 +426,8 @@ int server_recv(GXClient_t *client)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -446,6 +458,8 @@ int server_send(GXClient_t* client)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 	}
@@ -520,7 +534,7 @@ int server_serialize ( GXClient_t *client )
 
 int server_process   ( GXClient_t *client )
 {
-	GXInstance_t *instance = g_get_active_instance();
+	GXInstance_t *p_instance = g_get_active_instance();
 
 	if (!queue_empty(client->recv_queue))
 		while (!queue_empty(client->recv_queue))
@@ -533,7 +547,7 @@ int server_process   ( GXClient_t *client )
 	queue_destroy(client->recv_queue);
 	queue_construct(&client->recv_queue, 64);
 
-	if(instance->networking.server)
+	if(p_instance->networking.server)
 		for (size_t i = 0; i < client->actor_count; i++)
 		{
 			GXCommand_t *adr   = calloc(1, sizeof(GXCommand_t));
@@ -555,19 +569,19 @@ int server_process   ( GXClient_t *client )
 	{
 		GXCommand_t* adr = calloc(1, sizeof(GXCommand_t));
 
-		queue_enqueue(instance->networking.client->send_queue, adr);
+		queue_enqueue(p_instance->networking.client->send_queue, adr);
 	}
 	
 	return 0;
 }
 
-int server_wait    ( GXInstance_t* instance )
+int server_wait    ( GXInstance_t* p_instance )
 {
 
 	// Argument check 
 	{
 		#ifndef NDEBUG
-			if (instance == (void *)0)
+			if (p_instance == (void *)0)
 				goto no_instance;
 		#endif
 	}
@@ -576,7 +590,7 @@ int server_wait    ( GXInstance_t* instance )
 	{
 
 		// Initialized data
-		GXServer_t  *server          = instance->networking.server;
+		GXServer_t  *server          = p_instance->networking.server;
 		TCPsocket    sock            = SDLNet_TCP_Accept(server->sock);
 		GXClient_t  *client          = 0;
 		GXThread_t  *server_thread   = 0;
@@ -631,7 +645,7 @@ int server_wait    ( GXInstance_t* instance )
 		client->thread = server_thread;
 
 		// Add the thread to the scheduler
-		dict_add(instance->context.schedule->threads, client->thread->name, client->thread);
+		dict_add(p_instance->context.schedule->threads, client->thread->name, client->thread);
 
 		server->client_list [server->client_list_size] = client;
 		server->client_list_size++;
@@ -640,13 +654,13 @@ int server_wait    ( GXInstance_t* instance )
 		client->name = connect_command->connect.name;
 
 		// TODO: Dynamically switch actors 
-		size_t       active_scene_actors_count = dict_values(instance->context.scene->actors, 0);
+		size_t       active_scene_actors_count = dict_values(p_instance->context.scene->actors, 0);
 		GXEntity_t **actor_list                = calloc(active_scene_actors_count+1, sizeof(void *));
 
 		client->actors = actor_list;
 
 		// Get a list of actors from the active scene
-		dict_values(instance->context.scene->actors, actor_list);
+		dict_values(p_instance->context.scene->actors, actor_list);
 
 		// Iterate over each actor in the active scene
 		for (size_t i = 0; i < active_scene_actors_count; i++)
@@ -704,7 +718,7 @@ int server_wait    ( GXInstance_t* instance )
 
 	// TODO: 
 no_instance:
-	g_print_error("[G10] [Server] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
+	g_print_error("[G10] [Server] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 
 	return 0;
 no_socket:
@@ -740,7 +754,7 @@ int connect_client(char* name)
 	}
 
 	// Initialized data
-	GXInstance_t *instance            = g_get_active_instance();
+	GXInstance_t *p_instance            = g_get_active_instance();
 	GXClient_t   *i_client            = 0;
 	GXThread_t   *client_thread       = 0;
 	IPaddress     addr                = { 0 };
@@ -749,10 +763,10 @@ int connect_client(char* name)
 	GXCommand_t  *connect_command     = calloc(1, sizeof(GXCommand_t));
 
 	// Allocate a client
-	create_client(&instance->networking.client);
+	create_client(&p_instance->networking.client);
 
 	// Return the client
-	i_client = instance->networking.client;
+	i_client = p_instance->networking.client;
 
 	// Set the name
 	{
@@ -824,7 +838,7 @@ int connect_client(char* name)
 		}
 
 		// Add the scheduler to the thread list
-		dict_add(instance->context.schedule->threads, i_client->thread->name, i_client->thread);
+		dict_add(p_instance->context.schedule->threads, i_client->thread->name, i_client->thread);
 
 		// Start running the thread
 		{
@@ -849,6 +863,8 @@ int connect_client(char* name)
 				#ifndef NDEBUG
 					g_print_error("[G10] [Client] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
+
+				// Error
 				return 0;
 		}
 
@@ -868,7 +884,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 
 	// Initialized data
 	GXCommand_t  *i_ret        = calloc(1, sizeof(GXCommand_t));
-	GXInstance_t *instance     = g_get_active_instance();
+	GXInstance_t *p_instance   = g_get_active_instance();
 
 	u16           command_type = * ( (u16 *) data );
 	size_t        ret_len      = 0;
@@ -936,7 +952,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 				i_ret->actor_initialize.scale      = * ( (vec3 *)       ( (u8 *) data ) + ( 0x4 + sizeof(vec3) + sizeof(quaternion) ) );
 
 				// Find the entity in the scene
-				actor = get_entity(instance->context.scene, i_ret->actor_initialize.name);
+				actor = get_entity(p_instance->context.scene, i_ret->actor_initialize.name);
 
 				//// Set location, rotataion, scale
 				//actor->transform->location = i_ret->actor_initialize.location;

@@ -6,10 +6,22 @@
 #define RASTERIZER_POLYGON_MODE_COUNT 3
 #define BLEND_OPERATIONS_COUNT        5
 #define BLEND_FACTORS_COUNT           19
-#define SHADER_STAGES_COUNT           5
+#define SHADER_STAGES_COUNT           14
+#define SHADER_PIPELINE_CONSTRUCTORS  3
 
+// Forward declarations
+int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
+int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
+int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 
-char             *format_type_names              [FORMATS_COUNT] = {
+char *shader_pipeline_names [SHADER_PIPELINE_CONSTRUCTORS] = 
+{
+    "graphics",
+    "compute",
+    "ray"
+};
+char *format_type_names [FORMATS_COUNT] =
+{
     "float",
     "vec2",
     "vec3",
@@ -28,7 +40,8 @@ char             *format_type_names              [FORMATS_COUNT] = {
     "u8vec4",
     "u8vec4 sRGB"
 };
-char             *descriptor_type_names          [DESCRIPTOR_TYPE_COUNT] = {
+char *descriptor_type_names [DESCRIPTOR_TYPE_COUNT] =
+{
     "sampler",
     "combined image sampler",
     "sampled image",
@@ -41,23 +54,27 @@ char             *descriptor_type_names          [DESCRIPTOR_TYPE_COUNT] = {
     "storage buffer dynamic",
     "input attachment"
 };
-char             *push_constant_getter_names     [PUSH_CONSTANT_GETTERS_COUNT] = {
+char *push_constant_getter_names [PUSH_CONSTANT_GETTERS_COUNT] =
+{
     "camera position",
     "model matrix"
 };
-char             *rasterizer_polygon_mode_names  [RASTERIZER_POLYGON_MODE_COUNT] = {
+char *rasterizer_polygon_mode_names [RASTERIZER_POLYGON_MODE_COUNT] =
+{
     "fill",
     "line",
     "point"
 };
-char             *blend_operation_names          [BLEND_OPERATIONS_COUNT] = {
+char *blend_operation_names [BLEND_OPERATIONS_COUNT] =
+{
     "add",
     "subtract",
     "reverse subtract",
     "minimum",
     "maximum"
 };
-char             *blend_factor_names             [BLEND_FACTORS_COUNT] = {
+char *blend_factor_names [BLEND_FACTORS_COUNT] =
+{
     "zero",
     "one",
     "source color",
@@ -78,14 +95,31 @@ char             *blend_factor_names             [BLEND_FACTORS_COUNT] = {
     "source one alpha",
     "one minus source one alpha"
 };
-char             *shader_stages_names            [SHADER_STAGES_COUNT] = {
+char *shader_stages_names [SHADER_STAGES_COUNT] =
+{
     "vertex",
     "tessellation control",
     "tessellation evaluation",
     "geometry",
-    "fragment"
+    "fragment",
+    "compute",
+    "task",
+    "mesh",
+    "ray generation",
+    "miss",
+    "intersection",
+    "closest hit",
+    "any hit",
+    "callable"
 };
-VkDescriptorType  descriptor_type_enums          [DESCRIPTOR_TYPE_COUNT] = {
+void *graphics_pipeline_type_constructors [SHADER_PIPELINE_CONSTRUCTORS] = 
+{
+    &load_graphics_shader_as_json_value,
+    &load_compute_shader_as_json_value,
+    &load_ray_shader_as_json_value
+};
+VkDescriptorType  descriptor_type_enums [DESCRIPTOR_TYPE_COUNT] =
+{
     VK_DESCRIPTOR_TYPE_SAMPLER,
     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
     VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
@@ -98,7 +132,8 @@ VkDescriptorType  descriptor_type_enums          [DESCRIPTOR_TYPE_COUNT] = {
     VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
     VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 };
-VkFormat          format_type_enums              [FORMATS_COUNT] = {
+VkFormat format_type_enums [FORMATS_COUNT] =
+{
     VK_FORMAT_R32_SFLOAT,
     VK_FORMAT_R32G32_SFLOAT,
     VK_FORMAT_R32G32B32_SFLOAT,
@@ -118,7 +153,8 @@ VkFormat          format_type_enums              [FORMATS_COUNT] = {
     VK_FORMAT_R8G8B8A8_UINT,
     VK_FORMAT_R8G8B8A8_SRGB
 };
-size_t            format_type_sizes              [FORMATS_COUNT] = {
+size_t format_type_sizes [FORMATS_COUNT] =
+{
     4,
     8,
     12,
@@ -137,23 +173,27 @@ size_t            format_type_sizes              [FORMATS_COUNT] = {
     32,
     32
 };
-void             *push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] = {
+void *push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] =
+{
     &get_camera_position,
     &get_model_matrix
 };
-VkPolygonMode     rasterizer_polygon_mode_enum   [RASTERIZER_POLYGON_MODE_COUNT] = {
+VkPolygonMode rasterizer_polygon_mode_enum [RASTERIZER_POLYGON_MODE_COUNT] =
+{
     VK_POLYGON_MODE_FILL,
     VK_POLYGON_MODE_LINE,
     VK_POLYGON_MODE_POINT
 };
-VkBlendOp         blend_operation_enums          [BLEND_OPERATIONS_COUNT] = {
+VkBlendOp blend_operation_enums [BLEND_OPERATIONS_COUNT] =
+{
     VK_BLEND_OP_ADD,
     VK_BLEND_OP_SUBTRACT,
     VK_BLEND_OP_REVERSE_SUBTRACT,
     VK_BLEND_OP_MIN,
     VK_BLEND_OP_MAX
 };
-VkBlendFactor     blend_factor_enums             [BLEND_FACTORS_COUNT] = {
+VkBlendFactor blend_factor_enums [BLEND_FACTORS_COUNT] =
+{
     VK_BLEND_FACTOR_ZERO,
     VK_BLEND_FACTOR_ONE,
     VK_BLEND_FACTOR_SRC_COLOR,
@@ -174,22 +214,34 @@ VkBlendFactor     blend_factor_enums             [BLEND_FACTORS_COUNT] = {
     VK_BLEND_FACTOR_SRC1_ALPHA,
     VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
 };
-VkShaderStageFlagBits shader_stages_enum         [SHADER_STAGES_COUNT] = {
+VkShaderStageFlagBits shader_stages_enum [SHADER_STAGES_COUNT] =
+{
     VK_SHADER_STAGE_VERTEX_BIT,
     VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
     VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
     VK_SHADER_STAGE_GEOMETRY_BIT,
-    VK_SHADER_STAGE_FRAGMENT_BIT
+    VK_SHADER_STAGE_FRAGMENT_BIT,
+    VK_SHADER_STAGE_COMPUTE_BIT,
+    VK_SHADER_STAGE_TASK_BIT_EXT,
+    VK_SHADER_STAGE_MESH_BIT_EXT,
+    VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+    VK_SHADER_STAGE_MISS_BIT_KHR,
+    VK_SHADER_STAGE_INTERSECTION_BIT_KHR,
+    VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
+    VK_SHADER_STAGE_ANY_HIT_BIT_KHR,
+    VK_SHADER_STAGE_CALLABLE_BIT_KHR
 };
 
-dict             *format_types                       = 0;
-dict             *format_sizes                       = 0;
-dict             *descriptor_types                   = 0;
-dict             *push_constant_getters              = 0;
-dict             *polygon_modes                      = 0;
-dict             *blend_operations                   = 0;
-dict             *blend_factors                      = 0;
-dict             *shader_stagesD                     = 0;
+dict *format_types                  = 0,
+     *format_sizes                  = 0,
+     *descriptor_types              = 0,
+     *push_constant_getters         = 0,
+     *polygon_modes                 = 0,
+     *blend_operations              = 0,
+     *blend_factors                 = 0,
+     *shader_stagesD                = 0,
+     *shader_pipeline_constructors  = 0,
+     *pipeline_loader_lookup_tables = 0;
 
 typedef struct { 
     char                         *name; 
@@ -204,6 +256,30 @@ typedef struct {
         struct {
             size_t i;
         } combined_image_sampler;
+ 
+        struct {
+            size_t i;
+        } sampled_image;
+
+        struct {
+            size_t i;
+        } storage_image;
+
+        struct {
+            size_t i;
+        } uniform_texel_buffer;
+
+        struct {
+            size_t i;
+        } storage_texel_buffer;
+
+        struct {
+            size_t i;
+        } uniform_buffer_dynamic;
+
+        struct {
+            size_t i;
+        } storage_buffer_dynamic;
 
         struct {
             VkDeviceSize    size;
@@ -228,20 +304,24 @@ typedef struct {
                      descriptor_len;
 } GXSet_t;
 
-void init_shader                    ( void )
+void init_shader ( void )
 {
 
-    GXInstance_t *instance = g_get_active_instance();
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
 
-    dict_construct(&format_types         , FORMATS_COUNT);
-    dict_construct(&format_sizes         , FORMATS_COUNT);
-    dict_construct(&descriptor_types     , DESCRIPTOR_TYPE_COUNT);
-    dict_construct(&push_constant_getters, PUSH_CONSTANT_GETTERS_COUNT);
-    dict_construct(&polygon_modes        , RASTERIZER_POLYGON_MODE_COUNT);
-    dict_construct(&blend_operations     , BLEND_OPERATIONS_COUNT);
-    dict_construct(&blend_factors        , BLEND_FACTORS_COUNT);
-    dict_construct(&shader_stagesD       , SHADER_STAGES_COUNT);
+    // Construct lookup tables
+    dict_construct(&format_types                 , FORMATS_COUNT);
+    dict_construct(&format_sizes                 , FORMATS_COUNT);
+    dict_construct(&descriptor_types             , DESCRIPTOR_TYPE_COUNT);
+    dict_construct(&push_constant_getters        , PUSH_CONSTANT_GETTERS_COUNT);
+    dict_construct(&polygon_modes                , RASTERIZER_POLYGON_MODE_COUNT);
+    dict_construct(&blend_operations             , BLEND_OPERATIONS_COUNT);
+    dict_construct(&blend_factors                , BLEND_FACTORS_COUNT);
+    dict_construct(&shader_stagesD               , SHADER_STAGES_COUNT);
+    dict_construct(&pipeline_loader_lookup_tables, SHADER_PIPELINE_CONSTRUCTORS);
 
+    // Populate lookup tables
     for (size_t i = 0; i < FORMATS_COUNT; i++)
     {
         dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
@@ -267,1131 +347,540 @@ void init_shader                    ( void )
     for (size_t i = 0; i < BLEND_FACTORS_COUNT; i++)
         dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
 
-    instance->mutexes.shader_cache = SDL_CreateMutex();
-
-}
-
-int create_shader_module            ( char         *code   , size_t     code_len  , VkShaderModule *shader_module )
-{
-    GXInstance_t* instance = g_get_active_instance();
-
-    VkShaderModuleCreateInfo shader_module_create_info = { 0 };
-    shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shader_module_create_info.codeSize = code_len;
-    shader_module_create_info.pCode = code;
-
-    if (vkCreateShaderModule(instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module))
-
-        // TODO: Replace with a goto
-        printf("Failed to create a shader module");
-
-    return 0;
-}
-
-int create_shader                   ( GXShader_t  **shader )
-{
-    // TODO: Argument check
-    {
-
-    }
-
-    GXShader_t *i_shader = calloc(1, sizeof(GXShader_t));
-
-    // TODO: Check memory
-
-    *shader = i_shader;
-
-    return 1;
-
-    // TODO: Error handling
-    {
-
-    }
-}
-
-int load_shader                     ( GXShader_t  **shader, const char *path )
-{
-    // TODO: Argument check
-
-    char   *token_text     = 0;
-    size_t  token_text_len = g_load_file(path, (void*)0, false);
-        
-    token_text = calloc(token_text_len + 1, sizeof(char));
-
-    g_load_file(path, token_text, false);
-
-    load_shader_as_json(shader, token_text, token_text_len);
-
-    return 1;
-
-    // TODO: Error handling
-}
-
-int load_shader_as_json             ( GXShader_t  **shader, char       *token_text, size_t          token_text_len )
-{
-    // TODO: Argument check
-    GXInstance_t  *instance                  = g_get_active_instance();
-    GXShader_t    *i_shader                  = 0;
-    char          *name                      = 0,
-                  *vertex_shader_path        = 0,
-                  *geometry_shader_path      = 0,
-                  *fragment_shader_path      = 0,
-                  *compute_shader_path       = 0,
-                  *rasterizer_json           = 0;
-    dict          *json_data                 = 0,
-                  *vertex_shader_json_data   = 0,
-                  *geometry_shader_json_data = 0,
-                  *fragment_shader_json_data = 0,
-                  *compute_shader_json_data  = 0;
-    char         **vertex_groups             = 0,
-                 **attachments               = 0,
-                 **sets                      = 0,
-                  *push_constant_text        = 0;
-    JSONToken_t   *token                     = 0;
-    size_t         set_count                 = 0;
-
-    // Parse JSON data
-    {
-
-        parse_json(token_text, token_text_len, &json_data);
-
-        token                = (JSONToken_t *) dict_get(json_data, "name");
-        name                 = JSON_VALUE(token, JSONstring);
-
-        token                = (JSONToken_t *) dict_get(json_data, "vertex shader path");
-        vertex_shader_path   = JSON_VALUE(token, JSONstring);
-
-        token                = (JSONToken_t *) dict_get(json_data, "geometry shader path");
-        geometry_shader_path = JSON_VALUE(token, JSONstring);
-
-        token                = (JSONToken_t *) dict_get(json_data, "fragment shader path");
-        fragment_shader_path = JSON_VALUE(token, JSONstring);
-
-        token                = (JSONToken_t *) dict_get(json_data, "compute shader path");
-        compute_shader_path = JSON_VALUE(token, JSONstring);
-
-        token                = (JSONToken_t *) dict_get(json_data, "in");
-        vertex_groups        = JSON_VALUE(token, JSONarray);
-
-        token                = (JSONToken_t *) dict_get(json_data, "attachments");
-        attachments          = JSON_VALUE(token, JSONarray);
-
-        token                = (JSONToken_t *) dict_get(json_data, "sets");
-        sets                 = JSON_VALUE(token, JSONarray);
-
-        token                = (JSONToken_t *) dict_get(json_data, "push constant");
-        push_constant_text   = JSON_VALUE(token, JSONobject);
-
-        token                = (JSONToken_t *) dict_get(json_data, "rasterizer");
-        rasterizer_json      = JSON_VALUE(token, JSONobject);
-    }
+    for (size_t i = 0; i < SHADER_PIPELINE_CONSTRUCTORS; i++)
+        dict_add(pipeline_loader_lookup_tables, shader_pipeline_names[i], graphics_pipeline_type_constructors[i]);
     
-    // Check the cache
-    {
-        GXShader_t *r = g_find_shader(instance, name);
-        
-        if (r != (void*)0)
-        {
-            *shader = r;
-            goto exit;
-        }
-    }
 
-    // Construct the shader
-    {
+    // Create a shader cache mutex
+    p_instance->mutexes.shader_cache = SDL_CreateMutex();
 
-        // Allocate shader memory
-        create_shader(shader);
-
-        // Get the pointer to the shader memory
-        i_shader = *shader;
-
-        // Set the name
-        {
-
-            // Initialized data
-            size_t name_len = strlen(name);
-
-            // Allocate memory for the name
-            i_shader->name = calloc(name_len + 1, sizeof(char));
-
-            // Error check
-            {
-                #ifndef NDEBUG
-                    if (i_shader->name == (void *)0)
-                        goto no_mem;
-                #endif
-            }
-
-            // Copy the name
-            strncpy(i_shader->name, name, name_len);
-        }
-
-    }
-
-    // Construct the graphics shader
-    if      ( fragment_shader_path ){
-
-        // Load the graphics shader binaries
-        {
-
-            // Load the vertex shader binary
-            if (vertex_shader_path) {
-
-                // Initialized data
-                size_t   vertex_shader_data_len = g_load_file(vertex_shader_path, 0, true);
-                char* vertex_shader_data = calloc(vertex_shader_data_len, sizeof(char));
-
-                g_load_file(vertex_shader_path, vertex_shader_data, true);
-
-
-                // Create a shader module
-                create_shader_module(vertex_shader_data, vertex_shader_data_len, &i_shader->graphics.vertex_shader_module);
-
-                free(vertex_shader_data);
-            }
-
-            // TODO: Load tessellation control shader
-            
-            // TODO: Load tessellation evaluation shader
-             
-            // Load the geometry shader binary
-            if (geometry_shader_path) {
-
-                // Initialized data
-                size_t   geometry_shader_data_len = g_load_file(geometry_shader_path, 0, true);
-                char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
-
-                g_load_file(geometry_shader_path, geometry_shader_data, true);
-
-                // Create a shader module
-                create_shader_module(geometry_shader_data, geometry_shader_data_len, &i_shader->graphics.geometry_shader_module);
-
-                free(geometry_shader_data);
-            }
-
-            // Load the fragment shader binary
-            if (fragment_shader_path) {
-                size_t fragment_shader_data_len = g_load_file(fragment_shader_path, 0, true);
-                char* fragment_shader_data = calloc(fragment_shader_data_len + 1, sizeof(char));
-
-                g_load_file(fragment_shader_path, fragment_shader_data, true);
-
-                // Create a shader module
-                create_shader_module(fragment_shader_data, fragment_shader_data_len, &i_shader->graphics.fragment_shader_module);
-
-                free(fragment_shader_data);
-
-            }
-
-        }
-
-        // Set up the graphics shader pipeline
-        {
-
-            // Initialized data
-            VkPipelineShaderStageCreateInfo        *shader_stages                       = calloc(5, sizeof(VkPipelineShaderStageCreateInfo));
-            size_t                                  shader_stage_iterator               = 0,
-                                                    attachment_count                    = 0;
-            VkPipelineVertexInputStateCreateInfo    vertex_input_info_create_info       = { 0 };
-            VkPipelineInputAssemblyStateCreateInfo  input_assembly_create_info          = { 0 };
-            VkPipelineViewportStateCreateInfo       viewport_state_create_info          = { 0 };
-            VkPipelineRasterizationStateCreateInfo  rasterizer_create_info              = { 0 };
-            VkPipelineMultisampleStateCreateInfo    multisampling_create_info           = { 0 };
-            VkPipelineColorBlendAttachmentState    *color_blend_attachment_create_info  = 0;
-            VkPipelineColorBlendStateCreateInfo     color_blend_create_info             = { 0 };
-            VkPipelineDepthStencilStateCreateInfo   depth_stencil_state_create_info     = { 0 };
-            VkPipelineDynamicStateCreateInfo        dynamic_state_create_info           = { 0 };
-            VkPipelineLayoutCreateInfo              pipeline_layout_create_info         = { 0 };
-            VkDynamicState                          dynamic_states[2]                   = { { 0 }, { 0 } };
-            VkPushConstantRange                    *push_constant                       = calloc(1, sizeof(VkPushConstantRange));
-            VkGraphicsPipelineCreateInfo            graphics_pipeline_create_info       = { 0 };
-            VkVertexInputBindingDescription        *binding_description                 = calloc(1, sizeof(VkVertexInputBindingDescription));
-            VkViewport                              viewport                            = { 0 };
-            VkRect2D                                scissor                             = { 0 };
-            VkVertexInputAttributeDescription      *vertex_input_attribute_descriptions = 0;
-            VkDescriptorSetLayoutCreateInfo        *descriptor_set_layout               = 0;
-
-            // Set up the shader stages
-            {
-                
-                // Set up the vertex shader
-                if (i_shader->graphics.vertex_shader_module) {
-                    VkPipelineShaderStageCreateInfo* vertex_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
-
-                    vertex_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                    vertex_shader_stage_create_info->stage  = VK_SHADER_STAGE_VERTEX_BIT;
-                    vertex_shader_stage_create_info->module = i_shader->graphics.vertex_shader_module;
-                    vertex_shader_stage_create_info->pName  = "main";
-                }
-
-                // Set up the tessellation control shader
-                if (i_shader->graphics.tessellation_control_shader_module) {
-                    VkPipelineShaderStageCreateInfo* tessellation_control_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
-
-                    tessellation_control_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                    tessellation_control_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-                    tessellation_control_shader_stage_create_info->module = i_shader->graphics.tessellation_control_shader_module;
-                    tessellation_control_shader_stage_create_info->pName  = "main";
-                }
-
-                // Set up the tessellation evaluation shader
-                if (i_shader->graphics.tessellation_evaluation_shader_module) {
-                    VkPipelineShaderStageCreateInfo* tessellation_evaluation_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
-
-                    tessellation_evaluation_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                    tessellation_evaluation_shader_stage_create_info->stage  = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-                    tessellation_evaluation_shader_stage_create_info->module = i_shader->graphics.tessellation_evaluation_shader_module;
-                    tessellation_evaluation_shader_stage_create_info->pName  = "main";
-                }
-
-                // Set up the geometry shader
-                if (i_shader->graphics.geometry_shader_module) {
-                    VkPipelineShaderStageCreateInfo* geometry_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
-
-                    geometry_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                    geometry_shader_stage_create_info->stage  = VK_SHADER_STAGE_GEOMETRY_BIT;
-                    geometry_shader_stage_create_info->module = i_shader->graphics.geometry_shader_module;
-                    geometry_shader_stage_create_info->pName  = "main";
-                }
-
-                // Set up the fragment shader
-                if (i_shader->graphics.fragment_shader_module) {
-
-                    VkPipelineShaderStageCreateInfo *fragment_shader_stage_create_info = &shader_stages[shader_stage_iterator++];
-
-                    fragment_shader_stage_create_info->sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                    fragment_shader_stage_create_info->stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-                    fragment_shader_stage_create_info->module = i_shader->graphics.fragment_shader_module;
-                    fragment_shader_stage_create_info->pName  = "main";
-                }
-            }
-
-            // Set up the vertex input state
-            {
-
-                // Initialized data
-                u32    vertex_group_count        = 0;
-                size_t stride                    = 0,
-                       binding_description_count = 0;
-
-                // Did the user specify vertex groups?
-                if (vertex_groups)
-                {
-
-                    // Count vertex groups
-                    while (vertex_groups[++vertex_group_count]);
-                    
-                    // Allocate vertex attributes
-                    vertex_input_attribute_descriptions = calloc(vertex_group_count, sizeof(VkVertexInputAttributeDescription));
-
-                    // Iterate over each vertex group
-                    for (size_t i = 0; i < vertex_group_count; i++)
-                    {
-
-                        // Initialized data
-                        dict        *vertex_group   = 0;
-                        JSONToken_t *token          = 0;
-                        char        *type           = 0;
-                        char        *location       = 0;
-
-                        // Parse the JSON objects into a dictionary
-                        parse_json(vertex_groups[i], strlen(vertex_groups[i]), &vertex_group);
-
-                        token    = (JSONToken_t *) dict_get(vertex_group, "type");
-                        type     = JSON_VALUE(token, JSONstring);
-
-                        token    = (JSONToken_t *) dict_get(vertex_group, "location");
-                        location = JSON_VALUE(token, JSONprimative);
-
-                        // Construct a vertex input attribute
-                        {
-                            vertex_input_attribute_descriptions[i].binding  = 0;
-                            vertex_input_attribute_descriptions[i].location = atoi(location);
-                            vertex_input_attribute_descriptions[i].format   = (VkFormat)dict_get(format_types, type);
-                            vertex_input_attribute_descriptions[i].offset   = (u32)stride;
-                        }
-
-                        stride += (size_t) dict_get(format_sizes, type);
-
-                    }
-                    
-                    // Construct a binding description
-                    {
-                        binding_description->binding   = 0;
-                        binding_description->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-                        binding_description->stride    = (u32)stride;
-                        binding_description_count      = 1;
-                    }
-                }
-
-                // Set up the vertex input 
-                {
-                    vertex_input_info_create_info.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                    vertex_input_info_create_info.vertexBindingDescriptionCount   = (u32)binding_description_count;
-                    vertex_input_info_create_info.pVertexBindingDescriptions      = binding_description;
-                    vertex_input_info_create_info.vertexAttributeDescriptionCount = vertex_group_count;
-                    vertex_input_info_create_info.pVertexAttributeDescriptions    = vertex_input_attribute_descriptions;
-                }
-            }
-
-            // Set up the input assembly
-            {
-                input_assembly_create_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                input_assembly_create_info.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                input_assembly_create_info.primitiveRestartEnable = VK_FALSE;
-            }
-
-            // Set up the viewport state
-            {
-
-                // Set up the viewport
-                {
-                    viewport.x        = 0.f;
-                    viewport.y        = 0.f;
-                    viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
-                    viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
-                    viewport.minDepth = 0.0f;
-                    viewport.maxDepth = 1.0f;
-                }
-
-                // Set up the scissor
-                {
-                    scissor.offset.x = 0;
-                    scissor.offset.y = 0;
-                    scissor.extent = instance->vulkan.swap_chain_extent;
-                }
-
-                // Populate the viewport state create struct
-                {
-                    viewport_state_create_info.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                    viewport_state_create_info.viewportCount = 1;
-                    viewport_state_create_info.pViewports    = &viewport;
-                    viewport_state_create_info.scissorCount  = 1;
-                    viewport_state_create_info.pScissors     = &scissor;
-                }
-            }
-
-            // Set up the rasterizer 
-            {
-
-                VkPolygonMode polygon_mode               = VK_POLYGON_MODE_FILL;
-                float         line_width                 = 1.f,
-                              depth_bias_constant_factor = 0.f,
-                              depth_bias_clamp           = 0.f,
-                              depth_bias_slope_factor    = 0.f;
-
-                bool          depth_clamp_enable         = false,
-                              rasterizer_discard_enable  = false,
-                              clockwise                  = false,
-                              depth_bias_enable          = false;
-
-                // Parse the rasterizer property
-                if (rasterizer_json) {
-
-                    // Initialized data
-                    dict *rasterizer_json_dict              = 0;
-                    char *polygon_mode_string               = 0,
-                         *line_width_string                 = 0,
-                         *depth_bias_constant_factor_string = 0,
-                         *depth_bias_clamp_string           = 0,
-                         *depth_bias_slope_factor_string    = 0;
-
-                    // Parse the rasterizer JSON text into a JSON dictionary
-                    parse_json(rasterizer_json, strlen(rasterizer_json), &rasterizer_json_dict);
-
-                    // Parse the JSON dictionary into rasterizer parameters
-                    {
-                        JSONToken_t *token                = 0;
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth clamp enable");
-                        depth_clamp_enable                = JSON_VALUE(token, JSONprimative);
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "rasterizer discard enable");
-                        rasterizer_discard_enable         = JSON_VALUE(token, JSONprimative);
-                        
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "polygon mode");
-                        polygon_mode_string               = JSON_VALUE(token, JSONstring);
-                        
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "cull mode");
-                        rasterizer_discard_enable         = JSON_VALUE(token, JSONarray);
-                                                
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "clockwise");
-                        clockwise                         = JSON_VALUE(token, JSONprimative);
-                                                
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias enable");
-                        depth_bias_enable                 = JSON_VALUE(token, JSONprimative);
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias constant factor");
-                        depth_bias_constant_factor_string = JSON_VALUE(token, JSONprimative);
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias clamp");
-                        depth_bias_clamp_string           = JSON_VALUE(token, JSONprimative);
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "depth bias slope factor");
-                        depth_bias_slope_factor_string    = JSON_VALUE(token, JSONprimative);
-
-                        token                             = (JSONToken_t *) dict_get(rasterizer_json_dict, "line width");
-                        line_width_string                 = JSON_VALUE(token, JSONprimative);
-
-                    }
-
-                    // Get rasterizer parameters
-                    {
-                        if (polygon_mode_string)
-                            polygon_mode = (VkPolygonMode)dict_get(polygon_modes, polygon_mode_string);
-
-                        if(depth_bias_constant_factor_string)
-                            depth_bias_constant_factor = (float)atof(depth_bias_constant_factor_string);
-
-                        if (depth_bias_clamp_string)
-                            depth_bias_clamp = (float)atof(depth_bias_clamp_string);
-
-                        if (depth_bias_slope_factor_string)
-                            depth_bias_slope_factor = (float)atof(depth_bias_slope_factor_string);
-
-                        if (line_width_string)
-                            if (polygon_mode == VK_POLYGON_MODE_LINE)
-                            line_width = (float)atof(line_width_string);
-
-                    }
-
-                    // Free the dictionary
-                    dict_destroy(rasterizer_json_dict);
-                }
-
-                // Populate the rasterizer create struct
-                {
-                    rasterizer_create_info.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                    rasterizer_create_info.depthClampEnable        = depth_clamp_enable;
-                    rasterizer_create_info.rasterizerDiscardEnable = rasterizer_discard_enable;
-                    rasterizer_create_info.polygonMode             = polygon_mode;
-                    rasterizer_create_info.cullMode                = VK_CULL_MODE_FRONT_BIT;
-                    rasterizer_create_info.frontFace               = clockwise;
-                    rasterizer_create_info.depthBiasEnable         = depth_bias_enable;
-                    rasterizer_create_info.depthBiasConstantFactor = depth_bias_constant_factor;
-                    rasterizer_create_info.depthBiasClamp          = depth_bias_clamp;
-                    rasterizer_create_info.depthBiasSlopeFactor    = depth_bias_slope_factor;
-                    rasterizer_create_info.lineWidth               = line_width;
-                }
-
-            }
-
-            // Set up the multisampler
-            {
-                multisampling_create_info.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-                multisampling_create_info.sampleShadingEnable  = VK_FALSE;
-                multisampling_create_info.minSampleShading     = 1.f;
-            }
-
-            // Set up the color blend attachment
-            if(attachments){
-
-                // Count each attachment
-                while (attachments[++attachment_count]);
-
-                // Allocate memory to create each attachment
-                color_blend_attachment_create_info = calloc(attachment_count, sizeof(VkPipelineColorBlendAttachmentState));
-
-                // Iterate over each JSON attachment object
-                for (size_t i = 0; i < attachment_count; i++)
-                {
-
-                    // Initialized data
-                    char *name                           = 0,
-                         *source_color_blend_factor      = 0,
-                         *destination_color_blend_factor = 0,
-                         *color_blend_operation          = 0,
-                         *source_alpha_blend_factor      = 0,
-                         *destination_alpha_blend_factor = 0,
-                         *alpha_blend_operation          = 0;
-                    dict *a                              = 0;
-
-                    bool  blend_enable                   = true;
-
-                    // Parse JSON 
-                    {
-
-                        // Parse the JSON text into a dictionary
-                        parse_json(attachments[i], strlen(attachments[i]), &a);
-
-                        // Parse JSON properties
-                        {
-
-                            // Initialized data
-                            JSONToken_t *token = 0;
-
-                            token                          = (JSONToken_t *) dict_get(a, "name");
-                            name                           = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "blend enable");
-                            blend_enable                   = JSON_VALUE(token, JSONprimative);
-
-                            token                          = (JSONToken_t *) dict_get(a, "source color blend factor");
-                            source_color_blend_factor      = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "destination color blend factor");
-                            destination_color_blend_factor = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "color blend operation");
-                            color_blend_operation          = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "source alpha blend factor");
-                            source_alpha_blend_factor      = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "destination alpha blend factor");
-                            destination_alpha_blend_factor = JSON_VALUE(token, JSONstring);
-
-                            token                          = (JSONToken_t *) dict_get(a, "alpha blend operation");
-                            alpha_blend_operation          = JSON_VALUE(token, JSONstring);
-
-                        }
-
-                    }
-
-                    // Set up the attachment
-                    {
-                        color_blend_attachment_create_info[i].colorWriteMask    = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-                        color_blend_attachment_create_info[i].blendEnable       = blend_enable;
-
-                        color_blend_attachment_create_info[i].srcColorBlendFactor = (VkBlendFactor) dict_get(blend_factors   , source_color_blend_factor);
-                        color_blend_attachment_create_info[i].dstColorBlendFactor = (VkBlendFactor) dict_get(blend_factors   , destination_color_blend_factor);
-                        color_blend_attachment_create_info[i].colorBlendOp        = (VkBlendOp)     dict_get(blend_operations, color_blend_operation);
-                    
-                        color_blend_attachment_create_info[i].srcAlphaBlendFactor = (VkBlendFactor) dict_get(blend_factors   , source_alpha_blend_factor);
-                        color_blend_attachment_create_info[i].dstAlphaBlendFactor = (VkBlendFactor) dict_get(blend_factors   , destination_alpha_blend_factor);
-                        color_blend_attachment_create_info[i].alphaBlendOp        = (VkBlendOp)     dict_get(blend_operations, alpha_blend_operation);
-                    }
-
-                    // Destroy the JSON
-                    dict_destroy(a);
-                }
-
-            }
-
-            // Set up the depth / stencil state
-            {
-                depth_stencil_state_create_info.sType           = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-                depth_stencil_state_create_info.depthTestEnable = VK_TRUE;
-                depth_stencil_state_create_info.depthWriteEnable = VK_TRUE;
-                depth_stencil_state_create_info.depthCompareOp   = VK_COMPARE_OP_LESS;
-                depth_stencil_state_create_info.depthBoundsTestEnable = VK_FALSE;
-                depth_stencil_state_create_info.minDepthBounds = 0.f;
-                depth_stencil_state_create_info.maxDepthBounds = 1.f;
-                depth_stencil_state_create_info.stencilTestEnable = VK_FALSE;
-            }
-
-            // Set up the color blending state
-            {
-                color_blend_create_info.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-                color_blend_create_info.logicOpEnable   = VK_FALSE;
-                color_blend_create_info.logicOp         = VK_LOGIC_OP_COPY;
-                color_blend_create_info.attachmentCount = (u32)attachment_count;
-                color_blend_create_info.pAttachments    = color_blend_attachment_create_info;
-            }
-
-            // Set up descriptor layout
-            {
-
-                // Count up sets
-                while (sets[++set_count]);
-
-                i_shader->graphics.set_count              = set_count;
-                i_shader->graphics.sets_data              = calloc(set_count, sizeof(struct GXSet_s));
-                i_shader->graphics.descriptor_set_layouts = calloc(set_count, sizeof(VkDescriptorSetLayout));
-
-
-                // Iterate over each set JSON object
-                for (size_t i = 0; i < set_count; i++)
-                {
-
-                    // Initialized data
-                    VkDescriptorSetLayoutCreateInfo  *layout_info         = calloc(1, sizeof(VkDescriptorSetLayoutCreateInfo));
-                    VkDescriptorSetLayoutBinding     *ubo_layout_bindings = 0;
-                    VkDescriptorPoolSize             *pool_size           = 0;
-
-                    char                             *set_name            = 0,
-                                                    **descriptors         = 0;
-                    size_t                            descriptor_count    = 0;
-
-                    // Parse JSON 
-                    {
-
-                        // Initialized data
-                        dict *set_json = 0;
-                        
-                        // Parse JSON text into a dictionary
-                        parse_json(sets[i], strlen(sets[i]), &set_json);
-
-                        // Parse JSON properties
-                        {
-
-                            // Initialized data
-                            JSONToken_t *token = 0;
-
-                            token       = (JSONToken_t *) dict_get(set_json, "name");
-                            set_name    = JSON_VALUE(token, JSONstring);
-
-                            token       = (JSONToken_t *) dict_get(set_json, "descriptors");
-                            descriptors = JSON_VALUE(token, JSONarray);
-
-                        }
-
-                        // Free
-                        dict_destroy(set_json);
-                        
-                    }
-
-                    // Count descriptors
-                    while (descriptors[++descriptor_count]);
-
-                    // Allocate memory for descriptors
-                    ubo_layout_bindings                     = calloc(descriptor_count, sizeof(VkDescriptorSetLayoutBinding));
-                    pool_size                               = calloc(descriptor_count, sizeof(VkDescriptorPoolSize));
-                    i_shader->graphics.sets_data[i].descriptors_data = calloc(descriptor_count, sizeof(struct GXSet_s));;
-
-                    dict* descriptor_json = 0;
-
-                    // Iterate over each descriptor JSON object
-                    for (size_t j = 0; j < descriptor_count; j++)
-                    {
-
-                        // Initialized data
-                        char   *descriptor_name = 0, 
-                               *type            = 0,
-                              **stages          = 0; 
-
-                        // Parse JSON 
-                        {
-                            
-                        
-                            // Parse JSON text into a dictionary
-                            parse_json(descriptors[j], strlen(descriptors[j]), &descriptor_json);
-
-                            // Parse JSON properties
-                            {
-
-                                // Initialized data
-                                JSONToken_t *token = 0;
-
-                                token           = (JSONToken_t *) dict_get(descriptor_json, "name");
-                                descriptor_name = JSON_VALUE(token, JSONstring);
-
-                                token           = (JSONToken_t *) dict_get(descriptor_json, "type");
-                                type            = JSON_VALUE(token, JSONstring);
-
-                                token           = (JSONToken_t *) dict_get(descriptor_json, "stages");
-                                stages          = JSON_VALUE(token, JSONarray);
-
-                            }
-
-                            // Copy the descriptor name
-                            {
-
-                                // Initialized dtaa
-                                size_t len = strlen(descriptor_name);
-                                
-                                // Allocate memory to copy the name
-                                i_shader->graphics.sets_data[i].descriptors_data[j].name = calloc(len+1, sizeof(char));
-
-                                // Error checking
-                                strncpy(i_shader->graphics.sets_data[i].descriptors_data[j].name, descriptor_name, len);
-                            }
-
-                            // Construct each descriptor set layout binding
-                            {
-                                VkShaderStageFlagBits f = 0;
-
-                                // Set shader stages
-                                for (size_t i = 0; stages[i]; i++)
-                                    f |= (VkShaderStageFlagBits) dict_get(shader_stagesD, stages[i]);
-
-                                ubo_layout_bindings[j].binding            = (u32)j;
-
-                                // > 1 if array
-                                ubo_layout_bindings[j].descriptorCount    = 1;
-                                ubo_layout_bindings[j].descriptorType     = (VkDescriptorType)dict_get(descriptor_types, type);
-                                ubo_layout_bindings[j].pImmutableSamplers = 0;
-                                ubo_layout_bindings[j].stageFlags         = f;
-                            }
-
-                            // Construct each pool size
-                            {
-                                pool_size[j].type            = ubo_layout_bindings[j].descriptorType;
-                                pool_size[j].descriptorCount = (u32)2;
-                            }
-
-                            // Free
-                            dict_destroy(descriptor_json);
-                        
-                        }
-
-                    }
-
-                    // Populate descriptor set layout info struct
-                    {
-                        layout_info->sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-                        layout_info->bindingCount = (u32)descriptor_count;
-                        layout_info->pBindings    = ubo_layout_bindings;
-                    }
-
-                    // Create a descriptor set layout
-                    if (vkCreateDescriptorSetLayout(instance->vulkan.device, layout_info, 0, &i_shader->graphics.descriptor_set_layouts[i]) != VK_SUCCESS) {
-                        
-                        g_print_error("[G10] [Shader] Failed to create descriptor set layout in call to function \"%s\"\n", __FUNCTION__);
-                        return -1;
-                    }
-
-                    // Copy the name of the set
-                    {
-                                
-                        // Initialized data
-                        size_t len = strlen(set_name);
-                            
-                        i_shader->graphics.sets_data[i].name = calloc(len + 1, sizeof(char));
-
-                        // Error checking
-                        {
-                            #ifndef NDEBUG
-                                if (i_shader->graphics.sets_data[i].name == (void *) 0)
-                                    goto no_mem;
-                            #endif
-                        }
-
-                        // Copy the name into the buffer
-                        strncpy(i_shader->graphics.sets_data[i].name, set_name, len);
-
-                    }
-
-                    // Set the index of the set
-                    i_shader->graphics.sets_data[i].index = i;
-                    
-                    // Create descriptor pool
-                    {
-                        VkDescriptorPoolCreateInfo *pool_info = calloc(1, sizeof(VkDescriptorPoolCreateInfo));
-
-                        {
-                            pool_info->sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-                            pool_info->flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-                            pool_info->poolSizeCount = (u32)descriptor_count;
-                            pool_info->pPoolSizes    = pool_size;
-
-                            // TODO: Figure out what to do here
-                            pool_info->maxSets       = (u32)64;
-                        }
-
-                        if (vkCreateDescriptorPool(instance->vulkan.device, pool_info, (void*)0, &i_shader->graphics.sets_data[i].descriptor_pool) != VK_SUCCESS) {
-                            g_print_error("[G10] [Shader] Failed to create descriptor pool for set \"%s\" in call to function \"%s\"\n", set_name, __FUNCTION__);
-                            return 0;
-                        }
-                    }
-
-                }
-            }
-
-            // Set up the dynamic state
-            {
-                dynamic_states[0] = VK_DYNAMIC_STATE_VIEWPORT;
-                dynamic_states[1] = VK_DYNAMIC_STATE_SCISSOR;
-
-                dynamic_state_create_info.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-                dynamic_state_create_info.dynamicStateCount = 2;
-                dynamic_state_create_info.pDynamicStates    = &dynamic_states;
-            }
-
-            // Set up the push constant
-            if(push_constant_text) {
-                
-                // Initialized data
-                dict    *push_constant_dict           = 0;
-                char   **push_constant_struct         = 0;
-                size_t   push_constant_size           = 0;
-                size_t   push_constant_property_count = 0;
-
-                // Parse the push constant JSON into a dictionary
-                parse_json(push_constant_text, strlen(push_constant_text), &push_constant_dict);
-
-                // Parse the push constant dictionary
-                {
-
-                    // Initialized data
-                    JSONToken_t  *token                = 0;
-
-                    // Get the push constant struct
-                    token                = (JSONToken_t *) dict_get(push_constant_dict, "struct");
-                    push_constant_struct = JSON_VALUE(token, JSONarray);
-                }
-
-                while (push_constant_struct[++push_constant_property_count]);
-                
-                i_shader->graphics.push_constant_properties = calloc(push_constant_property_count + 1, sizeof(char*));
-                
-                for (size_t i = 0; i < push_constant_property_count; i++)
-                {
-
-                    // Initialized data
-                    char   *push_constant_property     = push_constant_struct[i];
-                    size_t  push_constant_property_len = strlen(push_constant_property);
-                    dict   *property_dict              = 0;
-
-                    char   *property_name              = 0;
-                    size_t  property_size              = 0;
-
-                    parse_json(push_constant_property, push_constant_property_len, &property_dict);
-
-                    // Parse the property dictionary
-                    {
-
-                        // Initialized data
-                        JSONToken_t *token = 0;
-                        
-                        token = (JSONToken_t *) dict_get(property_dict, "name");
-                        property_name = JSON_VALUE(token, JSONstring);
-
-                        token = (JSONToken_t *) dict_get(property_dict, "type");
-                        char* property_type = JSON_VALUE(token, JSONstring);
-
-                        // TODO: Check property_type?
-                        property_size = (size_t) dict_get(format_sizes, property_type);
-
-                    }
-
-                    // Copy the property name
-                    {
-                        
-                        // Initialized data
-                        size_t property_name_len              = strlen(property_name);
-
-                        // Allocate the property name
-                        i_shader->graphics.push_constant_properties[i] = calloc(property_name_len + 1, sizeof(char));
-
-                        // Copy the propery name
-                        strncpy(i_shader->graphics.push_constant_properties[i], property_name, property_name_len);
-
-                    }
-
-                    // Copy the property size
-                    push_constant_size += property_size;
-
-                }
-
-                if (push_constant_size > 128)
-                    goto push_constant_is_too_large;
-
-                i_shader->graphics.push_constant_size = push_constant_size;
-
-                i_shader->graphics.push_constant_data = calloc(128, sizeof(u8));
-
-                push_constant->offset     = 0;
-                push_constant->size       = (u32)push_constant_size;
-                push_constant->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-            }
-
-            // Set up the pipeline layout
-            {
-
-                pipeline_layout_create_info.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                pipeline_layout_create_info.setLayoutCount = (u32)set_count;
-
-                if (push_constant_text)
-                {
-                    pipeline_layout_create_info.pPushConstantRanges = push_constant;
-                    pipeline_layout_create_info.pushConstantRangeCount = 1;
-                }
-
-                pipeline_layout_create_info.pSetLayouts    = i_shader->graphics.descriptor_set_layouts;
-                
-            }
-
-            // Construct the pipeline layout
-            if (vkCreatePipelineLayout(instance->vulkan.device, &pipeline_layout_create_info, 0, &i_shader->graphics.pipeline_layout) != VK_SUCCESS)
-                g_print_error("[G10] [Shader] Failed to create pipeline layout");
-
-            // Set up the graphics pipeline
-            {
-                graphics_pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                graphics_pipeline_create_info.stageCount = (u32)shader_stage_iterator;
-                graphics_pipeline_create_info.pStages = shader_stages;
-                graphics_pipeline_create_info.pVertexInputState = &vertex_input_info_create_info;
-                graphics_pipeline_create_info.pInputAssemblyState = &input_assembly_create_info;
-
-                // TODO: 
-                graphics_pipeline_create_info.pTessellationState = 0;
-                graphics_pipeline_create_info.pViewportState = &viewport_state_create_info;
-                graphics_pipeline_create_info.pRasterizationState = &rasterizer_create_info;
-                graphics_pipeline_create_info.pMultisampleState = &multisampling_create_info;
-
-                // TODO: 
-                graphics_pipeline_create_info.pDepthStencilState = &depth_stencil_state_create_info;
-                graphics_pipeline_create_info.pColorBlendState = &color_blend_create_info;
-                graphics_pipeline_create_info.pDynamicState = &dynamic_state_create_info;
-                graphics_pipeline_create_info.layout = &pipeline_layout_create_info;
-                graphics_pipeline_create_info.layout = i_shader->graphics.pipeline_layout;
-                graphics_pipeline_create_info.renderPass = instance->context.renderer->render_passes_data[0]->render_pass;
-                graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
-                graphics_pipeline_create_info.basePipelineIndex = -1;
-            }
-
-            // Construct the graphics pipeline
-            if (vkCreateGraphicsPipelines(instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &i_shader->graphics.pipeline) != VK_SUCCESS)
-                g_print_error("failed to create graphics pipeline!\n");
-
-            // Clean up 
-            {
-                free(shader_stages);
-                free(color_blend_attachment_create_info);
-                free(binding_description);
-                free(vertex_input_attribute_descriptions);
-            }
-
-            // 
-            {
-
-                // Create uniform buffers
-                {
-                    // Iterate over each uniform
-                // Iterate over each frame
-                // Create a buffer for each uniform for each frame
-
-                    VkDeviceSize buffer_size = 3 * sizeof(mat4) + sizeof(vec3);
-
-                    i_shader->graphics.uniform_buffers = calloc(sizeof(void*), 2);
-                    i_shader->graphics.uniform_buffers_memory = calloc(sizeof(void*), 2);
-
-                    for (size_t i = 0; i < 2; i++)
-                        create_buffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &i_shader->graphics.uniform_buffers[i], &i_shader->graphics.uniform_buffers_memory[i]);
-                }
-
-                // Create descriptor sets
-                {
-                    VkDescriptorSetLayout* layouts = calloc(2, sizeof(VkDescriptorSetLayout));
-                    VkDescriptorSetAllocateInfo* alloc_info = calloc(1, sizeof(VkDescriptorSetAllocateInfo));
-
-                    for (size_t i = 0; i < 2; i++)
-                        memcpy(&layouts[i], &i_shader->graphics.descriptor_set_layouts[0], sizeof(VkDescriptorSetLayout));
-
-                    {
-                        alloc_info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-                        alloc_info->descriptorPool = i_shader->graphics.sets_data[0].descriptor_pool;
-                        alloc_info->descriptorSetCount = 2;
-                        alloc_info->pSetLayouts = layouts;
-                    }
-
-                    i_shader->graphics.sets_data[0].descriptor_sets = calloc(2, sizeof(VkDescriptorSet));
-
-                    if (vkAllocateDescriptorSets(instance->vulkan.device, alloc_info, i_shader->graphics.sets_data[0].descriptor_sets) != VK_SUCCESS) {
-                        g_print_error("[G10] [Shader] Failed to allocate descriptor sets in call to function \"%s\"\n", __FUNCTION__);
-                    }
-
-                    for (size_t i = 0; i < 2; i++)
-                    {
-                        VkDescriptorBufferInfo* buffer_info = calloc(1, sizeof(VkDescriptorBufferInfo));
-                        VkWriteDescriptorSet* descriptor_write = calloc(1, sizeof(VkWriteDescriptorSet));
-
-                        buffer_info->buffer = i_shader->graphics.uniform_buffers[i];
-                        buffer_info->offset = 0;
-                        buffer_info->range = 3 * sizeof(mat4) + sizeof(vec3);
-
-                        descriptor_write->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                        descriptor_write->dstSet = i_shader->graphics.sets_data[0].descriptor_sets[i];
-                        descriptor_write->dstBinding = 0;
-                        descriptor_write->dstArrayElement = 0;
-                        descriptor_write->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                        descriptor_write->descriptorCount = 1;
-                        descriptor_write->pBufferInfo = buffer_info;
-
-                        vkUpdateDescriptorSets(instance->vulkan.device, 1, descriptor_write, 0, 0);
-                    }
-                }
-            }
-    }
-
-    }
-
-    // Construct the compute shader
-    else if ( compute_shader_path ) 
-    {
-
-        // Load the compute shader binary
-        {
-            size_t compute_shader_data_len = g_load_file(compute_shader_path, 0, true);
-            char* compute_shader_data = calloc(compute_shader_data_len + 1, sizeof(char));
-
-            g_load_file(compute_shader_path, compute_shader_data, true);
-
-            // Create a shader module
-            create_shader_module(compute_shader_data, compute_shader_data_len, &i_shader->compute.compute_shader_module);
-
-            free(compute_shader_data);
-
-        }
-
-        // Set up the compute shader pipeline
-        {
-            VkComputePipelineCreateInfo compute_pipeline_create_info = { 0 };
-
-            compute_pipeline_create_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-            compute_pipeline_create_info.flags = 0;
-            compute_pipeline_create_info.stage;
-            compute_pipeline_create_info.layout = 0;
-            compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
-            compute_pipeline_create_info.basePipelineIndex = 0;
-        }
-
-    }
-
-    // TODO: Construct the raytracing shader
-    // else if ( ray_generation_shader ) ...
-
-    // Cache the shader
-    g_cache_shader(instance, i_shader);
-
-    exit:
-    return 1;
-
-    // TODO: Error handling
-    no_mem:
-    push_constant_is_too_large:
-        return 0;
-        
 }
 
-int use_shader                      ( GXShader_t   *shader )
+int create_shader_module ( char *code, size_t code_len, VkShaderModule *shader_module )
 {
-    GXInstance_t *instance = g_get_active_instance();
-    VkViewport    viewport = { 0 };
-    VkRect2D      scissor  = { 0 };
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( code          == (void *) 0 ) goto no_code;
+            if ( code_len      == (void *) 0 ) goto no_code_len;
+            if ( shader_module == (void *) 0 ) goto no_shader_module;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t             *p_instance                = g_get_active_instance();
+    VkShaderModuleCreateInfo  shader_module_create_info = 
+    { 
+        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = code_len,
+        .pCode    = (u32*)code
+    };
+    VkResult r = vkCreateShaderModule(p_instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module);
+    
+    // Error checking
+    switch ( r ) {
+        case VK_SUCCESS:
+            goto success;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            goto vulkan_out_of_host_memory;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            goto vulkan_out_of_device_memory;
+        case VK_ERROR_INVALID_SHADER_NV:
+            goto vulkan_invalid_shader_NV;
+        default:
+            goto vulkan_unknown;
+    }
+
+    success:
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_code:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"code\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_code_len:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"code_len\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_shader_module:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"shader_module\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+
+        // Vulkan errors
+        {
+            vulkan_out_of_host_memory:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to \"vkCreateShaderModule\" returned out of host memory, in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            vulkan_out_of_device_memory:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to \"vkCreateShaderModule\" returned out of device memory,  in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            vulkan_invalid_shader_NV:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to \"vkCreateShaderModule\" returned invalid shader NV, in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            vulkan_unknown:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to \"vkCreateShaderModule\" returned an unknown error, in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int create_shader ( GXShader_t **pp_shader )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXShader_t *p_shader = calloc(1, sizeof(GXShader_t));
+
+    // Check memory
+    if ( p_shader == (void *) 0 )
+        goto no_mem;
+
+    // Return a pointer to the caller
+    *pp_shader = p_shader;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
+}
+
+int load_shader ( GXShader_t **pp_shader, const char *path )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( path      == (void *) 0 ) goto no_path;
+        #endif
+    }
+
+    // Initialized data
+    size_t  len  = g_load_file(path, (void *) 0, true);
+    char   *text = calloc(len + 1, sizeof(char));
+    
+    // Error check
+    if ( text == (void *) 0 )
+        goto no_mem;
+    
+    // Load a file
+    if ( g_load_file(path, text, true) == 0 )
+        goto failed_to_load_file;
+    
+    // Load a shader as JSON text
+    if ( load_shader_as_json(pp_shader, text) == 0 )
+        goto failed_to_load_shader_as_json_text;
+
+    // Clean the scope
+    free(text);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            no_path:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10 errors
+        {
+            failed_to_load_file:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+            failed_to_load_shader_as_json_text:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load shader as JSON text in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
+}
+
+int load_shader_as_json ( GXShader_t **pp_shader, char *text )
+{
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( text      == (void *) 0 ) goto no_text;
+        #endif
+    }
+
+    // Initialized data
+    JSONValue_t *p_value = 0;
+
+    // Parse the JSON text into a JSON value
+    if ( parse_json_value(text, 0, &p_value) == 0 )
+        goto no_mem;
+        
+    // Load a shader as JSON text
+    if ( load_shader_as_json_value(pp_shader, p_value) == 0 )
+        goto failed_to_load_shader_as_json_value;
+
+    // Clean the scope
+    free(text);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            no_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10 errors
+        {
+            failed_to_parse_json:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+            failed_to_load_shader_as_json_value:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load shader as JSON value in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
+}
+
+int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
+{
+    
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( p_value   == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+    // Initialized dataS
+    GXInstance_t  *p_instance                  = g_get_active_instance();
+    GXShader_t    *p_shader                    = 0;
+    JSONValue_t   *p_type                      = 0,
+                  *p_name                      = 0,
+                  *p_vertex_shader_path        = 0,
+                  *p_geometry_shader_path      = 0,
+                  *p_fragment_shader_path      = 0,
+                  *p_compute_shader_path       = 0,
+                  *p_rasterizer_json           = 0,
+                  *p_json_data                 = 0,
+                  *p_vertex_shader_json_data   = 0,
+                  *p_geometry_shader_json_data = 0,
+                  *p_fragment_shader_json_data = 0,
+                  *p_compute_shader_json_data  = 0,
+                  *p_vertex_groups             = 0,
+                  *p_attachments               = 0,
+                  *p_sets                      = 0,
+                  *p_push_constant_text        = 0;
+    size_t         set_count                   = 0;
+
+    // Load a shader as a JSON object
+    if ( p_value->type == JSONobject )
+    {
+
+        // Get the pipeline type
+        p_type = dict_get(p_value->object, "type");
+
+        // Was a pipeline type provided?
+        if ( p_type )
+        {
+
+            // Get a function pointer from the lookup table
+            int (*pipeline_load_as_json_value)(GXShader_t **pp_shader, JSONValue_t *p_value) = dict_get(pipeline_loader_lookup_tables, p_type->string);
+
+            // If the function is valid...
+            if ( pipeline_load_as_json_value )
+
+                // ... call the function
+                if ( pipeline_load_as_json_value(pp_shader, p_value) == 0 )
+                    goto failed_to_parse_shader_pipeline;
+        }
+        else
+            goto unrecognized_type;
+    }
+
+    // Load the shader as a path
+    else if ( p_value->type == JSONstring )
+    {
+
+        // Load the shader as a path
+        if ( load_shader(pp_shader, p_value->string) == 0 )
+            goto failed_to_load_shader_as_path;
+    }
+    else
+        goto wrong_type;
+
+    // Success
+    return 1;
+
+    // TODO: Categorize
+    wrong_type:
+    unrecognized_type:
+        return 0;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10 errors
+        {
+
+            failed_to_load_shader_as_json_value:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load shader as JSON value in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+                // Error
+
+            failed_to_load_shader_as_path:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load shader from path in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+            
+            // TODO: More specific
+            failed_to_parse_shader_pipeline:
+                #ifndef NDEBUG
+					g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
+}
+
+int use_shader ( GXShader_t *p_shader )
+{
+
+    // Argument errors
+    {
+        #ifndef NDEBUG
+            if ( p_shader )
+                goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    VkRect2D scissor =
+    {
+        .offset.x = 0,
+        .offset.y = 0,
+        .extent   = p_instance->vulkan.swap_chain_extent
+    };
+    VkViewport viewport = 
+    {
+        .x        = 0.f,
+        .y        = 0.f,
+        .width    = (float)p_instance->vulkan.swap_chain_extent.width,
+        .height   = (float)p_instance->vulkan.swap_chain_extent.height,
+        .minDepth = 0.f,
+        .maxDepth = 1.f
+    };
 
     // Use the shader
-    vkCmdBindPipeline(instance->vulkan.command_buffers[instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->graphics.pipeline);
+    vkCmdBindPipeline(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_shader->graphics.pipeline);
     
     // Set the viewport
-    {
-        viewport.x        = 0.f;
-        viewport.y        = 0.f;
-        viewport.width    = (float)instance->vulkan.swap_chain_extent.width;
-        viewport.height   = (float)instance->vulkan.swap_chain_extent.height;
-        viewport.minDepth = 0.f;
-        viewport.maxDepth = 1.f;
-
-        vkCmdSetViewport(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &viewport);
-    }
+    vkCmdSetViewport(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &viewport);
     
-    // Set the scissor
+    // Set the scissors
+    vkCmdSetScissor(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &scissor);
+
+    // Success
+    return 1;
+
+    // Error handling
     {
-        scissor.offset.x = 0;
-        scissor.offset.y = 0;
 
-        scissor.extent   = instance->vulkan.swap_chain_extent;
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-        vkCmdSetScissor(instance->vulkan.command_buffers[instance->vulkan.current_frame], 0, 1, &scissor);
+                // Error
+                return 0;
+        }
     }
-
-    return 0;
 }
 
-int update_shader_push_constant     ( GXShader_t   *shader )
+/*
+int update_shader_push_constant ( GXShader_t *shader )
 {
     size_t offset = 0;
 
@@ -1407,7 +896,7 @@ int update_shader_push_constant     ( GXShader_t   *shader )
     return 1;
 }
 
-int add_shader_push_constant_getter ( char         *getter_name, int(*getter_function)(void*) )
+int add_shader_push_constant_getter ( char *getter_name, int(*getter_function)(void*) )
 {
 
     // Argument errors
@@ -1441,11 +930,15 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
             no_getter_function:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -1455,6 +948,8 @@ int add_shader_push_constant_getter ( char         *getter_name, int(*getter_fun
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to add getter in call to function \"%s\". There is already a getter called \"%s\"\n", __FUNCTION__, getter_name);
                 #endif
+
+                // Error
                 return 0;
         }
     }
@@ -1472,9 +967,9 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     }
 
     // Initialized data
-    GXInstance_t  *instance  = g_get_active_instance();
-    GXCamera_t    *camera    = instance->context.scene->active_camera;
-    GXTransform_t *transform = p_entity->transform;
+    GXInstance_t  *p_instance = g_get_active_instance();
+    GXCamera_t    *camera     = p_instance->context.scene->active_camera;
+    GXTransform_t *transform  = p_entity->transform;
 
     mat4 uniform_buffer[4];
 
@@ -1501,9 +996,9 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     
     void *data;
 
-    vkMapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
+    vkMapMemory(p_instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[p_instance->vulkan.current_frame], 0, sizeof(vec3) + 3 * sizeof(mat4), 0, &data);
     memcpy(data, uniform_buffer, sizeof(vec3) + 3*sizeof(mat4));
-    vkUnmapMemory(instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[instance->vulkan.current_frame]);
+    vkUnmapMemory(p_instance->vulkan.device, p_entity->shader->graphics.uniform_buffers_memory[p_instance->vulkan.current_frame]);
 
     return 1;
 
@@ -1520,20 +1015,1895 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
         }
     }
 }
-
-int destroy_shader                  ( GXShader_t   *shader )
+*/
+int destroy_shader ( GXShader_t *shader )
 {
 
     // TODO: Cache destruction
-    GXInstance_t* instance = g_get_active_instance();
+    GXInstance_t* p_instance = g_get_active_instance();
 
-    vkDestroyPipeline(instance->vulkan.device, shader->graphics.pipeline, 0);
-    vkDestroyPipelineLayout(instance->vulkan.device, shader->graphics.pipeline_layout, 0);
+    vkDestroyPipeline(p_instance->vulkan.device, shader->graphics.pipeline, 0);
+    vkDestroyPipelineLayout(p_instance->vulkan.device, shader->graphics.pipeline_layout, 0);
 
-    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
-    vkDestroyShaderModule(instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
+    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
+    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
 
     free(shader->name);
     free(shader);
     return 1;
+}
+
+int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
+{
+    // Argument notes
+    // p_value will always be valid. p_value->type will always be JSONobject
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t  *p_instance                            = g_get_active_instance();
+    GXShader_t    *p_shader                              = 0;
+    JSONValue_t   *p_name                                = 0,
+                  *p_vertex_shader_path                  = 0,
+                  *p_tessellation_control_shader_path    = 0,
+                  *p_tessellation_evaluation_shader_path = 0,
+                  *p_task_shader_path                    = 0,
+                  *p_mesh_shader_path                    = 0,
+                  *p_geometry_shader_path                = 0,
+                  *p_fragment_shader_path                = 0,
+                  *p_multisampler                        = 0,
+                  *p_in                                  = 0,
+                  *p_attachments                         = 0,
+                  *p_sets                                = 0,
+                  *p_push_constant                       = 0,
+                  *p_rasterizer                          = 0;
+
+    // Parse the JSON value 
+    {
+
+        p_name                                = dict_get(p_value->object, "name");
+        p_vertex_shader_path                  = dict_get(p_value->object, "vertex shader path");
+        p_tessellation_control_shader_path    = dict_get(p_value->object, "tessellation control shader path");
+        p_tessellation_evaluation_shader_path = dict_get(p_value->object, "tessellation evaluation shader path");
+        p_geometry_shader_path                = dict_get(p_value->object, "geometry shader path");
+        p_task_shader_path                    = dict_get(p_value->object, "task shader path");
+        p_mesh_shader_path                    = dict_get(p_value->object, "mesh shader path");
+        p_fragment_shader_path                = dict_get(p_value->object, "fragment shader path");
+        p_multisampler                        = dict_get(p_value->object, "multisampler");
+        p_in                                  = dict_get(p_value->object, "in");
+        p_attachments                         = dict_get(p_value->object, "attachments");
+        p_sets                                = dict_get(p_value->object, "sets");
+        p_push_constant                       = dict_get(p_value->object, "push constant");
+        p_rasterizer                          = dict_get(p_value->object, "rasterizer");
+
+        // Check properties
+        if ( !(p_name && p_fragment_shader_path ) )
+            goto missing_properties;
+
+        if ( p_vertex_shader_path && p_task_shader_path && p_mesh_shader_path )
+            goto missing_properties;
+        
+        if ( ( (bool)(p_vertex_shader_path) ^ (bool)(p_task_shader_path && p_mesh_shader_path) ) == 0 )
+            goto missing_properties;
+    }
+
+    // TODO: Cache check
+
+    // Construct the shader
+    {
+
+        // Allocate memory for a shader
+        if ( create_shader(&p_shader) == 0 )
+            goto failed_to_allocate_shader;
+
+        // Set the shader type
+        p_shader->type == g10_pipeline_graphics;
+
+        // Set the name
+        if(p_name->type == JSONstring){
+
+            // Initialized data
+            size_t name_len = strlen(p_name->string);
+
+            // Allocate memory for the name
+            p_shader->name = calloc(name_len + 1, sizeof(char));
+
+            // Error check
+            if ( p_shader->name == (void *) 0 )
+                goto no_mem;
+
+            // Copy the name
+            strncpy(p_shader->name, p_name->string, name_len);
+        }
+        else
+            goto name_wrong_type;
+
+        // Load the shader binaries
+        {
+
+            // Load the vertex shader binary
+            if ( p_vertex_shader_path )
+            {
+
+                // Parse the vertex shader path as a string
+                if ( p_vertex_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t vertex_shader_data_len = g_load_file(p_vertex_shader_path->string, 0, true);
+                    char* vertex_shader_data = calloc(vertex_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( vertex_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the vertex shader binary file
+                    if ( g_load_file(p_vertex_shader_path->string, vertex_shader_data, true) == 0 )
+                        goto failed_to_load_vertex_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(vertex_shader_data, vertex_shader_data_len, &p_shader->graphics.vertex_shader_module) == 0 )
+                        goto failed_to_create_vertex_shader_module; 
+
+                    // Clean the scope
+                    free(vertex_shader_data);
+                }
+                else
+                    goto wrong_vertex_shader_path_type;
+            }
+
+            // Load tessellation control shader
+            if ( p_tessellation_control_shader_path )
+            {
+
+                // Parse the tessellation control shader path as a string
+                if ( p_tessellation_control_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t tessellation_control_shader_data_len = g_load_file(p_tessellation_control_shader_path->string, 0, true);
+                    char* tessellation_control_shader_data = calloc(tessellation_control_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( tessellation_control_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the tessellation_control shader binary file
+                    if ( g_load_file(p_tessellation_control_shader_path->string, tessellation_control_shader_data, true) == 0 )
+                        goto failed_to_load_tessellation_control_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(tessellation_control_shader_data, tessellation_control_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 )
+                        goto failed_to_create_tessellation_control_shader_module; 
+
+                    // Clean the scope
+                    free(tessellation_control_shader_data);
+                }
+                else
+                    goto wrong_tessellation_control_shader_path_type;
+            }
+
+            // Load tessellation evaluation shader 
+            if ( p_tessellation_evaluation_shader_path )
+            {
+
+                // Parse the tessellation evaluation shader path as a string
+                if ( p_tessellation_evaluation_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t tessellation_evaluation_shader_data_len = g_load_file(p_tessellation_evaluation_shader_path->string, 0, true);
+                    char* tessellation_evaluation_shader_data = calloc(tessellation_evaluation_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( tessellation_evaluation_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the tessellation evaluation shader binary file
+                    if ( g_load_file(p_tessellation_evaluation_shader_path->string, tessellation_evaluation_shader_data, true) == 0 )
+                        goto failed_to_load_tessellation_evaluation_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(tessellation_evaluation_shader_data, tessellation_evaluation_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 )
+                        goto failed_to_create_tessellation_evaluation_shader_module; 
+
+                    // Clean the scope
+                    free(tessellation_evaluation_shader_data);
+                }
+                else
+                    goto wrong_tessellation_evaluation_shader_path_type;
+            }
+
+            // Load the geometry shader binary
+            if ( p_geometry_shader_path )
+            {
+
+                // Parse the geometry shader path as a string
+                if ( p_geometry_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t geometry_shader_data_len = g_load_file(p_geometry_shader_path->string, 0, true);
+                    char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( geometry_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the geometry shader binary file
+                    if ( g_load_file(p_geometry_shader_path->string, geometry_shader_data, true) == 0 )
+                        goto failed_to_load_geometry_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(geometry_shader_data, geometry_shader_data_len, &p_shader->graphics.geometry_shader_module) == 0 )
+                        goto failed_to_create_geometry_shader_module; 
+
+                    // Clean the scope
+                    free(geometry_shader_data);
+                }
+                else
+                    goto wrong_geometry_shader_path_type;
+            }
+
+            // Load the task shader binary
+            if ( p_task_shader_path )
+            {
+
+                // Parse the task shader path as a string
+                if ( p_task_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t task_shader_data_len = g_load_file(p_task_shader_path->string, 0, true);
+                    char* task_shader_data = calloc(task_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( task_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the task shader binary file
+                    if ( g_load_file(p_task_shader_path->string, task_shader_data, true) == 0 )
+                        goto failed_to_load_task_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(task_shader_data, task_shader_data_len, &p_shader->graphics.task_shader_module) == 0 )
+                        goto failed_to_create_task_shader_module; 
+
+                    // Clean the scope
+                    free(task_shader_data);
+                }
+                else
+                    goto wrong_task_shader_path_type;
+            }
+
+            // Load the mesh shader binary
+            if ( p_mesh_shader_path )
+            {
+
+                // Parse the mesh shader path as a string
+                if ( p_mesh_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t mesh_shader_data_len = g_load_file(p_mesh_shader_path->string, 0, true);
+                    char* mesh_shader_data = calloc(mesh_shader_data_len, sizeof(char));
+
+                    // Error check
+                    if ( mesh_shader_data == (void *) 0 )
+                        goto no_mem;
+
+                    // Load the mesh shader binary file
+                    if ( g_load_file(p_mesh_shader_path->string, mesh_shader_data, true) == 0 )
+                        goto failed_to_load_mesh_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(mesh_shader_data, mesh_shader_data_len, &p_shader->graphics.mesh_shader_module) == 0 )
+                        goto failed_to_create_mesh_shader_module; 
+
+                    // Clean the scope
+                    free(mesh_shader_data);
+                }
+                else
+                    goto wrong_mesh_shader_path_type;
+            }
+
+            // Load the fragment shader binary
+            if ( p_fragment_shader_path )
+            {
+
+                // Parse the fragment shader path as a string
+                if ( p_fragment_shader_path->type == JSONstring )
+                {
+                    // Initialized data
+                    size_t fragment_shader_data_len = g_load_file(p_fragment_shader_path->string, 0, true);
+                    char* fragment_shader_data = calloc(fragment_shader_data_len + 1, sizeof(char));
+                    
+                    // Error check
+                    if ( fragment_shader_data == (void *) 0 )
+                        goto no_mem;
+                    
+                    // Load the fragment shader binary file
+                    if ( g_load_file(p_fragment_shader_path->string, fragment_shader_data, true) == 0 ) 
+                        goto failed_to_load_fragment_shader_binary;
+
+                    // Create a shader module
+                    if ( create_shader_module(fragment_shader_data, fragment_shader_data_len, &p_shader->graphics.fragment_shader_module) == 0 )
+                        goto failed_to_create_fragment_shader_module; 
+
+                    // Clean the scope
+                    free(fragment_shader_data);
+                }
+                else
+                    goto wrong_fragment_shader_path_type;
+            }
+        }
+
+        // Construct the graphics shader
+        {
+            
+            // Set up the shader stages
+            {
+                // Initialized data
+                VkPipelineShaderStageCreateInfo        *shader_stages                       = calloc(8, sizeof(VkPipelineShaderStageCreateInfo));
+                size_t                                  shader_stage_iterator               = 0,
+                                                        attachment_count                    = 0;
+                VkPipelineVertexInputStateCreateInfo    vertex_input_info_create_info       = { 0 };
+                VkPipelineInputAssemblyStateCreateInfo  input_assembly_create_info          = { 0 };
+                VkPipelineViewportStateCreateInfo       viewport_state_create_info          = { 0 };
+                VkPipelineRasterizationStateCreateInfo  rasterizer_create_info              = { 0 };
+                VkPipelineMultisampleStateCreateInfo    multisampling_create_info           = { 0 };
+                VkPipelineColorBlendAttachmentState    *color_blend_attachment_create_info  = 0;
+                VkPipelineColorBlendStateCreateInfo     color_blend_create_info             = { 0 };
+                VkPipelineDepthStencilStateCreateInfo   depth_stencil_state_create_info     = { 0 };
+                VkPipelineDynamicStateCreateInfo        dynamic_state_create_info           = { 0 };
+                VkPipelineLayoutCreateInfo              pipeline_layout_create_info         = { 0 };
+                VkDynamicState                          dynamic_states[2]                   = { { 0 }, { 0 } };
+                VkPushConstantRange                    *push_constant                       = calloc(1, sizeof(VkPushConstantRange));
+                VkGraphicsPipelineCreateInfo            graphics_pipeline_create_info       = { 0 };
+                VkVertexInputBindingDescription         binding_description                 = { 0 };
+                VkViewport                              viewport                            = { 0 };
+                VkRect2D                                scissor                             = { 0 };
+                VkVertexInputAttributeDescription      *vertex_input_attribute_descriptions = 0;
+                VkDescriptorSetLayoutCreateInfo        *descriptor_set_layout               = 0;
+
+                //////////////////////////////
+                // Set up the shader stages //
+                //////////////////////////////
+                {
+
+                    // Set up the vertex shader
+                    if (p_shader->graphics.vertex_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_VERTEX_BIT,
+                            .module = p_shader->graphics.vertex_shader_module,
+                            .pName  = "main"
+                        };
+
+                    }
+
+                    // Set up the tessellation control shader
+                    if (p_shader->graphics.tessellation_control_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+                            .module = p_shader->graphics.tessellation_control_shader_module,
+                            .pName  = "main"
+                        };
+                    }
+
+                    // Set up the tessellation evaluation shader
+                    if (p_shader->graphics.tessellation_evaluation_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                            .module = p_shader->graphics.tessellation_evaluation_shader_module,
+                            .pName  = "main" 
+                        };
+                    }
+
+                    // Set up the geometry shader
+                    if (p_shader->graphics.geometry_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_GEOMETRY_BIT,
+                            .module = p_shader->graphics.geometry_shader_module,
+                            .pName  = "main"
+                        };
+                    }
+
+                    // Set up the task shader
+                    if (p_shader->graphics.task_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_TASK_BIT_EXT,
+                            .module = p_shader->graphics.task_shader_module,
+                            .pName  = "main"
+                        };
+                    }
+
+                    // Set up the mesh shader
+                    if (p_shader->graphics.mesh_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_MESH_BIT_EXT,
+                            .module = p_shader->graphics.mesh_shader_module,
+                            .pName  = "main"
+                        };
+                    }
+
+                    // Set up the fragment shader
+                    if (p_shader->graphics.fragment_shader_module)
+                    {
+                        shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
+                        {
+                            .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                            .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
+                            .module = p_shader->graphics.fragment_shader_module,
+                            .pName  = "main"
+                        };
+                    }
+
+                }
+            
+                ///////////////////////////////////
+                // Set up the vertex input state //
+                ///////////////////////////////////
+                if ( p_in )
+                {
+
+                    // Initialized data
+                    size_t vertex_group_count        = 0,
+                           stride                    = 0,
+                           binding_description_count = 0;
+
+                    // Did the user specify vertex groups?
+                    {
+
+                        // Initialized data
+                        size_t        vertex_group_count = 0;
+                        JSONValue_t **pp_vertex_groups   = 0;
+
+                        // Get the contents of the array
+                        {
+
+                            // Get the array size
+                            array_get(p_in->list, 0, &vertex_group_count);
+
+                            // Allocate for vertex group JSON values
+                            pp_vertex_groups = calloc(vertex_group_count+1, sizeof(JSONValue_t *));
+
+                            // Error checking
+                            if ( pp_vertex_groups == (void *) 0 )
+                                goto no_mem;
+
+                            // Get the array contents
+                            array_get(p_in->list, pp_vertex_groups, 0);
+                        }
+
+                        // Allocate vertex attributes
+                        vertex_input_attribute_descriptions = calloc(vertex_group_count, sizeof(VkVertexInputAttributeDescription));
+
+                        // Iterate over each vertex group
+                        for (size_t i = 0; i < vertex_group_count; i++)
+                        {
+
+                            // Initialized data
+                            dict        *vertex_group               = 0;
+                            char        *input_attribute_type       = 0;
+                            signed       input_attribute_location   = 0;
+                            JSONValue_t *p_vertex_group             = pp_vertex_groups[i],
+                                        *p_input_attribute_type     = 0,
+                                        *p_input_attribute_location = 0;
+
+                            // Parse the JSON value
+                            if ( p_vertex_group->type == JSONobject ){
+
+                                p_input_attribute_type     = dict_get(p_vertex_group->object, "type");
+                                p_input_attribute_location = dict_get(p_vertex_group->object, "location");
+
+                                // Check properties
+                                if ( ! ( p_input_attribute_type && p_input_attribute_location ) )
+                                    goto wrong_properties;
+
+                            }
+                            else
+                                goto wrong_type;
+
+                            input_attribute_type     = p_input_attribute_type->string;
+                            input_attribute_location = p_input_attribute_location->integer;
+
+                            // Construct a vertex input attribute
+                            vertex_input_attribute_descriptions[i] = (VkVertexInputAttributeDescription)
+                            {
+                                .binding  = 0,
+                                .location = input_attribute_location,
+                                .format   = (VkFormat)dict_get(format_types, input_attribute_type),
+                                .offset   = (u32)stride
+                            };
+
+                            // Accumulate stride
+                            stride += (size_t) dict_get(format_sizes, input_attribute_type);
+                        }
+
+                        // Construct a binding description
+                        binding_description = (VkVertexInputBindingDescription)
+                        {
+                            .binding   = 0,
+                            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+                            .stride    = (u32)stride
+                        };
+                    }
+                    
+                    // Set up the vertex input 
+                    vertex_input_info_create_info = (VkPipelineVertexInputStateCreateInfo)
+                    {
+                        .sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+                        .pNext                           = 0,
+                        .flags                           = 0,
+                        .vertexBindingDescriptionCount   = (u32)binding_description_count,
+                        .pVertexBindingDescriptions      = &binding_description,
+                        .vertexAttributeDescriptionCount = vertex_group_count,
+                        .pVertexAttributeDescriptions    = vertex_input_attribute_descriptions
+                    };
+                }
+
+                ///////////////////////////////
+                // Set up the input assembly //
+                ///////////////////////////////
+                input_assembly_create_info = (VkPipelineInputAssemblyStateCreateInfo) {
+                    .sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                    .pNext                  = 0,
+                    .flags                  = 0,
+                    .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                    .primitiveRestartEnable = VK_FALSE,
+                };
+
+                ///////////////////////////////
+                // Set up the viewport state //
+                ///////////////////////////////
+                {
+
+                    // Set up the viewport
+                    viewport = (VkViewport) {
+                        .x        = 0.f,
+                        .y        = 0.f,
+                        .width    = (float)p_instance->vulkan.swap_chain_extent.width,
+                        .height   = (float)p_instance->vulkan.swap_chain_extent.height,
+                        .minDepth = 0.0f,
+                        .maxDepth = 1.0f
+                    };
+
+                    // Set up the scissor
+                    scissor = (VkRect2D) {
+                        .offset.x = 0,
+                        .offset.y = 0,
+                        .extent   = p_instance->vulkan.swap_chain_extent
+                    };
+
+                    // Populate the viewport state create struct
+                    viewport_state_create_info = (VkPipelineViewportStateCreateInfo) {
+                        .sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+                        .viewportCount = 1,
+                        .pViewports    = &viewport,
+                        .scissorCount  = 1,
+                        .pScissors     = &scissor
+                    };
+                }
+
+                ///////////////////////////
+                // Set up the rasterizer //
+                ///////////////////////////
+                if ( p_rasterizer )
+                {
+                    
+                    // Parse the multisampler as a JSON object
+                    if ( p_rasterizer->type == JSONobject )
+                    {
+
+                        // Initialized data
+                        VkPolygonMode polygon_mode                 = VK_POLYGON_MODE_FILL;
+                        JSONValue_t  *p_line_width                 = 0,
+                                     *p_depth_bias_constant_factor = 0,
+                                     *p_depth_bias_clamp           = 0,
+                                     *p_depth_bias_slope_factor    = 0,
+                                     *p_depth_clamp_enable         = 0,
+                                     *p_rasterizer_discard_enable  = 0,
+                                     *p_clockwise                  = 0,
+                                     *p_depth_bias_enable          = 0;
+                        float         line_width                   = 1.f,
+                                      depth_bias_constant_factor   = 0.f,
+                                      depth_bias_clamp             = 0.f,
+                                      depth_bias_slope_factor      = 0.f;
+                        bool          depth_clamp_enable           = false,
+                                      rasterizer_discard_enable    = false,
+                                      clockwise                    = false,
+                                      depth_bias_enable            = false;
+
+                        // Parse the rasterizer 
+                        {
+
+                            if ( p_line_width )
+                            {
+                                if ( p_line_width->type == JSONfloat )
+                                    line_width = p_line_width->floating;
+                                else
+                                    goto no_rasterizer_line_width;
+                            }
+
+                            if ( p_depth_bias_constant_factor )
+                            {
+                                if ( p_depth_bias_constant_factor->type == JSONfloat )
+                                    line_width = p_depth_bias_constant_factor->floating;
+                                else
+                                    goto no_rasterizer_depth_bias_constant_factor;
+                            }
+
+                            if ( p_depth_bias_clamp )
+                            {
+                                if ( p_depth_bias_clamp->type == JSONfloat )
+                                    line_width = p_depth_bias_clamp->floating;
+                                else
+                                    goto no_rasterizer_depth_bias_clamp;
+                            }
+
+                            if ( p_depth_bias_slope_factor )
+                            {
+                                if ( p_depth_bias_slope_factor->type == JSONfloat )
+                                    line_width = p_depth_bias_slope_factor->floating;
+                                else
+                                    goto no_rasterizer_depth_bias_slope_factor;
+                            }
+
+                            if ( p_depth_clamp_enable )
+                            {
+                                if ( p_depth_clamp_enable->type == JSONboolean )
+                                    depth_clamp_enable = p_depth_clamp_enable->boolean;
+                                else
+                                    goto no_depth_clamp_enable;
+                            }
+
+                            if ( p_rasterizer_discard_enable )
+                            {
+                                if ( p_rasterizer_discard_enable->type == JSONboolean )
+                                    rasterizer_discard_enable = p_rasterizer_discard_enable->boolean;
+                                else
+                                    goto no_rasterizer_rasterizer_discard_enable;
+                            }
+
+                            if ( p_clockwise )
+                            {
+                                if ( p_clockwise->type == JSONboolean )
+                                    clockwise = p_clockwise->boolean;
+                                else
+                                    goto no_rasterizer_clockwise;
+                            }
+
+                            if ( p_depth_bias_enable )
+                            {
+                                if ( p_depth_bias_enable->type == JSONboolean )
+                                    depth_bias_enable = p_depth_bias_enable->boolean;
+                                else
+                                    goto no_rasterizer_depth_bias_enable;
+                            }
+
+                        }
+                        
+                        // Populate the rasterizer create struct
+                        rasterizer_create_info = (VkPipelineRasterizationStateCreateInfo) {
+                            .sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+                            .pNext                   = 0,
+                            .flags                   = 0,
+                            .depthClampEnable        = depth_clamp_enable,
+                            .rasterizerDiscardEnable = rasterizer_discard_enable,
+                            .polygonMode             = polygon_mode,
+                            .cullMode                = VK_CULL_MODE_FRONT_BIT,
+                            .frontFace               = clockwise,
+                            .depthBiasEnable         = depth_bias_enable,
+                            .depthBiasConstantFactor = depth_bias_constant_factor,
+                            .depthBiasClamp          = depth_bias_clamp,
+                            .depthBiasSlopeFactor    = depth_bias_slope_factor,
+                            .lineWidth               = line_width,
+                        };
+                    }
+                    else
+                        goto wrong_rasterizer_type;
+                }
+
+                // Default
+                else
+                {
+                    // Populate the rasterizer create struct
+                    rasterizer_create_info = (VkPipelineRasterizationStateCreateInfo) {
+                        .sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+                        .pNext                   = 0,
+                        .flags                   = 0,
+                        .depthClampEnable        = false,
+                        .rasterizerDiscardEnable = false,
+                        .polygonMode             = VK_POLYGON_MODE_FILL,
+                        .cullMode                = VK_CULL_MODE_FRONT_BIT,
+                        .frontFace               = VK_FRONT_FACE_CLOCKWISE,
+                        .depthBiasEnable         = true,
+                        .depthBiasConstantFactor = 0.0,
+                        .depthBiasClamp          = 0.0,
+                        .depthBiasSlopeFactor    = 0.0,
+                        .lineWidth               = 1.0
+                    };
+                }
+
+                /////////////////////////////
+                // Set up the multisampler //
+                /////////////////////////////
+                if ( p_multisampler )
+                {
+
+                    // Parse the multisampler as a JSON object
+                    if ( p_multisampler->type == JSONobject )
+                    {
+
+                        // Initialized data
+                        JSONValue_t *p_samples                  = dict_get(p_multisampler->object, "samples"),
+                                    *p_sample_shading_enable    = dict_get(p_multisampler->object, "sample shading enable"),
+                                    *p_minimum_sample_shading   = dict_get(p_multisampler->object, "minimum sample shading"),
+                                    *p_alpha_to_coverage_enable = dict_get(p_multisampler->object, "alpha to coverage enable"),
+                                    *p_alpha_to_one_enable      = dict_get(p_multisampler->object, "alpha to one enable");
+                        bool         sample_shading_enable      = false,
+                                     alpha_to_coverage_enable   = false,
+                                     alpha_to_one_enable        = false;
+                        signed       samples                    = 1;
+                        float        minimum_sample_shading     = 0.0;
+
+                        // Parse the multisampler 
+                        {
+
+                            if ( p_samples )
+                            {
+                                if ( p_samples->type == JSONinteger )
+                                    samples = p_samples->integer;
+                                else
+                                    goto no_multisampler_samples;
+                            }
+
+                            if ( p_sample_shading_enable )
+                            {
+                                if ( p_sample_shading_enable->type == JSONboolean )
+                                    sample_shading_enable = p_sample_shading_enable->integer;
+                                else
+                                    goto no_multisampler_sample_shading_enable;
+                            }
+
+                            if ( p_alpha_to_coverage_enable )
+                            {
+                                if ( p_alpha_to_coverage_enable->type == JSONboolean )
+                                    alpha_to_coverage_enable = p_alpha_to_coverage_enable->integer;
+                                else
+                                    goto no_multisampler_alpha_to_coverage_enable;
+                            }
+
+                            if ( p_alpha_to_one_enable )
+                            {
+                                if ( p_alpha_to_one_enable->type == JSONboolean )
+                                    alpha_to_one_enable = p_alpha_to_one_enable->integer;
+                                else
+                                    goto no_multisampler_alpha_to_one_enable;
+                            }
+
+                            if ( p_minimum_sample_shading )
+                            {
+                                if ( p_minimum_sample_shading->type == JSONfloat )
+                                    minimum_sample_shading = p_minimum_sample_shading->floating;
+                                else
+                                    goto no_minimum_sample_shading;
+                            }
+                        }
+
+                        multisampling_create_info  = (VkPipelineMultisampleStateCreateInfo) {
+                            .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                            .pNext                 = 0,
+                            .flags                 = 0,
+                            .rasterizationSamples  = samples,
+                            .sampleShadingEnable   = sample_shading_enable,
+                            .minSampleShading      = minimum_sample_shading,
+                            .pSampleMask           = 0,
+                            .alphaToCoverageEnable = alpha_to_coverage_enable,
+                            .alphaToOneEnable      = alpha_to_one_enable
+                        };
+                    }
+                    else
+                        goto wrong_multisampler_type;
+                }
+
+                // Default
+                else
+                {
+                    multisampling_create_info  = (VkPipelineMultisampleStateCreateInfo) {
+                            .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                            .pNext                 = 0,
+                            .flags                 = 0,
+                            .rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
+                            .sampleShadingEnable   = VK_FALSE,
+                            .minSampleShading      = 1.f,
+                            .pSampleMask           = 0,
+                            .alphaToCoverageEnable = 0,
+                            .alphaToOneEnable      = 0
+                        };
+                }
+                
+                //////////////////////////////////////
+                // Set up the depth / stencil state //
+                //////////////////////////////////////
+                depth_stencil_state_create_info = (VkPipelineDepthStencilStateCreateInfo) {
+                    .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                    .depthTestEnable       = VK_TRUE,
+                    .depthWriteEnable      = VK_TRUE,
+                    .depthCompareOp        = VK_COMPARE_OP_LESS,
+                    .depthBoundsTestEnable = VK_FALSE,
+                    .minDepthBounds        = 0.f,
+                    .maxDepthBounds        = 1.f,
+                    .stencilTestEnable     = VK_FALSE
+                };
+
+                //////////////////////////////////
+                // Set up the color blend state //
+                //////////////////////////////////
+                {
+                    color_blend_create_info = (VkPipelineColorBlendStateCreateInfo) {
+                        .sType           = 0, // VkStructureType                               
+                        .pNext           = 0, // const void*                                   
+                        .flags           = 0, // VkPipelineColorBlendStateCreateFlags          
+                        .logicOpEnable   = 0, // VkBool32                                      
+                        .logicOp         = 0, // VkLogicOp                                     
+                        .attachmentCount = 0, // uint32_t                                      
+                        .pAttachments    = 0, // const VkPipelineColorBlendAttachmentState*    
+                        .blendConstants  = 0  // float                                       
+                    };
+                }
+
+                //////////////////////////////
+                // Set up the dynamic state //
+                //////////////////////////////
+                {
+                    dynamic_states[0] = VK_DYNAMIC_STATE_VIEWPORT;
+                    dynamic_states[1] = VK_DYNAMIC_STATE_SCISSOR;
+
+                    dynamic_state_create_info = (VkPipelineDynamicStateCreateInfo)
+                    {
+                        .sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+                        .dynamicStateCount = 2,
+                        .pDynamicStates    = &dynamic_states
+                    };
+                }
+
+                ////////////////////////////////
+                // Create the pipeline layout //
+                ////////////////////////////////
+                {
+
+                    // Initialized data
+                    VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
+                        .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                        .pNext                  = 0,
+                        .flags                  = 0,
+                        .setLayoutCount         = 0,
+                        .pSetLayouts            = 0,
+                        .pushConstantRangeCount = 0,
+                        .pPushConstantRanges    = 0
+                    };
+
+                    // Create a pipeline layout
+                    if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->graphics.pipeline_layout) != VK_SUCCESS )
+                        goto failed_to_create_pipeline_layout;
+                }
+
+                //////////////////////////////
+                // Set up the push constant //
+                //////////////////////////////
+                if ( p_push_constant ) {
+
+                    /*
+                    // Initialized data
+                    dict    *push_constant_dict           = 0;
+                    char   **push_constant_struct         = 0;
+                    size_t   push_constant_size           = 0;
+                    size_t   push_constant_property_count = 0;
+
+                    // Parse the push constant JSON into a dictionary
+                    parse_json(push_constant_text, strlen(push_constant_text), &push_constant_dict);
+
+                    // Parse the push constant dictionary
+                    {
+
+                        // Initialized data
+                        JSONToken_t  *token                = 0;
+
+                        // Get the push constant struct
+                        token                = (JSONToken_t *) dict_get(push_constant_dict, "struct");
+                        push_constant_struct = JSON_VALUE(token, JSONarray);
+                    }
+
+                    while (push_constant_struct[++push_constant_property_count]);
+
+                    i_shader->graphics.push_constant_properties = calloc(push_constant_property_count + 1, sizeof(char*));
+
+                    for (size_t i = 0; i < push_constant_property_count; i++)
+                    {
+
+                        // Initialized data
+                        char   *push_constant_property     = push_constant_struct[i];
+                        size_t  push_constant_property_len = strlen(push_constant_property);
+                        dict   *property_dict              = 0;
+
+                        char   *property_name              = 0;
+                        size_t  property_size              = 0;
+
+                        parse_json(push_constant_property, push_constant_property_len, &property_dict);
+
+                        // Parse the property dictionary
+                        {
+
+                            // Initialized data
+                            JSONToken_t *token = 0;
+
+                            token = (JSONToken_t *) dict_get(property_dict, "name");
+                            property_name = JSON_VALUE(token, JSONstring);
+
+                            token = (JSONToken_t *) dict_get(property_dict, "type");
+                            char* property_type = JSON_VALUE(token, JSONstring);
+
+                            // TODO: Check property_type?
+                            property_size = (size_t) dict_get(format_sizes, property_type);
+
+                        }
+
+                        // Copy the property name
+                        {
+
+                            // Initialized data
+                            size_t property_name_len              = strlen(property_name);
+
+                            // Allocate the property name
+                            i_shader->graphics.push_constant_properties[i] = calloc(property_name_len + 1, sizeof(char));
+
+                            // Copy the propery name
+                            strncpy(i_shader->graphics.push_constant_properties[i], property_name, property_name_len);
+
+                        }
+
+                        // Copy the property size
+                        push_constant_size += property_size;
+
+                    }
+
+                    if (push_constant_size > 128)
+                        goto push_constant_is_too_large;
+
+                    i_shader->graphics.push_constant_size = push_constant_size;
+
+                    i_shader->graphics.push_constant_data = calloc(128, sizeof(u8));
+
+                    push_constant->offset     = 0;
+                    push_constant->size       = (u32)push_constant_size;
+                    push_constant->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                    */
+                }
+
+                //////////////////////////////////
+                // Set up the graphics pipeline //
+                //////////////////////////////////
+                graphics_pipeline_create_info = (VkGraphicsPipelineCreateInfo){
+                    .sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+                    .pNext               = 0,
+                    .flags               = 0,
+                    .stageCount          = (u32)shader_stage_iterator,     // Done
+                    .pStages             = shader_stages,                  // Done
+                    .pVertexInputState   = &vertex_input_info_create_info, // Done
+                    .pInputAssemblyState = &input_assembly_create_info,    // Done
+
+                    // TODO: 
+                    .pTessellationState  = 0,                              
+                    .pViewportState      = &viewport_state_create_info,    // Done
+                    .pRasterizationState = &rasterizer_create_info,        // Done
+                    .pMultisampleState   = &multisampling_create_info,     // Done
+
+                    // TODO: 
+                    .pDepthStencilState = &depth_stencil_state_create_info,// Done
+                    .pColorBlendState   = &color_blend_create_info,        // Not done
+                    .pDynamicState      = &dynamic_state_create_info,      // Dpme
+                    .layout             = p_shader->graphics.pipeline_layout,
+                    .subpass            = 0,
+                    .renderPass         = 0,//p_instance->context.renderer->render_passes_data[0]->render_pass, 
+                    .basePipelineHandle = VK_NULL_HANDLE,
+                    .basePipelineIndex  = -1
+                };
+                
+                /////////////////////////////////////
+                // Construct the graphics pipeline //
+                /////////////////////////////////////
+                if ( vkCreateGraphicsPipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &p_shader->graphics.pipeline ) != VK_SUCCESS )
+                    goto failed_to_create_graphics_pipeline;
+            }
+        }
+
+        // Return the pointer to the caller
+        *pp_shader = p_shader;
+    }
+    
+    // Success
+    return 1;
+
+    // TODO: 
+    failed_to_create_pipeline_layout:
+    missing_properties:
+    no_vertex_groups:
+    wrong_rasterizer_type:
+    name_wrong_type:
+    wrong_type:
+    no_multisampler_sample_shading_enable:
+    no_minimum_sample_shading:
+    no_multisampler_alpha_to_coverage_enable:
+    no_multisampler_alpha_to_one_enable:
+    no_mem:
+    no_rasterizer_line_width:
+    no_rasterizer_depth_bias_constant_factor:
+    no_rasterizer_depth_bias_clamp:
+    no_rasterizer_depth_bias_slope_factor:
+    wrong_properties:
+    no_depth_clamp_enable:
+    no_rasterizer_rasterizer_discard_enable:
+    no_rasterizer_clockwise:
+    no_rasterizer_depth_bias_enable:
+    no_vertex_shader_path:
+    no_fragment_shader_path:
+    failed_to_load_vertex_shader_binary:
+    failed_to_load_fragment_shader_binary:
+    no_multisampler_samples:
+    wrong_vertex_shader_path_type:
+    wrong_fragment_shader_path_type:
+    failed_to_allocate_shader:
+    failed_to_create_vertex_shader_module:
+    failed_to_load_tessellation_control_shader_binary:
+    failed_to_create_tessellation_control_shader_module:
+    wrong_tessellation_evaluation_shader_path_type:
+    no_tessellation_evaluation_shader_path:
+    wrong_tessellation_control_shader_path_type:
+    no_tessellation_control_shader_path:
+    failed_to_create_fragment_shader_module:
+    failed_to_load_geometry_shader_binary:
+    failed_to_create_geometry_shader_module:
+    failed_to_load_tessellation_evaluation_shader_binary:
+    failed_to_create_tessellation_evaluation_shader_module:
+    wrong_geometry_shader_path_type:
+    no_geometry_shader_path:
+    failed_to_load_mesh_shader_binary:
+    failed_to_create_mesh_shader_module:
+    wrong_multisampler_type:
+    wrong_mesh_shader_path_type:
+    no_mesh_shader_path:
+    failed_to_load_task_shader_binary:
+    failed_to_create_task_shader_module:
+    wrong_task_shader_path_type:
+    failed_to_create_graphics_pipeline:
+    no_task_shader_path:
+        return 0;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+                
+        }
+    }
+}
+
+int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
+{
+
+    // Argument notes
+    // p_value will always be valid. p_value->type will always be JSONobject
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t  *p_instance            = g_get_active_instance();
+    GXShader_t    *p_shader              = 0,
+     		      *p_cache_shader        = 0;
+    JSONValue_t   *p_name                = 0,
+                  *p_compute_shader_path = 0,
+                  *p_layout              = 0;
+
+    // Parse the JSON value 
+    {
+
+        p_name                = dict_get(p_value->object, "name");
+        p_compute_shader_path = dict_get(p_value->object, "compute shader path");
+        p_layout              = dict_get(p_value->object, "layout");
+
+        // Check properties
+        if ( !( p_name && p_compute_shader_path && p_layout ) )
+            goto missing_properties;
+    }
+
+	// Lock the shader cache mutex
+	SDL_LockMutex(p_instance->mutexes.shader_cache);
+
+	// Search the cache for the shader
+	p_cache_shader = g_find_ai(p_instance, p_name->string);
+	
+	// If the shader is in the cache ...
+	if (p_cache_shader)
+	{
+
+		// ... make a copy of the cached shader
+		copy_ai(pp_shader, p_cache_shader);
+
+		// Write the return
+		p_shader = *pp_shader;
+
+		// Set the initial state
+		goto exit;
+	}
+	
+	// ... the AI is not in the cache
+		
+    // Construct the shader
+    {
+
+        // Initialized data
+        VkShaderModule compute_shader_module = 0;
+
+        // Allocate memory for a shader
+        if ( create_shader(&p_shader) == 0 )
+            goto failed_to_allocate_shader;
+        
+        // Set the shader type
+        p_shader->type == g10_pipeline_compute;
+        
+        // Set the name
+        if ( p_name->type == JSONstring )
+        {
+
+            // Initialized data
+            size_t name_len = strlen(p_name->string);
+
+            // Allocate memory for the name
+            p_shader->name = calloc(name_len + 1, sizeof(char));
+
+            // Error check
+            if ( p_shader->name == (void *) 0 )
+                goto no_mem;
+
+            // Copy the name
+            strncpy(p_shader->name, p_name->string, name_len);
+        }
+        else
+            goto name_wrong_type;
+
+        // Load the compute shader binary
+        if ( p_compute_shader_path )
+        {
+
+            // Parse the compute shader path as a string
+            if ( p_compute_shader_path->type == JSONstring )
+            {
+                // Initialized data
+                size_t compute_shader_data_len = g_load_file(p_compute_shader_path->string, 0, true);
+                char* compute_shader_data = calloc(compute_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( compute_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the compute shader binary file
+                if ( g_load_file(p_compute_shader_path->string, compute_shader_data, true) == 0 )
+                    goto failed_to_load_compute_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(compute_shader_data, compute_shader_data_len, &compute_shader_module) == 0 )
+                    goto failed_to_create_compute_shader_module; 
+
+                // Clean the scope
+                free(compute_shader_data);
+            }
+            else
+                goto wrong_compute_shader_path_type;
+        }
+        else
+            goto no_compute_shader_path;
+
+        // Construct the compute shader
+        {
+
+            // Initialized data
+            VkPipelineShaderStageCreateInfo shader_stage                 = { 0 };
+            VkPipelineLayoutCreateInfo      pipeline_layout_create_info  = { 0 };
+            VkComputePipelineCreateInfo     compute_pipeline_create_info = { 0 };
+            
+            // Set up the compute shader stage
+            if ( compute_shader_module )
+            {
+
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_COMPUTE_BIT,
+                    .module = compute_shader_module,
+                    .pName  = "main"
+                };
+            }
+            else
+                ;// TODO:
+
+            //  Set up layout
+            {
+
+                // Initialized data
+                JSONValue_t                     *p_layout_sets                     = 0,
+                                                *p_layout_push_constant            = 0;
+                size_t                           layout_sets_count                 = 0;
+                JSONValue_t                    **pp_sets                           = 0;
+                VkPipelineLayoutCreateInfo       pipeline_layout_create_info       = { 0 };
+                size_t                           binding_count                     = 0,
+                                                 descriptor_set_layout_count       = 0;
+                VkDescriptorSetLayoutBinding     p_bindings                        = { 0 };
+                VkPushConstantRange             *p_push_constant                   = 0;
+                VkDescriptorSetLayout           *p_descriptor_set_layout           = 0;
+                VkDescriptorSetLayoutCreateInfo  descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
+                {
+                    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                    .pNext        = 0,
+                    .flags        = 0,
+                    .bindingCount = binding_count,
+                    .pBindings    = &p_bindings
+                };
+                VkDescriptorSetLayoutBinding     descriptor_set_layout_binding     = (VkDescriptorSetLayoutBinding)
+                {
+                    .binding            = 0,
+                    .descriptorType     = 0,
+                    .descriptorCount    = 0,
+                    .stageFlags         = 0,
+                    .pImmutableSamplers = 0
+                };
+
+                // Parse the JSON
+                {
+                    p_layout_sets          = dict_get(p_layout->object, "sets");
+                    p_layout_push_constant = dict_get(p_layout->object, "push constant");
+                }
+
+                // Get the contents of the sets array
+                {
+
+                    // Get the length of the array
+                    array_get(p_layout_sets->object, 0, &layout_sets_count);
+
+                    // Allocate memory for JSON tokens
+                    pp_sets = calloc(layout_sets_count, sizeof(JSONValue_t *));
+
+                    // Get the contents of the array
+                    array_get(p_layout_sets->object, pp_sets, 0);
+                }
+
+                // Iterate over each set
+                for ( size_t i = 0; i < layout_sets_count; i++ )
+                {
+                    
+                    // Initialized data
+                    JSONValue_t *p_set = pp_sets[i];
+
+                    print_json_value(p_set, stdout);
+                    printf("\n\n");
+                }
+
+                if ( vkCreateDescriptorSetLayout(p_instance->vulkan.device, &descriptor_set_layout_create_info, 0, &p_shader->compute.set_layout) != VK_SUCCESS)
+                    goto failed_to_create_descriptor_set_layout;
+
+                pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                {
+                    .sType               = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                    .pNext               = 0,
+                    .flags               = 0,
+                    .setLayoutCount      = descriptor_set_layout_count,
+                    .pSetLayouts         = p_descriptor_set_layout,
+                    .pPushConstantRanges = p_push_constant  /* pointer to an array of VkPushConstantRange structures
+                                                               defining a set of push constant ranges for use in a
+                                                               single pipeline layout. In addition to descriptor set
+                                                               layouts, a pipeline layout also describes how many push 
+                                                               constants can be accessed by each stage of the pipeline.*/
+                    
+                };
+
+                if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->compute.pipeline_layout) != VK_SUCCESS )
+                    goto failed_to_create_pipeline_layout;
+            }
+
+            // Set up the compute pipeline
+            compute_pipeline_create_info = (VkComputePipelineCreateInfo)
+            {
+                .sType              = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+                .pNext              = 0,
+                .flags              = 0,
+                .stage              = shader_stage,
+                .layout             = p_shader->compute.pipeline_layout,
+                .basePipelineHandle = 0,
+                .basePipelineIndex  = 0,
+            };
+
+            // Construct the compute pipeline
+            if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, 0, &p_shader->compute.pipeline) != VK_SUCCESS )
+                g_print_error("failed to create compute pipeline!\n");
+            
+        }
+        
+        // Cache the shader
+        g_cache_shader(p_instance, p_shader);
+
+        // Return the pointer to the caller
+        *pp_shader = p_shader;
+    }
+    
+    exit:
+    // Success
+    return 1;
+
+    // TODO: 
+    missing_properties:
+    name_wrong_type:
+    no_mem:
+    no_compute_shader_path:
+    failed_to_allocate_shader:
+    failed_to_load_compute_shader_binary:
+    failed_to_create_compute_shader_module:
+    wrong_compute_shader_path_type:
+    failed_to_create_pipeline_layout:
+    failed_to_create_descriptor_set_layout:
+        return 0;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+                
+        }
+    }
+}
+
+int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
+{
+
+    // Argument notes
+    // p_value will always be valid. p_value->type will always be JSONobject
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( p_value   == (void *) 0 ) goto no_value;
+        #endif
+    }
+    
+    // Initialized data
+    GXInstance_t  *p_instance                     = g_get_active_instance();
+    GXShader_t    *p_shader                       = 0;
+    JSONValue_t   *p_name                         = 0,
+                  *p_ray_generation_shader_path   = 0,
+                  *p_ray_any_hit_shader_path      = 0,
+                  *p_ray_closest_hit_shader_path  = 0,
+                  *p_ray_miss_shader_path         = 0,
+                  *p_ray_intersection_shader_path = 0,
+                  *p_ray_callable_shader_path     = 0;
+
+    // Parse the JSON value 
+    {
+
+        p_name                         = dict_get(p_value->object, "name");
+        p_ray_generation_shader_path   = dict_get(p_value->object, "generation shader path");
+        p_ray_any_hit_shader_path      = dict_get(p_value->object, "any hit shader path");
+        p_ray_closest_hit_shader_path  = dict_get(p_value->object, "closest_hit shader path");
+        p_ray_miss_shader_path         = dict_get(p_value->object, "miss shader path");
+        p_ray_intersection_shader_path = dict_get(p_value->object, "intersection shader path");
+        p_ray_callable_shader_path     = dict_get(p_value->object, "callable shader path");
+
+        // Check properties
+        if ( !( p_name && p_ray_generation_shader_path && p_ray_any_hit_shader_path && p_ray_closest_hit_shader_path && p_ray_miss_shader_path && p_ray_intersection_shader_path && p_ray_callable_shader_path) )
+            goto missing_properties;
+    }
+
+    // TODO: Cache check
+
+    // Construct the shader
+    {
+
+        // Initialized data
+        VkShaderModule ray_generation_shader_module   = 0,
+                       ray_any_hit_shader_module      = 0,
+                       ray_closest_hit_shader_module  = 0,
+                       ray_miss_shader_module         = 0,
+                       ray_intersection_shader_module = 0,
+                       ray_callable_shader_module     = 0;
+
+        // Allocate memory for a shader
+        if ( create_shader(&p_shader) == 0 )
+            goto failed_to_allocate_shader;
+        
+        // Set the shader type
+        p_shader->type == g10_pipeline_ray;
+        
+        // Set the name
+        if(p_name->type == JSONstring)
+        {
+
+            // Initialized data
+            size_t name_len = strlen(p_name->string);
+
+            // Allocate memory for the name
+            p_shader->name = calloc(name_len + 1, sizeof(char));
+
+            // Error check
+            if ( p_shader->name == (void *) 0 )
+                goto no_mem;
+
+            // Copy the name
+            strncpy(p_shader->name, p_name->string, name_len);
+        }
+        else
+            goto name_wrong_type;
+
+        // Load the ray generation shader binary
+        if ( p_ray_generation_shader_path )
+        {
+
+            // Parse the ray generation shader path as a string
+            if ( p_ray_generation_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_generation_shader_data_len = g_load_file(p_ray_generation_shader_path->string, 0, true);
+                char* ray_generation_shader_data = calloc(ray_generation_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_generation_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray generation shader binary file
+                if ( g_load_file(p_ray_generation_shader_path->string, ray_generation_shader_data, true) == 0 )
+                    goto failed_to_load_ray_generation_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_generation_shader_data, ray_generation_shader_data_len, &ray_generation_shader_module) == 0 )
+                    goto failed_to_create_ray_generation_shader_module; 
+
+                // Clean the scope
+                free(ray_generation_shader_data);
+            }
+            else
+                goto wrong_ray_generation_shader_path_type;
+        }
+        else
+            goto no_ray_generation_shader_path;
+
+        // Load the ray any hit shader binary
+        if ( p_ray_any_hit_shader_path )
+        {
+
+            // Parse the ray any hit shader path as a string
+            if ( p_ray_any_hit_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_any_hit_shader_data_len = g_load_file(p_ray_any_hit_shader_path->string, 0, true);
+                char* ray_any_hit_shader_data = calloc(ray_any_hit_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_any_hit_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray any hit shader binary file
+                if ( g_load_file(p_ray_any_hit_shader_path->string, ray_any_hit_shader_data, true) == 0 )
+                    goto failed_to_load_ray_any_hit_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_any_hit_shader_data, ray_any_hit_shader_data_len, &ray_any_hit_shader_module) == 0 )
+                    goto failed_to_create_ray_any_hit_shader_module; 
+
+                // Clean the scope
+                free(ray_any_hit_shader_data);
+            }
+            else
+                goto wrong_ray_any_hit_shader_path_type;
+        }
+        else
+            goto no_ray_any_hit_shader_path;
+
+        // Load the ray closest hit shader binary
+        if ( p_ray_closest_hit_shader_path )
+        {
+
+            // Parse the ray closest hit shader path as a string
+            if ( p_ray_closest_hit_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_closest_hit_shader_data_len = g_load_file(p_ray_closest_hit_shader_path->string, 0, true);
+                char* ray_closest_hit_shader_data = calloc(ray_closest_hit_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_closest_hit_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray closest hit shader binary file
+                if ( g_load_file(p_ray_closest_hit_shader_path->string, ray_closest_hit_shader_data, true) == 0 )
+                    goto failed_to_load_ray_closest_hit_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_closest_hit_shader_data, ray_closest_hit_shader_data_len, &ray_closest_hit_shader_module) == 0 )
+                    goto failed_to_create_ray_closest_hit_shader_module; 
+
+                // Clean the scope
+                free(ray_closest_hit_shader_data);
+            }
+            else
+                goto wrong_ray_closest_hit_shader_path_type;
+        }
+        else
+            goto no_ray_closest_hit_shader_path;
+
+        // Load the ray miss shader binary
+        if ( p_ray_miss_shader_path )
+        {
+
+            // Parse the ray miss shader path as a string
+            if ( p_ray_miss_shader_path->type == JSONstring )
+            {
+                // Initialized data
+                size_t ray_miss_shader_data_len = g_load_file(p_ray_miss_shader_path->string, 0, true);
+                char* ray_miss_shader_data = calloc(ray_miss_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_miss_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray miss shader binary file
+                if ( g_load_file(p_ray_miss_shader_path->string, ray_miss_shader_data, true) == 0 )
+                    goto failed_to_load_ray_miss_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_miss_shader_data, ray_miss_shader_data_len, &ray_miss_shader_module) == 0 )
+                    goto failed_to_create_ray_miss_shader_module; 
+
+                // Clean the scope
+                free(ray_miss_shader_data);
+            }
+            else
+                goto wrong_ray_miss_shader_path_type;
+        }
+        else
+            goto no_ray_miss_shader_path;
+
+        // Load the ray intersection shader binary
+        if ( p_ray_intersection_shader_path )
+        {
+
+            // Parse the ray intersection shader path as a string
+            if ( p_ray_intersection_shader_path->type == JSONstring )
+            {
+                // Initialized data
+                size_t ray_intersection_shader_data_len = g_load_file(p_ray_intersection_shader_path->string, 0, true);
+                char* ray_intersection_shader_data = calloc(ray_intersection_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_intersection_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray intersection shader binary file
+                if ( g_load_file(p_ray_intersection_shader_path->string, ray_intersection_shader_data, true) == 0 )
+                    goto failed_to_load_ray_intersection_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_intersection_shader_data, ray_intersection_shader_data_len, &ray_intersection_shader_module) == 0 )
+                    goto failed_to_create_ray_intersection_shader_module; 
+
+                // Clean the scope
+                free(ray_intersection_shader_data);
+            }
+            else
+                goto wrong_ray_intersection_shader_path_type;
+        }
+        else
+            goto no_ray_intersection_shader_path;
+
+        // Load the ray callable shader binary
+        if ( p_ray_callable_shader_path )
+        {
+
+            // Parse the ray callable shader path as a string
+            if ( p_ray_callable_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_callable_shader_data_len = g_load_file(p_ray_callable_shader_path->string, 0, true);
+                char* ray_callable_shader_data = calloc(ray_callable_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_callable_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray callable shader binary file
+                if ( g_load_file(p_ray_callable_shader_path->string, ray_callable_shader_data, true) == 0 )
+                    goto failed_to_load_ray_callable_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_callable_shader_data, ray_callable_shader_data_len, &ray_callable_shader_module) == 0 )
+                    goto failed_to_create_ray_callable_shader_module; 
+
+                // Clean the scope
+                free(ray_callable_shader_data);
+            }
+            else
+                goto wrong_ray_callable_shader_path_type;
+        }
+        else
+            goto no_ray_callable_shader_path;
+
+        // // TODO: Construct the ray shader
+        {
+
+            // Initialized data
+            VkPipelineShaderStageCreateInfo   shader_stage                 = { 0 };
+            VkPipelineLayoutCreateInfo        pipeline_layout_create_info  = { 0 };
+            VkRayTracingPipelineCreateInfoKHR ray_pipeline_create_info     = { 0 };
+            
+            // Set up the ray generation shader stage
+            if ( ray_generation_shader_module )
+            {
+
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray any hit shader stage
+            if ( ray_any_hit_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_ANY_HIT_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray closest hit shader stage
+            if ( ray_closest_hit_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray miss shader stage
+            if ( ray_miss_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_MISS_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray intersection shader stage
+            if ( ray_intersection_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_INTERSECTION_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray callable shader stage
+            if ( ray_callable_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_CALLABLE_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // TODO: 
+            //  Set up layout
+            {
+
+                // Initialized data
+                VkPipelineLayoutCreateInfo      pipeline_layout_create_info       = { 0 };
+                VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = { 0 };
+                VkDescriptorSetLayoutBinding    descriptor_set_layout_binding     = { 0 };
+                size_t                          binding_count                     = 0;
+                VkDescriptorSetLayoutBinding    p_bindings                        = { 0 };
+                
+                descriptor_set_layout_binding = (VkDescriptorSetLayoutBinding)
+                {
+                    .binding            = 0,
+                    .descriptorType     = 0,
+                    .descriptorCount    = 0,
+                    .stageFlags         = 0,
+                    .pImmutableSamplers = 0
+                };
+
+                descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
+                {
+                    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                    .pNext        = 0,
+                    .flags        = 0,
+                    .bindingCount = binding_count,
+                    .pBindings    = &p_bindings
+                };
+
+                pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                {
+                    .sType               = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                    .pNext               = 0,
+                    .flags               = 0,
+                    .setLayoutCount      = 0,
+                    .pSetLayouts         = 0,
+                    .pPushConstantRanges = 0
+                };
+            }
+
+            // Set up the compute pipeline
+            ray_pipeline_create_info = (VkRayTracingPipelineCreateInfoKHR)
+            {
+                .sType                        = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR,
+                .pNext                        = 0,
+                .flags                        = 0,
+                .stageCount                   = 0,
+                .pStages                      = 0,
+                .groupCount                   = 0,
+                .pGroups                      = 0,
+                .maxPipelineRayRecursionDepth = 0,
+                .pLibraryInfo                 = 0,
+                .pLibraryInterface            = 0,
+                .pDynamicState                = 0,
+                .layout                       = 0,
+                .basePipelineHandle           = 0,
+                .basePipelineIndex            = 0
+            };
+
+            // Construct the compute pipeline
+            if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &ray_pipeline_create_info, 0, &p_shader->ray.pipeline) != VK_SUCCESS )
+                g_print_error("failed to create ray pipeline!\n");
+            
+        }
+                
+        // Return the pointer to the caller
+        *pp_shader = p_shader;
+    }
+
+    // Success
+    return 1;
+
+    // TODO:
+    missing_properties:
+    failed_to_allocate_shader:
+    no_mem:
+    name_wrong_type:
+    failed_to_load_ray_generation_shader_binary:
+    failed_to_create_ray_generation_shader_module:
+    wrong_ray_generation_shader_path_type:
+    no_ray_generation_shader_path:
+    failed_to_load_ray_any_hit_shader_binary:
+    failed_to_create_ray_any_hit_shader_module:
+    wrong_ray_any_hit_shader_path_type:
+    no_ray_any_hit_shader_path:
+    failed_to_load_ray_closest_hit_shader_binary:
+    failed_to_create_ray_closest_hit_shader_module:
+    wrong_ray_closest_hit_shader_path_type:
+    no_ray_closest_hit_shader_path:
+    failed_to_load_ray_miss_shader_binary:
+    failed_to_create_ray_miss_shader_module:
+    wrong_ray_miss_shader_path_type:
+    no_ray_miss_shader_path:
+    failed_to_load_ray_intersection_shader_binary:
+    failed_to_create_ray_intersection_shader_module:
+    wrong_ray_intersection_shader_path_type:
+    no_ray_intersection_shader_path:
+    failed_to_load_ray_callable_shader_binary:
+    failed_to_create_ray_callable_shader_module:
+    wrong_ray_callable_shader_path_type:
+    no_ray_callable_shader_path:
+        return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+                
+        }
+    }
 }
