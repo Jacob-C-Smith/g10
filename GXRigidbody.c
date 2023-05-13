@@ -1,13 +1,12 @@
 #include <G10/GXRigidbody.h>
 
-int create_rigidbody(GXRigidbody_t** pp_rigidbody)
+int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_rigidbody == (void *) 0 )
-				goto no_rigidbody;
+			if ( pp_rigidbody == (void *) 0 ) goto no_rigidbody;
 		#endif
 	}
 
@@ -31,7 +30,7 @@ int create_rigidbody(GXRigidbody_t** pp_rigidbody)
 	// Error handling
 	{
 
-		// Argument check
+		// Argument errors
 		{
 			no_rigidbody:
 				#ifndef NDEBUG
@@ -55,7 +54,7 @@ int create_rigidbody(GXRigidbody_t** pp_rigidbody)
 	}
 }
 
-int update_force(GXRigidbody_t* rigidbody)
+int update_force ( GXRigidbody_t *rigidbody )
 {
 	rigidbody->forces[0] = (vec3){ 0.f, 0.f, 0.f, 0.f };
 
@@ -72,15 +71,13 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_rigidbody == (void *) 0 )
-				goto no_rigidbody;
-			if ( path == (void *) 0 )
-				goto no_path;
+			if ( pp_rigidbody == (void *) 0 ) goto no_rigidbody;
+			if ( path         == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  len  = g_load_file(path, 0, false);
+	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len+1, sizeof(char));
 
 	// Error checking
@@ -88,7 +85,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 		goto no_mem;
 
 	// Load the file
-	if ( g_load_file(path, text, false) == 0 )
+	if ( g_load_file(path, text, true) == 0 )
 		goto failed_to_load_file;
 
 	// Load the rigidbody from the JSON text
@@ -101,7 +98,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 	// Error handling
 	{
 
-		// Argument check
+		// Argument errors
 		{
 			no_rigidbody:
 				#ifndef NDEBUG
@@ -144,16 +141,14 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 	}
 }
 
-int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *text )
+int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_rigidbody == (void *) 0 )
-				goto no_rigidbody;
-			if ( text == (void *) 0 )
-				goto no_text;
+			if ( pp_rigidbody == (void *) 0 ) goto no_rigidbody;
+			if ( text         == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -221,7 +216,7 @@ int load_rigidbody_as_json(GXRigidbody_t** pp_rigidbody, char *text )
 	// Error handling
 	{
 
-		// Argument check
+		// Argument errors
 		{
 			no_rigidbody:
 				#ifndef NDEBUG

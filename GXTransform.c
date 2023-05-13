@@ -1,13 +1,12 @@
 #include <G10/GXTransform.h>
 
-int  create_transform        ( GXTransform_t **pp_transform ) 
+int create_transform ( GXTransform_t **pp_transform ) 
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_transform == (void*) 0 )
-				goto no_transform;
+			if ( pp_transform == (void *) 0 ) goto no_transform;
 		#endif
 	}
 
@@ -51,14 +50,13 @@ int  create_transform        ( GXTransform_t **pp_transform )
 	}
 }
 
-int  construct_transform     ( GXTransform_t **pp_transform, vec3 location, quaternion rotation, vec3 scale )
+int construct_transform ( GXTransform_t **pp_transform, vec3 location, quaternion rotation, vec3 scale )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_transform == (void *)0)
-				goto no_transform;
+			if ( pp_transform == (void *) 0 ) goto no_transform;
 		#endif
 	}
 
@@ -118,19 +116,17 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_transform == (void *)0)
-				goto no_transform;
-			if(path == (void *)0)
-				goto no_path;
+			if ( pp_transform == (void *) 0 ) goto no_transform;
+			if ( path         == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t         file_size   = g_load_file(path, 0, false);;
+	size_t         file_size   = g_load_file(path, 0, true);
 	char          *file_buffer = calloc(file_size + 1, sizeof(char));
 
 	// Load the file
-	if ( g_load_file(path, file_buffer, false) == 0 )
+	if ( g_load_file(path, file_buffer, true) == 0 )
 		goto failed_to_load_file;
 
 	// Load the transform as a json string
@@ -193,10 +189,8 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_transform == (void *)0 )
-				goto no_transform;
-			if (text == (void*)0)
-				goto no_text;
+			if ( pp_transform == (void *) 0 ) goto no_transform;
+			if ( text         == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -288,10 +282,8 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_transform == (void *) 0 )
-				goto no_transform;
-			if ( p_value == (void *) 0 )
-				goto no_value;
+			if ( pp_transform == (void *) 0 ) goto no_transform;
+			if ( p_value      == (void *) 0 ) goto no_value;
 		#endif
 	}
 
@@ -557,16 +549,15 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 }
 
-void transform_model_matrix  ( GXTransform_t  *p_transform , mat4 *r )
+void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r )
 {
 
     // Argument check
     {
-        if( r == (void *) 0 )
-            goto no_result;
-
-        if ( p_transform == (void *) 0 )
-            goto no_transform;
+		#ifndef NDEBUG
+	        if ( r           == (void *) 0 ) goto no_result;
+    	    if ( p_transform == (void *) 0 ) goto no_transform;
+		#endif
     }
 
     mat4 sca = scale_mat4(p_transform->scale),
@@ -603,12 +594,14 @@ void transform_model_matrix  ( GXTransform_t  *p_transform , mat4 *r )
     }
 }
 
-int  rotate_about_quaternion ( GXTransform_t  *p_transform , quaternion  axis,        float      theta)
+int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float theta)
 {
+
     // Argument check
     {
-        if ( p_transform == (void *) 0 )
-            goto no_transform;
+		#ifndef NDEBUG
+        	if ( p_transform == (void *) 0 ) goto no_transform;
+		#endif
     }
 
     /*
@@ -647,8 +640,7 @@ int destroy_transform ( GXTransform_t **pp_transform )
     // Argument check
     {
 		#ifndef NDEBUG
-        	if ( pp_transform == (void *) 0 )
-            	goto no_transform;
+        	if ( pp_transform == (void *) 0 ) goto no_transform;
 		#endif
     }
 

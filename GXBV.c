@@ -6,8 +6,7 @@ int create_bv ( GXBV_t **pp_bv )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_bv == (void *)0 )
-                goto no_bv;
+            if ( pp_bv == (void *) 0 ) goto no_bv;
         #endif
     }
 
@@ -56,8 +55,7 @@ int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_bv == (void *)0 )
-                goto no_bv;
+            if ( pp_bv == (void *) 0 ) goto no_bv;
         #endif
     }
 
@@ -123,7 +121,7 @@ int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *a, GXBV_t* b )
     return 1;
 }
 
-int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
+int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
 {
 
     // Commentary
@@ -146,8 +144,7 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
     // Argument check
     {
         #ifndef NDEBUG
-        if (scene == (void*)0)
-            goto no_scene;
+            if ( scene == (void *) 0 ) goto no_scene;
         #endif
     }
 
@@ -285,7 +282,7 @@ int     construct_bvh_from_scene ( GXBV_t **bv   , GXScene_t *scene )
     }
 }
 
-float   bv_distance              ( GXBV_t  *a    , GXBV_t    *b )
+float bv_distance ( GXBV_t *a, GXBV_t *b )
 {
     float  ret             = 0.f;
     vec3   distance_vector = { 0.f, 0.f, 0.f, 0.f };
@@ -299,7 +296,7 @@ float   bv_distance              ( GXBV_t  *a    , GXBV_t    *b )
     return ret;
 }
 
-GXBV_t *find_parent_bv           ( GXBV_t  *bvh  , GXBV_t    *bv )
+GXBV_t *find_parent_bv ( GXBV_t *bvh, GXBV_t *bv )
 {
     GXBV_t *b   = bvh,
            *ret = 0;
@@ -333,14 +330,13 @@ GXBV_t *find_parent_bv           ( GXBV_t  *bvh  , GXBV_t    *bv )
     return ret;
 }
 
-int     insert_bv                ( GXBV_t  *bvh  , GXBV_t    *bv )
+int insert_bv ( GXBV_t *bvh, GXBV_t *bv )
 {
     
     // Argument check
     {
         #ifndef NDEBUG
-            if (bvh == 0)
-                goto no_bvh;
+            if ( bvh == 0 ) goto no_bvh;
         #endif
     }
 
@@ -421,14 +417,13 @@ int     insert_bv                ( GXBV_t  *bvh  , GXBV_t    *bv )
     }
 }
 
-int     resize_bv                ( GXBV_t  *bv )
+int resize_bv ( GXBV_t *bv )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (bv == 0)
-                goto no_bv;
+            if ( bv == 0 ) goto no_bv;
         #endif
     }
 
@@ -711,13 +706,14 @@ int     resize_bv                ( GXBV_t  *bv )
     }
 }
 
-int     bv_info                 ( GXBV_t    *p_bv,    size_t d )
+int bv_info ( GXBV_t *p_bv, size_t d )
 {
 
     // Argument check
     {
-        if (p_bv == (void*)0)
-            goto no_bv;
+        #ifndef NDEBUG
+            if ( p_bv == (void *) 0 ) goto no_bv;
+        #endif
     }
 
     // Base case, print out a header
@@ -769,13 +765,14 @@ int     bv_info                 ( GXBV_t    *p_bv,    size_t d )
     }
 }
 
-size_t  get_entities_from_bv     ( GXBV_t  *bv   , queue     *entity_queue )
+size_t get_entities_from_bv ( GXBV_t *bv, queue *entity_queue )
 {
 
     // Argument check
     {
-        if (bv == (void*)0)
-            goto no_bv;
+        #ifndef NDEBUG
+            if ( bv == (void *) 0 ) goto no_bv;
+        #endif
     }
 
     // If the bounding volume is an entity, print the entities name
@@ -802,16 +799,14 @@ size_t  get_entities_from_bv     ( GXBV_t  *bv   , queue     *entity_queue )
     }
 }
 
-bool    aabb_intersect           ( GXBV_t  *a    , GXBV_t    *b )
+bool aabb_intersect ( GXBV_t *a, GXBV_t *b )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (a == (void *)0)
-                goto no_a;
-            if (b == (void*)0)
-                goto no_b;
+            if ( a == (void *) 0 ) goto no_a;
+            if ( b == (void *) 0 ) goto no_b;
         #endif
     }
 
@@ -845,7 +840,7 @@ bool    aabb_intersect           ( GXBV_t  *a    , GXBV_t    *b )
     }
 }
 
-int     destroy_bv               ( GXBV_t  *bv )
+int destroy_bv ( GXBV_t *bv )
 {
     free(bv);
 

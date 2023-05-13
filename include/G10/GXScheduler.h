@@ -110,7 +110,7 @@ DLLEXPORT int load_schedule ( GXSchedule_t **pp_schedule, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text );
+DLLEXPORT int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text );
 
 /** !
  *  Load a schedule from a JSON value
@@ -119,7 +119,7 @@ DLLEXPORT int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text );
  * @param p_value     : The schedule JSON object value
  *
  * @sa load_schedule
- * @sa load_schedule_as_json
+ * @sa load_schedule_as_json_text
  * @sa create_schedule
  *
  * @return 1 on success, 0 on error
@@ -132,7 +132,7 @@ DLLEXPORT int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValu
  * @param pp_thread : return
  * @param path      : The path to a JSON file containing an schedule object
  *
- * @sa load_schedule_as_json
+ * @sa load_schedule_as_json_value
  * @sa create_schedule
  *
  * @return 1 on success, 0 on error

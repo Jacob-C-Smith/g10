@@ -28,7 +28,7 @@ struct GXRenderer_s
 	dict            *render_passes;
 	GXRenderPass_t **render_passes_data;
 	size_t           render_pass_count;
-	
+	dict            *attachments;
 	size_t           clear_color_count;
 	VkClearValue    *clear_colors;
 };
@@ -52,19 +52,21 @@ struct GXRenderPass_s
 struct GXSubpass_s
 {
 	char *name;
+
+	GXShader_t *shader;
 };
 
 struct GXAttachment_s
 {
-	char        *name;
-	GXTexture_t *texture;
+	char                    *name;
+	VkAttachmentDescription  attachment_description;
+	GXTexture_t             *texture;
 };
 
 struct GXFramebuffer_s
 {
 	char          *name;
 	VkFramebuffer  framebuffer;
-
 };
 
 // Allocators
@@ -100,6 +102,17 @@ DLLEXPORT int create_render_pass ( GXRenderPass_t **pp_render_pass );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int create_subpass ( GXSubpass_t **pp_subpass );
+
+/** !
+ *  Allocate memory for a attachment
+ *
+ * @param pp_attachment : return
+ *
+ * @sa destroy_attachment
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int create_attachment ( GXAttachment_t **pp_attachment );
 
 // Constructors
 /** !
@@ -182,13 +195,13 @@ DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *
 DLLEXPORT int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_t *p_value );
 
 /** !
- *  Load a subpass from JSON text
+ *  Load a subpass from a JSON file
  *
  * @param pp_subpass : return
- * @param text : The subpass JSON  text
+ * @param path : path to JSON file
  *
  * @sa load_subpass_as_json
- * @sa create_subpass
+ * @sa load_subpass_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -198,17 +211,68 @@ DLLEXPORT int load_subpass ( GXSubpass_t **pp_subpass, char *path );
  *  Load a subpass from JSON text
  *
  * @param pp_subpass : return
- * @param text       : The subpass JSON  text
+ * @param text       : The JSON text
  *
- * @sa load_subpass_as_json
- * @sa create_subpass
+ * @sa load_subpass
+ * @sa load_subpass_as_json_value
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_subpass_as_json ( GXSubpass_t **pp_subpass, char *text );
 
-// Logging
+/** !
+ *  Load a subpass from a JSON value
+ *
+ * @param pp_subpass : return
+ * @param p_value    : The JSON value
+ *
+ * @sa load_subpass
+ * @sa load_subpass_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value );
 
+/** !
+ *  Load an attachment from a JSON file
+ *
+ * @param pp_attachment : return
+ * @param path          : path to JSON file
+ *
+ * @sa load_attachment_as_json
+ * @sa load_attachment_as_json_value
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_attachment ( GXAttachment_t **pp_attachment, char *path );
+
+/** !
+ *  Load an attachment from JSON text
+ *
+ * @param pp_attachment : return
+ * @param text          : The JSON text
+ *
+ * @sa load_attachment
+ * @sa load_attachment_as_json_value
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_attachment_as_json ( GXAttachment_t **pp_attachment, char *text );
+
+/** !
+ *  Load an attachment from a JSON value
+ *
+ * @param pp_attachment : return
+ * @param p_value       : The JSON value
+ *
+ * @sa load_attachment
+ * @sa load_attachment_as_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t *p_value );
+
+// Logging
 /** !
  *  Print info about a renderer
  *
@@ -218,13 +282,23 @@ DLLEXPORT int load_subpass_as_json ( GXSubpass_t **pp_subpass, char *text );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int renderer_info ( GXRenderer_t *p_renderer );
+DLLEXPORT int print_renderer ( GXRenderer_t *p_renderer );
+
+/** !
+ *  Print info about an attachment
+ *
+ * @param p_attachment : the attachment
+ *
+ * @sa load_attachment
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int print_attachment ( GXAttachment_t *p_attachment );
 
 // Add subpass callback
 DLLEXPORT int add_subpass_callback ( char *name, void (*function_pointer)());
 
 // Scheduler operations
-
 /** !
  *  Called once a frame by the scheduler to draw the game to the window. 
  * 
@@ -280,3 +354,14 @@ DLLEXPORT int destroy_render_pass ( GXRenderPass_t **pp_render_pass );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int destroy_subpass ( GXSubpass_t **pp_subpass );
+
+/** !
+ *  Destroy an attachment
+ *
+ * @param pp_attachment : Pointer to attachment pointer
+ *
+ * @sa create_attachment
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int destroy_attachment ( GXAttachment_t **pp_attachment );

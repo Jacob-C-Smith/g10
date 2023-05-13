@@ -116,12 +116,13 @@ int main ( int argc, const char *argv[] )
         p_ai = g_find_ai(p_instance, "AI 2");
         
         set_ai_pre_update_callback(p_ai,&preup);
-        scene_info(p_instance->context.scene);
+
+        print_renderer(p_instance->context.renderer);
     }
 
     GXShader_t *p_comp_shader = 0;
 
-    if ( load_shader(&p_comp_shader, "G10/Wireframe 2.json") == 0 )
+    if ( load_shader(&p_comp_shader, "G10/compute.json") == 0 )
         g_print_error("Failed to load shader!\n");
 
     // Start the game 

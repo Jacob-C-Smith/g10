@@ -59,16 +59,14 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
     // Argument Check
     {
         #ifndef NDEBUG
-            if ( pp_instance == (void *) 0 )
-                goto no_instance;
-            if ( path == (void *) 0 )
-                goto no_path;
+            if ( pp_instance == (void *) 0 ) goto no_instance;
+            if ( path        == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Initialized data
     GXInstance_t  *p_instance                      = 0;
-    size_t         text_len                        = g_load_file(path, 0, false);
+    size_t         text_len                        = g_load_file(path, 0, true);
     char          *text                            = calloc(text_len, sizeof(u8));
     JSONValue_t   *p_value                         = 0,
                   *p_name                          = 0,
@@ -114,7 +112,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
     */
     
     // Load the file
-    if ( g_load_file(path, text, false) == 0 )
+    if ( g_load_file(path, text, true) == 0 )
         goto no_file;
 
     // Parse the instance JSON
@@ -138,13 +136,13 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         p_fullscreen    = dict_get(p_dict, "fullscreen");
 
         // Input
-        p_input = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "input")), JSONstring);
+        p_input = dict_get(p_dict, "input");
 
         // Log file
-        p_log_file_i = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "log file")), JSONstring);
+        p_log_file_i = dict_get(p_dict, "log file");
 
         // Path to initial scene 
-        p_initial_scene = (char *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "initial scene")), JSONstring);
+        p_initial_scene = dict_get(p_dict, "initial scene");
 
         // Caches
         p_part_cache_count     =  dict_get(p_dict, "cache part count");
@@ -184,11 +182,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         if ( p_log_file_i )
         {
             if ( p_log_file_i->type == JSONstring )
-                log_file = fopen(p_log_file_i->string,"w");
+                log_file = fopen(p_log_file_i->string, "w");
             else
                 goto wrong_log_file_type;
         }
-        
         // Default
         else
             log_file = stdout;
@@ -209,7 +206,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 goto wrong_window_height_type;
             
         }
-
         // Default
         else
         {
@@ -414,7 +410,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         {
 
             // Set the name
-            if (p_name->type == (void *) 0 )
+            if (p_name->type == JSONstring )
             {
 
                 // Initialized data
@@ -437,10 +433,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // Initialized data
                 extern void init_renderer   ( void );
                 extern void init_shader     ( void );
-                extern void init_texture     ( void );
-                extern void init_input       ( void );
-                extern void init_part        ( void );
-                extern void init_material    ( void );
+                extern void init_texture    ( void );
+                extern void init_input      ( void );
+                extern void init_part       ( void );
+                extern void init_material   ( void );
                 extern void init_scheduler  ( void );
                 extern void init_scene      ( void );
                 extern void init_collider   ( void );
@@ -516,7 +512,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     else
                         goto wrong_material_cache_count_type;
                 }
-
                 // Default
                 else
                     dict_construct(&p_instance->cache.materials, 128);
@@ -529,7 +524,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     else
                         goto wrong_part_cache_count_type;
                 }
-
                 // Default
                 else
                     dict_construct(&p_instance->cache.parts, 128);
@@ -542,7 +536,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     else
                         goto wrong_shader_cache_count_type;
                 }
-
                 // Default
                 else
                     dict_construct(&p_instance->cache.shaders, 32);
@@ -555,7 +548,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     else
                         goto wrong_ai_cache_count_type;
                 }
-
                 // Default
                 else
                     dict_construct(&p_instance->cache.ais, 16);
@@ -597,7 +589,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             // Load an input set
             if ( p_input )
             {
-                if ( load_input(&p_instance->input, p_input) == 0 )
+                if ( load_input_as_json_value(&p_instance->input, p_input) == 0 )
                     goto failed_to_load_input;
             }
 
@@ -624,9 +616,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 {
 
 		            // Get the quantity of elements
-		            array_get(p_schedules, 0, &schedule_count );
-
-                    
+		            array_get(p_schedules->list, 0, &schedule_count );
 
 		            // Allocate an array for the elements
 		            pp_elements = calloc(schedule_count+1, sizeof(JSONValue_t *));
@@ -636,7 +626,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 		            	goto no_mem;
 
 		            // Populate the elements of the threads
-		            array_get(p_schedules, pp_elements, 0 );			
+		            array_get(p_schedules->list, pp_elements, 0 );			
                 }
 
 		        // Set up the schedules
@@ -663,12 +653,14 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 if ( p_initial_scene->type == JSONstring)
                 {
 
+                    /*
                     // Parse the schedule as an object
                     if ( load_scene(&p_instance->context.scene, p_initial_scene->string) == 0 )
                         goto failed_to_load_schedule;
 
                     // Add the initial scene to the scene dictionary
                     dict_add(p_instance->data.scenes, p_instance->context.scene->name, p_instance->context.scene);
+                    */
                 }
             }
 
@@ -865,8 +857,7 @@ void pick_physical_device ( char **required_extension_names )
     // Argument check
     {
         #ifndef NDEBUG
-            if(required_extension_names == (void *)0)
-                goto no_required_extension_names;
+            if ( required_extension_names == (void *) 0 ) goto no_required_extension_names;
         #endif
     }
 
@@ -1130,7 +1121,9 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
     bool passes_queue   = false,
          has_extensions = false,
          has_swap_chain = false;
-    
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(physical_device, &deviceProperties);
+
     // Check queue indices
     {
         struct { u32 g, p; }     indices = { 0, 0 };
@@ -1289,8 +1282,7 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
     // Argument checking 
     {
         #ifndef NDEBUG
-            if ( path == 0 )
-                goto noPath;
+            if ( path == 0 ) goto no_path;
         #endif
     }
 
@@ -1322,9 +1314,9 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
 
         // Argument errors
         {
-            noPath:
+            no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null path provided to function \"%s\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for \"path\" provided to function \"%s\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1368,8 +1360,9 @@ int g_print_error ( const char *const format, ... )
 
     // Argument check
     {
-        if (format == (void*)0)
-            goto no_format;
+        #ifndef NDEBUG
+            if ( format == (void *) 0 ) goto no_format;
+        #endif
     }
 
     // Use the varadic argument list in vprintf call
@@ -1413,8 +1406,9 @@ int g_print_warning ( const char *const format, ... )
 
     // Argument check
     {
-        if (format == (void*)0)
-            goto no_format;
+        #ifndef NDEBUG
+            if ( format == (void *) 0 ) goto no_format;
+        #endif
     }
 
     // Use the varadic argument list in vprintf call
@@ -1441,7 +1435,7 @@ int g_print_warning ( const char *const format, ... )
     // Error handling
     {
 
-        // Argument check
+        // Argument errors
         {
             no_format:
                 #ifndef NDEBUG
@@ -1458,8 +1452,9 @@ int g_print_log ( const char *const format, ... )
 
     // Argument check
     {
-        if (format == (void*)0)
-            goto no_format;
+        #ifndef NDEBUG
+            if ( format == (void *) 0 ) goto no_format;
+        #endif
     }
 
     // Use the varadic argument list in vprintf call
@@ -1507,10 +1502,8 @@ int g_start_schedule ( GXInstance_t* p_instance, char* name )
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if(name == (void *)0)
-                goto no_name;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( name       == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -1577,8 +1570,7 @@ int g_stop_schedule ( GXInstance_t *p_instance )
     // Argument check
     {
         #ifndef NDEBUG
-            if( p_instance == (void *) 0 )
-                goto no_instance;
+            if ( p_instance == (void *) 0 ) goto no_instance;
         #endif
     }
 
@@ -1622,10 +1614,8 @@ int copy_state ( GXInstance_t *p_instance )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_instance == (void *) 0 )
-                goto no_instance;
-            if ( p_instance->context.scene == (void *) 0 )
-                goto no_context_scene;
+            if ( p_instance                == (void *) 0 ) goto no_instance;
+            if ( p_instance->context.scene == (void *) 0 ) goto no_context_scene;
         #endif
     }
 
@@ -1768,10 +1758,8 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (material == (void*)0)
-                goto no_material;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( material   == (void *) 0 ) goto no_material;
         #endif
     }
 
@@ -1811,10 +1799,8 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part)
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (p_part == (void*)0)
-                goto no_part;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( p_part     == (void *) 0 ) goto no_part;
         #endif
     }
 
@@ -1854,10 +1840,8 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (p_shader == (void*)0)
-                goto no_shader;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( p_shader   == (void *) 0 ) goto no_shader;
         #endif
     }
     
@@ -1896,10 +1880,8 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_instance == (void *) 0 )
-                goto no_instance;
-            if ( p_ai == (void *) 0 )
-                goto no_ai;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( p_ai       == (void *) 0 ) goto no_ai;
         #endif
     }
     
@@ -1978,10 +1960,8 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (name == (void*)0)
-                goto no_name;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( name       == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -2013,16 +1993,14 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
     }
 }
 
-GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name)
+GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (name == (void*)0)
-                goto no_name;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( name       == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -2054,16 +2032,14 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name)
     }
 }
 
-GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name)
+GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (name == (void*)0)
-                goto no_name;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( name       == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -2101,10 +2077,8 @@ GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name )
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_instance == (void *)0)
-                goto no_instance;
-            if (name == (void*)0)
-                goto no_name;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( name       == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -2142,8 +2116,7 @@ int g_exit ( GXInstance_t **pp_instance )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_instance == (void *) 0 )
-                goto no_instance;
+            if ( pp_instance == (void *) 0 ) goto no_instance;
         #endif
     }
 
@@ -2249,7 +2222,8 @@ int g_exit ( GXInstance_t **pp_instance )
         }
 
         // Cleanup input
-        destroy_input(p_instance->input);
+        if ( p_instance->input )
+            destroy_input(p_instance->input);
     }
 
     // Cleanup vulkan

@@ -1,13 +1,12 @@
 #include <G10/GXUserCode.h>
 
-int user_code              ( GXInstance_t *p_instance )
+int user_code ( GXInstance_t *p_instance )
 {
 	
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(p_instance == (void *)0 )
-				goto no_instance;
+			if ( p_instance == (void *) 0 ) goto no_instance;
 		#endif
 	}
 
@@ -42,10 +41,8 @@ int add_user_code_callback ( GXInstance_t *p_instance, int ( *user_code_callback
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(p_instance == (void *)0 )
-				goto no_instance;
-			if (user_code_callback == (void*)0)
-				goto no_user_code_callback;
+			if ( p_instance         == (void *) 0 ) goto no_instance;
+			if ( user_code_callback == (void *) 0 ) goto no_user_code_callback;
 		#endif
 	}
 

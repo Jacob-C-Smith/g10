@@ -24,22 +24,26 @@
 struct GXCamera_s {
 
     // Name
-	char *name;
+    char *name;
 
     // View
-    vec3  location,
-          target,
-          up;
+    struct {
+      vec3 location,
+           target,
+           up;
+    }     view;
 
     // Projection
-    float fov,
-          near_clip,
-          far_clip,
-          aspect_ratio;
+    struct {
+      float fov,
+            near_clip,
+            far_clip,
+            aspect_ratio;
+    }     projection;
 
     // Matricies
-    mat4  view,
-          projection;
+    mat4  view_matrix,
+          projection_matrix;
 };
 
 // Allocators

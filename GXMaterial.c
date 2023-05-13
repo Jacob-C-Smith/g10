@@ -10,14 +10,13 @@ void init_material ( void )
 	p_instance->mutexes.material_cache = SDL_CreateMutex();
 }
 
-int create_material ( GXMaterial_t** material)
+int create_material ( GXMaterial_t** material )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (material == (void*)0)
-				goto no_material;
+			if ( material == (void *) 0 ) goto no_material;
 		#endif
 	}
 
@@ -35,7 +34,7 @@ int create_material ( GXMaterial_t** material)
 	// Error handling
 	{
 		
-		// Argument checking
+		// Argument errors
 		{
 			no_material:
 				#ifndef NDEBUG
@@ -65,15 +64,13 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (pp_material == (void *)0)
-				goto no_material;
-			if (path == (void *)0)
-				goto no_path;
+			if ( pp_material == (void *) 0 ) goto no_material;
+			if ( path        == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  len  = g_load_file(path, 0, false);
+	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len + 1, sizeof(char));
 	
 	// Error checking
@@ -81,7 +78,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 		goto no_mem;
 
 	// Load the file
-	if ( g_load_file(path, text, false) == 0 )
+	if ( g_load_file(path, text, true) == 0 )
 
 		// TODO: goto, error handling
 		return 0;
@@ -98,7 +95,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 	// Error handling
 	{
 		
-		// Argument checking
+		// Argument errors
 		{
 			no_material:
 				#ifndef NDEBUG
@@ -130,16 +127,14 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 	}
 }
 
-int load_material_as_json(GXMaterial_t** material, char* text )
+int load_material_as_json ( GXMaterial_t **material, char* text )
 {
 	
 	// Argument check
 	{
 		#ifndef NDEBUG
-		if ( material == (void *) 0 )
-			goto no_material;
-		if ( text == (void *) 0 )
-			goto no_text;
+			if ( material == (void *) 0 ) goto no_material;
+			if ( text     == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -194,7 +189,7 @@ int load_material_as_json(GXMaterial_t** material, char* text )
 	// Error handling
 	{
 		
-		// Argument checking
+		// Argument errors
 		{
 			no_material:
 				#ifndef NDEBUG

@@ -1,6 +1,6 @@
 ﻿#include <G10/GXCamera.h>
 
-mat4 perspective_matrix      ( float       fov,    float       aspect       , float near_clip , float far_clip)
+mat4 perspective_matrix ( float fov, float aspect, float near_clip, float far_clip )
 {
 	/*
 	 * Compute perspective projection, where f = fov, a = aspect, n = near, and r = far
@@ -33,7 +33,7 @@ int get_camera_position ( void *ret )
 
 	// Initialized data
 	GXInstance_t *p_instance        = g_get_active_instance();
-	vec3          camera_position = p_instance->context.scene->active_camera->location;
+	vec3          camera_position = p_instance->context.scene->active_camera->view.location;
 
 	// Write the camera position to the return
 	*(vec3 *)ret = camera_position;
@@ -56,7 +56,7 @@ int get_camera_position ( void *ret )
 	}
 }
 
-mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up ) 
+mat4 look_at ( vec3 eye, vec3 target, vec3 up ) 
 { 
     // Compute forward direction
     vec3 f = normalize((vec3) {
@@ -80,14 +80,13 @@ mat4 look_at          ( vec3        eye,    vec3        target       , vec3  up 
     };
 };
 
-int  create_camera    ( GXCamera_t **pp_camera )
+int create_camera ( GXCamera_t **pp_camera )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_camera == (void *) 0 )
-				goto no_camera;
+			if ( pp_camera == (void *) 0 ) goto no_camera;
 		#endif
 	}
 
@@ -135,28 +134,26 @@ int  create_camera    ( GXCamera_t **pp_camera )
 	}
 }
 
-int  load_camera ( GXCamera_t **pp_camera, const char *path )
+int load_camera ( GXCamera_t **pp_camera, const char *path )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_camera == (void *) 0 )
-				goto no_camera;
-			if ( path == (void *) 0 )
-				goto no_path;
+			if ( pp_camera == (void *) 0 ) goto no_camera;
+			if ( path      == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  file_len  = g_load_file(path, 0, false);
+	size_t  file_len  = g_load_file(path, 0, true);
 	char   *file_text = calloc(file_len + 1, sizeof(char));
 
 	// Load the file
-	if ( g_load_file(path, file_text, false) == 0 )
+	if ( g_load_file(path, file_text, true) == 0 )
 		goto failed_to_load_file;
 
-	if ( load_camera_as_json(pp_camera, file_text, file_len) == 0 )
+	if ( load_camera_as_json(pp_camera, file_text) == 0 )
 		goto failed_to_load_camera_as_json;
 
 	// Clean up the scope
@@ -210,16 +207,14 @@ int  load_camera ( GXCamera_t **pp_camera, const char *path )
 	}
 }
 
-int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
+int load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_camera == (void *) 0 )
-				goto no_camera;
-			if ( text == (void *) 0 )
-				goto no_object_text;
+			if ( pp_camera == (void *) 0 ) goto no_camera;
+			if ( text      == (void *) 0 ) goto no_object_text;
 		#endif
 	}
 
@@ -362,16 +357,14 @@ int  load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 	}
 }
 
-int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
+int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_camera == (void *) 0 )
-				goto no_camera;
-			if ( p_value == (void *) 0 )
-				goto no_value;
+			if ( pp_camera == (void *) 0 ) goto no_camera;
+			if ( p_value   == (void *) 0 ) goto no_value;
 		#endif
 	}
 
@@ -561,16 +554,16 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 		// Construct the camera		
 		*p_camera = (GXCamera_t) {
-			.name         = name,
-			.location     = location,
-			.target       = target,
-			.up           = up,
-			.near_clip    = near_clip,
-			.far_clip     = far_clip,
-			.aspect_ratio = aspect_ratio,
-			.fov          = fov,
-			.view         = look_at(location, target, up),
-			.projection   = perspective_matrix(fov, aspect_ratio, near_clip, far_clip)
+			.name                    = name,
+			.view.location           = location,
+			.view.target             = target,
+			.view.up                 = up,
+			.projection.near_clip    = near_clip,
+			.projection.far_clip     = far_clip,
+			.projection.aspect_ratio = aspect_ratio,
+			.projection.fov          = fov,
+			.view_matrix             = look_at(location, target, up),
+			.projection_matrix       = perspective_matrix(fov, aspect_ratio, near_clip, far_clip)
 		};
 		
 		// Return the camera to the caller
@@ -697,20 +690,18 @@ int  load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 	}
 }
 
-
 int print_camera ( GXCamera_t *p_camera )
 {
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_camera == (void *) 0 )
-				goto no_camera;
+			if ( p_camera == (void *) 0 ) goto no_camera;
 		#endif
 	}
 
 	// Initialized data
-	mat4 v = p_camera->view,
-	     p = p_camera->projection;
+	mat4 v = p_camera->view_matrix,
+	     p = p_camera->projection_matrix;
 
 	// Formatting 
     g_print_log(" - Camera info - \n");
@@ -719,25 +710,25 @@ int print_camera ( GXCamera_t *p_camera )
     g_print_log("name      : \"%s\"\n", p_camera->name);
 
 	// Print the location of the camera
-	g_print_log("location  : < %.3f, %.3f, %.3f >\n", p_camera->location.x, p_camera->location.y, p_camera->location.z );
+	g_print_log("location  : < %.3f, %.3f, %.3f >\n", p_camera->view.location.x, p_camera->view.location.y, p_camera->view.location.z );
 
 	// Print the up vector
-	g_print_log("up        : < %.3f, %.3f, %.3f >\n", p_camera->up.x, p_camera->up.y, p_camera->up.z );
+	g_print_log("up        : < %.3f, %.3f, %.3f >\n", p_camera->view.up.x, p_camera->view.up.y, p_camera->view.up.z );
 
 	// Print the target vector
-	g_print_log("front     : < %.3f, %.3f, %.3f >\n", p_camera->target.x, p_camera->target.y, p_camera->target.z );
+	g_print_log("front     : < %.3f, %.3f, %.3f >\n", p_camera->view.target.x, p_camera->view.target.y, p_camera->view.target.z );
 
 	// Print the near clip distance
-	g_print_log("near      : %.3f\n", p_camera->near_clip );
+	g_print_log("near      : %.3f\n", p_camera->projection.near_clip );
 
 	// Print the far clip distance
-	g_print_log("far       : %.1f\n", p_camera->far_clip );
+	g_print_log("far       : %.1f\n", p_camera->projection.far_clip );
 
 	// Print the aspect ratio
-	g_print_log("aspect    : %.2f\n", p_camera->aspect_ratio );
+	g_print_log("aspect    : %.2f\n", p_camera->projection.aspect_ratio );
 
 	// Print the FOV
-	g_print_log("fov       : %.1f\n", p_camera->fov );
+	g_print_log("fov       : %.1f\n", p_camera->projection.fov );
 
 	// Print the view matrix
 	g_print_log(
@@ -788,8 +779,7 @@ int destroy_camera ( GXCamera_t **pp_camera )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_camera == (void *) 0 )
-				goto no_camera;
+			if ( pp_camera == (void *) 0 ) goto no_camera;
 		#endif
 	}
 

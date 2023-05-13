@@ -6,7 +6,7 @@
 #define RASTERIZER_POLYGON_MODE_COUNT 3
 #define BLEND_OPERATIONS_COUNT        5
 #define BLEND_FACTORS_COUNT           19
-#define SHADER_STAGES_COUNT           5
+#define SHADER_STAGES_COUNT           14
 #define SHADER_PIPELINE_CONSTRUCTORS  3
 
 // Forward declarations
@@ -101,7 +101,16 @@ char *shader_stages_names [SHADER_STAGES_COUNT] =
     "tessellation control",
     "tessellation evaluation",
     "geometry",
-    "fragment"
+    "fragment",
+    "compute",
+    "task",
+    "mesh",
+    "ray generation",
+    "miss",
+    "intersection",
+    "closest hit",
+    "any hit",
+    "callable"
 };
 void *graphics_pipeline_type_constructors [SHADER_PIPELINE_CONSTRUCTORS] = 
 {
@@ -211,7 +220,16 @@ VkShaderStageFlagBits shader_stages_enum [SHADER_STAGES_COUNT] =
     VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
     VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
     VK_SHADER_STAGE_GEOMETRY_BIT,
-    VK_SHADER_STAGE_FRAGMENT_BIT
+    VK_SHADER_STAGE_FRAGMENT_BIT,
+    VK_SHADER_STAGE_COMPUTE_BIT,
+    VK_SHADER_STAGE_TASK_BIT_EXT,
+    VK_SHADER_STAGE_MESH_BIT_EXT,
+    VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+    VK_SHADER_STAGE_MISS_BIT_KHR,
+    VK_SHADER_STAGE_INTERSECTION_BIT_KHR,
+    VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
+    VK_SHADER_STAGE_ANY_HIT_BIT_KHR,
+    VK_SHADER_STAGE_CALLABLE_BIT_KHR
 };
 
 dict *format_types                  = 0,
@@ -238,6 +256,30 @@ typedef struct {
         struct {
             size_t i;
         } combined_image_sampler;
+ 
+        struct {
+            size_t i;
+        } sampled_image;
+
+        struct {
+            size_t i;
+        } storage_image;
+
+        struct {
+            size_t i;
+        } uniform_texel_buffer;
+
+        struct {
+            size_t i;
+        } storage_texel_buffer;
+
+        struct {
+            size_t i;
+        } uniform_buffer_dynamic;
+
+        struct {
+            size_t i;
+        } storage_buffer_dynamic;
 
         struct {
             VkDeviceSize    size;
@@ -320,12 +362,9 @@ int create_shader_module ( char *code, size_t code_len, VkShaderModule *shader_m
     // Argument check
     {
         #ifndef NDEBUG
-            if ( code == (void *) 0 )
-                goto no_code;
-            if ( code_len == (void *) 0 )
-                goto no_code_len;
-            if ( code_len == (void *) 0 )
-                goto no_shader_module;
+            if ( code          == (void *) 0 ) goto no_code;
+            if ( code_len      == (void *) 0 ) goto no_code_len;
+            if ( shader_module == (void *) 0 ) goto no_shader_module;
         #endif
     }
 
@@ -432,8 +471,7 @@ int create_shader ( GXShader_t **pp_shader )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
         #endif
     }
 
@@ -483,15 +521,13 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
-            if ( path == (void *) 0 )
-                goto no_path;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( path      == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Initialized data
-    size_t  len  = g_load_file(path, (void *) 0, false);
+    size_t  len  = g_load_file(path, (void *) 0, true);
     char   *text = calloc(len + 1, sizeof(char));
     
     // Error check
@@ -499,7 +535,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
         goto no_mem;
     
     // Load a file
-    if ( g_load_file(path, text, false) == 0 )
+    if ( g_load_file(path, text, true) == 0 )
         goto failed_to_load_file;
     
     // Load a shader as JSON text
@@ -571,10 +607,8 @@ int load_shader_as_json ( GXShader_t **pp_shader, char *text )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
-            if ( text == (void *) 0 )
-                goto no_text;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( text      == (void *) 0 ) goto no_text;
         #endif
     }
 
@@ -655,10 +689,8 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
-            if ( p_value == (void *) 0 )
-                goto no_value;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( p_value   == (void *) 0 ) goto no_value;
         #endif
     }
 
@@ -984,7 +1016,7 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     }
 }
 */
-int destroy_shader                  ( GXShader_t   *shader )
+int destroy_shader ( GXShader_t *shader )
 {
 
     // TODO: Cache destruction
@@ -1009,8 +1041,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
         #endif
     }
 
@@ -1069,6 +1100,9 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         // Allocate memory for a shader
         if ( create_shader(&p_shader) == 0 )
             goto failed_to_allocate_shader;
+
+        // Set the shader type
+        p_shader->type == g10_pipeline_graphics;
 
         // Set the name
         if(p_name->type == JSONstring){
@@ -1337,7 +1371,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 {
 
                     // Set up the vertex shader
-                    if (p_shader->graphics.vertex_shader_module) {
+                    if (p_shader->graphics.vertex_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1349,7 +1384,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the tessellation control shader
-                    if (p_shader->graphics.tessellation_control_shader_module) {
+                    if (p_shader->graphics.tessellation_control_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1360,7 +1396,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the tessellation evaluation shader
-                    if (p_shader->graphics.tessellation_evaluation_shader_module) {
+                    if (p_shader->graphics.tessellation_evaluation_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1371,7 +1408,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the geometry shader
-                    if (p_shader->graphics.geometry_shader_module) {
+                    if (p_shader->graphics.geometry_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1382,7 +1420,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the task shader
-                    if (p_shader->graphics.task_shader_module) {
+                    if (p_shader->graphics.task_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1393,7 +1432,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the mesh shader
-                    if (p_shader->graphics.mesh_shader_module) {
+                    if (p_shader->graphics.mesh_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1404,7 +1444,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
 
                     // Set up the fragment shader
-                    if (p_shader->graphics.fragment_shader_module) {
+                    if (p_shader->graphics.fragment_shader_module)
+                    {
                         shader_stages[shader_stage_iterator++] = (VkPipelineShaderStageCreateInfo)
                         {
                             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1981,7 +2022,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     .pDynamicState      = &dynamic_state_create_info,      // Dpme
                     .layout             = p_shader->graphics.pipeline_layout,
                     .subpass            = 0,
-                    .renderPass         = p_instance->context.renderer->render_passes_data[0]->render_pass, 
+                    .renderPass         = 0,//p_instance->context.renderer->render_passes_data[0]->render_pass, 
                     .basePipelineHandle = VK_NULL_HANDLE,
                     .basePipelineIndex  = -1
                 };
@@ -2090,30 +2131,52 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
         #endif
     }
 
     // Initialized data
     GXInstance_t  *p_instance            = g_get_active_instance();
-    GXShader_t    *p_shader              = 0;
+    GXShader_t    *p_shader              = 0,
+     		      *p_cache_shader        = 0;
     JSONValue_t   *p_name                = 0,
-                  *p_compute_shader_path = 0;
+                  *p_compute_shader_path = 0,
+                  *p_layout              = 0;
 
     // Parse the JSON value 
     {
 
         p_name                = dict_get(p_value->object, "name");
         p_compute_shader_path = dict_get(p_value->object, "compute shader path");
+        p_layout              = dict_get(p_value->object, "layout");
 
         // Check properties
-        if ( !( p_name && p_compute_shader_path ) )
+        if ( !( p_name && p_compute_shader_path && p_layout ) )
             goto missing_properties;
     }
 
-    // TODO: Cache check
+	// Lock the shader cache mutex
+	SDL_LockMutex(p_instance->mutexes.shader_cache);
 
+	// Search the cache for the shader
+	p_cache_shader = g_find_ai(p_instance, p_name->string);
+	
+	// If the shader is in the cache ...
+	if (p_cache_shader)
+	{
+
+		// ... make a copy of the cached shader
+		copy_ai(pp_shader, p_cache_shader);
+
+		// Write the return
+		p_shader = *pp_shader;
+
+		// Set the initial state
+		goto exit;
+	}
+	
+	// ... the AI is not in the cache
+		
     // Construct the shader
     {
 
@@ -2123,9 +2186,12 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         // Allocate memory for a shader
         if ( create_shader(&p_shader) == 0 )
             goto failed_to_allocate_shader;
-
+        
+        // Set the shader type
+        p_shader->type == g10_pipeline_compute;
+        
         // Set the name
-        if(p_name->type == JSONstring)
+        if ( p_name->type == JSONstring )
         {
 
             // Initialized data
@@ -2185,7 +2251,8 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
             VkComputePipelineCreateInfo     compute_pipeline_create_info = { 0 };
             
             // Set up the compute shader stage
-            if (compute_shader_module) {
+            if ( compute_shader_module )
+            {
 
                 // Set the shader stage
                 shader_stage = (VkPipelineShaderStageCreateInfo)
@@ -2196,10 +2263,90 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
                     .pName  = "main"
                 };
             }
+            else
+                ;// TODO:
 
             //  Set up layout
             {
-                // TODO:
+
+                // Initialized data
+                JSONValue_t                     *p_layout_sets                     = 0,
+                                                *p_layout_push_constant            = 0;
+                size_t                           layout_sets_count                 = 0;
+                JSONValue_t                    **pp_sets                           = 0;
+                VkPipelineLayoutCreateInfo       pipeline_layout_create_info       = { 0 };
+                size_t                           binding_count                     = 0,
+                                                 descriptor_set_layout_count       = 0;
+                VkDescriptorSetLayoutBinding     p_bindings                        = { 0 };
+                VkPushConstantRange             *p_push_constant                   = 0;
+                VkDescriptorSetLayout           *p_descriptor_set_layout           = 0;
+                VkDescriptorSetLayoutCreateInfo  descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
+                {
+                    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                    .pNext        = 0,
+                    .flags        = 0,
+                    .bindingCount = binding_count,
+                    .pBindings    = &p_bindings
+                };
+                VkDescriptorSetLayoutBinding     descriptor_set_layout_binding     = (VkDescriptorSetLayoutBinding)
+                {
+                    .binding            = 0,
+                    .descriptorType     = 0,
+                    .descriptorCount    = 0,
+                    .stageFlags         = 0,
+                    .pImmutableSamplers = 0
+                };
+
+                // Parse the JSON
+                {
+                    p_layout_sets          = dict_get(p_layout->object, "sets");
+                    p_layout_push_constant = dict_get(p_layout->object, "push constant");
+                }
+
+                // Get the contents of the sets array
+                {
+
+                    // Get the length of the array
+                    array_get(p_layout_sets->object, 0, &layout_sets_count);
+
+                    // Allocate memory for JSON tokens
+                    pp_sets = calloc(layout_sets_count, sizeof(JSONValue_t *));
+
+                    // Get the contents of the array
+                    array_get(p_layout_sets->object, pp_sets, 0);
+                }
+
+                // Iterate over each set
+                for ( size_t i = 0; i < layout_sets_count; i++ )
+                {
+                    
+                    // Initialized data
+                    JSONValue_t *p_set = pp_sets[i];
+
+                    print_json_value(p_set, stdout);
+                    printf("\n\n");
+                }
+
+                if ( vkCreateDescriptorSetLayout(p_instance->vulkan.device, &descriptor_set_layout_create_info, 0, &p_shader->compute.set_layout) != VK_SUCCESS)
+                    goto failed_to_create_descriptor_set_layout;
+
+                pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                {
+                    .sType               = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                    .pNext               = 0,
+                    .flags               = 0,
+                    .setLayoutCount      = descriptor_set_layout_count,
+                    .pSetLayouts         = p_descriptor_set_layout,
+                    .pPushConstantRanges = p_push_constant  /* pointer to an array of VkPushConstantRange structures
+                                                               defining a set of push constant ranges for use in a
+                                                               single pipeline layout. In addition to descriptor set
+                                                               layouts, a pipeline layout also describes how many push 
+                                                               constants can be accessed by each stage of the pipeline.*/
+                    
+                };
+
+                if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->compute.pipeline_layout) != VK_SUCCESS )
+                    goto failed_to_create_pipeline_layout;
             }
 
             // Set up the compute pipeline
@@ -2216,18 +2363,18 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             // Construct the compute pipeline
             if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, 0, &p_shader->compute.pipeline) != VK_SUCCESS )
-                g_print_error("failed to create graphics pipeline!\n");
-
+                g_print_error("failed to create compute pipeline!\n");
             
         }
         
-        // Clean up the scope
-        vkDestroyShaderModule(p_instance->vulkan.device, compute_shader_module, 0);
-        
+        // Cache the shader
+        g_cache_shader(p_instance, p_shader);
+
         // Return the pointer to the caller
         *pp_shader = p_shader;
     }
     
+    exit:
     // Success
     return 1;
 
@@ -2240,6 +2387,8 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
     failed_to_load_compute_shader_binary:
     failed_to_create_compute_shader_module:
     wrong_compute_shader_path_type:
+    failed_to_create_pipeline_layout:
+    failed_to_create_descriptor_set_layout:
         return 0;
 
     // Error handling
@@ -2276,17 +2425,463 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 )
-                goto no_shader;
-            if ( p_value == (void *) 0 )
-                goto no_value;
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+            if ( p_value   == (void *) 0 ) goto no_value;
         #endif
     }
     
-    // TODO:
+    // Initialized data
+    GXInstance_t  *p_instance                     = g_get_active_instance();
+    GXShader_t    *p_shader                       = 0;
+    JSONValue_t   *p_name                         = 0,
+                  *p_ray_generation_shader_path   = 0,
+                  *p_ray_any_hit_shader_path      = 0,
+                  *p_ray_closest_hit_shader_path  = 0,
+                  *p_ray_miss_shader_path         = 0,
+                  *p_ray_intersection_shader_path = 0,
+                  *p_ray_callable_shader_path     = 0;
+
+    // Parse the JSON value 
+    {
+
+        p_name                         = dict_get(p_value->object, "name");
+        p_ray_generation_shader_path   = dict_get(p_value->object, "generation shader path");
+        p_ray_any_hit_shader_path      = dict_get(p_value->object, "any hit shader path");
+        p_ray_closest_hit_shader_path  = dict_get(p_value->object, "closest_hit shader path");
+        p_ray_miss_shader_path         = dict_get(p_value->object, "miss shader path");
+        p_ray_intersection_shader_path = dict_get(p_value->object, "intersection shader path");
+        p_ray_callable_shader_path     = dict_get(p_value->object, "callable shader path");
+
+        // Check properties
+        if ( !( p_name && p_ray_generation_shader_path && p_ray_any_hit_shader_path && p_ray_closest_hit_shader_path && p_ray_miss_shader_path && p_ray_intersection_shader_path && p_ray_callable_shader_path) )
+            goto missing_properties;
+    }
+
+    // TODO: Cache check
+
+    // Construct the shader
+    {
+
+        // Initialized data
+        VkShaderModule ray_generation_shader_module   = 0,
+                       ray_any_hit_shader_module      = 0,
+                       ray_closest_hit_shader_module  = 0,
+                       ray_miss_shader_module         = 0,
+                       ray_intersection_shader_module = 0,
+                       ray_callable_shader_module     = 0;
+
+        // Allocate memory for a shader
+        if ( create_shader(&p_shader) == 0 )
+            goto failed_to_allocate_shader;
+        
+        // Set the shader type
+        p_shader->type == g10_pipeline_ray;
+        
+        // Set the name
+        if(p_name->type == JSONstring)
+        {
+
+            // Initialized data
+            size_t name_len = strlen(p_name->string);
+
+            // Allocate memory for the name
+            p_shader->name = calloc(name_len + 1, sizeof(char));
+
+            // Error check
+            if ( p_shader->name == (void *) 0 )
+                goto no_mem;
+
+            // Copy the name
+            strncpy(p_shader->name, p_name->string, name_len);
+        }
+        else
+            goto name_wrong_type;
+
+        // Load the ray generation shader binary
+        if ( p_ray_generation_shader_path )
+        {
+
+            // Parse the ray generation shader path as a string
+            if ( p_ray_generation_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_generation_shader_data_len = g_load_file(p_ray_generation_shader_path->string, 0, true);
+                char* ray_generation_shader_data = calloc(ray_generation_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_generation_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray generation shader binary file
+                if ( g_load_file(p_ray_generation_shader_path->string, ray_generation_shader_data, true) == 0 )
+                    goto failed_to_load_ray_generation_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_generation_shader_data, ray_generation_shader_data_len, &ray_generation_shader_module) == 0 )
+                    goto failed_to_create_ray_generation_shader_module; 
+
+                // Clean the scope
+                free(ray_generation_shader_data);
+            }
+            else
+                goto wrong_ray_generation_shader_path_type;
+        }
+        else
+            goto no_ray_generation_shader_path;
+
+        // Load the ray any hit shader binary
+        if ( p_ray_any_hit_shader_path )
+        {
+
+            // Parse the ray any hit shader path as a string
+            if ( p_ray_any_hit_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_any_hit_shader_data_len = g_load_file(p_ray_any_hit_shader_path->string, 0, true);
+                char* ray_any_hit_shader_data = calloc(ray_any_hit_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_any_hit_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray any hit shader binary file
+                if ( g_load_file(p_ray_any_hit_shader_path->string, ray_any_hit_shader_data, true) == 0 )
+                    goto failed_to_load_ray_any_hit_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_any_hit_shader_data, ray_any_hit_shader_data_len, &ray_any_hit_shader_module) == 0 )
+                    goto failed_to_create_ray_any_hit_shader_module; 
+
+                // Clean the scope
+                free(ray_any_hit_shader_data);
+            }
+            else
+                goto wrong_ray_any_hit_shader_path_type;
+        }
+        else
+            goto no_ray_any_hit_shader_path;
+
+        // Load the ray closest hit shader binary
+        if ( p_ray_closest_hit_shader_path )
+        {
+
+            // Parse the ray closest hit shader path as a string
+            if ( p_ray_closest_hit_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_closest_hit_shader_data_len = g_load_file(p_ray_closest_hit_shader_path->string, 0, true);
+                char* ray_closest_hit_shader_data = calloc(ray_closest_hit_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_closest_hit_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray closest hit shader binary file
+                if ( g_load_file(p_ray_closest_hit_shader_path->string, ray_closest_hit_shader_data, true) == 0 )
+                    goto failed_to_load_ray_closest_hit_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_closest_hit_shader_data, ray_closest_hit_shader_data_len, &ray_closest_hit_shader_module) == 0 )
+                    goto failed_to_create_ray_closest_hit_shader_module; 
+
+                // Clean the scope
+                free(ray_closest_hit_shader_data);
+            }
+            else
+                goto wrong_ray_closest_hit_shader_path_type;
+        }
+        else
+            goto no_ray_closest_hit_shader_path;
+
+        // Load the ray miss shader binary
+        if ( p_ray_miss_shader_path )
+        {
+
+            // Parse the ray miss shader path as a string
+            if ( p_ray_miss_shader_path->type == JSONstring )
+            {
+                // Initialized data
+                size_t ray_miss_shader_data_len = g_load_file(p_ray_miss_shader_path->string, 0, true);
+                char* ray_miss_shader_data = calloc(ray_miss_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_miss_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray miss shader binary file
+                if ( g_load_file(p_ray_miss_shader_path->string, ray_miss_shader_data, true) == 0 )
+                    goto failed_to_load_ray_miss_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_miss_shader_data, ray_miss_shader_data_len, &ray_miss_shader_module) == 0 )
+                    goto failed_to_create_ray_miss_shader_module; 
+
+                // Clean the scope
+                free(ray_miss_shader_data);
+            }
+            else
+                goto wrong_ray_miss_shader_path_type;
+        }
+        else
+            goto no_ray_miss_shader_path;
+
+        // Load the ray intersection shader binary
+        if ( p_ray_intersection_shader_path )
+        {
+
+            // Parse the ray intersection shader path as a string
+            if ( p_ray_intersection_shader_path->type == JSONstring )
+            {
+                // Initialized data
+                size_t ray_intersection_shader_data_len = g_load_file(p_ray_intersection_shader_path->string, 0, true);
+                char* ray_intersection_shader_data = calloc(ray_intersection_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_intersection_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray intersection shader binary file
+                if ( g_load_file(p_ray_intersection_shader_path->string, ray_intersection_shader_data, true) == 0 )
+                    goto failed_to_load_ray_intersection_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_intersection_shader_data, ray_intersection_shader_data_len, &ray_intersection_shader_module) == 0 )
+                    goto failed_to_create_ray_intersection_shader_module; 
+
+                // Clean the scope
+                free(ray_intersection_shader_data);
+            }
+            else
+                goto wrong_ray_intersection_shader_path_type;
+        }
+        else
+            goto no_ray_intersection_shader_path;
+
+        // Load the ray callable shader binary
+        if ( p_ray_callable_shader_path )
+        {
+
+            // Parse the ray callable shader path as a string
+            if ( p_ray_callable_shader_path->type == JSONstring )
+            {
+
+                // Initialized data
+                size_t ray_callable_shader_data_len = g_load_file(p_ray_callable_shader_path->string, 0, true);
+                char* ray_callable_shader_data = calloc(ray_callable_shader_data_len, sizeof(char));
+
+                // Error check
+                if ( ray_callable_shader_data == (void *) 0 )
+                    goto no_mem;
+
+                // Load the ray callable shader binary file
+                if ( g_load_file(p_ray_callable_shader_path->string, ray_callable_shader_data, true) == 0 )
+                    goto failed_to_load_ray_callable_shader_binary;
+
+                // Create a shader module
+                if ( create_shader_module(ray_callable_shader_data, ray_callable_shader_data_len, &ray_callable_shader_module) == 0 )
+                    goto failed_to_create_ray_callable_shader_module; 
+
+                // Clean the scope
+                free(ray_callable_shader_data);
+            }
+            else
+                goto wrong_ray_callable_shader_path_type;
+        }
+        else
+            goto no_ray_callable_shader_path;
+
+        // // TODO: Construct the ray shader
+        {
+
+            // Initialized data
+            VkPipelineShaderStageCreateInfo   shader_stage                 = { 0 };
+            VkPipelineLayoutCreateInfo        pipeline_layout_create_info  = { 0 };
+            VkRayTracingPipelineCreateInfoKHR ray_pipeline_create_info     = { 0 };
+            
+            // Set up the ray generation shader stage
+            if ( ray_generation_shader_module )
+            {
+
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray any hit shader stage
+            if ( ray_any_hit_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_ANY_HIT_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray closest hit shader stage
+            if ( ray_closest_hit_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray miss shader stage
+            if ( ray_miss_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_MISS_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray intersection shader stage
+            if ( ray_intersection_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_INTERSECTION_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // Set up the ray callable shader stage
+            if ( ray_callable_shader_module ) 
+            {
+                // Set the shader stage
+                shader_stage = (VkPipelineShaderStageCreateInfo)
+                {
+                    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .stage  = VK_SHADER_STAGE_CALLABLE_BIT_KHR,
+                    .module = ray_generation_shader_module,
+                    .pName  = "main"
+                };
+            }
+
+            // TODO: 
+            //  Set up layout
+            {
+
+                // Initialized data
+                VkPipelineLayoutCreateInfo      pipeline_layout_create_info       = { 0 };
+                VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = { 0 };
+                VkDescriptorSetLayoutBinding    descriptor_set_layout_binding     = { 0 };
+                size_t                          binding_count                     = 0;
+                VkDescriptorSetLayoutBinding    p_bindings                        = { 0 };
+                
+                descriptor_set_layout_binding = (VkDescriptorSetLayoutBinding)
+                {
+                    .binding            = 0,
+                    .descriptorType     = 0,
+                    .descriptorCount    = 0,
+                    .stageFlags         = 0,
+                    .pImmutableSamplers = 0
+                };
+
+                descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
+                {
+                    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                    .pNext        = 0,
+                    .flags        = 0,
+                    .bindingCount = binding_count,
+                    .pBindings    = &p_bindings
+                };
+
+                pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                {
+                    .sType               = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                    .pNext               = 0,
+                    .flags               = 0,
+                    .setLayoutCount      = 0,
+                    .pSetLayouts         = 0,
+                    .pPushConstantRanges = 0
+                };
+            }
+
+            // Set up the compute pipeline
+            ray_pipeline_create_info = (VkRayTracingPipelineCreateInfoKHR)
+            {
+                .sType                        = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR,
+                .pNext                        = 0,
+                .flags                        = 0,
+                .stageCount                   = 0,
+                .pStages                      = 0,
+                .groupCount                   = 0,
+                .pGroups                      = 0,
+                .maxPipelineRayRecursionDepth = 0,
+                .pLibraryInfo                 = 0,
+                .pLibraryInterface            = 0,
+                .pDynamicState                = 0,
+                .layout                       = 0,
+                .basePipelineHandle           = 0,
+                .basePipelineIndex            = 0
+            };
+
+            // Construct the compute pipeline
+            if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &ray_pipeline_create_info, 0, &p_shader->ray.pipeline) != VK_SUCCESS )
+                g_print_error("failed to create ray pipeline!\n");
+            
+        }
+                
+        // Return the pointer to the caller
+        *pp_shader = p_shader;
+    }
 
     // Success
     return 1;
+
+    // TODO:
+    missing_properties:
+    failed_to_allocate_shader:
+    no_mem:
+    name_wrong_type:
+    failed_to_load_ray_generation_shader_binary:
+    failed_to_create_ray_generation_shader_module:
+    wrong_ray_generation_shader_path_type:
+    no_ray_generation_shader_path:
+    failed_to_load_ray_any_hit_shader_binary:
+    failed_to_create_ray_any_hit_shader_module:
+    wrong_ray_any_hit_shader_path_type:
+    no_ray_any_hit_shader_path:
+    failed_to_load_ray_closest_hit_shader_binary:
+    failed_to_create_ray_closest_hit_shader_module:
+    wrong_ray_closest_hit_shader_path_type:
+    no_ray_closest_hit_shader_path:
+    failed_to_load_ray_miss_shader_binary:
+    failed_to_create_ray_miss_shader_module:
+    wrong_ray_miss_shader_path_type:
+    no_ray_miss_shader_path:
+    failed_to_load_ray_intersection_shader_binary:
+    failed_to_create_ray_intersection_shader_module:
+    wrong_ray_intersection_shader_path_type:
+    no_ray_intersection_shader_path:
+    failed_to_load_ray_callable_shader_binary:
+    failed_to_create_ray_callable_shader_module:
+    wrong_ray_callable_shader_path_type:
+    no_ray_callable_shader_path:
+        return 0;
 
     // Error handling
     {

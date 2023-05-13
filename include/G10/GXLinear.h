@@ -109,6 +109,9 @@ DLLEXPORT vec3 normalize ( vec3 v );
 /** !
  * Multiplies a 2x2 matrix by a vector
  * 
+ * |1 2| . | 1, 1 | = | 3, 7 |
+ * |3 4|   
+ * 
  * @param m : 2x2 matrix
  * @param v : vector
  * 

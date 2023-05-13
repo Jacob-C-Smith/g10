@@ -48,10 +48,10 @@ DLLEXPORT int create_transform ( GXTransform_t **pp_transform );
  *  Load a transform from a file
  *
  * @param pp_transform : return
- * @param path         : The path to a transform JSON object
+ * @param path         : The path to a transform JSON file
  *
  * @sa load_transform_as_json
- * @sa create_transform
+ * @sa load_transform_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -63,8 +63,8 @@ DLLEXPORT int  load_transform ( GXTransform_t **pp_transform, const char* path )
  * @param pp_transform : return
  * @param text         : Transform JSON text
  *
- * @sa load_transform_as_json
- * @sa create_transform
+ * @sa load_transform
+ * @sa load_transform_as_json_value
  *
  * @return 1 on success, 0 on error
  */

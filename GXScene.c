@@ -1,6 +1,6 @@
 #include <G10/GXScene.h>
 
-void init_scene(void)
+void init_scene ( void )
 {
 
     // Initialized data
@@ -16,8 +16,7 @@ int create_scene ( GXScene_t **pp_scene )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 )
-                goto no_scene;
+            if ( pp_scene == (void *) 0 ) goto no_scene;
         #endif
     }
 
@@ -67,8 +66,7 @@ int load_scene ( GXScene_t **pp_scene, const char *path )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 )
-                goto no_scene;
+            if ( pp_scene == (void *) 0 ) goto no_scene;
         #endif
     }
 
@@ -146,10 +144,8 @@ int load_scene_as_json ( GXScene_t **pp_scene, char *text )
     // Argument checking
     {
         #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 )
-                goto no_scene;
-            if ( text == (void *) 0 )
-                goto no_text;
+            if ( pp_scene == (void *) 0 ) goto no_scene;
+            if ( text     == (void *) 0 ) goto no_text;
         #endif
     }
 
@@ -211,10 +207,8 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 )
-                goto no_scene;
-            if ( p_value == (void *) 0 )
-                goto no_value;
+            if ( pp_scene == (void *) 0 ) goto no_scene;
+            if ( p_value  == (void *) 0 ) goto no_value;
         #endif
     }
 
@@ -495,15 +489,12 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
     // Argument check
     {
         #ifndef NDEBUG
-            if (p_scene == (void *)0)
-                goto no_scene;
-            if (p_scene->entities == (void*)0)
-                goto no_entities;
-            if (entity == (void *)0)
-                goto no_entity;
+            if ( p_scene           == (void *) 0 ) goto no_scene;
+            if ( p_scene->entities == (void *) 0 ) goto no_entities;
+            if ( entity            == (void *) 0 ) goto no_entity;
         #endif
-        if (entity->name == 0)
-            goto no_name;
+
+        if ( entity->name == 0 ) goto no_name;
     }
 
     // Add the entity to the scene
@@ -523,7 +514,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
     // Error handling
     {
 
-        // Argument check
+        // Argument errors
         {
             no_scene:
                 #ifndef NDEBUG 
@@ -548,19 +539,17 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
 
 }
 
-int         append_camera      ( GXScene_t  *scene, GXCamera_t    *camera)
+int append_camera ( GXScene_t *scene, GXCamera_t *camera)
 {
     
     // Argument check
     {
         #ifndef NDEBUG
-            if (scene == (void *)0)
-                goto no_scene;
-            if (scene->cameras == (void*)0)
-                goto no_cameras;
-            if (camera == (void *)0)
-                goto no_camera;
+            if ( scene          == (void *) 0 ) goto no_scene;
+            if ( scene->cameras == (void *) 0 ) goto no_cameras;
+            if ( camera         == (void *) 0 ) goto no_camera;
         #endif
+
         if (camera->name == 0)
             goto no_name;
     }
@@ -574,7 +563,7 @@ int         append_camera      ( GXScene_t  *scene, GXCamera_t    *camera)
     // Error handling
     {
 
-        // Argument check
+        // Argument errors
         {
             no_scene:
                 #ifndef NDEBUG 
@@ -598,19 +587,16 @@ int         append_camera      ( GXScene_t  *scene, GXCamera_t    *camera)
     }
 }
 
-int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
+int append_light ( GXScene_t *scene, GXLight_t *light)
 {
     // Argument check
     {
         #ifndef NDEBUG
-            if (scene == (void *)0)
-                goto no_scene;
-            if (scene->lights == (void*)0)
-                goto no_lights;
-            if (light == (void *)0)
-                goto no_light;
+            if ( scene         == (void *) 0 ) goto no_scene;
+            if ( scene->lights == (void *) 0 ) goto no_lights;
+            if ( light         == (void *) 0 ) goto no_light;
         #endif
-        if (light->name == 0)
+        if ( light->name == 0 )
             goto no_name;
     }
 
@@ -623,7 +609,7 @@ int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
     // Error handling
     {
 
-        // Argument check
+        // Argument errors
         {
             no_scene:
                 #ifndef NDEBUG 
@@ -647,7 +633,7 @@ int         append_light       ( GXScene_t  *scene, GXLight_t     *light)
     }
 }
 
-int         append_collision   ( GXScene_t  *scene, GXCollision_t *collision)
+int append_collision ( GXScene_t *scene, GXCollision_t *collision)
 {
     size_t i = 0;
     
@@ -659,7 +645,7 @@ int         append_collision   ( GXScene_t  *scene, GXCollision_t *collision)
     return 1;
 }
 
-int         draw_scene         ( GXScene_t  *scene )
+int draw_scene ( GXScene_t *scene )
 {
 
     // Initialized data
@@ -711,7 +697,7 @@ int         draw_scene         ( GXScene_t  *scene )
     return 1;
 }
 
-int         scene_info         ( GXScene_t *p_scene )
+int scene_info ( GXScene_t *p_scene )
 {
     size_t       entity_count    = dict_keys(p_scene->entities, 0),
                  re              = entity_count,
@@ -752,16 +738,14 @@ int         scene_info         ( GXScene_t *p_scene )
     return 1;
 }
 
-GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[] )
+GXEntity_t *get_entity ( GXScene_t *scene, const char name[] )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if(scene==(void*)0)
-                goto no_scene;
-            if (name == (void*)0)
-                goto no_name;
+            if ( scene == (void *) 0 ) goto no_scene;
+            if ( name  == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -783,16 +767,14 @@ GXEntity_t *get_entity         ( GXScene_t  *scene, const char     name[] )
     }
 }
 
-GXCamera_t *get_camera         ( GXScene_t  *scene, const char     name[])
+GXCamera_t *get_camera ( GXScene_t *scene, const char name[])
 {
     
     // Argument check
     {
         #ifndef NDEBUG
-            if(scene==(void*)0)
-                goto no_scene;
-            if (name == (void*)0)
-                goto no_name;
+            if ( scene == (void *) 0 ) goto no_scene;
+            if ( name  == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -813,16 +795,14 @@ GXCamera_t *get_camera         ( GXScene_t  *scene, const char     name[])
     }
 }
 
-GXLight_t  *get_light          ( GXScene_t  *scene, const char     name[])
+GXLight_t  *get_light ( GXScene_t *scene, const char name[])
 {
     
     // Argument check
     {
         #ifndef NDEBUG
-            if(scene==(void*)0)
-                goto no_scene;
-            if (name == (void*)0)
-                goto no_name;
+            if ( scene == (void *) 0 ) goto no_scene;
+            if ( name  == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -843,16 +823,14 @@ GXLight_t  *get_light          ( GXScene_t  *scene, const char     name[])
     }
 }
 
-int         set_active_camera  ( GXScene_t  *scene, const char     name[])
+int set_active_camera ( GXScene_t *scene, const char name[])
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if(scene == (void *)0)
-                goto no_scene;
-            if (name == (void *)0)
-                goto no_name;
+            if ( scene == (void *) 0 ) goto no_scene;
+            if ( name  == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -875,7 +853,7 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
     // Error handling
     {
 
-        // Argument check
+        // Argument errors
         {
             no_scene:
                 #ifndef NDEBUG
@@ -900,7 +878,7 @@ int         set_active_camera  ( GXScene_t  *scene, const char     name[])
     }
 }
 
-int         destroy_scene      ( GXScene_t  *scene )
+int destroy_scene ( GXScene_t *scene )
 {
     
     free(scene->name);

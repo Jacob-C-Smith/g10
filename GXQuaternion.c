@@ -1,11 +1,11 @@
 ﻿#include <G10/GXQuaternion.h>
 
-quaternion    identity_quaternion()
+quaternion identity_quaternion()
 {
     return (quaternion) { 1.f, 0.f, 0.f, 0.f };
 }
 
-quaternion    quaternion_from_euler_angle(vec3       v)
+quaternion quaternion_from_euler_angle ( vec3 v )
 {
     float sx = sinf(to_radians(v.x) * 0.5f),
           sy = sinf(to_radians(v.y) * 0.5f),
@@ -22,7 +22,7 @@ quaternion    quaternion_from_euler_angle(vec3       v)
     };
 }
 
-vec3          euler_angle_from_quaternion(quaternion q)
+vec3 euler_angle_from_quaternion ( quaternion q )
 {
     float wD = acosf(q.u / 2),
           iD = sinf(q.i / wD),
@@ -31,12 +31,12 @@ vec3          euler_angle_from_quaternion(quaternion q)
     return (vec3) { iD, jD, kD };
 }
 
-quaternion    quaternion_inverse(quaternion q)
+quaternion quaternion_inverse ( quaternion q )
 {
     return (quaternion) { q.u, -q.i, -q.j, -q.k };
 }
 
-quaternion    multiply_quaternion_quaternion_vec4(quaternion q1, quaternion q2)
+quaternion multiply_quaternion_quaternion_vec4 ( quaternion q1, quaternion q2 )
 {
     return (quaternion) {
         (-q1.i * q2.i - q1.j * q2.j - q1.k * q2.k),
@@ -46,7 +46,7 @@ quaternion    multiply_quaternion_quaternion_vec4(quaternion q1, quaternion q2)
     };
 }
 
-quaternion    multiply_quaternion_quaternion(quaternion q1, quaternion q2)
+quaternion multiply_quaternion_quaternion ( quaternion q1, quaternion q2 )
 {
     return (quaternion) {
         (q1.u * q2.u - q1.i * q2.i - q1.j * q2.j - q1.k * q2.k),
@@ -56,7 +56,7 @@ quaternion    multiply_quaternion_quaternion(quaternion q1, quaternion q2)
     };
 }
 
-mat4          rotation_mat4_from_quaternion(quaternion q)
+mat4 rotation_mat4_from_quaternion ( quaternion q )
 {
     /*
         (q.u * q.u + q.i * q.i - q.j * q.j - q.k * q.k), (2 * q.i * q.j - 2 * q.k * q.u)                , (2 * q.i * q.k + 2 * q.j * q.u)                , 0,
@@ -78,7 +78,7 @@ mat4          rotation_mat4_from_quaternion(quaternion q)
     };
 }
 
-void          rotate_vec3_by_quaternion(vec3* r, vec3 v, quaternion q)
+void rotate_vec3_by_quaternion ( vec3* r, vec3 v, quaternion q )
 {
     quaternion p  = (quaternion){ 0.f, v.x, v.y, v.z };
     quaternion pP = normalize_quaternion(multiply_quaternion_quaternion(multiply_quaternion_quaternion(q, p), quaternion_inverse(q)));
@@ -88,14 +88,14 @@ void          rotate_vec3_by_quaternion(vec3* r, vec3 v, quaternion q)
     r->z = pP.k;
 }
 
-quaternion normalize_quaternion(quaternion q)
+quaternion normalize_quaternion ( quaternion q )
 {
     quaternion ret = { 0.f, 0.f, 0.f, 0.f };
     float vl = sqrtf((q.i * q.i) + (q.j * q.j) + (q.k * q.k));
     return (quaternion) { 0.f, q.i / vl, q.j / vl, q.k / vl };
 }
 
-quaternion    q_slerp(quaternion q0, quaternion q1, float delta_time)
+quaternion q_slerp ( quaternion q0, quaternion q1, float delta_time )
 {
     // Uninitialized data
     float sinht,

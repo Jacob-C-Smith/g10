@@ -12,8 +12,7 @@ int create_entity ( GXEntity_t **pp_entity )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_entity == (void *) 0 )
-				goto no_entity;
+			if ( pp_entity == (void *) 0 ) goto no_entity;
 		#endif
 	}
 
@@ -63,15 +62,13 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_entity == (void *) 0 )
-				goto no_entity;
-			if ( path == (void *) 0 )
-				goto no_path;
+			if ( pp_entity == (void *) 0 ) goto no_entity;
+			if ( path      == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  len  = g_load_file(path, 0, false);
+	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len+1, sizeof(char));
 	
 	// Error checking
@@ -79,7 +76,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 		goto no_mem;
 
 	// Load the entity file
-	if ( g_load_file(path, text, false) == 0 )
+	if ( g_load_file(path, text, true) == 0 )
 		goto failed_to_load_entity;
 
 	// Load the entity as JSON text
@@ -153,10 +150,8 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* text )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_entity == (void *)0)
-				goto no_entity;
-			if (text == (void*)0)
-				goto no_text;
+			if ( pp_entity == (void *) 0 ) goto no_entity;
+			if ( text      == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -250,10 +245,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 	// Argument Check
 	{
 		#ifndef NDEBUG
-			if ( pp_entity == (void *) 0 )
-				goto no_entity;
-			if ( p_value == (void *) 0 )
-				goto no_value;
+			if ( pp_entity == (void *) 0 ) goto no_entity;
+			if ( p_value   == (void *) 0 ) goto no_value;
 		#endif
 	}
 
@@ -603,8 +596,7 @@ int calculate_entity_force ( GXEntity_t *p_entity )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_entity == (void *) 0 )
-				goto no_entity;
+			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif	
 	}
 
@@ -652,8 +644,7 @@ int preupdate_entity_ai ( GXEntity_t *p_entity )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_entity == (void *) 0 )
-				goto no_entity;
+			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif	
 	}
 
@@ -692,8 +683,7 @@ int update_entity_ai ( GXEntity_t* p_entity )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_entity == (void *) 0 )
-				goto no_entity;
+			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif	
 	}
 
@@ -729,7 +719,7 @@ int update_entity_ai ( GXEntity_t* p_entity )
 	}
 }
 
-int get_model_matrix(void* ret)
+int get_model_matrix ( void* ret )
 {
 
 	// Argument errors
@@ -784,7 +774,7 @@ vec3 calculate_force_gravitational ( GXEntity_t *p_entity )
 
 }
 
-vec3 calculate_force_applied ( GXEntity_t * p_entity )
+vec3 calculate_force_applied ( GXEntity_t *p_entity )
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
@@ -795,7 +785,7 @@ vec3 calculate_force_applied ( GXEntity_t * p_entity )
 	return ret;
 }
 
-vec3 calculate_force_normal ( GXEntity_t * p_entity )
+vec3 calculate_force_normal ( GXEntity_t *p_entity )
 {
 	GXInstance_t  *p_instance = g_get_active_instance();
 	vec3           ret      = { 0, 0, 0, 0 };
@@ -831,28 +821,28 @@ vec3 calculate_force_normal ( GXEntity_t * p_entity )
 	return ret;
 }
 
-vec3 calculate_force_friction ( GXEntity_t* p_entity)
+vec3 calculate_force_friction ( GXEntity_t *p_entity )
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
 	return ret;
 }
 
-vec3 calculate_force_tension ( GXEntity_t* p_entity)
+vec3 calculate_force_tension ( GXEntity_t *p_entity )
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
 	return ret;
 }
 
-vec3 calculate_force_spring ( GXEntity_t* p_entity)
+vec3 calculate_force_spring ( GXEntity_t *p_entity )
 {
 	vec3 ret = { 0, 0, 0, 0 };
 
 	return ret;
 }
 
-int load_entity_from_queue(GXInstance_t *p_instance)
+int load_entity_from_queue ( GXInstance_t *p_instance )
 {
 
 	// Initialized data
@@ -921,7 +911,7 @@ int load_entity_from_queue(GXInstance_t *p_instance)
 
 }
 
-int load_light_probe_from_queue(GXInstance_t* p_instance)
+int load_light_probe_from_queue ( GXInstance_t *p_instance )
 {
 
 	// TODO:
@@ -929,14 +919,13 @@ int load_light_probe_from_queue(GXInstance_t* p_instance)
 	return 0;
 }
 
-int draw_entity(GXEntity_t* p_entity)
+int draw_entity ( GXEntity_t *p_entity )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (p_entity == (void *)0)
-				goto no_entity;
+			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif
 	}
 
@@ -1000,7 +989,7 @@ int draw_entity(GXEntity_t* p_entity)
 	}
 }
 
-int destroy_entity(GXEntity_t **pp_entity)
+int destroy_entity ( GXEntity_t **pp_entity )
 {
 
 	// Argument error
@@ -1054,7 +1043,7 @@ int destroy_entity(GXEntity_t **pp_entity)
 	}
 }
 
-int move_entity ( GXEntity_t* p_entity )
+int move_entity ( GXEntity_t *p_entity )
 {
 	if (p_entity->rigidbody->mass == 0.f)
 		return 0;
@@ -1103,14 +1092,13 @@ int move_entity ( GXEntity_t* p_entity )
 	return 1;
 }
 
-int entity_info(GXEntity_t* p_entity)
+int entity_info ( GXEntity_t *p_entity )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_entity == (void *)0 )
-				goto no_entity;
+			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif
 	}
 

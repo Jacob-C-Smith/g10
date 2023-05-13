@@ -75,7 +75,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 	}
 
 	// Initialized data
-	size_t  len  = g_load_file(path, 0, false);
+	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len + 1, sizeof(char));
 
 	// Error checking
@@ -83,7 +83,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 		goto no_mem;
 
 	// Load the file into the buffer
-	if ( g_load_file(path, text, false) == 0 )
+	if ( g_load_file(path, text, true) == 0 )
 		goto failed_to_load_file;
 
 	// Load the part as JSON text
@@ -158,10 +158,8 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_part == (void *) 0 )
-				goto no_part;
-			if ( text == (void *) 0 ) 
-				goto no_text;
+			if ( pp_part == (void *) 0 ) goto no_part;
+			if ( text    == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -233,10 +231,8 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_part == (void *) 0 )
-				goto no_part;
-			if ( p_value == (void *) 0 ) 
-				goto no_value;
+			if ( pp_part == (void *) 0 ) goto no_part;
+			if ( p_value == (void *) 0 ) goto no_value;
 		#endif
 	}
 
@@ -391,14 +387,14 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	}
 }
 
-
 int draw_part ( GXPart_t *p_part )
 {
 
 	// Argument check
 	{
-		if ( p_part == (void *) 0 )
-			goto no_part;
+		#ifndef NDEBUG
+			if ( p_part == (void *) 0 ) goto no_part;
+		#endif
 	}
 
 	// Initialized data
@@ -440,8 +436,7 @@ int part_info ( GXPart_t *p_part )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_part == (void *)0 )
-				goto no_part;
+			if ( p_part == (void *) 0 ) goto no_part;
 		#endif
 	}
 

@@ -70,7 +70,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 	}
 
 	// Initialized data
-	size_t  len        = g_load_file(path, 0, false);
+	size_t  len        = g_load_file(path, 0, true);
 	char   *text = calloc(len+1, sizeof( char *));
 
 	// Error checking
@@ -78,7 +78,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 		goto no_mem;
 
 	// Load the file
-	g_load_file(path, text, false);
+	g_load_file(path, text, true);
 
 	// Parse the JSON into a GXServer
 	load_server_as_json(pp_server, text);

@@ -69,10 +69,8 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_instance == (void *)0 )
-                goto no_instance;
-            if (camera == (void *)0 )
-                goto no_camera;
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( camera     == (void *) 0 ) goto no_camera;
         #endif
     }
 

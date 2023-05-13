@@ -208,10 +208,8 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     // Argument checking
     {
         #ifndef NDEBUG
-            if (part == 0)
-                goto noPart;
-            if (path == 0)
-                goto noPath;
+            if ( part == (void *) 0 ) goto no_part;
+            if ( path == (void *) 0 ) goto no_path;
         #endif
     }
 
@@ -744,7 +742,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             // Error
             return 0;
 
-        noPart:
+        no_part:
             #ifndef NDEBUG
                 g_print_error("[G10] [PLY] Null pointer provided for parameter \"part\" in call to %s\n", __FUNCTION__);
             #endif
@@ -752,7 +750,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
             // Error
             return 0;
 
-        noPath:
+        no_path:
             #ifndef NDEBUG
                 g_print_error("[G10] [PLY] Null pointer provided for parameter \"path\" in call to %s\n", __FUNCTION__);
             #endif

@@ -1,6 +1,6 @@
 #include <G10/GXCollision.h>
 
-int create_collision(GXCollision_t **pp_collision)
+int create_collision ( GXCollision_t **pp_collision )
 {
 
 	// TODO: Argument check
@@ -19,7 +19,7 @@ int create_collision(GXCollision_t **pp_collision)
 	// TODO: Error handling
 }
 
-int construct_collision_from_entities(GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b)
+int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b )
 {
 
 	// TODO: Argument check

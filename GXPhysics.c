@@ -1,6 +1,6 @@
 #include <G10/GXPhysics.h>
 
-void init_physics(void)
+void init_physics ( void )
 {
 
     // Initialized data
@@ -14,15 +14,13 @@ void init_physics(void)
     return;
 }
 
-
-int detect_collisions  ( GXInstance_t *p_instance ) 
+int detect_collisions ( GXInstance_t *p_instance ) 
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if (p_instance == (void *) 0)
-                goto no_instance;
+            if ( p_instance == (void *) 0 ) goto no_instance;
         #endif
     }
 
@@ -298,14 +296,13 @@ exit:;
     }
 }
 
-int move_objects       ( GXInstance_t* p_instance )
+int move_objects ( GXInstance_t* p_instance )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-                if (p_instance == (void *) 0)
-                goto no_instance;
+            if ( p_instance == (void *) 0 ) goto no_instance;
         #endif
     }
 
@@ -359,8 +356,7 @@ int update_forces ( GXInstance_t *p_instance )
     // Argument check
     {
         #ifndef NDEBUG
-            if (p_instance == (void *) 0)
-                goto no_instance;
+            if ( p_instance == (void *) 0 ) goto no_instance;
         #endif
     }
 

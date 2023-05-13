@@ -1,6 +1,6 @@
 /** !
  * @file G10/GXUserCode.h
- * @author Jacob Smith, Benjamin F Daly
+ * @author Benjamin F Daly, Jacob Smith
  * 
  * Audio for G10
  */

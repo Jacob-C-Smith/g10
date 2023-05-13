@@ -21,9 +21,16 @@
 #include <G10/G10.h>
 #include <G10/GXCamera.h>
 
+enum g10_pipeline_e
+{
+    g10_pipeline_graphics,
+    g10_pipeline_compute,
+    g10_pipeline_ray
+};
+
 struct GXDescriptor_s
 {
-    char           *name;
+    char *name;
 
 };
 
@@ -39,8 +46,9 @@ struct GXSet_s
 struct GXShader_s
 {
 
-    char   *name;
-    size_t  users;
+    char                *name;
+    size_t               users;
+    enum g10_pipeline_e  type;
 
     union 
     {
@@ -76,13 +84,20 @@ struct GXShader_s
         struct {
             VkPipeline       pipeline;
             VkPipelineLayout pipeline_layout;
-
+            VkShaderModule   compute_shader_module;
+            VkDescriptorSetLayout set_layout;
         } compute;
+
+        struct {
+            VkPipeline       pipeline;
+            VkPipelineLayout pipeline_layout;
+            VkShaderModule   compute_shader_module;
+        } ray;
     };
 };
 
 
-DLLEXPORT int create_shader_module            ( char        *code, size_t code_len, VkShaderModule* shader_module);
+DLLEXPORT int create_shader_module ( char *code, size_t code_len, VkShaderModule* shader_module );
 
 // Allocators
 /** !
@@ -94,7 +109,7 @@ DLLEXPORT int create_shader_module            ( char        *code, size_t code_l
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_shader                   ( GXShader_t **pp_shader );
+DLLEXPORT int create_shader ( GXShader_t **pp_shader );
 
 // Constructors
 /** !
@@ -108,7 +123,7 @@ DLLEXPORT int create_shader                   ( GXShader_t **pp_shader );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_shader                     ( GXShader_t **pp_shader, const char* path );
+DLLEXPORT int load_shader ( GXShader_t **pp_shader, const char* path );
 
 /** !
  *  Load a shader from JSON text
@@ -121,7 +136,7 @@ DLLEXPORT int load_shader                     ( GXShader_t **pp_shader, const ch
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_shader_as_json             ( GXShader_t **pp_shader, char* text );
+DLLEXPORT int load_shader_as_json ( GXShader_t **pp_shader, char* text );
 
 /** !
  *  Load a shader from a JSON value
@@ -134,14 +149,14 @@ DLLEXPORT int load_shader_as_json             ( GXShader_t **pp_shader, char* te
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_shader_as_json_value       ( GXShader_t **pp_shader, JSONValue_t *p_value );
+DLLEXPORT int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 
-DLLEXPORT int use_shader                      ( GXShader_t  *p_shader );
+DLLEXPORT int use_shader ( GXShader_t  *p_shader );
 
-DLLEXPORT int update_shader_push_constant     ( GXShader_t  *p_shader );
+DLLEXPORT int update_shader_push_constant ( GXShader_t  *p_shader );
 DLLEXPORT int add_shader_push_constant_getter ( char *getter_name, int (*getter_function) (void *) );
 
-DLLEXPORT int set_shader_camera               ( GXEntity_t  *p_entity );
+DLLEXPORT int set_shader_camera ( GXEntity_t  *p_entity );
 
 // Destructors
 /** !

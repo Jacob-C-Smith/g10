@@ -92,8 +92,7 @@ int create_task ( GXTask_t **pp_task )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_task == (void *)0)
-				goto no_task;
+			if ( pp_task == (void *) 0 ) goto no_task;
 		#endif
 	}
 
@@ -143,8 +142,7 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_schedule == (void *) 0 )
-				goto no_schedule;
+			if ( pp_schedule == (void *) 0 ) goto no_schedule;
 		#endif
 	}
 
@@ -194,8 +192,7 @@ int create_thread ( GXThread_t **pp_thread )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_thread == (void *) 0 )
-				goto no_thread;
+			if ( pp_thread == (void *) 0 ) goto no_thread;
 		#endif
 	}
 
@@ -239,21 +236,19 @@ int create_thread ( GXThread_t **pp_thread )
 	}
 }
 
-int load_schedule ( GXSchedule_t **pp_schedule, char* path)
+int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_schedule == (void *) 0 )
-				goto no_schedule;
-			if ( path == (void *) 0 )
-				goto no_path;
+			if ( pp_schedule == (void *) 0 ) goto no_schedule;
+			if ( path        == (void *) 0 ) goto no_path;
 		#endif
 	}
 
 	// Initialized data
-	size_t  len  = g_load_file(path, 0, false);
+	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len+1, sizeof(char));
 	
 	// Error checking
@@ -261,11 +256,11 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path)
 		goto no_mem;
 
 	// Load the file
-	if ( g_load_file(path, text, false) == 0)
+	if ( g_load_file(path, text, true) == 0)
 		goto failed_to_load_file;
 
 	// Construct the schedule from the file contents
-	if ( load_schedule_as_json(pp_schedule, text) == 0 )
+	if ( load_schedule_as_json_text(pp_schedule, text) == 0 )
 		goto failed_to_load_schedule;
 
 	// Free the file contents
@@ -328,16 +323,14 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path)
 	}
 }
 
-int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text )
+int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (pp_schedule == (void*)0)
-				goto no_schedule;
-			if(text == (void *)0)
-				goto no_text;
+			if ( pp_schedule == (void *) 0 ) goto no_schedule;
+			if ( text        == (void *) 0 ) goto no_text;
 		#endif
 	}
 
@@ -355,8 +348,9 @@ int load_schedule_as_json ( GXSchedule_t **pp_schedule, char *text )
 	if ( load_schedule_as_json_value(pp_schedule, p_value) == 0 )
 		goto failed_to_create_schedule;
 	
+	// TODO:
 	// Deallocate the JSON value
-	free_json_value(p_value);
+	//free_json_value(p_value);
 
 	// Success
 	return 1;
@@ -433,17 +427,15 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_schedule == (void*) 0 )
-				goto no_schedule;
-			if ( p_value == (void *) 0 )
-				goto no_value;
+			if ( pp_schedule == (void *) 0 ) goto no_schedule;
+			if ( p_value     == (void *) 0 ) goto no_value;
 		#endif
 	}
 	
 	// Initialized data
-	GXInstance_t  *p_instance    = g_get_active_instance();
-	char          *name          = 0;
-	array         *p_threads     = 0;
+	GXInstance_t *p_instance    = g_get_active_instance();
+	JSONValue_t  *p_name        = 0,
+	             *p_threads     = 0;
 	
 	// Parse the schedule JSON
 	if (p_value->type == JSONobject)
@@ -453,11 +445,11 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		dict *p_dict = p_value->object;
 		
 		// Parse the JSON values into constructor parameters
-		name      = ((JSONValue_t *)dict_get(p_dict, "name"))->string;
-		p_threads = ((JSONValue_t *)dict_get(p_dict, "threads"))->list;
+		p_name    = dict_get(p_dict, "name");
+		p_threads = dict_get(p_dict, "threads");
 		
 		// Error checking
-		if ( ( name && p_threads ) == 0 )
+		if ( ( p_name && p_threads ) == 0 )
 			goto missing_properties;
 	}
 	else if (p_value->type == JSONstring)
@@ -477,23 +469,23 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		// Initialized data
 		GXSchedule_t *p_schedule = 0;
 		dict         *threads    = 0;
-		char         *p_name     = 0;
+		char         *name       = 0;
 
 		// Copy the schedule name
-		{
+		if ( p_name->type == JSONstring ) {
 
 			// Initialized data
-			size_t name_len = strlen(name);
+			size_t name_len = strlen(p_name->string);
 
 			// Allocate for the name
-			p_name = calloc(name_len+1, sizeof(char));
+			name = calloc(name_len+1, sizeof(char));
 
 			// Error checking
 			if ( name == (void *) 0 )
 				goto no_mem;
 
 			// Copy the name 
-			strncpy(p_name, name, name_len);
+			strncpy(name, p_name->string, name_len);
 
 		}
 
@@ -504,18 +496,22 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 			JSONValue_t **pp_elements  = 0;
 			size_t        thread_count = 0;
 			
-			// Get the quantity of elements
-			array_get(p_threads, 0, &thread_count);
+			// Get the array contents
+			{
 
-			// Allocate an array for the elements
-			pp_elements = calloc(thread_count+1, sizeof(JSONValue_t *));
+				// Get the quantity of elements
+				array_get(p_threads->list, 0, &thread_count);
 
-			// Error check
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(thread_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the threads
-			array_get(p_threads, pp_elements, 0 );			
+				// Error check
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the threads
+				array_get(p_threads->list, pp_elements, 0 );			
+			}
 
 			// Construct a thread dict
 			dict_construct(&threads, thread_count);
@@ -551,7 +547,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 		// Construct the transform 
 		*p_schedule = (GXSchedule_t) { 
-			.name    = p_name,
+			.name    = name,
 			.threads = threads
 		};
 	
@@ -651,7 +647,8 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				return 0;
 		}
 
-		no_value:;
+		no_value:
+		return 0;
 	}
 }
 
@@ -661,8 +658,7 @@ int client_work ( GXClient_t *p_client )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if (p_client == (void *)0 )
-				goto no_client;
+			if ( p_client == (void *) 0 ) goto no_client;
 		#endif
 	}
 
@@ -729,8 +725,7 @@ int work ( GXThread_t *p_thread )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_thread == (void *) 0 )
-				goto no_thread;
+			if ( p_thread == (void *) 0 ) goto no_thread;
 		#endif
 	}
 
@@ -807,8 +802,7 @@ int main_work ( GXThread_t *p_thread )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_thread == (void *) 0 )
-				goto no_thread;
+			if ( p_thread == (void *) 0 ) goto no_thread;
 		#endif
 	}
 
@@ -889,8 +883,7 @@ int start_schedule ( GXSchedule_t *p_schedule )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_schedule == (void *) 0 )
-				goto no_schedule;
+			if ( p_schedule == (void *) 0 ) goto no_schedule;
 		#endif
 	}
 
@@ -1003,12 +996,8 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_thread == (void *) 0 )
-				goto no_thread;
-			if ( p_value == (void *) 0 )
-				goto no_value;
-			if ( p_value->type != JSONobject )
-				goto wrong_type;
+			if ( pp_thread == (void *) 0 ) goto no_thread;
+			if ( p_value   == (void *) 0 ) goto no_value;
 		#endif
 	}
 
@@ -1240,7 +1229,8 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 				return 0;
 		}
 
-		no_value:;
+		no_value:
+		return 0;
 	}
 
 }
@@ -1251,10 +1241,8 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( pp_task == (void *) 0 )
-				goto no_task;
-			if ( p_value == (void *) 0 ) 
-				goto no_value;
+			if ( pp_task == (void *) 0 ) goto no_task;
+			if ( p_value == (void *) 0 ) goto no_value;
 		#endif
 	}
 	

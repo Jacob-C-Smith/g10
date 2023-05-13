@@ -20,7 +20,7 @@ float length ( vec3 a )
     return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
-float dot_product_vec3(vec3 a, vec3 b)
+float dot_product_vec3( vec3 a, vec3 b )
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -39,7 +39,6 @@ void mul_vec3_vec3 ( vec3 *r, vec3 a, vec3 b )
     r->x = a.x * b.x,
     r->y = a.y * b.y,
     r->z = a.z * b.z;
-
 }
 
 void div_vec3_f( vec3 *r, vec3 a, float s )
@@ -48,7 +47,6 @@ void div_vec3_f( vec3 *r, vec3 a, float s )
     r->y = a.y / s,
     r->z = a.z / s;
 }
-
 
 vec3 mul_vec3_f ( vec3 v, float s )
 {
@@ -102,7 +100,7 @@ mat4 mul_mat4_mat4 ( mat4 m, mat4 n )
     };
 }
 
-mat2 rcp_mat2(mat2 m)
+mat2 rcp_mat2( mat2 m )
 {
     return (mat2) {
         m.a, m.c,
@@ -110,7 +108,7 @@ mat2 rcp_mat2(mat2 m)
     };
 }
 
-mat4 rcp_mat4(mat4 m)
+mat4 rcp_mat4( mat4 m )
 {
     return (mat4) {
         (m.a), (m.e), (m.i), (m.m),

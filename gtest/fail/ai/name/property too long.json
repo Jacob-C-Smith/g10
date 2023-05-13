@@ -1,0 +1,9 @@
+{
+    "$schema" : "https://raw.githubusercontent.com/Jacob-C-Smith/G10-Schema/main/ai-schema.json",
+    "name" : "A name that is over 255 characters long~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "states" : [
+        "RUN LEFT",
+        "ATTACK"
+    ],
+    "initial state" : "RUN LEFT"
+}

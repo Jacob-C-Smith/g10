@@ -1,7 +1,8 @@
 #include <G10/GXInput.h>
 
 // Abstract keys into keyboard file.
-const kn_t keys[] = {
+const kn_t keys[] =
+{
     {
         SDL_SCANCODE_UNKNOWN,
         ""
@@ -470,8 +471,7 @@ int create_input ( GXInput_t **pp_input )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_input == (void *)0)
-				goto no_input;
+			if ( pp_input == (void *) 0 ) goto no_input;
 		#endif
 	}
 
@@ -521,22 +521,20 @@ int load_input ( GXInput_t **pp_input, const char path[] )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_input == (void *) 0 )
-                goto no_input;
-            if ( path == (void *) 0 )
-                goto no_path;
+            if ( pp_input == (void *) 0 ) goto no_input;
+            if ( path     == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Uninitialized data
-    size_t       i    = g_load_file(path, 0, false);
+    size_t       i    = g_load_file(path, 0, true);
     u8*          text = calloc(i + 1, sizeof(char));
 
     // Initialized data
     GXInput_t    *p_input = 0;
 
     // Load the file
-    if ( g_load_file(path, text, false) == 0 )
+    if ( g_load_file(path, text, true) == 0 )
         goto failed_to_load_file;
 
     // Construct the input from JSON text
@@ -600,8 +598,7 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( text == (void *) 0 )
-                goto no_text;
+            if ( text == (void *) 0 ) goto no_text;
         #endif
     }
 
@@ -660,10 +657,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_input == (void *) 0 )
-                goto no_input;
-            if ( p_value == (void *) 0 )
-                goto no_value;
+            if ( pp_input == (void *) 0 ) goto no_input;
+            if ( p_value  == (void *) 0 ) goto no_value;
         #endif
     }
 
@@ -838,10 +833,8 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_bind == (void *) 0 )
-                goto no_bind;
-            if ( p_value == (void *) 0 )
-                goto no_value;
+            if ( pp_bind == (void *) 0 ) goto no_bind;
+            if ( p_value == (void *) 0 ) goto no_value;
         #endif
     }
 
@@ -1171,8 +1164,7 @@ int create_bind ( GXBind_t **pp_bind )
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(pp_bind == (void *)0)
-				goto no_bind;
+			if ( pp_bind == (void *) 0 ) goto no_bind;
 		#endif
 	}
 
@@ -1216,16 +1208,13 @@ int create_bind ( GXBind_t **pp_bind )
 	}
 }
 
-
 int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
 {
 
     // Argument check
     {
-        if (p_bind == (void*)0)
-            goto no_bind;
-        if (function_pointer == (void*)0)
-            goto no_function_pointer;
+        if ( p_bind           == (void *) 0 ) goto no_bind;
+        if ( function_pointer == (void *) 0 ) goto no_function_pointer;
     }
 
     // Allocate memory for bind callbacks
@@ -1271,6 +1260,7 @@ int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
             return 0;
     }
 }
+
 int unregister_bind_callback ( GXBind_t *p_bind, void *function_pointer )
 {
     // TODO: Argument check
@@ -1285,8 +1275,7 @@ SDL_Scancode find_key ( const char *name )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( name == (void *) 0 )
-                goto no_name;    
+            if ( name == (void *) 0 ) goto no_name;    
         #endif
     }
 
@@ -1311,10 +1300,8 @@ int process_input ( GXInstance_t *p_instance )
     // Argument check
     {
         #ifndef NDEBUG
-            if (p_instance == (void*)0)
-                goto no_instance;
-            if (p_instance->input == (void*)0)
-                goto no_inputs;
+            if ( p_instance        == (void *) 0 ) goto no_instance;
+            if ( p_instance->input == (void *) 0 ) goto no_inputs;
         #endif  
     }
 
@@ -1550,8 +1537,7 @@ int input_info ( GXInput_t *p_input )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_input == (void *) 0 )
-                goto no_input;
+            if ( p_input == (void *) 0 ) goto no_input;
         #endif
     }
 
@@ -1620,8 +1606,7 @@ int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_in
     // Argument check
     {
         #ifndef NDEBUG
-            if( p_bind == (void *) 0 )
-                goto no_bind;
+            if ( p_bind == (void *) 0 ) goto no_bind;
         #endif
     }
 
@@ -1647,13 +1632,12 @@ int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_in
 
 GXBind_t *find_bind ( GXInput_t *p_input, char *name )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_input == (void*)0)
-                goto no_input;
-            if (name == (void*)0)
-                goto no_name;
+            if ( p_input == (void *) 0 ) goto no_input;
+            if ( name    == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -1686,13 +1670,12 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
 
 int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
-            if(p_input == (void*)0)
-                goto no_input;
-            if (p_bind == (void*)0)
-                goto no_bind;
+            if ( p_input == (void *) 0 ) goto no_input;
+            if ( p_bind  == (void *) 0 ) goto no_bind;
         #endif
     }
 
@@ -1726,10 +1709,12 @@ int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
  
 int destroy_bind ( GXBind_t *p_bind )
 {
+
     // Argument check
     {
-        if ( p_bind == (void *) 0 )
-            goto no_bind;
+        #ifndef NDEBUG
+            if ( p_bind == (void *) 0 ) goto no_bind;
+        #endif
     }
 
     // TODO: Free everything
@@ -1767,8 +1752,7 @@ int destroy_input ( GXInput_t *p_input )
     // Argument check
     {
         #ifndef NDEBUG
-            if (p_input == (void *) 0 )
-                goto no_input;
+            if ( p_input == (void *) 0 ) goto no_input;
         #endif
     }
 
