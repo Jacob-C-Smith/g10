@@ -1,6 +1,6 @@
 #include <G10/GXPart.h>
 
-void init_part ( void ) 
+void init_part ( void )
 {
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
@@ -15,8 +15,7 @@ int create_part ( GXPart_t **pp_part )
 	// Initialized data
 	{
 		#ifndef NDEBUG
-			if (pp_part == (void*)0)
-				goto no_part;
+			if ( pp_part == (void*) 0 ) goto no_part;
 		#endif
 	}
 
@@ -43,7 +42,7 @@ int create_part ( GXPart_t **pp_part )
 					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
 
@@ -67,10 +66,8 @@ int load_part ( GXPart_t **pp_part, char* path)
 	// Argument error
 	{
 		#ifndef NDEBUG
-			if (pp_part == (void *) 0 )
-				goto no_part;
-			if (path == (void *) 0 )
-				goto no_path;
+			if (pp_part == (void *) 0 ) goto no_part;
+			if (path    == (void *) 0 ) goto no_path;
 		#endif
 	}
 
@@ -190,28 +187,28 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 			no_part:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif 
+				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 			no_text:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif 
+				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 			no_len:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"len\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif 
+				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
-		
+
 		// Standard library errors
 		{
 			no_mem:
@@ -219,7 +216,7 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
 	}
@@ -238,7 +235,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
-	GXPart_t     *p_part     = 0; 
+	GXPart_t     *p_part     = 0;
 	JSONValue_t  *name       = 0,
 		         *path       = 0;
 
@@ -252,7 +249,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		name = dict_get(part_json, "name");
 		path = dict_get(part_json, "path");
 
-		// Check for required data 
+		// Check for required data
 		if ( !(name && path) )
 			goto not_enough_properties;
 	}
@@ -264,12 +261,12 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// Load a part from a JSON file
 		if ( load_part(pp_part, p_value->string) == (void *)0 )
 			goto failed_to_load_part_from_file;
-		
+
 		// Success
 		return 1;
 	}
 
-	// Check the cache 
+	// Check the cache
 	{
 
 		// Initialized data
@@ -280,7 +277,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 
 		// Search the cache for the part
 		p_cache_part = g_find_part(p_instance, name);
-		
+
 		// If the part is in the cache ...
 		if (p_cache_part)
 		{
@@ -296,7 +293,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 			return 1;
 			//	goto set_initial_state;
 		}
-		
+
 	}
 
 	// Construct the part
@@ -305,23 +302,23 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// Allocate a part
 		if ( create_part(pp_part) == 0 )
 			goto failed_to_create_part;
-		
+
 		p_part = *pp_part;
-		
+
 		// Copy the name
 		{
 
 			// Initilaized data
 			size_t name_len = strlen(name->string);
- 
+
 			// Allocate memory for the string
 			p_part->name = calloc(name_len + 1, sizeof(char));
-			
+
 			// Error handling
 			if ( p_part->name == (void *) 0 )
 				goto no_mem;
- 
-			// Copy the string 
+
+			// Copy the string
 			strncpy(p_part->name, name->string, name_len);
 		}
 
@@ -338,7 +335,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	// Error handling
 	{
 
-		// TODO: 
+		// TODO:
 		failed_to_load_part_from_file:
 		failed_to_create_part:
 			return 0;
@@ -348,21 +345,21 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 			no_part:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif 
+				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 			no_value:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif 
+				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 		}
-		
+
 		// Standard library errors
 		{
 			no_mem:
@@ -370,7 +367,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
 
@@ -440,9 +437,9 @@ int part_info ( GXPart_t *p_part )
 		#endif
 	}
 
-	// Formatting 
+	// Formatting
     g_print_log(" - Part info - \n");
-    
+
     // Print the name
     g_print_log("name            : \"%s\"\n", p_part->name);
 
@@ -482,9 +479,9 @@ int part_info ( GXPart_t *p_part )
 	}
 }
 
-int destroy_part ( GXPart_t *p_part ) 
+int destroy_part ( GXPart_t *p_part )
 {
-	
+
 	// Argument chack
 	{
 		#ifndef NDEBUG
@@ -495,7 +492,7 @@ int destroy_part ( GXPart_t *p_part )
 
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
-	
+
 	// Remove the part from the cache
 	if ( (GXPart_t *) dict_get(p_instance->cache.parts, p_part->name) == p_part )
 	{

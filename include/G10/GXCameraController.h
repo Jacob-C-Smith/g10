@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXCamera.h
  * @author Jacob Smith
- * 
+ *
  * Camera controller
  */
 
@@ -31,17 +31,17 @@ struct GXCameraController_s
     vec2  orientation;
     vec3  velocity,
           acceleration;
-    
+
 };
 
 /** !
  *  Assign the instance's camera controller to a particular camera
- * 
+ *
  *  @param instance : The instance
  *  @param camera   : The camera to control
- * 
+ *
  *  @sa update_controlee_camera
- * 
+ *
  *  @return 1 on success, 0 on error
  */
 DLLEXPORT int camera_controller_from_camera ( GXInstance_t *p_instance , GXCamera_t *p_camera );

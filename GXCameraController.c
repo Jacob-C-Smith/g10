@@ -11,11 +11,11 @@ GXCameraController_t* camera_controller = 0;
 GXCameraController_t* create_camera_controller       ( void )
 {
     GXCameraController_t *ret = calloc(1, sizeof(GXCameraController_t));
-    
+
     // Check allocaated memory
     {
         #ifndef NDEBUG
-            if( ret == (void *) 0 )
+            if ( ret == (void *) 0 )
                 goto no_mem;
         #endif
     }
@@ -54,7 +54,7 @@ void                  camera_controller_strafe_right ( callback_parameter_t stat
         x_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
-void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* p_instance ) 
+void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* p_instance )
 {
     if (state.input_state == MOUSE)
     {
@@ -86,14 +86,14 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
 
         // Orientation binds
         * mouse = find_bind(p_instance->input, "MOUSE");
-    
+
     // Error checking
     {
         // This error checking is a little bit unorthadox, so I figure its worth explaining whats going on.
         // 8 binds are required to set up a camera controller, and there are eight bits in a byte. If one of
         // the binds is missing, a bit is flipped. If there are any errors, the errors byte will be nonzero.
 
-        // The error byte is checked for nonzero value at the end. If there is a nonzero value, the program 
+        // The error byte is checked for nonzero value at the end. If there is a nonzero value, the program
         // branches to error handling. Else, continue
 
         #ifndef NDEBUG
@@ -133,7 +133,7 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
     camera_controller = ret;
 
     return 1;
-    
+
     // Error handling
     {
 
@@ -164,7 +164,7 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
                 g_print_error("[G10] [Camera controller] Missing \"STRAFE RIGHT\" input bind to set up camera controller\n");
             if ( errors & 0x10 )
                 g_print_error("[G10] [Camera controller] Missing \"MOUSE\" input bind to set up camera controller\n");
-            
+
             // TODO: Free camera controller
 
             return 0;
@@ -174,7 +174,7 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
     }
 }
 
-int                   update_controlee_camera        ( void ) 
+int                   update_controlee_camera        ( void )
 {
 
     // Context check
@@ -187,7 +187,11 @@ int                   update_controlee_camera        ( void )
     vec2                  l_orient     = { 0 };
     GXCamera_t           *camera       = camera_controller->camera;
 
-    camera_controller->orientation = (vec2) { x_orient, y_orient };
+    camera_controller->orientation = (vec2)
+    {
+        x_orient,
+        y_orient
+    };
 
     l_orient = camera_controller->orientation;
 
@@ -209,7 +213,7 @@ int                   update_controlee_camera        ( void )
 
     if (l_orient.x < 0.f)
         sub_vec3(&camera->location, camera->location, mul_vec3_f(normalize(cross_product_vec3(camera->target, camera->up)), camera_controller->spdlim));
-    
+
     if (l_orient.y < 0.f)
         sub_vec3(&camera->location, camera->location, mul_vec3_f(camera->target, camera_controller->spdlim));
 
@@ -227,7 +231,7 @@ int                   update_controlee_camera        ( void )
     {
         no_active_camera_controller:
         #ifndef NDEBUG
-            g_print_warning("[G10] [Camera controller] No active camera, set a camera with \"camera_controller_from_camera()\"\n");        
+            g_print_warning("[G10] [Camera controller] No active camera, set a camera with \"camera_controller_from_camera()\"\n");
         #endif
         return 0;
     }

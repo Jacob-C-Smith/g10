@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXRigidbody.h
  * @author Jacob Smith
- * 
+ *
  * Rigidbody
  */
 
@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// G10 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
@@ -58,7 +58,7 @@ DLLEXPORT int create_rigidbody       ( GXRigidbody_t **pp_rigidbody );
  * @param pp_rigidbody : return
  * @param path         : The path to a JSON file containing a rigidbody object
  *
- * @sa load_rigidbody_as_json
+ * @sa load_rigidbody_as_json_text
  * @sa create_rigidbody
  *
  * @return 1 on success, 0 on error
@@ -76,7 +76,7 @@ DLLEXPORT int load_rigidbody         ( GXRigidbody_t **pp_rigidbody, const char 
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_rigidbody_as_json ( GXRigidbody_t **pp_rigidbody, char *text );
+DLLEXPORT int load_rigidbody_as_json_text ( GXRigidbody_t **pp_rigidbody, char *text );
 
 // Destructors
 /** !

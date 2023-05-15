@@ -3,27 +3,56 @@
 int create_collision ( GXCollision_t **pp_collision )
 {
 
-	// TODO: Argument check
+    // Argument check
+    {
+        if ( pp_collision == (void *) 0 ) goto no_collision;
+    }
 
-	// Initialized data
-	GXCollision_t* p_collision = calloc(1, sizeof(GXCollision_t));
+    // Initialized data
+    GXCollision_t * p_collision = calloc(1, sizeof(GXCollision_t));
 
-	// TODO: Error check
+    // Error check
+    if ( pp_collision == (void *) 0 )
+        goto no_mem;
 
-	// Write the return value
-	*pp_collision = p_collision;
+    // Write the return value
+    *pp_collision = p_collision;
 
-	// Success
-	return 1;
+    // Success
+    return 1;
 
-	// TODO: Error handling
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_collision:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collision] Null pointer provided for parameter \"pp_collision\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
 }
 
 int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b )
 {
 
 	// TODO: Argument check
-	
+
 	// Initialized data
 	GXCollision_t *p_collision = 0;
 

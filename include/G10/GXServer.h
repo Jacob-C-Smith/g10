@@ -2,7 +2,7 @@
  * @file G10/GXServer.h
  * @author Aiden Smith
  * @author Jacob Smith
- * 
+ *
  * Networking
  */
 
@@ -26,7 +26,7 @@ enum   command_type_e  {
 	actor_displace_rotate = 3,
 	actor_detach          = 4,
 	chat                  = 5,
-	disconnect            = 6 
+	disconnect            = 6
 };
 
 enum   chat_channel_e
@@ -38,14 +38,14 @@ enum   chat_channel_e
 
 struct GXServer_s {
 
-	dict         *clients;  
-	GXClient_t  **client_list;  
+	dict         *clients;
+	GXClient_t  **client_list;
 
 	size_t		  client_list_size,
 		          max_clients;
 	IPaddress     ip;
 	TCPsocket     sock;
-	
+
 	char         *name;
 	char         *password; // Please make this something funny. My goto is a*** b**d
 };
@@ -60,7 +60,7 @@ struct GXClient_s
 				 send_len;
 
 	char        *name;
-	 
+
 	u8          *send_data,
 		        *recv_data;
 
@@ -80,7 +80,7 @@ struct GXCommand_s {
 			size_t i;
 		} no_op;
 
-		// Connect 
+		// Connect
 		struct {
 			char *name;
 		} connect;
@@ -113,7 +113,7 @@ struct GXCommand_s {
 			enum chat_channel_e  chat_channel;
 		} chat;
 
-		// Disconnect 
+		// Disconnect
 		struct {
 			size_t i;
 		} disconnect;
@@ -122,7 +122,7 @@ struct GXCommand_s {
 
 // Allocator
 /** !
- *  Allocate memory for a server structure. 
+ *  Allocate memory for a server structure.
  *
  * @param pp_server : return
  *
@@ -139,7 +139,7 @@ DLLEXPORT int create_server ( GXServer_t **pp_server );
  * @param pp_server : return
  * @param path      : The path to a JSON server object on the filesystem
  *
- * @sa load_server_as_json
+ * @sa load_server_as_json_text
  * @sa create_server
  *
  * @return 1 on success, 0 on error
@@ -157,7 +157,7 @@ DLLEXPORT int load_server ( GXServer_t **pp_server, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_server_as_json ( GXServer_t **pp_server, char *text );
+DLLEXPORT int load_server_as_json_text ( GXServer_t **pp_server, char *text );
 
 // Start
 /** !
@@ -173,7 +173,7 @@ DLLEXPORT int start_server ( void );
 
 // Sending / Recieving over the internet
 /** !
- *  Copy data from the TCP socket into client->recv_data 
+ *  Copy data from the TCP socket into client->recv_data
  *
  * @param client : Pointer to a client
  *
@@ -219,8 +219,8 @@ DLLEXPORT int server_serialize ( GXClient_t *p_client );
 
 // Process command queues
 /** !
- *  This function will do different things if you are a server or a client. 
- * 
+ *  This function will do different things if you are a server or a client.
+ *
  *  Run commands in recv command queue, generate new commands for send command queue
  *
  * @param p_client : client
@@ -233,8 +233,8 @@ DLLEXPORT int server_process ( GXClient_t *p_client );
 
 // Wait for clients to join
 /** !
- *  Start running a server wait thread. 
- *  The wait thread will wait for TCP connections. If the TCP connections are suitable, a new client thread will be spawned.  
+ *  Start running a server wait thread.
+ *  The wait thread will wait for TCP connections. If the TCP connections are suitable, a new client thread will be spawned.
  *
  * @param p_server  : Pointer to a server
  *
@@ -249,7 +249,7 @@ DLLEXPORT int server_wait         ( GXInstance_t *p_instance );
 // Destructors
 DLLEXPORT int destroy_server      ( GXServer_t   *p_server );
 
-DLLEXPORT int command_from_data   ( GXCommand_t **pp_ret, void        *data ); 
+DLLEXPORT int command_from_data   ( GXCommand_t **pp_ret, void        *data );
 DLLEXPORT int data_from_command   ( void        **pp_ret, GXCommand_t *conmmand );
 
 DLLEXPORT int create_client(GXClient_t** pp_client);

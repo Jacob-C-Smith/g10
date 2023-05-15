@@ -2,7 +2,7 @@
 /** !
  * @file G10/GXInput.h
  * @author Jacob Smith
- * 
+ *
  * Input processing for G10.
  */
 
@@ -71,7 +71,7 @@ struct callback_parameter_s
 				yrel;
 			u8  button;
 		} mouse_state;
-		
+
 		// A la xbox one controller
 		struct {
 
@@ -138,8 +138,7 @@ DLLEXPORT int create_bind ( GXBind_t **pp_bind );
  * @param pp_input : return
  * @param path     : The path to a JSON file containing an input object
  *
- * @sa create_input
- * @sa load_input_as_json
+ * @sa load_input_as_json_text
  * @sa load_input_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -152,7 +151,6 @@ DLLEXPORT int load_input ( GXInput_t **pp_input, const char *path );
  * @param pp_input : return
  * @param text     : The input JSON object text
  *
- * @sa create_input
  * @sa load_input
  * @sa load_input_as_json_value
  *
@@ -168,7 +166,6 @@ DLLEXPORT int load_input_as_json_text ( GXInput_t **pp_input, char *text );
  *
  * @sa load_input
  * @sa load_input_as_json_text
- * @sa create_input
  *
  * @return 1 on success, 0 on error
  */
@@ -178,17 +175,13 @@ DLLEXPORT int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_va
  *  Load a bind from a JSON value
  *
  * @param pp_bind : return
- * @param p_value : The bind JSON value 
- *
- * @sa load_bind
- * @sa load_bind_as_json_text
- * @sa create_bind
+ * @param p_value : The bind JSON value
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value );
 DLLEXPORT int construct_bind ( GXBind_t **pp_bind , char *name, char **keys );
- 
+
 // Callback registration
 /** !
  *  Add a callback to a bind

@@ -20,9 +20,14 @@ void create_buffer          ( VkDeviceSize  size, VkBufferUsageFlags usage, VkMe
 u32  find_memory_type       ( u32 type_filter, VkMemoryPropertyFlags properties );
 int  check_vulkan_device    ( GXInstance_t *p_instance , VkPhysicalDevice physical_device, char **required_extension_names);
 
-VKAPI_ATTR 
+VKAPI_ATTR
 VkBool32
-VKAPI_CALL debug_callback ( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+VKAPI_CALL debug_callback (
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData
+)
+{
 
     switch (messageSeverity)
     {
@@ -43,12 +48,15 @@ VKAPI_CALL debug_callback ( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
     return VK_FALSE;
 }
 void setup_debug_messenger(VkDebugUtilsMessengerCreateInfoEXT** debug_messenger_create_info);
-VkResult CreateDebugUtilsMessengerEXT ( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+VkResult CreateDebugUtilsMessengerEXT ( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+{
     PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if (func != 0) {
+    if ( func != 0 )
+    {
         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
     }
-    else {
+    else
+    {
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
@@ -70,18 +78,13 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
     char          *text                            = calloc(text_len, sizeof(u8));
     JSONValue_t   *p_value                         = 0,
                   *p_name                          = 0,
-                  *p_fullscreen                    = 0,
-                  *p_window_title                  = 0,
-                  *p_window_width                  = 0,
-                  *p_window_height                 = 0,
+                  *p_window                        = 0,
                   *p_requested_physical_device     = 0,
                   *p_max_buffered_frames           = 0,
                   *p_initial_scene                 = 0,
-                  *p_part_cache_count              = 0,
-                  *p_material_cache_count          = 0,
-                  *p_shader_cache_count            = 0,
-                  *p_ai_cache_count                = 0,
+                  *p_cache                         = 0,
                   *p_loading_thread_count          = 0,
+                  *p_vulkan                        = 0,
                   *p_log_file_i                    = 0,
                   *p_input                         = 0,
                   *p_audio                         = 0,
@@ -92,25 +95,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                   *p_device_extensions             = 0,
                   *p_schedules                     = 0;
 
-    /*
-    bool           fullscreen                      = false;
-    char          *text                            = 
-                  *name                            = "Instance",
-                  *window_title                    = "G10",
-                  *requested_physical_device       = 0,
-                  *max_buffered_frames             = 2,
-                  *initial_scene                   = 0,
-                  *log_file_i                      = 0,
-                  *input                           = 0,
-                  *audio                           = 0,
-                  *server                          = 0,
-                  *renderer                        = 0;
-    array         *p_requested_validation_layers   = 0,
-                  *p_requested_instance_extensions = 0,
-                  *p_device_extensions             = 0,
-                  *p_schedules                     = 0;
-    */
-    
     // Load the file
     if ( g_load_file(path, text, true) == 0 )
         goto no_file;
@@ -120,20 +104,17 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         goto failed_to_parse_json;
 
     // Is the JSONValue the right type?
-    if (p_value->type == JSONobject)
+    if ( p_value->type == JSONobject )
     {
-	
+
         // Initialized data
 		dict *p_dict = p_value->object;
 
         // Parse the name of the game
         p_name = dict_get(p_dict, "name");
 
-        // Window 
-        p_window_width  = dict_get(p_dict, "window width");
-        p_window_height = dict_get(p_dict, "window height");
-        p_window_title  = dict_get(p_dict, "window title");
-        p_fullscreen    = dict_get(p_dict, "fullscreen");
+        // Window
+        p_window = dict_get(p_dict, "window");
 
         // Input
         p_input = dict_get(p_dict, "input");
@@ -141,27 +122,26 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         // Log file
         p_log_file_i = dict_get(p_dict, "log file");
 
-        // Path to initial scene 
+        // Path to initial scene
         p_initial_scene = dict_get(p_dict, "initial scene");
 
         // Caches
-        p_part_cache_count     =  dict_get(p_dict, "cache part count");
-        p_material_cache_count =  dict_get(p_dict, "cache material count");
-        p_shader_cache_count   =  dict_get(p_dict, "cache shader count");
-        p_ai_cache_count       =  dict_get(p_dict, "cache ai count");
+        p_cache = dict_get(p_dict, "cache");
 
         // Loading thread count
         p_loading_thread_count = dict_get(p_dict, "loading thread count");
 
         // Vulkan
-        p_requested_validation_layers   = dict_get(p_dict, "vulkan validation layers");
-        p_requested_instance_extensions = dict_get(p_dict, "vulkan instance extensions");
-        p_device_extensions             = dict_get(p_dict, "vulkan device extensions");
-        p_requested_physical_device     = dict_get(p_dict, "vulkan physical device");
-        p_max_buffered_frames           = dict_get(p_dict, "max buffered frames");
-        p_renderer                      = dict_get(p_dict, "renderer");
-        p_server                        = dict_get(p_dict, "server");
-        p_schedules                     = dict_get(p_dict, "schedules");
+        p_vulkan = dict_get(p_dict, "vulkan");
+
+        // Renderer
+        p_renderer = dict_get(p_dict, "renderer");
+
+        // Server
+        p_server = dict_get(p_dict, "server");
+
+        // Schedules
+        p_schedules = dict_get(p_dict, "schedules");
 
         // Property check
         if ( ! ( p_name /* && p_schedule, so on */ ) )
@@ -171,7 +151,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
     // Allocate memory for the instance
     p_instance = calloc(1, sizeof(GXInstance_t));
-        
+
     // Set the active instance
     active_instance = p_instance;
 
@@ -191,20 +171,79 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             log_file = stdout;
 
         // Window initialization
-        if ( p_window_width && p_window_height ) {
+        if ( p_window )
+        {
 
-            // Set the window width
-            if ( p_window_width->type == JSONinteger )
-                p_instance->window.width = p_window_width->integer;
-            else
-                goto wrong_window_width_type;
+            if ( p_window->type == JSONobject )
+            {
 
-            // Set the window height
-            if ( p_window_height->type == JSONinteger )
-                p_instance->window.height = p_window_height->integer;
-            else
-                goto wrong_window_height_type;
-            
+                // Initialized data
+                JSONValue_t *p_window_width      = 0,
+                            *p_window_height     = 0,
+                            *p_window_title      = 0,
+                            *p_window_fullscreen = 0;
+
+                // Parse the JSON
+                {
+                    p_window_width      = dict_get(p_window->object, "width");
+                    p_window_height     = dict_get(p_window->object, "height");
+                    p_window_title      = dict_get(p_window->object, "title");
+                    p_window_fullscreen = dict_get(p_window->object, "fullscreen");
+
+                    if ( ! ( p_window_width && p_window_height && p_window_title ) )
+                        goto missing_properties;
+                }
+
+                // Set the window title
+                if ( p_window_title->type == JSONstring )
+                {
+
+                    // Initialized data
+                    size_t title_len = strlen(p_window_title->string);
+
+                    // Allocate memory
+                    p_instance->window.title = calloc(title_len+1, sizeof(char));
+
+                    // Error checking
+                    if ( p_instance->window.title == (void *) 0 )
+                        goto wrong_window_title_type;
+
+                    // Copy the string
+                    strncpy(p_instance->window.title, p_window_title->string, title_len);
+                }
+                // Default
+                else
+                    goto wrong_window_title_type;
+
+                // Set the window width
+                if ( p_window_width->type == JSONinteger )
+                    p_instance->window.width = p_window_width->integer;
+                // Default
+                else
+                    goto wrong_window_width_type;
+
+                // Set the window height
+                if ( p_window_height->type == JSONinteger )
+                    p_instance->window.height = p_window_height->integer;
+                // Default
+                else
+                    goto wrong_window_height_type;
+
+                // Set the window fullscreen bit
+                if ( p_window_fullscreen )
+                {
+
+                    // Parse the fullscreen property as a boolean
+                    if ( p_window_fullscreen->type == JSONboolean)
+                        p_instance->window.fullscreen = p_window_fullscreen->boolean;
+                    // Wrong type
+                    else
+                        goto wrong_window_fullscreen_type;
+                }
+                // Default
+                else
+                    p_instance->window.fullscreen = false;
+            }
         }
         // Default
         else
@@ -212,9 +251,9 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             p_instance->window.width  = 1280,
             p_instance->window.height = 720;
         }
-        
+
         // SDL initialization
-        if ( p_window_title->type == JSONstring )
+        if ( p_instance->window.height && p_instance->window.width && p_instance->window.title )
         {
 
             // Initialize SDL
@@ -223,7 +262,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Initialize SDL Image
             // if ( IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG ) )
-                
+
                 // TODO: this needs to be more specific
                 //goto noSDL;
 
@@ -235,176 +274,201 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // TODO: Check boolean
             // Create the window
-            p_instance->sdl2.window = SDL_CreateWindow(p_window_title->string,
+            p_instance->sdl2.window = SDL_CreateWindow(p_instance->window.title,
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
                 (int)p_instance->window.width, (int)p_instance->window.height,
-                SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((p_fullscreen->boolean) ? SDL_WINDOW_FULLSCREEN : 0));
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | ((p_instance->window.fullscreen) ? SDL_WINDOW_FULLSCREEN : 0));
 
             // Check the window
-            if (!p_instance->sdl2.window)
+            if ( !p_instance->sdl2.window )
                 goto noWindow;
-            
+
             // Display the window
             SDL_ShowWindow(p_instance->sdl2.window);
-            
+
             // Focus the game window
             SDL_SetWindowInputFocus(p_instance->sdl2.window);
-    
+
             p_instance->time.clock_div = SDL_GetPerformanceFrequency();
 
         }
 
         // Vulkan initialization
+        if ( p_vulkan )
         {
 
-            // Initialized data
-            char   **device_extensions      = 0;
-            size_t   device_extension_count = 0;
-
-            // Create an instance
+            // Parse the Vulkan properties
+            if ( p_vulkan->type == JSONobject )
             {
 
                 // Initialized data
-                VkApplicationInfo      application_info            = { 0 };
-                VkInstanceCreateInfo   instance_create_info        = { 0 };
-                char                 **required_extensions         = 0,
-                                     **requested_extensions        = 0,
-                                     **requested_validation_layers = 0;                                     
-                dict                  *extensions                  = 0;
-                size_t                 required_extension_count    = 0,
-                                       requested_extension_count   = 0,
-                                       requested_layers_count      = 0;
-                VkResult               result                      = 0;
+                char   **device_extensions      = 0;
+                size_t   device_extension_count = 0;
 
-                // Get the extensions
-                if ( p_requested_instance_extensions ) {
-
-                    if ( p_requested_instance_extensions->type == JSONarray )
-                    {
-                        // Get the number of extensions    
-                        array_get(p_requested_instance_extensions->list, 0, &requested_extension_count);
-
-                        // Allocate for each extension
-                        requested_extensions = calloc(requested_extension_count, sizeof(char *));
-
-                        // Get each extension
-                        array_get(p_requested_instance_extensions->list, requested_extensions, 0);
-                    }
-                    else
-                        goto wrong_requested_instance_extensions_type;
-                }
-                else
-                    ; // Default
-
-                if ( p_requested_validation_layers )
+                // Parse JSON value
                 {
-
-                    if ( p_requested_validation_layers->type == JSONarray )
-                    {
-                        // Get the number requested validation layers
-                        array_get(p_requested_validation_layers->list, 0, &requested_layers_count);
-
-                        // Allocate for each extension
-                        requested_validation_layers = calloc(requested_layers_count, sizeof(JSONValue_t *));
-
-                        // Get each extension
-                        array_get(p_requested_validation_layers->list, requested_validation_layers, 0);
-                    }
-                    else
-                        goto wrong_requested_validation_layers;
+                    p_requested_validation_layers   = dict_get(p_vulkan->object, "validation layers");
+                    p_requested_instance_extensions = dict_get(p_vulkan->object, "instance extensions");
+                    p_device_extensions             = dict_get(p_vulkan->object, "device extensions");
+                    p_requested_physical_device     = dict_get(p_vulkan->object, "physical device");
+                    p_max_buffered_frames           = dict_get(p_vulkan->object, "max buffered frames");
                 }
-                else
-                    ; // Default
 
-                // Populate application info struct
-                application_info = (VkApplicationInfo) { 
-                    .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                    .pApplicationName   = "G10",
-                    .pEngineName        = "G10",
-                    .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-                    .engineVersion      = VK_MAKE_VERSION(0, 0, 1),
-                    .apiVersion         = VK_API_VERSION_1_3
-                };
-                
-                // Populate instance create info struct
+                // Create an instance
+                if ( p_instance )
                 {
 
                     // Initialized data
-                    VkInstanceCreateInfo *t = 0;
+                    VkApplicationInfo      application_info            = { 0 };
+                    VkInstanceCreateInfo   instance_create_info        = { 0 };
+                    char                 **required_extensions         = 0,
+                                         **requested_extensions        = 0,
+                                         **requested_validation_layers = 0;
+                    dict                  *extensions                  = 0;
+                    size_t                 required_extension_count    = 0,
+                                           requested_extension_count   = 0,
+                                           requested_layers_count      = 0;
+                    VkResult               result                      = 0;
 
-                    // Get a list of the required instance extensions from SDL
+                    // Get the extensions
+                    if ( p_requested_instance_extensions )
                     {
-                        
-                        // Get the quantity of required instance extensions
-                        SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, (void*)0);
 
-                        // Allocate memory for the extensions
-                        required_extensions = calloc(required_extension_count + 1, sizeof(char*));
+                        if ( p_requested_instance_extensions->type == JSONarray )
+                        {
+                            // Get the number of extensions
+                            array_get(p_requested_instance_extensions->list, 0, &requested_extension_count);
 
-                        // Get the required instance extensions
-                        SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, required_extensions);
+                            // Allocate for each extension
+                            requested_extensions = calloc(requested_extension_count, sizeof(char *));
+
+                            // Get each extension
+                            array_get(p_requested_instance_extensions->list, requested_extensions, 0);
+                        }
+                        else
+                            goto wrong_requested_instance_extensions_type;
                     }
-        
-                    // Construct a dictionary from the required extensions
-                    dict_from_keys(&extensions, required_extensions, required_extension_count);
+                    else
+                        ; // Default
 
-                    for (size_t i = 0; i < requested_layers_count; i++)
-                        requested_validation_layers[i] = ((JSONValue_t **)requested_validation_layers)[i]->string;
+                    if ( p_requested_validation_layers )
+                    {
 
-                    // TODO: Add support for user defined extensions
-                    instance_create_info  = (VkInstanceCreateInfo) { 
-                        .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-                        .pApplicationInfo        = &application_info,
-                        .enabledExtensionCount   = required_extension_count,
-                        .ppEnabledExtensionNames = required_extensions,
-                        .enabledLayerCount       = requested_layers_count,
-                        .ppEnabledLayerNames     = requested_validation_layers
+                        if ( p_requested_validation_layers->type == JSONarray )
+                        {
+                            // Get the number requested validation layers
+                            array_get(p_requested_validation_layers->list, 0, &requested_layers_count);
+
+                            // Allocate for each extension
+                            requested_validation_layers = calloc(requested_layers_count, sizeof(JSONValue_t *));
+
+                            // Get each extension
+                            array_get(p_requested_validation_layers->list, requested_validation_layers, 0);
+                        }
+                        else
+                            goto wrong_requested_validation_layers_type;
+                    }
+                    else
+                        ; // Default
+
+                    // Populate application info struct
+                    application_info = (VkApplicationInfo)
+                    {
+                        .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                        .pApplicationName   = "G10",
+                        .pEngineName        = "G10",
+                        .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+                        .engineVersion      = VK_MAKE_VERSION(0, 0, 1),
+                        .apiVersion         = VK_API_VERSION_1_3
                     };
-                    
-                    // Create the debug messenger
-                    t = &instance_create_info;
-                    setup_debug_messenger(&t->pNext);
+
+                    // Populate instance create info struct
+                    {
+
+                        // Initialized data
+                        VkInstanceCreateInfo *t = 0;
+
+                        // Get a list of the required instance extensions from SDL
+                        {
+
+                            // Get the quantity of required instance extensions
+                            SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, (void*)0);
+
+                            // Allocate memory for the extensions
+                            required_extensions = calloc(required_extension_count + 1, sizeof(char*));
+
+                            // Get the required instance extensions
+                            SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, &required_extension_count, required_extensions);
+                        }
+
+                        // Construct a dictionary from the required extensions
+                        dict_from_keys(&extensions, required_extensions, required_extension_count);
+
+                        for (size_t i = 0; i < requested_layers_count; i++)
+                            requested_validation_layers[i] = ((JSONValue_t **)requested_validation_layers)[i]->string;
+
+                        // TODO: Add support for user defined extensions
+                        instance_create_info  = (VkInstanceCreateInfo)
+                        {
+                            .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+                            .pApplicationInfo        = &application_info,
+                            .enabledExtensionCount   = required_extension_count,
+                            .ppEnabledExtensionNames = required_extensions,
+                            .enabledLayerCount       = requested_layers_count,
+                            .ppEnabledLayerNames     = requested_validation_layers
+                        };
+
+                        // Create the debug messenger
+                        t = &instance_create_info;
+                        setup_debug_messenger(&t->pNext);
+                    }
+
+                    // Create the vulkan instance
+                    if ( vkCreateInstance(&instance_create_info, (void*)0, &p_instance->vulkan.instance) != VK_SUCCESS )
+                        goto failed_to_create_vulkan_instance;
+
                 }
-    
-                // Create the vulkan instance
-                if ( vkCreateInstance(&instance_create_info, (void*)0, &p_instance->vulkan.instance) != VK_SUCCESS )
-                    goto failed_to_create_vulkan_instance;
-    
+
+                // Set the maximum number of buffered frames
+                p_instance->vulkan.max_buffered_frames = p_max_buffered_frames->integer;
+
+                // Create a surface with SDL2
+                if ( SDL_Vulkan_CreateSurface(p_instance->sdl2.window, p_instance->vulkan.instance, &p_instance->vulkan.surface) == SDL_FALSE )
+                    goto failed_to_create_sdl2_surface;
+
+                array_get(p_device_extensions->list, 0, &device_extension_count);
+                device_extensions = calloc(device_extension_count+1, sizeof(char *));
+                array_get(p_device_extensions->list, device_extensions, 0);
+
+                // Iterate over each vulkan device extension
+                for (size_t i = 0; i < device_extension_count; i++)
+
+                    // JSONValue_t * ---> char *
+                    device_extensions[i] = ((JSONValue_t **)device_extensions)[i]->string;
+
+                // Get a physical device to use
+                pick_physical_device(device_extensions);
+
+                // Create a logical device from the physical device
+                create_logical_device(device_extensions);
+
+                // Create a swap chain
+                create_swap_chain();
+                create_image_views();
+
+                // Create other stuff
+                create_command_pool();
+                create_command_buffers();
+                create_sync_objects();
             }
-            
-            // Set the maximum number of buffered frames
-            p_instance->vulkan.max_buffered_frames = p_max_buffered_frames->integer;
-
-            // Create a surface with SDL2
-            if ( SDL_Vulkan_CreateSurface(p_instance->sdl2.window, p_instance->vulkan.instance, &p_instance->vulkan.surface) == SDL_FALSE )
-                goto failed_to_create_sdl2_surface;
-
-            array_get(p_device_extensions->list, 0, &device_extension_count);
-            device_extensions = calloc(device_extension_count+1, sizeof(char *));
-            array_get(p_device_extensions->list, device_extensions, 0);
-            
-            // Iterate over each vulkan device extension
-            for (size_t i = 0; i < device_extension_count; i++)
-
-                // JSONValue_t * ---> char *
-                device_extensions[i] = ((JSONValue_t **)device_extensions)[i]->string;
-
-            // Get a physical device to use
-            pick_physical_device(device_extensions);
-
-            // Create a logical device from the physical device
-            create_logical_device(device_extensions);
-
-            // Create a swap chain
-            create_swap_chain();
-            create_image_views();
-
-            // Create other stuff
-            create_command_pool();
-            create_command_buffers();
-            create_sync_objects();
+            // Default
+            else
+                goto wrong_vulkan_type;
         }
+        // Default
+        else
+            goto no_vulkan_property;
 
         // G10 Initialization
         {
@@ -456,12 +520,9 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Renderer initialization
                 init_renderer();
-               
+
                 // Shader initialization
                 init_shader();
-
-                // Texture initialization
-                //init_texture();
 
                 // Input initialization
                 init_input();
@@ -471,7 +532,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Part initialization
                 init_part();
-                
+
                 // Material initialization
                 init_material();
 
@@ -486,7 +547,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Physics initialization
                 //init_physics();
-               
+
                 // AI initialization
                 init_ai();
             }
@@ -502,56 +563,66 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             }
 
             // Caches
+            if ( p_cache )
             {
-                
+
+                // Initialized data
+                JSONValue_t *p_material_cache_count = 0,
+                            *p_part_cache_count     = 0,
+                            *p_shader_cache_count   = 0,
+                            *p_ai_cache_count       = 0;
+
+                // Parse the JSON value
+                {
+                    p_material_cache_count = dict_get(p_cache->object, "material count");
+                    p_part_cache_count     = dict_get(p_cache->object, "part count");
+                    p_shader_cache_count   = dict_get(p_cache->object, "shader count");
+                    p_ai_cache_count       = dict_get(p_cache->object, "ai count");
+                }
+
                 // Construct the material cache
                 if ( p_material_cache_count )
                 {
                     if ( p_material_cache_count->type == JSONinteger )
-                        dict_construct(&p_instance->cache.materials, p_material_cache_count);
+                        dict_construct(&p_instance->cache.materials, p_material_cache_count->integer);
                     else
                         goto wrong_material_cache_count_type;
                 }
-                // Default
-                else
-                    dict_construct(&p_instance->cache.materials, 128);
 
                 // Construct the part cache
                 if ( p_part_cache_count )
                 {
                     if ( p_part_cache_count->type == JSONinteger )
-                        dict_construct(&p_instance->cache.parts, p_part_cache_count);
+                        dict_construct(&p_instance->cache.parts, p_part_cache_count->integer);
                     else
                         goto wrong_part_cache_count_type;
                 }
-                // Default
-                else
-                    dict_construct(&p_instance->cache.parts, 128);
 
                 // Construct the shader cache
                 if ( p_shader_cache_count )
                 {
                     if ( p_shader_cache_count->type == JSONinteger )
-                        dict_construct(&p_instance->cache.shaders, p_shader_cache_count);
+                        dict_construct(&p_instance->cache.shaders, p_shader_cache_count->integer);
                     else
                         goto wrong_shader_cache_count_type;
                 }
-                // Default
-                else
-                    dict_construct(&p_instance->cache.shaders, 32);
 
                 // Construct the AI cache
                 if ( p_ai_cache_count )
                 {
                     if ( p_ai_cache_count->type == JSONinteger )
-                        dict_construct(&p_instance->cache.ais, p_ai_cache_count);
+                        dict_construct(&p_instance->cache.ais, p_ai_cache_count->integer);
                     else
                         goto wrong_ai_cache_count_type;
                 }
-                // Default
-                else
-                    dict_construct(&p_instance->cache.ais, 16);
-
+            }
+            // Default
+            else
+            {
+                dict_construct(&p_instance->cache.materials, 128);
+                dict_construct(&p_instance->cache.parts, 128);
+                dict_construct(&p_instance->cache.shaders, 32);
+                dict_construct(&p_instance->cache.ais, 16);
             }
 
             // Queues
@@ -580,34 +651,35 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 if ( load_renderer_as_json_value(&p_instance->context.renderer, p_renderer) == 0 )
                     goto failed_to_load_schedule;
             }
-
             // Default
             else
                 ; // TODO: default?
 
 
-            // Load an input set
+            // Load an input
             if ( p_input )
             {
+
+                // Parse the input as a JSON value
                 if ( load_input_as_json_value(&p_instance->input, p_input) == 0 )
                     goto failed_to_load_input;
             }
-
             // Default
             else
                 ; // TODO: default?
 
             // Load audio
-            if ( p_audio ) {
+            if ( p_audio )
+            {
 
             }
             else
                 ; // TODO: default?
-                
+
             // Load schedules
             if ( p_schedules )
             {
-  
+
 		        // Initialized data
 		        size_t        schedule_count = 0;
                 JSONValue_t **pp_elements    = 0;
@@ -626,7 +698,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 		            	goto no_mem;
 
 		            // Populate the elements of the threads
-		            array_get(p_schedules->list, pp_elements, 0 );			
+		            array_get(p_schedules->list, pp_elements, 0 );
                 }
 
 		        // Set up the schedules
@@ -647,7 +719,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             }
 
             // Load the initial scene
-            if ( p_initial_scene ) {
+            if ( p_initial_scene )
+            {
 
                 // Load the initial scene as a string
                 if ( p_initial_scene->type == JSONstring)
@@ -671,7 +744,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // Load the server as a JSON object
                 if (server[0] == '{')
                     load_server_as_json(&p_instance->networking.server, server, strlen(server));
-                
+
                 // Load the server from the filesystem
                 else
                     load_server(&p_instance->networking.server, server);
@@ -683,36 +756,25 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             // The instance is running
             p_instance->running = true;
         }
-        
+
         // 3rd party subsystem integration
         // Discord
         #ifdef BUILD_G10_WITH_DISCORD
             extern void init_discord_integration(void);
             init_discord_integration();
         #endif
-        
+
     }
 
     // Return an instance pointer to the caller
     *pp_instance = p_instance;
-    
+
     // Success
     return 1;
 
-    wrong_log_file_type:
-    wrong_window_width_type:
-    wrong_window_height_type:
-    missing_properties:
-    wrong_material_cache_count_type:
-    wrong_part_cache_count_type:
-    wrong_shader_cache_count_type:
-    wrong_ai_cache_count_type:
-    wrong_loading_thread_count_type:
-    wrong_requested_instance_extensions_type:
-    wrong_requested_validation_layers:
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_path:
@@ -720,7 +782,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     g_print_error("[G10] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error 
+                // Error
                 return 0;
         }
 
@@ -733,7 +795,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     g_print_error("[SDL2] Failed to initialize SDL\n");
                 #endif
 
-                // Error 
+                // Error
                 return 0;
 
             // SDL Image failed to initialize
@@ -742,7 +804,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     g_print_error("[SDL Image] Failed to initialize SDL Image\n");
                 #endif
 
-                // Error 
+                // Error
                 return 0;
 
             // SDL Networking failed to initialize
@@ -751,7 +813,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     g_print_error("[SDL Networking] Failed to initialize SDL Networking\n");
                 #endif
 
-                // Error 
+                // Error
                 return 0;
 
             // The SDL window failed to initialize
@@ -759,21 +821,30 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 #ifndef NDEBUG
                     g_print_error("[SDL2] Failed to create a window\nSDL Says: %s\n", SDL_GetError());
                 #endif
-                
-                // Error 
+
+                // Error
                 return 0;
-        
+
+            // The SDL2 surface
+            failed_to_create_sdl2_surface:
+                #ifndef NDEBUG
+                    g_print_error("[SDL2] Failed to create an SDL surface. SDL Says: %s in call to function \"%s\"\n", SDL_GetError(), __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
         }
 
         // Vulkan errors
         {
-            
+
             failed_to_create_vulkan_instance:
                 #ifndef NDEBUG
                     g_print_error("[Vulkan] Failed to create a Vulkan instance\n");
-                #endif 
+                #endif
 
-                // Error 
+                // Error
                 return 0;
         }
 
@@ -782,12 +853,12 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             no_file:
                 #ifndef NDEBUG
                     g_print_error("[G10] Failed to open file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-                #endif 
+                #endif
 
-                // Error 
+                // Error
                 return 0;
         }
-		
+
         // Standard library errors
 		{
 			no_mem:
@@ -799,36 +870,178 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 				return 0;
 		}
 
+        // JSON errors
+        {
+            failed_to_parse_json:
+                #ifndef NDEBUG
+                    g_print_error("[JSON] Failed to parse JSON text in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            missing_properties:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Not enough properties to construct instance in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_log_file_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"log file\" property. Wrong type in call to function \"%s\".\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_window_width_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"width\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_window_height_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"height\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_window_title_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"title\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_window_fullscreen_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"fullscreen\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_vulkan_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"vulkan\" property. Wrong property type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_vulkan_property:
+                #ifndef NDEBUG
+                    g_print_error("[G10] No \"vulkan\" property provided in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_requested_instance_extensions_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"instance extensions\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            wrong_requested_validation_layers_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"validation layers\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+
+            wrong_material_cache_count_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"material count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_part_cache_count_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"part count\" property of \"cache\" property. Wron type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_shader_cache_count_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"shader count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_ai_cache_count_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"ai count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_loading_thread_count_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to parse \"loading thread count\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+
         // TOOD: Categorize
         no_instance:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to allocate an instance in call to function \"%s\"\n", __FUNCTION__);
-            #endif 
+            #endif
 
-            // Error 
+            // Error
             return 0;
 
         failed_to_load_scene:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to open initial scene in call to function \"%s\"\n", __FUNCTION__);
-            #endif 
+            #endif
 
-            // Error 
+            // Error
             return 0;
+
+        failed_to_load_input:
+            #ifndef NDEBUG
+                g_print_error("[G10] Failed to load input in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+
 
         no_initial_scene:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to load initial scene in call to function \"%s\"\n" __FUNCTION__);
-            #endif 
+            #endif
 
-            // Error 
+            // Error
             return 0;
-        failed_to_load_input:
-        failed_to_parse_json:
-        no_device:
-        no_surface:
+
         failed_to_load_schedule:
-        failed_to_create_sdl2_surface:
+            #ifndef NDEBUG
+                g_print_error("[G10] Failed to load schedule in call to function \"%s\"\n" __FUNCTION__);
+            #endif
+
+            // Error
             return 0;
     }
 }
@@ -839,7 +1052,7 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     // Initialized data
     VkDebugUtilsMessengerCreateInfoEXT *i_debug_messenger_create_info = calloc(1, sizeof(VkDebugUtilsMessengerCreateInfoEXT));
 
-    // Populate debug messenger create info struct 
+    // Populate debug messenger create info struct
     {
         i_debug_messenger_create_info->sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         i_debug_messenger_create_info->messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -848,7 +1061,10 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     }
 
     // Return
-    *debug_messenger_create_info                   = i_debug_messenger_create_info;
+    *debug_messenger_create_info = i_debug_messenger_create_info;
+
+    // Success
+    return 0;
 }
 
 void pick_physical_device ( char **required_extension_names )
@@ -869,21 +1085,46 @@ void pick_physical_device ( char **required_extension_names )
     vkEnumeratePhysicalDevices(p_instance->vulkan.instance, &device_count, (void*)0);
 
     // Error check
-    if (device_count == 0)
+    if ( device_count == 0 )
         goto no_devices;
 
     devices = calloc(device_count + 1, sizeof(VkPhysicalDevice));
 
     vkEnumeratePhysicalDevices(p_instance->vulkan.instance, &device_count, devices);
 
+    // Iterate over each device
     for (size_t i = 0; i < device_count; i++)
     {
         if (check_vulkan_device(p_instance, devices[i], required_extension_names))
             p_instance->vulkan.physical_device = devices[i];
     }
 
-    no_devices:;
-    no_required_extension_names:;
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_required_extension_names:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"required_extension_names\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+
+        // Vulkan errors
+        {
+            no_devices:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Machine has no Vulkan devices!\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 void create_logical_device ( char **required_extension_names )
@@ -905,7 +1146,8 @@ void create_logical_device ( char **required_extension_names )
         queue_create_infos[i].pQueuePriorities = &p_instance->vulkan.priority;
     }
 
-    device_create_info = (VkDeviceCreateInfo) {
+    device_create_info = (VkDeviceCreateInfo)
+    {
         .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .queueCreateInfoCount    = 2,
         .pQueueCreateInfos       = queue_create_infos,
@@ -916,14 +1158,15 @@ void create_logical_device ( char **required_extension_names )
 
     result = vkCreateDevice(p_instance->vulkan.physical_device, &device_create_info, 0, &p_instance->vulkan.device);
 
-    if (result != VK_SUCCESS) {
+    if (result != VK_SUCCESS)
+    {
         printf("failed to create logical device!");
     }
 
     vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[0], 0, &p_instance->vulkan.graphics_queue);
     vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[1], 0, &p_instance->vulkan.present_queue);
 
-} 
+}
 
 void create_swap_chain ( void )
 {
@@ -938,7 +1181,7 @@ void create_swap_chain ( void )
     VkPresentModeKHR          present_mode           = VK_PRESENT_MODE_MAILBOX_KHR;
 
     u32                       qfi[2]                 = { 0, 0 };
-    
+
     qfi[0] = p_instance->vulkan.queue_family_indices.g;
     qfi[1] = p_instance->vulkan.queue_family_indices.p;
 
@@ -947,13 +1190,15 @@ void create_swap_chain ( void )
     for (size_t i = 0; i < 2; i++)
         if (p_instance->vulkan.swap_chain_details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && p_instance->vulkan.swap_chain_details.formats[i].format == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             surface_format = p_instance->vulkan.swap_chain_details.formats[i];
-    
-    extent = (VkExtent2D) {
+
+    extent = (VkExtent2D)
+    {
         .width  = p_instance->window.width,
         .height = p_instance->window.height
     };
 
-    swapchain_create_info = (VkSwapchainCreateInfoKHR) { 
+    swapchain_create_info = (VkSwapchainCreateInfoKHR)
+    {
         .sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .surface          = p_instance->vulkan.surface,
         .minImageCount    = 2,
@@ -967,7 +1212,7 @@ void create_swap_chain ( void )
         .clipped        = VK_TRUE,
         .oldSwapchain   = VK_NULL_HANDLE
     };
-    
+
     if (p_instance->vulkan.queue_family_indices.g != p_instance->vulkan.queue_family_indices.p)
     {
         swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -1007,14 +1252,15 @@ void cleanup_swap_chain ( void )
 
 }
 
-void create_image_views ( void ) {
+void create_image_views ( void )
+{
     GXInstance_t          *p_instance = g_get_active_instance();
-    
+
     p_instance->vulkan.swap_chain_image_views = calloc(p_instance->vulkan.image_count, sizeof(VkImageView));
-    
+
     for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
     {
-        VkImageViewCreateInfo  image_view_create_info = { 
+        VkImageViewCreateInfo  image_view_create_info = {
             .sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .image                           = p_instance->vulkan.swap_chain_images[i],
             .viewType                        = VK_IMAGE_VIEW_TYPE_2D,
@@ -1032,10 +1278,9 @@ void create_image_views ( void ) {
             .pNext                           = 0
         };
 
-        if ( vkCreateImageView(p_instance->vulkan.device, &image_view_create_info, 0, &p_instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS ) {
+        if ( vkCreateImageView(p_instance->vulkan.device, &image_view_create_info, 0, &p_instance->vulkan.swap_chain_image_views[i]) != VK_SUCCESS )
             g_print_error("failed to create image views!\n");
-        }
-        
+
     }
 }
 
@@ -1045,8 +1290,8 @@ void create_command_pool ( void )
     // Initialized data
     GXInstance_t            *p_instance = g_get_active_instance();
     VkCommandPoolCreateInfo  pool_create_info = {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = p_instance->vulkan.queue_family_indices.g
     };
 
@@ -1067,9 +1312,8 @@ void create_command_buffers ( void )
 
     p_instance->vulkan.command_buffers = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkCommandBuffer));
 
-    if (vkAllocateCommandBuffers(p_instance->vulkan.device, &alloc_info, p_instance->vulkan.command_buffers) != VK_SUCCESS) {
+    if ( vkAllocateCommandBuffers(p_instance->vulkan.device, &alloc_info, p_instance->vulkan.command_buffers) != VK_SUCCESS )
         g_print_error("failed to allocate command buffers!\n");
-    }
 }
 
 void create_sync_objects ( void )
@@ -1078,7 +1322,7 @@ void create_sync_objects ( void )
 
     VkSemaphoreCreateInfo *semaphore_create_info = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkSemaphoreCreateInfo));
     VkFenceCreateInfo     *fence_create_info     = calloc(p_instance->vulkan.max_buffered_frames, sizeof(VkFenceCreateInfo));
-    
+
     semaphore_create_info->sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     fence_create_info->sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -1092,7 +1336,8 @@ void create_sync_objects ( void )
     {
         if (vkCreateSemaphore(p_instance->vulkan.device, semaphore_create_info, 0, &p_instance->vulkan.image_available_semaphores[i]) != VK_SUCCESS ||
             vkCreateSemaphore(p_instance->vulkan.device, semaphore_create_info, 0, &p_instance->vulkan.render_finished_semaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(p_instance->vulkan.device, fence_create_info, 0, &p_instance->vulkan.in_flight_fences[i]) != VK_SUCCESS) {
+            vkCreateFence(p_instance->vulkan.device, fence_create_info, 0, &p_instance->vulkan.in_flight_fences[i]) != VK_SUCCESS)
+        {
             g_print_error("failed to create semaphores!\n");
         }
     }
@@ -1105,8 +1350,10 @@ u32 find_memory_type ( u32 type_filter, VkMemoryPropertyFlags properties )
     VkPhysicalDeviceMemoryProperties mem_properties;
     vkGetPhysicalDeviceMemoryProperties(p_instance->vulkan.physical_device, &mem_properties);
 
-    for (u32 i = 0; i < mem_properties.memoryTypeCount; i++) {
-        if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
+    for (u32 i = 0; i < mem_properties.memoryTypeCount; i++)
+    {
+        if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
             return i;
         }
     }
@@ -1146,7 +1393,7 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
                 indices.g = i;
             else
                 passes_queue = false;
-            
+
             vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, p_instance->vulkan.surface, &present_support);
 
             if (present_support)
@@ -1163,16 +1410,17 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
     }
 
     // Check device extensions
-    if(required_extension_names) {
+    if ( required_extension_names )
+    {
         u32                    device_extension_count = 0;
         VkExtensionProperties *available_device_extensions = 0;
-        
+
         dict                  *device_extension_name_dict = 0;
 
         vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, &device_extension_count, (void*)0);
-        
+
         available_device_extensions = calloc(device_extension_count + 1, sizeof(VkExtensionProperties));
-        
+
         vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, &device_extension_count, available_device_extensions);
 
         dict_from_keys(&device_extension_name_dict, required_extension_names, 32);
@@ -1198,7 +1446,7 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
 
         if (dict_keys(device_extension_name_dict, 0) == 0)
             has_extensions = true;
-         
+
     }
     else
         has_extensions = true;
@@ -1223,7 +1471,7 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
             p_instance->vulkan.swap_chain_details.present_modes = calloc(present_mode_count + 1, sizeof(VkPresentModeKHR));
 
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, p_instance->vulkan.surface, &present_mode_count, p_instance->vulkan.swap_chain_details.present_modes);
-            
+
             if ((bool)(present_mode_count) & (bool)(format_count) == true)
                 has_swap_chain = true;
         }
@@ -1238,12 +1486,13 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
     GXInstance_t         *p_instance         = g_get_active_instance();
     VkBufferCreateInfo    buffer_info      = { 0 };
     VkMemoryAllocateInfo  alloc_info       = { 0 };
-    
+
     // Create a buffer
     {
 
         // Populate the create info struct
-        buffer_info = (VkBufferCreateInfo) {
+        buffer_info = (VkBufferCreateInfo)
+        {
             .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .size        = size,
             .usage       = usage,
@@ -1261,7 +1510,8 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
     {
 
         // Populate the allocation struct
-        alloc_info = (VkMemoryAllocateInfo) {
+        alloc_info = (VkMemoryAllocateInfo)
+        {
             .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
             .allocationSize  = mem_requirements.size,
             .memoryTypeIndex = find_memory_type(mem_requirements.memoryTypeBits, properties)
@@ -1279,7 +1529,7 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
 size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
 {
 
-    // Argument checking 
+    // Argument checking
     {
         #ifndef NDEBUG
             if ( path == 0 ) goto no_path;
@@ -1289,7 +1539,7 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
     // Initialized data
     size_t  ret = 0;
     FILE   *f   = fopen(path, (binary_mode) ? "rb" : "r");
-    
+
     // Check if file is valid
     if (f == NULL)
         goto invalid_file;
@@ -1298,14 +1548,14 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
     fseek(f, 0, SEEK_END);
     ret = ftell(f);
     fseek(f, 0, SEEK_SET);
-    
+
     // Read to data
     if ( buffer )
         ret = fread(buffer, 1, ret, f);
 
     // The file is no longer needed
     fclose(f);
-    
+
     // Return 1
     return ret;
 
@@ -1339,9 +1589,8 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
 void clear_swap_chain ( void )
 {
     GXInstance_t *p_instance = g_get_active_instance();
-    for (size_t i = 0; i < p_instance->vulkan.image_count; i++) {
+    for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
         vkDestroyImageView(p_instance->vulkan.device, p_instance->vulkan.swap_chain_image_views[i], 0);
-    }
 
     vkDestroySwapchainKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, 0);
 }
@@ -1349,13 +1598,13 @@ void clear_swap_chain ( void )
 int g_window_resize ( GXInstance_t *p_instance )
 {
 
-    // TODO: 
+    // TODO:
     SDL_GetWindowSize(p_instance->sdl2.window, &p_instance->window.width, &p_instance->window.height);
 
     return 0;
 }
 
-int g_print_error ( const char *const format, ... ) 
+int g_print_error ( const char *const format, ... )
 {
 
     // Argument check
@@ -1370,14 +1619,14 @@ int g_print_error ( const char *const format, ... )
     va_start(aList, format);
 
     #ifdef BUILD_G10_WITH_ANSI_COLOR
-    // Uses ANSI terminal escapes to set the color to red, 
+    // Uses ANSI terminal escapes to set the color to red,
     // print the message, and restore the color.
     printf("\033[91m");
     #endif
 
     // TODO: Configure error messages to write to other files?
     vfprintf(log_file, format, aList);
-    
+
     #ifdef BUILD_G10_WITH_ANSI_COLOR
     printf("\033[0m");
     #endif
@@ -1386,7 +1635,7 @@ int g_print_error ( const char *const format, ... )
 
     // Success
     return 1;
-    
+
     // Error handling
     {
 
@@ -1396,12 +1645,14 @@ int g_print_error ( const char *const format, ... )
                 #ifndef NDEBUG
                     g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 }
 
-int g_print_warning ( const char *const format, ... ) 
+int g_print_warning ( const char *const format, ... )
 {
 
     // Argument check
@@ -1416,7 +1667,7 @@ int g_print_warning ( const char *const format, ... )
     va_start(aList, format);
 
     #ifdef BUILD_G10_WITH_ANSI_COLOR
-    // Uses ANSI terminal escapes to set the color to yellow, 
+    // Uses ANSI terminal escapes to set the color to yellow,
     // print the message, and restore the color.
     printf("\033[93m");
     #endif
@@ -1441,13 +1692,15 @@ int g_print_warning ( const char *const format, ... )
                 #ifndef NDEBUG
                     g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
 
 }
 
-int g_print_log ( const char *const format, ... ) 
+int g_print_log ( const char *const format, ... )
 {
 
     // Argument check
@@ -1462,13 +1715,13 @@ int g_print_log ( const char *const format, ... )
     va_start(aList, format);
 
     #ifdef BUILD_G10_WITH_ANSI_COLOR
-    // Uses ANSI terminal escapes to set the color to light blue, 
+    // Uses ANSI terminal escapes to set the color to light blue,
     // print the message, and restore the color.
     printf("\033[94m");
     #endif
 
     vfprintf(log_file, format, aList);
-    
+
     #ifdef BUILD_G10_WITH_ANSI_COLOR
     printf("\033[0m");
     #endif
@@ -1529,7 +1782,7 @@ int g_start_schedule ( GXInstance_t* p_instance, char* name )
             no_instance:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", name, __FUNCTION__);
-                #endif  
+                #endif
 
                 // Error
                 return 0;
@@ -1537,27 +1790,27 @@ int g_start_schedule ( GXInstance_t* p_instance, char* name )
             no_name:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Null pointer provided for \"name\" in call to function \"%s\"\n", name, __FUNCTION__);
-                #endif  
+                #endif
 
                 // Error
                 return 0;
         }
-        
+
         // G10 Errors
         {
             no_schedule:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Failed to find a schedule named \"%s\" in call to function \"%s\"\n", name, __FUNCTION__);
-                #endif  
-                
+                #endif
+
                 // Error
                 return 0;
 
             failed_to_start_schedule:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Failed to start schedule \"%s\" in call to function \"%s\"\n", name, __FUNCTION__);
-                #endif  
-            
+                #endif
+
                 // Error
                 return 0;
         }
@@ -1589,19 +1842,19 @@ int g_stop_schedule ( GXInstance_t *p_instance )
             no_instance:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif  
+                #endif
 
                 // Error
                 return 0;
         }
-        
+
         // G10 Errors
         {
             failed_to_stop_schedule:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Scheduler] Failed to stop active schedule in call to function \"%s\"\n", __FUNCTION__);
-                #endif  
-            
+                #endif
+
                 // Error
                 return 0;
         }
@@ -1610,7 +1863,7 @@ int g_stop_schedule ( GXInstance_t *p_instance )
 
 int copy_state ( GXInstance_t *p_instance )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -1627,7 +1880,7 @@ int copy_state ( GXInstance_t *p_instance )
                **ais         = 0;
 
     // Lock the mutexes
-    
+
     // Physics
     SDL_LockMutex(p_instance->mutexes.move_object);
     SDL_LockMutex(p_instance->mutexes.update_force);
@@ -1711,7 +1964,7 @@ int copy_state ( GXInstance_t *p_instance )
     free(ais);
 
     // Unlock the mutexes
-        
+
     // Physics
     SDL_UnlockMutex(p_instance->mutexes.move_object);
     SDL_UnlockMutex(p_instance->mutexes.update_force);
@@ -1736,7 +1989,7 @@ int copy_state ( GXInstance_t *p_instance )
 
                 // Error
                 return 0;
-            
+
             no_context_scene:
                 #ifndef NDEBUG
                     g_print_error("[G10] No active scene in instance in call to function \"%s\"\n", __FUNCTION__);
@@ -1770,7 +2023,7 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -1811,7 +2064,7 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part)
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -1844,7 +2097,7 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
             if ( p_shader   == (void *) 0 ) goto no_shader;
         #endif
     }
-    
+
     dict_add(p_instance->cache.shaders, p_shader->name, p_shader);
 
     // Success
@@ -1852,7 +2105,7 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -1884,7 +2137,7 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
             if ( p_ai       == (void *) 0 ) goto no_ai;
         #endif
     }
-    
+
     dict_add(p_instance->cache.ais, p_ai->name, p_ai);
 
     // Success
@@ -1892,14 +2145,14 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
                 #ifndef NDEBUG
                     printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -1925,10 +2178,10 @@ void g_user_exit ( callback_parameter_t input, GXInstance_t* p_instance )
         main_thread->running    = false;
     }
 }
-  
+
 void g_toggle_mouse_lock ( callback_parameter_t state, GXInstance_t *p_instance )
 {
-    if(state.inputs.key.depressed == true)
+    if ( state.inputs.key.depressed == true )
     {
         SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 
@@ -1970,7 +2223,7 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -2009,7 +2262,7 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -2048,7 +2301,7 @@ GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -2087,7 +2340,7 @@ GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_instance:
@@ -2131,7 +2384,7 @@ int g_exit ( GXInstance_t **pp_instance )
 
     // Cleanup the instance
     {
-        
+
         // Free the instance name
         free(p_instance->name);
 
@@ -2153,7 +2406,7 @@ int g_exit ( GXInstance_t **pp_instance )
             // ... and the active renderer ...
             p_instance->context.renderer = 0;
 
-            // ... and the user code callback 
+            // ... and the user code callback
             p_instance->context.user_code_callback = 0;
         }
 
@@ -2168,11 +2421,11 @@ int g_exit ( GXInstance_t **pp_instance )
         }
 
         // Cleanup the cache
-        {        
-            
+        {
+
             // TODO: Free the shaders...
             //dict_free_clear(p_instance->cache.shaders, &destroy_shader);
-        
+
             // TODO: Free materials
             //dict_free_clear(p_instance->cache.materials, &destroy_material);
 
@@ -2182,7 +2435,7 @@ int g_exit ( GXInstance_t **pp_instance )
 
         // Cleanup mutexes
         {
-            
+
             // Destroy the entity loading mutex...
             SDL_DestroyMutex(p_instance->mutexes.load_entity);
 
@@ -2259,7 +2512,7 @@ int g_exit ( GXInstance_t **pp_instance )
 
     // Clean up FMOD
     #ifdef BUILD_G10_WITH_FMOD
-        
+
         //FMOD Cleanup
 
         //Replace this with a struct member later?
@@ -2275,10 +2528,10 @@ int g_exit ( GXInstance_t **pp_instance )
     // SDL Cleanup
     SDL_DestroyWindow(p_instance->sdl2.window);
     SDL_Quit();
-    
+
     // Free the instance data
     free(p_instance);
-    
+
     g_print_log("[G10] Exit successful\n");
 
     // Success

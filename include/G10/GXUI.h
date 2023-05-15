@@ -1,10 +1,10 @@
 /** !
  * @file G10/GXUI.h
  * @author Jacob Smith
- * 
+ *
  * TODO
- * 
- * Include header for user interface integration. 
+ *
+ * Include header for user interface integration.
  */
 
 // Include guard
@@ -24,7 +24,7 @@
  *  Update the user interface
  *
  * @param p_instance : active instance
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int update_ui ( GXInstance_t *p_instance );

@@ -1,8 +1,8 @@
 /** !
  * @file G10/GXTransform.h
  * @author Jacob Smith
- * 
- * Include header for transforms. 
+ *
+ * Include header for transforms.
  */
 
 // Include guard
@@ -50,7 +50,7 @@ DLLEXPORT int create_transform ( GXTransform_t **pp_transform );
  * @param pp_transform : return
  * @param path         : The path to a transform JSON file
  *
- * @sa load_transform_as_json
+ * @sa load_transform_as_json_text
  * @sa load_transform_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -68,7 +68,7 @@ DLLEXPORT int  load_transform ( GXTransform_t **pp_transform, const char* path )
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_transform_as_json ( GXTransform_t **pp_transform, char *text );
+DLLEXPORT int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text );
 
 /** !
  *  Load a transform from a JSON value
@@ -77,8 +77,7 @@ DLLEXPORT int load_transform_as_json ( GXTransform_t **pp_transform, char *text 
  * @param p_value      : Transform JSON value
  *
  * @sa load_transform
- * @sa load_transform_as_json
- * @sa create_transform
+ * @sa load_transform_as_json_text
  *
  * @return 1 on success, 0 on error
  */
@@ -91,7 +90,7 @@ DLLEXPORT int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONV
  * @param location     : location (vec3)
  * @param rotation     : rotation (quaternion)
  * @param scale        : scale    (vec3)
- * 
+ *
  * @sa destroy_transform
  *
  * @return 1 on success, 0 on error

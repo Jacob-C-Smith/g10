@@ -29,11 +29,12 @@ int create_material ( GXMaterial_t** material )
 
 	*material = ret;
 
+	// Success
 	return 1;
 
 	// Error handling
 	{
-		
+
 		// Argument errors
 		{
 			no_material:
@@ -72,7 +73,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 	// Initialized data
 	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len + 1, sizeof(char));
-	
+
 	// Error checking
 	if ( text == (void *) 0 )
 		goto no_mem;
@@ -94,14 +95,14 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 
 	// Error handling
 	{
-		
+
 		// Argument errors
 		{
 			no_material:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Material] Null pointer provided for \"pp_material\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
-	
+
 				// Erorr
 				return 0;
 
@@ -129,7 +130,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 
 int load_material_as_json ( GXMaterial_t **material, char* text )
 {
-	
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -171,7 +172,7 @@ int load_material_as_json ( GXMaterial_t **material, char* text )
 
 			// Initialized data
 			size_t len = strlen(name);
-			
+
 			// Allocate memory for the name
 			p_material->name = calloc(1, sizeof(char));
 
@@ -188,7 +189,7 @@ int load_material_as_json ( GXMaterial_t **material, char* text )
 
 	// Error handling
 	{
-		
+
 		// Argument errors
 		{
 			no_material:

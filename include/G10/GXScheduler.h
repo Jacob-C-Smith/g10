@@ -1,8 +1,8 @@
 /** !
  * @file G10/GXScheduler.h
  * @author Jacob Smith
- * 
- * The scheduler specifies and coordinates work over time. 
+ *
+ * The scheduler specifies and coordinates work over time.
  */
 
 // Include guard
@@ -25,7 +25,7 @@
 // array submodule
 #include <array/array.h>
 
-// G10 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 #include <G10/GXScene.h>
@@ -92,7 +92,7 @@ DLLEXPORT int create_thread ( GXThread_t **pp_thread );
  * @param pp_schedule : return
  * @param path        : The path to a JSON file containing an schedule object
  *
- * @sa load_schedule_as_json
+ * @sa load_schedule_as_json_text
  * @sa create_schedule
  *
  * @return 1 on success, 0 on error
@@ -142,15 +142,15 @@ DLLEXPORT int load_thread ( GXThread_t **pp_thread, char *path );
 /** !
  *  Load a thread from a JSON file
  *
- * @param pp_thread : Double pointer to a thread
+ * @param pp_thread : return
  * @param text      : The thread JSON object text
  *
- * @sa load_thread_as_json
+ * @sa load_thread_as_json_text
  * @sa create_thread
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_thread_as_json ( GXThread_t **pp_thread , char *text );
+DLLEXPORT int load_thread_as_json_text ( GXThread_t **pp_thread , char *text );
 
 // Scheduling
 /** !

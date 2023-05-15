@@ -5,9 +5,9 @@
 ;	r9/xmm3
 ;	RTL (C)
 ;
-;	Stack aligned on 16 bytes. 32 bytes shadow space on stack. 
-;	The specified 8 registers can only be used for parameters 
-;	1 through 4. For C++ classes, the hidden this parameter 
+;	Stack aligned on 16 bytes. 32 bytes shadow space on stack.
+;	The specified 8 registers can only be used for parameters
+;	1 through 4. For C++ classes, the hidden this parameter
 ;	is the first parameter, and is passed in RCX.
 ;
 
@@ -32,18 +32,18 @@ oneEightyOverPi:
     real4 57.295772552490234f
     real4 57.295772552490234f
 _CONST ENDS
- 
+
 _TEXT SEGMENT
 
 ; Summates vector array pointed to by rdx+0x10. Stores resultant vector rdx.
 PUBLIC AVXSumVecs
-AVXSumVecs PROC 
+AVXSumVecs PROC
 
     push rdx                    ; Save rdx on the stack so it can be dereferenced later
     add rdx, 10h                ; Start at the pointer rdx+0x10
     vmovaps xmm4, [rdx]         ; Copy out the vector
 
-    loops:                      
+    loops:
         add rdx, 10h            ; Iterate to the next vector
         vmovaps xmm5, [rdx]     ; Copy out the second vector
         vaddps xmm4, xmm4, xmm5 ; Add the vectors together and sotre the result in xmm0
@@ -53,8 +53,8 @@ AVXSumVecs PROC
         jmp loops               ; If not keep going
     e:                          ;
     pop rdx                     ; Pop rdx from the stack
-    vmovaps [rdx], xmm4         ; Copy xmm0 to memory 
-    
+    vmovaps [rdx], xmm4         ; Copy xmm0 to memory
+
     ret                         ; exit
 AVXSumVecs ENDP
 
@@ -123,7 +123,7 @@ AVXCrossProduct PROC
     vmovaps xmm2, xmm0                 ; copy xmm0 into xmm2
     vmovaps xmm3, xmm1                 ; copy xmm1 into xmm3
     vshufps xmm2,xmm2, xmm2, 11001001b ; packed single shuffle xmm2 with itself
-    vshufps xmm3,xmm3, xmm3, 11010010b ; packed single shuffle xmm3 with itself 
+    vshufps xmm3,xmm3, xmm3, 11010010b ; packed single shuffle xmm3 with itself
     vmovaps xmm4, xmm2                 ; copy xmm2 into xmm4
     vmovaps xmm5, xmm2                 ; copy xmm2 into xmm5
     vmulps  xmm4,xmm4, xmm1            ; multiply xmm4 by xmm1
@@ -138,12 +138,12 @@ AVXCrossProduct ENDP
 
 PUBLIC AVXmat4xmat4
 AVXmat4xmat4 PROC
-        
+
     ; Save a copy of rcx, rsi, and rdi
     push rcx
     push rsi
     push rdi
-    
+
     mov rsi, rdx
     mov rdi, rcx
 
@@ -152,7 +152,7 @@ AVXmat4xmat4 PROC
     vzeroall
     l:
     vmovaps xmm0, [rsi]
-    
+
     vbroadcastss xmm1, REAL4 ptr [rdi+rax+0]
     vfmadd231ps xmm2, xmm1, xmm0
 
@@ -298,5 +298,5 @@ AVXHorizontalAdd ENDP
 
 
 _TEXT ENDS
- 
+
 END

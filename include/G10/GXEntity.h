@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXEntity.h
  * @author Jacob Smith
- * 
+ *
  * Entity
  */
 
@@ -54,7 +54,8 @@ DLLEXPORT int create_entity          ( GXEntity_t **pp_entity );
  * @param pp_entity : return
  * @param path      : The path to a file containing a entity JSON
  *
- * @sa destroy_entity
+ * @sa load_entity_as_json_text
+ * @sa load_entity_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -66,11 +67,12 @@ DLLEXPORT int load_entity ( GXEntity_t **pp_entity, char* path );
  * @param pp_entity : return
  * @param text      : The entity JSON text
  *
- * @sa destroy_entity
+ * @sa load_entity
+ * @sa load_entity_as_json_value
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_entity_as_json ( GXEntity_t **pp_entity, char* text );
+DLLEXPORT int load_entity_as_json_text ( GXEntity_t **pp_entity, char* text );
 
 /** !
  *  Load an entity as JSON object text
@@ -79,21 +81,20 @@ DLLEXPORT int load_entity_as_json ( GXEntity_t **pp_entity, char* text );
  * @param p_value   : The entity JSON value
  *
  * @sa load_entity
- * @sa load_entity_as_json
+ * @sa load_entity_as_json_text
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value );
 
 // Physics
-
 /** !
  * Calculate the net force on the object.
  * 6 Contact forces are summated Gravity,
- * Normal, Applied, Friction, Tension, Spring. 
+ * Normal, Applied, Friction, Tension, Spring.
  *
  * @param p_entity : Pointer to entity
- * 
+ *
  * @sa move_entity
  * TODO: See also, collision function
  *
@@ -159,7 +160,7 @@ DLLEXPORT int draw_entity ( GXEntity_t *p_entity );
  * @param p_entity : Pointer to entity pointer
  *
  * @sa create_entity
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int destroy_entity ( GXEntity_t **pp_entity );

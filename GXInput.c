@@ -460,7 +460,7 @@ void init_input ( void )
         dict_add(key_dict, (char *)keys[i].name, 0);
 
     // Is there a controller?
-    if ( SDL_IsGameController(0) ) 
+    if ( SDL_IsGameController(0) )
         controller = SDL_GameControllerOpen(0);
 
 }
@@ -479,7 +479,7 @@ int create_input ( GXInput_t **pp_input )
 	GXInput_t *p_input = calloc(1, sizeof(GXInput_t));
 
 	// Error checking
-    if( p_input == (void *) 0 )
+    if ( p_input == (void *) 0 )
 	    goto no_mem;
 
     // Return an input pointer to the caller
@@ -559,7 +559,7 @@ int load_input ( GXInput_t **pp_input, const char path[] )
 
                 // Error
                 return 0;
-            
+
             no_path:
                 #ifndef NDEBUG
                     g_print_log("[G10] [Input] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
@@ -567,7 +567,7 @@ int load_input ( GXInput_t **pp_input, const char path[] )
 
                 // Error
                 return 0;
-            
+
         }
 
         // G10 errors
@@ -576,7 +576,7 @@ int load_input ( GXInput_t **pp_input, const char path[] )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Input] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -584,7 +584,7 @@ int load_input ( GXInput_t **pp_input, const char path[] )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Input] Failed to parse file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -633,7 +633,7 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
         {
             failed_to_parse_json_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Failed to parse JSON value in call to function \"%s\"", __FUNCTION__);    
+                    g_print_error("[G10] [Input] Failed to parse JSON value in call to function \"%s\"", __FUNCTION__);
                 #endif
 
                 // Error
@@ -641,7 +641,7 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
 
             failed_to_parse_input_as_json_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Failed to load input in call to function \"%s\"", __FUNCTION__);    
+                    g_print_error("[G10] [Input] Failed to load input in call to function \"%s\"", __FUNCTION__);
                 #endif
 
                 // Error
@@ -689,7 +689,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
             goto missing_properties;
 
     }
-    
+
     // Parse the input as a path
     else if ( p_value->type == JSONstring )
     {
@@ -697,7 +697,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
         // Load the input as a path
         if ( load_input(pp_input, p_value->string) == 0 )
             goto failed_to_load_input_from_path;
-        
+
         goto exit;
     }
 
@@ -737,7 +737,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 			// Initialized data
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
-			
+
 			// Get the quantity of elements
 			array_get(p_binds, 0, &vector_element_count );
 
@@ -749,8 +749,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 				goto no_mem;
 
 			// Populate the elements of the array
-			array_get(p_binds, pp_elements, 0 );			
-			
+			array_get(p_binds, pp_elements, 0 );
+
             // TODO: Check return
             // Allocate a dictionary
             dict_construct(&p_input->binds, vector_element_count);
@@ -759,7 +759,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 			// Iterate over each element
             for (size_t i = 0; i < vector_element_count; i++)
             {
-                
+
                 // Initialized data
                 JSONValue_t *i_element = pp_elements[i];
                 GXBind_t    *p_bind    = 0;
@@ -767,19 +767,19 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 // Load the bind from the JSON value
                 if ( load_bind_as_json_value(&p_bind, i_element) == 0 )
                     goto failed_to_load_bind_as_json_value;
-                
+
                 // Add the bind to the input
                 dict_add(p_input->binds, p_bind->name, p_bind);
                 dict_add(p_input->bind_lut, p_bind->name, p_bind);
             }
-			
+
 			// Clean the scope
 			free(pp_elements);
         }
     }
 
     exit:
-    
+
     // Success
     return 1;
 
@@ -805,7 +805,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 // Error
                 return 0;
         }
-    
+
         // TODO: G10 errors
         {
             failed_to_load_input_from_path:
@@ -814,7 +814,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
             failed_to_load_bind_as_json_value:
                 return 0;
         }
-    
+
         // Standard library errors
 		{
 			no_mem:
@@ -909,11 +909,11 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
 				goto no_mem;
 
 			// Populate the elements of the array
-			array_get(p_keys, pp_elements, 0 );			
-			
+			array_get(p_keys, pp_elements, 0 );
+
             // Allocate memory for an array of keys
             p_keys_array = calloc(key_count+1, sizeof(char *));
-            
+
             // Error checking
 			if ( keys == (void *) 0 )
 				goto no_mem;
@@ -921,7 +921,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
 			// Iterate over each element
             for (size_t i = 0; i < key_count; i++)
             {
-                
+
                 // Initialized data
                 JSONValue_t *i_element = pp_elements[i];
                 size_t  key_len = 0;
@@ -939,19 +939,20 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
                 // Error checking
 			    if ( key == (void *) 0 )
 				    goto no_mem;
-                
+
                 // Copy the string
                 strncpy(key, i_element->string, key_len);
 
                 // Store the key pointer in the list of keys
                 p_keys_array[i] = key;
             }
-			
+
 			// Clean the scope
 			free(pp_elements);
         }
 
-        *p_bind = (GXBind_t) {
+        *p_bind = (GXBind_t)
+        {
             .name = name,
             .keys = p_keys_array,
             .key_count = key_count,
@@ -961,7 +962,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     }
 
     exit:
-    
+
     // Success
     return 1;
 
@@ -987,7 +988,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
                 // Error
                 return 0;
         }
-    
+
         // TODO: G10 errors
         {
             failed_to_load_bind_from_path:
@@ -997,7 +998,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
             failed_to_parse_key:
                 return 0;
         }
-    
+
         // Standard library errors
 		{
 			no_mem:
@@ -1026,7 +1027,7 @@ int load_bind_as_json ( GXBind_t **pp_bind, char *token )
                 goto no_token;
         #endif
     }
-    
+
     // Initialized data
     GXBind_t    *ret         = 0;
     dict        *json_tokens = 0;
@@ -1039,7 +1040,7 @@ int load_bind_as_json ( GXBind_t **pp_bind, char *token )
     {
         // TODO: Improve
         parse_json(token, strlen(token), &json_tokens);
-            
+
         t    = (JSONToken_t *) dict_get(json_tokens, "name");
         name = JSON_VALUE(t, JSONstring);
 
@@ -1056,7 +1057,7 @@ int load_bind_as_json ( GXBind_t **pp_bind, char *token )
 
     // Error handling
     {
-        
+
         // G10 errors
         {
             // TODO: Implement
@@ -1079,7 +1080,7 @@ int load_bind_as_json ( GXBind_t **pp_bind, char *token )
 /*
 int construct_bind ( GXBind_t** pp_bind, char* name, char** keys)
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -1097,7 +1098,7 @@ int construct_bind ( GXBind_t** pp_bind, char* name, char** keys)
 
     // Allocate for a bind
     create_bind(bind);
-    
+
     b = *bind;
 
     // Error handling
@@ -1133,16 +1134,22 @@ int construct_bind ( GXBind_t** pp_bind, char* name, char** keys)
                 #ifndef NDEBUG
                     g_print_error("[G10] [Bind] Null pointer provided for \"bind\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
             no_name:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Bind] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
             no_keys:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Bind] Null pointer provided for \"keys\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
 
@@ -1275,7 +1282,7 @@ SDL_Scancode find_key ( const char *name )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( name == (void *) 0 ) goto no_name;    
+            if ( name == (void *) 0 ) goto no_name;
         #endif
     }
 
@@ -1302,22 +1309,22 @@ int process_input ( GXInstance_t *p_instance )
         #ifndef NDEBUG
             if ( p_instance        == (void *) 0 ) goto no_instance;
             if ( p_instance->input == (void *) 0 ) goto no_inputs;
-        #endif  
+        #endif
     }
 
-    // TODO: Refactor bind fires into a queue. 
+    // TODO: Refactor bind fires into a queue.
     queue *p_update_binds_queue = 0;
-    
+
     // TODO: Reimplement for other libraries?
 
-    // Poll for events 
+    // Poll for events
     while ( SDL_PollEvent(&p_instance->sdl2.event) )
     {
 
         // Switch on the event type
         switch (p_instance->sdl2.event.type)
         {
-            
+
             // Mouse events
             case SDL_MOUSEMOTION:
             {
@@ -1331,7 +1338,8 @@ int process_input ( GXInstance_t *p_instance )
                 u8                   button = 0;
                 int                  x_rel  = p_instance->sdl2.event.motion.xrel,
                                      y_rel  = p_instance->sdl2.event.motion.yrel;
-                callback_parameter_t input  = (callback_parameter_t) {
+                callback_parameter_t input  = (callback_parameter_t)
+                {
                     .input_state               = MOUSE,
                     .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
                     .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
@@ -1369,7 +1377,8 @@ int process_input ( GXInstance_t *p_instance )
                 u8 button = 0;
                 int                  x_rel = p_instance->sdl2.event.motion.xrel,
                                      y_rel = p_instance->sdl2.event.motion.yrel;
-                callback_parameter_t input = (callback_parameter_t) {
+                callback_parameter_t input = (callback_parameter_t)
+                {
                     .input_state               = MOUSE,
                     .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
                     .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
@@ -1382,11 +1391,11 @@ int process_input ( GXInstance_t *p_instance )
 
             // Key up
             // Key down
-            case SDL_KEYDOWN:            
+            case SDL_KEYDOWN:
             {
-            
+
             }
-            
+
             // Window resize
             case SDL_WINDOWEVENT:
                 switch (p_instance->sdl2.event.window.event)
@@ -1420,7 +1429,7 @@ int process_input ( GXInstance_t *p_instance )
         // If the key is down...
         if ( keyboard_state[i] )
         {
-            
+
             // Initialized data
             GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
 
@@ -1436,13 +1445,14 @@ int process_input ( GXInstance_t *p_instance )
 
 
     // Game controller
-    if ( controller ) {
+    if ( controller )
+    {
 
         // Initialized data
-        callback_parameter_t input = (callback_parameter_t) 
+        callback_parameter_t input = (callback_parameter_t)
         {
             .input_state = GAMEPAD,
-        
+
             .inputs.gamepad_state.left_trigger  = (float)(SDL_GameControllerGetAxis(controller, 4) / (float)SHRT_MAX),
             .inputs.gamepad_state.right_trigger = (float)(SDL_GameControllerGetAxis(controller, 5) / (float)SHRT_MAX),
 
@@ -1463,12 +1473,12 @@ int process_input ( GXInstance_t *p_instance )
             .inputs.gamepad_state.select = SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK),
 
             .inputs.gamepad_state.left_stick = (vec2)
-            { 
+            {
                 .x = (float)(SDL_GameControllerGetAxis(controller, 2) / (float)SHRT_MAX),
                 .y = (float)(SDL_GameControllerGetAxis(controller, 3) / (float)SHRT_MAX)
             },
             .inputs.gamepad_state.right_stick = (vec2)
-            { 
+            {
                 .x = (float)(SDL_GameControllerGetAxis(controller, 0) / (float)SHRT_MAX),
                 .y = (float)(SDL_GameControllerGetAxis(controller, 1) / (float)SHRT_MAX)
             }
@@ -1524,10 +1534,10 @@ int append_bind ( GXInput_t *p_input, GXBind_t *p_bind )
     }
 
     dict_add(p_input->binds, p_bind->name, p_bind);
-    
+
     // Success
     return 1;
-    
+
     // TODO: Error handling
 }
 
@@ -1541,9 +1551,9 @@ int input_info ( GXInput_t *p_input )
         #endif
     }
 
-    // Formatting 
+    // Formatting
     g_print_log(" - Input info - \n");
-    
+
     // Print the name
     g_print_log("name             : \"%s\"\n", p_input->name);
 
@@ -1564,7 +1574,7 @@ int input_info ( GXInput_t *p_input )
     {
         g_print_log("                   [%d] \"%s\": \n", i, binds[i]->name);
         g_print_log("                         [ ", i, binds[i]->name);
-        
+
 
         if (binds[i]->key_count)
         {
@@ -1617,7 +1627,7 @@ int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_in
     }
 
     return 0;
-    
+
     // Error handling
     {
         no_bind:
@@ -1679,7 +1689,7 @@ int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
         #endif
     }
 
-    // TODO 
+    // TODO
     // Success
     return 1;
 
@@ -1706,7 +1716,7 @@ int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
         }
     }
 }
- 
+
 int destroy_bind ( GXBind_t *p_bind )
 {
 
@@ -1720,11 +1730,11 @@ int destroy_bind ( GXBind_t *p_bind )
     // TODO: Free everything
 
     free(p_bind->name);
-    
+
     for (size_t i = 0; i < p_bind->key_count; i++)
         free(p_bind->keys[i]);
-    
-    if(p_bind->callbacks)
+
+    if ( p_bind->callbacks )
         free(p_bind->callbacks);
 
     free(p_bind->keys);

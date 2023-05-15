@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXTypedef.h
  * @author Jacob Smith
- * 
+ *
  * Type definitions for G10
  */
 
@@ -72,7 +72,7 @@ struct quaternion_s
 };
 typedef struct quaternion_s quaternion;
 
-// Insatnce 
+// Insatnce
 struct GXInstance_s;
 
 /* !
@@ -125,7 +125,7 @@ enum uniform_type_e uniform_type_t;
 struct GXLight_s;
 typedef struct GXLight_s GXLight_t;
 
-// Bounding volume 
+// Bounding volume
 struct GXBV_s;
 typedef struct GXBV_s GXBV_t;
 
@@ -145,7 +145,7 @@ struct GXShader_s;
 */
 typedef struct GXShader_s GXShader_t;
 
-// Material 
+// Material
 struct GXMaterial_s;
 typedef struct GXMaterial_s GXMaterial_t;
 
@@ -161,7 +161,7 @@ typedef struct GXTransform_s GXTransform_t;
 struct GXRigidbody_s;
 typedef struct GXRigidbody_s GXRigidbody_t;
 
-// Collider 
+// Collider
 struct GXCollider_s;
 typedef struct GXCollider_s GXCollider_t;
 
@@ -234,6 +234,9 @@ typedef struct GXSubpass_s    GXSubpass_t;
 
 struct GXAttachment_s;
 typedef struct GXAttachment_s GXAttachment_t;
+
+struct GXImage_s;
+typedef struct GXImage_s GXImage_t;
 
 struct GXFramebuffer_s;
 typedef struct GXFramebuffer_s GXFramebuffer_t;

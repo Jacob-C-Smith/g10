@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXLight.h
  * @author Jacob Smith
- * 
+ *
  * Lights
  */
 

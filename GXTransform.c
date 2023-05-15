@@ -1,6 +1,6 @@
 #include <G10/GXTransform.h>
 
-int create_transform ( GXTransform_t **pp_transform ) 
+int create_transform ( GXTransform_t **pp_transform )
 {
 
 	// Argument check
@@ -67,8 +67,9 @@ int construct_transform ( GXTransform_t **pp_transform, vec3 location, quaternio
 	if ( create_transform(&p_transform) == 0 )
 		goto failed_to_create_transform;
 
-	// Return the transform 
-	*p_transform = (GXTransform_t) { 
+	// Return the transform
+	*p_transform = (GXTransform_t)
+	{
 		.location = location,
 		.rotation = rotation,
 		.scale    = scale
@@ -130,7 +131,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 		goto failed_to_load_file;
 
 	// Load the transform as a json string
-	if ( load_transform_as_json(pp_transform, file_buffer, file_size) == 0 )
+	if ( load_transform_as_json_text(pp_transform, file_buffer, file_size) == 0 )
 		goto failed_to_load_transform;
 
 	// Free up the memory
@@ -183,7 +184,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 	}
 }
 
-int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
+int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
 {
 
 	// Argument check
@@ -196,11 +197,11 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 
 	// Initialized data
 	JSONValue_t *p_value    = 0;
-	
+
 	// Parse the transform JSON
-	if ( parse_json_value(text, 0, &p_value) == 0 ) 
+	if ( parse_json_value(text, 0, &p_value) == 0 )
 		goto failed_to_parse_json;
-	
+
 
 	// Deallocate the JSON value
 	FREE_VALUE(p_value);
@@ -208,7 +209,7 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 	// Success
 	return 1;
 
-	// Error handling 
+	// Error handling
 	{
 
 		// Argument errors
@@ -225,7 +226,7 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Null pointer provided for \"text\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 		}
@@ -245,7 +246,7 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 
@@ -253,16 +254,16 @@ int load_transform_as_json ( GXTransform_t **pp_transform, char *text )
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 
 
-			
+
 		}
 
 
-	
+
 		// Standard library errors
 		{
 			no_mem:
@@ -295,11 +296,11 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 	// Parse the transform JSON
     if (p_value->type == JSONobject)
     {
-	
+
         // Initialized data
 		dict *p_dict = p_value->object;
 
-        // Parse the transform 
+        // Parse the transform
         p_location   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "location")), JSONarray);
         p_rotation   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "rotation")), JSONarray);
         p_scale      = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "scale"))   , JSONarray);
@@ -329,7 +330,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			// Initialized data
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
-			
+
 			// Get the quantity of elements
 			array_get(p_location, 0, &vector_element_count );
 
@@ -344,15 +345,16 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 				goto no_mem;
 
 			// Populate the elements of the vector
-			array_get(p_location, pp_elements, 0 );			
-			
+			array_get(p_location, pp_elements, 0 );
+
 			// Set the location
-			location = (vec3) {
+			location = (vec3)
+			{
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
 				.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
 				.z = (float) ((JSONValue_t *)pp_elements[2])->floating
 			};
-				
+
 			// Clean the scope
 			free(pp_elements);
 
@@ -364,7 +366,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			// Initialized data
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
-			
+
 			// Get the quantity of elements
 			array_get(p_rotation, 0, &vector_element_count );
 
@@ -374,13 +376,13 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 			// Allocate an array for the elements
 			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
-			
+
 			// Error checking
 			if ( pp_elements == (void *) 0 )
 				goto no_mem;
 
 			// Populate the elements of the vector
-			array_get(p_rotation, pp_elements, 0 );			
+			array_get(p_rotation, pp_elements, 0 );
 
 			// Parse the data as a quaternion or an euler angle
 			if ( vector_element_count == 3 )
@@ -388,7 +390,8 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 				// Set the rotation
 				rotation = quaternion_from_euler_angle(
-					(vec3) {
+					(vec3)
+					{
 						.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
 						.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
 						.z = (float) ((JSONValue_t *)pp_elements[2])->floating
@@ -402,7 +405,8 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			{
 
 				// Set the rotation
-				rotation = (quaternion) {
+				rotation = (quaternion)
+				{
 					.u = (float) ((JSONValue_t *)pp_elements[0])->floating,
 					.i = (float) ((JSONValue_t *)pp_elements[1])->floating,
 					.j = (float) ((JSONValue_t *)pp_elements[2])->floating,
@@ -421,7 +425,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			// Initialized data
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
-			
+
 			// Get the quantity of elements
 			array_get(p_scale, 0, &vector_element_count );
 
@@ -437,19 +441,20 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 				goto no_mem;
 
 			// Populate the elements of the vector
-			array_get(p_scale, pp_elements, 0 );			
-			
+			array_get(p_scale, pp_elements, 0 );
+
 			// Set the scale
-			scale = (vec3) {
+			scale = (vec3)
+			{
 				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
 				.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
 				.z = (float) ((JSONValue_t *)pp_elements[2])->floating
 			};
-				
+
 			// Clean the scope
 			free(pp_elements);
 		}
-	
+
 		// Construct the transform
 		if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
 			goto failed_to_create_transform;
@@ -461,7 +466,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 	// Error handling
 	{
-		
+
 		// Argument errors
 		{
 			no_transform:
@@ -476,18 +481,18 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Null pointer provided for \"p_value\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 		}
-	
+
 		// G10 Errors
 		{
 			wrong_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 
@@ -495,7 +500,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 
@@ -514,7 +519,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 				// Error
 				return 0;
-						
+
 			scale_len_error:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Failed to parse \"scale\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
@@ -576,7 +581,7 @@ void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_result:
@@ -616,7 +621,7 @@ int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float
                cosHalf   = cosf(halfAngle),
                sinHalf   = sinf(halfAngle);
     vec3       newIJK    = { p_transform->rotation.i, p_transform->rotation.j, p_transform->rotation.k };
-    
+
     rotate_vec3_by_quaternion(&newIJK, newIJK, axis);
 	p_transform->rotation = (quaternion){ cosHalf, sinHalf * newIJK.x, sinHalf * newIJK.y, sinHalf * newIJK.z };
 

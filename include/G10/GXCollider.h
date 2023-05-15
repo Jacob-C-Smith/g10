@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXCollider.h
  * @author Jacob Smith
- * 
+ *
  * Colliders
  */
 
@@ -96,8 +96,8 @@ DLLEXPORT int create_collider ( GXCollider_t **pp_collider );
  * @param pp_collider : return
  * @param path        : The path to file containing collider JSON
  *
- * @sa load_collider_as_json
- * @sa create_collider
+ * @sa load_collider_as_json_text
+ * @sa load_collider_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -111,11 +111,24 @@ DLLEXPORT int load_collider ( GXCollider_t **pp_collider, const char *path );
  *
  * @sa load_collider
  * @sa load_collider_as_json_value
- * @sa create_collider
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_collider_as_json ( GXCollider_t **pp_collider, char *text );
+DLLEXPORT int load_collider_as_json_text ( GXCollider_t **pp_collider, char *text );
+
+/** !
+ *  Load a collider from a JSON value
+ *
+ * @param pp_collider : return
+ * @param text        : The collider JSON text
+ *
+ * @sa load_collider
+ * @sa load_collider_as_json_text
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_collider_as_json_value ( GXCollider_t **pp_collider, JSONValue_t *p_value );
+
 
 // Callbacks
 /** !

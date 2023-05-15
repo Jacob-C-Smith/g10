@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXMaterial.h
  * @author Jacob Smith
- * 
+ *
  * Material
  */
 
@@ -43,7 +43,7 @@ DLLEXPORT int create_material ( GXMaterial_t **pp_material );
  * @param pp_material : return
  * @param path        : The path to a JSON file containing a material object
  *
- * @sa load_material_as_json
+ * @sa load_material_as_json_text
  * @sa create_material
  *
  * @return 1 on success, 0 on error
@@ -61,7 +61,7 @@ DLLEXPORT int load_material ( GXMaterial_t **pp_material, const char path[] );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_material_as_json ( GXMaterial_t **pp_material, char *text );
+DLLEXPORT int load_material_as_json_text ( GXMaterial_t **pp_material, char *text );
 
 // Destructors
 // TODO

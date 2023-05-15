@@ -1,8 +1,8 @@
 ﻿/** !
  * @file G10/G10.h
  * @author Jacob Smith
- * 
- * Include header for G10. 
+ *
+ * Include header for G10.
  */
 
 // Include guard
@@ -73,17 +73,17 @@
 struct GXInstance_s
 {
 
-    // Name 
+    // Name
     char       *name;
-    
-    // SDL2 
+
+    // SDL2
     struct {
-        SDL_Window               *window;
-        SDL_Event                 event;
-        SDL_AudioDeviceID         audio_device;
+        SDL_Window        *window;
+        SDL_Event          event;
+        SDL_AudioDeviceID  audio_device;
     }           sdl2;
 
-    // Vulkan 
+    // Vulkan
     struct {
         VkInstance                instance;
         VkDebugUtilsMessengerEXT  debug_messenger;
@@ -92,10 +92,8 @@ struct GXInstance_s
         VkDevice                  device;
         VkQueue                   graphics_queue;
         VkQueue                   present_queue;
-
         VkSwapchainKHR            swap_chain;
         VkImage                  *swap_chain_images;
-    
         VkFormat                  swap_chain_image_format;
         VkExtent2D                swap_chain_extent;
         VkImageView              *swap_chain_image_views;
@@ -106,7 +104,6 @@ struct GXInstance_s
         VkSemaphore              *image_available_semaphores;
         VkSemaphore              *render_finished_semaphores;
         VkFence                  *in_flight_fences;
-
         i32                       max_buffered_frames;
         u32                       current_frame,
                                   image_count,
@@ -123,8 +120,11 @@ struct GXInstance_s
 
     // Window parameters
     struct {
-        u32 width,
-            height;
+        char *title;
+        u32   width,
+              height;
+        bool  fullscreen;
+
     }           window;
 
     // Context
@@ -132,7 +132,8 @@ struct GXInstance_s
         GXSchedule_t  *schedule;
         GXScene_t     *scene,
                       *loading_scene;
-        GXRenderer_t  *renderer;
+        GXRenderer_t  *renderer,
+                      *loading_renderer;
         int          (*user_code_callback) (GXInstance_t *instance);
     }           context;
 
@@ -165,7 +166,7 @@ struct GXInstance_s
               *ai_preupdate,
               *ai_update;
     }           queues;
-    
+
     // Mutexes
     struct {
         SDL_mutex *load_entity,
@@ -183,15 +184,15 @@ struct GXInstance_s
     // Time
     struct {
         size_t ticks;
-        u32    d, 
+        u32    d,
                last_time;
         u64    clock_div;
         float  delta_time;
     }           time;
-    
+
     // Discord integration
     #ifdef BUILD_G10_WITH_DISCORD
-    
+
     struct {
         struct IDiscordCore                *core;
         struct IDiscordUserManager         *users;
@@ -217,7 +218,7 @@ struct GXInstance_s
 
     #endif
 
-    // Input 
+    // Input
     GXInput_t  *input;
 
     // How many threads should be used to load a scene
@@ -233,7 +234,7 @@ struct GXInstance_s
  *
  * @param pp_instance : return
  * @param path        : Path to instance JSON file
- * 
+ *
  * @sa g_exit
  *
  * @return 1 on success, 0 on error
@@ -245,7 +246,7 @@ DLLEXPORT int g_init ( GXInstance_t **pp_instance, const char *path );
  *  Create a Vulkan buffer
  *
  * @param size          : Double pointer to instance
- * @param usage         : Path to instance JSON 
+ * @param usage         : Path to instance JSON
  * @param properties    :
  * @param buffer        :
  * @param buffer_memory :
@@ -282,7 +283,7 @@ DLLEXPORT int   g_window_resize ( GXInstance_t *p_instance );
  *
  * @param format : printf format parameter
  * @param ...    : Additional arguments
- * 
+ *
  * @sa g_print_warning
  * @sa g_print_log
  *
@@ -295,10 +296,10 @@ DLLEXPORT int g_print_error ( const char *const format, ... );
  *
  * @param format : printf format parameter
  * @param ...    : Additional arguments
- * 
+ *
  * @sa g_print_error
  * @sa g_print_log
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int g_print_warning ( const char *const format, ... );
@@ -308,7 +309,7 @@ DLLEXPORT int g_print_warning ( const char *const format, ... );
  *
  * @param format : printf format parameter
  * @param ...    : Additional arguments
- * 
+ *
  * @sa g_print_error
  * @sa g_print_warning
  *
@@ -318,24 +319,24 @@ DLLEXPORT int g_print_log ( const char *const format, ... );
 
 /** !
  *  Set an instances active schedule, and start running said schedule
- * 
+ *
  *  @param instance : the instance
  *  @param name     : the name of the schedule to start running
- * 
+ *
  *  @sa g_stop_schedule
- * 
+ *
  *  @return 1 on success, 0 on error
  */
 DLLEXPORT int g_start_schedule ( GXInstance_t *p_instance, char *name );
 
 /** !
  *  Stop the instances active schedule
- * 
+ *
  *  @param p_instance : the instance
- * 
+ *
  *  @sa g_stop_schedule
  *  @sa g_user_exit
- * 
+ *
  *  @return 1 on success, 0 on error
  */
 DLLEXPORT int g_stop_schedule ( GXInstance_t *p_instance );
@@ -353,7 +354,7 @@ DLLEXPORT int copy_state ( GXInstance_t *p_instance );
 // Getters
 /** !
  *  Returns the active instance
- * 
+ *
  *  @return pointer to active instance on success, 0 on error
  */
 DLLEXPORT GXInstance_t* g_get_active_instance ( void );
@@ -361,12 +362,12 @@ DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 // Cache operations
 /** !
  * Cache a material. Caching a material adds it to the garbage collector.
- * 
+ *
  * @param instance: The active instance
  * @param material: A pointer to a material
  *
  * @sa g_find_material
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *p_material );
@@ -412,10 +413,10 @@ DLLEXPORT int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai );
  *
  * @param p_instance : The active instance
  * @param name       : The name of the ai
- * 
+ *
  * @sa g_find_ai
- * @sa g_find_part  
- * @sa g_find_shader    
+ * @sa g_find_part
+ * @sa g_find_shader
  *
  * @return 1 on success, 0 on error
  */
@@ -427,10 +428,10 @@ DLLEXPORT GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
  * @param p_instance : The active instance
  * @param name       : The name of the part
  *
- * @sa g_find_material  
+ * @sa g_find_material
  * @sa g_find_shader
  * @sa g_find_ai
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name );
@@ -441,10 +442,10 @@ DLLEXPORT GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name );
  * @param p_instance : The active instance
  * @param name       : The name of the shader
  *
- * @sa g_find_material  
+ * @sa g_find_material
  * @sa g_find_part
  * @sa g_find_ai
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name );
@@ -455,10 +456,10 @@ DLLEXPORT GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name );
  * @param p_instance : The active instance
  * @param name       : The name of the ai
  *
- * @sa g_find_material  
+ * @sa g_find_material
  * @sa g_find_part
  * @sa g_find_ai
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name );
@@ -485,7 +486,7 @@ DLLEXPORT void g_user_exit         ( callback_parameter_t state, GXInstance_t *p
 DLLEXPORT void g_toggle_mouse_lock ( callback_parameter_t state, GXInstance_t *p_instance );
 
 /** !
- * Play a sound 
+ * Play a sound
  *
  * @param state      : Input state
  * @param p_instance : The active instance

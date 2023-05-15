@@ -1,8 +1,8 @@
 /** !
  * @file G10/GXRig.h
  * @author Jacob Smith
- * 
- * Rigs and animation 
+ *
+ * Rigs and animation
  */
 
 // Include guard

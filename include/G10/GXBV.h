@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXBV.h
  * @author Jacob Smith
- * 
+ *
  * Bounding volume heierarchy
  */
 
@@ -43,10 +43,10 @@ DLLEXPORT int create_bv ( GXBV_t **pp_bv );
  * @param pp_bv : return
  * @param min   : The minimum axis aligned bounding vector
  * @param max   : The maximum axis aligned bounding vector
- * 
+ *
  * @sa construct_bv_from_bvs
  * @sa construct_bvh_from_scene
- * 
+ *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max );

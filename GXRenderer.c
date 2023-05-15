@@ -1,14 +1,21 @@
 ﻿#include <G10/GXRenderer.h>
 
 // Constants
-#define ATTACHMENT_LOAD_OPERATION_COUNT  3
+#define ATTACHMENT_LOAD_OPERATION_COUNT 3
 #define ATTACHMENT_STORE_OPERATION_COUNT 3
-#define IMAGE_LAYOUTS_COUNT              18
-#define SUBPASS_FUNCTION_COUNT           11
-#define FORMAT_ENUM_COUNT                130
-#define PIPELINE_STAGE_FLAG_BITS_COUNT   18
-#define ACCESS_FLAG_BITS_COUNT           18
-#define DEPENDENCY_FLAG_BITS_COUNT       3
+#define IMAGE_LAYOUTS_COUNT 18
+#define SUBPASS_FUNCTION_COUNT 11
+#define FORMAT_ENUM_COUNT 130
+#define PIPELINE_STAGE_FLAG_BITS_COUNT 25
+#define ACCESS_FLAG_BITS_COUNT 33
+#define DEPENDENCY_FLAG_BITS_COUNT 3
+#define TEXTURING_MODE_COUNT 5
+#define FILTERINT_MODE_COUNT 2
+#define TILING_COUNT 2
+#define USAGE_COUNT 8
+#define VIEW_TYPE_COUNT 7
+#define SWIZZLE_COUNT 7
+#define ASPECT_COUNT 4
 
 VkAttachmentLoadOp attachment_load_operation_enums[ATTACHMENT_LOAD_OPERATION_COUNT] =
 {
@@ -23,7 +30,7 @@ char *attachment_load_operation_names[ATTACHMENT_LOAD_OPERATION_COUNT] =
     "don't care"
 };
 
-VkAttachmentStoreOp  attachment_store_operation_enums[ATTACHMENT_STORE_OPERATION_COUNT] =
+VkAttachmentStoreOp attachment_store_operation_enums[ATTACHMENT_STORE_OPERATION_COUNT] =
 {
     VK_ATTACHMENT_STORE_OP_STORE,
     VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -79,21 +86,21 @@ char *image_layout_names[IMAGE_LAYOUTS_COUNT] =
     "present source"
 };
 
-void *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT] = 
+void *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT] =
 {
     &draw_scene,
-    0,//&draw_material,
-    0,//&draw_depth_pass,
-    0,//&draw_direct_lighting,
-    0,//&draw_shadows,
-    0,//&draw_translucency,
-    0,//&draw_indirect_lighting,
-    0,//&draw_depth_of_field,
-    0,//&draw_motion_blur,
-    0,//&draw_bloom_blur,
-    0,//&draw_tone_map_gamma_correct
+    0, //&draw_material,
+    0, //&draw_depth_pass,
+    0, //&draw_direct_lighting,
+    0, //&draw_shadows,
+    0, //&draw_translucency,
+    0, //&draw_indirect_lighting,
+    0, //&draw_depth_of_field,
+    0, //&draw_motion_blur,
+    0, //&draw_bloom_blur,
+    0, //&draw_tone_map_gamma_correct
 };
-char *subpass_function_names[SUBPASS_FUNCTION_COUNT] = 
+char *subpass_function_names[SUBPASS_FUNCTION_COUNT] =
 {
     "draw scene",
     "material output",
@@ -107,8 +114,7 @@ char *subpass_function_names[SUBPASS_FUNCTION_COUNT] =
     "bloom blur",
     "tone map gamma correct"
 };
-
-VkFormat format_enums[FORMAT_ENUM_COUNT] = 
+VkFormat format_enums[FORMAT_ENUM_COUNT] =
 {
     VK_FORMAT_UNDEFINED,
     0,
@@ -241,7 +247,7 @@ VkFormat format_enums[FORMAT_ENUM_COUNT] =
     VK_FORMAT_D16_UNORM_S8_UINT,
     VK_FORMAT_D24_UNORM_S8_UINT
 };
-char *format_names[FORMAT_ENUM_COUNT] = 
+char *format_names[FORMAT_ENUM_COUNT] =
 {
     "undefined",
     0,
@@ -375,8 +381,9 @@ char *format_names[FORMAT_ENUM_COUNT] =
     "unorm d24 uint s8"
 };
 
-VkDependencyFlagBits pipeline_stage_flag_bits_enum[PIPELINE_STAGE_FLAG_BITS_COUNT] = 
+VkPipelineStageFlagBits pipeline_stage_flag_bits_enum[PIPELINE_STAGE_FLAG_BITS_COUNT] =
 {
+    VK_PIPELINE_STAGE_NONE,
     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
     VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
     VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
@@ -394,10 +401,17 @@ VkDependencyFlagBits pipeline_stage_flag_bits_enum[PIPELINE_STAGE_FLAG_BITS_COUN
     VK_PIPELINE_STAGE_HOST_BIT,
     VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
     VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-    VK_PIPELINE_STAGE_NONE
+    VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT,
+    VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+    VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
+    VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT,
+    VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR,
+    VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
+    VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT,
 };
-char *pipeline_stage_flag_bits_names[PIPELINE_STAGE_FLAG_BITS_COUNT] = 
+char *pipeline_stage_flag_bits_names[PIPELINE_STAGE_FLAG_BITS_COUNT] =
 {
+    "none",
     "top of pipe",
     "draw indirect",
     "vertex input",
@@ -415,11 +429,31 @@ char *pipeline_stage_flag_bits_names[PIPELINE_STAGE_FLAG_BITS_COUNT] =
     "host",
     "all graphics",
     "all commands",
-    "none"
+    "transform feedback",
+    "acceleration structure build",
+    "ray tracing",
+    "fragment density process",
+    "fragment shading rate attachment",
+    "task",
+    "mesh"
 };
 
-VkAccessFlagBits access_flag_bits_enum[ACCESS_FLAG_BITS_COUNT] = 
+VkDependencyFlagBits dependency_flag_bits_enum[DEPENDENCY_FLAG_BITS_COUNT] =
 {
+    VK_DEPENDENCY_BY_REGION_BIT,
+    VK_DEPENDENCY_DEVICE_GROUP_BIT,
+    VK_DEPENDENCY_VIEW_LOCAL_BIT
+};
+char *dependency_flag_bits_name[DEPENDENCY_FLAG_BITS_COUNT] =
+{
+    "by region",
+    "device group",
+    "view local"
+};
+
+VkAccessFlags access_flag_bits_enum[ACCESS_FLAG_BITS_COUNT] =
+{
+    VK_ACCESS_NONE,
     VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
     VK_ACCESS_INDEX_READ_BIT,
     VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
@@ -437,10 +471,25 @@ VkAccessFlagBits access_flag_bits_enum[ACCESS_FLAG_BITS_COUNT] =
     VK_ACCESS_HOST_WRITE_BIT,
     VK_ACCESS_MEMORY_READ_BIT,
     VK_ACCESS_MEMORY_WRITE_BIT,
-    VK_ACCESS_NONE
+    VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT,
+    VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT,
+    VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT,
+    VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT,
+    VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT,
+    VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR,
+    VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR,
+    VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT,
+    VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR,
+    VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_NV,
+    VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_NV,
+    VK_ACCESS_SHADING_RATE_IMAGE_READ_BIT_NV,
+    VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_NV,
+    VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_NV,
+    VK_ACCESS_NONE_KHR
 };
-char *access_flag_bits_names[ACCESS_FLAG_BITS_COUNT] = 
+char *access_flag_bits_names[ACCESS_FLAG_BITS_COUNT] =
 {
+    "none",
     "indirect command read",
     "index read",
     "vertex attribute read",
@@ -450,62 +499,196 @@ char *access_flag_bits_names[ACCESS_FLAG_BITS_COUNT] =
     "shader write",
     "color attachment read",
     "color attachment write",
-    "depth stencil attachment read",
-    "depth stencil attachment write",
+    "stencil attachment read",
+    "stencil attachment write",
     "transfer read",
     "transfer write",
     "host read",
     "host write",
     "memory read",
     "memory write",
+    "transform feedback write",
+    "transform feedback counter read",
+    "transform feedback counter write",
+    "conditional rendering read",
+    "color attachment read noncoherent",
+    "acceleration structure read khr",
+    "acceleration structure write",
+    "fragment density map read",
+    "fragment shading rate attachment read",
+    "command preprocess read",
+    "command preprocess write",
+    "shading rate image read",
+    "acceleration structure read",
+    "acceleration structure write",
     "none"
 };
 
-VkDependencyFlagBits dependency_flag_bits_enum[DEPENDENCY_FLAG_BITS_COUNT] = 
+char *texturing_addressing_keys [TEXTURING_MODE_COUNT] =
 {
-    VK_DEPENDENCY_BY_REGION_BIT,
-    VK_DEPENDENCY_DEVICE_GROUP_BIT,
-    VK_DEPENDENCY_VIEW_LOCAL_BIT
+    "repeat",
+    "mirror repeat",
+    "clamp edge",
+    "clamp border",
+    "mirror clamp edge"
 };
-char *dependency_flag_bits_name[DEPENDENCY_FLAG_BITS_COUNT] = 
+enum VkSamplerAddressMode  texturing_addressing_values [TEXTURING_MODE_COUNT] =
 {
-    "by region",
-    "device group",
-    "view local"
+    VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+    VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
 };
 
-dict *attachment_load_operations  = 0,
-     *image_layouts               = 0,
-     *subpass_functions           = 0,
-     *attachment_store_operations = 0,
-     *format_enumeration_lookup   = 0,
-     *pipeline_stage_flag_bits    = 0,
-     *access_flag_bits            = 0,
-     *dependency_flag_bits        = 0;
+char *texture_filtering_keys [TILING_COUNT] =
+{
+    "linear",
+    "nearest"
+};
+enum VkFilter  texture_filtering_values [TILING_COUNT] =
+{
+    VK_FILTER_LINEAR,
+    VK_FILTER_NEAREST
+};
+
+char *tiling_keys [TILING_COUNT] =
+{
+    "optimal",
+    "linear"
+};
+enum VkImageTiling  tiling_enum [TILING_COUNT] =
+{
+    VK_IMAGE_TILING_OPTIMAL,
+    VK_IMAGE_TILING_LINEAR
+};
+
+char *usage_keys [USAGE_COUNT] =
+{
+    "transfer source",
+    "transfer destination",
+    "sampled",
+    "storage",
+    "color attachment",
+    "depth attachment",
+    "transient attachment",
+    "input attachment"
+};
+enum VkImageUsageFlagBits usage_enum [USAGE_COUNT] =
+{
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+    VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+    VK_IMAGE_USAGE_SAMPLED_BIT,
+    VK_IMAGE_USAGE_STORAGE_BIT,
+    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+    VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT,
+    VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+};
+
+char *view_type_names [VIEW_TYPE_COUNT] =
+{
+    "1D",
+    "2D",
+    "3D",
+    "cubemap",
+    "1D array",
+    "2D array",
+    "cube array"
+};
+enum VkImageViewType view_type_enums [VIEW_TYPE_COUNT] =
+{
+    VK_IMAGE_VIEW_TYPE_1D,
+    VK_IMAGE_VIEW_TYPE_2D,
+    VK_IMAGE_VIEW_TYPE_3D,
+    VK_IMAGE_VIEW_TYPE_CUBE,
+    VK_IMAGE_VIEW_TYPE_1D_ARRAY,
+    VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+    VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
+};
+
+char *swizzle_names [SWIZZLE_COUNT] =
+{
+    "identity",
+    "zero",
+    "one",
+    "r",
+    "g",
+    "b",
+    "a"
+};
+enum VkComponentSwizzle swizzle_enums [SWIZZLE_COUNT] =
+{
+    VK_COMPONENT_SWIZZLE_IDENTITY,
+    VK_COMPONENT_SWIZZLE_ZERO,
+    VK_COMPONENT_SWIZZLE_ONE,
+    VK_COMPONENT_SWIZZLE_R,
+    VK_COMPONENT_SWIZZLE_G,
+    VK_COMPONENT_SWIZZLE_B,
+    VK_COMPONENT_SWIZZLE_A
+};
+
+char *aspect_names [ASPECT_COUNT] =
+{
+    "color",
+    "depth",
+    "stencil",
+    "metadata"
+};
+enum VkImageAspectFlagBits aspect_enums [ASPECT_COUNT] =
+{
+    VK_IMAGE_ASPECT_COLOR_BIT,
+    VK_IMAGE_ASPECT_DEPTH_BIT,
+    VK_IMAGE_ASPECT_STENCIL_BIT,
+    VK_IMAGE_ASPECT_METADATA_BIT
+};
+
+dict *attachment_load_operations  =  0,
+     *image_layouts               =  0,
+     *subpass_functions           =  0,
+     *attachment_store_operations =  0,
+     *format_enumeration_lookup   =  0,
+     *pipeline_stage_flag_bits    =  0,
+     *access_flag_bits            =  0,
+     *dependency_flag_bits        =  0,
+     *texturing_modes             =  0,
+     *filtering_modes             =  0,
+     *tiling_lut                  =  0,
+     *usage_lut                   =  0,
+     *view_type_lut               =  0,
+     *swizzle_lut                 =  0,
+     *aspect_lut                  =  0;
 
 void init_renderer ( void )
 {
 
     // Construct lookup tables
-    dict_construct(&attachment_load_operations , ATTACHMENT_LOAD_OPERATION_COUNT);
+    dict_construct(&attachment_load_operations, ATTACHMENT_LOAD_OPERATION_COUNT);
     dict_construct(&attachment_store_operations, ATTACHMENT_STORE_OPERATION_COUNT);
-    dict_construct(&image_layouts              , IMAGE_LAYOUTS_COUNT);
-    dict_construct(&subpass_functions          , SUBPASS_FUNCTION_COUNT);
-    dict_construct(&format_enumeration_lookup  , FORMAT_ENUM_COUNT);
-    dict_construct(&pipeline_stage_flag_bits   , PIPELINE_STAGE_FLAG_BITS_COUNT);
-    dict_construct(&access_flag_bits           , ACCESS_FLAG_BITS_COUNT);
-    dict_construct(&dependency_flag_bits       , DEPENDENCY_FLAG_BITS_COUNT);
+    dict_construct(&image_layouts, IMAGE_LAYOUTS_COUNT);
+    dict_construct(&subpass_functions, SUBPASS_FUNCTION_COUNT);
+    dict_construct(&format_enumeration_lookup, FORMAT_ENUM_COUNT);
+    dict_construct(&pipeline_stage_flag_bits, PIPELINE_STAGE_FLAG_BITS_COUNT);
+    dict_construct(&access_flag_bits, ACCESS_FLAG_BITS_COUNT);
+    dict_construct(&dependency_flag_bits, DEPENDENCY_FLAG_BITS_COUNT);
+    dict_construct(&texturing_modes, TEXTURING_MODE_COUNT);
+    dict_construct(&filtering_modes, FILTERINT_MODE_COUNT);
+    dict_construct(&tiling_lut, TILING_COUNT);
+    dict_construct(&usage_lut, USAGE_COUNT);
+    dict_construct(&view_type_lut, VIEW_TYPE_COUNT);
+    dict_construct(&swizzle_lut, SWIZZLE_COUNT);
+    dict_construct(&aspect_lut, ASPECT_COUNT);
 
     // Populate lookup tables
     {
-        
+
         // Populate attachment load operations
         for (size_t i = 0; i < ATTACHMENT_LOAD_OPERATION_COUNT; i++)
-            dict_add(attachment_load_operations, attachment_load_operation_names[i], (void*)attachment_load_operation_enums[i]);
+            dict_add(attachment_load_operations, attachment_load_operation_names[i], (void *)attachment_load_operation_enums[i]);
 
         // Populate attachment store operations
         for (size_t i = 0; i < ATTACHMENT_STORE_OPERATION_COUNT; i++)
-            dict_add(attachment_store_operations, attachment_store_operation_names[i], (void*)attachment_store_operation_enums[i]);
+            dict_add(attachment_store_operations, attachment_store_operation_names[i], (void *)attachment_store_operation_enums[i]);
 
         for (size_t i = 0; i < IMAGE_LAYOUTS_COUNT; i++)
             dict_add(image_layouts, image_layout_names[i], (void *)image_layout_enums[i]);
@@ -518,9 +701,34 @@ void init_renderer ( void )
 
         for (size_t i = 0; i < PIPELINE_STAGE_FLAG_BITS_COUNT; i++)
             dict_add(pipeline_stage_flag_bits, pipeline_stage_flag_bits_names[i], (void *)pipeline_stage_flag_bits_enum[i]);
-        
+
         for (size_t i = 0; i < ACCESS_FLAG_BITS_COUNT; i++)
             dict_add(access_flag_bits, access_flag_bits_names[i], (void *)access_flag_bits_enum[i]);
+
+        for (size_t i = 0; i < DEPENDENCY_FLAG_BITS_COUNT; i++)
+            dict_add(dependency_flag_bits, dependency_flag_bits_enum, (void *)dependency_flag_bits_name);
+
+        for (size_t i = 0; i < TEXTURING_MODE_COUNT; i++)
+            dict_add(texturing_modes, texturing_addressing_keys[i], (void *) texturing_addressing_values[i]);
+
+        for (size_t i = 0; i < FILTERINT_MODE_COUNT; i++)
+            dict_add(filtering_modes, texture_filtering_keys[i], (void *) texture_filtering_values[i]);
+
+        for (size_t i = 0; i < TILING_COUNT; i++)
+            dict_add(tiling_lut, tiling_keys[i], (void *) tiling_enum[i]);
+
+        for (size_t i = 0; i < USAGE_COUNT; i++)
+            dict_add(usage_lut, usage_keys[i], (void *) usage_enum[i]);
+
+        for (size_t i = 0; i < VIEW_TYPE_COUNT; i++)
+            dict_add(view_type_lut, view_type_names[i], (void *) view_type_enums[i]);
+
+        for (size_t i = 0; i < SWIZZLE_COUNT; i++)
+            dict_add(swizzle_lut, swizzle_names[i], (void *) swizzle_enums[i]);
+
+        for (size_t i = 0; i < ASPECT_COUNT; i++)
+            dict_add(aspect_lut, aspect_names[i], (void *) aspect_enums[i]);
+
     }
 
     return;
@@ -532,7 +740,8 @@ int create_renderer ( GXRenderer_t **pp_renderer )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_renderer == (void *) 0 ) goto no_ret;
+            if (pp_renderer == (void *)0)
+                goto no_ret;
         #endif
     }
 
@@ -540,9 +749,9 @@ int create_renderer ( GXRenderer_t **pp_renderer )
     GXRenderer_t *p_renderer = calloc(1, sizeof(GXRenderer_t));
 
     // Error checking
-    if ( p_renderer == (void *) 0 )
+    if (p_renderer == (void *)0)
         goto no_mem;
-    
+
     // Return a pointer to the caller
     *pp_renderer = p_renderer;
 
@@ -573,7 +782,6 @@ int create_renderer ( GXRenderer_t **pp_renderer )
                 // Error
                 return 0;
         }
-
     }
 }
 
@@ -583,7 +791,8 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_render_pass == (void *) 0 ) goto no_ret;
+            if (pp_render_pass == (void *)0)
+                goto no_ret;
         #endif
     }
 
@@ -591,7 +800,7 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
     GXRenderPass_t *p_render_pass = calloc(1, sizeof(GXRenderPass_t));
 
     // Error checking
-    if ( p_render_pass == (void *) 0 )
+    if (p_render_pass == (void *)0)
         goto no_mem;
 
     // Return a pointer to the caller
@@ -605,26 +814,25 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
 
         // Argument errors
         {
-            no_ret:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_ret:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
 
         // Standard library errors
         {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_mem:
+            #ifndef NDEBUG
+                g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
-
     }
 }
 
@@ -678,6 +886,57 @@ int create_subpass ( GXSubpass_t **pp_subpass )
     }
 }
 
+int create_image ( GXImage_t **pp_image )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_image == (void *) 0 )
+                goto no_image;
+        #endif
+    }
+
+    // Initialized data
+    GXImage_t *p_image = calloc(1, sizeof(GXSubpass_t));
+
+    // Error checking
+    if ( pp_image == (void *) 0 )
+        goto no_mem;
+
+    // Return a pointer to the caller
+    *pp_image = p_image;
+
+    // Success
+    return 1;
+
+    // Erorr handling
+    {
+
+        // Argument check
+        {
+            no_image:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter \"pp_image\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
+}
+
 int create_attachment ( GXAttachment_t **pp_attachment )
 {
 
@@ -692,7 +951,7 @@ int create_attachment ( GXAttachment_t **pp_attachment )
     GXAttachment_t *p_attachment = calloc(1, sizeof(GXSubpass_t));
 
     // Error checking
-    if ( p_attachment == (void *) 0 )
+    if (p_attachment == (void *)0)
         goto no_mem;
 
     // Return a pointer to the caller
@@ -728,31 +987,31 @@ int create_attachment ( GXAttachment_t **pp_attachment )
     }
 }
 
-int load_renderer ( GXRenderer_t **pp_renderer, char* path )
+int load_renderer ( GXRenderer_t **pp_renderer, char *path )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_renderer == (void *) 0 ) goto no_renderer;
-            if ( path        == (void *) 0 ) goto no_path;
+            if (    pp_renderer == (void *) 0 ) goto no_renderer;
+            if (    path        == (void *) 0 ) goto no_path;
         #endif
     }
 
     // Initialized data
-    size_t  len  = g_load_file(path, 0, true);
-    char   *text = calloc(1+len, sizeof(char));
+    size_t len = g_load_file(path, 0, true);
+    char *text = calloc(1 + len, sizeof(char));
 
     // Error checking
-    if ( text == (void *) 0 )
+    if (text == (void *)0)
         goto no_mem;
 
     // Load the file
-    if ( g_load_file(path, text, true) == 0 )
+    if (g_load_file(path, text, true) == 0)
         goto failed_to_read_file;
 
     // Construct a renderer
-    if ( load_renderer_as_json_text(pp_renderer, text) == 0 )
+    if (load_renderer_as_json_text(pp_renderer, text) == 0)
         goto failed_to_load_renderer;
 
     // Clean the scope
@@ -763,54 +1022,54 @@ int load_renderer ( GXRenderer_t **pp_renderer, char* path )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
-            no_renderer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_renderer:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
 
-            no_path:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_path:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
 
         // G10 errors
         {
-            failed_to_read_file:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-                #endif
+        failed_to_read_file:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
 
-            failed_to_load_renderer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-                #endif
+        failed_to_load_renderer:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
 
         // Standard library errors
         {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_mem:
+            #ifndef NDEBUG
+                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
     }
 }
@@ -830,7 +1089,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
     GXRenderer_t *p_renderer = 0;
     JSONValue_t  *p_value    = 0;
 
-    // Parse the JSON text into a JSON value      
+    // Parse the JSON text into a JSON value
     if ( parse_json_value(text, 0, &p_value) == 0 )
         goto failed_to_parse_json;
 
@@ -838,9 +1097,8 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
     if ( load_renderer_as_json_value(pp_renderer, p_value) == 0 )
         goto failed_to_construct_renderer_from_json_value;
 
-    // TODO:
     // Clean the scope
-    //free_json_value(p_value);
+    // free_json_value(p_value);
 
     // Success
     return 1;
@@ -850,7 +1108,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
 
         // Argument errors
         {
-            
+
             no_renderer:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
@@ -863,7 +1121,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
         }
@@ -912,7 +1170,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                  *p_clear_color = 0;
 
     // Parse the value as an object
-    if ( p_value->type == JSONobject )
+    if (p_value->type == JSONobject)
     {
 
         p_name        = dict_get(p_value->object, "name");
@@ -920,12 +1178,12 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         p_clear_color = dict_get(p_value->object, "clear color");
         p_attachments = dict_get(p_value->object, "attachments");
 
-        if ( !( p_name && p_passes ) ) 
+        if ( ! ( p_name && p_passes ) )
             goto missing_parameters;
     }
 
     // Parse the value as a path
-    else if ( p_value->type == JSONstring )
+    else if (p_value->type == JSONstring)
     {
         if ( load_renderer(pp_renderer, p_value->string) == 0 )
             goto faild_to_load_renderer;
@@ -933,7 +1191,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         // Success
         return 1;
     }
-    
+
     // Default
     else
         goto wrong_value_type;
@@ -942,14 +1200,18 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
     {
 
         // Initialized data
-        VkClearValue* clear_color = calloc(2, sizeof(VkClearValue));
+        VkClearValue *clear_color = calloc(2, sizeof(VkClearValue));
 
         // Allocate a renderer
         if ( create_renderer(&p_renderer) == 0 )
             goto failed_to_allocate_renderer;
 
+        // Set the active instance's loading scene
+        p_instance->context.loading_renderer = p_renderer;
+
         // Copy the name
-        if ( p_name->type == JSONstring ){
+        if ( p_name->type == JSONstring )
+        {
 
             // Initialized data
             size_t len = strlen(p_name->string);
@@ -958,44 +1220,46 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             p_renderer->name = calloc(len + 1, sizeof(char));
 
             // Error checking
-            if ( p_renderer->name == (void *) 0 )
+            if (p_renderer->name == (void *)0)
                 goto no_mem;
 
             // Copy the name to the renderer
             strncpy(p_renderer->name, p_name->string, len);
         }
-        if(p_clear_color == 0)
+
+        if ( p_clear_color == 0 )
             goto no_p_clear;
+
         // Parse the clear color as an array
         if ( p_clear_color->type == JSONarray )
         {
 
             // Initialized data
-            size_t        array_len         = 0;
+            size_t        array_len = 0;
             JSONValue_t **pp_array_contents = 0;
 
             // Get the array contents
             {
 
-                    // Get the array length
-                    array_get(p_clear_color->list, 0, &array_len);
+                // Get the array length
+                array_get(p_clear_color->list, 0, &array_len);
 
-                    // Allocate memory for array
-                    pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+                // Allocate memory for array
+                pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
 
-                    // Error checking
-                    if ( pp_array_contents == (void *) 0 )
-                        goto no_mem;
+                // Error checking
+                if (pp_array_contents == (void *)0)
+                    goto no_mem;
 
-                    // Dump array to memory
-                    array_get(p_clear_color->list, pp_array_contents, 0);
-                }
+                // Dump array to memory
+                array_get(p_clear_color->list, pp_array_contents, 0);
+            }
 
             // Iterate over each array element
             for (size_t i = 0; i < array_len; i++)
 
                 // Set the clear color
-                clear_color[0].color.float32[i] = (float) pp_array_contents[i]->floating;
+                clear_color[0].color.float32[i] = (float)pp_array_contents[i]->floating;
 
             // Set the depth stencil clear color
             clear_color[1].depthStencil.depth = 1.f;
@@ -1007,58 +1271,13 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         else
             goto wrong_renderer_clear_color;
         no_p_clear:;
-        
-        // Parse each render pass
-        if ( p_passes->type == JSONarray )
+
+        // Parse each attachment
+        if (p_attachments->type == JSONarray)
         {
-            /*
+
             // Initialized data
-            size_t        array_len         = 0;
-            JSONValue_t **pp_array_contents = 0;
-
-            // Get the array contents
-            {
-
-                // Get the array length
-                array_get(p_passes->list, 0, &array_len);
-
-                // Allocate memory for array
-                pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
-
-                // Error checking
-                if ( pp_array_contents == (void *) 0 )
-                    goto no_mem;
-
-                // Dump array to memory
-                array_get(p_passes->list, pp_array_contents, 0);
-            }
-
-            p_renderer->render_pass_count = array_len;
-
-            // Allocate a list of render passes
-            p_renderer->render_passes_data = calloc(array_len, sizeof(void *));
-            
-            // Error checking
-            if ( p_renderer->render_passes_data == 0 )
-                goto no_mem;
-
-            // Iterate over each render pass
-            for (size_t i = 0; i < array_len; i++)
-
-                // Load the render pass as a JSON value
-                if ( load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0 )
-                    goto failed_to_load_renderer_as_json_value;
-            */
-        }
-        else
-            goto wrong_passes_type;
-
-        // Populate the attachments
-        if( p_attachments->type == JSONarray )
-        {
-            
-            // Initialized data
-            size_t        array_len         = 0;
+            size_t array_len = 0;
             JSONValue_t **pp_array_contents = 0;
 
             // Get the array contents
@@ -1071,7 +1290,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
 
                 // Error checking
-                if ( pp_array_contents == (void *) 0 )
+                if (pp_array_contents == (void *)0)
                     goto no_mem;
 
                 // Dump array to memory
@@ -1091,68 +1310,55 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 // Load the attachment as a JSON value
                 if ( load_attachment_as_json_value(&p_attachment, pp_array_contents[i]) == 0 )
                     goto failed_to_load_attachment_as_json_value;
-                
-                // Create a texture
+
+                // Create an image
                 {
-                    
-                    // Initialized data
-                    GXTexture_t *p_texture = 0;
 
-                    // Allocate memory for a texture
-                    if ( create_texture(&p_texture) == 0 )
-                        goto failed_to_allocate_texture;
-                    
-                    if ( strcmp(p_attachment->name, "final") == 0 )
-                    {
-                        p_texture->texture_image = p_instance->vulkan.swap_chain_images[i];
-                        construct_image_view(p_texture, VK_IMAGE_VIEW_TYPE_2D, p_instance->vulkan.swap_chain_image_format, (VkComponentMapping) { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY }, VK_IMAGE_ASPECT_COLOR_BIT);
-                    }
-                    else
-                    {
-                        construct_image(
-                            p_texture,
-                            0, 
-                            VK_IMAGE_TYPE_2D,
-                            VK_FORMAT_D32_SFLOAT,
-                            p_instance->vulkan.swap_chain_extent.width,
-                            p_instance->vulkan.swap_chain_extent.height,
-                            1,
-                            1,
-                            1,
-                            1,
-                            VK_IMAGE_TILING_OPTIMAL,
-                            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                            VK_SHARING_MODE_EXCLUSIVE,
-                            VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
-                        );
-                        construct_image_view(
-                            p_texture,
-                            VK_IMAGE_VIEW_TYPE_2D, 
-                            VK_FORMAT_D32_SFLOAT,
-                            (VkComponentMapping) {
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY
-                            }, 
-                            VK_IMAGE_ASPECT_DEPTH_BIT
-                        );
-                    }
-                    
-                    /*
-                    p_render_pass->image_attachments[i] = p_texture->texture_image_view;
-
-                    if ( i == 0 )
-                        p_render_pass->image_attachments[i] = p_instance->vulkan.swap_chain_image_views[p_instance->vulkan.image_index];
-                
-                */
                 }
-                
+
                 // Add the attachment
                 dict_add(p_renderer->attachments, p_attachment->name, p_attachment);
             }
-
         }
+
+        // Parse each render pass
+        if (p_passes->type == JSONarray)
+        {
+            // Initialized data
+            size_t array_len = 0;
+            JSONValue_t **pp_array_contents = 0;
+
+            // Get the array contents
+            {
+
+                // Get the array length
+                array_get(p_passes->list, 0, &array_len);
+
+                // Allocate memory for array
+                pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+
+                // Error checking
+                if (pp_array_contents == (void *)0)
+                    goto no_mem;
+
+                // Dump array to memory
+                array_get(p_passes->list, pp_array_contents, 0);
+            }
+
+            p_renderer->render_passes_data = calloc(array_len, sizeof(GXRenderPass_t *));
+
+            // Iterate over each render pass
+            for (size_t i = 0; i < array_len; i++)
+
+                // Load the render pass as a JSON value
+                if (load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0)
+                    goto failed_to_load_renderer_as_json_value;
+        }
+        else
+            goto wrong_passes_type;
+
+        // Unset the active instance's loading scene
+        p_instance->context.loading_renderer = 0;
 
         // Return a pointer to the caller
         *pp_renderer = p_renderer;
@@ -1162,85 +1368,84 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
     return 1;
 
     // TODO:
-    
-    failed_to_allocate_texture:
-    wrong_passes_type:
-    failed_to_load_renderer_as_json_value:
-    wrong_renderer_clear_color:
-    
-    faild_to_load_renderer:
-    failed_to_load_attachment_as_json_value:
-        // Error
-        return 0;
+
+failed_to_allocate_texture:
+wrong_passes_type:
+failed_to_load_renderer_as_json_value:
+wrong_renderer_clear_color:
+
+faild_to_load_renderer:
+failed_to_load_attachment_as_json_value:
+    // Error
+    return 0;
 
     // Error handling
     {
 
         // Argument errors
         {
-            
-            no_return:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
 
-                // Error
-                return 0;
+        no_return:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-            no_value:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                
-                // Error
-                return 0;
+            // Error
+            return 0;
+
+        no_value:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
         }
 
         // JSON errors
         {
-            wrong_value_type:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Expected JSON [ string | object ] value in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                
-                // Error
-                return 0;
+        wrong_value_type:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Expected JSON [ string | object ] value in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-            missing_parameters:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Missing properties in \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                
-                // Error
-                return 0;
+            // Error
+            return 0;
 
+        missing_parameters:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Missing properties in \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
         }
 
         // G10 errors
         {
-            failed_to_allocate_renderer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        failed_to_allocate_renderer:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
 
         // Standard library errors
         {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_mem:
+            #ifndef NDEBUG
+                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
     }
 }
 
-int load_render_pass ( GXRenderPass_t **pp_render_pass, char* path )
+int load_render_pass ( GXRenderPass_t **pp_render_pass, char *path )
 {
 
     // Argument check
@@ -1252,11 +1457,11 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char* path )
     }
 
     // Initialized data
-    size_t  len    = g_load_file(path, 0, true);
-    char   *text = calloc(1+len, sizeof(char));
+    size_t  len  = g_load_file(path, 0, true);
+    char   *text = calloc(1 + len, sizeof(char));
 
     // Error checking
-    if (text == (void *)0)
+    if ( text == (void *) 0 )
         goto no_mem;
 
     // Load the file
@@ -1275,7 +1480,7 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char* path )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_render_pass:
@@ -1327,9 +1532,9 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char* path )
     }
 }
 
-int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text )
+int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char *text )
 {
- 
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -1339,9 +1544,9 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text 
     }
 
     // Initialized data
-    GXInstance_t   *p_instance    = g_get_active_instance();
+    GXInstance_t *p_instance = g_get_active_instance();
     GXRenderPass_t *p_render_pass = 0;
-    JSONValue_t    *p_value       = 0;
+    JSONValue_t *p_value = 0;
 
     // Parse the JSON text into a JSON value
     if ( parse_json_value(text, 0, &p_value) == 0 )
@@ -1353,7 +1558,7 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text 
 
     // TODO:
     // Clean the scope
-    //free_json_value(p_value);
+    // free_json_value(p_value);
 
     // Success
     return 1;
@@ -1379,7 +1584,6 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text 
 
                 // Error
                 return 0;
-
         }
 
         // G10 errors
@@ -1389,7 +1593,7 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text 
                     g_print_error("[G10] [Renderer] Failed to parse JSON text into JSON value in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error 
+                // Error
                 return 0;
 
             failed_to_load_renderer_as_json_value:
@@ -1405,7 +1609,7 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char* text 
 
 int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_t *p_value )
 {
- 
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -1415,21 +1619,24 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     }
 
     // Initialized data
-    GXInstance_t   *p_instance    = g_get_active_instance();
-    GXRenderPass_t *p_render_pass = 0;
-    JSONValue_t    *p_name        = 0, 
-                   *p_attachments = 0,
-                   *p_subpasses   = 0;
+    GXInstance_t   *p_instance     = g_get_active_instance();
+    GXRenderPass_t *p_render_pass  = 0;
+    JSONValue_t    *p_name         = 0,
+                   *p_attachments  = 0,
+                   *p_subpasses    = 0,
+                   *p_dependencies = 0;
 
     // Parse the render pass JSON value
-    if ( p_value->type == JSONobject ) {
+    if (p_value->type == JSONobject)
+    {
 
-        p_name        = dict_get(p_value->object, "name");
-        p_attachments = dict_get(p_value->object, "attachments");
-        p_subpasses   = dict_get(p_value->object, "subpasses");
+        p_name         = dict_get(p_value->object, "name");
+        p_attachments  = dict_get(p_value->object, "attachments");
+        p_subpasses    = dict_get(p_value->object, "subpasses");
+        p_dependencies = dict_get(p_value->object, "dependencies");
 
         // Check for missing parameters
-        if ( ! ( p_name && p_attachments && p_subpasses ) )
+        if ( ! ( p_name && p_subpasses ) )
             goto missing_parameters;
     }
     else
@@ -1439,20 +1646,22 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     {
 
         // Initialized data
-        VkRenderPassCreateInfo   render_pass_create_info = { 0 };
-        VkSubpassDependency      dependency              = { 0 };
+        VkRenderPassCreateInfo   render_pass_create_info = {0};
+        VkSubpassDependency      dependency              = {0};
         size_t                   attachment_count        = 0,
-                                 subpass_count           = 0;
+                                 subpass_count           = 0,
+                                 dependency_count        = 0;
         VkAttachmentDescription *attachments             = 0;
         VkAttachmentReference   *attachment_references   = 0;
         VkSubpassDescription    *subpasses               = 0;
+        VkSubpassDependency     *dependencies            = 0;
 
         // Allocate memory for a render pass
         if ( create_render_pass(&p_render_pass) == 0 )
             goto failed_to_create_render_pass;
 
         // Set the name
-        if ( p_name->type == JSONstring )
+        if (p_name->type == JSONstring)
         {
 
             // Initialized data
@@ -1467,11 +1676,63 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             // Copy the name
             strncpy(p_render_pass->name, p_name->string, len);
-
         }
-        
-        
-        
+        // Default
+        else
+            goto wrong_name_type;
+
+        // Populate attachments
+        if ( p_attachments )
+        {
+            if ( p_attachments->type == JSONarray )
+            {
+
+                // Initialized data
+                size_t array_len = 0;
+                JSONValue_t **pp_array_contents = 0;
+
+                // Get the array contents
+                {
+
+                    // Get the array length
+                    array_get(p_attachments->list, 0, &array_len);
+
+                    // Allocate memory for array
+                    pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+
+                    // Error checking
+                    if (pp_array_contents == (void *)0)
+                        goto no_mem;
+
+                    // Dump array to memory
+                    array_get(p_attachments->list, pp_array_contents, 0);
+                }
+
+                // Allocate memory for attachment descriptions
+                attachments = calloc(array_len, sizeof(VkAttachmentDescription));
+
+                // Error checking
+                if (attachments == (void *)0)
+                    goto no_mem;
+
+                attachment_count = array_len;
+
+                // Iterate over each attachment JSON object text
+                for (size_t i = 0; i < array_len; i++)
+                {
+                    if (pp_array_contents[i]->type == JSONstring)
+                    {
+                        GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, pp_array_contents[i]->string);
+                        attachments[i] = p_attachment->attachment_description;
+                    }
+                }
+            }
+        }
+        // Default
+        else
+        {
+        }
+
         // Populate subpasses
         if ( p_subpasses->type == JSONarray )
         {
@@ -1497,131 +1758,127 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                 array_get(p_subpasses->list, pp_array_contents, 0);
             }
 
+            // Allocate memory for subpass description
+            subpasses     = calloc(array_len, sizeof(VkSubpassDescription));
+            subpass_count = array_len;
+
+            // Error checking
+            if ( subpasses == (void *) 0 )
+                goto no_mem;
 
             // Iterate over each subpass JSON object text
             for (size_t i = 0; i < array_len; i++)
             {
 
                 // Initialized data
-                JSONValue_t *p_subpass                       = pp_array_contents[i],
-                            *p_subpass_name                  = 0,
-                            *p_subpass_input_attachments     = 0,
-                            *p_subpass_color_attachments     = 0,
-                            *p_subpass_preserved_attachments = 0,
-                            *p_subpass_depth_attachment      = 0;
+                GXSubpass_t *p_subpass = 0;
 
-                // Get the required information to construct an attachment
-                if ( p_subpass->type == JSONobject)
+                // Load the subpass as a JSON value
+                if ( load_subpass_as_json_value(&p_subpass, pp_array_contents[i]) == 0 )
+                    goto failed_to_load_subpass_as_json_value;
+
+                subpasses[i] = p_subpass->subpass_description;
+            }
+        }
+
+        // Populate dependencies
+        if ( p_dependencies )
+        {
+            if ( p_dependencies->type == JSONarray )
+            {
+                // Initialized data
+                size_t        array_len         = 0;
+                JSONValue_t **pp_array_contents = 0;
+
+                // Get the array contents
                 {
 
-                    p_subpass_name                  = ( (JSONValue_t *) dict_get(p_subpass->object, "name"));
-                    p_subpass_input_attachments     = ( (JSONValue_t *) dict_get(p_subpass->object, "input attachments"));
-                    p_subpass_color_attachments     = ( (JSONValue_t *) dict_get(p_subpass->object, "color attachments"));
-                    p_subpass_preserved_attachments = ( (JSONValue_t *) dict_get(p_subpass->object, "preserved attachments"));
-                    p_subpass_depth_attachment      = ( (JSONValue_t *) dict_get(p_subpass->object, "depth attachments"));
-                    
-                    if  ( p_subpass_name                  &&
-                          p_subpass_input_attachments     && 
-                          p_subpass_color_attachments     &&
-                          p_subpass_preserved_attachments &&
-                          p_subpass_depth_attachment )
-                        goto missing_properties;
+                    // Get the array length
+                    array_get(p_dependencies->list, 0, &array_len);
+
+                    // Allocate memory for array
+                    pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
+
+                    // Error checking
+                    if ( pp_array_contents == (void *) 0 )
+                        goto no_mem;
+
+                    // Dump array to memory
+                    array_get(p_dependencies->list, pp_array_contents, 0);
                 }
 
-                // Construct the subpass
+                // Allocate memory for dependencies
+                dependencies     = calloc(array_len, sizeof(VkSubpassDescription));
+                dependency_count = array_len;
+
+                // Error checking
+                if ( dependencies == (void *) 0 )
+                    goto no_mem;
+
+                // Iterate over each dependencies JSON object text
+                for (size_t i = 0; i < array_len; i++)
                 {
-                    size_t                  input_attachment_count           = 0,
-                                            color_attachment_count           = 0,
-                                            preserved_attachment_count       = 0;
-                    VkAttachmentReference  *input_attachment_references      = calloc(input_attachment_count    , sizeof(VkAttachmentReference)),
-                                           *color_attachment_references      = calloc(color_attachment_count    , sizeof(VkAttachmentReference)),
-                                           *preserved_attachment_references  = calloc(preserved_attachment_count, sizeof(VkAttachmentReference)),
-                                           *depth_attachment_reference       = calloc(1                         , sizeof(VkAttachmentReference));
-                    JSONValue_t           **pp_subpass_input_attachments     = 0,
-                                          **pp_subpass_color_attachments     = 0,
-                                          **pp_subpass_preserved_attachments = 0,
-                                          **pp_subpass_depth_attachment     = 0;
 
-                    // Parse the JSON value
+                    // Initialized data
+                    JSONValue_t *p_dependency = pp_array_contents[i],
+                                *p_dependency_flags = 0,
+                                *p_dependency_source_subpass = 0,
+                                *p_dependency_destination_subpass = 0,
+                                *p_dependency_source_stage = 0,
+                                *p_dependency_destination_stage = 0,
+                                *p_dependency_source_access = 0,
+                                *p_dependency_destination_access = 0;
+
+                    // Parse the JSON
                     {
+                        p_dependency_flags               = dict_get(p_dependency->object, "flags");
+                        p_dependency_source_subpass      = dict_get(p_dependency->object, "source subpass");
+                        p_dependency_destination_subpass = dict_get(p_dependency->object, "destination subpass");
+                        p_dependency_source_stage        = dict_get(p_dependency->object, "source stage");
+                        p_dependency_destination_stage   = dict_get(p_dependency->object, "destination stage");
+                        p_dependency_source_access       = dict_get(p_dependency->object, "source access");
+                        p_dependency_destination_access  = dict_get(p_dependency->object, "destination access");
 
-                        // Get the quantity of each type of attachment
-                        if ( p_subpass_input_attachments ) 
-                        {
-                            if ( p_subpass_input_attachments->type == JSONarray )
-                                array_get(p_subpass_input_attachments->list, 0, &input_attachment_count);
-                            else
-                                goto wrong_subpass_input_attachments_type;
-                        }
-
-                        // Default
-                        else
-                        { }
-
-                        if ( p_subpass_color_attachments ) 
-                        {
-                            if ( p_subpass_color_attachments )
-                                array_get(p_subpass_color_attachments->list, 0, &color_attachment_count);
-                            else
-                                goto wrong_subpass_color_attachments_type;
-                        }
-
-                        // Default
-                        else
-                        { }
-
-                        if ( p_subpass_preserved_attachments ) 
-                        {
-                            if ( p_subpass_preserved_attachments->type == JSONarray )
-                                array_get(p_subpass_preserved_attachments->list, 0, &preserved_attachment_count);
-                            else
-                                goto wrong_subpass_preserved_attachments_type;
-                        }
-
-                        // Default
-                        else
-                        { }
-
-                        if ( p_subpass_depth_attachment ) 
-                        {
-                            if ( p_subpass_depth_attachment->type == JSONstring )
-                            { }
-                            else
-                                goto wrong_subpass_depth_attachments_type;
-                        }
-
-                        // Default
-                        else
-                        { }
+                        // Check properties
+                        if (!(
+                            p_dependency_flags &&
+                            p_dependency_source_subpass &&
+                            p_dependency_destination_subpass &&
+                            p_dependency_source_stage &&
+                            p_dependency_destination_stage &&
+                            p_dependency_source_access &&
+                            p_dependency_destination_access
+                        ))
+                            goto missing_properties;
                     }
 
-                    // Populate a subpass description structure
-                    subpasses[i] = (VkSubpassDescription)
+                    // Construct the dependency
                     {
-                        .flags                   = 0,
-                        .pipelineBindPoint       = 0,
-                        .inputAttachmentCount    = (u32) input_attachment_count,
-                        .pInputAttachments       = 0,
-                        .colorAttachmentCount    = (u32) color_attachment_count,
-                        .pColorAttachments       = 0,
-                        .pResolveAttachments     = 0,
-                        .pDepthStencilAttachment = 0,
-                        .preserveAttachmentCount = (u32) preserved_attachment_count,
-                        .pPreserveAttachments    = 0
-                    };
+                        uint32_t             source_subpass_index      = 0,
+                                             destination_subpass_index = 0;
+                        VkPipelineStageFlags source_stage_mask         = (VkPipelineStageFlags)dict_get(pipeline_stage_flag_bits, p_dependency_source_stage->string),
+                                             destination_stage_mask    = (VkPipelineStageFlags)dict_get(pipeline_stage_flag_bits, p_dependency_destination_stage->string);
+                        VkAccessFlags        source_access_mask        = (VkAccessFlags)dict_get(access_flag_bits, p_dependency_source_access->string),
+                                             destination_access_mask   = (VkAccessFlags)dict_get(access_flag_bits, p_dependency_destination_access->string);
+                        VkDependencyFlags    dependency_flags          = (VkDependencyFlags)dict_get(dependency_flag_bits, p_dependency_flags->string);
+
+                        dependencies[i] = (VkSubpassDependency){
+                            .srcSubpass      = source_subpass_index,
+                            .dstSubpass      = destination_subpass_index,
+                            .srcStageMask    = source_stage_mask,
+                            .dstStageMask    = destination_stage_mask,
+                            .srcAccessMask   = source_access_mask,
+                            .dstAccessMask   = destination_access_mask,
+                            .dependencyFlags = dependency_flags
+                        };
+                    }
                 }
             }
         }
-        
-        dependency = (VkSubpassDependency)
+        // Default
+        else
         {
-            .srcSubpass    = VK_SUBPASS_EXTERNAL,
-            .dstSubpass    = 0,
-            .srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-            .srcAccessMask = 0,
-            .dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-        };
+        }
 
         // Populate render pass create info struct
         render_pass_create_info = (VkRenderPassCreateInfo)
@@ -1631,15 +1888,14 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
             .pAttachments    = attachments,
             .subpassCount    = (u32)subpass_count,
             .pSubpasses      = subpasses,
-            .dependencyCount = 1,
-            .pDependencies   = &dependency
+            .dependencyCount = (u32)dependency_count,
+            .pDependencies   = dependencies
         };
 
-        if ( vkCreateRenderPass(p_instance->vulkan.device, &render_pass_create_info, 0, &p_render_pass->render_pass) != VK_SUCCESS ) {
-            g_print_error("failed to create render pass!\n");
-        }
+        if ( vkCreateRenderPass(p_instance->vulkan.device, &render_pass_create_info, 0, &p_render_pass->render_pass) != VK_SUCCESS )
+            goto failed_to_create_render_pass;
     }
-    
+
     // TODO: Check
     p_render_pass->framebuffers = calloc(p_instance->vulkan.image_count, sizeof(GXFramebuffer_t));
 
@@ -1652,10 +1908,10 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
             p_render_pass->image_attachments[1]
         };
 
-        VkFramebufferCreateInfo framebuffer_create_info = { 
+        VkFramebufferCreateInfo framebuffer_create_info = {
             .sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .renderPass      = p_render_pass->render_pass,
-            .attachmentCount = 2,
+            .attachmentCount = 1,
             .pAttachments    = attachments,
             .width           = p_instance->vulkan.swap_chain_extent.width,
             .height          = p_instance->vulkan.swap_chain_extent.height,
@@ -1664,34 +1920,13 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
         if ( vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS )
             goto failed_to_create_render_pass;
-
     }
-    
+
     // Return a pointer to the caller
     *pp_render_pass = p_render_pass;
 
     // Success
     return 1;
-
-    // TODO:
-    wrong_type:
-    missing_properties:
-    wrong_subpass_input_attachments_type:
-    wrong_subpass_color_attachments_type:
-    wrong_subpass_preserved_attachments_type:
-    wrong_subpass_depth_attachments_type:
-    failed_to_allocate_texture:
-    missing_parameters:
-    no_mem:
-    failed_to_load_attachment_as_json_value:
-    wrong_samples_type:
-    wrong_load_operation_type:
-    wrong_store_operation_type:
-    wrong_stencil_load_operation_type:
-    wrong_stencil_store_operation_type:
-    wrong_initial_layout_type:
-    wrong_final_layout_type:
-        return 0;
 
     // Error handling
     {
@@ -1714,6 +1949,61 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
                 // Error
                 return 0;
+        }
+
+        // JSON errors
+        {
+            wrong_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Can not parse render pass. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_name_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"name\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            missing_properties:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Missing properties to construct dependency in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            missing_parameters:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Missing properties to construct render pass in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_load_subpass_as_json_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load subpass from JSON value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
         }
 
@@ -1731,7 +2021,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     }
 }
 
-int load_subpass ( GXSubpass_t **pp_subpass, char* path )
+int load_subpass ( GXSubpass_t **pp_subpass, char *path )
 {
 
     // Argument check
@@ -1743,19 +2033,19 @@ int load_subpass ( GXSubpass_t **pp_subpass, char* path )
     }
 
     // Initialized data
-    size_t  len    = g_load_file(path, 0, true);
-    char   *buffer = calloc(1+len, sizeof(char));
+    size_t len = g_load_file(path, 0, true);
+    char *buffer = calloc(1 + len, sizeof(char));
 
     // Error checking
-    if ( buffer == (void *) 0 )
+    if (buffer == (void *)0)
         goto no_mem;
 
     // Load the file
-    if ( g_load_file(path, buffer, true) == 0 )
+    if (g_load_file(path, buffer, true) == 0)
         goto failed_to_read_file;
 
     // Construct a subpass
-    if ( load_subpass_as_json_value(pp_subpass, buffer) == 0 )
+    if (load_subpass_as_json_value(pp_subpass, buffer) == 0)
         goto failed_to_load_subpass;
 
     // Clean the scope
@@ -1766,7 +2056,7 @@ int load_subpass ( GXSubpass_t **pp_subpass, char* path )
 
     // Error handling
     {
-        
+
         // Argument errors
         {
             no_subpass:
@@ -1818,28 +2108,30 @@ int load_subpass ( GXSubpass_t **pp_subpass, char* path )
     }
 }
 
-int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char* text )
+int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text )
 {
- 
+
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_subpass == (void *) 0 ) goto no_subpass;
-            if ( text       == (void *) 0 ) goto no_text;
+            if (pp_subpass == (void *)0)
+                goto no_subpass;
+            if (text == (void *)0)
+                goto no_text;
         #endif
     }
 
     // Initialized data
-    GXInstance_t *p_instance    = g_get_active_instance();
-    GXSubpass_t  *p_render_pass = 0;
-    JSONValue_t  *p_value       = 0;
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXSubpass_t *p_render_pass = 0;
+    JSONValue_t *p_value = 0;
 
     // Parse the JSON text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
+    if (parse_json_value(text, 0, &p_value) == 0)
         goto failed_to_parse_json_as_value;
 
     // Load the renderer as a JSON value
-    if ( load_subpass_as_json_value(pp_subpass, p_value) == 0 )
+    if (load_subpass_as_json_value(pp_subpass, p_value) == 0)
         goto failed_to_load_subpass_as_json_value;
 
     // Clean the scope
@@ -1848,10 +2140,10 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char* text )
     // Success
     return 1;
 
-    // TODO:
-    failed_to_parse_json_as_value:
-    failed_to_load_subpass_as_json_value:
-        return 0;
+// TODO:
+failed_to_parse_json_as_value:
+failed_to_load_subpass_as_json_value:
+    return 0;
 
     // Error handling
     {
@@ -1859,29 +2151,28 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char* text )
         // Argument errors
         {
 
-            no_subpass:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_subpass:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
 
-            no_text:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_text:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
-
+            // Error
+            return 0;
         }
     }
 }
 
 int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value )
 {
- 
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -1891,62 +2182,240 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
     }
 
     // Initialized data
-    GXInstance_t *p_instance    = g_get_active_instance();
-    GXSubpass_t  *p_subpass     = 0;
-    JSONValue_t  *p_name        = 0, 
-                 *p_            = 0;
+    GXInstance_t *p_instance             = g_get_active_instance();
+    GXSubpass_t *p_subpass               = 0;
+    JSONValue_t *p_name                  = 0,
+                *p_input_attachments     = 0,
+                *p_color_attachments     = 0,
+                *p_preserved_attachments = 0,
+                *p_depth_attachment      = 0;
 
-    // Parse the render pass JSON value
-    if ( p_value->type == JSONobject ) {
-
-        //p_name        = dict_get(p_value->object, "name");
-        //p_attachments = dict_get(p_value->object, "attachments");
-        //p_subpasses   = dict_get(p_value->object, "subpasses");
-        //// Check for missing parameters
-        //if ( ! ( p_name && p_attachments && p_subpasses ) )
-        //    goto missing_parameters;
-    }
-    else
-        goto wrong_type;
-
-    // Construct the render pass
+    // Get the required information to construct an attachment
+    if ( p_value->type == JSONobject )
     {
 
-        // Initialized data
+        p_name                  = dict_get(p_value->object, "name");
+        p_input_attachments     = dict_get(p_value->object, "input attachments");
+        p_color_attachments     = dict_get(p_value->object, "color attachments");
+        p_preserved_attachments = dict_get(p_value->object, "preserved attachments");
+        p_depth_attachment      = dict_get(p_value->object, "depth attachments");
 
-        // Allocate memory for a subpass
-        if ( create_subpass(&p_subpass) == 0 )
-            goto failed_to_create_subpass;
+        if ( !(p_name) )
+            goto missing_properties;
+    }
 
-        // Set the name
-        if ( p_name->type == JSONstring )
+    // Construct the subpass
+    {
+        size_t input_attachment_count     = 0,
+               color_attachment_count     = 0,
+               preserved_attachment_count = 0;
+        VkAttachmentReference *input_attachment_references     = calloc(input_attachment_count, sizeof(VkAttachmentReference)),
+                              *color_attachment_references     = calloc(color_attachment_count, sizeof(VkAttachmentReference)),
+                              *preserved_attachment_references = calloc(preserved_attachment_count, sizeof(VkAttachmentReference)),
+                              *depth_attachment_reference      = calloc(1, sizeof(VkAttachmentReference));
+        JSONValue_t **pp_input_attachments     = 0,
+                    **pp_color_attachments     = 0,
+                    **pp_preserved_attachments = 0,
+                    *p_depth_attachment        = 0;
+
+        // Parse the JSON value
         {
 
-            // Initialized data
-            size_t len = strlen(p_name->string);
+            // Parse input attachments
+            if (p_input_attachments)
+            {
 
-            // Allocate memory for name
-            p_subpass->name = calloc(len + 1, sizeof(char));
+                // Parse the input attachments as an array
+                if (p_input_attachments->type == JSONarray)
+                {
+                    array_get(p_input_attachments->list, 0, &input_attachment_count);
+                    pp_input_attachments = calloc(input_attachment_count, sizeof(JSONValue_t *));
 
-            // Error checking
-            if ( p_subpass->name == (void *) 0 )
-                goto no_mem;
+                    if (pp_input_attachments == (void *)0)
+                        goto no_mem;
 
-            // Copy the name
-            strncpy(p_subpass->name, p_name->string, len);
+                    array_get(p_input_attachments->list, pp_input_attachments, 0);
+                }
+                // Type error
+                else
+                    goto wrong_input_attachments_type;
+            }
+            // Default
+            else
+            {
+            }
 
+            // Parse color attachments
+            if (p_color_attachments)
+            {
+
+                // Parse the color attachments as an array
+                if (p_color_attachments->type == JSONarray)
+                {
+                    array_get(p_color_attachments->list, 0, &color_attachment_count);
+                    pp_color_attachments = calloc(color_attachment_count, sizeof(JSONValue_t *));
+
+                    if (pp_color_attachments == (void *)0)
+                        goto no_mem;
+
+                    array_get(p_color_attachments->list, pp_color_attachments, 0);
+                }
+                // Type error
+                else
+                    goto wrong_color_attachments_type;
+            }
+            // Default
+            else
+            {
+            }
+
+            // Parse preserved attachments
+            if (p_preserved_attachments)
+            {
+
+                // Parse the preserved attachments as an array
+                if (p_preserved_attachments->type == JSONarray)
+                {
+                    array_get(p_preserved_attachments->list, 0, &preserved_attachment_count);
+                    pp_preserved_attachments = calloc(preserved_attachment_count, sizeof(JSONValue_t *));
+
+                    if (pp_preserved_attachments == (void *)0)
+                        goto no_mem;
+
+                    array_get(p_preserved_attachments->list, pp_preserved_attachments, 0);
+                }
+                // Type error
+                else
+                    goto wrong_preserved_attachments_type;
+            }
+            // Default
+            else
+            {
+            }
+
+            if (p_depth_attachment)
+            {
+                if (p_depth_attachment->type == JSONstring)
+                    ;
+                else
+                    goto wrong_depth_attachments_type;
+            }
+            // Default
+            else
+            {
+            }
+        }
+
+        // Create the subpass
+        {
+
+            // Allocate memory for a subpass
+            if (create_subpass(&p_subpass) == 0)
+                goto failed_to_allocate_subpass;
+
+            // Copy the name of the subpass
+            if (p_name->string == JSONstring)
+            {
+
+                // Initialized data
+                size_t len = strlen(p_name->string);
+
+                // Allocate memory for name
+                p_subpass->name = calloc(len + 1, sizeof(char));
+
+                // Error check
+                if (p_subpass->name == (void *)0)
+                    goto no_mem;
+
+                // Copy the string
+                strncpy(p_subpass->name, p_name->string, len);
+            }
+            // Default
+            else
+                ;
+
+            // Parse input attachments
+            if (pp_input_attachments)
+            {
+            }
+            // Default
+            else
+                ;
+
+            // Parse color attachments
+            if (pp_color_attachments)
+            {
+
+                // Iterate over each attachment name
+                for (size_t i = 0; i < color_attachment_count; i++)
+                {
+
+                    // Initialized data
+                    JSONValue_t *p_color_attachment = pp_color_attachments[i];
+
+                    if (p_color_attachment->type == JSONstring)
+                    {
+                        GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, p_color_attachment->string);
+
+                        color_attachment_references[i] = (VkAttachmentReference){
+                            .attachment = i,
+                            // TODO: Set the image layout
+                            .layout = p_attachment->attachment_description.initialLayout};
+                    }
+                }
+            }
+            // Default
+            else
+                ;
+
+            // Parse preserved attachments
+            if (pp_preserved_attachments)
+            {
+            }
+            // Default
+            else
+                ;
+
+            // Parse dept attachments
+            if (p_depth_attachment)
+            {
+            }
+            // Default
+            else
+                ;
+
+            // Populate a subpass description structure
+            p_subpass->subpass_description = (VkSubpassDescription){
+                .flags                   = 0,
+                .pipelineBindPoint       = 0,
+                .inputAttachmentCount    = (u32)input_attachment_count,
+                .pInputAttachments       = 0,
+                .colorAttachmentCount    = (u32)color_attachment_count,
+                .pColorAttachments       = color_attachment_references,
+                .pResolveAttachments     = 0,
+                .pDepthStencilAttachment = 0,
+                .preserveAttachmentCount = (u32)preserved_attachment_count,
+                .pPreserveAttachments    = 0
+            };
+            printf("");
         }
     }
-        
+
     // Return a pointer to the caller
     *pp_subpass = p_subpass;
 
     // Success
     return 1;
 
-    // TODO:
-    wrong_type:
-    no_mem:
+// TODO:
+wrong_type:
+no_mem:
+failed_to_allocate_subpass:
+missing_properties:
+wrong_input_attachments_type:
+wrong_color_attachments_type:
+wrong_preserved_attachments_type:
+wrong_depth_attachments_type:
     return 0;
 
     // Error handling
@@ -1955,22 +2424,21 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
         // Argument errors
         {
 
-            no_subpass:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_subpass:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
 
-            no_value:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_value:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
-
+            // Error
+            return 0;
         }
 
         // Vulkan errors
@@ -1989,7 +2457,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
 int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t *p_value )
 {
- 
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -2010,7 +2478,8 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
                    *p_final_layout    = 0;
 
     // Parse the attachment JSON value
-    if ( p_value->type == JSONobject ) {
+    if ( p_value->type == JSONobject )
+    {
 
         p_name            = dict_get(p_value->object, "name");
         p_samples         = dict_get(p_value->object, "samples");
@@ -2040,7 +2509,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
         VkImageLayout           initialLayout          = 0;
         VkImageLayout           finalLayout            = 0;
         VkAttachmentDescription attachment_description = { 0 };
-        
+
         // Allocate memory for an attachment
         if ( create_attachment(&p_attachment) == 0 )
             goto failed_to_create_attachment;
@@ -2056,7 +2525,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
             p_attachment->name = calloc(len + 1, sizeof(char));
 
             // Error checking
-            if ( p_attachment->name == (void *) 0 )
+            if (p_attachment->name == (void *)0)
                 goto no_mem;
 
             // Copy the name
@@ -2069,9 +2538,9 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
         // Set the format
         if ( p_format->type == JSONstring )
         {
-            format = (VkFormat) dict_get(format_enumeration_lookup, p_format->string);
+            format = (VkFormat)dict_get(format_enumeration_lookup, p_format->string);
 
-            if ( format == 0 )
+            if (format == 0)
                 goto wrong_format;
         }
         // Default
@@ -2087,26 +2556,26 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
         // Set the load operation
         if ( p_load_operation->type == JSONstring )
-            loadOp = (VkAttachmentLoadOp) dict_get(attachment_load_operations, p_load_operation->string);
+            loadOp = (VkAttachmentLoadOp)dict_get(attachment_load_operations, p_load_operation->string);
         // Default
         else
             goto wrong_load_operation_type;
-        
+
         // Set the store operation
         if ( p_store_operation->type == JSONstring )
-            storeOp = (VkAttachmentStoreOp) dict_get(attachment_store_operations, p_store_operation->string);
+            storeOp = (VkAttachmentStoreOp)dict_get(attachment_store_operations, p_store_operation->string);
         // Default
         else
             goto wrong_store_operation_type;
-        
+
         // (Maybe) set the stencil load operation
 
         // (Maybe) set the stencil store operation
-        
+
         // Set the initial layout
         if ( p_initial_layout->type == JSONstring )
         {
-            initialLayout = (VkImageLayout) dict_get(image_layouts, p_initial_layout->string);
+            initialLayout = (VkImageLayout)dict_get(image_layouts, p_initial_layout->string);
 
             if ( initialLayout == 0 )
                 goto wrong_initial_layout;
@@ -2115,12 +2584,12 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
         else
             goto wrong_initial_layout_type;
 
-        // Set the final layout 
+        // Set the final layout
         if ( p_final_layout->type == JSONstring )
         {
-            finalLayout = (VkImageLayout) dict_get(image_layouts, p_final_layout->string);
+            finalLayout = (VkImageLayout)dict_get(image_layouts, p_final_layout->string);
 
-            if ( finalLayout == 0  )
+            if (finalLayout == 0)
                 goto wrong_final_layout;
         }
         // Default
@@ -2138,33 +2607,21 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
             .stencilLoadOp  = stencilLoadOp,
             .stencilStoreOp = stencilStoreOp,
             .initialLayout  = initialLayout,
-            .finalLayout    = finalLayout 
+            .finalLayout    = finalLayout
         };
+
+        // Create an image
+        {
+
+        }
+
     }
-        
+
     // Return a pointer to the caller
     *pp_attachment = p_attachment;
 
     // Success
     return 1;
-
-    // TODO:
-    wrong_type:
-    wrong_name_type:
-    no_mem:
-    missing_parameters:
-    failed_to_create_attachment:
-    wrong_format:
-    wrong_format_type:
-    wrong_load_operation:
-    wrong_load_operation_type:
-    wrong_store_operation:
-    wrong_store_operation_type:
-    wrong_initial_layout:
-    wrong_initial_layout_type:
-    wrong_final_layout:
-    wrong_final_layout_type:
-    return 0;
 
     // Error handling
     {
@@ -2187,7 +2644,370 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
                 // Error
                 return 0;
+        }
 
+        // Vulkan errors
+        {
+
+            failed_to_create_subpass:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to create render pass in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10
+        {
+            failed_to_create_attachment:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to allocate memory for attachment in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+        // JSON errors
+        {
+
+            wrong_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Attachment JSON value is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            missing_parameters:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Missing JSON parameters in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+
+            wrong_format:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Wrong \"format\" VkFormat value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_load_operation:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Wrong \"load operation\" VkAttachmentStoreOp value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_store_operation:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Wrong \"store operation\" VkAttachmentStoreOp value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_initial_layout:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Wrong \"initial layout\" VkImageLayout value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_final_layout:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Wrong \"final layout\" VkImageLayout value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_image == (void *) 0 ) goto no_image;
+            if ( p_value  == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance        = g_get_active_instance();
+    GXImage_t    *p_image           = 0;
+    JSONValue_t  *p_name            = 0,
+                 *p_samples         = 0,
+                 *p_format          = 0,
+                 *p_load_operation  = 0,
+                 *p_store_operation = 0,
+                 *p_initial_layout  = 0,
+                 *p_final_layout    = 0;
+
+    // Parse the image JSON value
+    if ( p_value->type == JSONobject )
+    {
+
+        p_name            = dict_get(p_value->object, "name");
+        p_samples         = dict_get(p_value->object, "samples");
+        p_format          = dict_get(p_value->object, "format");
+        p_load_operation  = dict_get(p_value->object, "load operation");
+        p_store_operation = dict_get(p_value->object, "store operation");
+        p_initial_layout  = dict_get(p_value->object, "initial layout");
+        p_final_layout    = dict_get(p_value->object, "final layout");
+
+        // Check for missing parameters
+        if ( ! ( p_name && p_samples && p_format && p_initial_layout && p_final_layout ) )
+            goto missing_parameters;
+    }
+    else
+        goto wrong_type;
+
+    // Construct the image
+    {
+        /*
+        // Initialized data
+        VkFormat                format                 = 0;
+        VkSampleCountFlagBits   samples                = 0;
+        VkAttachmentLoadOp      loadOp                 = 0;
+        VkAttachmentStoreOp     storeOp                = 0;
+        VkAttachmentLoadOp      stencilLoadOp          = 0;
+        VkAttachmentStoreOp     stencilStoreOp         = 0;
+        VkImageLayout           initialLayout          = 0;
+        VkImageLayout           finalLayout            = 0;
+        VkAttachmentDescription attachment_description = { 0 };
+
+        // Allocate memory for an image
+        if ( create_image(&p_image) == 0 )
+            goto failed_to_create_image;
+
+        // Set the name
+        if ( p_name->type == JSONstring )
+        {
+
+            // Initialized data
+            size_t len = strlen(p_name->string);
+
+            // Allocate memory for name
+            p_image->name = calloc(len + 1, sizeof(char));
+
+            // Error checking
+            if (p_image->name == (void *)0)
+                goto no_mem;
+
+            // Copy the name
+            strncpy(p_image->name, p_name->string, len);
+        }
+        // Default
+        else
+            goto wrong_name_type;
+
+        // Set the format
+        if ( p_format->type == JSONstring )
+        {
+            format = (VkFormat)dict_get(format_enumeration_lookup, p_format->string);
+
+            if (format == 0)
+                goto wrong_format;
+        }
+        // Default
+        else
+            goto wrong_format_type;
+
+        // Set the sample count
+        if ( p_samples->type == JSONinteger )
+            samples = p_samples->integer;
+        // Default
+        else
+            goto wrong_name_type;
+
+        // Set the load operation
+        if ( p_load_operation->type == JSONstring )
+            loadOp = (VkAttachmentLoadOp)dict_get(attachment_load_operations, p_load_operation->string);
+        // Default
+        else
+            goto wrong_load_operation_type;
+
+        // Set the store operation
+        if ( p_store_operation->type == JSONstring )
+            storeOp = (VkAttachmentStoreOp)dict_get(attachment_store_operations, p_store_operation->string);
+        // Default
+        else
+            goto wrong_store_operation_type;
+
+        // (Maybe) set the stencil load operation
+
+        // (Maybe) set the stencil store operation
+
+        // Set the initial layout
+        if ( p_initial_layout->type == JSONstring )
+        {
+            initialLayout = (VkImageLayout)dict_get(image_layouts, p_initial_layout->string);
+
+            if ( initialLayout == 0 )
+                goto wrong_initial_layout;
+        }
+        // Default
+        else
+            goto wrong_initial_layout_type;
+
+        // Set the final layout
+        if ( p_final_layout->type == JSONstring )
+        {
+            finalLayout = (VkImageLayout)dict_get(image_layouts, p_final_layout->string);
+
+            if (finalLayout == 0)
+                goto wrong_final_layout;
+        }
+        // Default
+        else
+            goto wrong_final_layout_type;
+
+        // Populate the attachment description
+        p_attachment->attachment_description = (VkImageCreateInfo)
+        {
+            .sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .pNext                 = 0,
+            .flags                 = 0,
+            .imageType             = 0,
+            .format                = 0,
+            .extent                = 0,
+            .mipLevels             = 0,
+            .arrayLayers           = 0,
+            .samples               = 0,
+            .tiling                = 0,
+            .usage                 = 0,
+            .sharingMode           = 0,
+            .queueFamilyIndexCount = 0,
+            .pQueueFamilyIndices   = 0,
+            .initialLayout         = 0,
+        };
+        */
+        // Create a texture
+        {
+            /*
+            // Initialized data
+            GXTexture_t *p_texture = 0;
+
+            // Allocate memory for a texture
+            if ( create_texture(&p_texture) == 0 )
+                goto failed_to_allocate_texture;
+
+            if ( strcmp(p_attachment->name, "final") == 0 )
+            {
+                p_texture->texture_image = p_instance->vulkan.swap_chain_images[i];
+                construct_image_view(p_texture, VK_IMAGE_VIEW_TYPE_2D, p_instance->vulkan.swap_chain_image_format, (VkComponentMapping){VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY}, VK_IMAGE_ASPECT_COLOR_BIT);
+            }
+            else
+            {
+                construct_image(
+                    p_texture,
+                    0,
+                    VK_IMAGE_TYPE_2D,
+                    VK_FORMAT_D32_SFLOAT,
+                    p_instance->vulkan.swap_chain_extent.width,
+                    p_instance->vulkan.swap_chain_extent.height,
+                    1,
+                    1,
+                    1,
+                    1,
+                    VK_IMAGE_TILING_OPTIMAL,
+                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                    VK_SHARING_MODE_EXCLUSIVE,
+                    VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
+                );
+                construct_image_view(
+                    p_texture,
+                    VK_IMAGE_VIEW_TYPE_2D,
+                    VK_FORMAT_D32_SFLOAT,
+                    (VkComponentMapping) {
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY
+                    },
+                    VK_IMAGE_ASPECT_DEPTH_BIT
+                );
+            }
+
+
+            p_render_pass->image_attachments[i] = p_texture->texture_image_view;
+
+            if ( i == 0 )
+                p_render_pass->image_attachments[i] = p_instance->vulkan.swap_chain_image_views[p_instance->vulkan.image_index];
+
+        */
+        }
+
+    }
+
+    // Return a pointer to the caller
+    *pp_image = p_image;
+
+    // Success
+    return 1;
+
+// TODO:
+wrong_type:
+failed_to_create_image:
+wrong_name_type:
+no_mem:
+missing_parameters:
+failed_to_create_attachment:
+wrong_format:
+wrong_format_type:
+wrong_load_operation:
+wrong_load_operation_type:
+wrong_store_operation:
+wrong_store_operation_type:
+wrong_initial_layout:
+wrong_initial_layout_type:
+wrong_final_layout:
+wrong_final_layout_type:
+    return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+
+            no_image:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
         // Vulkan errors
@@ -2214,17 +3034,17 @@ int print_renderer ( GXRenderer_t *p_renderer )
         #endif
     }
 
-    // Formatting 
+    // Formatting
     g_print_log(" - Renderer info - \n");
-    
+
     // Print the name
     g_print_log("name        : \"%s\"\n", p_renderer->name);
 
-    // Formatting 
+    // Formatting
     g_print_log("attachments :\n");
 
     // Print each attachment
-    dict_foreach(p_renderer->attachments,print_attachment);
+    dict_foreach(p_renderer->attachments, print_attachment);
     putchar('\n');
 
     // Success
@@ -2235,13 +3055,13 @@ int print_renderer ( GXRenderer_t *p_renderer )
 
         // Argument errors
         {
-            no_renderer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+        no_renderer:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
     }
 }
@@ -2249,20 +3069,19 @@ int print_renderer ( GXRenderer_t *p_renderer )
 int print_attachment ( GXAttachment_t *p_attachment )
 {
 
-	// Argument errors
-	{
-		#ifndef NDEBUG
-			if ( p_attachment == (void *) 0 )
-				goto no_attachment;
-		#endif
-	}
+    // Argument errors
+    {
+        #ifndef NDEBUG
+            if ( p_attachment == (void *) 0 ) goto no_attachment;
+        #endif
+    }
 
-	// Formatting 
+    // Formatting
     g_print_log(" - Attachment info - \n");
-    
+
     // Print the name
     g_print_log("name            : \"%s\"\n", p_attachment->name);
-    
+
     // Print the attachment description
     g_print_log("format          : \"%s\"\n", format_names[p_attachment->attachment_description.format]);
 
@@ -2271,49 +3090,49 @@ int print_attachment ( GXAttachment_t *p_attachment )
 
     // Print the load operation
     g_print_log("load operation  : \"%s\"\n", attachment_load_operation_names[p_attachment->attachment_description.loadOp]);
-    
+
     // Print the store operation
     g_print_log("store operation : \"");
-    if ( p_attachment->attachment_description.storeOp == VK_ATTACHMENT_STORE_OP_NONE )
+    if (p_attachment->attachment_description.storeOp == VK_ATTACHMENT_STORE_OP_NONE)
         g_print_log("none\"\n");
     else
         g_print_log("%s\"\n", attachment_store_operation_names[p_attachment->attachment_description.storeOp]);
 
     // Print the initial layout
     g_print_log("initial layout  : \"");
-    if ( p_attachment->attachment_description.initialLayout > 8 )
+    if (p_attachment->attachment_description.initialLayout > 8)
         g_print_log("none\"\n");
     else
         g_print_log("%s\"\n", image_layout_names[p_attachment->attachment_description.initialLayout]);
 
     g_print_log("final layout    : \"");
-    if ( p_attachment->attachment_description.finalLayout > 8 )
+    if (p_attachment->attachment_description.finalLayout > 8)
         g_print_log("none\"\n");
     else
         g_print_log("%s\"\n", image_layout_names[p_attachment->attachment_description.finalLayout]);
 
-	putchar('\n');
+    putchar('\n');
 
-	// Success
+    // Success
     return 1;
-	
-	// Error handling
-	{
 
-		// Argument errors
-		{
-			no_attachment:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Renderer] Null pointer provided for \"p_attachment\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-				
-				// Error
-				return 0;
-		}
-	}
+    // Error handling
+    {
+
+        // Argument errors
+        {
+        no_attachment:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"p_attachment\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+        }
+    }
 }
 
-int add_subpass_callback ( char *name, void(*function_pointer)( ) )
+int add_subpass_callback ( char *name, void (*function_pointer)() )
 {
 
     // Argument check
@@ -2329,20 +3148,23 @@ int add_subpass_callback ( char *name, void(*function_pointer)( ) )
     // Error handling
     {
 
-        // Argument errors 
+        // Argument errors
         {
-            no_name:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                return 0;
-            no_function_pointer:
-                    #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-                return 0;
-        }
+        no_name:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
 
+            // Error
+            return 0;
+        no_function_pointer:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+        }
     }
 }
 
@@ -2350,14 +3172,14 @@ int render_frame ( GXInstance_t *p_instance )
 {
 
     // Initialized data
-	VkSemaphore               wait_semaphores[]       = { p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame]};
-	VkSemaphore               signal_semaphores[]     = { p_instance->vulkan.render_finished_semaphores[p_instance->vulkan.current_frame]};
-	VkPipelineStageFlags      wait_stages[]           = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	
-	VkSwapchainKHR            swap_chains[]           = { p_instance->vulkan.swap_chain };
-    VkResult                  result;
-    u64                       start                   = 0,
-                              end                     = 0;
+    VkSemaphore wait_semaphores[] = {p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame]};
+    VkSemaphore signal_semaphores[] = {p_instance->vulkan.render_finished_semaphores[p_instance->vulkan.current_frame]};
+    VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+    VkSwapchainKHR swap_chains[] = {p_instance->vulkan.swap_chain};
+    VkResult result;
+    u64 start = 0,
+        end = 0;
 
     start = SDL_GetPerformanceCounter();
 
@@ -2365,17 +3187,19 @@ int render_frame ( GXInstance_t *p_instance )
     {
 
         // Wait for the previous frame to finish rendering
-	    vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, UINT64_MAX);
-	
+        vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, UINT64_MAX);
+
         // Grab an image from the swapchain
         result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, UINT64_MAX, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
-	
+
         // Make sure the image is usable
-        if ( result == VK_ERROR_OUT_OF_DATE_KHR ) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
             g_window_resize(p_instance);
             goto fail;
         }
-        else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR ) {
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+        {
             printf("Failed to acquire swap chain image!\n");
             goto fail;
         }
@@ -2384,14 +3208,15 @@ int render_frame ( GXInstance_t *p_instance )
         vkResetFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]);
 
         // Clear out the command buffer
-    	vkResetCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0);
-	}
+        vkResetCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0);
+    }
 
     // Draw the frame
     {
+
         // Initialized data
-        GXRenderer_t             *active_renderer = p_instance->context.renderer;
-        VkCommandBufferBeginInfo  begin_info      = { 0 };
+        GXRenderer_t *active_renderer = p_instance->context.renderer;
+        VkCommandBufferBeginInfo begin_info = {0};
 
         // Set up the command buffer begin info struct
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -2404,12 +3229,11 @@ int render_frame ( GXInstance_t *p_instance )
         {
 
             // Initialized data
-            GXRenderPass_t  *rp            = active_renderer->render_passes_data[i];
-            size_t           subpass_count = 0;
-            size_t           entity_count  = dict_values(p_instance->context.scene->entities, 0);
-            GXEntity_t     **entities      = calloc(entity_count, sizeof(void*));
-
-            VkRenderPassBeginInfo render_pass_begin_info = 
+            GXRenderPass_t         *rp                     = active_renderer->render_passes_data[i];
+            size_t                  subpass_count          = 0;
+            size_t                  entity_count           = dict_values(p_instance->context.scene->entities, 0);
+            GXEntity_t            **entities               = calloc(entity_count, sizeof(void *));
+            VkRenderPassBeginInfo   render_pass_begin_info =
             {
                 .sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
                 .renderPass          = rp->render_pass,
@@ -2424,7 +3248,6 @@ int render_frame ( GXInstance_t *p_instance )
             // Start the render pass
             vkCmdBeginRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-            
             // TODO: Iterate over each subpass
             {
 
@@ -2434,9 +3257,9 @@ int render_frame ( GXInstance_t *p_instance )
                 // TODO: Check memory
 
                 // TODO: Wait for sync primatives
-                
+
                 // Bind the subpasses shader pipeline
-                if ( p_subpass->shader->type == g10_pipeline_graphics )
+                if (p_subpass->shader->type == g10_pipeline_graphics)
                 {
                     vkCmdBindPipeline(
                         p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
@@ -2444,15 +3267,24 @@ int render_frame ( GXInstance_t *p_instance )
                         p_subpass->shader->graphics.pipeline
                     );
                 }
-                else if ( p_subpass->shader->type == g10_pipeline_compute )
+                else if (p_subpass->shader->type == g10_pipeline_compute)
                 {
                     vkCmdBindPipeline(
                         p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-                        VK_PIPELINE_BIND_POINT_COMPUTE, 
+                        VK_PIPELINE_BIND_POINT_COMPUTE,
                         p_subpass->shader->compute.pipeline
                     );
+
+                    // ...
+
+                    vkCmdDispatch(
+                        p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
+                        p_subpass->shader->compute.x_groups,
+                        p_subpass->shader->compute.y_groups,
+                        p_subpass->shader->compute.z_groups
+                    );
                 }
-                else if ( p_subpass->shader->type == g10_pipeline_ray )
+                else if (p_subpass->shader->type == g10_pipeline_ray)
                 {
 
                     vkCmdBindPipeline(
@@ -2464,7 +3296,6 @@ int render_frame ( GXInstance_t *p_instance )
                 else
                     goto failed_to_bind_pipeline_type;
 
-                
                 // TODO: Bind descriptor sets
                 // TODO: Push constants
                 // TODO: call vkCmdDrawIndexed()
@@ -2475,21 +3306,20 @@ int render_frame ( GXInstance_t *p_instance )
                     VK_SUBPASS_CONTENTS_INLINE
                 );
             }
-            
+
             // End the render pass
             vkCmdEndRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
         }
-        
+
         // End the command buffer
         vkEndCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
-
     }
 
     // Submit the commands
     {
-        
+
         // Initialized data
-        VkSubmitInfo submit_info = 
+        VkSubmitInfo submit_info =
         {
             .sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .waitSemaphoreCount   = 1,
@@ -2500,7 +3330,8 @@ int render_frame ( GXInstance_t *p_instance )
             .signalSemaphoreCount = 1,
             .pSignalSemaphores    = &signal_semaphores
         };
-        VkPresentInfoKHR present_info = 
+
+        VkPresentInfoKHR present_info =
         {
             .sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .waitSemaphoreCount = 1,
@@ -2511,48 +3342,47 @@ int render_frame ( GXInstance_t *p_instance )
         };
 
         // Submit the draw commands
-        if ( vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]) )
+        if (vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]))
             g_print_error("Failed to submit draw command buffer!\n");
 
         // Present the image to the swapchain
         result = vkQueuePresentKHR(p_instance->vulkan.present_queue, &present_info);
 
         // Does the window need to be resized?
-        switch ( result )
+        switch (result)
         {
-            case VK_ERROR_OUT_OF_DATE_KHR:
-            case VK_SUBOPTIMAL_KHR:
-                g_window_resize(p_instance);
-                break;
-            case VK_SUCCESS:
-                break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+        case VK_SUBOPTIMAL_KHR:
+            g_window_resize(p_instance);
+            break;
+        case VK_SUCCESS:
+            break;
 
-            default:
-                goto failed_to_queue_presentation;
+        default:
+            goto failed_to_queue_presentation;
         }
     }
 
     p_instance->vulkan.current_frame = (p_instance->vulkan.current_frame + 1) % p_instance->vulkan.max_buffered_frames;
 
-    fail:
+fail:
 
     end = SDL_GetPerformanceCounter();
     p_instance->time.delta_time = (float)(((double)(end - start)) / (double)(p_instance->time.clock_div));
-    if(p_instance->time.ticks%1000 == 1)
-        printf("Render time: %dms                           \r", (int)( p_instance->time.delta_time * 1000.f ));
+    if (p_instance->time.ticks % 1000 == 1)
+        printf("Render time: %dms                           \r", (int)(p_instance->time.delta_time * 1000.f));
     p_instance->time.ticks += 1;
 
     // Success
-	return 1;
+    return 1;
 
-    // TODO:
-    failed_to_queue_presentation:
-    failed_to_bind_pipeline_type:
-        return 0;
-    
+// TODO:
+failed_to_queue_presentation:
+failed_to_bind_pipeline_type:
+    return 0;
+
     // Error handling
     {
-
     }
 }
 
@@ -2566,15 +3396,24 @@ int present_frame ( GXInstance_t *p_instance )
         #endif
     }
 
-
+    // Success
     return 1;
-    no_instance:
-    return 0;
+
+    // Error handling
+    {
+        no_instance:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Renderer] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+    }
 }
 
 int destroy_renderer ( GXRenderer_t **pp_renderer )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -2596,7 +3435,7 @@ int destroy_renderer ( GXRenderer_t **pp_renderer )
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error 
+                // Error
                 return 0;
         }
     }
@@ -2604,7 +3443,7 @@ int destroy_renderer ( GXRenderer_t **pp_renderer )
 
 int destroy_render_pass ( GXRenderPass_t **pp_render_pass )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -2626,7 +3465,7 @@ int destroy_render_pass ( GXRenderPass_t **pp_render_pass )
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error 
+                // Error
                 return 0;
         }
     }
@@ -2634,7 +3473,7 @@ int destroy_render_pass ( GXRenderPass_t **pp_render_pass )
 
 int destroy_subpass ( GXSubpass_t **pp_subpass )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -2656,7 +3495,7 @@ int destroy_subpass ( GXSubpass_t **pp_subpass )
                     g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error 
+                // Error
                 return 0;
         }
     }

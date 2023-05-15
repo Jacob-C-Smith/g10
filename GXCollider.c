@@ -35,11 +35,19 @@ void init_collider ( void )
 
 int create_collider ( GXCollider_t **pp_collider )
 {
-    // TODO: Argument check
+
+    // Argument check
+    {
+        if ( pp_collider == (void *) 0 ) goto no_collider;
+    }
 
     // Initialized data
     GXCollider_t * p_collider = calloc(1, sizeof(GXCollider_t));
-    
+
+    // Error check
+    if ( pp_collider == (void *) 0 )
+        goto no_mem;
+
     // Write the return value
     *pp_collider = p_collider;
 
@@ -47,23 +55,104 @@ int create_collider ( GXCollider_t **pp_collider )
     return 1;
 
     // Error handling
+    {
+
+        // Argument errors
+        {
+            no_collider:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collider] Null pointer provided for parameter \"pp_collider\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    }
 }
 
-int load_collider ( GXCollider_t **collider, const char *path )
+int load_collider ( GXCollider_t **pp_collider, const char *path )
 {
-    size_t  len   = g_load_file(path, 0, true);
-    char   *token = calloc(len+1, sizeof(char));
 
-    g_load_file(path, token, true);
+    // Argument check
+    {
+        if ( pp_collider == (void *) 0 ) goto no_collider;
+        if ( path        == (void *) 0 ) goto no_path;
+    }
 
-    load_collider_as_json(collider, token);
+    // Initialized data
+    size_t  len  = g_load_file(path, 0, true);
+    char   *text = calloc(len+1, sizeof(char));
 
-    free(token);
+    // Load the file contents into a text buffer
+    if ( g_load_file(path, text, true) == 0 )
+        goto failed_to_load_file;
 
+    // Load the collider as JSON text
+    if ( load_collider_as_json_text(pp_collider, text) == 0 )
+        goto failed_to_construct_collider;
+
+    // Clean the scope
+    free(text);
+
+    // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_collider:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collider] Null pointer provided for \"pp_collider\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_path:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collider] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+
+        // G10 errors
+        {
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collider] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_construct_collider:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collider] Failed to construct collider in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
-int load_collider_as_json ( GXCollider_t **collider, char *text )
+int load_collider_as_json_text ( GXCollider_t **collider, char *text )
 {
     GXCollider_t  *i_collider    = 0;
     dict          *collider_json = 0;
@@ -71,9 +160,9 @@ int load_collider_as_json ( GXCollider_t **collider, char *text )
                  **max           = 0,
                  **min           = 0;
 
-    parse_json(text, len, &collider_json);
+    parse_json_value(text, 0, &collider_json);
 
-    {
+    /*{
         JSONToken_t *token = 0;
 
         token = (JSONToken_t *) dict_get(collider_json, "type");
@@ -100,7 +189,7 @@ int load_collider_as_json ( GXCollider_t **collider, char *text )
     construct_bv(&i_collider->bv, i_collider->aabb_min, i_collider->aabb_max);
 
     // TODO: Change 16 to something smarter
-    dict_construct(&i_collider->collisions, 16);
+    dict_construct(&i_collider->collisions, 16);*/
 
     return 1;
 }

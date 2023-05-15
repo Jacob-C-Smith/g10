@@ -12,20 +12,17 @@ int create_server(GXServer_t** pp_server)
 	}
 
 	// Initialized data
-	GXServer_t* i_server = calloc(1, sizeof(GXServer_t));
+	GXServer_t* p_server = calloc(1, sizeof(GXServer_t));
 
 	// Error handling
-	{
-		#ifndef NDEBUG
-			if(i_server == (void *)0)
-				goto no_mem;
-		#endif
-	}
+	if ( p_server == (void *) 0 )
+		goto no_mem;
 
-	// Return the memory pointer 
-	*pp_server = i_server;
+	// Return the memory pointer
+	*pp_server = p_server;
 
-	return 0;
+	// Success
+	return 1;
 
 	// Error handling
 	{
@@ -126,7 +123,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 
 int load_server_as_json(GXServer_t** pp_server, char* text )
 {
-	
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -157,7 +154,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 
 		// Parse the JSON text into a dictionary
 		//arse_json(text, len, &json);
-		
+
 		// Get the name
 		token       = (JSONToken_t *) dict_get(json, "name");
 		name        = JSON_VALUE(token, JSONstring);
@@ -182,7 +179,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 		token       = (JSONToken_t *) dict_get(json, "tick rate");
 		tick_rate   = JSON_VALUE(token, JSONprimative);
 	}
-	
+
 	// Create the server
 	{
 
@@ -229,10 +226,10 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 
 		// Print an error
 		g_print_error("[G10] [Networking] Failed to resolve \"%s\":%hu. Attempting reconnect %d/%d\r", host, port, (int)retries, MAX_RETRIES);
-		
+
 		// Small delay
 		SDL_Delay(100);
-		
+
 		// Try again
 		goto retry_connection;
 	}
@@ -279,7 +276,7 @@ int start_server()
 	p_server->sock = SDLNet_TCP_Open(&p_server->ip);
 
 	// Error handling
-	if(!p_server->sock)
+	if ( !p_server->sock )
 		g_print_error("[SDLNet Error]: %s\n", SDLNet_GetError());
 
 	// TODO: Correct return
@@ -305,7 +302,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 			for (size_t i = 0; i < server->client_list_size; i++)
 			{
 				GXClient_t *c = server->client_list[i];
-				
+
 				// Construct a chat command for each client
 			}
 			break;
@@ -313,7 +310,8 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 	}
 
 	// Client processing
-	else if (p_instance->networking.client) {
+	else if (p_instance->networking.client)
+	{
 		switch (p_command->type)
 		{
 			case actor_initialize:
@@ -329,7 +327,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 				{
 					#ifndef NDEBUG
 						if (actor == (void*)0)
-							;// TODO: Error handling 
+							;// TODO: Error handling
 					#endif
 				}
 
@@ -358,7 +356,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 				{
 					#ifndef NDEBUG
 						if (actor == (void*)0)
-							;// TODO: Error handling 
+							;// TODO: Error handling
 					#endif
 				}
 
@@ -401,8 +399,7 @@ int server_recv(GXClient_t *client)
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(client == (void *)0)
-				goto no_client;
+			if ( client == (void *) 0 ) goto no_client;
 		#endif
 	}
 	if (client->recv_data == 0)
@@ -434,13 +431,12 @@ int server_recv(GXClient_t *client)
 }
 
 int server_send(GXClient_t* client)
-{	
+{
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if(client == (void *)0)
-				goto no_client;
+			if ( client == (void *) 0 ) goto no_client;
 		#endif
 	}
 
@@ -500,9 +496,9 @@ int server_parse     ( GXClient_t *client )
 		// Argument errors
 		{
 
-			// TODO: 
+			// TODO:
 			no_client:
-				
+
 				return 0;
 		}
 	}
@@ -547,7 +543,7 @@ int server_process   ( GXClient_t *client )
 	queue_destroy(client->recv_queue);
 	queue_construct(&client->recv_queue, 64);
 
-	if(p_instance->networking.server)
+	if ( p_instance->networking.server )
 		for (size_t i = 0; i < client->actor_count; i++)
 		{
 			GXCommand_t *adr   = calloc(1, sizeof(GXCommand_t));
@@ -571,14 +567,14 @@ int server_process   ( GXClient_t *client )
 
 		queue_enqueue(p_instance->networking.client->send_queue, adr);
 	}
-	
+
 	return 0;
 }
 
 int server_wait    ( GXInstance_t* p_instance )
 {
 
-	// Argument check 
+	// Argument check
 	{
 		#ifndef NDEBUG
 			if (p_instance == (void *)0)
@@ -595,21 +591,23 @@ int server_wait    ( GXInstance_t* p_instance )
 		GXClient_t  *client          = 0;
 		GXThread_t  *server_thread   = 0;
 		GXCommand_t *connect_command = 0;
-		size_t       client_name_len = 0; 
+		size_t       client_name_len = 0;
 
 		// Error checking
 		{
 			#ifndef NDEBUG
-				if (sock == NULL) {
+				if (sock == NULL)
+				{
 					goto no_socket;
 				}
 			#endif
 		}
 
 		g_print_log("[SDLNet] New TCP connection accepted\n");
-		
+
 		//Resize client list
-		if (server->client_list == NULL) {
+		if (server->client_list == NULL)
+		{
 			server->client_list = malloc(sizeof(GXClient_t*));
 			server->client_list_size = 1;
 		}
@@ -626,7 +624,7 @@ int server_wait    ( GXInstance_t* p_instance )
 
 		// Read data from the socket
 		SDLNet_TCP_Recv(client->socket, client->recv_data, 4096);
-			
+
 		// Parse the data into a connect command
 		command_from_data(&connect_command, client->recv_data);
 
@@ -653,7 +651,7 @@ int server_wait    ( GXInstance_t* p_instance )
 		// TODO: Copy
 		client->name = connect_command->connect.name;
 
-		// TODO: Dynamically switch actors 
+		// TODO: Dynamically switch actors
 		size_t       active_scene_actors_count = dict_values(p_instance->context.scene->actors, 0);
 		GXEntity_t **actor_list                = calloc(active_scene_actors_count+1, sizeof(void *));
 
@@ -665,10 +663,10 @@ int server_wait    ( GXInstance_t* p_instance )
 		// Iterate over each actor in the active scene
 		for (size_t i = 0; i < active_scene_actors_count; i++)
 		{
-			
+
 			// Get an entity from the actor list
 			GXEntity_t *entity              = actor_list[i];
-			
+
 			// Allocate a command
 			GXCommand_t *actor_init_command = calloc(1, sizeof(GXCommand_t));
 
@@ -716,7 +714,7 @@ int server_wait    ( GXInstance_t* p_instance )
 		}
 	}
 
-	// TODO: 
+	// TODO:
 no_instance:
 	g_print_error("[G10] [Server] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 
@@ -730,7 +728,7 @@ int create_client  ( GXClient_t** client)
 	GXClient_t* c = calloc(1, sizeof(GXClient_t));
 	*client = c;
 
-	// TODO: Make a constructor 
+	// TODO: Make a constructor
 	c->socket = NULL;
 	c->name   = NULL;
 	c->send_data = calloc(4096, sizeof(u8));
@@ -833,7 +831,7 @@ int connect_client(char* name)
 		{
 			i_client->thread          = client_thread;
 
-			// Start running 
+			// Start running
 			i_client->thread->running = true;
 		}
 
@@ -904,14 +902,14 @@ int command_from_data(GXCommand_t** ret, void* data)
 			break;
 
 		case connect_CMD:
-			
+
 			// Construct the connection command
 			{
 
 				// Initialized data
 				size_t  name_len    = strlen(((u8 *)data)+2);
 				char   *name        = ((char *)data)+2;
-			
+
 				// Allocate memory for client name
 				i_ret->connect.name = calloc(name_len + 1, sizeof(u8));
 
@@ -1018,11 +1016,11 @@ int data_from_command(void** ret, GXCommand_t* command)
 	{
 		case no_op:
 			ret_len = 2;
-			
+
 			break;
 		case connect_CMD:
 		{
-			
+
 			size_t name_len = strlen(command->connect.name);
 			ret_len += name_len;
 			ret_len += 2 + 1;
@@ -1034,7 +1032,7 @@ int data_from_command(void** ret, GXCommand_t* command)
 			break;
 		case actor_initialize:
 		{
-			
+
 			size_t chat_len = strlen(command->actor_initialize.name);
 			ret_len += chat_len;
 			ret_len += 2 + 2 + 1 + (2 * sizeof(vec3) ) + sizeof(quaternion);
@@ -1108,13 +1106,14 @@ int destroy_command(GXCommand_t* command)
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( command == (void *) 0 ) 
+			if ( command == (void *) 0 )
 				goto no_command;
 		#endif
 	}
 
 	// Deallocate command data
-	switch (command->type) {
+	switch (command->type)
+	{
 		case no_op:
 		case actor_displace_rotate:
 		case actor_detach:
@@ -1139,10 +1138,10 @@ int destroy_command(GXCommand_t* command)
 		}
 		break;
 
-		default: 
+		default:
 		break;
 	}
-	
+
 	// Deallocate the command
 	free(command);
 

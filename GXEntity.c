@@ -18,7 +18,7 @@ int create_entity ( GXEntity_t **pp_entity )
 
 	// Initialized data
 	GXEntity_t *p_entity = calloc(1,sizeof(GXEntity_t));
-	
+
 	// Error checking
 	if ( p_entity == (void *) 0 )
 		goto no_mem;
@@ -28,7 +28,7 @@ int create_entity ( GXEntity_t **pp_entity )
 
 	// Success
 	return 1;
-	
+
 	// Error handling
 	{
 
@@ -70,7 +70,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 	// Initialized data
 	size_t  len  = g_load_file(path, 0, true);
 	char   *text = calloc(len+1, sizeof(char));
-	
+
 	// Error checking
 	if ( text == (void *) 0 )
 		goto no_mem;
@@ -80,7 +80,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 		goto failed_to_load_entity;
 
 	// Load the entity as JSON text
-	if ( load_entity_as_json(pp_entity, text) == 0 )
+	if ( load_entity_as_json_text(pp_entity, text) == 0 )
 		goto failed_to_load_entity_as_json;
 
 	// Clean up the scope
@@ -88,7 +88,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 
 	// Success
 	return 1;
-	
+
 	// Error handling
 	{
 
@@ -132,19 +132,19 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 
 				// Error
 				return 0;
-				
+
 			failed_to_load_entity:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Failed to load entity from \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
-				
+
 				// Error
 				return 0;
 		}
 	}
 }
 
-int load_entity_as_json ( GXEntity_t** pp_entity, char* text )
+int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 {
 
 	// Argument check
@@ -164,7 +164,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* text )
 
 	// Load the entity as a JSON value
 	if ( load_entity_as_json_value(pp_entity, p_value) == (void *) 0 )
-		goto failed_to_load_entity_as_json_value;		
+		goto failed_to_load_entity_as_json_value;
 
 	// Clean up the scope
 	free_json_value(p_value);
@@ -194,29 +194,6 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* text )
 				return 0;
 		}
 
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
-
-		// User errors
-		{
-			not_enough_info:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Not enough information to construct entity in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-		}
-
 		// G10 errors
 		{
 
@@ -241,7 +218,7 @@ int load_entity_as_json ( GXEntity_t** pp_entity, char* text )
 
 int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 {
-	
+
 	// Argument Check
 	{
 		#ifndef NDEBUG
@@ -260,7 +237,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 				*p_rigidbody_value = 0,
 				*p_collider_value  = 0,
 				*p_ai_value        = 0;
-				 	
+
 	// Parse the JSON value
 	if (p_value->type == JSONobject)
 	{
@@ -277,7 +254,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		p_rigidbody_value = (JSONValue_t *) dict_get(p_entity_value, "rigidbody");
 		p_collider_value  = (JSONValue_t *) dict_get(p_entity_value, "collider");
 		p_ai_value        = (JSONValue_t *) dict_get(p_entity_value, "ai");
-		
+
 		// Check for required data
 		if ( !p_name_value )
 			goto not_enough_values;
@@ -304,7 +281,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			if ( p_entity->name == (void *)0 )
 				goto no_mem;
 
-			// Copy the name 
+			// Copy the name
 			strncpy(p_entity->name, p_name_value->string, name_len);
 
 		}
@@ -383,7 +360,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 		/*
 		// Part
-		if (p_parts) {
+		if (p_parts)
+		{
 
 			// Initialized data
 			size_t part_count = 0;
@@ -453,7 +431,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		}
 
 		// Shader
-		if (shader) {
+		if (shader)
+		{
 
 			// Differentiate objects from paths
 
@@ -468,7 +447,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		}
 
 		// Rigidbody
-		if (rigid_body) {
+		if (rigid_body)
+		{
 
 			// Differentiate objects from paths
 
@@ -482,7 +462,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		}
 
 		// Collider
-		if (collider) {
+		if (collider)
+		{
 
 			// Differentiate objects from paths
 
@@ -493,7 +474,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			// Path branch
 			else
 				load_collider(&i_entity->collider, collider);
-			
+
 			i_entity->collider->bv->entity = i_entity;
 
 			resize_bv(i_entity->collider->bv);
@@ -512,7 +493,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 	// Error handling
 	{
 
-		// TODO: 
+		// TODO:
 		wrong_name_type:
 		failed_to_load_part:
 		wrong_parts_type:
@@ -597,7 +578,7 @@ int calculate_entity_force ( GXEntity_t *p_entity )
 	{
 		#ifndef NDEBUG
 			if ( p_entity == (void *) 0 ) goto no_entity;
-		#endif	
+		#endif
 	}
 
 	// Initialized data
@@ -645,13 +626,13 @@ int preupdate_entity_ai ( GXEntity_t *p_entity )
 	{
 		#ifndef NDEBUG
 			if ( p_entity == (void *) 0 ) goto no_entity;
-		#endif	
+		#endif
 	}
 
 	// Initialized data
 	GXAI_t* p_ai = p_entity->ai;
 
-	// Get the callback function associated with the current state 
+	// Get the callback function associated with the current state
 	void (*preupdate_ai)(GXEntity_t * p_entity) = p_ai->pre_ai;
 
 	// Pre update
@@ -684,7 +665,7 @@ int update_entity_ai ( GXEntity_t* p_entity )
 	{
 		#ifndef NDEBUG
 			if ( p_entity == (void *) 0 ) goto no_entity;
-		#endif	
+		#endif
 	}
 
 	// Initialized data
@@ -693,9 +674,9 @@ int update_entity_ai ( GXEntity_t* p_entity )
 	if (dict_get(p_entity->ai->states, p_entity->ai->current_state))
 	{
 
-		// Get the callback function associated with the current state 
+		// Get the callback function associated with the current state
 		void (*update_ai_function)(GXEntity_t *) = ( void (*)(GXEntity_t*) ) dict_get(p_ai->states, p_ai->current_state);
-	
+
 		// Update
 		update_ai_function(p_entity);
 	}
@@ -733,7 +714,7 @@ int get_model_matrix ( void* ret )
 	// Initialized data
 	GXInstance_t *p_instance        = g_get_active_instance();
 	mat4          model_matrix    = { 0 };
-	
+
 	transform_model_matrix(p_instance->context.scene->active_entity->transform, &model_matrix);
 
 	// Write the camera position to the return
@@ -780,7 +761,7 @@ vec3 calculate_force_applied ( GXEntity_t *p_entity )
 
 	// TODO: Get collisions
 	dict* collisions = p_entity->collider->collisions;
-	
+
 	// Success
 	return ret;
 }
@@ -796,11 +777,12 @@ vec3 calculate_force_normal ( GXEntity_t *p_entity )
     GXCollision_t *c        = 0;
 
     dict_values(a->collisions, &c);
-    
-    if ( c ) {
+
+    if ( c )
+	{
 
         b = c->b->collider;
-        
+
         vec3  a_min = a->bv->minimum,
               a_max = a->bv->maximum,
               b_min = b->bv->minimum,
@@ -850,26 +832,26 @@ int load_entity_from_queue ( GXInstance_t *p_instance )
 	JSONValue_t  *p_value  = 0;
 	GXEntity_t   *p_entity = 0;
 	GXScene_t    *p_scene  = p_instance->context.loading_scene;
-	
-	// TODO: Fix 
+
+	// TODO: Fix
 	while ( queue_empty(p_instance->queues.load_entity) == false )
 	{
 
 		// Lock the loading mutex while we find an entity to load
 		SDL_LockMutex(p_instance->mutexes.load_entity);
-		
+
 		// If the queue is empty, unlock the mutex and exit
 		if (queue_empty(p_instance->queues.load_entity))
 		{
-		
+
 			// Unlock the mutex
 			SDL_UnlockMutex(p_instance->mutexes.load_entity);
-		
+
 			// Success
 			return 0;
 		}
-		
-		// TODO: Fix 
+
+		// TODO: Fix
 		// text is either a path -OR- a JSON object
 		queue_dequeue(p_instance->queues.load_entity,&p_value);
 
@@ -882,7 +864,7 @@ int load_entity_from_queue ( GXInstance_t *p_instance )
 		// Add the entity to the active scene
 		append_entity(p_scene, p_entity);
 	}
-	
+
 	// Success
 	return 1;
 
@@ -908,7 +890,6 @@ int load_entity_from_queue ( GXInstance_t *p_instance )
 				return 0;
 		}
 	}
-
 }
 
 int load_light_probe_from_queue ( GXInstance_t *p_instance )
@@ -916,7 +897,8 @@ int load_light_probe_from_queue ( GXInstance_t *p_instance )
 
 	// TODO:
 
-	return 0;
+	// Success
+	return 1;
 }
 
 int draw_entity ( GXEntity_t *p_entity )
@@ -938,7 +920,7 @@ int draw_entity ( GXEntity_t *p_entity )
 	// Draw the thing
 	size_t part_count = dict_values(p_entity->parts, 0);
 	GXPart_t **parts  = calloc(part_count, sizeof(void *));
-	
+
 	dict_values(p_entity->parts, parts);
 
 	// TODO: Uncomment
@@ -964,13 +946,14 @@ int draw_entity ( GXEntity_t *p_entity )
 		{
 			vkCmdBindDescriptorSets(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->graphics.pipeline_layout, 0, 1, &p_entity->shader->graphics.sets_data[i].descriptor_sets[p_instance->vulkan.current_frame], 0, 0);
 		}
-		
-		// TODO: Uncomment when shader sets are done	
+
+		// TODO: Uncomment when shader sets are done
 		//draw_part(parts[i]);
 	}
 
 	free(parts);
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -995,8 +978,7 @@ int destroy_entity ( GXEntity_t **pp_entity )
 	// Argument error
 	{
 		#ifndef NDEBUG
-			if ( pp_entity == (void *) 0 )
-				goto no_entity;
+			if ( pp_entity == (void *) 0 ) goto no_entity;
 		#endif
 	}
 
@@ -1009,16 +991,16 @@ int destroy_entity ( GXEntity_t **pp_entity )
 	// Free the name
 	free(p_entity->name);
 
-	if (p_entity->shader)
+	if ( p_entity->shader )
 		p_entity->shader = (void *)0;
 
-	if (p_entity->transform)
+	if ( p_entity->transform )
 		destroy_transform(&p_entity->transform);
-	
-	if(p_entity->rigidbody)
+
+	if ( p_entity->rigidbody )
 		;//destroy_rigidbody(p_entity->rigidbody);
 
-	if(p_entity->ai)
+	if ( p_entity->ai )
 		destroy_ai(&p_entity->ai);
 
 	// Free the entity
@@ -1045,8 +1027,13 @@ int destroy_entity ( GXEntity_t **pp_entity )
 
 int move_entity ( GXEntity_t *p_entity )
 {
-	if (p_entity->rigidbody->mass == 0.f)
-		return 0;
+
+	// Argument check
+	{
+		if (p_entity->rigidbody->mass == 0.f) return 0;
+	}
+
+	// Initialized data
 	GXInstance_t* p_instance = g_get_active_instance();
 
 	float delta_time = p_instance->time.delta_time;
@@ -1067,7 +1054,7 @@ int move_entity ( GXEntity_t *p_entity )
 		add_vec3(&rigidbody->velocity, mul_vec3_f(rigidbody->acceleration, delta_time), rigidbody->velocity);
 
 		// Calculate linear momentum
-		// momentum = kg * ( m / s ) 
+		// momentum = kg * ( m / s )
 		rigidbody->momentum = mul_vec3_f(rigidbody->velocity, rigidbody->mass);
 
 		// Calculate location
@@ -1102,9 +1089,9 @@ int entity_info ( GXEntity_t *p_entity )
 		#endif
 	}
 
-	// Formatting 
+	// Formatting
     g_print_log(" - Entity info - \n");
-    
+
     // Print the name
     g_print_log("name: \"%s\"\n", p_entity->name);
 
@@ -1131,12 +1118,6 @@ int entity_info ( GXEntity_t *p_entity )
 				// Error
 				return 0;
 		}
-		
+
 	}
 }
-
-// TODO: Argument check
-// TODO: Memory check
-// TODO: Error handling
-//			- Argument errors
-//          - Standard library errors

@@ -1,8 +1,8 @@
 /** !
  * @file G10/GXCamera.h
  * @author Jacob Smith
- * 
- * Camera 
+ *
+ * Camera
  */
 
 // Include guard
@@ -72,7 +72,7 @@ DLLEXPORT int create_camera ( GXCamera_t **pp_camera );
  * @param aspect_ratio : Window width divided by window height
  * @param fov          : The camera's field of view, in degrees
  *
- * @sa load_camera_as_json
+ * @sa load_camera_as_json_text
  * @sa create_camera
  *
  * @return 1 on success, 0 on error
@@ -85,7 +85,7 @@ DLLEXPORT int construct_camera ( GXCamera_t **pp_camera, vec3 location, vec3 fro
  * @param pp_camera : return
  * @param path      : The path to a JSON file containing a camera object
  *
- * @sa load_camera_as_json
+ * @sa load_camera_as_json_text
  * @sa load_camera_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -103,7 +103,7 @@ DLLEXPORT int load_camera ( GXCamera_t **pp_camera, const char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_camera_as_json ( GXCamera_t **pp_camera, char *text );
+DLLEXPORT int load_camera_as_json_text ( GXCamera_t **pp_camera, char *text );
 
 /** !
  *  Load a camera from a JSON value
@@ -112,7 +112,7 @@ DLLEXPORT int load_camera_as_json ( GXCamera_t **pp_camera, char *text );
  * @param p_value   : The camera JSON value
  *
  * @sa load_camera
- * @sa load_camera_as_json
+ * @sa load_camera_as_json_text
  *
  * @return 1 on success, 0 on error
  */
@@ -129,7 +129,7 @@ DLLEXPORT int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p
  *
  * @sa perspective_matrix
  *
- * @return a view mat4 
+ * @return a view mat4
  */
 DLLEXPORT mat4 look_at ( vec3 eye, vec3 target, vec3 up );
 
@@ -143,7 +143,7 @@ DLLEXPORT mat4 look_at ( vec3 eye, vec3 target, vec3 up );
  *
  * @sa look_at
  *
- * @return a projection mat4 
+ * @return a projection mat4
  */
 DLLEXPORT mat4 perspective_matrix ( float fov, float aspect, float near_clip, float far_clip );
 

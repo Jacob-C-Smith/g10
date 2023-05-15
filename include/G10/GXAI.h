@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXAI.h
  * @author Jacob Smith
- * 
+ *
  * Simple finite state automaton
  */
 
@@ -19,7 +19,7 @@
 // json submodule
 #include <json/json.h>
 
-// G10 
+// G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
 
@@ -51,8 +51,8 @@ DLLEXPORT int create_ai ( GXAI_t **pp_ai );
  * @param pp_ai : return
  * @param path  : The path to a JSON file containing an AI object
  *
- * @sa load_ai_as_json
- * @sa create_ai
+ * @sa load_ai_as_json_text
+ * @sa load_ai_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -65,11 +65,11 @@ DLLEXPORT int load_ai ( GXAI_t **pp_ai, char *path );
  * @param text  : The AI JSON object text
  *
  * @sa load_ai
- * @sa create_ai
+ * @sa load_ai_as_json_value
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_ai_as_json ( GXAI_t **pp_ai, char *text );
+DLLEXPORT int load_ai_as_json_text ( GXAI_t **pp_ai, char *text );
 
 /** !
  *  Load an AI from a JSON value
@@ -78,7 +78,7 @@ DLLEXPORT int load_ai_as_json ( GXAI_t **pp_ai, char *text );
  * @param p_value : The JSON value
  *
  * @sa load_ai
- * @sa load_ai_as_json
+ * @sa load_ai_as_json_text
  *
  * @return 1 on success, 0 on error
  */
@@ -93,7 +93,8 @@ DLLEXPORT int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value );
  *
  * @sa create_ai
  * @sa load_ai
- * @sa load_ai_as_json
+ * @sa load_ai_as_json_text
+ * @sa load_ai_as_json_value
  *
  * @return 1 on success, 0 on error
  */

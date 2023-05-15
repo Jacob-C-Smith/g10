@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXUserCode.h
  * @author Jacob Smith
- * 
+ *
  * User code will call a function one time per frame. Use this for per frame game logic.
  */
 

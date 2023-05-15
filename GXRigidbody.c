@@ -127,7 +127,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 					g_print_error("[G10] [Rigidbody] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 			failed_to_load_rigidbody_as_json:
@@ -135,7 +135,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 					g_print_error("[G10] [Rigidbody] Failed to load rigidbody from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
 	}
@@ -166,7 +166,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 
 		// Initialized data
 		JSONToken_t *token = 0;
-	
+
 		token  = (JSONToken_t *)dict_get(json_object, "mass");
 		mass   = JSON_VALUE(token, JSONprimative);
 
@@ -175,7 +175,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 	}
 
 	// Allocate memory for a rigidbody
-	if ( create_rigidbody(pp_rigidbody) == 0 ) 
+	if ( create_rigidbody(pp_rigidbody) == 0 )
 		goto failed_to_allocate_rigidbody;
 
 	// Get a pointer to the rigidbody
@@ -231,7 +231,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 					g_print_error("[G10] [Rigidbody] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 
 			no_len:
@@ -239,7 +239,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 					g_print_error("[G10] [Rigidbody] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error 
+				// Error
 				return 0;
 		}
 

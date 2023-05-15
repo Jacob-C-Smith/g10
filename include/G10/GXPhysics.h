@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXPhysics.h
  * @author Jacob Smith
- * 
+ *
  * Physics
  */
 
@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// G10 
+// G10
 #include <G10/G10.h>
 #include <G10/GXCollider.h>
 #include <G10/GXCollision.h>
@@ -34,9 +34,9 @@ DLLEXPORT int detect_collisions ( GXInstance_t *p_instance );
 
 /** !
  *  Updates location and rotation derivatives for each object in the instances active scene.
- * 
+ *
  * Updates linear and angular momentum, acceleration, velocity, and the base unit (location / rotation)
- * 
+ *
  * @param p_instance : Pointer to instance
  *
  * @sa detect_collisions
@@ -48,8 +48,8 @@ DLLEXPORT int detect_collisions ( GXInstance_t *p_instance );
 DLLEXPORT int move_objects      ( GXInstance_t *p_instance );
 
 /** !
- *  Calculates forces and torque for each entity in the instances active scene. 
- * 
+ *  Calculates forces and torque for each entity in the instances active scene.
+ *
  * @param p_instance : Pointer to instance
  *
  * @sa detect_collisions

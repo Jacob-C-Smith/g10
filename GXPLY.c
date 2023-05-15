@@ -122,7 +122,7 @@ struct GXply_file_s {
 typedef struct GXply_file_s GXply_file_t;
 
 #pragma pack (push)
-#pragma pack (1) 
+#pragma pack (1)
 struct GXPLYindex_s {
     u8  count;
     u32 a;
@@ -137,15 +137,15 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
     // Commentary
     {
-        /* 
+        /*
          * The PLY loaders job is  to turn a PLY file header into a 64 bit metadata value.
          * the function is written to recognize vertex properties and parse them into common vertex
-         * groups. Each vertex property in a vertex group should appear concurrently. Each 
-         * group has an associated byte code. The vertex groups metadata value is used to create a 
-         * vertex array object, vertex buffer object, and element buffer object.  
-         * 
+         * groups. Each vertex property in a vertex group should appear concurrently. Each
+         * group has an associated byte code. The vertex groups metadata value is used to create a
+         * vertex array object, vertex buffer object, and element buffer object.
+         *
          * ┌─────────────────────┬──────────────────────────────────────────────────┬──────┐
-         * │ Vertex group name   │ Vertex properties as they appear in the PLY file │ Code │                                                   
+         * │ Vertex group name   │ Vertex properties as they appear in the PLY file │ Code │
          * ├─────────────────────┼──────────────────────────────────────────────────┼──────┤
          * │ Geometric vertices  │ ( x, y, z )                                      │ 0x01 │
          * │ Texture coordinates │ ( u, v ) or ( s, t )                             │ 0x02 │
@@ -156,52 +156,52 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
          * │ Bone groups         │ ( b0, b1, b2, b3 )                               │ 0x40 │
          * │ Bone weights        │ ( w0, w1, w2, w3 )                               │ 0x80 │
          * └─────────────────────┴──────────────────────────────────────────────────┴──────┘
-         * 
-         * NOTE: The function can be modified to read two more vertex groups, supporting a 
+         *
+         * NOTE: The function can be modified to read two more vertex groups, supporting a
          * maximum of 8 vertex groups.
-         * 
-         * The parser makes several passes through the header, populating more and more data each 
+         *
+         * The parser makes several passes through the header, populating more and more data each
          * time. Each pass and its purpose is listed below
-         * 
+         *
          * Pass 1.
          *     On pass 1, the function counts all the elements in the header. It will also print
          *     any comments it n_counters. After this pass, the elements are allocated for
-         * 
+         *
          * Pass 2.
-         *     On pass 2, the elements are populated and the properties are counted up and 
+         *     On pass 2, the elements are populated and the properties are counted up and
          *     allocated for.
-         * 
-         * Pass 3. 
+         *
+         * Pass 3.
          *     On pass 3, the properties are populated and the stride of the element is computed.
-         *     Each property is kept track of using bitflags and a temporary value. The temporary 
-         *     value is then tested with various AND masks to deduce what vertex groups are 
-         *     present and which are absent. 
-         * 
+         *     Each property is kept track of using bitflags and a temporary value. The temporary
+         *     value is then tested with various AND masks to deduce what vertex groups are
+         *     present and which are absent.
+         *
          *     All this work to determine the vertex groups is integrated when the function creates
-         *     the vertexGroups quad word. This 64 bit number is an especially compact way to 
-         *     represent both the type and position of each vertex group in the file. Each 
-         *     code is packed into the 64 bit number, such that the last vertex group occupies 
-         *     the eight least significant bits. For comprehension and completeness, here are a 
+         *     the vertexGroups quad word. This 64 bit number is an especially compact way to
+         *     represent both the type and position of each vertex group in the file. Each
+         *     code is packed into the 64 bit number, such that the last vertex group occupies
+         *     the eight least significant bits. For comprehension and completeness, here are a
          *     few examples and how they should be interpreted.
-         * 
+         *
          *        63......................................0
          *     A. | 00 | 00 | 00 | 00 | 00 | 01 | 04 | 20 |
          *     B. | 00 | 00 | 00 | 00 | 00 | 04 | 02 | 01 |
          *     C. | 01 | 02 | 04 | 08 | 10 | 20 | 40 | 80 |
-         *       
-         *     A. First is geometric, second is normals, third is colors 
+         *
+         *     A. First is geometric, second is normals, third is colors
          *     B. First is normals, second is texture coordinates, third is geometric
-         *     C. First is geometric, second is texture coordinates, third is vertex normals, fourth is 
-         *        vertex bitangents, fifth is vertex tangents, sixth is vertex bitangents, seventh is 
+         *     C. First is geometric, second is texture coordinates, third is vertex normals, fourth is
+         *        vertex bitangents, fifth is vertex tangents, sixth is vertex bitangents, seventh is
          *        bone groups,and eighth is bone weights.
-         * 
-         * After the third pass, all the metadata to describe the file data has been extracted, and 
+         *
+         * After the third pass, all the metadata to describe the file data has been extracted, and
          * the function can start making the VAO, and VBO. The last significant byte
-         * of the vertex groups variable is masked off, and switch()ed against the vertex group codes. 
+         * of the vertex groups variable is masked off, and switch()ed against the vertex group codes.
          * Vertex attribute pointers are created for the specific offset and stride of the vertex
-         * group. The first vertex group will be at layout position 0, the second at 1, the third at 2, and soforth. 
-         * 
-         * 
+         * group. The first vertex group will be at layout position 0, the second at 1, the third at 2, and soforth.
+         *
+         *
          */
     }
 
@@ -217,7 +217,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     GXInstance_t  *p_instance  = g_get_active_instance();
     size_t         vertices_in_buffer = 0,
                    indices_in_buffer = 0;
-    
+
     char          *c_data = 0;
     float         *vertex_array = 0;
     GXPLYindex_t  *indices = 0;
@@ -254,12 +254,12 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
         while ( *(u32*)c_data != GXPLY_HEnd )
         {
             // Check the first four bytes of the line
-            if( *(u32*)c_data == GXPLY_HElement )
+            if ( *(u32*)c_data == GXPLY_HElement )
                 ply_file->n_elements++;
 
             // Here is as good a place as any to look for comments
             #ifndef NDEBUG
-                if( *(u32*)c_data == GXPLY_HComment )
+                if ( *(u32*)c_data == GXPLY_HComment )
                 {
                     i = 0;
                     while ( c_data[++i] != '\n' );
@@ -286,7 +286,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                 // Check if iterator is on an element
                 if (*(u32*)c_data == GXPLY_HElement)
                 {
-                    // TODO: Dynamically determine size. 
+                    // TODO: Dynamically determine size.
                     char *l = strchr(c_data+8, ' ');
                     size_t n_len = l-(c_data+8);
                     ply_file->elements[j].name = calloc(n_len+1, sizeof(u8));
@@ -326,10 +326,10 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                 j++;
             }
         }
-        
+
         // Zero set j
         j ^= j;
-        
+
         // Copy data pointer again
         c_data = data;
 
@@ -341,7 +341,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                 // Check if iterator is on an element
                 if (*(u32*)c_data == GXPLY_HElement)
                 {
-                    // TODO: Dynamically determine size. 
+                    // TODO: Dynamically determine size.
 
                     i = 0;
                     while (c_data[++i] != '\n'); // Skip to the end of the line
@@ -475,7 +475,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                         tflags |= GXPLY_NY;
                     else if (strncmp(ply_file->elements[a].properties[b].name, "nz", 2) == 0)
                         tflags |= GXPLY_NZ;
-        
+
                     else if (strncmp(ply_file->elements[a].properties[b].name, "bx", 2) == 0)
                     {
                         ply_file->flags <<= 8;
@@ -622,12 +622,13 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
         vkGetBufferMemoryRequirements(p_instance->vulkan.device, part->vertex_buffer, &memory_requirements);
 
-        allocate_info = (VkMemoryAllocateInfo) { 
+        allocate_info = (VkMemoryAllocateInfo)
+        {
             .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
             .allocationSize = memory_requirements.size,
             .memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         };
-        
+
         if (vkAllocateMemory(p_instance->vulkan.device, &allocate_info, 0, &part->vertex_buffer_memory))
             g_print_error("[G10] [PLY] Failed to allocate vertex buffer memory");
 
@@ -687,7 +688,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
 
     }
 
-   
+
     // Destroy the PLY File
     //{
     //    // Depopulate all elements
@@ -698,31 +699,25 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     //        {
     //           // Free the name of the property
     //           free(ply_file->elements[i].properties[j].name);
-
     //           // Zero set the type_size
     //           ply_file->elements[i].properties[j].type_size = 0;
     //        }
-
     //        // Free the properties
     //        free(ply_file->elements[i].properties);
-    //        
+    //
     //        // Free the name of the element
     //        //free(ply_file->elements[i].name);
-
     //        // Zero set all the primatives
     //        ply_file->elements[i].n_count = 0;
     //        ply_file->elements[i].n_properties = 0;
     //        ply_file->elements[i].s_stride = 0;
     //    }
-
     //    // Free the elements
     //    free(ply_file->elements);
-
     //    // Zero set all the primatives
     //    ply_file->flags = 0;
     //    ply_file->format = 0;
     //    ply_file->n_elements = 0;
-
     //    // Free the ply_file
     //    free(ply_file);
     //}

@@ -13,7 +13,7 @@ int create_bv ( GXBV_t **pp_bv )
     // Initialized data
     GXBV_t *p_bv = calloc(1, sizeof(GXBV_t));
 
-    // Check if the memory was allocated 
+    // Check if the memory was allocated
     if ( p_bv == (void *) 0 )
         goto no_mem;
 
@@ -133,8 +133,8 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
          *
          * The algorithm starts by generating a list of bounding volume heierarchies from the list
          * of entities from the scene. The algorithm then compute which two bounding volumes are
-         * the closest together. This is an O(n^2) operation. The closest objects are removed from 
-         * the list, and are combined to form a new bounding volume that is concometently 
+         * the closest together. This is an O(n^2) operation. The closest objects are removed from
+         * the list, and are combined to form a new bounding volume that is concometently
          * reinserted to the list. Removing two and insterting one. The algorithm does this for as
          * many bounding boxes are in the list, until only one bounding volume is left. This is the
          * bounding volume of the scene, and contains every entity in the scene.
@@ -151,7 +151,7 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
     // Uninitialized data
     GXEntity_t **actor_list        = 0; // List of entities
     GXBV_t     **bounding_volumes  = 0; // List of qualifying entities
-    
+
     // Initialized data
     size_t       actors_in_scene       = dict_values(scene->actors, 0), // How many entities are in the scene?
                  actors_with_colliders = 0,
@@ -169,7 +169,7 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
     bounding_volumes = calloc(actors_in_scene, sizeof(void*));
     dict_values(scene->actors, actor_list);
 
-    // Error checking 
+    // Error checking
     {
         #ifndef NDEBUG
             if ( actor_list        == (void *) 0 )
@@ -198,13 +198,13 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
         else
             continue;
     }
-    
+
     // Iterate through the list until there are no more bounding volumes to combine
     while (actors_with_colliders > 1)
     {
         float   best = FLT_MAX;
 
-        GXBV_t *a = 0, 
+        GXBV_t *a = 0,
                *b = 0;
 
         // Iterate over bounding volumes with i
@@ -221,7 +221,7 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
                     best = pD,
                     best_j   = j,
                     best_i   = i;
-                    
+
             }
 
 
@@ -232,8 +232,8 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
                *t      = bounding_volumes[actors_with_colliders - 1];
 
         construct_bv_from_bvs(&bounding_volumes[best_i], bounding_volumes[best_i], bounding_volumes[best_j]);
-        
-        // XOR swap the best 
+
+        // XOR swap the best
         (size_t)bounding_volumes[best_j]                    ^= (size_t)bounding_volumes[actors_with_colliders - 1],
         (size_t)bounding_volumes[actors_with_colliders - 1] ^= (size_t)bounding_volumes[best_j],
         (size_t)bounding_volumes[best_j]                    ^= (size_t)bounding_volumes[actors_with_colliders - 1];
@@ -261,6 +261,7 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
                 g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
+            // Error
             return 0;
 
         }
@@ -271,12 +272,16 @@ int construct_bvh_from_scene ( GXBV_t **bv, GXScene_t *scene )
                 #ifndef NDEBUG
                     g_print_error("[G10] [BV] Null pointer provided for \"scene\" in call to function %s\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
 
             no_actors:
                 #ifndef NDEBUG
                     g_print_error("[G10] [BV] No actors in \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
+
+                // Error
                 return 0;
         }
     }
@@ -300,7 +305,7 @@ GXBV_t *find_parent_bv ( GXBV_t *bvh, GXBV_t *bv )
 {
     GXBV_t *b   = bvh,
            *ret = 0;
-        
+
     if (bvh->left == bv)
         return bvh;
 
@@ -332,7 +337,7 @@ GXBV_t *find_parent_bv ( GXBV_t *bvh, GXBV_t *bv )
 
 int insert_bv ( GXBV_t *bvh, GXBV_t *bv )
 {
-    
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -362,7 +367,7 @@ int insert_bv ( GXBV_t *bvh, GXBV_t *bv )
         {
             if ( bvh->left->entity )
             {
-                
+
             }
             else
             {
@@ -449,9 +454,9 @@ int resize_bv ( GXBV_t *bv )
             goto entity;
 
         // Remove the node
-        else 
+        else
 
-            // TODO: 
+            // TODO:
             return 0;
     }
 
@@ -473,7 +478,7 @@ int resize_bv ( GXBV_t *bv )
          * └─────┴───────────┴─────┘
          *
          * Diagram of bv state. This operation will resize the parent bv to fit A and B.
-         * 
+         *
          * If you can't read this, try a monospaced font
          */
     }
@@ -487,7 +492,7 @@ int resize_bv ( GXBV_t *bv )
                     a_min = bv->left->minimum,
                     b_max = bv->right->maximum,
                     b_min = bv->right->minimum;
-        
+
         vec3        max   = { 0, 0, 0, 0 },
                     min   = { 0, 0, 0, 0 };
 
@@ -504,25 +509,25 @@ int resize_bv ( GXBV_t *bv )
         {
             /*
              * The token ( a > b ) will be evaluated as 1 when a > b, and 0 when b > a.
-             * 
+             *
              * The following min/max equations can be understood as
-             * 
-             *  ( a > b ) * a + ( a < b ) * b 
-             * 
+             *
+             *  ( a > b ) * a + ( a < b ) * b
+             *
              * Such that when a > b, ( a > b ) will evaluate to 1, and ( b > a ) must
              * evaluate to 0
-             * 
+             *
              * 1 * a + 0 * b =
-             * 1 * a = 
+             * 1 * a =
              * a
-             * 
+             *
              * or in the opposite case, when ( b > a ) = 1, and ( a > b ) = 0,
-             * 
+             *
              * 0 * a + 1 * b =
-             * 1 * b = 
+             * 1 * b =
              * b
-             * 
-             * This avoids brances, and is easily vectorizable. Time for some SIMD. 
+             *
+             * This avoids brances, and is easily vectorizable. Time for some SIMD.
              * TODO: vectorize
              */
         }
@@ -547,7 +552,7 @@ int resize_bv ( GXBV_t *bv )
     }
 
     // Commentary
-    {      
+    {
         /*
          *
          * ┌───────────┬───────────┐
@@ -598,7 +603,7 @@ int resize_bv ( GXBV_t *bv )
     // Commentary
     {
         /*
-         * 
+         *
          * ┌───────────┬───────────┐
          * │           │           │
          * │   ┌───────┴───────┐   │
@@ -611,16 +616,16 @@ int resize_bv ( GXBV_t *bv )
          * │   └───┘ └───┘ └─┬─┘   │
          * │                 │     │
          * └─────────────────┴─────┘
-         * 
+         *
          * This operation will copy B into the parent BV, and free the memory of B
-         * 
+         *
          * If you can't read this, try a monospaced font
          */
     }
 
     no_left:
     {
-        
+
         // Initialized data
         GXBV_t *right = bv->right;
 
@@ -646,7 +651,7 @@ int resize_bv ( GXBV_t *bv )
     // Commentary
     {
         /*
-         * 
+         *
          * ┌───────────┬───────────┐
          * │           │           │
          * │   ┌───────┴───────┐   │
@@ -661,7 +666,7 @@ int resize_bv ( GXBV_t *bv )
          * └───────────┴───────────┘
          *
          * This operation resizes an entity from its model matrix
-         * 
+         *
          * If you can't read this, try a monospaced font
          */
     }
@@ -670,11 +675,11 @@ int resize_bv ( GXBV_t *bv )
     {
 
         // Get the model matrix of the entity
-        
+
         // Initialized data
         GXCollider_t *collider = bv->entity->collider;
         mat4          m        = bv->entity->transform->model_matrix;
-        
+
         // Compute axis aligned radius
         float x_radius = (fabsf(m.a) + fabsf(m.b) + fabsf(m.c) ),
               y_radius = (fabsf(m.e) + fabsf(m.f) + fabsf(m.g) ),
@@ -719,7 +724,7 @@ int bv_info ( GXBV_t *p_bv, size_t d )
     // Base case, print out a header
     if (d == 0)
         printf("[G10] [BV] Bounding volume hierarchy\n[ entity name ] - < location > - < dimension >\n\n");
-        
+
     // Indent proportional to the deapth of the BVH
     for (size_t i = 0; i < d * 4; i++)
         putchar(' ');

@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXRenderer.h
  * @author Jacob Smith
- * 
+ *
  * Renderer
  */
 
@@ -51,16 +51,32 @@ struct GXRenderPass_s
 
 struct GXSubpass_s
 {
-	char *name;
+	char                 *name;
+	GXShader_t           *shader;
+	VkSubpassDescription  subpass_description;
+};
 
-	GXShader_t *shader;
+struct GXImage_s
+{
+	char           *name;
+	VkImage         texture_image;
+	VkDeviceMemory  texture_image_memory;
 };
 
 struct GXAttachment_s
 {
 	char                    *name;
 	VkAttachmentDescription  attachment_description;
-	GXTexture_t             *texture;
+	GXImage_t               *p_image;
+	VkImageView              image_view;
+};
+
+struct GXTexture_s
+{
+	char        *name;
+	GXImage_t   *p_image;
+	VkImageView  image_view;
+	VkSampler    sampler;
 };
 
 struct GXFramebuffer_s
@@ -104,6 +120,17 @@ DLLEXPORT int create_render_pass ( GXRenderPass_t **pp_render_pass );
 DLLEXPORT int create_subpass ( GXSubpass_t **pp_subpass );
 
 /** !
+ *  Allocate memory for am image
+ *
+ * @param pp_image : return
+ *
+ * @sa destroy_image
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int create_image ( GXImage_t **pp_image );
+
+/** !
  *  Allocate memory for a attachment
  *
  * @param pp_attachment : return
@@ -114,6 +141,28 @@ DLLEXPORT int create_subpass ( GXSubpass_t **pp_subpass );
  */
 DLLEXPORT int create_attachment ( GXAttachment_t **pp_attachment );
 
+/** !
+ *  Allocate memory for a texture
+ *
+ * @param pp_texture : return
+ *
+ * @sa destroy_texture
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int create_texture ( GXTexture_t **pp_texture );
+
+/** !
+ *  Allocate memory for a framebuffer
+ *
+ * @param pp_framebuffer : return
+ *
+ * @sa destroy_framebuffer
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int create_framebuffer ( GXFramebuffer_t **pp_framebuffer );
+
 // Constructors
 /** !
  *  Load a renderer from a JSON file
@@ -121,7 +170,7 @@ DLLEXPORT int create_attachment ( GXAttachment_t **pp_attachment );
  * @param pp_renderer : return
  * @param path        : The path to a JSON file containing a renderer object
  *
- * @sa load_renderer_as_json
+ * @sa load_renderer_as_json_text
  * @sa load_renderer_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -139,7 +188,7 @@ DLLEXPORT int load_renderer ( GXRenderer_t **pp_renderer, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer, char *text );
+DLLEXPORT int load_renderer_as_json_text ( GXRenderer_t   **pp_renderer, char *text );
 
 /** !
  *  Load a renderer as a JSON value
@@ -148,12 +197,11 @@ DLLEXPORT int load_renderer_as_json    ( GXRenderer_t   **pp_renderer, char *tex
  * @param p_value     : The JSON value
  *
  * @sa load_renderer
- * @sa load_renderer_as_json
+ * @sa load_renderer_as_json_text
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_value );
-
 
 /** !
  *  Load a render pass from a JSON file
@@ -161,7 +209,7 @@ DLLEXPORT int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValu
  * @param pp_render_pass : return
  * @param path           : The path to a JSON file containing a render pass object
  *
- * @sa load_render_pass_as_json
+ * @sa load_render_pass_as_json_text
  * @sa load_render_pass_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -179,7 +227,7 @@ DLLEXPORT int load_render_pass         ( GXRenderPass_t **pp_render_pass, char *
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *text );
+DLLEXPORT int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char *text );
 
 /** !
  *  Load a render pass from a JSON value
@@ -188,7 +236,7 @@ DLLEXPORT int load_render_pass_as_json ( GXRenderPass_t **pp_render_pass, char *
  * @param p_value        : The render pass JSON value
  *
  * @sa load_render_pass
- * @sa load_render_pass_as_json
+ * @sa load_render_pass_as_json_text
  *
  * @return 1 on success, 0 on error
  */
@@ -200,7 +248,7 @@ DLLEXPORT int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, 
  * @param pp_subpass : return
  * @param path : path to JSON file
  *
- * @sa load_subpass_as_json
+ * @sa load_subpass_as_json_text
  * @sa load_subpass_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -218,7 +266,7 @@ DLLEXPORT int load_subpass ( GXSubpass_t **pp_subpass, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_subpass_as_json ( GXSubpass_t **pp_subpass, char *text );
+DLLEXPORT int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text );
 
 /** !
  *  Load a subpass from a JSON value
@@ -227,11 +275,53 @@ DLLEXPORT int load_subpass_as_json ( GXSubpass_t **pp_subpass, char *text );
  * @param p_value    : The JSON value
  *
  * @sa load_subpass
- * @sa load_subpass_as_json
+ * @sa load_subpass_as_json_text
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value );
+
+/** !
+ *  Allocate and construct a Vulkan image
+ *
+ * @param p_image        : return
+ * @param flags          : VkImageCreateFlags
+ * @param image_type     : VkImageType
+ * @param format         : VkFormat
+ * @param width          : int
+ * @param height         : int
+ * @param depth          : int
+ * @param mip_levels     : size_t
+ * @param array_layers   : size_t
+ * @param samples        : VkSampleCountFlagBits
+ * @param tiling         : VkImageTiling
+ * @param usage          : VkImageUsageFlags
+ * @param sharing_mode   : VkSharingMode
+ * @param initial_layout : VkImageLayout
+ *
+ * @sa load_image
+ * @sa load_image_as_json_text
+ * @sa load_image_as_json_value
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int construct_image
+(
+	GXImage_t     *p_image     , VkImageCreateFlags    flags,
+	VkImageType    image_type  , VkFormat              format,
+	int            width       , int                   height,
+	int            depth       , size_t                mip_levels,
+	size_t         array_layers, VkSampleCountFlagBits samples,
+	VkImageTiling  tiling      , VkImageUsageFlags     usage,
+	VkSharingMode  sharing_mode, VkImageLayout         initial_layout
+);
+
+/*DLLEXPORT int construct_image_view
+(
+	GXTexture_t       *p_texture, VkImageViewType    view_type,
+	VkFormat           format   , VkComponentMapping swizzle,
+	VkImageAspectFlags aspect_mask
+);*/
 
 /** !
  *  Load an attachment from a JSON file
@@ -239,7 +329,7 @@ DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t
  * @param pp_attachment : return
  * @param path          : path to JSON file
  *
- * @sa load_attachment_as_json
+ * @sa load_attachment_as_json_text
  * @sa load_attachment_as_json_value
  *
  * @return 1 on success, 0 on error
@@ -257,7 +347,7 @@ DLLEXPORT int load_attachment ( GXAttachment_t **pp_attachment, char *path );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_attachment_as_json ( GXAttachment_t **pp_attachment, char *text );
+DLLEXPORT int load_attachment_as_json_text ( GXAttachment_t **pp_attachment, char *text );
 
 /** !
  *  Load an attachment from a JSON value
@@ -266,7 +356,7 @@ DLLEXPORT int load_attachment_as_json ( GXAttachment_t **pp_attachment, char *te
  * @param p_value       : The JSON value
  *
  * @sa load_attachment
- * @sa load_attachment_as_json
+ * @sa load_attachment_as_json_text
  *
  * @return 1 on success, 0 on error
  */
@@ -300,10 +390,10 @@ DLLEXPORT int add_subpass_callback ( char *name, void (*function_pointer)());
 
 // Scheduler operations
 /** !
- *  Called once a frame by the scheduler to draw the game to the window. 
- * 
- * Draws every render pass in the instances active renderer to a swapchain, presents the last frame. 
- * 
+ *  Called once a frame by the scheduler to draw the game to the window.
+ *
+ * Draws every render pass in the instances active renderer to a swapchain, presents the last frame.
+ *
  * @param p_instance : The active instance
  *
  * @return 1 on success, 0 on error
