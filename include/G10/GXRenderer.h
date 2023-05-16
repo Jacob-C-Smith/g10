@@ -59,8 +59,8 @@ struct GXSubpass_s
 struct GXImage_s
 {
 	char           *name;
-	VkImage         texture_image;
-	VkDeviceMemory  texture_image_memory;
+	VkImage         image;
+	VkDeviceMemory  image_memory;
 };
 
 struct GXAttachment_s
@@ -307,13 +307,14 @@ DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t
  */
 DLLEXPORT int construct_image
 (
-	GXImage_t     *p_image     , VkImageCreateFlags    flags,
-	VkImageType    image_type  , VkFormat              format,
-	int            width       , int                   height,
-	int            depth       , size_t                mip_levels,
-	size_t         array_layers, VkSampleCountFlagBits samples,
-	VkImageTiling  tiling      , VkImageUsageFlags     usage,
-	VkSharingMode  sharing_mode, VkImageLayout         initial_layout
+	VkImageView           *ret           , GXImage_t     *p_image,
+	VkImageCreateFlags     flags         , VkImageType    image_type,
+	VkFormat               format        , int            width,
+	int                    height        , int            depth,
+	size_t                 mip_levels    , size_t         array_layers, 
+	VkSampleCountFlagBits  samples       , VkImageTiling  tiling, 
+	VkImageUsageFlags      usage         , VkSharingMode  sharing_mode,
+	VkImageLayout          initial_layout
 );
 
 /*DLLEXPORT int construct_image_view

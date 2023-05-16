@@ -1,6 +1,6 @@
 ﻿#include <G10/GXQuaternion.h>
 
-quaternion identity_quaternion()
+quaternion identity_quaternion ( void )
 {
     return (quaternion)
     {
@@ -13,12 +13,12 @@ quaternion identity_quaternion()
 
 quaternion quaternion_from_euler_angle ( vec3 v )
 {
-    float sx = sinf(to_radians(v.x) * 0.5f),
-          sy = sinf(to_radians(v.y) * 0.5f),
-          sz = sinf(to_radians(v.z) * 0.5f),
-          cx = cosf(to_radians(v.x) * 0.5f),
-          cy = cosf(to_radians(v.y) * 0.5f),
-          cz = cosf(to_radians(v.z) * 0.5f);
+    float sx = sinf(to_radians(v.x) * .5f),
+          sy = sinf(to_radians(v.y) * .5f),
+          sz = sinf(to_radians(v.z) * .5f),
+          cx = cosf(to_radians(v.x) * .5f),
+          cy = cosf(to_radians(v.y) * .5f),
+          cz = cosf(to_radians(v.z) * .5f);
 
     return (quaternion)
     {
@@ -35,6 +35,7 @@ vec3 euler_angle_from_quaternion ( quaternion q )
           iD = sinf(q.i / wD),
           jD = sinf(q.j / wD),
           kD = sinf(q.k / wD);
+
     return (vec3)
     {
         iD,

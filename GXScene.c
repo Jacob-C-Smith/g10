@@ -147,7 +147,7 @@ int load_scene ( GXScene_t **pp_scene, const char *path )
     }
 }
 
-int load_scene_as_json ( GXScene_t **pp_scene, char *text )
+int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 {
 
     // Argument checking
@@ -266,7 +266,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     {
 
         // Allocate a scene
-        if ( create_scene(&p_scene) == (void *) 0 )
+        if ( create_scene(&p_scene) == 0 )
             goto failed_to_allocate_scene;
 
         // Set the name
@@ -321,7 +321,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                 }
 
                 // Empty the active instances -> entity loading queue
-                while(queue_dequeue(p_instance->queues.load_entity, 0) != (void *)0);
+                while ( queue_dequeue(p_instance->queues.load_entity, 0) != 0 );
 
                 // Iterate over each entity
                 for (size_t i = 0; i < len; i++)
@@ -1051,28 +1051,11 @@ int destroy_scene ( GXScene_t **pp_scene )
     if ( p_scene->entities )
     {
 
-        // Initialized data
-        size_t       entity_count = dict_keys(p_scene->entities, 0);
-        GXEntity_t **entities     = calloc(entity_count, sizeof(void *));
-
-        // Erorr checking
-        if ( entities == (void *) 0 )
-            goto no_mem;
-
-        // Dump the dictionary contents
-        dict_values(p_scene->entities, entities);
-
-        // Iterate over each entity
-        for ( size_t i = 0; i < entity_count; i++ )
-
-            // Destroy the entity
-            destroy_entity(entities[i]);
-
-        // Free the list
-        free(entities);
+        // Clear the dictionary and free every value
+        dict_free_clear(p_scene->entities, destroy_entity);
 
         // Destroy the entity dictionary
-        dict_destroy(p_scene->entities);
+        dict_destroy(&p_scene->entities);
 
     }
 
@@ -1080,27 +1063,11 @@ int destroy_scene ( GXScene_t **pp_scene )
     if ( p_scene->cameras )
     {
 
-        // Initialized data
-        size_t camera_count = dict_keys(p_scene->cameras, 0);
-        GXCamera_t **cameras = calloc(camera_count, sizeof(void*));
-
-        // Erorr checking
-        if ( cameras == (void *) 0 )
-            goto no_mem;
-
-        dict_values(p_scene->cameras, cameras);
-
-        // Iterate over each camera
-        for (size_t i = 0; i < camera_count; i++)
-
-            // Destroy the camera
-            destroy_camera(cameras[i]);
-
-        // Free the list
-        free(cameras);
+        // Clear the dictionary and free every value
+        dict_free_clear(p_scene->cameras, destroy_camera);
 
         // Destroy the camera dictionary
-        dict_destroy(p_scene->cameras);
+        dict_destroy(&p_scene->cameras);
 
     }
 
@@ -1160,16 +1127,5 @@ int destroy_scene ( GXScene_t **pp_scene )
                 return 0;
 
         }
-
-        // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
-				#endif
-
-				// Erorr
-				return 0;
-		}
     }
 }

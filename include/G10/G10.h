@@ -23,6 +23,8 @@
 
 // SDL 2
 #include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_net.h>
 #include <SDL_vulkan.h>
 
 // SDL 2 Bug
@@ -327,7 +329,7 @@ DLLEXPORT int g_print_log ( const char *const format, ... );
  *
  *  @return 1 on success, 0 on error
  */
-DLLEXPORT int g_start_schedule ( GXInstance_t *p_instance, char *name );
+DLLEXPORT int g_start_schedule ( GXInstance_t *p_instance, const char *name );
 
 /** !
  *  Stop the instances active schedule

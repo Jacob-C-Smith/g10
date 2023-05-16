@@ -156,7 +156,7 @@ int load_camera ( GXCamera_t **pp_camera, const char *path )
 	if ( g_load_file(path, file_text, true) == 0 )
 		goto failed_to_load_file;
 
-	if ( load_camera_as_json(pp_camera, file_text) == 0 )
+	if ( load_camera_as_json_text(pp_camera, file_text) == 0 )
 		goto failed_to_load_camera_as_json;
 
 	// Clean up the scope
@@ -210,7 +210,7 @@ int load_camera ( GXCamera_t **pp_camera, const char *path )
 	}
 }
 
-int load_camera_as_json ( GXCamera_t **pp_camera, char *text )
+int load_camera_as_json_text ( GXCamera_t **pp_camera, char *text )
 {
 
 	// Argument check
@@ -237,7 +237,7 @@ int load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 		goto failed_to_parse_json;
 
 	// Parse the JSON value into a camera
-	if ( load_camera_as_json_value(pp_camera, p_value) == (void *) 0 )
+	if ( load_camera_as_json_value(pp_camera, p_value) == 0 )
 		goto failed_to_load_camera_as_json_value;
 
 	// Success
@@ -264,15 +264,6 @@ int load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 
 				// Error
 				return 0;
-
-			no_len:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
 		}
 
 		// JSON parsing errors
@@ -288,70 +279,6 @@ int load_camera_as_json ( GXCamera_t **pp_camera, char *text )
 			failed_to_load_camera_as_json_value:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Camera] Failed to construct camera in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			wrong_type:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			missing_properties:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to construct Camera in call to function \"%s\". Missing properties!\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			location_len_error:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"location\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			target_len_error:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"target\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			up_len_error:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"up\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-		}
-
-		// G10 Errors
-		{
-			failed_to_allocate_camera:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to allocate memory for camera in call to function \"%s\"\n",  __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-		}
-
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -401,7 +328,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 		if ( ( name && near_clip && far_clip && fov && p_location && p_target && p_up ) == 0 )
 			goto missing_properties;
 	}
-	else if (p_value->type == JSONstring)
+	else if ( p_value->type == JSONstring )
 	{
 
 		if ( load_camera(pp_camera, p_value->string) == 0 )
@@ -601,26 +528,10 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 				// Error
 				return 0;
-
-			no_len:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
 		}
 
-		// JSON parsing errors
+		// JSON errors
 		{
-			failed_to_parse_json:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 
 			wrong_type:
 				#ifndef NDEBUG

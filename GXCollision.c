@@ -51,21 +51,66 @@ int create_collision ( GXCollision_t **pp_collision )
 int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t* a, GXEntity_t* b )
 {
 
-	// TODO: Argument check
+	// Argument check
+    {
+        if ( pp_collision == (void *) 0 ) goto no_collision;
+        if ( a            == (void *) 0 ) goto no_a;
+        if ( b            == (void *) 0 ) goto no_b;
+    }
 
 	// Initialized data
 	GXCollision_t *p_collision = 0;
 
-	create_collision(pp_collision);
+    // Allocate memory for a collision
+	if ( create_collision(pp_collision) == 0 )
+        goto failed_to_allocate_collision;
 
+    // Return a pointer to the caller
 	p_collision = *pp_collision;
 
+    // Set entity A
 	p_collision->a = a;
+
+    // Set entity B
 	p_collision->b = b;
 
+    // Set the begin tick
 	p_collision->begin_tick = p_instance->time.ticks;
+
+    // Set the colliding flag
 	p_collision->aabb_colliding = true;
 
 	// Success
 	return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_collision:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collision] Null pointer provided for parameter \"pp_collision\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_a:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collision] Null pointer provided for parameter \"a\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_b:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collision] Null pointer provided for parameter \"b\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }

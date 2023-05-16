@@ -961,8 +961,6 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
         };
     }
 
-    exit:
-
     // Success
     return 1;
 

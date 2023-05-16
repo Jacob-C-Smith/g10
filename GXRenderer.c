@@ -114,6 +114,7 @@ char *subpass_function_names[SUBPASS_FUNCTION_COUNT] =
     "bloom blur",
     "tone map gamma correct"
 };
+
 VkFormat format_enums[FORMAT_ENUM_COUNT] =
 {
     VK_FORMAT_UNDEFINED,
@@ -643,21 +644,21 @@ enum VkImageAspectFlagBits aspect_enums [ASPECT_COUNT] =
     VK_IMAGE_ASPECT_METADATA_BIT
 };
 
-dict *attachment_load_operations  =  0,
-     *image_layouts               =  0,
-     *subpass_functions           =  0,
-     *attachment_store_operations =  0,
-     *format_enumeration_lookup   =  0,
-     *pipeline_stage_flag_bits    =  0,
-     *access_flag_bits            =  0,
-     *dependency_flag_bits        =  0,
-     *texturing_modes             =  0,
-     *filtering_modes             =  0,
-     *tiling_lut                  =  0,
-     *usage_lut                   =  0,
-     *view_type_lut               =  0,
-     *swizzle_lut                 =  0,
-     *aspect_lut                  =  0;
+dict *attachment_load_operations  = 0,
+     *image_layouts               = 0,
+     *subpass_functions           = 0,
+     *attachment_store_operations = 0,
+     *format_enumeration_lookup   = 0,
+     *pipeline_stage_flag_bits    = 0,
+     *access_flag_bits            = 0,
+     *dependency_flag_bits        = 0,
+     *texturing_modes             = 0,
+     *filtering_modes             = 0,
+     *tiling_lut                  = 0,
+     *usage_lut                   = 0,
+     *view_type_lut               = 0,
+     *swizzle_lut                 = 0,
+     *aspect_lut                  = 0;
 
 void init_renderer ( void )
 {
@@ -706,7 +707,7 @@ void init_renderer ( void )
             dict_add(access_flag_bits, access_flag_bits_names[i], (void *)access_flag_bits_enum[i]);
 
         for (size_t i = 0; i < DEPENDENCY_FLAG_BITS_COUNT; i++)
-            dict_add(dependency_flag_bits, dependency_flag_bits_enum, (void *)dependency_flag_bits_name);
+            dict_add(dependency_flag_bits, dependency_flag_bits_name[i], (void *)dependency_flag_bits_enum[i]);
 
         for (size_t i = 0; i < TEXTURING_MODE_COUNT; i++)
             dict_add(texturing_modes, texturing_addressing_keys[i], (void *) texturing_addressing_values[i]);
@@ -951,7 +952,7 @@ int create_attachment ( GXAttachment_t **pp_attachment )
     GXAttachment_t *p_attachment = calloc(1, sizeof(GXSubpass_t));
 
     // Error checking
-    if (p_attachment == (void *)0)
+    if ( p_attachment == (void *) 0 )
         goto no_mem;
 
     // Return a pointer to the caller
@@ -993,8 +994,8 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
     // Argument check
     {
         #ifndef NDEBUG
-            if (    pp_renderer == (void *) 0 ) goto no_renderer;
-            if (    path        == (void *) 0 ) goto no_path;
+            if ( pp_renderer == (void *) 0 ) goto no_renderer;
+            if ( path        == (void *) 0 ) goto no_path;
         #endif
     }
 
@@ -1003,15 +1004,15 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
     char *text = calloc(1 + len, sizeof(char));
 
     // Error checking
-    if (text == (void *)0)
+    if ( text == (void *) 0 )
         goto no_mem;
 
     // Load the file
-    if (g_load_file(path, text, true) == 0)
+    if ( g_load_file(path, text, true) == 0 )
         goto failed_to_read_file;
 
     // Construct a renderer
-    if (load_renderer_as_json_text(pp_renderer, text) == 0)
+    if ( load_renderer_as_json_text(pp_renderer, text) == 0 )
         goto failed_to_load_renderer;
 
     // Clean the scope
@@ -1025,51 +1026,51 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
 
         // Argument errors
         {
-        no_renderer:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
 
-        no_path:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_path:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // G10 errors
         {
-        failed_to_read_file:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-            #endif
+            failed_to_read_file:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
 
-        failed_to_load_renderer:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-            #endif
+            failed_to_load_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load renderer from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // Standard library errors
         {
-        no_mem:
-            #ifndef NDEBUG
-                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+    
+                // Error
+                return 0;
         }
     }
 }
@@ -1273,7 +1274,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         no_p_clear:;
 
         // Parse each attachment
-        if (p_attachments->type == JSONarray)
+        if ( p_attachments->type == JSONarray )
         {
 
             // Initialized data
@@ -1322,7 +1323,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         }
 
         // Parse each render pass
-        if (p_passes->type == JSONarray)
+        if ( p_passes->type == JSONarray )
         {
             // Initialized data
             size_t array_len = 0;
@@ -1351,7 +1352,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             for (size_t i = 0; i < array_len; i++)
 
                 // Load the render pass as a JSON value
-                if (load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0)
+                if ( load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0 )
                     goto failed_to_load_renderer_as_json_value;
         }
         else
@@ -1368,16 +1369,15 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
     return 1;
 
     // TODO:
+    failed_to_allocate_texture:
+    wrong_passes_type:
+    failed_to_load_renderer_as_json_value:
+    wrong_renderer_clear_color:
 
-failed_to_allocate_texture:
-wrong_passes_type:
-failed_to_load_renderer_as_json_value:
-wrong_renderer_clear_color:
-
-faild_to_load_renderer:
-failed_to_load_attachment_as_json_value:
-    // Error
-    return 0;
+    faild_to_load_renderer:
+    failed_to_load_attachment_as_json_value:
+        // Error
+        return 0;
 
     // Error handling
     {
@@ -1385,62 +1385,62 @@ failed_to_load_attachment_as_json_value:
         // Argument errors
         {
 
-        no_return:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_return:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
 
-        no_value:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // JSON errors
         {
-        wrong_value_type:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Expected JSON [ string | object ] value in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            wrong_value_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Expected JSON [ string | object ] value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
 
-        missing_parameters:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Missing properties in \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            missing_parameters:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Missing properties in \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // G10 errors
         {
-        failed_to_allocate_renderer:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            failed_to_allocate_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
 
         // Standard library errors
         {
-        no_mem:
-            #ifndef NDEBUG
-                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
     }
 }
@@ -1661,7 +1661,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
             goto failed_to_create_render_pass;
 
         // Set the name
-        if (p_name->type == JSONstring)
+        if ( p_name->type == JSONstring )
         {
 
             // Initialized data
@@ -1899,16 +1899,19 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     // TODO: Check
     p_render_pass->framebuffers = calloc(p_instance->vulkan.image_count, sizeof(GXFramebuffer_t));
 
-    for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
+    // Create frame buffers
+    /*for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
     {
 
         // Initialized data
-        VkImageView attachments[2] = {
+        VkImageView attachments[2] =
+        {
             p_instance->vulkan.swap_chain_image_views[i],
             p_render_pass->image_attachments[1]
         };
 
-        VkFramebufferCreateInfo framebuffer_create_info = {
+        VkFramebufferCreateInfo framebuffer_create_info =
+        {
             .sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .renderPass      = p_render_pass->render_pass,
             .attachmentCount = 1,
@@ -1921,7 +1924,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         if ( vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS )
             goto failed_to_create_render_pass;
     }
-
+    */
     // Return a pointer to the caller
     *pp_render_pass = p_render_pass;
 
@@ -2140,10 +2143,10 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text )
     // Success
     return 1;
 
-// TODO:
-failed_to_parse_json_as_value:
-failed_to_load_subpass_as_json_value:
-    return 0;
+    // TODO:
+    failed_to_parse_json_as_value:
+    failed_to_load_subpass_as_json_value:
+        return 0;
 
     // Error handling
     {
@@ -2151,21 +2154,21 @@ failed_to_load_subpass_as_json_value:
         // Argument errors
         {
 
-        no_subpass:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_subpass:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
 
-        no_text:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_text:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
         }
     }
 }
@@ -2455,6 +2458,129 @@ wrong_depth_attachments_type:
     }
 }
 
+int construct_image ( GXImage_t *p_image, VkImageCreateFlags flags, VkImageType image_type, VkFormat format, int width, int height, int depth, size_t mip_levels, size_t array_layers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, VkSharingMode sharing_mode, VkImageLayout initial_layout )
+{
+
+    // Uninitialized data
+    VkMemoryRequirements  memory_requirements;
+
+    // Initialized data
+    GXInstance_t         *instance          = g_get_active_instance();
+    VkImageCreateInfo     image_create_info = { 0 };
+    size_t                dim               = 0;
+    VkMemoryAllocateInfo  allocate_info     = { 0 };
+
+    if ( height > 1 ) dim++;
+    if ( depth  > 1 ) dim++;
+
+    // Popultate image create info struct
+    image_create_info = (VkImageCreateInfo)
+    {
+        .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .flags         = 0,
+        .imageType     = image_type,
+        .format        = format,
+        .extent.width  = (u32)width,
+        .extent.height = (u32)height,
+        .extent.depth  = (u32)depth,
+        .mipLevels     = (u32)mip_levels,
+        .arrayLayers   = (u32)array_layers,
+        .tiling        = tiling,
+        .usage         = usage,
+        .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .samples       = samples
+    };
+       
+    // Create the image
+    if ( vkCreateImage(instance->vulkan.device, &image_create_info, 0, &p_image->image) != VK_SUCCESS )
+        goto failed_to_create_image;
+
+    // Figure out how much memory the image will use
+    vkGetImageMemoryRequirements(instance->vulkan.device, p_image->image, &memory_requirements);
+
+    // Popultate the allocate info struct
+    allocate_info = (VkMemoryAllocateInfo) 
+    {
+        .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize  = memory_requirements.size,
+        .memoryTypeIndex = find_memory_type(memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+    };
+
+    // Allocate memory for the image
+    if ( vkAllocateMemory(instance->vulkan.device, &allocate_info, 0, &p_image->image_memory) != VK_SUCCESS )
+    {
+        // TODO: GOTO, error handling
+        printf("failed to allocate image memory!");
+    }
+
+    // Bind the image to the image memory
+    vkBindImageMemory(instance->vulkan.device, p_image->image, p_image->image_memory, 0);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+
+        }
+
+        // Vulkan errors
+        {
+            failed_to_create_image:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Failed to create image in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int construct_image_view ( VkImageView *ret, GXImage_t *p_image, VkImageViewType view_type, VkFormat format, VkComponentMapping swizzle, VkImageAspectFlags aspect_mask )
+{
+    
+    GXInstance_t          *instance               = g_get_active_instance();
+    VkImageViewCreateInfo  image_view_create_info = 
+    {
+
+        .sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image                           = p_image->image,
+        .viewType                        = view_type,
+        .format                          = format,
+        .subresourceRange.aspectMask     = aspect_mask,
+        .subresourceRange.baseMipLevel   = 0,
+        .subresourceRange.levelCount     = 1,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount     = 1
+    };
+
+    if ( vkCreateImageView(instance->vulkan.device, &image_view_create_info, 0, ret) != VK_SUCCESS )
+        goto failed_to_create_image_view;
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument check
+        {
+            failed_to_create_image_view:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to create image view in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t *p_value )
 {
 
@@ -2613,6 +2739,51 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
         // Create an image
         {
 
+            // Initialized data
+            GXImage_t *p_image = 0;
+            
+            // Allocate memory for an image
+            if ( create_image(&p_image) == 0 )
+
+                // TODO: replace with a goto
+                return 0;
+            
+            // Construct the image
+            construct_image(
+                p_image,
+                0,
+                VK_IMAGE_TYPE_2D,
+                p_attachment->attachment_description.finalLayout,
+                p_instance->window.width,
+                p_instance->window.height,
+                1,
+                1,
+                1,
+                1,
+                VK_IMAGE_TILING_LINEAR,
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_SHARING_MODE_EXCLUSIVE,
+                p_attachment->attachment_description.initialLayout
+            );
+
+            // Set the attachment image
+            p_attachment->p_image = p_image;
+            
+            // Construct the image view
+            construct_image_view(
+                &p_attachment->image_view,
+                p_image,
+                VK_IMAGE_VIEW_TYPE_2D,
+                p_attachment->attachment_description.format,
+                (VkComponentMapping)
+                { 
+                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .a = VK_COMPONENT_SWIZZLE_IDENTITY
+                },
+                VK_IMAGE_ASPECT_COLOR_BIT
+            );
         }
 
     }
@@ -2682,7 +2853,6 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
         // JSON errors
         {
-
             wrong_type:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Attachment JSON value is of wrong type in call to function \"%s\"\n", __FUNCTION__);
@@ -2698,7 +2868,6 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
                 // Error
                 return 0;
-
 
             wrong_format:
                 #ifndef NDEBUG
@@ -2735,6 +2904,54 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
             wrong_final_layout:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Wrong \"final layout\" VkImageLayout value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            wrong_name_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"name\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            wrong_format_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"format\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            wrong_load_operation_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"load operation\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            wrong_store_operation_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"store operation\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            wrong_initial_layout_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"initial layout\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            wrong_final_layout_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"final layout\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2786,7 +3003,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
     // Construct the image
     {
-        /*
+        
         // Initialized data
         VkFormat                format                 = 0;
         VkSampleCountFlagBits   samples                = 0;
@@ -2826,7 +3043,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         // Set the format
         if ( p_format->type == JSONstring )
         {
-            format = (VkFormat)dict_get(format_enumeration_lookup, p_format->string);
+            format = (VkFormat) dict_get(format_enumeration_lookup, p_format->string);
 
             if (format == 0)
                 goto wrong_format;
@@ -2844,14 +3061,14 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
         // Set the load operation
         if ( p_load_operation->type == JSONstring )
-            loadOp = (VkAttachmentLoadOp)dict_get(attachment_load_operations, p_load_operation->string);
+            loadOp = (VkAttachmentLoadOp) dict_get(attachment_load_operations, p_load_operation->string);
         // Default
         else
             goto wrong_load_operation_type;
 
         // Set the store operation
         if ( p_store_operation->type == JSONstring )
-            storeOp = (VkAttachmentStoreOp)dict_get(attachment_store_operations, p_store_operation->string);
+            storeOp = (VkAttachmentStoreOp) dict_get(attachment_store_operations, p_store_operation->string);
         // Default
         else
             goto wrong_store_operation_type;
@@ -2863,7 +3080,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         // Set the initial layout
         if ( p_initial_layout->type == JSONstring )
         {
-            initialLayout = (VkImageLayout)dict_get(image_layouts, p_initial_layout->string);
+            initialLayout = (VkImageLayout) dict_get(image_layouts, p_initial_layout->string);
 
             if ( initialLayout == 0 )
                 goto wrong_initial_layout;
@@ -2875,7 +3092,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         // Set the final layout
         if ( p_final_layout->type == JSONstring )
         {
-            finalLayout = (VkImageLayout)dict_get(image_layouts, p_final_layout->string);
+            finalLayout = (VkImageLayout) dict_get(image_layouts, p_final_layout->string);
 
             if (finalLayout == 0)
                 goto wrong_final_layout;
@@ -2885,7 +3102,8 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
             goto wrong_final_layout_type;
 
         // Populate the attachment description
-        p_attachment->attachment_description = (VkImageCreateInfo)
+        /*
+        (VkImageCreateInfo)
         {
             .sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
             .pNext                 = 0,
@@ -2901,9 +3119,10 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
             .sharingMode           = 0,
             .queueFamilyIndexCount = 0,
             .pQueueFamilyIndices   = 0,
-            .initialLayout         = 0,
+            .initialLayout         = 0
         };
         */
+        /**/
         // Create a texture
         {
             /*
@@ -2941,7 +3160,8 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
                     p_texture,
                     VK_IMAGE_VIEW_TYPE_2D,
                     VK_FORMAT_D32_SFLOAT,
-                    (VkComponentMapping) {
+                    (VkComponentMapping)
+                    {
                         VK_COMPONENT_SWIZZLE_IDENTITY,
                         VK_COMPONENT_SWIZZLE_IDENTITY,
                         VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -3055,13 +3275,48 @@ int print_renderer ( GXRenderer_t *p_renderer )
 
         // Argument errors
         {
-        no_renderer:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+            no_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-            // Error
-            return 0;
+                // Error
+                return 0;
+        }
+    }
+}
+
+int print_image ( GXImage_t *p_image )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_image == (void *) 0 ) goto no_image;
+        #endif
+    }
+
+    // Formatting
+    g_print_log(" - Image info - \n");
+
+    // Print the name
+    g_print_log("name : \"%s\"\n", p_image->name);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_image:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_image\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+    
+                // Error
+                return 0;
         }
     }
 }

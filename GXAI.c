@@ -77,23 +77,23 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 	}
 
 	// Initialized data
-	size_t  file_len  = g_load_file(path, 0, true);
-	char   *file_data = calloc(file_len+1, sizeof(char));
+	size_t  len  = g_load_file(path, 0, true);
+	char   *text = calloc(len+1, sizeof(char));
 
 	// Error checking
-	if ( file_data == (void *) 0 )
+	if ( text == (void *) 0 )
 		goto no_mem;
 
 	// Load the file contents into memory
-	if ( g_load_file(path, file_data, true) == 0 )
+	if ( g_load_file(path, text, true) == 0 )
 		goto failed_to_load_file;
 
 	// Parse the file contents into an AI struct
-	if ( load_ai_as_json(pp_ai, file_data) == 0)
+	if ( load_ai_as_json_text(pp_ai, text) == 0)
 		goto failed_to_construct_ai_from_file_json;
 
 	// Free the file data
-	free(file_data);
+	free(text);
 
 	// Success
 	return 1;
@@ -135,7 +135,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 		{
 			failed_to_load_file:
 				#ifndef NDEBUG
-					free(file_data);
+					free(text);
 					g_print_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 
@@ -144,7 +144,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 
 			failed_to_construct_ai_from_file_json:
 				#ifndef NDEBUG
-					free(file_data);
+					free(text);
 					g_print_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
 				#endif
 
@@ -154,7 +154,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 	}
 }
 
-int load_ai_as_json ( GXAI_t **pp_ai, char *text )
+int load_ai_as_json_text ( GXAI_t **pp_ai, char *text )
 {
 
 	// Argument check
@@ -175,8 +175,8 @@ int load_ai_as_json ( GXAI_t **pp_ai, char *text )
 	if ( load_ai_as_json_value(pp_ai, p_value) == 0)
 		goto failed_to_load_ai_as_json_value;
 
-	// Deallocate the JSON value
-	FREE_VALUE(p_value);
+	// Clean the scope
+	free_json_value(p_value);
 
 	// Success
 	return 1;
@@ -281,7 +281,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 		p_cache_ai = g_find_ai(p_instance, p_name->string);
 
 		// If the AI is in the cache ...
-		if (p_cache_ai)
+		if ( p_cache_ai )
 		{
 
 			// ... make a copy of the cached AI

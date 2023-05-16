@@ -16,6 +16,7 @@
 // G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
+#include <G10/GXTransform.h>
 
 // SDL2
 #include <SDL.h>
@@ -35,7 +36,7 @@ struct GXPart_s
 
 	GXMaterial_t   *active_material;
 	GXShader_t     *active_shader;
-
+	GXTransform_t  *p_transform;
 
 	VkBuffer        vertex_buffer,
 	                element_buffer;
@@ -83,6 +84,7 @@ DLLEXPORT int load_part         ( GXPart_t   **pp_part, char *path );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_part_as_json_text ( GXPart_t **pp_part, char *text );
+DLLEXPORT int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value );
 
 // Drawing
 

@@ -131,7 +131,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 		goto failed_to_load_file;
 
 	// Load the transform as a json string
-	if ( load_transform_as_json_text(pp_transform, file_buffer, file_size) == 0 )
+	if ( load_transform_as_json_text(pp_transform, file_buffer) == 0 )
 		goto failed_to_load_transform;
 
 	// Free up the memory
@@ -241,38 +241,6 @@ int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
 
 				// Error
 				return 0;
-
-			wrong_type:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			missing_properties:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-
-
-		}
-
-
-
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 		}
 	}
 }
@@ -289,25 +257,22 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 	}
 
 	// Initialized data
-	array *p_location = 0,
-  		  *p_rotation = 0,
-		  *p_scale    = 0;
+	JSONValue_t *p_location = 0,
+  		        *p_rotation = 0,
+		        *p_scale    = 0;
 
 	// Parse the transform JSON
     if (p_value->type == JSONobject)
     {
 
-        // Initialized data
-		dict *p_dict = p_value->object;
-
         // Parse the transform
-        p_location   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "location")), JSONarray);
-        p_rotation   = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "rotation")), JSONarray);
-        p_scale      = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "scale"))   , JSONarray);
+        p_location   = dict_get(p_value->object, "location");
+        p_rotation   = dict_get(p_value->object, "rotation");
+        p_scale      = dict_get(p_value->object, "scale");
 
 		// Quaternion?
 		if ( p_rotation == 0 )
-			p_rotation = (array *) JSON_VALUE(((JSONValue_t *)dict_get(p_dict, "quaternion")), JSONarray);
+			p_rotation = dict_get(p_value->object, "quaternion");
 
 		// Error checking
 		if ( ( p_location && p_rotation && p_scale ) == 0 )
@@ -325,34 +290,40 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 		quaternion     rotation    = { 0, 0, 0, 0 };
 
 		// Set the location
+		if ( p_location->type == JSONarray )
 		{
 
 			// Initialized data
-			JSONValue_t **pp_elements          = 0;
-			size_t        vector_element_count = 0;
+			JSONValue_t **pp_elements   = 0;
+			size_t        element_count = 0;
 
-			// Get the quantity of elements
-			array_get(p_location, 0, &vector_element_count );
+			// Get the location contents
+			{ 
 
-			// Error checking
-			if ( vector_element_count != 3 )
-				goto location_len_error;
+				// Get the quantity of elements
+				array_get(p_location->list, 0, &element_count);
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+				// Error checking
+				if ( element_count != 3 )
+					goto location_len_error;
 
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the vector
-			array_get(p_location, pp_elements, 0 );
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_location->list, pp_elements, 0 );
+			}
 
 			// Set the location
 			location = (vec3)
 			{
-				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
-				.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
-				.z = (float) ((JSONValue_t *)pp_elements[2])->floating
+				.x = (float) pp_elements[0]->floating,
+				.y = (float) pp_elements[1]->floating,
+				.z = (float) pp_elements[2]->floating
 			};
 
 			// Clean the scope
@@ -364,59 +335,59 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 		{
 
 			// Initialized data
-			JSONValue_t **pp_elements          = 0;
-			size_t        vector_element_count = 0;
+			JSONValue_t **pp_elements   = 0;
+			size_t        element_count = 0;
 
-			// Get the quantity of elements
-			array_get(p_rotation, 0, &vector_element_count );
-
-			// Error checking
-			if ( !( vector_element_count == 3 || vector_element_count == 4 )  )
-				goto rotation_len_error;
-
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
-
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
-
-			// Populate the elements of the vector
-			array_get(p_rotation, pp_elements, 0 );
-
-			// Parse the data as a quaternion or an euler angle
-			if ( vector_element_count == 3 )
+			// Get the array contents
 			{
 
-				// Set the rotation
+				// Get the quantity of elements
+				array_get(p_rotation->list, 0, &element_count );
+
+				// Error checking
+				if ( ! ( element_count == 3 || element_count == 4 ) )
+					goto rotation_len_error;
+
+				// Allocate an array for the elements
+				pp_elements = calloc(element_count+1, sizeof(JSONValue_t *));
+
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_rotation->list, pp_elements, 0 );
+			}
+
+			// Parse the data as a quaternion or an euler angle
+			if ( element_count == 3 )
+			{
+
+				// Parse the rotation as an euler angle
 				rotation = quaternion_from_euler_angle(
 					(vec3)
 					{
-						.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
-						.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
-						.z = (float) ((JSONValue_t *)pp_elements[2])->floating
+						.x = (float) pp_elements[0]->floating,
+						.y = (float) pp_elements[1]->floating,
+						.z = (float) pp_elements[2]->floating
 					}
 				);
-
-				// Clean the scope
-				free(pp_elements);
 			}
-			else if ( vector_element_count == 4 )
+			else if ( element_count == 4 )
 			{
 
-				// Set the rotation
+				// Parse the rotation as a quaternion
 				rotation = (quaternion)
 				{
-					.u = (float) ((JSONValue_t *)pp_elements[0])->floating,
-					.i = (float) ((JSONValue_t *)pp_elements[1])->floating,
-					.j = (float) ((JSONValue_t *)pp_elements[2])->floating,
-					.k = (float) ((JSONValue_t *)pp_elements[3])->floating
+					.u = (float) pp_elements[0]->floating,
+					.i = (float) pp_elements[1]->floating,
+					.j = (float) pp_elements[2]->floating,
+					.k = (float) pp_elements[3]->floating
 				};
-
-				// Clean the scope
-				free(pp_elements);
-
 			}
+
+			// Clean the scope
+			free(pp_elements);
 		}
 
 		// Set the scale
@@ -426,29 +397,33 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
 
-			// Get the quantity of elements
-			array_get(p_scale, 0, &vector_element_count );
+			// Get the array contents
+			{
 
-			// Error checking
-			if ( vector_element_count != 3 )
-				goto scale_len_error;
+				// Get the quantity of elements
+				array_get(p_scale->list, 0, &vector_element_count );
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+				// Error checking
+				if ( vector_element_count != 3 )
+					goto scale_len_error;
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the vector
-			array_get(p_scale, pp_elements, 0 );
+				// Error checking
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
+
+				// Populate the elements of the vector
+				array_get(p_scale->list, pp_elements, 0 );
+			}
 
 			// Set the scale
 			scale = (vec3)
 			{
-				.x = (float) ((JSONValue_t *)pp_elements[0])->floating,
-				.y = (float) ((JSONValue_t *)pp_elements[1])->floating,
-				.z = (float) ((JSONValue_t *)pp_elements[2])->floating
+				.x = (float) pp_elements[0]->floating,
+				.y = (float) pp_elements[1]->floating,
+				.z = (float) pp_elements[2]->floating
 			};
 
 			// Clean the scope
@@ -458,7 +433,6 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 		// Construct the transform
 		if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
 			goto failed_to_create_transform;
-
 	}
 
 	// Success

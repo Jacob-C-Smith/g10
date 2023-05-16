@@ -84,7 +84,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 		// TODO: goto, error handling
 		return 0;
 
-	if ( load_material_as_json(pp_material, text) == 0)
+	if ( load_material_as_json_text(pp_material, text) == 0)
 		// TODO: goto, error handling
 		return 0;
 
@@ -128,7 +128,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 	}
 }
 
-int load_material_as_json ( GXMaterial_t **material, char* text )
+int load_material_as_json_text ( GXMaterial_t **material, char* text )
 {
 
 	// Argument check

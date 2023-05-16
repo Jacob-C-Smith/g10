@@ -79,7 +79,7 @@ DLLEXPORT int create_scene ( GXScene_t  **pp_scene );
  * @param path     : The path to a JSON file containing a scene object
  *
  * @sa load_scene_as_json_text
- * @sa create_scene
+ * @sa load_scene_as_json_value
  *
  * @return 1 on success, 0 on error
  */
@@ -88,15 +88,28 @@ DLLEXPORT int load_scene ( GXScene_t **pp_scene, const char *path );
 /** !
  *  Load a scene from JSON text
  *
- * @param pp_scene   : return
- * @param text : The scene JSON object text
+ * @param pp_scene : return
+ * @param text     : The scene JSON object text
  *
+ * @sa load_scene
  * @sa load_scene_as_json_value
- * @sa create_scene
  *
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int load_scene_as_json_text ( GXScene_t **pp_scene, char *text );
+
+/** !
+ *  Load a scene from JSON text
+ *
+ * @param pp_scene : return
+ * @param p_value  : The scene JSON object value
+ *
+ * @sa load_scene
+ * @sa load_scene_as_json_text
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value );
 
 // Appenders
 /** !
@@ -160,7 +173,6 @@ DLLEXPORT int draw_scene ( GXScene_t *p_scene );
 DLLEXPORT int draw_lights ( GXScene_t *p_scene, GXPart_t *light_part, GXShader_t *shader );
 
 // Info
-
 /** !
  *  Print info about a scene
  *
@@ -245,7 +257,7 @@ DLLEXPORT int load_light_probe_from_queue ( GXInstance_t *p_instance );
  * Remove an entity from the scene by it's name
  *
  * @param p_scene : The scene
- * @param name : The name
+ * @param name    : The name
  *
  * @return a pointer to the entity, if the scene contains the entity, else 0
  */
@@ -255,7 +267,7 @@ DLLEXPORT GXEntity_t *remove_entity ( GXScene_t *p_scene, const char *name );
  * Remove a camera from the scene by it's name
  *
  * @param p_scene : The scene
- * @param name : The name
+ * @param name    : The name
  *
  * @return a pointer to the camera, if the scene contains the camera, else 0
  */
@@ -265,7 +277,7 @@ DLLEXPORT GXCamera_t *remove_camera ( GXScene_t *p_scene, const char *name );
  * Remove a light from the scene by it's name
  *
  * @param p_scene : The scene
- * @param name : The name
+ * @param name    : The name
  *
  * @return a pointer to the light, if the scene contains the light, else 0
  */
@@ -274,7 +286,7 @@ DLLEXPORT GXLight_t *remove_light ( GXScene_t *p_scene, const char *name );
 /** !
  * Remove a collision from the scene
  *
- * @param p_scene : The scene
+ * @param p_scene     : The scene
  * @param p_collision : The collision
  *
  * @return a pointer to the collision, if the scene contains the collision, else 0
@@ -285,10 +297,10 @@ DLLEXPORT GXCollision_t *remove_collision ( GXScene_t *p_scene, GXCollision_t *p
 /** !
  *  Free a scene and all its contents
  *
- * @param p_scene : Pointer to scene
+ * @param pp_scene : Pointer to scene pointer
  *
  * @sa create_scene
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_scene ( GXScene_t *p_scene );
+DLLEXPORT int destroy_scene ( GXScene_t **pp_scene );

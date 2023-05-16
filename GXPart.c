@@ -84,7 +84,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 		goto failed_to_load_file;
 
 	// Load the part as JSON text
-	if ( load_part_as_json(pp_part, text) == 0 )
+	if ( load_part_as_json_text(pp_part, text) == 0 )
 		goto failed_to_load_part;
 
 	// Free the token text
@@ -143,13 +143,12 @@ int load_part ( GXPart_t **pp_part, char* path)
 
 				// Error
 				return 0;
-
 		}
 	}
 
 }
 
-int load_part_as_json ( GXPart_t **pp_part, char* text )
+int load_part_as_json_text ( GXPart_t **pp_part, char* text )
 {
 
 	// Argument check
@@ -199,25 +198,6 @@ int load_part_as_json ( GXPart_t **pp_part, char* text )
 
 				// Error
 				return 0;
-
-			no_len:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter \"len\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
-
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 		}
 	}
 }
@@ -259,7 +239,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	{
 
 		// Load a part from a JSON file
-		if ( load_part(pp_part, p_value->string) == (void *)0 )
+		if ( load_part(pp_part, p_value->string) == 0 )
 			goto failed_to_load_part_from_file;
 
 		// Success
@@ -276,7 +256,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		SDL_LockMutex(p_instance->mutexes.part_cache);
 
 		// Search the cache for the part
-		p_cache_part = g_find_part(p_instance, name);
+		p_cache_part = g_find_part(p_instance, name->string);
 
 		// If the part is in the cache ...
 		if (p_cache_part)
@@ -479,19 +459,22 @@ int part_info ( GXPart_t *p_part )
 	}
 }
 
-int destroy_part ( GXPart_t *p_part )
+int destroy_part ( GXPart_t **pp_part )
 {
 
 	// Argument chack
 	{
 		#ifndef NDEBUG
-			if ( p_part == (void *) 0 )
+			if ( pp_part == (void *) 0 )
 				goto no_part;
 		#endif
 	}
-
+	
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
+	GXPart_t     *p_part = *pp_part;
+
+	*pp_part = 0;
 
 	// Remove the part from the cache
 	if ( (GXPart_t *) dict_get(p_instance->cache.parts, p_part->name) == p_part )

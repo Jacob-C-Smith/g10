@@ -159,11 +159,11 @@ int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 	JSONValue_t *p_value = 0;
 
 	// Parse the JSON
-	if ( parse_json_value(text, 0, &p_value) == (void *) 0 )
+	if ( parse_json_value(text, 0, &p_value) == 0 )
 		goto failed_to_parse_json;
 
 	// Load the entity as a JSON value
-	if ( load_entity_as_json_value(pp_entity, p_value) == (void *) 0 )
+	if ( load_entity_as_json_value(pp_entity, p_value) == 0 )
 		goto failed_to_load_entity_as_json_value;
 
 	// Clean up the scope

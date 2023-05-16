@@ -79,13 +79,13 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
     ret->camera = camera;
 
     // Displacement binds
-    GXBind_t* forward = find_bind(p_instance->input, "FORWARD"),
-        * backward = find_bind(p_instance->input, "BACKWARD"),
-        * left = find_bind(p_instance->input, "STRAFE LEFT"),
-        * right = find_bind(p_instance->input, "STRAFE RIGHT"),
+    GXBind_t *forward  = find_bind(p_instance->input, "FORWARD"),
+             *backward = find_bind(p_instance->input, "BACKWARD"),
+             *left     = find_bind(p_instance->input, "STRAFE LEFT"),
+             *right    = find_bind(p_instance->input, "STRAFE RIGHT"),
 
-        // Orientation binds
-        * mouse = find_bind(p_instance->input, "MOUSE");
+             // Orientation binds
+             * mouse   = find_bind(p_instance->input, "MOUSE");
 
     // Error checking
     {
@@ -97,22 +97,18 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
         // branches to error handling. Else, continue
 
         #ifndef NDEBUG
-
-        if (forward      == (void*)0)
-            errors |= 0x1;
-        if (backward     == (void*)0)
-            errors |= 0x2;
-        if (left         == (void*)0)
-            errors |= 0x4;
-        if (right        == (void*)0)
-            errors |= 0x8;
-        if (mouse    == (void*)0)
-            errors |= 0x10;
-
-
-        if (errors)
-            goto missing_binds;
-
+            if (forward == (void*)0)
+                errors |= 0x1;
+            if (backward == (void*)0)
+                errors |= 0x2;
+            if (left == (void*)0)
+                errors |= 0x4;
+            if (right == (void*)0)
+                errors |= 0x8;
+            if (mouse == (void*)0)
+                errors |= 0x10;
+            if (errors)
+                goto missing_binds;
         #endif
     }
 

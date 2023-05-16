@@ -96,12 +96,11 @@ int main ( int argc, const char *argv[] )
             
             // Set up the camera controller
             {
-            // 
-            //     // First person controller
-            //     camera_controller_from_camera(instance, instance->context.scene->active_camera);
-            // 
-            //     // Third person controller. Thanks Aiden :)
-            //     //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
+                // First person controller
+                // camera_controller_from_camera(instance, instance->context.scene->active_camera);
+               
+                // Third person controller. Thanks Aiden :)
+                //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
             }
              
         }
@@ -119,11 +118,6 @@ int main ( int argc, const char *argv[] )
 
         print_renderer(p_instance->context.renderer);
     }
-
-    GXShader_t *p_comp_shader = 0;
-
-    if ( load_shader(&p_comp_shader, "G10/compute.json") == 0 )
-        g_print_error("Failed to load shader!\n");
 
     // Start the game 
     g_start_schedule(p_instance, schedule_name);

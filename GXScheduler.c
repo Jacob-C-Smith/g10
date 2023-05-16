@@ -376,17 +376,6 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 				return 0;
 		}
 
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-			// Error
-			return 0;
-		}
-
 		// G10 Errors
 		{
 			failed_to_create_schedule:
