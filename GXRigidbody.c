@@ -89,7 +89,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 		goto failed_to_load_file;
 
 	// Load the rigidbody from the JSON text
-	if ( load_rigidbody_as_json(pp_rigidbody, text) == 0 )
+	if ( load_rigidbody_as_json_text(pp_rigidbody, text) == 0 )
 		goto failed_to_load_rigidbody_as_json;
 
 	// Success
@@ -107,6 +107,15 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 
 				// Error
 				return 0;
+
+			no_path:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+				
 		}
 
 		// Standard library
@@ -141,7 +150,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 	}
 }
 
-int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
+int load_rigidbody_as_json_text ( GXRigidbody_t** pp_rigidbody, char *text )
 {
 
 	// Argument check
@@ -152,6 +161,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 		#endif
 	}
 
+	/*
 	// Initialized data
 	dict          *json_object = 0;
 	GXRigidbody_t *p_rigidbody = 0;
@@ -208,7 +218,7 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 			if ( p_rigidbody->torques == (void *) 0 )
 				goto no_mem;
 		#endif
-	}
+	}*/
 
 	// Success
 	return 1;
@@ -234,24 +244,6 @@ int load_rigidbody_as_json ( GXRigidbody_t** pp_rigidbody, char *text )
 				// Error
 				return 0;
 
-			no_len:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for \"len\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
-
-		// Standard library
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"pp_rigidbody\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 		}
 
 		// G10 errors

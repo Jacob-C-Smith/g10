@@ -13,6 +13,9 @@
 int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
+int destroy_graphics_shader ( GXShader_t **pp_shader );
+int destroy_compute_shader ( GXShader_t **pp_shader );
+int destroy_ray_shader ( GXShader_t **pp_shader );
 
 char *shader_pipeline_names [SHADER_PIPELINE_CONSTRUCTORS] =
 {
@@ -20,6 +23,13 @@ char *shader_pipeline_names [SHADER_PIPELINE_CONSTRUCTORS] =
     "compute",
     "ray"
 };
+void *graphics_pipeline_type_constructors [SHADER_PIPELINE_CONSTRUCTORS] =
+{
+    &load_graphics_shader_as_json_value,
+    &load_compute_shader_as_json_value,
+    &load_ray_shader_as_json_value
+};
+
 char *format_type_names [FORMATS_COUNT] =
 {
     "float",
@@ -39,98 +49,6 @@ char *format_type_names [FORMATS_COUNT] =
     "mat3",
     "u8vec4",
     "u8vec4 sRGB"
-};
-char *descriptor_type_names [DESCRIPTOR_TYPE_COUNT] =
-{
-    "sampler",
-    "combined image sampler",
-    "sampled image",
-    "storage image",
-    "uniform texel buffer",
-    "storage texel buffer",
-    "uniform buffer",
-    "storage buffer",
-    "uniform buffer dynamic",
-    "storage buffer dynamic",
-    "input attachment"
-};
-char *push_constant_getter_names [PUSH_CONSTANT_GETTERS_COUNT] =
-{
-    "camera position",
-    "model matrix"
-};
-char *rasterizer_polygon_mode_names [RASTERIZER_POLYGON_MODE_COUNT] =
-{
-    "fill",
-    "line",
-    "point"
-};
-char *blend_operation_names [BLEND_OPERATIONS_COUNT] =
-{
-    "add",
-    "subtract",
-    "reverse subtract",
-    "minimum",
-    "maximum"
-};
-char *blend_factor_names [BLEND_FACTORS_COUNT] =
-{
-    "zero",
-    "one",
-    "source color",
-    "one minus source color",
-    "destination color",
-    "one minus destination color",
-    "source alpha",
-    "one minus source alpha",
-    "destination alpha",
-    "one minus destination alpha",
-    "constant color",
-    "one minus constant color",
-    "constant alpha",
-    "one minus constant alpha",
-    "source alpha saturate",
-    "source one color",
-    "one minus source one color",
-    "source one alpha",
-    "one minus source one alpha"
-};
-char *shader_stages_names [SHADER_STAGES_COUNT] =
-{
-    "vertex",
-    "tessellation control",
-    "tessellation evaluation",
-    "geometry",
-    "fragment",
-    "compute",
-    "task",
-    "mesh",
-    "ray generation",
-    "miss",
-    "intersection",
-    "closest hit",
-    "any hit",
-    "callable"
-};
-void *graphics_pipeline_type_constructors [SHADER_PIPELINE_CONSTRUCTORS] =
-{
-    &load_graphics_shader_as_json_value,
-    &load_compute_shader_as_json_value,
-    &load_ray_shader_as_json_value
-};
-VkDescriptorType  descriptor_type_enums [DESCRIPTOR_TYPE_COUNT] =
-{
-    VK_DESCRIPTOR_TYPE_SAMPLER,
-    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-    VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-    VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
-    VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
-    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-    VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 };
 VkFormat format_type_enums [FORMATS_COUNT] =
 {
@@ -173,16 +91,67 @@ size_t format_type_sizes [FORMATS_COUNT] =
     32,
     32
 };
+
+char *descriptor_type_names [DESCRIPTOR_TYPE_COUNT] =
+{
+    "sampler",
+    "combined image sampler",
+    "sampled image",
+    "storage image",
+    "uniform texel buffer",
+    "storage texel buffer",
+    "uniform buffer",
+    "storage buffer",
+    "uniform buffer dynamic",
+    "storage buffer dynamic",
+    "input attachment"
+};
+VkDescriptorType  descriptor_type_enums [DESCRIPTOR_TYPE_COUNT] =
+{
+    VK_DESCRIPTOR_TYPE_SAMPLER,
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+    VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+    VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
+    VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+};
+
+char *push_constant_getter_names [PUSH_CONSTANT_GETTERS_COUNT] =
+{
+    "camera position",
+    "model matrix"
+};
 void *push_constant_getter_functions [PUSH_CONSTANT_GETTERS_COUNT] =
 {
     &get_camera_position,
     &get_model_matrix
+};
+
+char *rasterizer_polygon_mode_names [RASTERIZER_POLYGON_MODE_COUNT] =
+{
+    "fill",
+    "line",
+    "point"
 };
 VkPolygonMode rasterizer_polygon_mode_enum [RASTERIZER_POLYGON_MODE_COUNT] =
 {
     VK_POLYGON_MODE_FILL,
     VK_POLYGON_MODE_LINE,
     VK_POLYGON_MODE_POINT
+};
+
+char *blend_operation_names [BLEND_OPERATIONS_COUNT] =
+{
+    "add",
+    "subtract",
+    "reverse subtract",
+    "minimum",
+    "maximum"
 };
 VkBlendOp blend_operation_enums [BLEND_OPERATIONS_COUNT] =
 {
@@ -191,6 +160,29 @@ VkBlendOp blend_operation_enums [BLEND_OPERATIONS_COUNT] =
     VK_BLEND_OP_REVERSE_SUBTRACT,
     VK_BLEND_OP_MIN,
     VK_BLEND_OP_MAX
+};
+
+char *blend_factor_names [BLEND_FACTORS_COUNT] =
+{
+    "zero",
+    "one",
+    "source color",
+    "one minus source color",
+    "destination color",
+    "one minus destination color",
+    "source alpha",
+    "one minus source alpha",
+    "destination alpha",
+    "one minus destination alpha",
+    "constant color",
+    "one minus constant color",
+    "constant alpha",
+    "one minus constant alpha",
+    "source alpha saturate",
+    "source one color",
+    "one minus source one color",
+    "source one alpha",
+    "one minus source one alpha"
 };
 VkBlendFactor blend_factor_enums [BLEND_FACTORS_COUNT] =
 {
@@ -213,6 +205,24 @@ VkBlendFactor blend_factor_enums [BLEND_FACTORS_COUNT] =
     VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
     VK_BLEND_FACTOR_SRC1_ALPHA,
     VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+};
+
+char *shader_stages_names [SHADER_STAGES_COUNT] =
+{
+    "vertex",
+    "tessellation control",
+    "tessellation evaluation",
+    "geometry",
+    "fragment",
+    "compute",
+    "task",
+    "mesh",
+    "ray generation",
+    "miss",
+    "intersection",
+    "closest hit",
+    "any hit",
+    "callable"
 };
 VkShaderStageFlagBits shader_stages_enum [SHADER_STAGES_COUNT] =
 {
@@ -540,7 +550,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
         goto failed_to_load_file;
 
     // Load a shader as JSON text
-    if ( load_shader_as_json(pp_shader, text) == 0 )
+    if ( load_shader_as_json_text(pp_shader, text) == 0 )
         goto failed_to_load_shader_as_json_text;
 
     // Clean the scope
@@ -603,7 +613,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
     }
 }
 
-int load_shader_as_json ( GXShader_t **pp_shader, char *text )
+int load_shader_as_json_text ( GXShader_t **pp_shader, char *text )
 {
     // Argument check
     {
@@ -1004,21 +1014,68 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
     }
 }
 */
-int destroy_shader ( GXShader_t *shader )
+int destroy_shader ( GXShader_t **pp_shader )
 {
 
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
     // TODO: Cache destruction
-    GXInstance_t* p_instance = g_get_active_instance();
 
-    vkDestroyPipeline(p_instance->vulkan.device, shader->graphics.pipeline, 0);
-    vkDestroyPipelineLayout(p_instance->vulkan.device, shader->graphics.pipeline_layout, 0);
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXShader_t   *p_shader = *pp_shader;
 
-    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.vertex_shader_module, 0);
-    vkDestroyShaderModule(p_instance->vulkan.device, shader->graphics.fragment_shader_module, 0);
+    // Error check
+    if ( p_shader == (void *) 0 )
+        goto pointer_to_null_pointer;
 
-    free(shader->name);
-    free(shader);
+    // Destroy the pipeline
+    vkDestroyPipeline(p_instance->vulkan.device, p_shader->graphics.pipeline, 0);
+
+    // Destroy the pipeline layout
+    vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->graphics.pipeline_layout, 0);
+
+    // Destroy the shader modules
+    {
+
+    }
+
+    vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.vertex_shader_module, 0);
+    vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.fragment_shader_module, 0);
+
+    free(p_shader->name);
+    free(p_shader);
+
+    // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            pointer_to_null_pointer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Parameter \"pp_shader\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+            
+                // Error
+                return 0;
+
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
@@ -2480,7 +2537,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         p_layout              = dict_get(p_value->object, "layout");
 
         // Check properties
-        if ( !( p_name && p_compute_shader_path && p_layout ) )
+        if ( !( p_name && p_compute_shader_path ) )
             goto missing_properties;
     }
 
@@ -2491,20 +2548,14 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 	p_cache_shader = g_find_ai(p_instance, p_name->string);
 
 	// If the shader is in the cache ...
-	if (p_cache_shader)
+	if ( p_cache_shader )
 	{
 
-		// ... make a copy of the cached shader
-		copy_ai(pp_shader, p_cache_shader);
+        // TODO
 
-		// Write the return
-		p_shader = *pp_shader;
-
-		// Set the initial state
-		goto exit;
 	}
 
-	// ... the AI is not in the cache
+	// ... the shader is not in the cache
 
     // Construct the shader
     {
@@ -2600,88 +2651,131 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
                 ;// TODO:
 
             //  Set up layout
+            if ( p_layout )
             {
-
-                // Initialized data
-                JSONValue_t                     *p_layout_sets                     = 0,
-                                                *p_layout_push_constant            = 0;
-                size_t                           layout_sets_count                 = 0;
-                JSONValue_t                    **pp_sets                           = 0;
-                VkPipelineLayoutCreateInfo       pipeline_layout_create_info       = { 0 };
-                size_t                           binding_count                     = 0,
-                                                 descriptor_set_layout_count       = 0;
-                VkDescriptorSetLayoutBinding     p_bindings                        = { 0 };
-                VkPushConstantRange             *p_push_constant                   = 0;
-                VkDescriptorSetLayout           *p_descriptor_set_layout           = 0;
-                VkDescriptorSetLayoutCreateInfo  descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
-                {
-                    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-                    .pNext        = 0,
-                    .flags        = 0,
-                    .bindingCount = (u32)binding_count,
-                    .pBindings    = &p_bindings
-                };
-                VkDescriptorSetLayoutBinding     descriptor_set_layout_binding     = (VkDescriptorSetLayoutBinding)
-                {
-                    .binding            = 0,
-                    .descriptorType     = 0,
-                    .descriptorCount    = 0,
-                    .stageFlags         = 0,
-                    .pImmutableSamplers = 0
-                };
-
-                // Parse the JSON
-                {
-                    p_layout_sets          = dict_get(p_layout->object, "sets");
-                    p_layout_push_constant = dict_get(p_layout->object, "push constant");
-                }
-
-                // Get the contents of the sets array
-                {
-
-                    // Get the length of the array
-                    array_get(p_layout_sets->list, 0, &layout_sets_count);
-
-                    // Allocate memory for JSON tokens
-                    pp_sets = calloc(layout_sets_count, sizeof(JSONValue_t *));
-
-                    // Get the contents of the array
-                    array_get(p_layout_sets->list, pp_sets, 0);
-                }
-
-                // Iterate over each set
-                for ( size_t i = 0; i < layout_sets_count; i++ )
+                if ( p_layout->type == JSONobject )
                 {
 
                     // Initialized data
-                    JSONValue_t *p_set = pp_sets[i];
+                    JSONValue_t                     *p_layout_sets                     = 0,
+                                                    *p_layout_push_constant            = 0;
+                    size_t                           layout_sets_count                 = 0;
+                    JSONValue_t                    **pp_sets                           = 0;
+                    VkPipelineLayoutCreateInfo       pipeline_layout_create_info       = { 0 };
+                    size_t                           binding_count                     = 0,
+                                                     descriptor_set_layout_count       = 0;
+                    VkDescriptorSetLayoutBinding     p_bindings                        = { 0 };
+                    VkPushConstantRange             *p_push_constant                   = 0;
+                    VkDescriptorSetLayout           *p_descriptor_set_layout           = 0;
+                    VkDescriptorSetLayoutCreateInfo  descriptor_set_layout_create_info = (VkDescriptorSetLayoutCreateInfo)
+                    {
+                        .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                        .pNext        = 0,
+                        .flags        = 0,
+                        .bindingCount = (u32)binding_count,
+                        .pBindings    = &p_bindings
+                    };
+                    VkDescriptorSetLayoutBinding     descriptor_set_layout_binding     = (VkDescriptorSetLayoutBinding)
+                    {
+                        .binding            = 0,
+                        .descriptorType     = 0,
+                        .descriptorCount    = 0,
+                        .stageFlags         = 0,
+                        .pImmutableSamplers = 0
+                    };
 
-                    print_json_value(p_set, stdout);
-                    printf("\n\n");
+                    // Parse the JSON
+                    {
+                        p_layout_sets          = dict_get(p_layout->object, "sets");
+                        p_layout_push_constant = dict_get(p_layout->object, "push constant");
+                    }
+
+                    // Parse the sets
+                    if ( p_layout_sets )
+                    {
+
+                        if ( p_layout_sets->type == JSONarray )
+                        {
+
+                            // Get the contents of the sets array
+                            {
+
+                                // Get the length of the array
+                                array_get(p_layout_sets->list, 0, &layout_sets_count);
+
+                                // Allocate memory for JSON tokens
+                                pp_sets = calloc(layout_sets_count, sizeof(JSONValue_t *));
+
+                                // Get the contents of the array
+                                array_get(p_layout_sets->list, pp_sets, 0);
+                            }
+
+                            // Iterate over each set
+                            for ( size_t i = 0; i < layout_sets_count; i++ )
+                            {
+
+                                // Initialized data
+                                JSONValue_t *p_set = pp_sets[i];
+
+                                // Print the JSON value
+                                printf("[G10] [Shader] %s: ", __FUNCTION__);
+                                print_json_value(p_set, stdout);
+                                printf("\n");
+                            }
+
+                            if ( vkCreateDescriptorSetLayout(p_instance->vulkan.device, &descriptor_set_layout_create_info, 0, &p_shader->compute.set_layout) != VK_SUCCESS)
+                                goto failed_to_create_descriptor_set_layout;
+                        }
+                    }
+
+                    if ( p_layout_push_constant )
+                    {
+                        
+                        if ( p_layout_push_constant->type == JSONobject )
+                        {
+
+                        }
+                    }
+
+                    pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                    {
+                        .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                        .pNext                  = 0,
+                        .flags                  = 0,
+                        .setLayoutCount         = (u32)descriptor_set_layout_count,
+                        .pSetLayouts            = p_descriptor_set_layout,
+                        .pushConstantRangeCount = 0,
+                        .pPushConstantRanges    = p_push_constant  /* pointer to an array of VkPushConstantRange structures
+                                                                   defining a set of push constant ranges for use in a
+                                                                   single pipeline layout. In addition to descriptor set
+                                                                   layouts, a pipeline layout also describes how many push
+                                                                   constants can be accessed by each stage of the pipeline.*/
+
+                    };
+
+                    if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->compute.pipeline_layout) != VK_SUCCESS )
+                        goto failed_to_create_pipeline_layout;
                 }
+            }
+            // Default
+            {
 
-                if ( vkCreateDescriptorSetLayout(p_instance->vulkan.device, &descriptor_set_layout_create_info, 0, &p_shader->compute.set_layout) != VK_SUCCESS)
-                    goto failed_to_create_descriptor_set_layout;
-
-                pipeline_layout_create_info = (VkPipelineLayoutCreateInfo)
+                // Initialized data
+                VkPipelineLayoutCreateInfo pipeline_layout_create_info = 
                 {
-                    .sType               = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                    .pNext               = 0,
-                    .flags               = 0,
-                    .setLayoutCount      = (u32)descriptor_set_layout_count,
-                    .pSetLayouts         = p_descriptor_set_layout,
-                    .pPushConstantRanges = p_push_constant  /* pointer to an array of VkPushConstantRange structures
-                                                               defining a set of push constant ranges for use in a
-                                                               single pipeline layout. In addition to descriptor set
-                                                               layouts, a pipeline layout also describes how many push
-                                                               constants can be accessed by each stage of the pipeline.*/
-
+                    .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                    .pNext                  = 0,
+                    .flags                  = 0,
+                    .setLayoutCount         = 0,
+                    .pSetLayouts            = 0,
+                    .pushConstantRangeCount = 0,
+                    .pPushConstantRanges    = 0
                 };
 
                 if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->compute.pipeline_layout) != VK_SUCCESS )
                     goto failed_to_create_pipeline_layout;
             }
-
+            
             // Set up the compute pipeline
             compute_pipeline_create_info = (VkComputePipelineCreateInfo)
             {
@@ -2841,7 +2935,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         p_name                         = dict_get(p_value->object, "name");
         p_ray_generation_shader_path   = dict_get(p_value->object, "generation shader path");
         p_ray_any_hit_shader_path      = dict_get(p_value->object, "any hit shader path");
-        p_ray_closest_hit_shader_path  = dict_get(p_value->object, "closest_hit shader path");
+        p_ray_closest_hit_shader_path  = dict_get(p_value->object, "closest hit shader path");
         p_ray_miss_shader_path         = dict_get(p_value->object, "miss shader path");
         p_ray_intersection_shader_path = dict_get(p_value->object, "intersection shader path");
         p_ray_callable_shader_path     = dict_get(p_value->object, "callable shader path");
@@ -3373,7 +3467,6 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 // Error
                 return 0;
 
-
             failed_to_load_ray_generation_shader_binary:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to load generation ray shader binary in call to function \"%s\"\n", __FUNCTION__);
@@ -3469,6 +3562,227 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
                 // Error
                 return 0;
+        }
+    }
+}
+
+int destroy_graphics_shader ( GXShader_t **pp_shader )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXShader_t   *p_shader   = *pp_shader;
+
+    // Error checking
+    if ( p_shader == (void *) 0 )
+        goto pointer_to_null_pointer;
+
+    // Destroy the pipeline 
+    vkDestroyPipeline(p_instance->vulkan.device, p_shader->graphics.pipeline, 0);
+
+    // Destroy the pipeline layout
+    vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->graphics.pipeline_layout, 0);
+
+    // Destroy shader modules
+    {
+
+        // Destroy the vertex module
+        if ( p_shader->graphics.vertex_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.vertex_shader_module, 0);
+
+        // Destroy the tessellation control module
+        if ( p_shader->graphics.tessellation_control_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.tessellation_control_shader_module, 0);
+
+        // Destroy the tessellation evaluation module
+        if ( p_shader->graphics.tessellation_evaluation_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.tessellation_evaluation_shader_module, 0);
+        
+        // Destroy the geometry module
+        if ( p_shader->graphics.geometry_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.geometry_shader_module, 0);
+        
+        // Destroy the task module
+        if ( p_shader->graphics.task_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.task_shader_module, 0);
+            
+        // Destroy the mesh module
+        if ( p_shader->graphics.mesh_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.mesh_shader_module, 0);
+            
+        // Destroy the fragment module
+        if ( p_shader->graphics.fragment_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->graphics.fragment_shader_module, 0);
+    
+    }
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
+
+            pointer_to_null_pointer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Parameter \"pp_shader\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
+        }
+    }
+}
+
+int destroy_compute_shader ( GXShader_t **pp_shader )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXShader_t   *p_shader   = *pp_shader;
+
+    // Error checking
+    if ( p_shader == (void *) 0 )
+        goto pointer_to_null_pointer;
+
+    // Destroy the pipeline 
+    vkDestroyPipeline(p_instance->vulkan.device, p_shader->compute.pipeline, 0);
+
+    // Destroy the pipeline layout
+    vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->compute.pipeline_layout, 0);
+
+    // Destroy the compute shader module
+    vkDestroyShaderModule(p_instance->vulkan.device, p_shader->compute.compute_shader_module, 0);
+    
+    // Destroy the descriptor set layout
+    vkDestroyDescriptorSetLayout(p_instance->vulkan.device, p_shader->compute.set_layout, 0);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
+
+            pointer_to_null_pointer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Parameter \"pp_shader\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
+        }
+    }
+}
+
+int destroy_ray_shader ( GXShader_t **pp_shader )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_shader == (void *) 0 ) goto no_shader;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXShader_t   *p_shader   = *pp_shader;
+
+    // Error checking
+    if ( p_shader == (void *) 0 )
+        goto pointer_to_null_pointer;
+
+    // Destroy the pipeline 
+    vkDestroyPipeline(p_instance->vulkan.device, p_shader->ray.pipeline, 0);
+
+    // Destroy the pipeline layout
+    vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->ray.pipeline_layout, 0);
+
+    // Destroy shader modules
+    {
+
+        // Destroy the ray generation shader module
+        if ( p_shader->ray.ray_generation_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_generation_shader_module, 0);
+
+        // Destroy the any hit shader module
+        if ( p_shader->ray.ray_any_hit_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_any_hit_shader_module, 0);
+
+        // Destroy the closest hit shader module
+        if ( p_shader->ray.ray_closest_hit_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_closest_hit_shader_module, 0);
+        
+        // Destroy the miss shader module
+        if ( p_shader->ray.ray_miss_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_miss_shader_module, 0);
+        
+        // Destroy the intersection shader module
+        if ( p_shader->ray.ray_intersection_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_intersection_shader_module, 0);
+            
+        // Destroy the callable shader module
+        if ( p_shader->ray.ray_callable_shader_module )
+            vkDestroyShaderModule(p_instance->vulkan.device, p_shader->ray.ray_callable_shader_module, 0);
+    
+    }
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
+
+            pointer_to_null_pointer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Parameter \"pp_shader\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+            // Error
+            return 0;
         }
     }
 }

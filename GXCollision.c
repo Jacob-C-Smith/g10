@@ -59,6 +59,7 @@ int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t
     }
 
 	// Initialized data
+    GXInstance_t  *p_instance  = g_get_active_instance();
 	GXCollision_t *p_collision = 0;
 
     // Allocate memory for a collision
@@ -107,6 +108,17 @@ int construct_collision_from_entities ( GXCollision_t **pp_collision, GXEntity_t
             no_b:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Collision] Null pointer provided for parameter \"b\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // G10 errors
+        {
+            failed_to_allocate_collision:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Collision] Failed to allocate collision in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

@@ -247,26 +247,23 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 	              *p_states        = 0,
 	             **pp_states       = 0;
 
-	// Parse the AI JSON
+	// Parse the AI as an object
 	if ( p_value->type == JSONobject )
 	{
 
-		// Initialized data
-		dict *p_dict = p_value->object;
-
 		// Parse the JSON values into constructor parameters
-		p_name          = dict_get(p_dict, "name");
-		p_states        = dict_get(p_dict, "states");
-		p_initial_state = dict_get(p_dict, "initial state");
+		p_name          = dict_get(p_value->object, "name");
+		p_states        = dict_get(p_value->object, "states");
+		p_initial_state = dict_get(p_value->object, "initial state");
 
 		// Error checking
-		if ( ( p_name && p_states && p_initial_state ) == 0 )
+		if ( ! ( p_name && p_states && p_initial_state ) )
 			goto missing_properties;
 	}
 	else
 		goto wrong_type;
 
-	// Construct the AI
+	// Parse the AI as a path
 	if ( p_name->type == JSONstring )
 	{
 
@@ -400,7 +397,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 	// Error handling
 	{
 
-		// JSON parsing errors
+		// JSON errors
 		{
 
 			wrong_type:
@@ -418,10 +415,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 				// Error
 				return 0;
-		}
 
-		// JSON errors
-		{
 			wrong_name_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [AI] \"name\" property was of wrong type in call to function \"%s\". Expected a string\n", __FUNCTION__);
@@ -490,12 +484,9 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 	// Argument errors
 	{
 		#ifndef NDEBUG
-			if ( p_ai == (void *) 0 )
-				goto no_ai;
-			if ( state_name == (void *) 0 )
-				goto no_state_name;
-			if ( function_pointer == (void *) 0 )
-				goto no_function_pointer;
+			if ( p_ai             == (void *) 0 ) goto no_ai;
+			if ( state_name       == (void *) 0 ) goto no_state_name;
+			if ( function_pointer == (void *) 0 ) goto no_function_pointer;
 		#endif
 	}
 

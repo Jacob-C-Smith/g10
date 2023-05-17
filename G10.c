@@ -281,7 +281,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Check the window
             if ( !p_instance->sdl2.window )
-                goto noWindow;
+                goto no_window;
 
             // Display the window
             SDL_ShowWindow(p_instance->sdl2.window);
@@ -823,7 +823,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 return 0;
 
             // The SDL window failed to initialize
-            noWindow:
+            no_window:
                 #ifndef NDEBUG
                     g_print_error("[SDL2] Failed to create a window\nSDL Says: %s\n", SDL_GetError());
                 #endif
@@ -1104,6 +1104,9 @@ void pick_physical_device ( char **required_extension_names )
         if (check_vulkan_device(p_instance, devices[i], required_extension_names))
             p_instance->vulkan.physical_device = devices[i];
     }
+
+    // Return
+    return;
 
     // Error handling
     {
@@ -2385,6 +2388,8 @@ int g_exit ( GXInstance_t **pp_instance )
     // No more instance for caller
     *pp_instance = 0;
 
+    p_instance->running = false;
+
     // Wait for the GPU to finish whatever its doing
     vkDeviceWaitIdle(p_instance->vulkan.device);
 
@@ -2426,7 +2431,7 @@ int g_exit ( GXInstance_t **pp_instance )
             //dict_free_clear(p_instance->data.schedules, destroy_schedule);
         }
 
-        // Cleanup the cache
+        // Clean up the cache
         {
 
             // TODO: Free the shaders...
@@ -2437,47 +2442,79 @@ int g_exit ( GXInstance_t **pp_instance )
 
             // ... and the parts...
             dict_free_clear(p_instance->cache.parts, &destroy_part);
+            dict_destroy(&p_instance->cache.parts);
         }
 
         // Cleanup mutexes
         {
 
             // Destroy the entity loading mutex...
-            SDL_DestroyMutex(p_instance->mutexes.load_entity);
+            if ( p_instance->mutexes.load_entity )
+                SDL_DestroyMutex(p_instance->mutexes.load_entity);
 
             // ... and the cache mutexes...
-            SDL_DestroyMutex(p_instance->mutexes.shader_cache);
-            SDL_DestroyMutex(p_instance->mutexes.part_cache);
-            SDL_DestroyMutex(p_instance->mutexes.ai_cache);
-            SDL_DestroyMutex(p_instance->mutexes.material_cache);
+            if ( p_instance->mutexes.shader_cache )
+                SDL_DestroyMutex(p_instance->mutexes.shader_cache);
+            
+            if ( p_instance->mutexes.part_cache )
+                SDL_DestroyMutex(p_instance->mutexes.part_cache);
+
+            if ( p_instance->mutexes.ai_cache )
+                SDL_DestroyMutex(p_instance->mutexes.ai_cache);
+
+            if ( p_instance->mutexes.material_cache )
+                SDL_DestroyMutex(p_instance->mutexes.material_cache);
 
             // ... and the physics mutexes...
-            SDL_DestroyMutex(p_instance->mutexes.move_object);
-            SDL_DestroyMutex(p_instance->mutexes.update_force);
-            SDL_DestroyMutex(p_instance->mutexes.resolve_collision);
+            if ( p_instance->mutexes.move_object )
+                SDL_DestroyMutex(p_instance->mutexes.move_object);
+            if ( p_instance->mutexes.update_force )
+                SDL_DestroyMutex(p_instance->mutexes.update_force);
+            if ( p_instance->mutexes.resolve_collision )
+                SDL_DestroyMutex(p_instance->mutexes.resolve_collision);
 
             // ... and the AI mutexes
-            SDL_DestroyMutex(p_instance->mutexes.ai_preupdate);
+            if ( p_instance->mutexes.ai_preupdate )
+                SDL_DestroyMutex(p_instance->mutexes.ai_preupdate);
+            if ( p_instance->mutexes.ai_update )
             SDL_DestroyMutex(p_instance->mutexes.ai_update);
+
+            p_instance->mutexes.load_entity = 0,
+            p_instance->mutexes.shader_cache = 0,
+            p_instance->mutexes.part_cache = 0,
+            p_instance->mutexes.ai_cache = 0,
+            p_instance->mutexes.material_cache = 0,
+            p_instance->mutexes.move_object = 0,
+            p_instance->mutexes.update_force = 0,
+            p_instance->mutexes.resolve_collision = 0,
+            p_instance->mutexes.ai_preupdate = 0,
+            p_instance->mutexes.ai_update = 0;
         }
 
         // Cleanup queues
         {
 
             // Destroy the entity loading queue
-            queue_destroy(&p_instance->queues.load_entity);
+            if ( p_instance->queues.load_entity )
+                queue_destroy(&p_instance->queues.load_entity);
 
             // Destroy the light probe loading queue
-            //queue_destroy(&p_instance->queues.load_light_probe);
+            if ( p_instance->queues.load_light_probe ) 
+                queue_destroy(&p_instance->queues.load_light_probe);
 
             // Destroy the physics queues
-            queue_destroy(&p_instance->queues.actor_move);
-            queue_destroy(&p_instance->queues.actor_collision);
-            queue_destroy(&p_instance->queues.actor_force);
+            if ( p_instance->queues.actor_move ) 
+                queue_destroy(&p_instance->queues.actor_move);
+            if ( p_instance->queues.actor_collision ) 
+                queue_destroy(&p_instance->queues.actor_collision);
+            if ( p_instance->queues.actor_force ) 
+                queue_destroy(&p_instance->queues.actor_force);
 
             // Destroy the AI queues
-            queue_destroy(&p_instance->queues.ai_preupdate);
-            queue_destroy(&p_instance->queues.ai_update);
+            if ( p_instance->queues.ai_preupdate ) 
+                queue_destroy(&p_instance->queues.ai_preupdate);
+            if ( p_instance->queues.ai_update ) 
+                queue_destroy(&p_instance->queues.ai_update);
         }
 
         // Cleanup input

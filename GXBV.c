@@ -686,13 +686,13 @@ int resize_bv ( GXBV_t *bv )
               z_radius = (fabsf(m.i) + fabsf(m.j) + fabsf(m.k) );
 
         // Compute min and max from radius and location
-        bv->maximum.x = ( collider->aabb_max.x * x_radius ) + m.m,
-        bv->maximum.y = ( collider->aabb_max.y * y_radius ) + m.n,
-        bv->maximum.z = ( collider->aabb_max.z * z_radius ) + m.o;
+        bv->maximum.x = ( collider->aabb.aabb_max.x * x_radius ) + m.m,
+        bv->maximum.y = ( collider->aabb.aabb_max.y * y_radius ) + m.n,
+        bv->maximum.z = ( collider->aabb.aabb_max.z * z_radius ) + m.o;
 
-        bv->minimum.x = ( collider->aabb_min.x * x_radius ) + m.m,
-        bv->minimum.y = ( collider->aabb_min.y * y_radius ) + m.n,
-        bv->minimum.z = ( collider->aabb_min.z * z_radius ) + m.o;
+        bv->minimum.x = ( collider->aabb.aabb_min.x * x_radius ) + m.m,
+        bv->minimum.y = ( collider->aabb.aabb_min.y * y_radius ) + m.n,
+        bv->minimum.z = ( collider->aabb.aabb_min.z * z_radius ) + m.o;
 
         return 0;
     }

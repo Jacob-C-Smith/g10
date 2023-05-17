@@ -289,54 +289,56 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			goto wrong_name_type;
 
 		// Parts
-		if ( p_parts_value->type == JSONarray )
+		if ( p_parts_value )
 		{
-
-			// Initialized data
-			size_t        part_count = 0;
-			JSONValue_t **parts      = 0;
-
-			// Construct a dictionary
-			dict_construct(&p_entity->parts, 16);
-
-			// Get the array
-			{
-
-				// Get the size of the array
-				array_get(p_parts_value->list, 0, &part_count);
-
-				// Allocate memory for a list of parts
-				parts = calloc(part_count+1, sizeof(JSONValue_t *));
-
-				// Error check
-				if ( parts == (void *) 0 )
-					goto no_mem;
-
-				// Get each array element
-				array_get(p_parts_value->list, parts, &part_count);
-			}
-
-			// Iterate over each array element
-			for (size_t i = 0; i < part_count; i++)
+			if ( p_parts_value->type == JSONarray )
 			{
 
 				// Initialized data
-				GXPart_t *p_part = 0;
+				size_t        part_count = 0;
+				JSONValue_t **parts      = 0;
 
-				// Load the part
-				if ( load_part_as_json_value(&p_part, parts[i]) == 0 )
-					goto failed_to_load_part;
+				// Construct a dictionary
+				dict_construct(&p_entity->parts, 16);
 
-				// Add the part to the dictionary
-				dict_add(p_entity->parts, p_part->name, p_part);
+				// Get the array
+				{
+
+					// Get the size of the array
+					array_get(p_parts_value->list, 0, &part_count);
+
+					// Allocate memory for a list of parts
+					parts = calloc(part_count+1, sizeof(JSONValue_t *));
+
+					// Error check
+					if ( parts == (void *) 0 )
+						goto no_mem;
+
+					// Get each array element
+					array_get(p_parts_value->list, parts, &part_count);
+				}
+
+				// Iterate over each array element
+				for (size_t i = 0; i < part_count; i++)
+				{
+
+					// Initialized data
+					GXPart_t *p_part = 0;
+
+					// Load the part
+					if ( load_part_as_json_value(&p_part, parts[i]) == 0 )
+						goto failed_to_load_part;
+
+					// Add the part to the dictionary
+					dict_add(p_entity->parts, p_part->name, p_part);
+				}
+
+				// Clean the scope
+				free(parts);
 			}
-
-			// Clean the scope
-			free(parts);
+			else
+				goto wrong_parts_type;
 		}
-		else
-			goto wrong_parts_type;
-
 		// Materials
 
 		// Shader

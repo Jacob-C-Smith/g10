@@ -242,7 +242,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                  *p_skyboxes_value     = 0,
                  *p_light_probes_value = 0;
 
-    // Parse the JSON value
+    // Parse the scene as a JSON value
     if ( p_value->type == JSONobject )
     {
 
@@ -259,6 +259,15 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         if ( ! ( p_name_value ) )
             goto not_enough_properties;
     }
+    // Parse the scene as a file path
+    else if ( p_value->type == JSONstring )
+    {
+        if ( load_scene(pp_scene, p_value->string) == 0 )
+            goto failed_to_load_initial_scene;
+            
+        return 1;
+    }    
+    // Failed to parse. Wrong type
     else
         goto wrong_type;
 
@@ -463,6 +472,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     not_enough_properties:
     failed_to_create_thread:
     wrong_type:
+    failed_to_load_initial_scene:
         return 0;
 
     // Error handling

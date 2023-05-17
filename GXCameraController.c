@@ -182,7 +182,7 @@ int                   update_controlee_camera        ( void )
     // Initialized data
     vec2                  l_orient     = { 0 };
     GXCamera_t           *camera       = camera_controller->camera;
-
+    /*
     camera_controller->orientation = (vec2)
     {
         x_orient,
@@ -219,7 +219,7 @@ int                   update_controlee_camera        ( void )
     camera->target.x = cosf(to_radians(h_ang)) * cosf(to_radians(v_ang));
     camera->target.z = sinf(to_radians(v_ang));
     camera->target.y = sinf(to_radians(h_ang)) * cosf(to_radians(v_ang));
-
+    */
     // Success
     return 1;
 

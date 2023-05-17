@@ -162,6 +162,7 @@ struct GXInstance_s
     // Queues
     struct {
         queue *load_entity,
+              *load_light_probe,
               *actor_move,
               *actor_collision,
               *actor_force,

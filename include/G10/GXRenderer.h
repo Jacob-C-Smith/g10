@@ -25,6 +25,7 @@ struct GXRenderer_s
 {
 	char            *name;
 
+	dict            *shaders;
 	dict            *render_passes;
 	GXRenderPass_t **render_passes_data;
 	size_t           render_pass_count;

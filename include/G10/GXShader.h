@@ -94,7 +94,12 @@ struct GXShader_s
         struct {
             VkPipeline       pipeline;
             VkPipelineLayout pipeline_layout;
-            VkShaderModule   compute_shader_module;
+            VkShaderModule   ray_generation_shader_module,
+                             ray_any_hit_shader_module,
+                             ray_closest_hit_shader_module,
+                             ray_miss_shader_module,
+                             ray_intersection_shader_module,
+                             ray_callable_shader_module;
         } ray;
     };
 };

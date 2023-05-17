@@ -114,7 +114,7 @@ int main ( int argc, const char *argv[] )
 
         p_ai = g_find_ai(p_instance, "AI 2");
         
-        set_ai_pre_update_callback(p_ai,&preup);
+        set_ai_pre_update_callback(p_ai, &preup);
 
         print_renderer(p_instance->context.renderer);
     }

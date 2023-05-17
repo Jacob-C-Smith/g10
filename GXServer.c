@@ -131,7 +131,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 				goto no_server;
 		#endif
 	}
-
+	/*
 	// Constant data
 	const size_t MAX_RETRIES = 32;
 
@@ -233,7 +233,9 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 		// Try again
 		goto retry_connection;
 	}
+	*/
 
+	// Success
 	return 1;
 
 	// Error handling
@@ -477,7 +479,7 @@ int server_parse     ( GXClient_t *client )
 	size_t       i         = 0;
 
 	// Iterate over data
-	while (i <= client->recv_len && !queue_full(client->recv_queue))
+	while (i <= client->recv_len && queue_empty(client->recv_queue))
 	{
 
 		// Parse data into a command
@@ -518,7 +520,7 @@ int server_serialize ( GXClient_t *client )
 	while (i < 4096 && !queue_empty(client->send_queue))
 	{
 
-		command = queue_dequeue(client->send_queue);
+		queue_dequeue(client->send_queue, &command);
 		u8* z = client->send_data + i;
 		i += data_from_command(&z, command);
 	}
@@ -535,7 +537,8 @@ int server_process   ( GXClient_t *client )
 	if (!queue_empty(client->recv_queue))
 		while (!queue_empty(client->recv_queue))
 		{
-			GXCommand_t* cmd = queue_dequeue(client->recv_queue);
+			GXCommand_t* cmd = 0;
+			 queue_dequeue(client->recv_queue, &cmd);
 
 			process_command(client, cmd);
 		}
@@ -635,7 +638,7 @@ int server_wait    ( GXInstance_t* p_instance )
 		client_name_len = strlen(connect_command->connect.name);
 
 		// Load a player thread
-		load_thread(&server_thread, "G10/client thread.json");
+		load_thread_as_json_value(&server_thread, "G10/client thread.json");
 
 		sprintf(server_thread->name, "%.*s thread\0", (client_name_len > 31) ? 32 : (int)client_name_len, connect_command->connect.name);
 
@@ -823,7 +826,7 @@ int connect_client(char* name)
 	{
 
 		// Load a scheduler thread for the client
-		load_thread(&client_thread, "G10/client thread.json");
+		load_thread_as_json_value(&client_thread, "G10/client thread.json");
 
 		sprintf(client_thread->name, "Network thread\0");
 
