@@ -4,13 +4,6 @@ NOTE: This is a hobby project. This code may not be the most performant, secure,
 
 ![Nitric acid plant scene](Nitric%20acid%20plant.png)
 
-## Intro
-
-Howdy! I'm Jake. This is my project, the G10 game engine. 
-
-
-There are three main components of G10
-
 > [G10 (The Engine)](https://github.com/Jacob-C-Smith/G10-Vulkan)
 >
 > [GPort (The Import/Exporter)](https://github.com/Jacob-C-Smith/GPort)
