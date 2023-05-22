@@ -145,6 +145,12 @@ struct GXShader_s;
 */
 typedef struct GXShader_s GXShader_t;
 
+struct GXLayout_s;
+typedef struct GXLayout_s GXLayout_t;
+
+struct GXSet_s;
+typedef struct GXSet_s GXSet_t;
+
 // Material
 struct GXMaterial_s;
 typedef struct GXMaterial_s GXMaterial_t;

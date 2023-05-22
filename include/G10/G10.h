@@ -10,7 +10,7 @@
 
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
-#define BUILD_G10_WITH_ANSI_COLOR
+//#define BUILD_G10_WITH_ANSI_COLOR
 
 // Standard library
 #include <stdio.h>
@@ -88,24 +88,30 @@ struct GXInstance_s
     // Vulkan
     struct {
         VkInstance                instance;
+        
         VkDebugUtilsMessengerEXT  debug_messenger;
         VkSurfaceKHR              surface;
+
         VkPhysicalDevice          physical_device;
         VkDevice                  device;
+
         VkQueue                   graphics_queue;
         VkQueue                   present_queue;
+
         VkSwapchainKHR            swap_chain;
         VkImage                  *swap_chain_images;
         VkFormat                  swap_chain_image_format;
         VkExtent2D                swap_chain_extent;
         VkImageView              *swap_chain_image_views;
         VkFramebuffer            *swap_chain_framebuffers;
-        VkRenderPass              render_pass;
+
         VkCommandPool             command_pool;
         VkCommandBuffer          *command_buffers;
+
         VkSemaphore              *image_available_semaphores;
         VkSemaphore              *render_finished_semaphores;
         VkFence                  *in_flight_fences;
+
         i32                       max_buffered_frames;
         u32                       current_frame,
                                   image_count,

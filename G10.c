@@ -1150,7 +1150,7 @@ void create_logical_device ( char **required_extension_names )
     for (size_t i = 0; i < 2; i++)
     {
         queue_create_infos[i].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_create_infos[i].queueFamilyIndex = i;
+        queue_create_infos[i].queueFamilyIndex = (u32)i;
         queue_create_infos[i].queueCount       = 1;
         queue_create_infos[i].pQueuePriorities = &p_instance->vulkan.priority;
     }

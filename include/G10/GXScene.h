@@ -43,16 +43,16 @@ struct GXScene_s
 	GXCollision_t **collisions;
 
 	// A list of entities with rigidbodies
-	dict           *actors;
+	dict *actors;
 
 	// A list of entities with rigs
-	dict           *rigs;
+	dict *rigs;
 
 	// A list of entities with AIs
-	dict           *ais;
+	dict *ais;
 
 	// A bounding volume hierarchy tree containing entities with colliders
-	GXBV_t         *bvh;
+	GXBV_t *bvh;
 
 	// The camera to be used while drawing the scene
 	GXCamera_t     *active_camera;

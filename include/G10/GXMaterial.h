@@ -19,8 +19,8 @@
 struct GXMaterial_s {
     char   *name;
     dict   *textures;
-	dict   *mutable_ints; // TODO
-    dict   *mutable_floats; // TODO
+	dict   *mutable_ints;
+    dict   *mutable_floats;
 };
 
 // Allocators

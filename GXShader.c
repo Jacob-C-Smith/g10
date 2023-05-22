@@ -13,6 +13,8 @@
 int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
 int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value );
+int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value );
+int load_set_as_json_value ( struct GXSet_t **pp_set, JSONValue_t *p_value );
 int destroy_graphics_shader ( GXShader_t **pp_shader );
 int destroy_compute_shader ( GXShader_t **pp_shader );
 int destroy_ray_shader ( GXShader_t **pp_shader );
@@ -254,65 +256,40 @@ dict *format_types                  = 0,
      *pipeline_loader_lookup_tables = 0;
 
 typedef struct {
-    char                         *name;
-    VkDescriptorType              descriptor_type;
-    VkDescriptorSetLayoutBinding  descriptor_set_layout_binding;
+    char *name;
+    VkDescriptorType descriptor_type;
+    VkDescriptorSetLayoutBinding descriptor_set_layout_binding;
     union
     {
-        struct {
-            size_t i;
-        } sampler;
+        struct { size_t i; } sampler;
 
-        struct {
-            size_t i;
-        } combined_image_sampler;
+        struct { size_t i; } combined_image_sampler;
 
-        struct {
-            size_t i;
-        } sampled_image;
+        struct { size_t i; } sampled_image;
 
-        struct {
-            size_t i;
-        } storage_image;
+        struct { size_t i; } storage_image;
 
-        struct {
-            size_t i;
-        } uniform_texel_buffer;
+        struct { size_t i; } uniform_texel_buffer;
 
-        struct {
-            size_t i;
-        } storage_texel_buffer;
+        struct { size_t i; } storage_texel_buffer;
 
-        struct {
-            size_t i;
-        } uniform_buffer_dynamic;
+        struct { size_t i; } uniform_buffer_dynamic;
 
-        struct {
-            size_t i;
-        } storage_buffer_dynamic;
+        struct { size_t i; } storage_buffer_dynamic;
 
-        struct {
+        struct { 
             VkDeviceSize    size;
             VkBuffer       *buffers;
             VkDeviceMemory *memories;
         } uniform;
 
-        struct {
-            size_t i;
-        } input_attachment;
+        struct { size_t i; } input_attachment;
+
+        struct { size_t i; } inline_uniform_block;
 
     };
-    size_t                        index;
+    size_t index;
 } GXDescriptor_t;
-
-typedef struct {
-    char            *name;
-    dict            *descriptors;
-    GXDescriptor_t **descriptor_data;
-    size_t           len,
-                     index,
-                     descriptor_len;
-} GXSet_t;
 
 void init_shader ( void )
 {
@@ -523,6 +500,56 @@ int create_shader ( GXShader_t **pp_shader )
 				// Error
 				return 0;
 		}
+    }
+}
+
+int create_layout ( GXLayout_t **pp_layout )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_layout == (void *) 0 ) goto no_layout;
+        #endif
+    }
+
+    // Initialized data
+    GXLayout_t *p_layout = calloc(1, sizeof(GXLayout_t));
+
+    // Error checking
+    if ( p_layout == (void *) 0 )
+        goto no_mem;
+
+    // Return a pointer to the caller
+    *pp_layout = p_layout;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_layout:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_layout\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -1125,16 +1152,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         p_layout                              = dict_get(p_value->object, "layout");
         p_in                                  = dict_get(p_value->object, "in");
         p_attachments                         = dict_get(p_value->object, "attachments");
+        p_rasterizer                          = dict_get(p_value->object, "rasterizer");
 
         if ( p_layout )
         {
-            if ( p_layout->type == JSONobject )
-            {
-                p_layout_sets          = dict_get(p_layout->object, "sets");
-                p_layout_push_constant = dict_get(p_layout->object, "push constant");
-            }
+            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 )
+                goto failed_to_load_layout_as_json_value;
         }
-        p_rasterizer = dict_get(p_value->object, "rasterizer");
 
 
         // Check properties
@@ -2132,6 +2156,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
     // TODO:
     wrong_input_attribute_properties:
+    failed_to_load_layout_as_json_value:
         return 0;
 
     // Error handling
@@ -2625,6 +2650,12 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         }
         else
             goto no_compute_shader_path;
+        
+        if ( p_layout )
+        {
+            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 )
+                goto failed_to_load_layout_as_json_value;
+        }
 
         // Construct the compute shader
         {
@@ -2807,6 +2838,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
     // TODO:
     no_compute_shader_path:
+    failed_to_load_layout_as_json_value:
     failed_to_create_descriptor_set_layout:
         return 0;
 
@@ -3564,6 +3596,206 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 return 0;
         }
     }
+}
+
+int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
+{
+
+    // Argument errors
+    {
+        #ifndef NDEBUG
+            if ( pp_layout == (void *) 0 ) goto no_layout;
+            if ( p_value   == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance      = g_get_active_instance();
+    GXLayout_t   *p_layout        = 0;
+    JSONValue_t  *p_sets          = 0,
+                 *p_push_constant = 0;
+
+    printf("\n\n\n\n\n\n");
+    print_json_value(p_value, stdout);
+    printf("\n\n\n\n\n\n");
+    
+    // Parse the JSON value
+    if ( p_value->type == JSONobject )
+    {
+
+        p_sets = dict_get(p_value->object, "sets");
+        p_push_constant = dict_get(p_value->object, "push constant");
+
+        // Check properties
+        if ( !( p_sets ) )
+            goto missing_properties;
+    }
+    else
+        goto wrong_type;
+
+    // TODO: Cache check
+
+    // Construct the shader
+    {
+
+        // Allocate memory for a shader layout
+        if ( create_layout(&p_layout) == 0 )
+            goto failed_to_allocate_layout;
+
+        // Construct sets
+        if ( p_sets->type == JSONarray )
+        {
+
+            // Initialized data
+            JSONValue_t **pp_sets   = 0;
+            size_t        set_count = 0;
+
+            // Get the contents of the array
+            {
+
+                // Get the size of the array
+                array_get(p_sets->list, 0, &set_count);
+                
+                // Allocate memory for the set JSON values
+                pp_sets = calloc(set_count, sizeof(JSONValue_t *));
+
+                // Error check
+                if ( pp_sets == (void *) 0 )
+                    goto no_mem;
+
+                // Get the array contents
+                array_get(p_sets->list, pp_sets, 0);
+
+            }
+
+            // Allocate memory for the sets
+            p_layout->sets = calloc(set_count, sizeof(GXSet_t *));
+
+            // Error check
+            if ( p_layout->sets  == (void *) 0 )
+                goto no_mem;
+
+            // Iterate over each JSONValue
+            for (size_t i = 0; i < set_count; i++)
+            {
+                
+                // Initialized data
+                JSONValue_t *i_set = pp_sets[i];
+                GXSet_t     *p_set = 0;
+
+                // Construct a set from a JSON value
+                if ( load_set_as_json_value(&p_set, i_set) == 0 )
+                    goto failed_to_load_set_as_json_value;
+
+                // I don't like this specific line. -Jake +
+                                                       // |
+                p_set->index = i; // <--------------------+
+
+                p_layout->sets[i] = p_set;
+            }
+        }
+
+        // Construct a push constant        
+
+    }
+
+    // Success
+    return 1;
+
+    missing_properties:
+    wrong_type:
+    failed_to_allocate_shader:
+    failed_to_allocate_layout:
+    no_mem:
+    failed_to_load_set_as_json_value:
+        return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_layout:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"pp_layout\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+    }
+}
+
+int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( pp_set == (void *) 0 ) goto no_set;
+            if ( p_value == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    GXSet_t     *p_set         = 0;
+    JSONValue_t *p_name        = 0,
+                *p_descriptors = 0;
+
+    // Parse the JSON value
+    if ( p_value->type == JSONobject ) 
+    {
+
+        p_name        = dict_get(p_value->object, "name");
+        p_descriptors = dict_get(p_value->object, "descriptors");
+
+    }
+    // Default
+    else
+        goto wrong_value_type;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_set:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"\" in call to function \"\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Null pointer provided for \"\" in call to function \"\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+    }
+}
+
+int load_descriptor_as_json_value ( GXDescriptor_t **pp_descriptor, JSONValue_t *p_value )
+{
+
+    // Success
+    return 1;
 }
 
 int destroy_graphics_shader ( GXShader_t **pp_shader )

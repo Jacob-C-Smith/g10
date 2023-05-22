@@ -2,7 +2,7 @@
  * @file G10/GXShader.h
  * @author Jacob Smith
  *
- * Include header for graphics, compute, and mesh shaders
+ * Include header for graphics, compute, mesh, and ray shaders
  */
 
 // Include guard
@@ -43,13 +43,22 @@ struct GXSet_s
     struct GXDescriptor_s *descriptors_data;
 };
 
+struct GXLayout_s
+{
+    size_t i;
+    GXSet_t **sets;
+    size_t set_count;
+    
+};
+
 struct GXShader_s
 {
 
     char                *name;
     size_t               users;
     enum g10_pipeline_e  type;
-
+    GXLayout_t          *layout;
+    
     union
     {
         struct
@@ -78,8 +87,8 @@ struct GXShader_s
             size_t                  push_constant_size,
                                     set_count;
 
-            struct GXSet_s         *sets_data;
-        } graphics;
+            GXSet_t                *sets_data;
+        } graphics; // g10_pipeline_graphics
 
         struct {
             VkPipeline            pipeline;
@@ -89,7 +98,7 @@ struct GXShader_s
             u32                   x_groups,
                                   y_groups,
                                   z_groups;
-        } compute;
+        } compute; // g10_pipeline_compute
 
         struct {
             VkPipeline       pipeline;
@@ -100,7 +109,7 @@ struct GXShader_s
                              ray_miss_shader_module,
                              ray_intersection_shader_module,
                              ray_callable_shader_module;
-        } ray;
+        } ray; // g10_pipeline_ray
     };
 };
 

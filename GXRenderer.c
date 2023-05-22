@@ -522,7 +522,7 @@ char *access_flag_bits_names[ACCESS_FLAG_BITS_COUNT] =
     "shading rate image read",
     "acceleration structure read",
     "acceleration structure write",
-    "none"
+    "none khr"
 };
 
 char *texturing_addressing_keys [TEXTURING_MODE_COUNT] =
@@ -1412,10 +1412,6 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 if ( load_attachment_as_json_value(&p_attachment, pp_array_contents[i]) == 0 )
                     goto failed_to_load_attachment_as_json_value;
 
-                // Create an image
-                {
-
-                }
 
                 // Add the attachment
                 dict_add(p_renderer->attachments, p_attachment->name, p_attachment);
@@ -2024,7 +2020,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         if ( p_subpass_value->type == JSONobject )
         {
         
-            p_name   = dict_get(p_subpass_value->object, "name");
+            p_name         = dict_get(p_subpass_value->object, "name");
             p_shader_value = dict_get(p_subpass_value->object, "shader");
 
             if ( ! ( p_name && p_shader_value ) )
@@ -2044,34 +2040,33 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     }
 
     // TODO: Check
-    p_render_pass->framebuffers = calloc(p_instance->vulkan.image_count, sizeof(GXFramebuffer_t));
+    p_render_pass->framebuffers = calloc(p_instance->vulkan.image_count, sizeof(VkFramebuffer));
 
     // Create frame buffers
-    /*for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
+    for (size_t i = 0; i < p_instance->vulkan.image_count; i++)
     {
-
         // Initialized data
-        VkImageView attachments[2] =
-        {
-            p_instance->vulkan.swap_chain_image_views[i],
-            p_render_pass->image_attachments[1]
-        };
+        //VkImageView attachments[2] =
+        //{
+        //    p_instance->vulkan.swap_chain_image_views[i],
+        //    p_render_pass->image_attachments[1]
+        //};
 
         VkFramebufferCreateInfo framebuffer_create_info =
         {
             .sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .renderPass      = p_render_pass->render_pass,
-            .attachmentCount = 1,
-            .pAttachments    = attachments,
+            .attachmentCount = p_render_pass->attachments_count,
+            .pAttachments    = p_render_pass->attachments_data,
             .width           = p_instance->vulkan.swap_chain_extent.width,
             .height          = p_instance->vulkan.swap_chain_extent.height,
             .layers          = 1
         };
 
-        if ( vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i].framebuffer) != VK_SUCCESS )
+        if ( vkCreateFramebuffer(p_instance->vulkan.device, &framebuffer_create_info, 0, &p_render_pass->framebuffers[i]) != VK_SUCCESS )
             goto failed_to_create_render_pass;
     }
-    */
+    
     // Return a pointer to the caller
     *pp_render_pass = p_render_pass;
 
@@ -2786,12 +2781,33 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
                 return 0;
             
             // Construct the image
-            
+            construct_image(
+                p_image, 0,
+                VK_IMAGE_TYPE_2D, p_attachment->attachment_description.format,
+                1280,720,
+                1,1,
+                1,1,
+                VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_SHARING_MODE_EXCLUSIVE, p_attachment->attachment_description.initialLayout );
+
             // Set the attachment image
             p_attachment->p_image = p_image;
             
             // Construct the image view
-            
+            construct_image_view(
+                &p_attachment->image_view,
+                p_image,
+                VK_IMAGE_VIEW_TYPE_2D, 
+                p_attachment->attachment_description.format,
+                (VkComponentMapping)
+                { 
+                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .a = VK_COMPONENT_SWIZZLE_IDENTITY
+                },
+                VK_IMAGE_ASPECT_COLOR_BIT
+            );
         }
 
     }
@@ -3621,7 +3637,7 @@ int render_frame ( GXInstance_t *p_instance )
             {
                 .sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
                 .renderPass          = rp->render_pass,
-                .framebuffer         = rp->framebuffers[p_instance->vulkan.current_frame].framebuffer,
+                .framebuffer         = rp->framebuffers[p_instance->vulkan.current_frame],
                 .renderArea.offset.x = 0,
                 .renderArea.offset.y = 0,
                 .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
@@ -3630,20 +3646,23 @@ int render_frame ( GXInstance_t *p_instance )
             };
 
             // Start the render pass
-            vkCmdBeginRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+            // vkCmdBeginRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
             // TODO: Iterate over each subpass
-            {
+            /*
+                // in -> GXSubpass_t *p_subpass
+
+            if (p_subpass){
 
                 // Initialized data
-                GXSubpass_t *p_subpass = 0;
+                
 
                 // TODO: Check memory
 
                 // TODO: Wait for sync primatives
 
                 // Bind the subpasses shader pipeline
-                if (p_subpass->shader->type == g10_pipeline_graphics)
+                if       (p_subpass->shader->type == g10_pipeline_graphics)
                 {
                     vkCmdBindPipeline(
                         p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
@@ -3651,8 +3670,11 @@ int render_frame ( GXInstance_t *p_instance )
                         p_subpass->shader->graphics.pipeline
                     );
                 }
-                else if (p_subpass->shader->type == g10_pipeline_compute)
+                else if  (p_subpass->shader->type == g10_pipeline_compute)
                 {
+
+                    // Bind each descriptor
+                    
                     vkCmdBindPipeline(
                         p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
                         VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -3668,7 +3690,7 @@ int render_frame ( GXInstance_t *p_instance )
                         p_subpass->shader->compute.z_groups
                     );
                 }
-                else if (p_subpass->shader->type == g10_pipeline_ray)
+                else if  (p_subpass->shader->type == g10_pipeline_ray)
                 {
 
                     vkCmdBindPipeline(
@@ -3689,10 +3711,11 @@ int render_frame ( GXInstance_t *p_instance )
                     p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
                     VK_SUBPASS_CONTENTS_INLINE
                 );
-            }
+                */
+            //}
 
             // End the render pass
-            vkCmdEndRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
+            // vkCmdEndRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
         }
 
         // End the command buffer
@@ -3726,7 +3749,7 @@ int render_frame ( GXInstance_t *p_instance )
         };
 
         // Submit the draw commands
-        if (vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]))
+        if ( vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]) )
             g_print_error("Failed to submit draw command buffer!\n");
 
         // Present the image to the swapchain
@@ -3764,10 +3787,6 @@ fail:
 failed_to_queue_presentation:
 failed_to_bind_pipeline_type:
     return 0;
-
-    // Error handling
-    {
-    }
 }
 
 int present_frame ( GXInstance_t *p_instance )
@@ -4026,63 +4045,6 @@ int destroy_texture ( GXTexture_t **pp_texture )
             no_texture:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-        }
-    }
-}
-
-int destroy_framebuffer ( GXFramebuffer_t **pp_framebuffer )
-{
-    
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_framebuffer == (void *) 0 ) goto no_framebuffer;
-        #endif
-    }
-
-    // Initializd data
-    GXInstance_t    *p_instance   = g_get_active_instance();
-    GXFramebuffer_t *p_framebuffer = *pp_framebuffer;
-
-    // Error checking
-    if ( p_framebuffer == (void *) 0 )
-        goto pointer_to_null_pointer; 
-
-    // No more pointer for caller
-    *pp_framebuffer = 0;
-
-    // Destroy the framebuffer
-    vkDestroyFramebuffer(p_instance->vulkan.device, p_framebuffer->framebuffer, 0);
-
-    // Free the name
-    free(p_framebuffer->name);
-
-    // Free the framebuffer
-    free(p_framebuffer);
-
-    // Success
-    return 1;
-
-    // Error handling
-    {
-        
-        // Argument errors
-        {
-            no_framebuffer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for parameter \"pp_framebuffer\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-
-            pointer_to_null_pointer:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Parameter \"pp_framebuffer\" pointed to null pointer in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

@@ -29,25 +29,27 @@ struct GXRenderer_s
 	dict            *render_passes;
 	GXRenderPass_t **render_passes_data;
 	size_t           render_pass_count;
-	dict            *attachments;
+	dict            *attachments; // type: GXAttachment_t *
 	size_t           clear_color_count;
 	VkClearValue    *clear_colors;
 };
 
 struct GXRenderPass_s
 {
-	char            *name;
+	char             *name;
 
-	VkRenderPass     render_pass;
+	VkRenderPass      render_pass;
 
-	dict            *subpasses;
-	GXSubpass_t    **subpasses_data;
-	size_t           subpasses_count;
-
-	GXFramebuffer_t *framebuffers;
-
-	dict            *attachments;
-	VkImageView     *image_attachments;
+	dict             *subpasses;
+	GXSubpass_t     **subpasses_data;
+	size_t            subpasses_count;
+ 
+	VkFramebuffer    *framebuffers;
+ 
+	dict             *attachments; // type: char *
+	GXAttachment_t  **attachments_data;
+	size_t            attachments_count;
+	VkImageView      *attachment_image_views;
 };
 
 struct GXSubpass_s
@@ -78,12 +80,6 @@ struct GXTexture_s
 	GXImage_t   *p_image;
 	VkImageView  image_view;
 	VkSampler    sampler;
-};
-
-struct GXFramebuffer_s
-{
-	char          *name;
-	VkFramebuffer  framebuffer;
 };
 
 // Allocators
@@ -308,22 +304,21 @@ DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t
  */
 DLLEXPORT int construct_image
 (
-	VkImageView           *ret           , GXImage_t     *p_image,
-	VkImageCreateFlags     flags         , VkImageType    image_type,
-	VkFormat               format        , int            width,
-	int                    height        , int            depth,
-	size_t                 mip_levels    , size_t         array_layers, 
-	VkSampleCountFlagBits  samples       , VkImageTiling  tiling, 
-	VkImageUsageFlags      usage         , VkSharingMode  sharing_mode,
-	VkImageLayout          initial_layout
+	GXImage_t             *p_image     , VkImageCreateFlags     flags,
+	VkImageType            image_type  , VkFormat               format,
+	int                    width       , int                    height,
+	int                    depth       , size_t                 mip_levels,
+	size_t                 array_layers, VkSampleCountFlagBits  samples,
+	VkImageTiling          tiling      , VkImageUsageFlags      usage,
+	VkSharingMode          sharing_mode, VkImageLayout          initial_layout
 );
 
-/*DLLEXPORT int construct_image_view
+DLLEXPORT int construct_image_view
 (
-	GXTexture_t       *p_texture, VkImageViewType    view_type,
-	VkFormat           format   , VkComponentMapping swizzle,
-	VkImageAspectFlags aspect_mask
-);*/
+	VkImageView        *ret      , GXImage_t          *p_image,
+	VkImageViewType     view_type, VkFormat            format,
+	VkComponentMapping  swizzle  , VkImageAspectFlags  aspect_mask
+);
 
 /** !
  *  Load an attachment from a JSON file

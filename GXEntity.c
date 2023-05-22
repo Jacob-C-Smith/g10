@@ -9,6 +9,7 @@ vec3 calculate_force_spring(GXEntity_t* entity);
 
 int create_entity ( GXEntity_t **pp_entity )
 {
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -268,7 +269,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			goto failed_to_allocate_entity;
 
 		// Copy the name
-		if (p_name_value->type == JSONstring)
+		if ( p_name_value->type == JSONstring )
 		{
 
 			// Initialized data
@@ -359,131 +360,6 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		if ( p_ai_value )
 			if ( load_ai_as_json_value(&p_entity->ai, p_ai_value) == 0 )
 				goto failed_to_load_ai_as_json_value;
-
-		/*
-		// Part
-		if (p_parts)
-		{
-
-			// Initialized data
-			size_t part_count = 0;
-
-			// Count up parts
-			while (parts[++part_count]);
-
-			// Construct a list of parts
-			dict_construct(&i_entity->parts, part_count);
-
-			// Iterate over parts
-			for (size_t i = 0; i < part_count; i++)
-			{
-
-				// Initialized data
-				GXPart_t *p = 0;
-
-				// Differentiate objects from paths
-
-				// Object branch
-				if (*parts[i] == '{')
-					load_part_as_json(&p, parts[i], strlen(parts[i]));
-
-				// Path branch
-				else
-					load_part(&p, parts[i]);
-
-				// Add the part to the list
-				dict_add(i_entity->parts, p->name, p);
-			}
-
-		}
-
-		// Material
-		if (p_materials)
-		{
-
-			// Initialized data
-			size_t materail_count = 0;
-
-			// Count up materials
-			while (materials[++materail_count]);
-
-			// Construct a list of materials
-			dict_construct(&i_entity->materials, materail_count);
-
-			// Iterate over materials
-			for (size_t i = 0; i < materail_count; i++)
-			{
-
-				// Initialized data
-				GXMaterial_t *m = 0;
-
-				// Differentiate objects from paths
-
-				// Object branch
-				if (*materials[i] == '{')
-					load_material_as_json(&m, materials[i], strlen(materials[i]));
-
-				// Path branch
-				else
-					load_material(&m, materials[i]);
-
-				// Add the material to the list
-				dict_add(i_entity->materials, m->name, m);
-			}
-		}
-
-		// Shader
-		if (shader)
-		{
-
-			// Differentiate objects from paths
-
-			// Object branch
-			if (*shader == '{')
-				load_shader_as_json(&i_entity->shader, shader, strlen(shader));
-
-			// Path branch
-			else
-				load_shader(&i_entity->shader, shader);
-
-		}
-
-		// Rigidbody
-		if (rigid_body)
-		{
-
-			// Differentiate objects from paths
-
-			// Object branch
-			if (*rigid_body == '{')
-				load_rigidbody_as_json(&i_entity->rigidbody, rigid_body, strlen(rigid_body));
-
-			// Path branch
-			else
-				load_rigidbody(&i_entity->rigidbody, rigid_body);
-		}
-
-		// Collider
-		if (collider)
-		{
-
-			// Differentiate objects from paths
-
-			// Object branch
-			if (*collider == '{')
-				load_collider_as_json(&i_entity->collider, collider, strlen(collider));
-
-			// Path branch
-			else
-				load_collider(&i_entity->collider, collider);
-
-			i_entity->collider->bv->entity = i_entity;
-
-			resize_bv(i_entity->collider->bv);
-
-		}
-
-		*/
 
 		// Return a pointer to the caller
 		*pp_entity = p_entity;

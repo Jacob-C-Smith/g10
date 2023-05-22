@@ -10,33 +10,8 @@
 // This gets called once a frame
 int user_code_callback ( GXInstance_t *p_instance )
 {
-    printf("/");SDL_Delay(50);printf("\r");
-    printf("-");SDL_Delay(50);printf("\r");
-    printf("\\");SDL_Delay(50);printf("\r");
-    printf("|");SDL_Delay(50);printf("\r");
 
-    return 1;
-}
 
-int mu()
-{
-    printf("UPUPUP\n");
-    return 0;
-}
-
-int md()
-{
-    printf("DOWNDOWN\n");
-    return 0;
-}
-
-int preup ( GXEntity_t *p_entity )
-{
-
-    // Print the name
-    printf("%s\n",p_entity->name);
-    
-    // Success
     return 1;
 }
 
@@ -64,14 +39,6 @@ int main ( int argc, const char *argv[] )
         // Name of schedule
         if ( strcmp("-schedule", argv[i]) == 0 )
             schedule_name = argv[++i];
-
-        // Connect to a host
-        if ( strcmp("-connect", argv[i]) == 0 )
-            connect_to_server = true;
-
-        // Client name 
-        if ( strcmp("-client_name", argv[i]) == 0 )
-            client_name = argv[++i];
     }
     
     // Create an instance
@@ -100,7 +67,7 @@ int main ( int argc, const char *argv[] )
                 // camera_controller_from_camera(instance, instance->context.scene->active_camera);
                
                 // Third person controller. Thanks Aiden :)
-                //aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
+                // aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
             }
              
         }
@@ -109,16 +76,6 @@ int main ( int argc, const char *argv[] )
         add_user_code_callback(p_instance, &user_code_callback);
     }
     
-    // Log stuff
-    {
-
-        p_ai = g_find_ai(p_instance, "AI 2");
-        
-        set_ai_pre_update_callback(p_ai, &preup);
-
-        print_renderer(p_instance->context.renderer);
-    }
-
     // Start the game 
     g_start_schedule(p_instance, schedule_name);
     

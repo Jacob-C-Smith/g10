@@ -780,49 +780,7 @@ int append_collision ( GXScene_t *scene, GXCollision_t *collision)
 int draw_scene ( GXScene_t *scene )
 {
 
-    // Initialized data
-    GXInstance_t             *p_instance                = g_get_active_instance();
-    VkCommandBufferBeginInfo  begin_info              = { 0 };
-    VkClearValue              clear_color             = { {{1.f, 1.f, 1.f, 0.0f}} };
-
-    VkRenderPassBeginInfo     render_pass_begin_info  =
-    {
-        .sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass          = p_instance->vulkan.render_pass,
-        .framebuffer         = p_instance->vulkan.swap_chain_framebuffers[p_instance->vulkan.image_index],
-        .renderArea.offset.x = 0,
-        .renderArea.offset.y = 0,
-        .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
-        .clearValueCount     = 2,
-        .pClearValues        = p_instance->context.renderer->clear_colors
-    };
-
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-    vkBeginCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &begin_info);
-
-
-    // Start the render pass
-    vkCmdBeginRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-
-    // Get a list of entities
-    size_t       entity_count = dict_values(scene->entities, 0);
-    GXEntity_t **entities     = calloc(entity_count, sizeof(void*));
-
-    dict_values(scene->entities, entities);
-
-    // Draw each entity
-    for (size_t i = 0; i < entity_count; i++)
-        draw_entity(entities[i]);
-
-    free(entities);
-
-    // End the render pass
-    vkCmdEndRenderPass(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
-
-    // End the command buffer
-    vkEndCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame]);
-
+    
     // Success
     return 1;
 }
