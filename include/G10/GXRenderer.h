@@ -28,6 +28,7 @@ struct GXRenderer_s
 	dict            *shaders;
 	dict            *render_passes;
 	GXRenderPass_t **render_passes_data;
+	GXRenderPass_t  *current_render_pass;
 	size_t           render_pass_count;
 	dict            *attachments; // type: GXAttachment_t *
 	size_t           clear_color_count;
@@ -43,9 +44,9 @@ struct GXRenderPass_s
 	dict             *subpasses;
 	GXSubpass_t     **subpasses_data;
 	size_t            subpasses_count;
- 
+
 	VkFramebuffer    *framebuffers;
- 
+
 	dict             *attachments; // type: char *
 	GXAttachment_t  **attachments_data;
 	size_t            attachments_count;

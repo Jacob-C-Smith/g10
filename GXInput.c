@@ -989,10 +989,8 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
 
         // TODO: G10 errors
         {
-            failed_to_load_bind_from_path:
             missing_properties:
             failed_to_load_bind:
-            failed_to_load_bind_as_json_value:
             failed_to_parse_key:
                 return 0;
         }

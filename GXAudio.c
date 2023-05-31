@@ -58,7 +58,7 @@ int load_sound(GXSound_t** pp_sound, const char* path)
 		#ifndef NDEBUG
 		if (path == (void*)0)
 			goto no_path;
-		#endif  
+		#endif
 	}
 
 	GXSound_t *p_sound = calloc(1, sizeof(GXSound_t));
@@ -96,12 +96,12 @@ int play_sound(GXSound_t* p_sound, bool startPaused)
 	#ifndef NDEBUG
 		if (p_sound == (void*)0)
 			goto no_sound;
-	#endif  
+	#endif
 	}
 
 	//Tweak parameters later.
 	FMOD_RESULT r = FMOD_System_PlaySound(g_get_active_instance()->fmod.system, p_sound->sound, NULL, startPaused, NULL);
-	
+
 	// FMOD Error Handling
 	{
 		#ifndef NDEBUG
@@ -131,7 +131,7 @@ int destroy_sound(GXSound_t* p_sound)
 	#ifndef NDEBUG
 	if (p_sound == (void*)0)
 		goto no_sound;
-	#endif  
+	#endif
 
 	FMOD_RESULT r = FMOD_Sound_Release(p_sound->sound);
 

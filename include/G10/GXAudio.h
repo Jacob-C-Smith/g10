@@ -1,7 +1,7 @@
 /** !
  * @file G10/GXUserCode.h
  * @author Benjamin F Daly, Jacob Smith
- * 
+ *
  * Audio for G10
  */
 
@@ -97,7 +97,7 @@ DLLEXPORT void set_3d_listener_and_orient ( GXCamera_t* p_camera );
 
 /** !
  *  Set the vector describing the position of an audio source on a given channel
- * 
+ *
  * @param channel : the index of the channel
  * @param position : vec3
  */
@@ -105,29 +105,29 @@ DLLEXPORT void set_channel_3d_position ( int channel, vec3 position );
 
 /** !
  *  Set the volume of a channel in dB
- * 
+ *
  * @param channel : the index of the channel
  * @param position : vec3
- * 
+ *
  */
 DLLEXPORT void set_channel_volume ( int channel, float dB );
 
 // Actions
 /** !
  * Play a sound
- * 
+ *
  * @param p_sound      : the sound to play
  * @param start_paused : Play the audio immediately, if true
- * 
+ *
  * @return channel_number
  */
 DLLEXPORT int play_sound ( GXSound_t* p_sound, bool start_paused );
 
 /** !
  * Stop a channel
- * 
+ *
  * @param channel : the index of the channel
- * 
+ *
  */
 DLLEXPORT void stop_channel ( int channel );
 
@@ -139,16 +139,16 @@ DLLEXPORT void stop_all_channels ( void ) ;
 // State
 /** !
  *  Is a channel playing?
- * 
+ *
  * @param channel : the index of the channel
- * 
+ *
  * @return true if playing else false
  */
 DLLEXPORT bool is_playing ( int channel );
 
 // Destructors
 /** !
- *  Free a sound 
+ *  Free a sound
  *
  * @param p_sound : Pointer to sound
  *
@@ -156,7 +156,7 @@ DLLEXPORT bool is_playing ( int channel );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_sound ( GXSound_t* p_sound ); 
+DLLEXPORT int destroy_sound ( GXSound_t* p_sound );
 
 	#ifdef BUILD_G10_WITH_FMOD
 	//TODO: May implement this, gotta talk to Jake about it

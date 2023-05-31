@@ -298,7 +298,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			size_t        element_count = 0;
 
 			// Get the location contents
-			{ 
+			{
 
 				// Get the quantity of elements
 				array_get(p_location->list, 0, &element_count);

@@ -44,6 +44,9 @@ struct GXCamera_s {
     // Matricies
     mat4  view_matrix,
           projection_matrix;
+
+    // Has the camera been changed?
+    bool  dirty;
 };
 
 // Allocators

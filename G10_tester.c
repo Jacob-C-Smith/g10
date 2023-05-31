@@ -99,7 +99,7 @@ bool test_model_mat4_from_vec3    ( vec3 location, vec3 rotation, vec3 scale, ma
 GXInstance_t *p_instance = 0;
 
 // Entry point
-int main      ( int argc, const char* argv[] )
+int main ( int argc, const char* argv[] )
 {
 
     // Initialize a G10 instance

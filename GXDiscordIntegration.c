@@ -7,7 +7,7 @@
 #include <time.h>
 
 void DISCORD_CALLBACK OnUserUpdated(void* data)
-{   
+{
     GXInstance_t* p_instance = g_get_active_instance();
 
     struct DiscordUser user;
@@ -24,11 +24,11 @@ void init_discord_integration(void)
     struct IDiscordUserEvents  users_events = { 0 };
     struct DiscordCreateParams params       = { 0 };
     GXInstance_t* p_instance = g_get_active_instance();
-    
+
     users_events.on_current_user_update = OnUserUpdated;
 
     DiscordCreateParamsSetDefault(&params);
-    
+
     params.client_id = 1059248544785117244;
     params.flags = DiscordCreateFlags_Default;
     params.event_data = &p_instance->discord_integration;
@@ -67,7 +67,7 @@ void init_discord_integration(void)
 
 int discord_callbacks ( GXInstance_t *p_instance )
 {
-	
+
 	// Argument check
 	{
 		#ifndef NDEBUG
@@ -75,7 +75,7 @@ int discord_callbacks ( GXInstance_t *p_instance )
 				goto no_instance;
 		#endif
 	}
-    
+
 
     // Run callbacks
     if ( p_instance->discord_integration.core->run_callbacks(p_instance->discord_integration.core) != DiscordResult_Ok )
@@ -92,7 +92,7 @@ int discord_callbacks ( GXInstance_t *p_instance )
 			no_instance:
 				#ifndef NDEBUG
 					g_print_error("[G10] [User code] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif	
+				#endif
 
                 // Error
 				return 0;

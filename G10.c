@@ -664,10 +664,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 if ( load_renderer_as_json_value(&p_instance->context.renderer, p_renderer) == 0 )
                     goto failed_to_load_schedule;
             }
-            // Default
-            else
-                ; // TODO: default?
-
 
             // Load an input
             if ( p_input )
@@ -677,17 +673,12 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 if ( load_input_as_json_value(&p_instance->input, p_input) == 0 )
                     goto failed_to_load_input;
             }
-            // Default
-            else
-                ; // TODO: default?
 
             // Load audio
             if ( p_audio )
             {
 
             }
-            else
-                ; // TODO: default?
 
             // Load schedules
             if ( p_schedules )
@@ -738,7 +729,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // Load the initial scene as a string
                 if ( load_scene_as_json_value(&p_instance->context.scene, p_initial_scene) == 0 )
                     goto failed_to_load_scene;
-                
+
             }
             else
                 goto no_initial_scene;
@@ -1607,10 +1598,34 @@ void clear_swap_chain ( void )
 int g_window_resize ( GXInstance_t *p_instance )
 {
 
-    // TODO:
-    SDL_GetWindowSize(p_instance->sdl2.window, &p_instance->window.width, &p_instance->window.height);
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_instance == (void *) 0 )
+                goto no_instance;
+        #endif
+    }
 
-    return 0;
+    // Get 
+    SDL_SetWindowSize(p_instance->sdl2.window, p_instance->window.width, p_instance->window.height);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n,", __FUNCTION__);
+                #endif
+
+                // Error
+                return 1;
+        }
+    }
 }
 
 int g_print_error ( const char *const format, ... )
@@ -1756,6 +1771,41 @@ int g_print_log ( const char *const format, ... )
         }
     }
 
+}
+
+int g_print_instance ( GXInstance_t *p_instance )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_instance == (void *) 0 ) goto no_instance;
+        #endif
+    }
+
+    // Formatting
+    g_print_log(" - Instance info - \n");
+
+    // Print the name
+    g_print_log("name: \"%s\"\n", p_instance->name);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int g_start_schedule ( GXInstance_t* p_instance, const char* name )
@@ -1920,22 +1970,22 @@ int copy_state ( GXInstance_t *p_instance )
             // Physics
             {
                 if (p_instance->queues.actor_move)
-                    queue_destroy(&(queue *)p_instance->queues.actor_move);
+                    queue_destroy(&p_instance->queues.actor_move);
 
                 if (p_instance->queues.actor_force)
-                    queue_destroy(&(queue *)p_instance->queues.actor_force);
+                    queue_destroy(&p_instance->queues.actor_force);
 
                 if (p_instance->queues.actor_collision)
-                    queue_destroy(&(queue *)p_instance->queues.actor_collision);
+                    queue_destroy(&p_instance->queues.actor_collision);
             }
 
             // AI
             {
                 if (p_instance->queues.ai_preupdate)
-                    queue_destroy(&(queue *)p_instance->queues.ai_preupdate);
+                    queue_destroy(&p_instance->queues.ai_preupdate);
 
                 if (p_instance->queues.ai_update)
-                    queue_destroy(&(queue *)p_instance->queues.ai_update);
+                    queue_destroy(&p_instance->queues.ai_update);
             }
         }
 
@@ -2399,8 +2449,8 @@ int g_exit ( GXInstance_t **pp_instance )
         // Free the instance name
         free(p_instance->name);
 
-        // TODO: Free scenes
-        //dict_free_clear(p_instance->data.scenes, &destroy_scene);
+        // Free scenes
+        dict_free_clear(p_instance->data.scenes, &destroy_scene);
 
         // Cleanup the context
         {
@@ -2455,7 +2505,7 @@ int g_exit ( GXInstance_t **pp_instance )
             // ... and the cache mutexes...
             if ( p_instance->mutexes.shader_cache )
                 SDL_DestroyMutex(p_instance->mutexes.shader_cache);
-            
+
             if ( p_instance->mutexes.part_cache )
                 SDL_DestroyMutex(p_instance->mutexes.part_cache);
 
@@ -2499,21 +2549,21 @@ int g_exit ( GXInstance_t **pp_instance )
                 queue_destroy(&p_instance->queues.load_entity);
 
             // Destroy the light probe loading queue
-            if ( p_instance->queues.load_light_probe ) 
+            if ( p_instance->queues.load_light_probe )
                 queue_destroy(&p_instance->queues.load_light_probe);
 
             // Destroy the physics queues
-            if ( p_instance->queues.actor_move ) 
+            if ( p_instance->queues.actor_move )
                 queue_destroy(&p_instance->queues.actor_move);
-            if ( p_instance->queues.actor_collision ) 
+            if ( p_instance->queues.actor_collision )
                 queue_destroy(&p_instance->queues.actor_collision);
-            if ( p_instance->queues.actor_force ) 
+            if ( p_instance->queues.actor_force )
                 queue_destroy(&p_instance->queues.actor_force);
 
             // Destroy the AI queues
-            if ( p_instance->queues.ai_preupdate ) 
+            if ( p_instance->queues.ai_preupdate )
                 queue_destroy(&p_instance->queues.ai_preupdate);
-            if ( p_instance->queues.ai_update ) 
+            if ( p_instance->queues.ai_update )
                 queue_destroy(&p_instance->queues.ai_update);
         }
 

@@ -30,25 +30,28 @@ enum g10_pipeline_e
 
 struct GXDescriptor_s
 {
-    char *name;
-
+    char                         *name;
+    VkDescriptorType              type;
+    size_t                        index;
+    VkDescriptorSetLayoutBinding  descriptor_set_layout_binding;
 };
 
 struct GXSet_s
 {
-    char                  *name;
-    size_t                 index;
-    VkDescriptorPool       descriptor_pool;
-    VkDescriptorSet       *descriptor_sets;
-    struct GXDescriptor_s *descriptors_data;
+    char                          *name;
+    size_t                         index;
+    VkDescriptorSetLayout          set_layout;
+    VkDescriptorSetLayoutBinding  *p_bindings;
+    size_t                         descriptor_count;
+    GXDescriptor_t               **descriptors_data;
 };
 
 struct GXLayout_s
 {
-    size_t i;
-    GXSet_t **sets;
-    size_t set_count;
-    
+    GXSet_t               **sets;
+    size_t                  set_count;
+    VkDescriptorSetLayout   p_sets;
+    VkPipelineLayout        pipeline_layout;
 };
 
 struct GXShader_s
@@ -58,7 +61,7 @@ struct GXShader_s
     size_t               users;
     enum g10_pipeline_e  type;
     GXLayout_t          *layout;
-    
+
     union
     {
         struct
@@ -112,7 +115,6 @@ struct GXShader_s
         } ray; // g10_pipeline_ray
     };
 };
-
 
 DLLEXPORT int create_shader_module ( char *code, size_t code_len, VkShaderModule* shader_module );
 
@@ -185,4 +187,4 @@ DLLEXPORT int set_shader_camera ( GXEntity_t  *p_entity );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_shader                  ( GXShader_t  *p_shader );
+DLLEXPORT int destroy_shader ( GXShader_t  **pp_shader );

@@ -88,7 +88,7 @@ struct GXInstance_s
     // Vulkan
     struct {
         VkInstance                instance;
-        
+
         VkDebugUtilsMessengerEXT  debug_messenger;
         VkSurfaceKHR              surface;
 

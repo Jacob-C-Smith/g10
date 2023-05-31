@@ -15,7 +15,7 @@ int user_code_callback ( GXInstance_t *p_instance )
     return 1;
 }
 
-// Entry point 
+// Entry point
 int main ( int argc, const char *argv[] )
 {
 
@@ -40,7 +40,7 @@ int main ( int argc, const char *argv[] )
         if ( strcmp("-schedule", argv[i]) == 0 )
             schedule_name = argv[++i];
     }
-    
+
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
         goto failed_to_initialize_g10;
@@ -48,7 +48,7 @@ int main ( int argc, const char *argv[] )
     // Game setup
     {
 
-        // Set up input 
+        // Set up input
         {
 
             // Initialized data
@@ -60,29 +60,32 @@ int main ( int argc, const char *argv[] )
 
             // If quit is fired, exit the game loop
             register_bind_callback(exit_bind, &g_user_exit);
-            
+
             // Set up the camera controller
             {
                 // First person controller
                 // camera_controller_from_camera(instance, instance->context.scene->active_camera);
-               
+
                 // Third person controller. Thanks Aiden :)
                 // aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
             }
-             
+
         }
 
         // Set up user code
         add_user_code_callback(p_instance, &user_code_callback);
     }
-    
-    // Start the game 
+
+    // Print the renderer to stdout
+    print_renderer(p_instance->context.renderer);
+
+    // Start the game
     g_start_schedule(p_instance, schedule_name);
-    
+
     // Stop the game
     g_stop_schedule(p_instance);
 
-    // Exit 
+    // Exit
     g_exit(&p_instance);
 
     // Return

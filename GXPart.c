@@ -315,10 +315,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	// Error handling
 	{
 
-		// TODO:
-		failed_to_load_part_from_file:
-		failed_to_create_part:
-			return 0;
+		
 
 		// Argument errors
 		{
@@ -351,11 +348,31 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 				return 0;
 		}
 
-		// G10 errors
+		// JSON errors
 		{
+			
 			not_enough_properties:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Part] Missing JSON properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+		// G10 errors
+		{
+			failed_to_load_part_from_file:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Failed to load part as path in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			failed_to_create_part:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Failed to allocate part  in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -469,7 +486,7 @@ int destroy_part ( GXPart_t **pp_part )
 				goto no_part;
 		#endif
 	}
-	
+
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
 	GXPart_t     *p_part = *pp_part;

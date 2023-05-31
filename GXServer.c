@@ -252,18 +252,6 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 				return 0;
 
 		}
-
-		// Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
-
 	}
 };
 

@@ -617,14 +617,6 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				// Error
 				return 0;
 
-			no_text:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
 		}
 
 		// Standard library errors
@@ -1343,14 +1335,6 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 		no_value:return 0;
 		// JSON parsing errors
 		{
-			failed_to_parse_json:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
 			wrong_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);

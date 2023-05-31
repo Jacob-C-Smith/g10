@@ -115,7 +115,7 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 
 				// Error
 				return 0;
-				
+
 		}
 
 		// Standard library
@@ -244,17 +244,6 @@ int load_rigidbody_as_json_text ( GXRigidbody_t** pp_rigidbody, char *text )
 				// Error
 				return 0;
 
-		}
-
-		// G10 errors
-		{
-			failed_to_allocate_rigidbody:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Failed to allocate rigidbody in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 		}
 	}
 }

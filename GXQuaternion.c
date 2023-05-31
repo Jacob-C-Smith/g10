@@ -60,9 +60,9 @@ quaternion multiply_quaternion_quaternion_vec4 ( quaternion q1, quaternion q2 )
     return (quaternion)
     {
         (-q1.i * q2.i - q1.j * q2.j - q1.k * q2.k),
-        (q1.j * q2.k - q1.k * q2.j),
-        (q1.k * q2.i - q1.i * q2.k),
-        (q1.i * q2.j - q1.j * q2.i)
+        ( q1.j * q2.k - q1.k * q2.j),
+        ( q1.k * q2.i - q1.i * q2.k),
+        ( q1.i * q2.j - q1.j * q2.i)
     };
 }
 

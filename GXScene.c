@@ -264,9 +264,9 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     {
         if ( load_scene(pp_scene, p_value->string) == 0 )
             goto failed_to_load_initial_scene;
-            
+
         return 1;
-    }    
+    }
     // Failed to parse. Wrong type
     else
         goto wrong_type;
@@ -780,7 +780,7 @@ int append_collision ( GXScene_t *scene, GXCollision_t *collision)
 int draw_scene ( GXScene_t *scene )
 {
 
-    
+
     // Success
     return 1;
 }

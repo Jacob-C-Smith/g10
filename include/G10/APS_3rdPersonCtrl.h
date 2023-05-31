@@ -1,8 +1,8 @@
 /** !
  * @file G10/G10.h
  * @author Jacob Smith
- * 
- * Include header for G10. 
+ *
+ * Include header for G10.
  */
 
 // Include guard
@@ -17,8 +17,8 @@
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
 
-/* Aiden's third person character controller. 
-* Takes a reference to the character entity, 
+/* Aiden's third person character controller.
+* Takes a reference to the character entity,
 * and to the third person camera for the character.
 * */
 typedef struct APS_3rdPersonCtrl

@@ -340,7 +340,9 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			else
 				goto wrong_parts_type;
 		}
+		
 		// Materials
+		// TODO
 
 		// Shader
 		if ( p_shader_value )
@@ -353,9 +355,11 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 				goto failed_to_load_transform_as_json_value;
 
 		// Rigidbody
+		// TODO
 
 		// Collider
-
+		// TODO
+		
 		// AI
 		if ( p_ai_value )
 			if ( load_ai_as_json_value(&p_entity->ai, p_ai_value) == 0 )
@@ -371,8 +375,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 	// Error handling
 	{
 
-		// TODO:
-		wrong_name_type:
+		
 		failed_to_load_part:
 		wrong_parts_type:
 		failed_to_load_shader_as_json_value:
@@ -410,6 +413,14 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			failed_to_allocate_entity:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Failed to allocate entity in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_name_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Property \"name\" was of wrong type in call to function in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -758,14 +769,6 @@ int load_entity_from_queue ( GXInstance_t *p_instance )
 
 				// Error
 				return 0;
-
-			failed_to_load_entity:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Scene] Failed to load entity in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
 		}
 	}
 }
@@ -817,12 +820,12 @@ int draw_entity ( GXEntity_t *p_entity )
 		{
 			// TODO: Uncomment when shader sets are done
 			//update_shader_push_constant(p_entity->shader);
-			vkCmdPushConstants(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], p_entity->shader->graphics.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, (u32) p_entity->shader->graphics.push_constant_size, p_entity->shader->graphics.push_constant_data);
+			//vkCmdPushConstants(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], p_entity->shader->graphics.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, (u32) p_entity->shader->graphics.push_constant_size, p_entity->shader->graphics.push_constant_data);
 		}
 
 		for (size_t i = 0; i < p_entity->shader->graphics.set_count; i++)
 		{
-			vkCmdBindDescriptorSets(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->graphics.pipeline_layout, 0, 1, &p_entity->shader->graphics.sets_data[i].descriptor_sets[p_instance->vulkan.current_frame], 0, 0);
+			//vkCmdBindDescriptorSets(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], VK_PIPELINE_BIND_POINT_GRAPHICS, p_entity->shader->graphics.pipeline_layout, 0, 1, &p_entity->shader->graphics.sets_data[i].descriptor_sets[p_instance->vulkan.current_frame], 0, 0);
 		}
 
 		// TODO: Uncomment when shader sets are done

@@ -1,24 +1,21 @@
 #include <G10/GXCameraController.h>
 
-float  x_orient,
-       y_orient,
-       h_ang,
-       v_ang,
-       camera_acceleration = 1.0f;
+float                 x_orient            = 0.f,
+                      y_orient            = 0.f,
+                      h_ang               = 90.f,
+                      v_ang               = 0.f,
+                      camera_acceleration = 1.0f;
+GXCameraController_t *camera_controller   = 0;
 
-GXCameraController_t* camera_controller = 0;
-
-GXCameraController_t* create_camera_controller       ( void )
+GXCameraController_t* create_camera_controller ( void )
 {
+
+    // Initialized data
     GXCameraController_t *ret = calloc(1, sizeof(GXCameraController_t));
 
-    // Check allocaated memory
-    {
-        #ifndef NDEBUG
-            if ( ret == (void *) 0 )
-                goto no_mem;
-        #endif
-    }
+    // Error checking
+    if ( ret == (void *) 0 )
+        goto no_mem;
 
     // Success
     return ret;
@@ -29,43 +26,53 @@ GXCameraController_t* create_camera_controller       ( void )
             #ifndef NDEBUG
                 g_print_error("[G10] [Camera controller] Unable to allocate memory for camera controller\n");
             #endif
+
+            // Error
             return 0;
     }
 }
 
-void                  camera_controller_forward      ( callback_parameter_t state, GXInstance_t* p_instance )
+void camera_controller_forward ( callback_parameter_t state, GXInstance_t* p_instance )
 {
+
+    // Check the keyboard state
     if (state.input_state == KEYBOARD)
         y_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
-void                  camera_controller_backward     ( callback_parameter_t state, GXInstance_t* p_instance )
+void camera_controller_backward ( callback_parameter_t state, GXInstance_t* p_instance )
 {
+
+    // Check the keyboard state
     if (state.input_state == KEYBOARD)
         y_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
-void                  camera_controller_strafe_left  ( callback_parameter_t state, GXInstance_t* p_instance )
+void camera_controller_strafe_left ( callback_parameter_t state, GXInstance_t* p_instance )
 {
+
+    // Check the keyboard state
     if (state.input_state == KEYBOARD)
         x_orient = (state.inputs.key.depressed) ? -1.f : 0.f;
 }
-void                  camera_controller_strafe_right ( callback_parameter_t state, GXInstance_t* p_instance )
+void camera_controller_strafe_right ( callback_parameter_t state, GXInstance_t* p_instance )
 {
+
+    // Check the keyboard state
     if (state.input_state == KEYBOARD)
         x_orient = (state.inputs.key.depressed) ? 1.f : 0.f;
 }
 
-void                  camera_controller_mouse           ( callback_parameter_t state, GXInstance_t* p_instance )
+void camera_controller_mouse ( callback_parameter_t state, GXInstance_t* p_instance )
 {
-    if (state.input_state == MOUSE)
-    {
-        v_ang -= camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.yrel / 720.0f);
-        h_ang += camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.xrel / 1280.0f);
-    }
 
+    // Check the keyboard state
+    if (state.input_state == MOUSE)
+        v_ang -= camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.yrel / p_instance->window.height),
+        h_ang += camera_acceleration * p_instance->input->mouse_sensitivity * (state.inputs.mouse_state.xrel / p_instance->window.width);
 }
 
-int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camera )
+int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera )
 {
+
     // Argument check
     {
         #ifndef NDEBUG
@@ -74,9 +81,9 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
         #endif
     }
 
-    GXCameraController_t *ret = create_camera_controller();
-    u8 errors = 0;
-    ret->camera = camera;
+    // Initialized data
+    GXCameraController_t *ret    = create_camera_controller();
+    u8                    errors = 0;
 
     // Displacement binds
     GXBind_t *forward  = find_bind(p_instance->input, "FORWARD"),
@@ -112,7 +119,11 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
         #endif
     }
 
-    ret->spdlim = 0.0025f;
+    // Set the camera controller
+    *ret = (GXCameraController_t) {
+        .camera = camera,
+        .spdlim = 0.0025f
+    };
 
     // Assign displacement callbacks
     register_bind_callback(forward     , &camera_controller_forward);
@@ -121,13 +132,12 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
     register_bind_callback(right       , &camera_controller_strafe_right);
 
     // Assign orientation callbacks
-    register_bind_callback(mouse   , &camera_controller_mouse);
+    register_bind_callback(mouse       , &camera_controller_mouse);
 
-
-    ret->camera = camera;
-
+    // Set the camera controller
     camera_controller = ret;
 
+    // Success
     return 1;
 
     // Error handling
@@ -136,15 +146,20 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
         // Argument error
         {
             no_instance:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Camera Controller] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Camera Controller] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
             no_camera:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Camera Controller] Null pointer provided for \"camera\" in call to \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Camera Controller] Null pointer provided for \"camera\" in call to \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
         // Missing bind for camera controller
@@ -161,16 +176,16 @@ int camera_controller_from_camera  ( GXInstance_t* p_instance, GXCamera_t *camer
             if ( errors & 0x10 )
                 g_print_error("[G10] [Camera controller] Missing \"MOUSE\" input bind to set up camera controller\n");
 
-            // TODO: Free camera controller
+            free(ret);
 
+            // Error
             return 0;
 
         }
-
     }
 }
 
-int                   update_controlee_camera        ( void )
+int update_controlee_camera ( void )
 {
 
     // Context check
@@ -180,8 +195,8 @@ int                   update_controlee_camera        ( void )
     }
 
     // Initialized data
-    vec2                  l_orient     = { 0 };
-    GXCamera_t           *camera       = camera_controller->camera;
+    vec2        l_orient = { 0 };
+    GXCamera_t *camera   = camera_controller->camera;
     /*
     camera_controller->orientation = (vec2)
     {
@@ -220,15 +235,18 @@ int                   update_controlee_camera        ( void )
     camera->target.z = sinf(to_radians(v_ang));
     camera->target.y = sinf(to_radians(h_ang)) * cosf(to_radians(v_ang));
     */
+
     // Success
     return 1;
 
     // Error handling
     {
         no_active_camera_controller:
-        #ifndef NDEBUG
-            g_print_warning("[G10] [Camera controller] No active camera, set a camera with \"camera_controller_from_camera()\"\n");
-        #endif
-        return 0;
+            #ifndef NDEBUG
+                g_print_warning("[G10] [Camera controller] No active camera, set a camera with \"camera_controller_from_camera()\"\n");
+            #endif
+
+            // Error
+            return 0;
     }
 }

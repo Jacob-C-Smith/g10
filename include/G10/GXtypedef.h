@@ -151,6 +151,9 @@ typedef struct GXLayout_s GXLayout_t;
 struct GXSet_s;
 typedef struct GXSet_s GXSet_t;
 
+struct GXDescriptor_s;
+typedef struct GXDescriptor_s GXDescriptor_t;
+
 // Material
 struct GXMaterial_s;
 typedef struct GXMaterial_s GXMaterial_t;
