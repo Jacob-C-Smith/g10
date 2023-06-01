@@ -247,14 +247,14 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		dict *p_entity_value = p_value->object;
 
 		// Get properties from JSON object
-		p_name_value      = (JSONValue_t *) dict_get(p_entity_value, "name");
-		p_parts_value     = (JSONValue_t *) dict_get(p_entity_value, "parts");
-		p_materials_value = (JSONValue_t *) dict_get(p_entity_value, "materials");
-		p_shader_value    = (JSONValue_t *) dict_get(p_entity_value, "shader");
-		p_transform_value = (JSONValue_t *) dict_get(p_entity_value, "transform");
-		p_rigidbody_value = (JSONValue_t *) dict_get(p_entity_value, "rigidbody");
-		p_collider_value  = (JSONValue_t *) dict_get(p_entity_value, "collider");
-		p_ai_value        = (JSONValue_t *) dict_get(p_entity_value, "ai");
+		p_name_value      = dict_get(p_entity_value, "name");
+		p_parts_value     = dict_get(p_entity_value, "parts");
+		p_materials_value = dict_get(p_entity_value, "materials");
+		p_shader_value    = dict_get(p_entity_value, "shader");
+		p_transform_value = dict_get(p_entity_value, "transform");
+		p_rigidbody_value = dict_get(p_entity_value, "rigidbody");
+		p_collider_value  = dict_get(p_entity_value, "collider");
+		p_ai_value        = dict_get(p_entity_value, "ai");
 
 		// Check for required data
 		if ( !p_name_value )
@@ -268,7 +268,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		if ( create_entity(&p_entity) == 0 )
 			goto failed_to_allocate_entity;
 
-		// Copy the name
+		// Set the name
 		if ( p_name_value->type == JSONstring )
 		{
 
@@ -284,7 +284,6 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			// Copy the name
 			strncpy(p_entity->name, p_name_value->string, name_len);
-
 		}
 		else
 			goto wrong_name_type;
@@ -292,6 +291,8 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		// Parts
 		if ( p_parts_value )
 		{
+
+			// Parse each part
 			if ( p_parts_value->type == JSONarray )
 			{
 
@@ -346,13 +347,40 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 		// Shader
 		if ( p_shader_value )
-			if ( load_shader_as_json_value(&p_entity->shader, p_shader_value) == 0 )
-				goto failed_to_load_shader_as_json_value;
+		{
 
+			// Get the name of the shader
+			if ( p_shader_value->type == JSONstring )
+			{
+				
+				// Initialized data
+				size_t len = strlen(p_shader_value->string);
+
+				// Allocate memory for the shader
+				p_entity->shader = calloc(len+1, sizeof(char));
+
+				// Error checking
+				if ( p_entity->shader == (void *) 0 )
+					goto no_mem;
+				
+				// Copy the name of the shader
+				strncpy(p_entity->shader, p_shader_value->string, len);
+			}
+			else
+				goto wrong_shader_type;
+		}
+		
 		// Transform
 		if ( p_transform_value )
-			if ( load_transform_as_json_value(&p_entity->transform, p_transform_value) == 0 )
-				goto failed_to_load_transform_as_json_value;
+		{
+			if ( p_transform_value->type == JSONobject )
+			{
+				if ( load_transform_as_json_value(&p_entity->transform, p_transform_value) == 0 )
+					goto failed_to_load_transform_as_json_value;
+			}
+			else
+				goto wrong_transform_type;
+		}
 
 		// Rigidbody
 		// TODO
@@ -379,7 +407,9 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		failed_to_load_part:
 		wrong_parts_type:
 		failed_to_load_shader_as_json_value:
-		return 0;
+		wrong_shader_type:
+		wrong_transform_type:
+			return 0;
 
 		// Argument errors
 		{
@@ -795,6 +825,7 @@ int draw_entity ( GXEntity_t *p_entity )
 	if (p_entity->parts == 0)
 		return 0;
 
+	// Initialized data
 	GXInstance_t* p_instance = g_get_active_instance();
 	p_instance->context.scene->active_entity = p_entity;
 
@@ -873,7 +904,7 @@ int destroy_entity ( GXEntity_t **pp_entity )
 	free(p_entity->name);
 
 	if ( p_entity->shader )
-		p_entity->shader = (void *)0;
+		;//
 
 	if ( p_entity->transform )
 		destroy_transform(&p_entity->transform);

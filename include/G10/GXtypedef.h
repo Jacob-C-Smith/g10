@@ -239,7 +239,7 @@ struct GXRenderPass_s;
 typedef struct GXRenderPass_s GXRenderPass_t;
 
 struct GXSubpass_s;
-typedef struct GXSubpass_s    GXSubpass_t;
+typedef struct GXSubpass_s GXSubpass_t;
 
 struct GXAttachment_s;
 typedef struct GXAttachment_s GXAttachment_t;

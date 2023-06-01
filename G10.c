@@ -2157,6 +2157,7 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
         #endif
     }
 
+    // Add the shader to the cache
     dict_add(p_instance->cache.shaders, p_shader->name, p_shader);
 
     // Success

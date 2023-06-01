@@ -88,7 +88,7 @@ char *image_layout_names[IMAGE_LAYOUTS_COUNT] =
 
 void *subpass_function_callbacks[SUBPASS_FUNCTION_COUNT] =
 {
-    &draw_scene,
+    0,
     0, //&draw_material,
     0, //&draw_depth_pass,
     0, //&draw_direct_lighting,
@@ -500,8 +500,8 @@ char *access_flag_bits_names[ACCESS_FLAG_BITS_COUNT] =
     "shader write",
     "color attachment read",
     "color attachment write",
-    "stencil attachment read",
-    "stencil attachment write",
+    "depth stencil attachment read",
+    "depth stencil attachment write",
     "transfer read",
     "transfer write",
     "host read",
@@ -1427,14 +1427,11 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             clear_color[1].depthStencil.depth = 1.f;
             clear_color[1].depthStencil.stencil = 0;
 
-            
             p_renderer->clear_colors = calloc(attachment_count*2,sizeof(VkClearValue));
 
             // Store the clear color in the renderer
             for (size_t i = 0; i < attachment_count*2; i++)
-            {
                 p_renderer->clear_colors[i] = *clear_color;
-            }
             
         }
         else
@@ -1444,6 +1441,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         // Parse each render pass
         if ( p_passes->type == JSONarray )
         {
+
             // Initialized data
             size_t array_len = 0;
             JSONValue_t **pp_array_contents = 0;
@@ -1471,6 +1469,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             // Iterate over each render pass
             for (size_t i = 0; i < array_len; i++)
             {
+
                 // Load the render pass as a JSON value
                 if ( load_render_pass_as_json_value(&p_renderer->render_passes_data[i], pp_array_contents[i]) == 0 )
                     goto failed_to_load_renderer_as_json_value;
@@ -1678,9 +1677,8 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char *text 
     if ( load_render_pass_as_json_value(pp_render_pass, p_value) == 0 )
         goto failed_to_load_renderer_as_json_value;
 
-    // TODO:
     // Clean the scope
-    // free_json_value(p_value);
+    free_json_value(p_value);
 
     // Success
     return 1;
@@ -1984,15 +1982,13 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                         p_dependency_destination_access  = dict_get(p_dependency->object, "destination access");
 
                         // Check properties
-                        if (!(
+                        if ( ! (
                             p_dependency_flags &&
-                            p_dependency_source_subpass &&
                             p_dependency_destination_subpass &&
                             p_dependency_source_stage &&
                             p_dependency_destination_stage &&
-                            p_dependency_source_access &&
                             p_dependency_destination_access
-                        ))
+                        ) )
                             goto missing_properties;
                     }
 
@@ -2000,14 +1996,341 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                     {
                         uint32_t             source_subpass_index      = 0,
                                              destination_subpass_index = 0;
-                        VkPipelineStageFlags source_stage_mask         = (VkPipelineStageFlags)dict_get(pipeline_stage_flag_bits, p_dependency_source_stage->string),
-                                             destination_stage_mask    = (VkPipelineStageFlags)dict_get(pipeline_stage_flag_bits, p_dependency_destination_stage->string);
-                        VkAccessFlags        source_access_mask        = (VkAccessFlags)dict_get(access_flag_bits, p_dependency_source_access->string),
-                                             destination_access_mask   = (VkAccessFlags)dict_get(access_flag_bits, p_dependency_destination_access->string);
-                        VkDependencyFlags    dependency_flags          = (VkDependencyFlags)dict_get(dependency_flag_bits, p_dependency_flags->string);
+                        VkPipelineStageFlags source_stage_mask         = 0,
+                                             destination_stage_mask    = 0;
+                        VkAccessFlags        source_access_mask        = 0,
+                                             destination_access_mask   = 0;
+                        VkDependencyFlags    dependency_flags          = (VkDependencyFlags) dict_get(dependency_flag_bits, p_dependency_flags->string);
+
+                        if ( p_dependency_source_subpass )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_source_subpass->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_source_subpass->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_source_subpass->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_source_subpass
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                    {
+
+                                    }
+                                    // Default
+                                    else
+                                        goto wrong_dependency_source_subpass_type;
+                                }
+                                
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_source_subpass->type == JSONstring )
+                            {
+
+                            }
+                            // Default
+                            else
+                                goto wrong_dependency_source_subpass_type;
+                        }
+
+                        if ( p_dependency_destination_subpass )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_destination_subpass->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_destination_subpass->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_destination_subpass->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_destination_subpass
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                    {
+
+                                    }
+                                    // Default
+                                    else
+                                        goto wrong_dependency_destination_subpass_type;
+                                }
+                                
+                                // Clean the scope
+                                free(pp_flags);
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_destination_subpass->type == JSONstring )
+                            {
+
+                            }
+                            // Default
+                            else
+                                goto wrong_dependency_destination_subpass_type;
+                        }
+
+                        if ( p_dependency_source_stage )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_source_stage->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_source_stage->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_source_stage->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_source_stage
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                        source_stage_mask |= (VkPipelineStageFlags) dict_get(pipeline_stage_flag_bits, i_flag->string);
+                                    // Default
+                                    else
+                                        goto wrong_dependency_source_stage_type;
+                                }
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_source_stage->type == JSONstring )
+                                source_stage_mask = (VkPipelineStageFlags) dict_get(pipeline_stage_flag_bits, p_dependency_source_stage->string);
+                            // Default
+                            else
+                                goto wrong_dependency_source_stage_type;
+                        }
+
+                        if ( p_dependency_destination_stage )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_destination_stage->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_destination_stage->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_destination_stage->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_destination_stage
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                        destination_stage_mask |= (VkPipelineStageFlags)dict_get(pipeline_stage_flag_bits, i_flag->string);
+                                    // Default
+                                    else
+                                        goto wrong_dependency_destination_stage_type;
+                                }
+
+                                // Clean the scope
+                                free(pp_flags);
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_destination_stage->type == JSONstring )
+                                destination_stage_mask = (VkPipelineStageFlags) dict_get(pipeline_stage_flag_bits, p_dependency_destination_stage->string);
+                            // Default
+                            else
+                                goto wrong_dependency_destination_stage_type;
+                        }
+
+                        if ( p_dependency_source_access )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_source_access->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_source_access->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_source_access->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_source_access
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                        source_access_mask |= (VkAccessFlags) dict_get(access_flag_bits, i_flag->string);
+                                    // Default
+                                    else
+                                        goto wrong_dependency_source_access_type;
+                                }
+                                
+                                // Clean the scope
+                                free(pp_flags);
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_source_access->type == JSONstring )
+                                source_access_mask = (VkAccessFlags) dict_get(access_flag_bits, p_dependency_source_access->string);
+                            // Default
+                            else
+                                goto wrong_dependency_source_access_type;
+                        }
+
+                        if ( p_dependency_destination_access )
+                        {
+
+                            // Parse the flags as an array
+                            if ( p_dependency_destination_access->type == JSONarray )
+                            {
+
+                                // Initialized data
+                                size_t flags_count = 0;
+                                JSONValue_t **pp_flags = 0;
+
+                                // Get the array contents
+                                {
+
+                                    // Get the size of the array
+                                    array_get(p_dependency_destination_access->list, 0, &flags_count);
+
+                                    // Allocate memory for the array
+                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+
+                                    // Error handling
+                                    if ( pp_flags == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the contents of the array
+                                    array_get(p_dependency_destination_access->list, pp_flags, 0);
+                                }
+
+                                // Iterate over each dependency_destination_access
+                                for (size_t i = 0; i < flags_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_flag = pp_flags[i];
+
+                                    // Set the flag
+                                    if ( i_flag->type == JSONstring )
+                                        destination_access_mask |= (VkAccessFlags) dict_get(access_flag_bits, i_flag->string);
+                                    // Default
+                                    else
+                                        goto wrong_dependency_destination_access_type;
+                                }
+                                
+                                // Clean the scope
+                                free(pp_flags);
+                            }
+                            // Parse the flags as a string
+                            else if ( p_dependency_destination_access->type == JSONstring )
+                                destination_access_mask = (VkAccessFlags) dict_get(access_flag_bits, p_dependency_destination_access->string);
+                            // Default
+                            else
+                                goto wrong_dependency_destination_access_type;
+                        }
 
                         dependencies[i] = (VkSubpassDependency){
-                            .srcSubpass      = source_subpass_index,
+                            .srcSubpass      = VK_SUBPASS_EXTERNAL,
                             .dstSubpass      = destination_subpass_index,
                             .srcStageMask    = source_stage_mask,
                             .dstStageMask    = destination_stage_mask,
@@ -2015,6 +2338,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                             .dstAccessMask   = destination_access_mask,
                             .dependencyFlags = dependency_flags
                         };
+                        printf("");
                     }
                 }
             }
@@ -2044,38 +2368,93 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
     p_instance->context.loading_renderer->current_render_pass = p_render_pass;
 
+    // Construct a dictionary
+    dict_construct(&p_instance->context.loading_renderer->current_render_pass->draw_queue_types, subpass_count);
+
     // Load each subpasses shader
     for ( size_t i = 0; i < subpass_count; i++ )
     {
 
         // Initialized data
-        GXSubpass_t *p_subpass       = 0;
-        GXShader_t  *p_shader        = 0;
-        JSONValue_t *p_subpass_value = pp_subpasses_contents[i],
-                    *p_name          = 0,
-                    *p_shader_value  = 0;
+        GXSubpass_t *p_subpass        = 0;
+        GXShader_t  *p_shader         = 0;
+        JSONValue_t *p_subpass_value  = pp_subpasses_contents[i],
+                    *p_name           = 0,
+                    *p_shaders_value  = 0;
+        queue       *p_draw_queue     = 0;
 
         // Get the required information to load a subpasses shader
         if ( p_subpass_value->type == JSONobject )
         {
 
-            p_name         = dict_get(p_subpass_value->object, "name");
-            p_shader_value = dict_get(p_subpass_value->object, "shader");
+            p_name          = dict_get(p_subpass_value->object, "name");
+            p_shaders_value = dict_get(p_subpass_value->object, "shaders");
 
-            if ( ! ( p_name && p_shader_value ) )
+            if ( ! ( p_name && p_shaders_value ) )
                 goto missing_properties;
         }
 
-        // Get the subpass
-        p_subpass = dict_get(p_render_pass->subpasses, p_name->string);
+        // Get the shaders
+        {
+            
+            // Initialized data
+            size_t        shader_count     = 0;
+            JSONValue_t **pp_shader_values = 0;
 
-        // Load the shader
-        if ( load_shader_as_json_value(&p_shader, p_shader_value) == 0 )
-            goto failed_to_load_shader_as_json_value;
+            // Get the contents of the array
+            if ( p_shaders_value->type == JSONarray )
+            {
+                
+                // Get the quantity of shaders
+                array_get(p_shaders_value->list, 0, &shader_count);
 
-        // Set the subpasses shader
-        p_subpass->shader = p_shader;
+                // Allocate for the array contents
+                pp_shader_values = calloc(shader_count, sizeof(JSONValue_t *));
 
+                // Error checking
+                if ( pp_shader_values == (void *) 0 )
+                    goto no_mem;
+                
+                // Get the array contents
+                array_get(p_shaders_value->list, pp_shader_values, 0);
+            }
+
+            // Get the subpass
+            p_subpass = dict_get(p_render_pass->subpasses, p_name->string);
+
+            // Allocate memory for an array of shader names
+            p_subpass->shader_names = calloc(shader_count, sizeof(char *));
+
+            // Error check
+            if ( p_subpass->shader_names == (void *) 0 )
+                goto no_mem;
+
+            // Set the shader count
+            p_subpass->shader_count = shader_count;
+
+            // Iterate over each shader
+            for (size_t i = 0; i < shader_count; i++)
+            {
+
+                // Initialized data
+                JSONValue_t *p_shader_value = pp_shader_values[i];
+                
+                
+                
+                // Load the shader
+                if ( load_shader_as_json_value(&p_shader, p_shader_value) == 0 )
+                    goto failed_to_load_shader_as_json_value;
+
+                // Construct a draw queue for the shader
+                queue_construct(&p_draw_queue);
+
+                // Add the draw queue to the subpass
+                dict_add(p_instance->context.loading_renderer->current_render_pass->draw_queue_types, p_shader->name, p_draw_queue);
+                
+                // Set the subpasses shader
+                p_subpass->shader_names[i] = p_shader->name;
+            }
+        }
     }
 
     // TODO: Check
@@ -2139,6 +2518,12 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
     // TODO:
     failed_to_load_shader_as_json_value:
+    wrong_dependency_source_subpass_type:
+    wrong_dependency_destination_subpass_type:
+    wrong_dependency_source_stage_type:
+    wrong_dependency_destination_stage_type:
+    wrong_dependency_source_access_type:
+    wrong_dependency_destination_access_type:
         return 0;
 
     // Error handling
@@ -2395,26 +2780,26 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
     }
 
     // Initialized data
-    GXInstance_t *p_instance             = g_get_active_instance();
-    GXSubpass_t *p_subpass               = 0;
-    JSONValue_t *p_name                  = 0,
-                *p_pipeline              = 0,
-                *p_shader_name           = 0,
-                *p_input_attachments     = 0,
-                *p_color_attachments     = 0,
-                *p_preserved_attachments = 0,
-                *p_depth_attachment      = 0;
+    GXInstance_t *p_instance              = g_get_active_instance();
+    GXSubpass_t  *p_subpass               = 0;
+    JSONValue_t  *p_name                  = 0,
+                 *p_shaders               = 0,
+                 *p_shader_name           = 0,
+                 *p_input_attachments     = 0,
+                 *p_color_attachments     = 0,
+                 *p_preserved_attachments = 0,
+                 *p_depth_attachment      = 0;
 
-    // Get the required information to construct an attachment
+    // Parse the JSON value into constructor parameters
     if ( p_value->type == JSONobject )
     {
 
         p_name                  = dict_get(p_value->object, "name");
-        p_pipeline              = dict_get(p_value->object, "pipeline");
+        p_shaders               = dict_get(p_value->object, "shaders");
         p_input_attachments     = dict_get(p_value->object, "input attachments");
         p_color_attachments     = dict_get(p_value->object, "color attachments");
         p_preserved_attachments = dict_get(p_value->object, "preserved attachments");
-        p_depth_attachment      = dict_get(p_value->object, "depth attachments");
+        p_depth_attachment      = dict_get(p_value->object, "depth attachment");
 
         if ( ! ( p_name ) )
             goto missing_properties;
@@ -2431,26 +2816,44 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                                *depth_attachment_reference      = calloc(1, sizeof(VkAttachmentReference));
         JSONValue_t           **pp_input_attachments            = 0,
                               **pp_color_attachments            = 0,
-                              **pp_preserved_attachments        = 0,
-                              *p_depth_attachment               = 0;
+                              **pp_preserved_attachments        = 0;
         char                  *name                             = 0;
+
+        // Error checking
+        if ( input_attachment_references == (void *) 0 )
+            goto no_mem; 
+
+        if ( color_attachment_references == (void *) 0 )
+            goto no_mem;
+
+        if ( preserved_attachment_references == (void *) 0 )
+            goto no_mem;
+
+        if ( depth_attachment_reference == (void *) 0 )
+            goto no_mem; 
 
         // Parse the JSON value
         {
 
             // Parse input attachments
-            if (p_input_attachments)
+            if ( p_input_attachments )
             {
 
                 // Parse the input attachments as an array
-                if (p_input_attachments->type == JSONarray)
+                if ( p_input_attachments->type == JSONarray )
                 {
+
+                    // Get the quantity of input attachments
                     array_get(p_input_attachments->list, 0, &input_attachment_count);
+
+                    // Allocate memory for input attachment names
                     pp_input_attachments = calloc(input_attachment_count, sizeof(JSONValue_t *));
 
-                    if (pp_input_attachments == (void *)0)
+                    // Error checking
+                    if ( pp_input_attachments == (void *)0 )
                         goto no_mem;
-
+                    
+                    // Get the contents of the array
                     array_get(p_input_attachments->list, pp_input_attachments, 0);
                 }
                 // Type error
@@ -2574,10 +2977,12 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                     {
                         GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, p_color_attachment->string);
 
-                        color_attachment_references[i] = (VkAttachmentReference){
+                        color_attachment_references[i] = (VkAttachmentReference)
+                        {
                             .attachment = i,
                             // TODO: Set the image layout
-                            .layout = p_attachment->attachment_description.initialLayout};
+                            .layout = p_attachment->attachment_description.initialLayout
+                        };
                     }
                 }
             }
@@ -2593,15 +2998,22 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
             else
                 ;
 
-            // Parse dept attachments
+            // Parse depth attachments
             if ( p_depth_attachment )
             {
+
+                *depth_attachment_reference = (VkAttachmentReference)
+                {
+                    .attachment = 1,
+                    .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+                };
             }
             // Default
             else
                 ;
         }
 
+        // TODO: Finish attachments
         *p_subpass = (GXSubpass_t)
         {
             .name                = name,
@@ -2609,17 +3021,16 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
             (VkSubpassDescription)
             {
                 .flags                   = 0,
-                .pipelineBindPoint       = 0,
+                .pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS,
                 .inputAttachmentCount    = (u32)input_attachment_count,
                 .pInputAttachments       = 0,
                 .colorAttachmentCount    = (u32)color_attachment_count,
                 .pColorAttachments       = color_attachment_references,
                 .pResolveAttachments     = 0,
-                .pDepthStencilAttachment = 0,
+                .pDepthStencilAttachment = depth_attachment_reference,
                 .preserveAttachmentCount = (u32)preserved_attachment_count,
                 .pPreserveAttachments    = 0
-            },
-            .shader              = 0
+            }
         };
     }
 
@@ -2629,15 +3040,15 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
     // Success
     return 1;
 
-// TODO:
-no_mem:
-failed_to_allocate_subpass:
-missing_properties:
-wrong_input_attachments_type:
-wrong_color_attachments_type:
-wrong_preserved_attachments_type:
-wrong_depth_attachments_type:
-    return 0;
+    // TODO:
+    no_mem:
+    failed_to_allocate_subpass:
+    missing_properties:
+    wrong_input_attachments_type:
+    wrong_color_attachments_type:
+    wrong_preserved_attachments_type:
+    wrong_depth_attachments_type:
+        return 0;
 
     // Error handling
     {
@@ -3533,10 +3944,6 @@ int print_subpass ( GXSubpass_t *p_subpass )
     // Print the name
     g_print_log("name: \"%s\"\n", p_subpass->name);
 
-    // Print the name of the shader
-    g_print_log("shader: \"%s\"\n", p_subpass->shader->name);
-
-
     // Success
     return 1;
 
@@ -3694,6 +4101,16 @@ int add_subpass_callback ( char *name, void (*function_pointer)() )
     }
 }
 
+void add_draw_item ( GXEntity_t *p_entity )
+{
+
+    // Initialized data
+    GXInstance_t *p_instance        = g_get_active_instance();
+    queue        *p_draw_item_queue = dict_get(p_instance->context.renderer->current_render_pass->draw_queue_types, p_entity->shader);
+    queue_enqueue(p_draw_item_queue, p_entity);
+
+}
+
 int render_frame ( GXInstance_t *p_instance )
 {
 
@@ -3701,21 +4118,28 @@ int render_frame ( GXInstance_t *p_instance )
     VkResult result = 0;
     u64      start  = 0,
              end    = 0;
-    VkSemaphore wait_semaphores [ ] = {
+    VkSemaphore wait_semaphores [ ] =
+    {
         p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame]
     };
-    VkSemaphore signal_semaphores [ ] = {
+    VkSemaphore signal_semaphores [ ] =
+    {
         p_instance->vulkan.render_finished_semaphores[p_instance->vulkan.current_frame]
     };
-    VkPipelineStageFlags wait_stages      [ ] = {
+    VkPipelineStageFlags wait_stages [ ] =
+    {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
     };
-    VkSwapchainKHR swap_chains[ ] = {
+    VkSwapchainKHR swap_chains [ ] =
+    {
         p_instance->vulkan.swap_chain
     };
     
     // Get the microsecond counter
     start = SDL_GetPerformanceCounter();
+
+    // Prepare draw queues
+    dict_foreach(p_instance->context.scene->entities, &add_draw_item);
 
     // Prepare the command buffer for rendering
     {
@@ -3750,12 +4174,9 @@ int render_frame ( GXInstance_t *p_instance )
 
         // Initialized data
         GXRenderer_t             *active_renderer = p_instance->context.renderer;
-        VkCommandBufferBeginInfo  begin_info      = {0};
+        VkCommandBufferBeginInfo  begin_info      = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
         VkCommandBuffer           command_buffer  = p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame];
-
-        // Set up the command buffer begin info struct
-        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
+        
         // Begin the command buffer
         vkBeginCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &begin_info);
 
@@ -3764,31 +4185,60 @@ int render_frame ( GXInstance_t *p_instance )
         {
 
             // Initialized data
-            GXRenderPass_t         *rp                     = active_renderer->render_passes_data[i];
-            size_t                  subpass_count          = rp->subpasses_count;
+            GXRenderPass_t         *p_render_pass          = active_renderer->render_passes_data[i];
+            size_t                  subpass_count          = p_render_pass->subpasses_count;
             VkRenderPassBeginInfo   render_pass_begin_info =
             {
                 .sType               = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-                .renderPass          = rp->render_pass,
-                .framebuffer         = rp->framebuffers[p_instance->vulkan.current_frame],
+                .renderPass          = p_render_pass->render_pass,
+                .framebuffer         = p_render_pass->framebuffers[p_instance->vulkan.current_frame],
                 .renderArea.offset.x = 0,
                 .renderArea.offset.y = 0,
                 .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
                 .clearValueCount     = active_renderer->current_render_pass->attachments_count,
                 .pClearValues        = active_renderer->clear_colors
             };
+            dict *draw_item_queues = p_render_pass->draw_queue_types;
 
             // Start the render pass
             vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
             // Iterate over each subpass
-            for (size_t i = 0; i < rp->subpasses_count; i++)
+            for (size_t j = 0; j < p_render_pass->subpasses_count; j++)
             {
-
+                
                 // Initialized data
-                GXSubpass_t *p_subpass = rp->subpasses_data[i];
-                GXShader_t  *p_shader  = p_subpass->shader;
+                GXSubpass_t *p_subpass = p_render_pass->subpasses_data[i];
+                
+                // Iterate over each shader
+                for (size_t i = 0; i < p_subpass->shader_count; i++)
+                {
 
+                    // Initialized data
+                    GXShader_t *p_shader        = g_find_shader(p_instance, p_subpass->shader_names[i]);
+                    queue      *draw_item_queue = dict_get(draw_item_queues, p_shader->name);
+
+                    // Draw ( or dispatch or trace ) each draw object
+                    while ( !queue_empty(draw_item_queue) )
+                    {
+
+                        // Initialized data
+                        GXEntity_t *p_entity = 0;
+
+                        // Get a draw item
+                        queue_dequeue(draw_item_queue, &p_entity);
+
+                        // Draw the item
+                        // TODO:
+
+                    }
+
+                }
+
+                // Next subpass
+                //vkCmdNextSubpass(command_buffer, VK_SUBPASS_CONTENTS_INLINE);
+
+                /*
                 // Bind the shader pipeline
                 {
                     if ( p_shader->type == g10_pipeline_graphics )
@@ -3806,36 +4256,33 @@ int render_frame ( GXInstance_t *p_instance )
                     else 
                         return 0; // TODO: goto wrong_pipeline_type
                 }
-                
-                // TODO: Foreach drawable
-                //  - Set up the layout
-                {
-                    // TODO
-                }
 
-                //  - Draw (or dispatch or trace)
-                if ( p_shader->type == g10_pipeline_graphics )
+                // Draw ( or dispatch or trace )
                 {
-                    //vkCmdDrawIndexed(command_buffer,VK_PIPELINE_BIND_POINT_GRAPHICS,p_);
+                    if ( p_shader->type == g10_pipeline_graphics )
+                    {
+                        //vkCmdDrawIndexed(command_buffer,VK_PIPELINE_BIND_POINT_GRAPHICS,p_);
+                    }
+                    else if ( p_shader->type == g10_pipeline_compute )
+                    {
+                        vkCmdDispatch(command_buffer,p_shader->compute.x_groups,p_shader->compute.y_groups,p_shader->compute.z_groups);
+                    }
+                    else if ( p_shader->type == g10_pipeline_ray )
+                    {
+
+                        // TODO: 
+                        
+                         * 1. Generate N rays via compute shader, and store them in memory.
+                         * 2. Use the closest intersection shader to put rays in material queues
+                         * 3. Process gasses and liquids
+                         * 4. Process emissive materials and skybox
+                         * 5. Compute material BSDFs, sample lights, and generate more rays.
+                         * 6. Trace shadow rays
+                         * 7. Repeat step 1-7 until frame is finished
+                         
+                    }
                 }
-                else if ( p_shader->type == g10_pipeline_compute )
-                {
-                    vkCmdDispatch(command_buffer,p_shader->compute.x_groups,p_shader->compute.y_groups,p_shader->compute.z_groups);
-                }
-                else if ( p_shader->type == g10_pipeline_ray )
-                {
-                    
-                    // TODO: 
-                    /*
-                     * 1. Generate N rays via compute shader, and store them in memory.
-                     * 2. Use the closest intersection shader to put rays in material queues
-                     * 3. Process gasses and liquids
-                     * 4. Process emissive materials and skybox
-                     * 5. Compute material BSDFs, sample lights, and generate more rays.
-                     * 6. Trace shadow rays
-                     * 7. Repeat step 1-7 until frame is finished
-                     */
-                }
+                */
             }
             
             // End the render pass
@@ -3882,15 +4329,15 @@ int render_frame ( GXInstance_t *p_instance )
         // Does the window need to be resized?
         switch (result)
         {
-        case VK_ERROR_OUT_OF_DATE_KHR:
-        case VK_SUBOPTIMAL_KHR:
-            g_window_resize(p_instance);
-            break;
-        case VK_SUCCESS:
-            break;
+            case VK_ERROR_OUT_OF_DATE_KHR:
+            case VK_SUBOPTIMAL_KHR:
+                g_window_resize(p_instance);
+                break;
+            case VK_SUCCESS:
+                break;
 
-        default:
-            goto failed_to_queue_presentation;
+            default:
+                goto failed_to_queue_presentation;
         }
     }
 
@@ -3912,88 +4359,6 @@ fail:
 failed_to_queue_presentation:
 failed_to_end_command_buffer:
     return 0;
-}
-
-int render_renderpass ( GXRenderPass_t *p_renderpass )
-{
-
-    // Iterate over each renderpass
-    for (size_t i = 0; i < p_renderpass->subpasses_count; i++)
-    {
-
-        // Initialized data
-        GXSubpass_t *p_subpass = p_renderpass->subpasses_data[i];
-
-        render_subpass(p_subpass);
-
-    }
-
-
-    // Success
-    return 1;
-}
-
-int render_subpass ( GXSubpass_t *p_subpass )
-{
-
-    // Initialized data
-    GXInstance_t *p_instance = g_get_active_instance();
-
-    // TODO: Wait for sync primatives
-
-    // Bind the subpasses shader pipeline
-    if ( p_subpass->shader->type == g10_pipeline_graphics )
-    {
-        vkCmdBindPipeline(
-            p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            p_subpass->shader->graphics.pipeline
-        );
-    }
-    else if (p_subpass->shader->type == g10_pipeline_compute)
-    {
-
-        vkCmdBindPipeline(
-            p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-            VK_PIPELINE_BIND_POINT_COMPUTE,
-            p_subpass->shader->compute.pipeline
-        );
-
-        // ...
-
-        vkCmdDispatch(
-            p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-            p_subpass->shader->compute.x_groups,
-            p_subpass->shader->compute.y_groups,
-            p_subpass->shader->compute.z_groups
-        );
-    }
-    else if (p_subpass->shader->type == g10_pipeline_ray)
-    {
-
-        vkCmdBindPipeline(
-            p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-            VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR,
-            p_subpass->shader->graphics.pipeline
-        );
-    }
-    else
-        return 0; // TODO: goto failed_to_bind_pipeline_type;
-
-    //vkCmdBindDescriptorBuffersEXT(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],)
-
-    // TODO: Bind descriptor sets
-    // TODO: Push constants
-    // TODO: call vkCmdDrawIndexed()
-    // TODO: Wait for sync primatives
-
-    vkCmdNextSubpass(
-        p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame],
-        VK_SUBPASS_CONTENTS_INLINE
-    );
-
-    // Success
-    return 1;
 }
 
 int present_frame ( GXInstance_t *p_instance )
@@ -4091,7 +4456,36 @@ int destroy_subpass ( GXSubpass_t **pp_subpass )
         #endif
     }
 
-    // TODO:
+    // Initialized data
+    GXSubpass_t *p_subpass = *pp_subpass;
+
+    // No more pointer for caller
+    *pp_subpass = 0;
+
+    // Free the subpass name
+    free(p_subpass->name);
+
+    // Free the subpass attachment references
+    {
+        if ( p_subpass->subpass_description.pColorAttachments )
+            free(p_subpass->subpass_description.pColorAttachments);
+    
+        if ( p_subpass->subpass_description.pInputAttachments ) 
+            free(p_subpass->subpass_description.pInputAttachments);
+
+        if ( p_subpass->subpass_description.pPreserveAttachments )
+            free(p_subpass->subpass_description.pPreserveAttachments);
+
+        if ( p_subpass->subpass_description.pDepthStencilAttachment )
+            free(p_subpass->subpass_description.pDepthStencilAttachment);
+    }
+
+    // TODO: Destroy the shader
+    //destroy_shader(&p_subpass->shader);
+
+    // Free the subpass
+    free(p_subpass);
+
     // Success
     return 1;
 

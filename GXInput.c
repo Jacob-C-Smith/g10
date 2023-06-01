@@ -515,6 +515,56 @@ int create_input ( GXInput_t **pp_input )
 	}
 }
 
+int create_bind ( GXBind_t **pp_bind )
+{
+
+	// Argument check
+	{
+		#ifndef NDEBUG
+			if ( pp_bind == (void *) 0 ) goto no_bind;
+		#endif
+	}
+
+    // Initialized data
+	GXBind_t *p_bind = calloc(1, sizeof(GXBind_t));
+
+	// Error checking
+    if ( p_bind == (void *) 0 )
+	    goto no_mem;
+
+    // Return a bind pointer to the caller
+    *pp_bind = p_bind;
+
+    // Success
+	return 1;
+
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_bind:
+			    #ifndef NDEBUG
+			    	printf("[G10] [Bind] Null pointer provided for \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+			    #endif
+
+                // Error
+			    return 0;
+		}
+
+		// Standard library errors
+		{
+			no_mem:
+			    #ifndef NDEBUG
+			    	printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+			    #endif
+
+                // Error
+			    return 0;
+		}
+	}
+}
+
 int load_input ( GXInput_t **pp_input, const char path[] )
 {
 
@@ -526,12 +576,14 @@ int load_input ( GXInput_t **pp_input, const char path[] )
         #endif
     }
 
-    // Uninitialized data
-    size_t       i    = g_load_file(path, 0, true);
-    u8*          text = calloc(i + 1, sizeof(char));
-
     // Initialized data
-    GXInput_t    *p_input = 0;
+    GXInput_t *p_input = 0;
+    size_t     len     = g_load_file(path, 0, true);
+    char      *text    = calloc(len + 1, sizeof(char));    
+    
+    // Error checking
+    if ( text == (void *) 0 )
+        goto no_mem;
 
     // Load the file
     if ( g_load_file(path, text, true) == 0 )
@@ -569,6 +621,17 @@ int load_input ( GXInput_t **pp_input, const char path[] )
                 return 0;
 
         }
+        
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
 
         // G10 errors
         {
@@ -612,6 +675,9 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
     if ( load_input_as_json_value(pp_input, p_value) == 0 )
         goto failed_to_parse_input_as_json_value;
 
+    // Clean the scope
+    free_json_value(p_value);
+
     // Success
     return 1;
 
@@ -646,7 +712,6 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
 
                 // Error
                 return 0;
-
         }
     }
 }
@@ -663,29 +728,22 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
     }
 
     // Initialized data
-    GXInput_t *p_input           = 0;
-    char      *name              = 0;
-    float      mouse_sensitivity = 0.f;
-    array     *p_binds           = 0;
+    GXInput_t   *p_input             = 0;
+    JSONValue_t *p_name              = 0,
+                *p_mouse_sensitivity = 0,
+                *p_binds             = 0;
 
-    // Parse the input as an object
+    // Parse the input as a JSON object
     if ( p_value->type == JSONobject )
     {
 
-        // Initialized data
-        dict *p_dict = p_value->object;
-
-        // Get the name
-        name = (char *) ((JSONValue_t *)dict_get(p_dict, "name"))->string;
-
-        // Get the mouse sense
-        mouse_sensitivity = (float) ((JSONValue_t *)dict_get(p_dict, "mouse sensitivity"))->floating;
-
-        // Get an array of binds for the input
-        p_binds = (array *) ((JSONValue_t *)dict_get(p_dict, "binds"))->list;
+        // Get each property
+        p_name              = dict_get(p_value->object, "name");
+        p_mouse_sensitivity = dict_get(p_value->object, "mouse sensitivity");
+        p_binds             = dict_get(p_value->object, "binds");
 
         // Check for missing data
-        if ( !(name && mouse_sensitivity && p_binds) )
+        if ( ! ( p_name && p_mouse_sensitivity && p_binds ) )
             goto missing_properties;
 
     }
@@ -698,7 +756,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
         if ( load_input(pp_input, p_value->string) == 0 )
             goto failed_to_load_input_from_path;
 
-        goto exit;
+        // Success
+        return 1;
     }
 
     // Construct the input
@@ -712,10 +771,11 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
         p_input = *pp_input;
 
         // Copy the name
+        if ( p_name->type == JSONstring)
         {
 
             // Initialized data
-            size_t name_len = strlen(name);
+            size_t name_len = strlen(p_name->string);
 
             // Allocate memory for the name
             p_input->name = calloc(name_len+1, sizeof(char));
@@ -725,34 +785,46 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 goto no_mem;
 
             // Copy the string
-            strncpy(p_input->name, name, name_len);
+            strncpy(p_input->name, p_name->string, name_len);
         }
+        // Default
+        else
+            goto wrong_name_type;
 
         // Set the mouse sense
-        p_input->mouse_sensitivity = mouse_sensitivity;
+        if ( p_mouse_sensitivity->type == JSONfloat )
+            p_input->mouse_sensitivity = (float) p_mouse_sensitivity->floating;
+        // Default
+        else
+            goto wrong_mouse_sensitivity_type;
 
         // Parse the binds
+        if ( p_binds->type == JSONarray )
         {
 
 			// Initialized data
 			JSONValue_t **pp_elements          = 0;
 			size_t        vector_element_count = 0;
 
-			// Get the quantity of elements
-			array_get(p_binds, 0, &vector_element_count );
+            // Get the contents of the array
+            {
 
-			// Allocate an array for the elements
-			pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
+			    // Get the quantity of elements
+			    array_get(p_binds->list, 0, &vector_element_count );
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+			    // Allocate an array for the elements
+			    pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the array
-			array_get(p_binds, pp_elements, 0 );
+			    // Error checking
+			    if ( pp_elements == (void *) 0 )
+			    	goto no_mem;
+
+			    // Populate the elements of the array
+			    array_get(p_binds->list, pp_elements, 0 );
+            }
 
             // TODO: Check return
-            // Allocate a dictionary
+            // Allocate dictionaries
             dict_construct(&p_input->binds, vector_element_count);
             dict_construct(&p_input->bind_lut, vector_element_count);
 
@@ -776,12 +848,19 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 			// Clean the scope
 			free(pp_elements);
         }
+        // Default
+        else
+            goto wrong_binds_type;
     }
-
-    exit:
 
     // Success
     return 1;
+
+    // TODO:
+    wrong_name_type:
+    wrong_mouse_sensitivity_type:
+    wrong_binds_type:
+        return 0;
 
     // Error handling
     {
@@ -1008,209 +1087,6 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     }
 }
 
-/*
-int load_bind_as_json ( GXBind_t **pp_bind, char *token )
-{
-
-    return 1;
-    /*
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if ( bind  == (void *) 0 )
-                goto no_bind;
-            if ( token == (void *) 0 )
-                goto no_token;
-        #endif
-    }
-
-    // Initialized data
-    GXBind_t    *ret         = 0;
-    dict        *json_tokens = 0;
-    JSONToken_t *t           = 0;
-
-    char        *name        = 0,
-               **keys        = 0;
-
-    // Construct the bind
-    {
-        // TODO: Improve
-        parse_json(token, strlen(token), &json_tokens);
-
-        t    = (JSONToken_t *) dict_get(json_tokens, "name");
-        name = JSON_VALUE(t, JSONstring);
-
-        t    = (JSONToken_t *) dict_get(json_tokens, "keys");
-        keys = JSON_VALUE(t, JSONarray);
-
-    }
-
-    if ( construct_bind(bind, name, keys) == 0)
-        goto failed_to_construct_bind;
-
-    // Success
-    return 1;
-
-    // Error handling
-    {
-
-        // G10 errors
-        {
-            // TODO: Implement
-            failed_to_construct_bind:
-            no_bind:
-                return 0;
-        }
-
-        // Argument errors
-        {
-            no_token:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Bind] Null pointer provided for \"token\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-            return 0;
-        }
-    }
-}
-*/
-/*
-int construct_bind ( GXBind_t** pp_bind, char* name, char** keys)
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if(bind == (void *)0)
-                goto no_bind;
-            if(name == (void *)0)
-                goto no_name;
-            if (keys == (void*)0)
-                goto no_keys;
-        #endif
-    }
-
-    // Initialized data
-    GXBind_t *b = 0;
-
-    // Allocate for a bind
-    create_bind(bind);
-
-    b = *bind;
-
-    // Error handling
-    {
-        #ifndef NDEBUG
-            if(b == (void *)0)
-                goto no_b;
-        #endif
-    }
-
-    // Construct the bind
-    {
-        b->name = name;
-        b->keys = keys;
-
-        while (keys[++b->key_count]);
-
-        b->callback_max = 2,
-        b->callbacks    = calloc(b->callback_max, sizeof(void*));
-
-    }
-
-
-    // Success
-    return 1;
-
-    // Error handling
-    {
-
-        // Argument check
-        {
-            no_bind:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Bind] Null pointer provided for \"bind\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-            no_name:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Bind] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-            no_keys:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Bind] Null pointer provided for \"keys\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-        }
-
-        // G10 Errors
-        {
-            no_b:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Bind] Failed to allocate a bind in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-            return 0;
-        }
-    }
-}
-*/
-
-int create_bind ( GXBind_t **pp_bind )
-{
-
-	// Argument check
-	{
-		#ifndef NDEBUG
-			if ( pp_bind == (void *) 0 ) goto no_bind;
-		#endif
-	}
-
-    // Initialized data
-	GXBind_t *p_bind = calloc(1, sizeof(GXBind_t));
-
-	// Error checking
-    if ( p_bind == (void *) 0 )
-	    goto no_mem;
-
-    // Return a bind pointer to the caller
-    *pp_bind = p_bind;
-
-    // Success
-	return 1;
-
-	// Error handling
-	{
-
-		// Argument errors
-		{
-			no_bind:
-			    #ifndef NDEBUG
-			    	printf("[G10] [Bind] Null pointer provided for \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
-			    #endif
-
-                // Error
-			    return 0;
-		}
-
-		// Standard library errors
-		{
-			no_mem:
-			    #ifndef NDEBUG
-			    	printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-			    #endif
-
-                // Error
-			    return 0;
-		}
-	}
-}
-
 int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
 {
 
@@ -1308,7 +1184,7 @@ int process_input ( GXInstance_t *p_instance )
         #endif
     }
 
-    // TODO: Refactor bind fires into a queue.
+    // TODO: Refactor bind calls into a queue.
     queue *p_update_binds_queue = 0;
 
     // TODO: Reimplement for other libraries?
@@ -1326,7 +1202,7 @@ int process_input ( GXInstance_t *p_instance )
             {
 
                 // TODO: Uncomment
-                // Don't fire binds if the mouse isn't lockced
+                // Don't call binds if the mouse isn't lockced
                 //if (!SDL_GetRelativeMouseMode())
                 //    break;
 
@@ -1342,9 +1218,10 @@ int process_input ( GXInstance_t *p_instance )
                     .inputs.mouse_state.button = 0
                 };
 
-                // TODO: Fire binds
-                printf("%3d %3d \r", x_rel, y_rel);
-
+                // TODO: call binds
+                //printf("%3d %3d \r", x_rel, y_rel);
+                
+                /*
                 // -X, mouse left
                 if ( x_rel < 0 )
                     queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
@@ -1360,12 +1237,13 @@ int process_input ( GXInstance_t *p_instance )
                 // +Y, mouse down
                 if ( 0 < y_rel )
                     queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
-
+                */
             }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
             {
-                // Don't fire binds if the mouse isn't lockced
+
+                // Don't call binds if the mouse isn't lockced
                 if ( !SDL_GetRelativeMouseMode() )
                     break;
 
@@ -1434,11 +1312,10 @@ int process_input ( GXInstance_t *p_instance )
             {
                 bind->active = true;
                 p_instance.input.inputs.key.depressed = true;
-                fire_bind(bind, p_input, p_instance);
+                call_bind(bind, p_input, p_instance);
             }
         }
     }*/
-
 
     // Game controller
     if ( controller )
@@ -1482,6 +1359,19 @@ int process_input ( GXInstance_t *p_instance )
 
     }
 
+    // Call each bind
+    //while ( !queue_empty(p_instance->input->p_bind_queue) )
+    {
+
+        // Initialized data
+        GXBind_t *p_bind = 0;
+
+        // Dequeue a bind
+        // queue_dequeue(p_instance->input->p_bind_queue, &p_bind);
+
+        //call_bind(p_bind, callback_parameter, p_instance)
+    }
+
     // Success
     return 1;
 
@@ -1513,28 +1403,41 @@ int process_input ( GXInstance_t *p_instance )
 int append_bind ( GXInput_t *p_input, GXBind_t *p_bind )
 {
 
-    // TODO: Argument check
-
-    for (size_t i = 0; i < p_bind->key_count; i++)
+    // Argument check
     {
-        GXBind_t* b = (GXBind_t *) dict_get(p_input->bind_lut, p_bind->keys[i]);
-        if (b)
-        {
-            while (b->next)
-                b = b->next;
-            b->next = p_bind;
-        }
-        else
-            dict_add(p_input->bind_lut, p_bind->keys[i], p_bind);
-
+        #ifndef NDEBUG
+            if ( p_input == (void *) 0 ) goto no_input;
+            if ( p_bind  == (void *) 0 ) goto no_bind;
+        #endif
     }
 
-    dict_add(p_input->binds, p_bind->name, p_bind);
+    // TODO:
 
     // Success
     return 1;
 
-    // TODO: Error handling
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_input:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"p_input\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_bind:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int input_info ( GXInput_t *p_input )
@@ -1560,31 +1463,42 @@ int input_info ( GXInput_t *p_input )
     g_print_log("binds            : \n");
 
 	// Print each bind
-    size_t l         = dict_values(p_input->binds, 0);
-    GXBind_t** binds = calloc(l, sizeof( GXBind_t *));
+    size_t     l     = dict_values(p_input->binds, 0);
+    GXBind_t **binds = calloc(l, sizeof( GXBind_t *));
 
+    // Error checking
+    if ( binds == (void *) 0 )
+        goto no_mem;
+
+    // Get an array of binds
     dict_values(p_input->binds, binds);
 
     // TODO: Better formatting, like the scene_info function
+    // Iterate over each bind
     for (size_t i = 0; i < l; i++)
     {
+        
+        // Format
         g_print_log("                   [%d] \"%s\": \n", i, binds[i]->name);
         g_print_log("                         [ ", i, binds[i]->name);
 
-
-        if (binds[i]->key_count)
+        // Print key binds
+        if ( binds[i]->key_count )
         {
+
+            // Print the first bind
             g_print_log("%s", binds[i]->keys[0]);
 
+            // Iterate from the second bind to the Nth
             for (size_t j = 1; j < binds[i]->key_count; j++)
-            {
                 g_print_log(", %s", binds[i]->keys[j]);
-            }
 
+            // Format
             g_print_log(" ]\n");
         }
-
     }
+
+    // Format
 	putchar('\n');
 
     // Success
@@ -1603,10 +1517,21 @@ int input_info ( GXInput_t *p_input )
                 // Error handling
                 return 0;
         }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
     }
 }
 
-int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_instance )
+int call_bind ( GXBind_t *p_bind, callback_parameter_t input )
 {
 
     // Argument check
@@ -1616,13 +1541,23 @@ int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t *p_in
         #endif
     }
 
+    // Initialized data
+    GXInstance_t *p_instance = 0;
+
+    // Iterate over each callback
     for (size_t i = 0; i < p_bind->callback_count; i++)
     {
+
+        // Initialized data
         void (*function)(input, p_instance) = p_bind->callbacks[i];
-        function(input, p_instance);
+
+        // Call the function
+        if ( function )
+            function(input, p_instance);
     }
 
-    return 0;
+    // Success
+    return 1;
 
     // Error handling
     {
@@ -1674,18 +1609,26 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
     }
 }
 
-int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
+int remove_bind ( GXInput_t *p_input, char *name )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
             if ( p_input == (void *) 0 ) goto no_input;
-            if ( p_bind  == (void *) 0 ) goto no_bind;
+            if ( name    == (void *) 0 ) goto no_name;
         #endif
     }
 
-    // TODO
+    // Initialized data
+    GXBind_t *p_bind = 0;
+
+    // Remove the bind
+    dict_pop(p_input->binds, name, &p_bind);
+
+    // Destroy the bind
+    destroy_bind(&p_bind);
+
     // Success
     return 1;
 
@@ -1702,9 +1645,9 @@ int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
                 // Error
                 return 0;
 
-            no_bind:
+            no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1713,28 +1656,41 @@ int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind )
     }
 }
 
-int destroy_bind ( GXBind_t *p_bind )
+int destroy_bind ( GXBind_t **pp_bind )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_bind == (void *) 0 ) goto no_bind;
+            if ( pp_bind == (void *) 0 ) goto no_bind;
         #endif
     }
 
-    // TODO: Free everything
+    // Initialized data
+    GXBind_t *p_bind = *pp_bind;
 
+    // No more pointer for caller
+    *pp_bind = 0;
+
+    // Free the name
     free(p_bind->name);
 
+    // Iterate over each key
     for (size_t i = 0; i < p_bind->key_count; i++)
+
+        // Free each key
         free(p_bind->keys[i]);
 
+    // Free the callbacks
     if ( p_bind->callbacks )
+
+        // Free the bind
         free(p_bind->callbacks);
 
+    // Free the list of keys
     free(p_bind->keys);
 
+    // Free the bind
     free(p_bind);
 
     // Success
@@ -1752,30 +1708,51 @@ int destroy_bind ( GXBind_t *p_bind )
     }
 }
 
-int destroy_input ( GXInput_t *p_input )
+int destroy_input ( GXInput_t **pp_input )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( p_input == (void *) 0 ) goto no_input;
+            if ( pp_input == (void *) 0 ) goto no_input;
         #endif
     }
 
     // Initialized data
-    size_t     bind_count = dict_values(p_input->binds, 0);
-    GXBind_t **binds      = calloc(bind_count, sizeof(void *));
+    GXInput_t  *p_input    = *pp_input;
+    size_t      bind_count = 0;
+    GXBind_t  **pp_binds   = 0;
+
+    // No more pointer for caller
+    *pp_input = 0;
+
+    // Get the number of binds
+    bind_count = dict_values(p_input->binds, 0);
+    
+    // Allocate memory for the binds
+    pp_binds = calloc(bind_count, sizeof(void *));
+
+    // Error checking
+    if ( pp_binds == (void *) 0 )
+        goto no_mem;
 
     // Free the input name
     free(p_input->name);
 
     // Get each bind
-    dict_values(p_input->binds, binds);
+    dict_values(p_input->binds, pp_binds);
 
-    // Free each bind
+    // Iterate over each bind
     for (size_t i = 0; i < bind_count; i++)
-        free(binds[i]);
 
+        // Destroy the bind
+        if ( destroy_bind(&pp_binds[i]) == 0 )
+            goto failed_to_destroy_bind;
+
+    // Free the list of binds
+    free(pp_binds);
+    
+    // Free the input struct
     free(p_input);
 
     // Success
@@ -1783,12 +1760,35 @@ int destroy_input ( GXInput_t *p_input )
 
     // Error handling
     {
-        no_input:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null poiner provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
 
-            // Error
-            return 0;
+        // Argument errors
+        {
+            no_input:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Null poiner provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_destroy_bind:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Failed to destroy bind in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
     }
 }

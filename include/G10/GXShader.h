@@ -179,12 +179,12 @@ DLLEXPORT int set_shader_camera ( GXEntity_t  *p_entity );
 
 // Destructors
 /** !
- *  Destroy a camera
+ *  Destroy a shader
  *
- * @param pp_camera : Pointer to pointer to camera to destroy
+ * @param pp_shader : Pointer to pointer to shader
  *
- * @sa create_camera
+ * @sa create_shader
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_shader ( GXShader_t  **pp_shader );
+DLLEXPORT int destroy_shader ( GXShader_t **pp_shader );

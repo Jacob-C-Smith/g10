@@ -19,45 +19,51 @@
 // G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
+#include <G10/GXShader.h>
 #include <G10/GXCameraController.h>
 
 struct GXRenderer_s
 {
-	char            *name;
+	char *name;
 
-	dict            *shaders;
-	dict            *render_passes;
-	GXRenderPass_t **render_passes_data;
-	GXRenderPass_t  *current_render_pass;
-	size_t           render_pass_count;
-	dict            *attachments; // type: GXAttachment_t *
-	size_t           clear_color_count;
-	VkClearValue    *clear_colors;
+	dict *shaders,
+	     *render_passes,
+	     *attachments; // value is of type GXAttachment_t *
+	
+	size_t render_pass_count,
+	       clear_color_count;
+
+	GXRenderPass_t **render_passes_data,
+	                *current_render_pass;
+
+	VkClearValue *clear_colors;
 };
 
 struct GXRenderPass_s
 {
 	char             *name;
 
-	VkRenderPass      render_pass;
+	dict             *subpasses,
+	                 *draw_queue_types,
+	                 *attachments; // type: char *
 
-	dict             *subpasses;
+	size_t            subpasses_count,
+	                  attachments_count;
+
 	GXSubpass_t     **subpasses_data;
-	size_t            subpasses_count;
-
 	VkFramebuffer    *framebuffers;
-
-	dict             *attachments; // type: char *
 	GXAttachment_t  **attachments_data;
-	size_t            attachments_count;
+	
+	VkRenderPass      render_pass;
 	VkImageView      *attachment_image_views;
 };
 
 struct GXSubpass_s
 {
-	char                 *name;
-	GXShader_t           *shader;
-	VkSubpassDescription  subpass_description;
+	char                  *name,
+	                     **shader_names;
+	size_t                 shader_count;
+	VkSubpassDescription   subpass_description;
 };
 
 struct GXImage_s
@@ -305,13 +311,13 @@ DLLEXPORT int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t
  */
 DLLEXPORT int construct_image
 (
-	GXImage_t             *p_image     , VkImageCreateFlags     flags,
-	VkImageType            image_type  , VkFormat               format,
-	int                    width       , int                    height,
-	int                    depth       , size_t                 mip_levels,
-	size_t                 array_layers, VkSampleCountFlagBits  samples,
-	VkImageTiling          tiling      , VkImageUsageFlags      usage,
-	VkSharingMode          sharing_mode, VkImageLayout          initial_layout
+	GXImage_t     *p_image     , VkImageCreateFlags    flags,
+	VkImageType    image_type  , VkFormat              format,
+	int            width       , int                   height,
+	int            depth       , size_t                mip_levels,
+	size_t         array_layers, VkSampleCountFlagBits samples,
+	VkImageTiling  tiling      , VkImageUsageFlags     usage,
+	VkSharingMode  sharing_mode, VkImageLayout         initial_layout
 );
 
 DLLEXPORT int construct_image_view

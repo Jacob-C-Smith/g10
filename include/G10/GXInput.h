@@ -54,7 +54,8 @@ struct GXInput_s
 	char  *name;
 	dict  *bind_lut,
 		  *binds;
-	queue *p_key_queue;
+	queue *p_key_queue,
+	      *p_bind_queue;
 	float  mouse_sensitivity;
 };
 
@@ -232,8 +233,8 @@ DLLEXPORT int append_bind ( GXInput_t *p_input, GXBind_t *p_bind );
  */
 DLLEXPORT int input_info ( GXInput_t *p_input );
 
-// Bind firing
-DLLEXPORT int fire_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t* p_instance );
+// Bind calling
+DLLEXPORT int call_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t* p_instance );
 
 // Bind operations
 DLLEXPORT GXBind_t *find_bind ( GXInput_t *p_input, char *name );

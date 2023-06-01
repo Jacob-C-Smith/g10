@@ -47,6 +47,7 @@ struct GXCamera_s {
 
     // Has the camera been changed?
     bool  dirty;
+    
 };
 
 // Allocators

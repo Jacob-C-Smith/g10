@@ -242,6 +242,12 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                  *p_skyboxes_value     = 0,
                  *p_light_probes_value = 0;
 
+    // State check
+    {
+        if ( p_instance->context.renderer == (void *) 0 )
+            goto no_renderer;
+    }
+
     // Parse the scene as a JSON value
     if ( p_value->type == JSONobject )
     {
@@ -472,6 +478,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     not_enough_properties:
     failed_to_create_thread:
     wrong_type:
+    no_renderer:
     failed_to_load_initial_scene:
         return 0;
 
@@ -772,14 +779,6 @@ int append_collision ( GXScene_t *scene, GXCollision_t *collision)
     while (scene->collisions[++i]);
 
     scene->collisions[i-1] = collision;
-
-    // Success
-    return 1;
-}
-
-int draw_scene ( GXScene_t *scene )
-{
-
 
     // Success
     return 1;

@@ -29,7 +29,7 @@ int main ( int argc, const char *argv[] )
     bool          connect_to_server = false;
 
     // Parse command line arguments
-    for (size_t i = 0; i < argc; i++)
+    for ( size_t i = 0; i < argc; i++ )
     {
 
         // Path to instance
@@ -58,7 +58,7 @@ int main ( int argc, const char *argv[] )
                      *mouse_up   = find_bind(p_instance->input, "MOUSE UP"),
                      *mouse_down = find_bind(p_instance->input, "MOUSE DOWN");
 
-            // If quit is fired, exit the game loop
+            // If quit is called, exit the game loop
             register_bind_callback(exit_bind, &g_user_exit);
 
             // Set up the camera controller

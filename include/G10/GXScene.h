@@ -169,7 +169,6 @@ DLLEXPORT int append_light ( GXScene_t *p_scene, GXLight_t *light );
 DLLEXPORT int append_collision ( GXScene_t *p_scene, GXCollision_t *collision );
 
 // Drawing
-DLLEXPORT int draw_scene ( GXScene_t *p_scene );
 DLLEXPORT int draw_lights ( GXScene_t *p_scene, GXPart_t *light_part, GXShader_t *shader );
 
 // Info

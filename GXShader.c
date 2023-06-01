@@ -638,8 +638,26 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
     }
 
     // Initialized data
-    size_t  len  = g_load_file(path, (void *) 0, true);
-    char   *text = calloc(len + 1, sizeof(char));
+    GXInstance_t *p_instance = g_get_active_instance();
+    GXShader_t *p_shader = dict_get(p_instance->cache.shaders, path);
+    size_t  len  = 0;
+    char   *text = 0;
+
+    if ( p_shader )
+    {
+
+        // Return a pointer to the caller
+        *pp_shader = p_shader;
+        
+        // Increment the users
+        p_shader->users++;
+
+        // Success
+        return 1;
+    }
+
+    len  = g_load_file(path, (void *) 0, true);
+    text = calloc(len + 1, sizeof(char));
 
     // Error check
     if ( text == (void *) 0 )
@@ -798,7 +816,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
         #endif
     }
 
-    // Initialized dataS
+    // Initialized data
     GXInstance_t  *p_instance                  = g_get_active_instance();
     GXShader_t    *p_shader                    = 0;
     JSONValue_t   *p_type                      = 0,
@@ -823,7 +841,32 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
     {
 
         // Get the pipeline type
+        p_name = dict_get(p_value->object, "name");
         p_type = dict_get(p_value->object, "type");
+
+        if ( p_name )
+        {
+            if ( p_name->type == JSONstring )
+            {
+                
+                // Initialized data
+                GXShader_t *p_shader = dict_get(p_instance->cache.shaders, p_name->string);
+
+                if ( p_shader )
+                {
+                    *pp_shader = p_shader;
+                    
+                    p_shader->users++;
+
+                    return 1;
+                }
+                
+            }
+            else
+                goto wrong_name_type;
+        }
+        else
+            goto no_name_property;
 
         // Was a pipeline type provided?
         if ( p_type )
@@ -849,13 +892,23 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
         // Load the shader as a path
         if ( load_shader(pp_shader, p_value->string) == 0 )
             goto failed_to_load_shader_as_path;
+
+        // Success
+        return 1;
     }
     // Type error
     else
         goto wrong_type;
 
+    (*pp_shader)->users++;
+    dict_add(p_instance->cache.shaders,(*pp_shader)->name,*pp_shader);
+
     // Success
     return 1;
+
+    wrong_name_type:
+    no_name_property:
+        return 0;
 
     // Error handling
     {
@@ -2014,7 +2067,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         .alphaToOneEnable      = alpha_to_one_enable
                     };
                 }
-                 // Default
+                // Default
                 else
                     goto wrong_multisampler_type;
             }
