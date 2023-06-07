@@ -8,6 +8,8 @@ G10/*
 *.dll
 Level 1/
 
+RelWithDebInfo/
+
 include/JSON/*
 # User-specific files
 *.rsuser
@@ -374,3 +376,8 @@ build/
 extern/
 .vscode/
 *.lnk
+queue_example.exe
+queue_test.exe
+stack_example.exe
+stack_test.exe
+desktop.ini

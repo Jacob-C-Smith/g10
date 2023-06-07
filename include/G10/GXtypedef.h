@@ -75,8 +75,8 @@ typedef struct quaternion_s quaternion;
 // Insatnce
 struct GXInstance_s;
 
-/* !
-    An instance stores information about G10 in an application
+/** !
+ * @struct 
  */
 typedef struct GXInstance_s GXInstance_t;
 
@@ -91,8 +91,8 @@ typedef struct GXTask_s GXTask_s;
 
 // Bind
 struct GXBind_s;
-/* !
-    A bind is a set of callback function triggered by an input
+/** !
+    @callergraph bind is a set of callback function triggered by an input
 */
 typedef struct GXBind_s GXBind_t;
 

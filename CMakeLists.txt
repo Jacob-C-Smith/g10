@@ -77,8 +77,10 @@ endif(WIN32)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/json)
 add_subdirectory(${PROJECT_SOURCE_DIR}/queue)
+add_subdirectory(${PROJECT_SOURCE_DIR}/stack)
 
 find_library(array NAMES array HINTS ${PROJECT_SOURCE_DIR}/array/build/Debug/*)
+find_library(stack NAMES stack HINTS ${PROJECT_SOURCE_DIR}/stack/build/Debug/*)
 find_library(queue NAMES queue HINTS ${PROJECT_SOURCE_DIR}/queue/build/Debug/*)
 find_library(dict  NAMES dict HINTS  ${PROJECT_SOURCE_DIR}/dict/build/Debug/*)
 find_library(json  NAMES json HINTS  ${PROJECT_SOURCE_DIR}/json/build/Debug/*)
@@ -96,9 +98,9 @@ add_executable (g10_tester "G10_tester.c" "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c"
 # Add source to this project's 
 add_library    (g10 SHARED  "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c")
 
-target_link_libraries(g10 PUBLIC queue array dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})
-target_link_libraries(g10_example PUBLIC queue array dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
-target_link_libraries(g10_tester PUBLIC queue array dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
+target_link_libraries(g10 PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})
+target_link_libraries(g10_example PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
+target_link_libraries(g10_tester PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
 target_link_libraries(g10 PRIVATE SDL2_image::SDL2_image)
 target_link_libraries(g10 PRIVATE SDL2_net::SDL2_net)
 target_link_libraries(g10_example PRIVATE SDL2_image::SDL2_image)

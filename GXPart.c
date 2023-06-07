@@ -216,8 +216,8 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	// Initialized data
 	GXInstance_t *p_instance = g_get_active_instance();
 	GXPart_t     *p_part     = 0;
-	JSONValue_t  *name       = 0,
-		         *path       = 0;
+	JSONValue_t  *p_name     = 0,
+		         *p_path     = 0;
 
 	// Parse the JSON as an object
 	if ( p_value->type == JSONobject )
@@ -226,14 +226,13 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// Initialized data
 		dict *part_json = p_value->object;
 
-		name = dict_get(part_json, "name");
-		path = dict_get(part_json, "path");
+		p_name = dict_get(part_json, "name");
+		p_path = dict_get(part_json, "path");
 
 		// Check for required data
-		if ( !(name && path) )
-			goto not_enough_properties;
+		if ( ! ( p_name && p_path ) )
+			goto missing_properties;
 	}
-
 	// Parse the JSON as a path
 	else if ( p_value->type == JSONstring )
 	{
@@ -245,8 +244,12 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// Success
 		return 1;
 	}
+	// Default
+	else
+		goto wrong_value_type;
 
 	// Check the cache
+	if ( p_name->type == JSONstring )
 	{
 
 		// Initialized data
@@ -256,10 +259,10 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		SDL_LockMutex(p_instance->mutexes.part_cache);
 
 		// Search the cache for the part
-		p_cache_part = g_find_part(p_instance, name->string);
+		p_cache_part = g_find_part(p_instance, p_name->string);
 
 		// If the part is in the cache ...
-		if (p_cache_part)
+		if ( p_cache_part )
 		{
 
 			// ... make a copy of the cached part
@@ -273,8 +276,10 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 			return 1;
 			//	goto set_initial_state;
 		}
-
 	}
+	// Default
+	else
+		goto wrong_name_type;
 
 	// Construct the part
 	{
@@ -289,7 +294,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		{
 
 			// Initilaized data
-			size_t name_len = strlen(name->string);
+			size_t name_len = strlen(p_name->string);
 
 			// Allocate memory for the string
 			p_part->name = calloc(name_len + 1, sizeof(char));
@@ -299,14 +304,19 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 				goto no_mem;
 
 			// Copy the string
-			strncpy(p_part->name, name->string, name_len);
+			strncpy(p_part->name, p_name->string, name_len);
 		}
 
 		// Get a pointer to the PLY loader
 		extern GXPart_t* load_ply(GXPart_t * part, const char* path);
 
-		// Call the ply loader with the part
-		load_ply(p_part, path->string);
+		// Load the part as a PLY file
+		if ( p_path->type == JSONstring )
+			load_ply(p_part, p_path->string);
+
+		//  Default
+		else
+			goto wrong_path_type;
 	}
 
 	// Success
@@ -314,8 +324,6 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 
 	// Error handling
 	{
-
-		
 
 		// Argument errors
 		{
@@ -351,9 +359,33 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// JSON errors
 		{
 			
-			not_enough_properties:
+			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Missing JSON properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Missing properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+				
+			wrong_value_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Parameter \"p_value\" must be of type [ object | string ] in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_name_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_path_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Part] Property \"path\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

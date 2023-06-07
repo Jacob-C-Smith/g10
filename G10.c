@@ -487,7 +487,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         {
 
             // Set the name
-            if (p_name->type == JSONstring )
+            if ( p_name->type == JSONstring )
             {
 
                 // Initialized data
@@ -1007,7 +1007,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Error
             return 0;
-
+        failed_to_load_input:
+                return 0;
         failed_to_load_scene:
             #ifndef NDEBUG
                 g_print_error("[G10] Failed to open initial scene in call to function \"%s\"\n", __FUNCTION__);
@@ -1015,15 +1016,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Error
             return 0;
-
-        failed_to_load_input:
-            #ifndef NDEBUG
-                g_print_error("[G10] Failed to load input in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
-
 
         no_initial_scene:
             #ifndef NDEBUG
@@ -2490,9 +2482,13 @@ int g_exit ( GXInstance_t **pp_instance )
 
             // TODO: Free materials
             //dict_free_clear(p_instance->cache.materials, &destroy_material);
-
+            
             // ... and the parts...
-            dict_free_clear(p_instance->cache.parts, &destroy_part);
+            typedef void free_clear_fun(void *);
+
+
+
+            dict_free_clear(p_instance->cache.parts, (free_clear_fun*)&destroy_part);
             dict_destroy(&p_instance->cache.parts);
         }
 

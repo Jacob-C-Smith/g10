@@ -229,36 +229,33 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 	}
 
 	// Initialized data
-	GXEntity_t  *p_entity          = 0;
-	JSONValue_t *p_name_value      = 0,
-	            *p_parts_value     = 0,
-	            *p_materials_value = 0,
-				*p_shader_value    = 0,
-				*p_transform_value = 0,
-				*p_rigidbody_value = 0,
-				*p_collider_value  = 0,
-				*p_ai_value        = 0;
+	GXEntity_t  *p_entity            = 0;
+	JSONValue_t *p_name_value        = 0,
+	            *p_parts_value       = 0,
+	            *p_materials_value   = 0,
+				*p_shader_name_value = 0,
+				*p_transform_value   = 0,
+				*p_rigidbody_value   = 0,
+				*p_collider_value    = 0,
+				*p_ai_value          = 0;
 
 	// Parse the JSON value
-	if (p_value->type == JSONobject)
+	if ( p_value->type == JSONobject )
 	{
 
-		// Initialized data
-		dict *p_entity_value = p_value->object;
-
-		// Get properties from JSON object
-		p_name_value      = dict_get(p_entity_value, "name");
-		p_parts_value     = dict_get(p_entity_value, "parts");
-		p_materials_value = dict_get(p_entity_value, "materials");
-		p_shader_value    = dict_get(p_entity_value, "shader");
-		p_transform_value = dict_get(p_entity_value, "transform");
-		p_rigidbody_value = dict_get(p_entity_value, "rigidbody");
-		p_collider_value  = dict_get(p_entity_value, "collider");
-		p_ai_value        = dict_get(p_entity_value, "ai");
+		// Parse the object properties into constructor parameters
+		p_name_value        = dict_get(p_value->object, "name");
+		p_parts_value       = dict_get(p_value->object, "parts");
+		p_materials_value   = dict_get(p_value->object, "materials");
+		p_shader_name_value = dict_get(p_value->object, "shader");
+		p_transform_value   = dict_get(p_value->object, "transform");
+		p_rigidbody_value   = dict_get(p_value->object, "rigidbody");
+		p_collider_value    = dict_get(p_value->object, "collider");
+		p_ai_value          = dict_get(p_value->object, "ai");
 
 		// Check for required data
-		if ( !p_name_value )
-			goto not_enough_values;
+		if ( ! ( p_name_value /*&& [REQUIRED PROPERTEIS]*/ ) )
+			goto missing_properties;
 	}
 
 	// Construct the entity
@@ -346,25 +343,25 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		// TODO
 
 		// Shader
-		if ( p_shader_value )
+		if ( p_shader_name_value )
 		{
 
 			// Get the name of the shader
-			if ( p_shader_value->type == JSONstring )
+			if ( p_shader_name_value->type == JSONstring )
 			{
 				
 				// Initialized data
-				size_t len = strlen(p_shader_value->string);
+				size_t len = strlen(p_shader_name_value->string);
 
 				// Allocate memory for the shader
-				p_entity->shader = calloc(len+1, sizeof(char));
+				p_entity->shader_name = calloc(len+1, sizeof(char));
 
 				// Error checking
-				if ( p_entity->shader == (void *) 0 )
+				if ( p_entity->shader_name == (void *) 0 )
 					goto no_mem;
 				
 				// Copy the name of the shader
-				strncpy(p_entity->shader, p_shader_value->string, len);
+				strncpy(p_entity->shader_name, p_shader_name_value->string, len);
 			}
 			else
 				goto wrong_shader_type;
@@ -432,9 +429,9 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 		// G10 errors
 		{
-			not_enough_values:
+			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Missing JSON properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Missing properties to parse entity as JSON value in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -450,7 +447,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Property \"name\" was of wrong type in call to function in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Property \"name\" must be of type [ string ] in call to function in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -821,7 +818,8 @@ int draw_entity ( GXEntity_t *p_entity )
 			if ( p_entity == (void *) 0 ) goto no_entity;
 		#endif
 	}
-
+	
+	/*
 	if (p_entity->parts == 0)
 		return 0;
 
@@ -863,7 +861,7 @@ int draw_entity ( GXEntity_t *p_entity )
 		//draw_part(parts[i]);
 	}
 
-	free(parts);
+	free(parts);*/
 
 	// Success
 	return 1;
@@ -903,7 +901,7 @@ int destroy_entity ( GXEntity_t **pp_entity )
 	// Free the name
 	free(p_entity->name);
 
-	if ( p_entity->shader )
+	if ( p_entity->shader_name )
 		;//
 
 	if ( p_entity->transform )

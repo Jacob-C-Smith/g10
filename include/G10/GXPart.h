@@ -58,7 +58,7 @@ struct GXPart_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_part       ( GXPart_t   **pp_part );
+DLLEXPORT int create_part ( GXPart_t   **pp_part );
 
 // Constructors
 /** !
@@ -71,7 +71,7 @@ DLLEXPORT int create_part       ( GXPart_t   **pp_part );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_part         ( GXPart_t   **pp_part, char *path );
+DLLEXPORT int load_part ( GXPart_t   **pp_part, char *path );
 
 /** !
  *  Load a part from a JSON object

@@ -510,7 +510,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             name_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"name\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -518,7 +518,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             entities_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"entities\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"entities\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -526,7 +526,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             cameras_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"cameras\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"cameras\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -534,7 +534,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             lights_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"lights\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"lights\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -542,7 +542,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             light_probes_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"light probes\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"light probes\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

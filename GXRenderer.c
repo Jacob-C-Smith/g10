@@ -711,7 +711,7 @@ void init_renderer ( void )
 
         // Populate access flag bits
         for (size_t i = 0; i < ACCESS_FLAG_BITS_COUNT; i++)
-            dict_add(access_flag_bits, access_flag_bits_names[i], (void *)access_flag_bits_enum[i]);
+            dict_add(access_flag_bits, access_flag_bits_names[i], (void *)(size_t)access_flag_bits_enum[i]);
 
         // Populate dependency flag bits
         for (size_t i = 0; i < DEPENDENCY_FLAG_BITS_COUNT; i++)
@@ -755,8 +755,7 @@ int create_renderer ( GXRenderer_t **pp_renderer )
     // Argument check
     {
         #ifndef NDEBUG
-            if (pp_renderer == (void *)0)
-                goto no_ret;
+            if ( pp_renderer == (void *) 0 ) goto no_ret;
         #endif
     }
 
@@ -764,7 +763,7 @@ int create_renderer ( GXRenderer_t **pp_renderer )
     GXRenderer_t *p_renderer = calloc(1, sizeof(GXRenderer_t));
 
     // Error checking
-    if (p_renderer == (void *)0)
+    if ( p_renderer == (void *) 0 )
         goto no_mem;
 
     // Return a pointer to the caller
@@ -806,8 +805,7 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_render_pass == (void *) 0 )
-                goto no_ret;
+            if ( pp_render_pass == (void *) 0 ) goto no_ret;
         #endif
     }
 
@@ -907,8 +905,7 @@ int create_image ( GXImage_t **pp_image )
     // Argument check
     {
         #ifndef NDEBUG
-            if ( pp_image == (void *) 0 )
-                goto no_image;
+            if ( pp_image == (void *) 0 ) goto no_image;
         #endif
     }
 
@@ -1063,7 +1060,7 @@ int create_framebuffer ( GXFramebuffer_t **pp_framebuffer )
     }
 
     // Initialized data
-    GXAttachment_t *p_framebuffer = calloc(1, sizeof(GXSubpass_t));
+    GXFramebuffer_t *p_framebuffer = calloc(1, sizeof(GXSubpass_t));
 
     // Error checking
     if ( p_framebuffer == (void *) 0 )
@@ -1114,8 +1111,8 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
     }
 
     // Initialized data
-    size_t len = g_load_file(path, 0, true);
-    char *text = calloc(1 + len, sizeof(char));
+    size_t  len  = g_load_file(path, 0, true);
+    char   *text = calloc(1 + len, sizeof(char));
 
     // Error checking
     if ( text == (void *) 0 )
@@ -1213,7 +1210,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
         goto failed_to_construct_renderer_from_json_value;
 
     // Clean the scope
-    // free_json_value(p_value);
+    free_json_value(p_value);
 
     // Success
     return 1;
@@ -1293,7 +1290,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         p_clear_color = dict_get(p_value->object, "clear color");
         p_attachments = dict_get(p_value->object, "attachments");
 
-        if ( ! ( p_name && p_passes ) )
+        if ( ! ( p_name && p_passes && p_clear_color ) )
             goto missing_parameters;
     }
 
@@ -1335,12 +1332,15 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             p_renderer->name = calloc(len + 1, sizeof(char));
 
             // Error checking
-            if (p_renderer->name == (void *)0)
+            if ( p_renderer->name == (void *) 0 )
                 goto no_mem;
 
             // Copy the name to the renderer
             strncpy(p_renderer->name, p_name->string, len);
         }
+        // Default
+        else
+            goto wrong_name_type;
 
         // Parse each attachment
         if ( p_attachments->type == JSONarray )
@@ -1360,7 +1360,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
 
                 // Error checking
-                if (pp_array_contents == (void *)0)
+                if ( pp_array_contents == (void *) 0 )
                     goto no_mem;
 
                 // Dump array to memory
@@ -1385,9 +1385,9 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 dict_add(p_renderer->attachments, p_attachment->name, p_attachment);
             }
         }
-        
-        if ( p_clear_color == 0 )
-            goto no_p_clear;
+        // Default
+        else
+            goto wrong_attachments_type;
 
         // Parse the clear color as an array
         if ( p_clear_color->type == JSONarray )
@@ -1408,14 +1408,21 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
 
                 // Error checking
-                if (pp_array_contents == (void *)0)
+                if ( pp_array_contents == (void *) 0 )
                     goto no_mem;
 
                 // Dump array to memory
                 array_get(p_clear_color->list, pp_array_contents, 0);
             }
 
+            // TODO: vvvvvv Fix this vvvvv
+
+            // Allocate clear colors for each attachment
             clear_color = calloc(2*attachment_count, sizeof(VkClearValue));
+
+            // Error checking
+            if ( clear_color == (void *) 0 )
+                goto no_mem;
 
             // Iterate over each array element
             for (size_t i = 0; i < array_len; i++)
@@ -1434,9 +1441,9 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 p_renderer->clear_colors[i] = *clear_color;
             
         }
+        // Default
         else
-            goto wrong_renderer_clear_color;
-        no_p_clear:;
+            goto wrong_renderer_clear_color_type;
 
         // Parse each render pass
         if ( p_passes->type == JSONarray )
@@ -1456,14 +1463,21 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
                 pp_array_contents = calloc(array_len, sizeof(JSONValue_t *));
 
                 // Error checking
-                if (pp_array_contents == (void *)0)
+                if ( pp_array_contents == (void *) 0 )
                     goto no_mem;
 
                 // Dump array to memory
                 array_get(p_passes->list, pp_array_contents, 0);
             }
 
+            // Allocate memory for render passes array
             p_renderer->render_passes_data = calloc(array_len, sizeof(GXRenderPass_t *));
+
+            // Error check
+            if ( p_renderer->render_passes_data == (void *) 0 )
+                goto no_mem;
+
+            // Set the render pass count
             p_renderer->render_pass_count = array_len;
 
             // Iterate over each render pass
@@ -1480,7 +1494,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         else
             goto wrong_passes_type;
 
-        // Unset the active instance's loading scene
+        // This is no longer the loading renderer
         p_instance->context.loading_renderer = 0;
 
         // Return a pointer to the caller
@@ -1489,16 +1503,6 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
     // Success
     return 1;
-
-    // TODO:
-    wrong_passes_type:
-    failed_to_load_renderer_as_json_value:
-    wrong_renderer_clear_color:
-
-    faild_to_load_renderer:
-    failed_to_load_attachment_as_json_value:
-        // Error
-        return 0;
 
     // Error handling
     {
@@ -1527,7 +1531,40 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         {
             wrong_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Expected JSON [ string | object ] value in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Parameter \"p_value\" must be of type [ string | object ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_name_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_attachments_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"attachments\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+
+            wrong_renderer_clear_color_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"clear color\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_passes_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"passes\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1535,7 +1572,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             missing_parameters:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Missing properties in \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Missing properties in parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1547,6 +1584,30 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
             failed_to_allocate_renderer:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Failed to allocate renderer in in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_load_renderer_as_json_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load renderer as JSON value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_load_attachment_as_json_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load attachment as JSON value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            faild_to_load_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to load renderer in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2561,7 +2622,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2979,7 +3040,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
                         color_attachment_references[i] = (VkAttachmentReference)
                         {
-                            .attachment = i,
+                            .attachment = (u32)i,
                             // TODO: Set the image layout
                             .layout = p_attachment->attachment_description.initialLayout
                         };
@@ -3377,25 +3438,9 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
                 // Error
                 return 0;
 
-            wrong_initial_layout:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Wrong \"initial layout\" VkImageLayout value in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-
-            wrong_final_layout:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Wrong \"final layout\" VkImageLayout value in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3403,7 +3448,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_format_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"format\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3411,7 +3456,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_load_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"load operation\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3419,7 +3464,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_store_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"store operation\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3427,7 +3472,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_initial_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"initial layout\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3435,7 +3480,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_final_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"final layout\" was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3664,7 +3709,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
             samples = p_samples->integer;
         // Default
         else
-            goto wrong_name_type;
+            goto wrong_samples_type;
 
         // Set the load operation
         if ( p_load_operation->type == JSONstring )
@@ -3789,22 +3834,6 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
     // Success
     return 1;
 
-// TODO:
-wrong_type:
-failed_to_create_image:
-wrong_name_type:
-no_mem:
-missing_parameters:
-wrong_format:
-wrong_format_type:
-wrong_load_operation_type:
-wrong_store_operation_type:
-wrong_initial_layout:
-wrong_initial_layout_type:
-wrong_final_layout:
-wrong_final_layout_type:
-    return 0;
-
     // Error handling
     {
 
@@ -3822,6 +3851,104 @@ wrong_final_layout_type:
             no_value:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+    
+        // JSON errors
+        {
+            wrong_type:
+                
+            missing_parameters:
+                
+            wrong_name_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_samples_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"samples\" must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+
+            // vvvvv TODO: FIX  vvvvvv
+            
+            wrong_format:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_format_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            // ^^^^^^^^^^^^^^^^^^^^^^^
+
+            wrong_load_operation_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_store_operation_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_initial_layout_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_final_layout_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    
+        // G10 errors
+        {
+            failed_to_create_image:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to allocate memory for image in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4106,7 +4233,7 @@ void add_draw_item ( GXEntity_t *p_entity )
 
     // Initialized data
     GXInstance_t *p_instance        = g_get_active_instance();
-    queue        *p_draw_item_queue = dict_get(p_instance->context.renderer->current_render_pass->draw_queue_types, p_entity->shader);
+    queue        *p_draw_item_queue = dict_get(p_instance->context.renderer->current_render_pass->draw_queue_types, p_entity->shader_name);
     queue_enqueue(p_draw_item_queue, p_entity);
 
 }
@@ -4138,8 +4265,9 @@ int render_frame ( GXInstance_t *p_instance )
     // Get the microsecond counter
     start = SDL_GetPerformanceCounter();
 
-    // Prepare draw queues
-    dict_foreach(p_instance->context.scene->entities, &add_draw_item);
+    // TODO: Prepare draw queues
+    // if ( dict_values(p_instance->context.scene->entities,0) )
+    //     dict_foreach(p_instance->context.scene->entities, &add_draw_item);
 
     // Prepare the command buffer for rendering
     {
@@ -4195,7 +4323,7 @@ int render_frame ( GXInstance_t *p_instance )
                 .renderArea.offset.x = 0,
                 .renderArea.offset.y = 0,
                 .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
-                .clearValueCount     = active_renderer->current_render_pass->attachments_count,
+                .clearValueCount     = (u32)active_renderer->current_render_pass->attachments_count,
                 .pClearValues        = active_renderer->clear_colors
             };
             dict *draw_item_queues = p_render_pass->draw_queue_types;

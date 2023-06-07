@@ -45,7 +45,7 @@ DLLEXPORT int detect_collisions ( GXInstance_t *p_instance );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int move_objects      ( GXInstance_t *p_instance );
+DLLEXPORT int move_objects ( GXInstance_t *p_instance );
 
 /** !
  *  Calculates forces and torque for each entity in the instances active scene.

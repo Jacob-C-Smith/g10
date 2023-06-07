@@ -11,7 +11,7 @@
 int user_code_callback ( GXInstance_t *p_instance )
 {
 
-
+    // Success
     return 1;
 }
 
@@ -44,7 +44,8 @@ int main ( int argc, const char *argv[] )
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
         goto failed_to_initialize_g10;
-
+   
+    /*
     // Game setup
     {
 
@@ -75,18 +76,16 @@ int main ( int argc, const char *argv[] )
         // Set up user code
         add_user_code_callback(p_instance, &user_code_callback);
     }
-
-    // Print the renderer to stdout
-    print_renderer(p_instance->context.renderer);
+    */
 
     // Start the game
-    g_start_schedule(p_instance, schedule_name);
+    (void)g_start_schedule(p_instance, schedule_name);
 
     // Stop the game
-    g_stop_schedule(p_instance);
+    (void)g_stop_schedule(p_instance);
 
     // Exit
-    g_exit(&p_instance);
+    (void)g_exit(&p_instance);
 
     // Return
     return EXIT_SUCCESS;

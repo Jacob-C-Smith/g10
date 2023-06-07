@@ -392,7 +392,7 @@ DLLEXPORT int print_attachment ( GXAttachment_t *p_attachment );
 // Add subpass callback
 DLLEXPORT int add_subpass_callback ( char *name, void (*function_pointer)());
 
-// Scheduler operations
+// Renderer operations
 /** !
  *  Called once a frame by the scheduler to draw the game to the window.
  *
@@ -413,7 +413,6 @@ DLLEXPORT int render_frame ( GXInstance_t *p_instance );
  */
 DLLEXPORT int present_frame ( GXInstance_t *p_instance );
 
-// Renderer operations
 
 // Destructors
 /** !

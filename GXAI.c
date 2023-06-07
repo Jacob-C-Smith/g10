@@ -172,7 +172,7 @@ int load_ai_as_json_text ( GXAI_t **pp_ai, char *text )
 	if ( parse_json_value(text, 0, &p_value) == 0 )
 		goto failed_to_parse_json;
 
-	if ( load_ai_as_json_value(pp_ai, p_value) == 0)
+	if ( load_ai_as_json_value(pp_ai, p_value) == 0 )
 		goto failed_to_load_ai_as_json_value;
 
 	// Clean the scope
@@ -266,6 +266,10 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 	// Parse the AI as a path
 	if ( p_name->type == JSONstring )
 	{
+
+		// Error check
+		if ( p_initial_state->type == JSONstring )
+			goto wrong_initial_state_type;
 
 		// Initialized data
 		GXAI_t* p_ai = 0;
@@ -372,6 +376,9 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 			// Clean the scope
 			free(pp_states);
 		}
+		// Default
+		else
+			goto wrong_states_type;
 
 		// Cache the AI
 		g_cache_ai(p_instance, p_ai);
@@ -418,7 +425,23 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] \"name\" property was of wrong type in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Property \"name\" must be of type [ string ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_initial_state_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Property \"initial state\" must be of type [ string ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_states_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [AI] Property \"states\" must be of type [ array ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -426,7 +449,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			name_too_long:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] \"name\" property length must be less than 256 in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] \"name\" property's length must be less than 256 in call to function \"%s\". Expected a string\n", __FUNCTION__);
 				#endif
 
 				// Error

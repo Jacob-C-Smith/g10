@@ -625,7 +625,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"name\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"name\" must be of type [ string ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -633,7 +633,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_location_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"location\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"location\" must be of type [ array ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -641,7 +641,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_target_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"target\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"target\" must be of type [ array ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -649,7 +649,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_up_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"up\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"up\" must be of type [ array ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -657,7 +657,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_near_clip_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"near clip\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"near clip\" must be of type [ float ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -665,7 +665,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_far_clip_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"far clip\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"far clip\" must be of type [ float ] in call to function \"%s\"\n");
 				#endif
 
 				// Error
@@ -673,7 +673,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_fov_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"fov\" was of wrong type in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"fov\" must be of type [ float ] in call to function \"%s\"\n");
 				#endif
 
 				// Error

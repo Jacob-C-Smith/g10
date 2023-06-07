@@ -759,6 +759,9 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
         // Success
         return 1;
     }
+    // Default
+    else
+        goto wrong_value_type;
 
     // Construct the input
     {
@@ -857,9 +860,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
     return 1;
 
     // TODO:
-    wrong_name_type:
-    wrong_mouse_sensitivity_type:
-    wrong_binds_type:
+    
         return 0;
 
     // Error handling
@@ -892,6 +893,42 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
             failed_to_load_input:
             failed_to_load_bind_as_json_value:
                 return 0;
+        }
+
+        // JSON errors
+        {
+            wrong_value_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_name_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Property \"name\" must be of type [ string ] in call to function \"%s\"\n\"", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_mouse_sensitivity_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Property \"mouse sensitivity\" must be of type [ float ] in call to function \"%s\"\n\"", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_binds_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Property \"binds\" must be of type [ array ] in call to function \"%s\"\n\"", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
         }
 
         // Standard library errors
@@ -1184,11 +1221,92 @@ int process_input ( GXInstance_t *p_instance )
         #endif
     }
 
-    // TODO: Refactor bind calls into a queue.
+    // Initialized data
     queue *p_update_binds_queue = 0;
 
-    // TODO: Reimplement for other libraries?
+    // Iterate over each SDL2 event
+    while ( SDL_PollEvent(&p_instance->sdl2.event) ) 
+    {
 
+        // 
+        switch (p_instance->sdl2.event.type)
+        {
+            case SDL_MOUSEMOTION:
+            {
+                bool mouse_lock = SDL_GetRelativeMouseMode();
+                u8   button     = 0;
+                int  x_rel      = p_instance->sdl2.event.motion.xrel,
+                     y_rel      = p_instance->sdl2.event.motion.yrel;
+                callback_parameter_t input = 
+                {
+                    .input_state               = MOUSE,
+                    .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
+                    .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
+                    .inputs.mouse_state.button = 0 // TODO
+                };
+
+                // -X, mouse left
+                if ( x_rel < 0 )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
+
+                // +X, mouse right
+                if ( 0 < x_rel )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
+
+                // -Y, mouse up
+                if ( y_rel < 0 )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
+
+                // +Y, mouse down
+                if ( 0 < y_rel )
+                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
+            }
+            break;
+            case SDL_MOUSEBUTTONDOWN:
+            {
+
+            }
+            break;
+            case SDL_MOUSEBUTTONUP:
+            {
+
+            }
+            break;
+            case SDL_KEYDOWN:
+            {
+
+            }
+            break;
+            case SDL_WINDOWEVENT:
+            {
+                switch (p_instance->sdl2.event.window.event)
+                {
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    {
+                        // TODO: Uncomment
+                        g_window_resize(p_instance);
+                        break;
+                    }
+                }
+            }
+            break;
+            case SDL_DROPFILE:
+            {
+
+            }
+            break;
+            case SDL_QUIT:
+            {
+
+            }
+            break;
+            default:
+                break;
+        }
+    }
+
+    // TODO: Reimplement for other libraries?
+    /*
     // Poll for events
     while ( SDL_PollEvent(&p_instance->sdl2.event) )
     {
@@ -1221,7 +1339,7 @@ int process_input ( GXInstance_t *p_instance )
                 // TODO: call binds
                 //printf("%3d %3d \r", x_rel, y_rel);
                 
-                /*
+                
                 // -X, mouse left
                 if ( x_rel < 0 )
                     queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
@@ -1237,7 +1355,7 @@ int process_input ( GXInstance_t *p_instance )
                 // +Y, mouse down
                 if ( 0 < y_rel )
                     queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
-                */
+                
             }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
@@ -1249,8 +1367,8 @@ int process_input ( GXInstance_t *p_instance )
 
                 // Initialized data
                 u8 button = 0;
-                int                  x_rel = p_instance->sdl2.event.motion.xrel,
-                                     y_rel = p_instance->sdl2.event.motion.yrel;
+                int x_rel = p_instance->sdl2.event.motion.xrel,
+                    y_rel = p_instance->sdl2.event.motion.yrel;
                 callback_parameter_t input = (callback_parameter_t)
                 {
                     .input_state               = MOUSE,
@@ -1280,10 +1398,23 @@ int process_input ( GXInstance_t *p_instance )
                         g_window_resize(p_instance);
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
+
+            // File drop
+            case SDL_DROPFILE:
+            {
+                char* dropped_filedir = p_instance->sdl2.event.drop.file;
+                // Shows directory of dropped file
+                SDL_ShowSimpleMessageBox(
+                    SDL_MESSAGEBOX_INFORMATION,
+                    "File dropped on window",
+                    dropped_filedir,
+                    p_instance->sdl2.window
+                );
+                SDL_free(dropped_filedir);    // Free dropped_filedir memory
+            }
+
 
             // Quit
             case SDL_QUIT:
@@ -1293,7 +1424,6 @@ int process_input ( GXInstance_t *p_instance )
             }
         }
     }
-    /*
     const u8* keyboard_state = SDL_GetKeyboardState(NULL);
 
     // Iterate over each key
@@ -1361,16 +1491,13 @@ int process_input ( GXInstance_t *p_instance )
 
     // Call each bind
     //while ( !queue_empty(p_instance->input->p_bind_queue) )
-    {
-
+    //{
         // Initialized data
-        GXBind_t *p_bind = 0;
-
+        //GXBind_t *p_bind = 0;
         // Dequeue a bind
         // queue_dequeue(p_instance->input->p_bind_queue, &p_bind);
-
         //call_bind(p_bind, callback_parameter, p_instance)
-    }
+    //}
 
     // Success
     return 1;

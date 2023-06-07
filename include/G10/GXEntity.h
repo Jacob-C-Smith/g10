@@ -27,7 +27,7 @@ struct GXEntity_s
 	char          *name;
 	dict          *parts;
 	dict          *materials;
-	GXShader_t    *shader;
+	char          *shader_name;
 	GXTransform_t *transform;
 	GXRigidbody_t *rigidbody;
 	GXCollider_t  *collider;
@@ -44,7 +44,7 @@ struct GXEntity_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_entity          ( GXEntity_t **pp_entity );
+DLLEXPORT int create_entity ( GXEntity_t **pp_entity );
 
 // Constructors
 
@@ -112,10 +112,10 @@ DLLEXPORT int calculate_entity_force ( GXEntity_t *p_entity );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int move_entity            ( GXEntity_t *p_entity );
+DLLEXPORT int move_entity ( GXEntity_t *p_entity );
 
 // Info
-DLLEXPORT int entity_info            ( GXEntity_t  *p_entity );
+DLLEXPORT int entity_info ( GXEntity_t  *p_entity );
 
 // AI
 /** !
@@ -127,7 +127,7 @@ DLLEXPORT int entity_info            ( GXEntity_t  *p_entity );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int preupdate_entity_ai    ( GXEntity_t *p_entity );
+DLLEXPORT int preupdate_entity_ai ( GXEntity_t *p_entity );
 
 /** !
  * Run state update function
@@ -142,22 +142,11 @@ DLLEXPORT int update_entity_ai ( GXEntity_t *p_entity );
 
 DLLEXPORT int get_model_matrix ( void *ret );
 
-// Renderer
-
-/** !
- * Draw each part with its respective shader and material
- *
- * @param p_entity : Pointer to entity
- *
- * @return 1 on success, 0 on error
- */
-DLLEXPORT int draw_entity ( GXEntity_t *p_entity );
-
 // Destructor
 /** !
- * Frees an entity, and all its contents
+ * Free an entity, and all its contents
  *
- * @param p_entity : Pointer to entity pointer
+ * @param pp_entity : Pointer to entity pointer
  *
  * @sa create_entity
  *
