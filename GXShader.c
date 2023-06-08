@@ -1681,9 +1681,9 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 {
 
                     p_vertex_attributes = dict_get(p_in->object, "vertex attributes");
-                    p_topology          = dict_get(p_in->object, "triangle");
+                    p_topology          = dict_get(p_in->object, "topology");
 
-                    if ( p_vertex_attributes && p_topology )
+                    if ( ! ( p_vertex_attributes && p_topology ) )
                         goto missing_properties;
                 }
 
@@ -1724,18 +1724,16 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         char        *input_attribute_type       = 0;
                         signed       input_attribute_location   = 0;
                         JSONValue_t *p_vertex_group             = pp_vertex_groups[i],
-                                    *p_input_attribute_type     = 0,
-                                    *p_input_attribute_location = 0;
+                                    *p_input_attribute_type     = 0;
 
                         // Parse the JSON value
                         if ( p_vertex_group->type == JSONobject )
                         {
 
                             p_input_attribute_type     = dict_get(p_vertex_group->object, "type");
-                            p_input_attribute_location = dict_get(p_vertex_group->object, "location");
 
                             // Check properties
-                            if ( ! ( p_input_attribute_type && p_input_attribute_location ) )
+                            if ( ! ( p_input_attribute_type ) )
                                 goto wrong_input_attribute_properties;
 
                         }
@@ -1746,7 +1744,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             input_attribute_type = p_input_attribute_type->string;
 
                         if ( p_input_attribute_type->type == JSONinteger )
-                            input_attribute_location = p_input_attribute_location->integer;
+                            input_attribute_location = i;
 
                         // Construct a vertex input attribute
                         vertex_input_attribute_descriptions[i] = (VkVertexInputAttributeDescription)

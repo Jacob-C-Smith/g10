@@ -30,6 +30,10 @@ if ( NOT ("${HAS_STACK}"))
 	add_subdirectory(${CMAKE_SOURCE_DIR}/extern/stack ${CMAKE_SOURCE_DIR}/build/stack)
 endif()
 
+if ( NOT "${HAS_G10}")
+    set(HAS_G10 true PARENT_SCOPE)
+endif()
+
 option(AUTO_LOCATE_VULKAN "AUTO_LOCATE_VULKAN" ON)
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
