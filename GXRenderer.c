@@ -779,7 +779,7 @@ int create_renderer ( GXRenderer_t **pp_renderer )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -829,7 +829,7 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -879,7 +879,7 @@ int create_subpass ( GXSubpass_t **pp_subpass )
         {
             no_ret:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -979,7 +979,7 @@ int create_attachment ( GXAttachment_t **pp_attachment )
         {
             no_attachment:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_attachment\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_attachment\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1029,7 +1029,7 @@ int create_texture ( GXTexture_t **pp_texture )
         {
             no_texture:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1079,7 +1079,7 @@ int create_framebuffer ( GXFramebuffer_t **pp_framebuffer )
         {
             no_framebuffer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_framebuffer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_framebuffer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1139,7 +1139,7 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
         {
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1147,7 +1147,7 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1223,7 +1223,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
 
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1231,7 +1231,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
 
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1512,7 +1512,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             no_return:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1520,7 +1520,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1667,7 +1667,7 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char *path )
         {
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1675,7 +1675,7 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1752,7 +1752,7 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char *text 
 
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1760,7 +1760,7 @@ int load_render_pass_as_json_text ( GXRenderPass_t **pp_render_pass, char *text 
 
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2595,7 +2595,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2603,7 +2603,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2720,7 +2720,7 @@ int load_subpass ( GXSubpass_t **pp_subpass, char *path )
         {
             no_subpass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2728,7 +2728,7 @@ int load_subpass ( GXSubpass_t **pp_subpass, char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2812,7 +2812,7 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text )
 
             no_subpass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2820,7 +2820,7 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text )
 
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3119,7 +3119,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
         no_subpass:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -3127,7 +3127,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
         no_value:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -3375,7 +3375,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             no_attachment:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3383,7 +3383,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3529,6 +3529,8 @@ int construct_image ( GXImage_t *p_image, VkImageCreateFlags flags, VkImageType 
 
     // Figure out how much memory the image will use
     vkGetImageMemoryRequirements(instance->vulkan.device, p_image->image, &memory_requirements);
+
+    extern u32 find_memory_type ( u32 type_filter, VkMemoryPropertyFlags properties );
 
     // Popultate the allocate info struct
     allocate_info = (VkMemoryAllocateInfo)
@@ -3842,7 +3844,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             no_image:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3850,7 +3852,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3976,8 +3978,9 @@ int print_renderer ( GXRenderer_t *p_renderer )
     // Formatting
     g_print_log("attachments :\n");
 
+    // TODO: FIX
     // Print each attachment
-    dict_foreach(p_renderer->attachments, print_attachment);
+    // dict_foreach(p_renderer->attachments, print_attachment);
     putchar('\n');
 
     // Iterate over each render pass
@@ -3994,7 +3997,7 @@ int print_renderer ( GXRenderer_t *p_renderer )
         {
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4029,12 +4032,14 @@ int print_render_pass ( GXRenderPass_t *p_render_pass )
     // Formatting
     g_print_log("attachments[%d]: \n", p_render_pass->attachments_count);
 
+    // TODO: Fix
     // Print the names of the attachments
-    dict_foreach(p_render_pass->attachments, println);
+    //dict_foreach(p_render_pass->attachments, println);
 
     // Formatting
     g_print_log("subpasses[%d]  : \n", p_render_pass->attachments_count);
-        dict_foreach(p_render_pass->subpasses, print_subpass);
+    // TODO: Fix
+    //dict_foreach(p_render_pass->subpasses, print_subpass);
 
     // Success
     return 1;
@@ -4046,7 +4051,7 @@ int print_render_pass ( GXRenderPass_t *p_render_pass )
         {
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4081,7 +4086,7 @@ int print_subpass ( GXSubpass_t *p_subpass )
         {
             no_subpass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4116,7 +4121,7 @@ int print_image ( GXImage_t *p_image )
         {
             no_image:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"p_image\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_image\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4183,7 +4188,7 @@ int print_attachment ( GXAttachment_t *p_attachment )
         {
         no_attachment:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"p_attachment\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_attachment\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -4212,14 +4217,14 @@ int add_subpass_callback ( char *name, void (*function_pointer)() )
         {
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
             return 0;
         no_function_pointer:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -4273,10 +4278,10 @@ int render_frame ( GXInstance_t *p_instance )
     {
 
         // Wait for the previous frame to finish rendering
-        vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, 0xffffffffffffffff);
         
         // Grab an image from the swapchain
-        result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, UINT64_MAX, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
+        result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, 0xffffffffffffffff, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
 
         // Make sure the image is usable
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -4506,7 +4511,7 @@ int present_frame ( GXInstance_t *p_instance )
     {
         no_instance:
             #ifndef NDEBUG
-                g_print_error("[G10] [Renderer] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Renderer] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -4535,7 +4540,7 @@ int destroy_renderer ( GXRenderer_t **pp_renderer )
         {
             no_renderer:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_renderer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4565,7 +4570,7 @@ int destroy_render_pass ( GXRenderPass_t **pp_render_pass )
         {
             no_render_pass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4624,7 +4629,7 @@ int destroy_subpass ( GXSubpass_t **pp_subpass )
         {
             no_subpass:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Null pointer provided for \"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Null pointer provided for parameter\"pp_subpass\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

@@ -115,7 +115,7 @@ int load_collider ( GXCollider_t **pp_collider, const char *path )
         {
             no_collider:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Collider] Null pointer provided for \"pp_collider\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Collider] Null pointer provided for parameter\"pp_collider\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -123,7 +123,7 @@ int load_collider ( GXCollider_t **pp_collider, const char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Collider] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Collider] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -194,8 +194,8 @@ int load_collider_as_json_text ( GXCollider_t **collider, char *text )
     return 1;
 }
 
-int add_aabb_start_collision_callback ( GXCollider_t* collider, void* function_pointer )
-{
-    return 1;
-}
-
+//int add_aabb_start_collision_callback ( GXCollider_t* collider, void* function_pointer )
+//{
+//    return 1;
+//}
+//

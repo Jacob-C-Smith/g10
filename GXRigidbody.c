@@ -238,7 +238,7 @@ int load_rigidbody_as_json_text ( GXRigidbody_t** pp_rigidbody, char *text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -248,16 +248,26 @@ int load_rigidbody_as_json_text ( GXRigidbody_t** pp_rigidbody, char *text )
 	}
 }
 
-int destroy_rigidbody ( GXRigidbody_t *p_rigidbody )
+int destroy_rigidbody ( GXRigidbody_t **pp_rigidbody )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_rigidbody == (void *) 0 )
+			if ( pp_rigidbody == (void *) 0 )
 				goto no_rigidbody;
 		#endif
 	}
+
+	// Initialized data
+	GXRigidbody_t *p_rigidbody = *pp_rigidbody;
+	
+	// Error check
+	if ( p_rigidbody == (void *) 0 )
+		goto pointer_to_null;
+
+	// No more pointer for caller
+	*pp_rigidbody = 0;
 
 	// Free the forces
 	free(p_rigidbody->forces);
@@ -278,11 +288,20 @@ int destroy_rigidbody ( GXRigidbody_t *p_rigidbody )
 		{
 			no_rigidbody:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"p_rigidbody\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"pp_rigidbody\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
 				return 0;
+
+			pointer_to_null:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Rigidbody] Parameter \"pp_rigidbody\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+				
 		}
 	}
 }

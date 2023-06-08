@@ -373,7 +373,10 @@ FodyWeavers.xsd
 time partitioning.txt
 
 build/
-extern/
+extern/SDL2-*
+extern/SDL2_image-*
+extern/SDL2_net-*
+
 .vscode/
 *.lnk
 queue_example.exe

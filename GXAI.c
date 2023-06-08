@@ -44,7 +44,7 @@ int create_ai ( GXAI_t **pp_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -105,7 +105,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -113,7 +113,7 @@ int load_ai ( GXAI_t **pp_ai, char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -211,7 +211,7 @@ int load_ai_as_json_text ( GXAI_t **pp_ai, char *text )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -219,7 +219,7 @@ int load_ai_as_json_text ( GXAI_t **pp_ai, char *text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -472,7 +472,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -480,7 +480,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			no_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -526,7 +526,7 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -534,7 +534,7 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 
 			no_state_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"state_name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -542,7 +542,7 @@ int add_ai_state_callback ( GXAI_t *p_ai , char *state_name, int (*function_poin
 
 			no_function_pointer:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -580,7 +580,7 @@ int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -588,7 +588,7 @@ int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 
 			no_state_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"state_name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -597,7 +597,7 @@ int set_ai_state ( GXAI_t *p_ai , const char *state_name )
 	}
 }
 
-int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEntity_t *entity ) )
+int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEntity_t *p_entity ) )
 {
 
 	// Argument errors
@@ -610,6 +610,7 @@ int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEnti
 		#endif
 	}
 
+	// TODO: FIX 
 	// Set the AI preupdate callback
 	p_ai->pre_ai = function_pointer;
 
@@ -623,7 +624,7 @@ int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEnti
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -631,7 +632,7 @@ int set_ai_pre_update_callback ( GXAI_t *p_ai , int (*function_pointer) ( GXEnti
 
 			no_function_pointer:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -691,7 +692,7 @@ int pre_update_ai ( GXInstance_t *p_instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_log("[G10] [AI] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [AI] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -738,7 +739,7 @@ int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -746,7 +747,7 @@ int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
 
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -821,7 +822,7 @@ int ai_info ( GXAI_t *p_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -858,7 +859,7 @@ int update_ai ( GXInstance_t *p_instance )
 			return 1;
 		}
 
-		queue_dequeue(p_instance->queues.ai_update, &entity);
+		queue_dequeue(p_instance->queues.ai_update, (void **)(&entity));
 
 		SDL_UnlockMutex(p_instance->mutexes.ai_update);
 	}
@@ -878,7 +879,7 @@ int update_ai ( GXInstance_t *p_instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_log("[G10] [AI] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [AI] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -934,7 +935,7 @@ int destroy_ai ( GXAI_t **pp_ai )
 		{
 			no_ai:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Null pointer provided for parameter\"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

@@ -30,7 +30,7 @@ int create_texture ( GXTexture_t **pp_texture )
 		{
 			no_texture:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Texture] Null pointer provided for \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Texture] Null pointer provided for parameter\"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

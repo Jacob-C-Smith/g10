@@ -406,13 +406,13 @@ bool test_load_ai ( GXAI_t **pp_ai, char *path, result_t expected )
     // Return
     return (result == expected);
 }
-bool test_set_ai_state ( GXAI_t *p_ai, char *state, result_t expected )
+bool test_set_ai_state ( GXAI_t **pp_ai, char *state, result_t expected )
 {
 
     // Initialized data
     int result = 0;
 
-    result = set_ai_state(p_ai, state);
+    result = set_ai_state(*pp_ai, state);
 
     // Return
     return (result == expected);

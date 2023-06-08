@@ -776,7 +776,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         {
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1019,7 +1019,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
         no_initial_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] Failed to load initial scene in call to function \"%s\"\n" __FUNCTION__);
+                g_print_error("[G10] Failed to load initial scene in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1027,7 +1027,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
         failed_to_load_schedule:
             #ifndef NDEBUG
-                g_print_error("[G10] Failed to load schedule in call to function \"%s\"\n" __FUNCTION__);
+                g_print_error("[G10] Failed to load schedule in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1053,7 +1053,7 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     *debug_messenger_create_info = i_debug_messenger_create_info;
 
     // Success
-    return 1;
+    return;
 }
 
 void pick_physical_device ( char **required_extension_names )
@@ -1558,7 +1558,7 @@ size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
         {
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"path\" provided to function \"%s\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"path\" provided to function \"%s\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1659,7 +1659,7 @@ int g_print_error ( const char *const format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1706,7 +1706,7 @@ int g_print_warning ( const char *const format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1755,7 +1755,7 @@ int g_print_log ( const char *const format, ... )
         {
             no_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"format\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"format\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1791,7 +1791,7 @@ int g_print_instance ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1832,7 +1832,7 @@ int g_start_schedule ( GXInstance_t* p_instance, const char* name )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scheduler] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", name, __FUNCTION__);
+                    g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", name, __FUNCTION__);
                 #endif
 
                 // Error
@@ -1840,7 +1840,7 @@ int g_start_schedule ( GXInstance_t* p_instance, const char* name )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scheduler] Null pointer provided for \"name\" in call to function \"%s\"\n", name, __FUNCTION__);
+                    g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", name, __FUNCTION__);
                 #endif
 
                 // Error
@@ -1892,7 +1892,7 @@ int g_stop_schedule ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scheduler] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2079,7 +2079,7 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2087,7 +2087,7 @@ int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
 
             no_material:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"material\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"material\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2120,7 +2120,7 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part)
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2128,7 +2128,7 @@ int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part)
 
             no_part:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2162,7 +2162,7 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2170,7 +2170,7 @@ int g_cache_shader ( GXInstance_t *p_instance, GXShader_t *p_shader )
 
             no_shader:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2202,7 +2202,7 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2210,7 +2210,7 @@ int g_cache_ai ( GXInstance_t *p_instance, GXAI_t *p_ai )
 
             no_ai:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2280,7 +2280,7 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2288,7 +2288,7 @@ GXMaterial_t *g_find_material ( GXInstance_t *p_instance, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2319,7 +2319,7 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2327,7 +2327,7 @@ GXPart_t *g_find_part ( GXInstance_t *p_instance, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2358,7 +2358,7 @@ GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2366,7 +2366,7 @@ GXShader_t *g_find_shader ( GXInstance_t *p_instance, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2397,7 +2397,7 @@ GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2405,7 +2405,7 @@ GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    printf("[G10] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    printf("[G10] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2442,8 +2442,8 @@ int g_exit ( GXInstance_t **pp_instance )
         // Free the instance name
         free(p_instance->name);
 
-        // Free scenes
-        dict_free_clear(p_instance->data.scenes, &destroy_scene);
+        // TODO: Fix
+        //dict_free_clear(p_instance->data.scenes, &destroy_scene);
 
         // Cleanup the context
         {
@@ -2634,7 +2634,7 @@ int g_exit ( GXInstance_t **pp_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

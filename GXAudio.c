@@ -81,7 +81,7 @@ int load_sound(GXSound_t** pp_sound, const char* path)
         {
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
         }
@@ -116,7 +116,7 @@ int play_sound(GXSound_t* p_sound, bool startPaused)
 		{
 			no_sound:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for \"p_sound\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for parameter \"p_sound\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 		}
@@ -153,7 +153,7 @@ int destroy_sound(GXSound_t* p_sound)
 		{
 			no_sound:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for \"p_sound\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for parameter\"p_sound\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 return 0;
 		}

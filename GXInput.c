@@ -495,7 +495,7 @@ int create_input ( GXInput_t **pp_input )
 		{
 			no_input:
 			    #ifndef NDEBUG
-			    	printf("[G10] [Input] Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
+			    	printf("[G10] [Input] Null pointer provided for parameter \"pp_input\" in call to function \"%s\"\n", __FUNCTION__);
 			    #endif
 
                 // Error
@@ -545,7 +545,7 @@ int create_bind ( GXBind_t **pp_bind )
 		{
 			no_bind:
 			    #ifndef NDEBUG
-			    	printf("[G10] [Bind] Null pointer provided for \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+			    	printf("[G10] [Bind] Null pointer provided for parameter\"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
 			    #endif
 
                 // Error
@@ -688,7 +688,7 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
         {
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1161,7 +1161,7 @@ int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null pointer provided for \"bind\" in call to function \"%s\"\n",__FUNCTION__);
+                g_print_error("[G10] [Input] Null pointer provided for parameter\"bind\" in call to function \"%s\"\n",__FUNCTION__);
             #endif
 
             // Error
@@ -1169,7 +1169,7 @@ int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
 
         no_function_pointer:
             #ifndef NDEBUG
-                g_print_warning("[G10] [Input] Null pointer provided for \"function_pointer\" in call to function \"%s\"\n",__FUNCTION__);
+                g_print_warning("[G10] [Input] Null pointer provided for parameter\"function_pointer\" in call to function \"%s\"\n",__FUNCTION__);
             #endif
 
             // Error
@@ -1245,21 +1245,21 @@ int process_input ( GXInstance_t *p_instance )
                     .inputs.mouse_state.button = 0 // TODO
                 };
 
-                // -X, mouse left
-                if ( x_rel < 0 )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
-
-                // +X, mouse right
-                if ( 0 < x_rel )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
-
-                // -Y, mouse up
-                if ( y_rel < 0 )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
-
-                // +Y, mouse down
-                if ( 0 < y_rel )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
+                //// -X, mouse left
+                //if ( x_rel < 0 )
+                //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
+//
+                //// +X, mouse right
+                //if ( 0 < x_rel )
+                //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
+//
+                //// -Y, mouse up
+                //if ( y_rel < 0 )
+                //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
+//
+                //// +Y, mouse down
+                //if ( 0 < y_rel )
+                //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
             }
             break;
             case SDL_MOUSEBUTTONDOWN:
@@ -1509,7 +1509,7 @@ int process_input ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_instance\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1638,7 +1638,7 @@ int input_info ( GXInput_t *p_input )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for parameter\"input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error handling
@@ -1669,18 +1669,19 @@ int call_bind ( GXBind_t *p_bind, callback_parameter_t input )
     }
 
     // Initialized data
-    GXInstance_t *p_instance = 0;
+    GXInstance_t *p_instance = g_get_active_instance();
 
     // Iterate over each callback
     for (size_t i = 0; i < p_bind->callback_count; i++)
     {
 
         // Initialized data
-        void (*function)(input, p_instance) = p_bind->callbacks[i];
+        void (*function)(GXInput_t *a, GXInstance_t *b) = p_bind->callbacks[i];
 
+        // TODO: Fix
         // Call the function
-        if ( function )
-            function(input, p_instance);
+        //if ( function )
+        //    function(input, p_instance);
     }
 
     // Success
@@ -1690,7 +1691,7 @@ int call_bind ( GXBind_t *p_bind, callback_parameter_t input )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Bind] Null pointer provided for \"bind\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Bind] Null pointer provided for parameter\"bind\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1719,7 +1720,7 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"p_input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1727,7 +1728,7 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1736,7 +1737,7 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
     }
 }
 
-int remove_bind ( GXInput_t *p_input, char *name )
+int remove_bind ( GXInput_t *p_input, char *name, GXBind_t **pp_bind )
 {
 
     // Argument check
@@ -1753,8 +1754,19 @@ int remove_bind ( GXInput_t *p_input, char *name )
     // Remove the bind
     dict_pop(p_input->binds, name, &p_bind);
 
-    // Destroy the bind
-    destroy_bind(&p_bind);
+    // Did the caller specify a return?
+    if ( pp_bind )
+
+        // The bind belongs to the caller now
+        *pp_bind = p_bind;
+    
+    // Default
+    else
+
+        // Destroy the bind
+        destroy_bind(&p_bind);
+    
+
 
     // Success
     return 1;
@@ -1766,7 +1778,7 @@ int remove_bind ( GXInput_t *p_input, char *name )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"p_input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1774,7 +1786,7 @@ int remove_bind ( GXInput_t *p_input, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1827,7 +1839,7 @@ int destroy_bind ( GXBind_t **pp_bind )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null pointer provided for \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Input] Null pointer provided for parameter\"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1849,6 +1861,9 @@ int destroy_input ( GXInput_t **pp_input )
     GXInput_t  *p_input    = *pp_input;
     size_t      bind_count = 0;
     GXBind_t  **pp_binds   = 0;
+
+    if ( p_input == (void *) 0 )
+        goto pointer_to_null;
 
     // No more pointer for caller
     *pp_input = 0;
@@ -1892,11 +1907,20 @@ int destroy_input ( GXInput_t **pp_input )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null poiner provided for \"input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null poiner provided for parameter \"pp_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
+
+            pointer_to_null:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Input] Parameter \"pp_input\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
 
             failed_to_destroy_bind:
                 #ifndef NDEBUG

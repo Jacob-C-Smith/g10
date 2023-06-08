@@ -37,7 +37,7 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -97,7 +97,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -105,7 +105,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -180,7 +180,7 @@ int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -188,7 +188,7 @@ int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -549,7 +549,7 @@ int preupdate_entity_ai ( GXEntity_t *p_entity )
 	GXAI_t* p_ai = p_entity->ai;
 
 	// Get the callback function associated with the current state
-	void (*preupdate_ai)(GXEntity_t * p_entity) = p_ai->pre_ai;
+	int (*preupdate_ai)(GXEntity_t * p_entity) = p_ai->pre_ai;
 
 	// Pre update
 	if (preupdate_ai)
@@ -645,7 +645,7 @@ int get_model_matrix ( void* ret )
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"ret\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -873,7 +873,7 @@ int draw_entity ( GXEntity_t *p_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -926,7 +926,7 @@ int destroy_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1005,8 +1005,9 @@ int entity_info ( GXEntity_t *p_entity )
     // Print the name
     g_print_log("name: \"%s\"\n", p_entity->name);
 
-	if ( p_entity->parts )
-		dict_foreach(p_entity->parts, &part_info);
+	// TODO: Fix
+	//if ( p_entity->parts )
+	//	dict_foreach(p_entity->parts, &part_info);
 
 	if ( p_entity->ai )
 		ai_info(p_entity->ai);
@@ -1022,7 +1023,7 @@ int entity_info ( GXEntity_t *p_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

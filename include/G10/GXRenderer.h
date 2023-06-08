@@ -379,6 +379,17 @@ DLLEXPORT int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JS
 DLLEXPORT int print_renderer ( GXRenderer_t *p_renderer );
 
 /** !
+ *  Print info about a render pass
+ *
+ * @param p_render_pass : the render pass
+ *
+ * @sa load_render_pass
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int print_render_pass ( GXRenderPass_t *p_render_pass );
+
+/** !
  *  Print info about an attachment
  *
  * @param p_attachment : the attachment

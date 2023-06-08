@@ -1,9 +1,34 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.26)
 
 project ("g10")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/extern/)
+
+if ( NOT ("${HAS_JSON}"))
+	message("[G10] adding json project")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/json ${CMAKE_SOURCE_DIR}/build/json)
+endif()
+
+if ( NOT ("${HAS_ARRAY}"))
+	message("[G10] adding array project")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/array ${CMAKE_SOURCE_DIR}/build/array)
+endif()
+
+if ( NOT ("${HAS_DICT}"))
+	message("[G10] adding dict project")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/dict ${CMAKE_SOURCE_DIR}/build/dict)
+endif()
+
+if ( NOT ("${HAS_QUEUE}"))
+	message("[G10] adding queue project")
+	add_subdirectory(${CMAKE_SOURCE_DIR}/extern/queue ${CMAKE_SOURCE_DIR}/build/queue)
+endif()
+
+if ( NOT ("${HAS_STACK}"))
+	message("[G10] adding stack project")
+	add_subdirectory(${CMAKE_SOURCE_DIR}/extern/stack ${CMAKE_SOURCE_DIR}/build/stack)
+endif()
 
 option(AUTO_LOCATE_VULKAN "AUTO_LOCATE_VULKAN" ON)
 
@@ -11,6 +36,7 @@ find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 find_package(SDL2_image REQUIRED CONFIG REQUIRED COMPONENTS SDL2_image)
 find_package(SDL2_net REQUIRED CONFIG REQUIRED COMPONENTS SDL2_net)
+
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 if(AUTO_LOCATE_VULKAN)
@@ -75,40 +101,36 @@ if(WIN32)
     source_group("source" REGULAR_EXPRESSION "source/*")
 endif(WIN32)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/json)
-add_subdirectory(${PROJECT_SOURCE_DIR}/queue)
-add_subdirectory(${PROJECT_SOURCE_DIR}/stack)
-
-find_library(array NAMES array HINTS ${PROJECT_SOURCE_DIR}/array/build/Debug/*)
-find_library(stack NAMES stack HINTS ${PROJECT_SOURCE_DIR}/stack/build/Debug/*)
-find_library(queue NAMES queue HINTS ${PROJECT_SOURCE_DIR}/queue/build/Debug/*)
-find_library(dict  NAMES dict HINTS  ${PROJECT_SOURCE_DIR}/dict/build/Debug/*)
-find_library(json  NAMES json HINTS  ${PROJECT_SOURCE_DIR}/json/build/Debug/*)
-
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_INCLUDE_DIRS})
-
 # "APS_3rdPersonCtrl.c" "GXAudio.c" "GXDiscordIntegration.c"
 
 # Add source to this project's executable.
 add_executable (g10_example "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c" "main.c") 
+add_dependencies(g10_example json array dict stack queue)
+target_include_directories(g10_example PUBLIC include ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ) 
+target_link_libraries(g10_example PUBLIC json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
 
 # Add source to this project's tester
-add_executable (g10_tester "G10_tester.c" "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c") 
+#add_executable (g10_tester "G10_tester.c" "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c") 
+#add_dependencies(g10_tester json array dict stack queue)
 
 # Add source to this project's 
-add_library    (g10 SHARED  "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c")
+#add_library    (g10 SHARED  "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c")
+#add_dependencies(g10 json array dict stack queue)
+#target_include_directories(g10 PUBLIC "include/" "json/include/")
+#target_link_libraries(g10 PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})
+#target_link_libraries(g10 PRIVATE SDL2_net::SDL2_net SDL2_image::SDL2_image)
 
-target_link_libraries(g10 PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})
-target_link_libraries(g10_example PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
-target_link_libraries(g10_tester PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
-target_link_libraries(g10 PRIVATE SDL2_image::SDL2_image)
-target_link_libraries(g10 PRIVATE SDL2_net::SDL2_net)
-target_link_libraries(g10_example PRIVATE SDL2_image::SDL2_image)
-target_link_libraries(g10_example PRIVATE SDL2_net::SDL2_net)
-target_link_libraries(g10_tester PRIVATE SDL2_image::SDL2_image)
-target_link_libraries(g10_tester PRIVATE SDL2_net::SDL2_net)
 
-# Define targets
-target_include_directories(g10 PUBLIC "include/" "json/include/")
-target_include_directories(g10_example PUBLIC "include/" "json/include/")
-target_include_directories(g10_tester PUBLIC "include/" "json/include/")
+
+
+#target_link_libraries(g10_example PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
+#target_link_libraries(g10_tester PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
+#
+#target_link_libraries(g10_example PRIVATE )
+#target_link_libraries(g10_tester PRIVATE SDL2_image::SDL2_image)
+#
+#target_link_libraries(g10_example PRIVATE )
+#target_link_libraries(g10_tester PRIVATE SDL2_net::SDL2_net)
+#
+## Define targets
+#target_include_directories(g10_tester PUBLIC "include/" "json/include/")

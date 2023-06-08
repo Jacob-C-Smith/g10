@@ -39,7 +39,7 @@ int create_part ( GXPart_t **pp_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter\"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -100,7 +100,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter\"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -108,7 +108,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -499,7 +499,7 @@ int part_info ( GXPart_t *p_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter\"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -564,7 +564,7 @@ int destroy_part ( GXPart_t **pp_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter\"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

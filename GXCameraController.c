@@ -147,7 +147,7 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Camera Controller] Null pointer provided for \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Camera Controller] Null pointer provided for parameter\"p_instance\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -155,7 +155,7 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
 
             no_camera:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Camera Controller] Null pointer provided for \"camera\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Camera Controller] Null pointer provided for parameter\"camera\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

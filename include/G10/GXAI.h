@@ -22,14 +22,15 @@
 // G10
 #include <G10/GXtypedef.h>
 #include <G10/G10.h>
+#include <G10/GXEntity.h>
 
 struct GXAI_s
 {
-	char  *name,
-	      *current_state;
-	dict  *states;
-	void (*pre_ai)(GXEntity_t*);
-	size_t users;
+	char    *name,
+	        *current_state;
+	dict    *states;
+	int    (*pre_ai)(GXEntity_t* p_entity);
+	size_t   users;
 };
 
 // Allocators

@@ -37,6 +37,13 @@
 #define UI_SWUP   0x20
 #define UI_SWDOWN 0x40
 
+enum input_state_e
+{
+	KEYBOARD = 1,
+	MOUSE    = 2,
+	GAMEPAD  = 3
+};
+
 struct GXBind_s
 {
 	bool              active;
@@ -62,6 +69,7 @@ struct GXInput_s
 struct callback_parameter_s
 {
 	enum input_state_e input_state;
+
 	union {
 		struct {
 			bool depressed;
@@ -102,12 +110,7 @@ struct callback_parameter_s
 	} inputs;
 };
 
-enum   input_state_e
-{
-	KEYBOARD = 1,
-	MOUSE    = 2,
-	GAMEPAD  = 3
-};
+
 
 // Allocators
 /** !
@@ -234,31 +237,42 @@ DLLEXPORT int append_bind ( GXInput_t *p_input, GXBind_t *p_bind );
 DLLEXPORT int input_info ( GXInput_t *p_input );
 
 // Bind calling
-DLLEXPORT int call_bind ( GXBind_t *p_bind, callback_parameter_t input, GXInstance_t* p_instance );
+DLLEXPORT int call_bind ( GXBind_t *p_bind, callback_parameter_t input );
 
 // Bind operations
 DLLEXPORT GXBind_t *find_bind ( GXInput_t *p_input, char *name );
-DLLEXPORT int remove_bind ( GXInput_t *p_input, GXBind_t *p_bind );
+/** !
+ *  Remove a bind from a GXInput. Deallocate the bind if pp_bind == nullptr else return the bind to pp_bind
+ * 
+ * @param p_input : An input
+ * @param name    : The name of the bind 
+ * @param pp_bind : return
+ *
+ * @sa load_input
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int remove_bind ( GXInput_t *p_input, char *name, GXBind_t **pp_bind );
 
 // Destructors
 /** !
  *  Free a bind and all its contents
  *
- * @param p_bind : Pointer to bind
+ * @param pp_bind : Pointer to bind pointer
  *
  * @sa create_bind
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_bind ( GXBind_t *p_bind );
+DLLEXPORT int destroy_bind ( GXBind_t **pp_bind );
 
 /** !
  *  Destroy an input
  *
- * @param p_input : Pointer to input
+ * @param pp_input : Pointer to input pointer
  *
  * @sa create_input
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int destroy_input ( GXInput_t *p_input );
+DLLEXPORT int destroy_input ( GXInput_t **pp_input );

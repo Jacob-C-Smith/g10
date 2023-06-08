@@ -31,7 +31,7 @@ int create_server(GXServer_t** pp_server)
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -77,8 +77,9 @@ int load_server ( GXServer_t **pp_server, char *path )
 	// Load the file
 	g_load_file(path, text, true);
 
+	// TODO: Fix
 	// Parse the JSON into a GXServer
-	load_server_as_json(pp_server, text);
+	//load_server_as_json(pp_server, text);
 
 	// Free the file text
 	free(text);
@@ -92,7 +93,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -100,7 +101,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -245,7 +246,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -377,7 +378,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 	}
 
 	// Deallocate the command
-	destroy_command(p_command);
+	destroy_command(&p_command);
 
 	return 0;
 
@@ -411,7 +412,7 @@ int server_recv(GXClient_t *client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -442,7 +443,7 @@ int server_send(GXClient_t* client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for \"client\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter\"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -531,8 +532,9 @@ int server_process   ( GXClient_t *client )
 			process_command(client, cmd);
 		}
 
-	queue_destroy(client->recv_queue);
-	queue_construct(&client->recv_queue, 64);
+	// TODO: Fix
+	//queue_destroy(client->recv_queue);
+	//queue_construct(&client->recv_queue, 64);
 
 	if ( p_instance->networking.server )
 		for (size_t i = 0; i < client->actor_count; i++)
@@ -624,6 +626,8 @@ int server_wait    ( GXInstance_t* p_instance )
 			printf("%s connected\n", connect_command->connect.name);
 
 		client_name_len = strlen(connect_command->connect.name);
+		
+		extern int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value );
 
 		// Load a player thread
 		load_thread_as_json_value(&server_thread, "G10/client thread.json");
@@ -701,13 +705,14 @@ int server_wait    ( GXInstance_t* p_instance )
 
 			extern int client_work(GXThread_t * thread);
 
-			client->thread->thread = SDL_CreateThread(client_work, client->thread->name, client);
+			// TODO: Fix
+			// client->thread->thread = SDL_CreateThread(client_work, client->thread->name, client);
 		}
 	}
 
 	// TODO:
 no_instance:
-	g_print_error("[G10] [Server] Null pointer provided for \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+	g_print_error("[G10] [Server] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 
 	return 0;
 no_socket:
@@ -725,8 +730,8 @@ int create_client  ( GXClient_t** client)
 	c->send_data = calloc(4096, sizeof(u8));
 	c->recv_data = calloc(4096, sizeof(u8));
 
-	queue_construct(&c->send_queue, 64);
-	queue_construct(&c->recv_queue, 64);
+	queue_construct(&c->send_queue);
+	queue_construct(&c->recv_queue);
 
 	return 0;
 }
@@ -813,8 +818,9 @@ int connect_client(char* name)
 	// Set up the networking thread
 	{
 
+		// TODO: Fix
 		// Load a scheduler thread for the client
-		load_thread_as_json_value(&client_thread, "G10/client thread.json");
+		//load_thread_as_json_value(&client_thread, "G10/client thread.json");
 
 		sprintf(client_thread->name, "Network thread\0");
 
@@ -835,8 +841,9 @@ int connect_client(char* name)
 			// Client worker thread
 			extern int client_work(GXThread_t * thread);
 
+			// TODO: Fix
 			// Create a new thread
-			i_client->thread->thread = SDL_CreateThread(client_work, i_client->thread->name, i_client);
+			//i_client->thread->thread = SDL_CreateThread(client_work, i_client->thread->name, i_client);
 
 		}
 	}
@@ -850,7 +857,7 @@ int connect_client(char* name)
 		{
 			no_client_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Client] Null pointer provided for \"name\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Client] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1077,65 +1084,65 @@ int data_from_command(void** ret, GXCommand_t* command)
 	return (int) ret_len;
 }
 
-int destroy_client ( GXClient_t *client )
+int destroy_client ( GXClient_t **pp_client )
 {
-	free(client->name);
-	free(client->send_data);
-	free(client->recv_data);
-	queue_destroy(client->send_queue);
-	queue_destroy(client->recv_queue);
-
-	SDLNet_TCP_Close(client->socket);
-
-	free(client);
-
-	return 0;
+	//free(client->name);
+	//free(client->send_data);
+	//free(client->recv_data);
+	//queue_destroy(client->send_queue);
+	//queue_destroy(client->recv_queue);
+	//
+	//SDLNet_TCP_Close(client->socket);
+	//
+	//free(client);
+	//
+	//return 0;
 }
 
-int destroy_command(GXCommand_t* command)
+int destroy_command(GXCommand_t** pp_command)
 {
-	// Argument check
-	{
-		#ifndef NDEBUG
-			if ( command == (void *) 0 )
-				goto no_command;
-		#endif
-	}
-
-	// Deallocate command data
-	switch (command->type)
-	{
-		case no_op:
-		case actor_displace_rotate:
-		case actor_detach:
-		case disconnect:
-		break;
-
-		case connect_CMD:
-		{
-			free(command->connect.name);
-		}
-		break;
-
-		case actor_initialize:
-		{
-			free(command->actor_initialize.name);
-		}
-		break;
-
-		case chat:
-		{
-			free(command->chat.chat);
-		}
-		break;
-
-		default:
-		break;
-	}
-
-	// Deallocate the command
-	free(command);
-
-	no_command:
-		return 0;
+	//// Argument check
+	//{
+	//	#ifndef NDEBUG
+	//		if ( pp_command == (void *) 0 )
+	//			goto no_command;
+	//	#endif
+	//}
+	//
+	//// Deallocate command data
+	//switch (command->type)
+	//{
+	//	case no_op:
+	//	case actor_displace_rotate:
+	//	case actor_detach:
+	//	case disconnect:
+	//	break;
+	//
+	//	case connect_CMD:
+	//	{
+	//		free(command->connect.name);
+	//	}
+	//	break;
+	//
+	//	case actor_initialize:
+	//	{
+	//		free(command->actor_initialize.name);
+	//	}
+	//	break;
+	//
+	//	case chat:
+	//	{
+	//		free(command->chat.chat);
+	//	}
+	//	break;
+	//
+	//	default:
+	//	break;
+	//}
+	//
+	//// Deallocate the command
+	//free(command);
+	//
+	//no_command:
+	//	return 0;
 }

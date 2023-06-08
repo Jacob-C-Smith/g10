@@ -9,6 +9,7 @@
 // Forward declarations
 int load_task_as_json ( GXTask_t **pp_task, char *text );
 int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value );
+int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value );
 
 dict *scheduler_tasks = 0;
 
@@ -68,7 +69,7 @@ void *task_function_pointers[TASK_COUNT] = {
 	&discord_callbacks,
 	#else
 	0,
-	#endif,
+	#endif
 	0
 };
 
@@ -116,7 +117,7 @@ int create_task ( GXTask_t **pp_task )
 		{
 			no_task:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -166,7 +167,7 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -216,7 +217,7 @@ int create_thread ( GXThread_t **pp_thread )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -276,7 +277,7 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for parameter\"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -284,7 +285,7 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -362,14 +363,14 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
 				return 0;
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -611,7 +612,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -702,18 +703,19 @@ int client_work ( GXClient_t *p_client )
 	return 0;
 }
 
-int work ( GXThread_t *p_thread )
+int work ( void *vp_thread )
 {
 
 	// Argument check
 	{
 		#ifndef NDEBUG
-			if ( p_thread == (void *) 0 ) goto no_thread;
+			if ( vp_thread == (void *) 0 ) goto no_thread;
 		#endif
 	}
 
 	// Initialized data
-	GXTask_t     **tasks    = p_thread->tasks;
+	GXThread_t    *p_thread   = vp_thread;
+	GXTask_t     **tasks      = p_thread->tasks;
 	GXInstance_t  *p_instance = g_get_active_instance();
 
 	// Run until told otherwise
@@ -770,7 +772,7 @@ int work ( GXThread_t *p_thread )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"p_thread\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"vp_thread\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -902,7 +904,6 @@ int start_schedule ( GXSchedule_t *p_schedule )
 
 		// Create the thread
 		thread->thread  = SDL_CreateThread(work, thread->name, thread);
-
 	}
 
 	// Get the main thread
@@ -1186,7 +1187,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1194,7 +1195,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

@@ -456,7 +456,7 @@ int create_shader ( GXShader_t **pp_shader )
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -684,7 +684,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -692,7 +692,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -765,7 +765,7 @@ int load_shader_as_json_text ( GXShader_t **pp_shader, char *text )
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -773,7 +773,7 @@ int load_shader_as_json_text ( GXShader_t **pp_shader, char *text )
 
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -917,7 +917,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -925,7 +925,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1021,7 +1021,7 @@ int use_shader ( GXShader_t *p_shader )
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1079,14 +1079,14 @@ int add_shader_push_constant_getter ( char *getter_name, int(*getter_function)(v
         {
             no_getter_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"getter_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
             no_getter_function:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"getter_function\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"getter_function\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1160,7 +1160,7 @@ int set_shader_camera               ( GXEntity_t   *p_entity )
         {
             #ifndef NDEBUG
                 no_shader:
-                    g_print_log("[G10] [Shader] Null pointer provided for \"shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_log("[G10] [Shader] Null pointer provided for parameter\"shader\" in call to function \"%s\"\n", __FUNCTION__);
                     return 0;
             #endif
         }
@@ -2461,7 +2461,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3017,7 +3017,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3513,7 +3513,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         {
             no_shader:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3521,7 +3521,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4094,7 +4094,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
         {
             no_set:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_set\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_set\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4102,7 +4102,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4232,7 +4232,7 @@ int load_descriptor_as_json_value ( GXDescriptor_t **pp_descriptor, JSONValue_t 
         {
             no_descriptor:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"pp_descriptor\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"pp_descriptor\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4240,7 +4240,7 @@ int load_descriptor_as_json_value ( GXDescriptor_t **pp_descriptor, JSONValue_t 
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Null pointer provided for \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
