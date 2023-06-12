@@ -369,7 +369,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 				
 			wrong_value_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Parameter \"p_value\" must be of type [ object | string ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Property \"p_value\" must be of type [ object | string ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

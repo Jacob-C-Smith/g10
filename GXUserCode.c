@@ -11,7 +11,7 @@ int user_code ( GXInstance_t *p_instance )
 	}
 
 	// Check for a user callback function, so to avoid calling a null pointer
-	if (p_instance->context.user_code_callback)
+	if ( p_instance->context.user_code_callback )
 
 		// Call the callback function
 		p_instance->context.user_code_callback(p_instance);

@@ -901,7 +901,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
             wrong_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1913,7 +1913,7 @@ int destroy_input ( GXInput_t **pp_input )
 
             pointer_to_null:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Parameter \"pp_input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"pp_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

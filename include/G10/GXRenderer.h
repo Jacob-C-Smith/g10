@@ -63,7 +63,7 @@ struct GXSubpass_s
 	char  *name,
 	     **shader_names;
 	size_t shader_count;
-	VkSubpassDescription subpass_description;
+	VkSubpassDescription2 subpass_description;
 };
 
 struct GXImage_s
@@ -76,7 +76,7 @@ struct GXImage_s
 struct GXAttachment_s
 {
 	char *name;
-	VkAttachmentDescription attachment_description;
+	VkAttachmentDescription2 attachment_description2;
 	GXImage_t *p_image;
 	VkImageView image_view;
 };

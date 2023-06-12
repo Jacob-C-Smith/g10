@@ -7,8 +7,8 @@ FILE* log_file;
 static GXInstance_t *active_instance = 0;
 
 // Forward declared functions
-void pick_physical_device   ( char **required_extension_names );
-void create_logical_device  ( char **required_extension_names );
+int  pick_physical_device   ( char **required_extension_names );
+int  create_logical_device  ( char **required_extension_names );
 void create_swap_chain      ( void );
 void cleanup_swap_chain     ( void );
 void create_image_views     ( void );
@@ -324,26 +324,46 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     char                 **required_extensions         = 0,
                                          **requested_extensions        = 0,
                                          **requested_validation_layers = 0;
-                    dict                  *extensions                  = 0;
+                    dict                  *extensions                  = 0,
+                                          *validation_layers           = 0;
                     u32                    required_extension_count    = 0;
                     size_t                 requested_extension_count   = 0,
-                                           requested_layers_count      = 0;
+                                           requested_extensions_count  = 0,
+                                           requested_layers_count      = 0,
+                                           validation_layers_count     = 0;
                     VkResult               result                      = 0;
-
+                    
+                    // Construct a dictionary for the validation layers
+                    dict_construct(&validation_layers, 32);
+                    
                     // Get the extensions
                     if ( p_requested_instance_extensions )
                     {
 
                         if ( p_requested_instance_extensions->type == JSONarray )
                         {
-                            // Get the number of extensions
-                            array_get(p_requested_instance_extensions->list, 0, &requested_extension_count);
 
-                            // Allocate for each extension
-                            requested_extensions = calloc(requested_extension_count, sizeof(char *));
+                            // Dump the requested instance extensions
+                            {
+        
+                                // Get the number of extensions
+                                array_get(p_requested_instance_extensions->list, 0, &requested_extension_count);
 
-                            // Get each extension
-                            array_get(p_requested_instance_extensions->list, (void **)requested_extensions, 0);
+                                // TODO: This should accound for instance extensions required by the WSI (ie, SDL2, GLFW (if I ever implement that))
+                                // Allocate for each extension
+                                requested_extensions = calloc(requested_extension_count+16, sizeof(char *));
+
+                                // Error checking
+                                if ( requested_extensions == (void *) 0 )
+                                    goto no_mem;
+
+                                // Get each extension
+                                array_get(p_requested_instance_extensions->list, (void **)requested_extensions, 0);
+                            }
+
+                            for (size_t i = 0; i < requested_extension_count; i++)
+                                requested_extensions[i] = ((JSONValue_t *)requested_extensions[i])->string;
+                            
                         }
                         else
                             goto wrong_requested_instance_extensions_type;
@@ -356,14 +376,25 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                         if ( p_requested_validation_layers->type == JSONarray )
                         {
-                            // Get the number requested validation layers
-                            array_get(p_requested_validation_layers->list, 0, &requested_layers_count);
 
-                            // Allocate for each extension
-                            requested_validation_layers = calloc(requested_layers_count, sizeof(JSONValue_t *));
+                            // Get the contents of the array
+                            {
+                                // Get the number requested validation layers
+                                array_get(p_requested_validation_layers->list, 0, &requested_layers_count);
 
-                            // Get each extension
-                            array_get(p_requested_validation_layers->list, (void **)requested_validation_layers, 0);
+                                // Allocate for each extension
+                                requested_validation_layers = calloc(requested_layers_count, sizeof(JSONValue_t *));
+
+                                // Error checking
+                                if ( requested_validation_layers == (void *) 0 )
+                                    goto no_mem;
+
+                                // Get each extension
+                                array_get(p_requested_validation_layers->list, (void **)requested_validation_layers, 0);
+                            }
+
+                            for (size_t i = 0; i < requested_layers_count; i++)
+                                requested_validation_layers[i] = ((JSONValue_t *)requested_validation_layers[i])->string;
                         }
                         else
                             goto wrong_requested_validation_layers_type;
@@ -375,9 +406,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     application_info = (VkApplicationInfo)
                     {
                         .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                        .pNext              = 0,
                         .pApplicationName   = "G10",
-                        .pEngineName        = "G10",
                         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+                        .pEngineName        = "G10",
                         .engineVersion      = VK_MAKE_VERSION(0, 0, 1),
                         .apiVersion         = VK_API_VERSION_1_3
                     };
@@ -393,7 +425,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                             // Get the quantity of required instance extensions
                             SDL_Vulkan_GetInstanceExtensions(p_instance->sdl2.window, (unsigned int *)&required_extension_count, (void*)0);
-
+                            
+                            // TODO: Free
                             // Allocate memory for the extensions
                             required_extensions = calloc(required_extension_count + 1, sizeof(char*));
 
@@ -404,18 +437,78 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                         // Construct a dictionary from the required extensions
                         dict_from_keys(&extensions, required_extensions, required_extension_count);
 
-                        for (size_t i = 0; i < requested_layers_count; i++)
-                            requested_validation_layers[i] = ((JSONValue_t **)requested_validation_layers)[i]->string;
+                        // If the user is requesting extensions ...
+                        if ( p_requested_instance_extensions )
+                        {
+
+                            // ... If the user is supplying the extensions as an array ...
+                            if ( p_requested_instance_extensions->type == JSONarray )
+                            {
+                                
+                                // Initialized data
+                                size_t        requested_instance_extensions_count = 0;
+                                JSONValue_t **pp_requested_instance_extensions    = 0;
+
+                                // Dump the array contents
+                                {
+
+                                    // Get the number of instance extensions
+                                    array_get(p_requested_instance_extensions->list, 0, &requested_instance_extensions_count);
+
+                                    // Allocate memory for requested instance extensions
+                                    pp_requested_instance_extensions = calloc(requested_instance_extensions_count+1, sizeof(JSONValue_t *));
+
+                                    // Error checking
+                                    if ( pp_requested_instance_extensions == (void *) 0 )
+                                        goto no_mem;
+                                    
+                                    // Get the array contents
+                                    array_get(p_requested_instance_extensions->list, pp_requested_instance_extensions, 0);
+                                }
+
+                                // Iterate over each instance extension
+                                for (size_t i = 0; i < requested_instance_extensions_count; i++)
+                                {
+                                    
+                                    // Initialized data
+                                    JSONValue_t *i_requested_instance_extension_value = pp_requested_instance_extensions[i];
+                                    char *requested_instance_extension = 0;
+
+                                    // Error checking
+                                    if ( i_requested_instance_extension_value->type != JSONstring )
+                                        goto wrong_requested_instance_extension_value_type;
+
+                                    // Get the instance extension string
+                                    requested_instance_extension = i_requested_instance_extension_value->string;
+
+                                    // Add the requested instance extension to the dictionary
+                                    dict_add(extensions, requested_instance_extension, 0);
+                                }
+                            }
+                            // Default
+                            else
+                                goto wrong_requested_instance_extensions_type;
+                        }
+
+                        // Dump the requested extensions
+                        dict_keys(extensions, requested_extensions);
+                        requested_extensions_count = dict_keys(extensions, 0);
+
+                        // Dump the validation layers
+                        //dict_keys(validation_layers, requested_validation_layers);
+                        //validation_layers_count = dict_keys(validation_layers, 0);
 
                         // TODO: Add support for user defined extensions
                         instance_create_info  = (VkInstanceCreateInfo)
                         {
                             .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+                            .pNext                   = 0,
+                            .flags                   = 0,
                             .pApplicationInfo        = &application_info,
-                            .enabledExtensionCount   = required_extension_count,
-                            .ppEnabledExtensionNames = (const char *const *) required_extensions,
                             .enabledLayerCount       = (u32) requested_layers_count,
-                            .ppEnabledLayerNames     =(const char *const *) requested_validation_layers
+                            .ppEnabledLayerNames     =(const char *const *) requested_validation_layers,
+                            .enabledExtensionCount   = (u32) requested_extensions_count,
+                            .ppEnabledExtensionNames = (const char *const *) requested_extensions
                         };
 
                         // Create the debug messenger
@@ -461,10 +554,12 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     device_extensions[i] = ((JSONValue_t **)device_extensions)[i]->string;
 
                 // Get a physical device to use
-                pick_physical_device(device_extensions);
+                if ( pick_physical_device(device_extensions) == 0 )
+                    goto failed_to_pick_physical_device;
 
                 // Create a logical device from the physical device
-                create_logical_device(device_extensions);
+                if ( create_logical_device(device_extensions) == 0 )
+                    goto failed_to_create_logical_device;
 
                 // Create a swap chain
                 create_swap_chain();
@@ -508,7 +603,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             {
 
                 // Initialized data
-                extern void init_renderer   ( void );
+                extern int init_renderer   ( void );
                 extern void init_shader     ( void );
                 extern void init_texture    ( void );
                 extern void init_input      ( void );
@@ -532,7 +627,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     p_instance->loading_thread_count = 4;
 
                 // Renderer initialization
-                init_renderer();
+                if ( init_renderer() == 0 )
+                    goto failed_to_initialize_renderer;
 
                 // Shader initialization
                 init_shader();
@@ -768,6 +864,11 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
     // Success
     return 1;
+    
+    wrong_requested_instance_extension_value_type:
+    failed_to_pick_physical_device:
+    failed_to_create_logical_device:
+        return 0;
 
     // Error handling
     {
@@ -999,6 +1100,18 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
         }
 
+        // G10 errors
+        {
+            failed_to_initialize_renderer:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Failed to initialize renderer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+        }
+
         // TOOD: Categorize
         no_instance:
             #ifndef NDEBUG
@@ -1007,6 +1120,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             // Error
             return 0;
+
         failed_to_load_input:
                 return 0;
         failed_to_load_scene:
@@ -1056,7 +1170,7 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     return;
 }
 
-void pick_physical_device ( char **required_extension_names )
+int pick_physical_device ( char **required_extension_names )
 {
 
     // Argument check
@@ -1071,25 +1185,48 @@ void pick_physical_device ( char **required_extension_names )
     u32               device_count = 0;
     VkPhysicalDevice *devices      = 0;
 
-    vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, (void*)0);
+    // Get the number of physical devices
+    switch (
+        vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, (void *) 0)
+    )
+    {
+        case VK_SUCCESS:
+        case VK_INCOMPLETE:
+            break;
+        default:
+            goto failed_to_enumerate_physical_devices;
+    }
 
     // Error check
     if ( device_count == 0 )
         goto no_devices;
 
+    // Allocate memory for devices list
     devices = calloc(device_count + 1, sizeof(VkPhysicalDevice));
 
-    vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, devices);
+    // Error checking
+    if ( devices == (void *) 0 )
+        goto no_mem;
+    
+    // Enumerate physical devices
+    switch (
+        vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, devices)
+    )
+    {
+        case VK_SUCCESS:
+        case VK_INCOMPLETE:
+            break;
+        default:
+            goto failed_to_enumerate_physical_devices;
+    }
 
     // Iterate over each device
     for (size_t i = 0; i < device_count; i++)
-    {
-        if (check_vulkan_device(p_instance, devices[i], required_extension_names))
+        if ( check_vulkan_device(p_instance, devices[i], required_extension_names) )
             p_instance->vulkan.physical_device = devices[i];
-    }
 
-    // Return
-    return;
+    // Success
+    return 1;
 
     // Error handling
     {
@@ -1102,9 +1239,20 @@ void pick_physical_device ( char **required_extension_names )
                 #endif
 
                 // Error
-                return;
+                return 0;
 
         }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
 
         // Vulkan errors
         {
@@ -1114,21 +1262,101 @@ void pick_physical_device ( char **required_extension_names )
                 #endif
 
                 // Error
-                return;
+                return 0;
+
+            failed_to_enumerate_physical_devices:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Failed to call vkEnumeratePhysicalDevices in call to function \"%s\"\n\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
         }
     }
 }
 
-void create_logical_device ( char **required_extension_names )
+int create_logical_device ( char **required_extension_names )
 {
-    GXInstance_t             *p_instance                 = g_get_active_instance();
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( required_extension_names == (void *) 0 ) goto no_required_extension_names;
+        #endif
+    }
+
+    // Initialized data
+    GXInstance_t             *p_instance               = g_get_active_instance();
     VkDeviceQueueCreateInfo  *queue_create_infos       = calloc(2, sizeof(VkDeviceQueueCreateInfo));
-    VkPhysicalDeviceFeatures  device_features          = { 0 };
+    VkPhysicalDeviceFeatures  device_features          = { 
+        .robustBufferAccess                       = VK_FALSE,
+        .fullDrawIndexUint32                      = VK_FALSE,
+        .imageCubeArray                           = VK_FALSE,
+        .independentBlend                         = VK_FALSE,
+        .geometryShader                           = VK_TRUE,
+        .tessellationShader                       = VK_TRUE,
+        .sampleRateShading                        = VK_FALSE,
+        .dualSrcBlend                             = VK_FALSE,
+        .logicOp                                  = VK_FALSE,
+        .multiDrawIndirect                        = VK_FALSE,
+        .drawIndirectFirstInstance                = VK_FALSE,
+        .depthClamp                               = VK_FALSE,
+        .depthBiasClamp                           = VK_FALSE,
+        .fillModeNonSolid                         = VK_FALSE,
+        .depthBounds                              = VK_FALSE,
+        .wideLines                                = VK_FALSE,
+        .largePoints                              = VK_FALSE,
+        .alphaToOne                               = VK_FALSE,
+        .multiViewport                            = VK_FALSE,
+        .samplerAnisotropy                        = VK_FALSE,
+        .textureCompressionETC2                   = VK_FALSE,
+        .textureCompressionASTC_LDR               = VK_FALSE,
+        .textureCompressionBC                     = VK_FALSE,
+        .occlusionQueryPrecise                    = VK_FALSE,
+        .pipelineStatisticsQuery                  = VK_FALSE,
+        .vertexPipelineStoresAndAtomics           = VK_FALSE,
+        .fragmentStoresAndAtomics                 = VK_FALSE,
+        .shaderTessellationAndGeometryPointSize   = VK_FALSE,
+        .shaderImageGatherExtended                = VK_FALSE,
+        .shaderStorageImageExtendedFormats        = VK_FALSE,
+        .shaderStorageImageMultisample            = VK_FALSE,
+        .shaderStorageImageReadWithoutFormat      = VK_FALSE,
+        .shaderStorageImageWriteWithoutFormat     = VK_FALSE,
+        .shaderUniformBufferArrayDynamicIndexing  = VK_FALSE,
+        .shaderSampledImageArrayDynamicIndexing   = VK_FALSE,
+        .shaderStorageBufferArrayDynamicIndexing  = VK_FALSE,
+        .shaderStorageImageArrayDynamicIndexing   = VK_FALSE,
+        .shaderClipDistance                       = VK_FALSE,
+        .shaderCullDistance                       = VK_FALSE,
+        .shaderFloat64                            = VK_FALSE,
+        .shaderInt64                              = VK_FALSE,
+        .shaderInt16                              = VK_FALSE,
+        .shaderResourceResidency                  = VK_FALSE,
+        .shaderResourceMinLod                     = VK_FALSE,
+        .sparseBinding                            = VK_FALSE,
+        .sparseResidencyBuffer                    = VK_FALSE,
+        .sparseResidencyImage2D                   = VK_FALSE,
+        .sparseResidencyImage3D                   = VK_FALSE,
+        .sparseResidency2Samples                  = VK_FALSE,
+        .sparseResidency4Samples                  = VK_FALSE,
+        .sparseResidency8Samples                  = VK_FALSE,
+        .sparseResidency16Samples                 = VK_FALSE,
+        .sparseResidencyAliased                   = VK_FALSE,
+        .variableMultisampleRate                  = VK_FALSE,
+        .inheritedQueries                         = VK_FALSE
+    };
     VkDeviceCreateInfo        device_create_info       = { 0 };
-    VkBool32                  result                   = 0;
+    VkPhysicalDeviceSynchronization2Features synchronization2_features =
+    {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
+        .synchronization2 = true,
+        .pNext = 0
+    };
+    VkResult                  result                   = 0;
     u32                       unique_queue_families[2] = { p_instance->vulkan.queue_family_indices.g, p_instance->vulkan.queue_family_indices.p };
 
-    p_instance->vulkan.priority = 1.f;
+    p_instance->vulkan.priority = 1.f;   
 
     for (size_t i = 0; i < 2; i++)
     {
@@ -1141,23 +1369,45 @@ void create_logical_device ( char **required_extension_names )
     device_create_info = (VkDeviceCreateInfo)
     {
         .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pNext                   = &synchronization2_features,
+        .flags                   = 0,
         .queueCreateInfoCount    = 2,
         .pQueueCreateInfos       = queue_create_infos,
-        .enabledExtensionCount   = 1,
-        .pEnabledFeatures        = &device_features,
-        .ppEnabledExtensionNames = (const char *const *)required_extension_names
+        .enabledLayerCount       = 0,
+        .ppEnabledLayerNames     = 0,
+        .enabledExtensionCount   = 4,
+        .ppEnabledExtensionNames = (const char *const *)required_extension_names,
+        .pEnabledFeatures        = &device_features
     };
 
     result = vkCreateDevice(p_instance->vulkan.physical_device, &device_create_info, 0, &p_instance->vulkan.device);
 
-    if (result != VK_SUCCESS)
-    {
-        printf("failed to create logical device!");
-    }
+    if ( result != VK_SUCCESS )
+        goto failed_to_create_logical_device;
 
     vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[0], 0, &p_instance->vulkan.graphics_queue);
     vkGetDeviceQueue(p_instance->vulkan.device, unique_queue_families[1], 0, &p_instance->vulkan.present_queue);
 
+    // Success
+    return 1;
+    
+    no_required_extension_names:
+    return 0;
+
+    // Error handling
+    {
+        
+        // Vulkan errors
+        {
+            failed_to_create_logical_device:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Failed to create logical device in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 void create_swap_chain ( void )
@@ -1368,28 +1618,39 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
     bool passes_queue   = false,
          has_extensions = false,
          has_swap_chain = false;
-
     VkPhysicalDeviceProperties deviceProperties = { 0 };
 
-    
+    // Get the physical devices properties
     vkGetPhysicalDeviceProperties(physical_device, &deviceProperties);
 
     // Check queue indices
     {
+
+        // Initialized data
         struct { u32 g, p; }     indices = { 0, 0 };
         u32                      queue_family_count = 0;
         VkQueueFamilyProperties* queue_families = 0;
 
+        // Get the number of queue family properties
         vkGetPhysicalDeviceQueueFamilyProperties(physical_device, (unsigned int *)&queue_family_count, (void*)0);
 
+        // Allocate memory for the queue family properties
         queue_families = calloc(queue_family_count + 1, sizeof(VkQueueFamilyProperties));
 
+        // Error checking
+        if ( queue_families == (void *) 0 )
+            goto no_mem;
+        
+        // Get the queue family properties
         vkGetPhysicalDeviceQueueFamilyProperties(physical_device, (unsigned int *)&queue_family_count, queue_families);
 
+        // Iterate over eqch queue family property
         for (size_t i = 0; i < queue_family_count; i++)
         {
-            VkBool32 present_support = 0;
 
+            // Initialized data
+            VkBool32 present_support = 0;
+            
             passes_queue = true;
 
             if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
@@ -1408,47 +1669,78 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
                 break;
         }
 
+        // Set the graphics queue family index
         p_instance->vulkan.queue_family_indices.g = indices.g;
+
+        // Set the present queue family index
         p_instance->vulkan.queue_family_indices.p = indices.p;
     }
 
     // Check device extensions
     if ( required_extension_names )
     {
-        u32                    device_extension_count = 0;
-        VkExtensionProperties *available_device_extensions = 0;
 
-        dict                  *device_extension_name_dict = 0;
+        // Initialized data
+        u32                     device_extension_count           = 0;
+        VkExtensionProperties  *available_device_extensions      = 0;
+        dict                   *device_extension_name_dict       = 0;
+        char                  **available_device_extension_names = 0;
 
-        vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, (unsigned int *)&device_extension_count, (void*)0);
+        // Get the quantity of device extension properties
+        switch (
+            vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, (unsigned int *)&device_extension_count, (void*)0)
+        )
+        {
+            case VK_SUCCESS:
+            case VK_INCOMPLETE:
+                break;
+            default:
+                goto failed_to_enumerate_device_extension_properties;
+        }
 
+        // Allocaet a list of availabler device extensions
         available_device_extensions = calloc(device_extension_count + 1, sizeof(VkExtensionProperties));
 
-        vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, (unsigned int *)&device_extension_count, available_device_extensions);
+        // Error checking
+        if ( available_device_extensions == (void *) 0 )
+            goto no_mem;
 
+        // Get the device extension properties
+        switch (
+            vkEnumerateDeviceExtensionProperties(physical_device, (void*)0, (unsigned int *)&device_extension_count, available_device_extensions)
+        )
+        {
+            case VK_SUCCESS:
+            case VK_INCOMPLETE:
+                break;
+            default:
+                goto failed_to_enumerate_device_extension_properties;
+        }
+
+        // Construct a dictionary from the required extension names
         dict_from_keys(&device_extension_name_dict, required_extension_names, 32);
 
-        char** available_device_extension_names = 0;
-
+        // Allocate memory for the available device extensions
         available_device_extension_names = calloc(device_extension_count + 1, sizeof(char*));
 
+        // Error checking
+        if ( available_device_extension_names == (void *) 0 )
+            goto no_mem;
+
+        // Dump the keys
         dict_keys(device_extension_name_dict, available_device_extension_names);
 
         // TODO: What the hell is this continuation condition?
         for (size_t i = 0; i < required_extension_names[i]; i++)
-        {
             for (size_t j = 0; j < device_extension_count; j++)
-            {
                 if (strcmp(required_extension_names[i], available_device_extension_names[j]) == 0)
                 {
                     char *t = 0;
                     dict_pop(device_extension_name_dict, required_extension_names[i], (void **)&t);
                     break;
                 }
-            }
-        }
 
-        if (dict_keys(device_extension_name_dict, 0) == 0)
+        if ( dict_keys(device_extension_name_dict, 0) == 0 )
             has_extensions = true;
 
     }
@@ -1483,7 +1775,8 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
 
     // Success
     return passes_queue && has_extensions && has_swap_chain;
-
+    failed_to_enumerate_device_extension_properties:
+    return 0;
     // Error handling
     {
 
@@ -1514,6 +1807,17 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
                 return 0;
 
         }
+    
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
     }
 }
 
