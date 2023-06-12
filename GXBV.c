@@ -30,7 +30,7 @@ int create_bv ( GXBV_t **pp_bv )
         {
             no_bv:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -84,7 +84,7 @@ int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max )
         {
             no_bv:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -149,7 +149,7 @@ int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *p_a, GXBV_t* p_b )
         {
             no_bv:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"pp_bv\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -157,7 +157,7 @@ int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *p_a, GXBV_t* p_b )
 
             no_a:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"p_a\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"p_a\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -165,7 +165,7 @@ int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *p_a, GXBV_t* p_b )
 
             no_b:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"p_b\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"p_b\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -219,7 +219,7 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
     // Allocate a double pointer list
     actor_list       = calloc(actors_in_scene, sizeof(void*));
     bounding_volumes = calloc(actors_in_scene, sizeof(void*));
-    dict_values(scene->actors, actor_list);
+    dict_values(scene->actors, (void **)actor_list);
 
     // Error checking
     {
@@ -324,7 +324,7 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"scene\" in call to function %s\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"scene\" in call to function %s\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -470,7 +470,7 @@ int insert_bv ( GXBV_t *bvh, GXBV_t *bv )
     {
         no_bvh:
             #ifndef NDEBUG
-                g_print_error("[G10] [BV] Null pointer provided for parameter\"bvh\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [BV] Null pointer provided for parameter \"bvh\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return 0;
     }
@@ -759,7 +759,7 @@ int resize_bv ( GXBV_t *bv )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for parameter\"bv\" in call to function \"%s\"\n", __FUNCTION__);
+            g_print_error("[G10] [BVH] Null pointer provided for parameter \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -818,7 +818,7 @@ int bv_info ( GXBV_t *p_bv, size_t d )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for parameter\"bv\" in call to function \"%s\"\n", __FUNCTION__);
+            g_print_error("[G10] [BVH] Null pointer provided for parameter \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -852,7 +852,7 @@ size_t get_entities_from_bv ( GXBV_t *bv, queue *entity_queue )
     {
         no_bv:
         #ifndef NDEBUG
-            g_print_error("[G10] [BVH] Null pointer provided for parameter\"bv\" in call to function \"%s\"\n", __FUNCTION__);
+            g_print_error("[G10] [BVH] Null pointer provided for parameter \"bv\" in call to function \"%s\"\n", __FUNCTION__);
         #endif
         return 0;
     }
@@ -889,14 +889,14 @@ bool aabb_intersect ( GXBV_t *p_a, GXBV_t *p_b )
         {
             no_a:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"a\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"a\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
                 return false;
             no_b:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [BV] Null pointer provided for parameter\"b\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [BV] Null pointer provided for parameter \"b\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

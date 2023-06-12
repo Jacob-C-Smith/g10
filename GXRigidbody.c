@@ -238,7 +238,7 @@ int load_rigidbody_as_json_text ( GXRigidbody_t** pp_rigidbody, char *text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

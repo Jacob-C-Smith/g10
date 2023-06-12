@@ -30,7 +30,7 @@ int create_transform ( GXTransform_t **pp_transform )
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -91,7 +91,7 @@ int construct_transform ( GXTransform_t **pp_transform, vec3 location, quaternio
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -147,7 +147,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -155,7 +155,7 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -216,7 +216,7 @@ int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -224,7 +224,7 @@ int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"text\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"text\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -315,7 +315,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_location->list, pp_elements, 0 );
+				array_get(p_location->list, (void **)pp_elements, 0 );
 			}
 
 			// Set the location
@@ -330,8 +330,12 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			free(pp_elements);
 
 		}
+		// Default
+		else
+			goto wrong_location_type;
 
 		// Set the rotation
+		if ( p_rotation->type == JSONarray )
 		{
 
 			// Initialized data
@@ -356,7 +360,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_rotation->list, pp_elements, 0 );
+				array_get(p_rotation->list, (void **)pp_elements, 0 );
 			}
 
 			// Parse the data as a quaternion or an euler angle
@@ -389,8 +393,12 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			// Clean the scope
 			free(pp_elements);
 		}
+		// Default
+		else
+			goto wrong_rotation_type;
 
 		// Set the scale
+		if ( p_scale->type == JSONarray )
 		{
 
 			// Initialized data
@@ -415,7 +423,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_scale->list, pp_elements, 0 );
+				array_get(p_scale->list, (void **)pp_elements, 0 );
 			}
 
 			// Set the scale
@@ -429,6 +437,9 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			// Clean the scope
 			free(pp_elements);
 		}
+		// Default
+		else
+			goto wrong_scale_type;
 
 		// Construct the transform
 		if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
@@ -445,7 +456,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 		{
 			no_transform:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -453,7 +464,43 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 			no_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n",__FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+		// JSON Errors
+		{
+
+			missing_properties:
+				#ifndef NDEBUG
+                    g_print_error("[G10] [Transform] Not enough properties to construct transform in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_location_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Property \"location\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_rotation_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Property \"rotation\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_scale_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Transform] Property \"scale\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -465,14 +512,6 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 			wrong_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Transform] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-
-			missing_properties:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Failed to construct AI in call to function \"%s\". Missing properties!\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -560,13 +599,13 @@ void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r )
         {
             no_result:
             #ifndef NDEBUG
-                g_print_error("[G10] [Transform] Null pointer provided for parameter\"r\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Transform] Null pointer provided for parameter \"r\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return;
 
             no_transform:
             #ifndef NDEBUG
-                g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
             return;
         }
@@ -606,7 +645,7 @@ int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float
     {
         no_transform:
         #ifndef NDEBUG
-            g_print_error("[G10] [Transform] Null pointer provided for parameter\"transform\" in call to function \"%s\"\n",__FUNCTION__);
+            g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
         #endif
         return 0;
     }
@@ -642,7 +681,7 @@ int destroy_transform ( GXTransform_t **pp_transform )
 		{
 	        no_transform:
 		    	#ifndef NDEBUG
-				    g_print_error("[G10] [Transform] Null pointer provided for parameter\"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+				    g_print_error("[G10] [Transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
 		    	#endif
 
 				// Error

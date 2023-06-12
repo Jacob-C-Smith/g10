@@ -91,7 +91,7 @@ int discord_callbacks ( GXInstance_t *p_instance )
 		{
 			no_instance:
 				#ifndef NDEBUG
-					g_print_error("[G10] [User code] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [User code] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
                 // Error

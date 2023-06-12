@@ -39,7 +39,7 @@ int create_part ( GXPart_t **pp_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter\"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -100,7 +100,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter\"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"pp_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -108,7 +108,7 @@ int load_part ( GXPart_t **pp_part, char* path)
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -361,7 +361,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 			
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Missing properties to parse entity in call to function \"%s\". Consult gschema\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Not enough properties to construct part in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json", __FUNCTION__);
 				#endif
 
 				// Error
@@ -413,49 +413,6 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 	}
 }
 
-int draw_part ( GXPart_t *p_part )
-{
-
-	// Argument check
-	{
-		#ifndef NDEBUG
-			if ( p_part == (void *) 0 ) goto no_part;
-		#endif
-	}
-
-	// Initialized data
-	GXInstance_t *p_instance         = g_get_active_instance();
-	VkBuffer      vertex_buffers[] = { p_part->vertex_buffer };
-	VkDeviceSize  offsets       [] = { 0 };
-
-	// Bind the vertex buffers for the draw call
-	vkCmdBindVertexBuffers(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, vertex_buffers, offsets);
-
-	// Bind the face buffers for the draw call
-	vkCmdBindIndexBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], p_part->element_buffer, 0, VK_INDEX_TYPE_UINT32);
-
-	// Draw the part
-	vkCmdDrawIndexed(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], (u32)p_part->index_count*3, 1, 0, 0, 0);
-
-	// Success
-	return 1;
-
-	// Error handling
-	{
-
-		// Argument errors
-		{
-			no_part:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
-
-				// Error
-				return 0;
-		}
-	}
-}
-
 int part_info ( GXPart_t *p_part )
 {
 
@@ -499,7 +456,7 @@ int part_info ( GXPart_t *p_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter\"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -523,12 +480,13 @@ int destroy_part ( GXPart_t **pp_part )
 	GXInstance_t *p_instance = g_get_active_instance();
 	GXPart_t     *p_part = *pp_part;
 
+	// No more pointer for caller
 	*pp_part = 0;
 
 	// Remove the part from the cache
 	if ( (GXPart_t *) dict_get(p_instance->cache.parts, p_part->name) == p_part )
 	{
-		if (--p_part->users > 1)
+		if ( --p_part->users > 1 )
 			dict_pop(p_instance->cache.parts, p_part->name, 0);
 	}
 	else
@@ -564,7 +522,7 @@ int destroy_part ( GXPart_t **pp_part )
 		{
 			no_part:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Null pointer provided for parameter\"p_part\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Null pointer provided for parameter \"p_part\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

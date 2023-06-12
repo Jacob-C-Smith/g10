@@ -97,7 +97,7 @@ mat2 mul_mat2_mat2 ( mat2 m, mat2 n )
     return (mat2)
     {
         .a = m.a* n.a + m.b * n.c, .b = m.a* n.b + m.b * n.d,
-        .b = m.c* n.a + m.d * n.c, .d = m.c* n.b + m.d * n.d
+        .c = m.c* n.a + m.d * n.c, .d = m.c* n.b + m.d * n.d
     };
 }
 

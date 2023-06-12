@@ -232,13 +232,13 @@ DLLEXPORT int set_active_camera ( GXScene_t   *scene, const char    name[] );
 /** !
  * Dequeue an entity from the load queue, parse it, and add it to the instance's active scene
  *
- * @param p_instance : The active instance
+ * @param vp_instance : void pointer to active instance
  *
  * @sa load_light_probe_from_queue
  *
  * @return 1 on success, 0 on error
 */
-DLLEXPORT int load_entity_from_queue ( GXInstance_t *p_instance );
+DLLEXPORT int load_entity_from_queue ( void *vp_instance );
 
 /** !
  * Dequeue a light probe from the load queue, parse it, and add it to the instance's active scene

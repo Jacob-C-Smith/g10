@@ -48,7 +48,7 @@ int get_camera_position ( void *ret )
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"ret\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -117,7 +117,7 @@ int create_camera ( GXCamera_t **pp_camera )
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"pp_camera\" in call to function \"%s\"", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"", __FUNCTION__);
 				#endif
 
 				// Error
@@ -173,7 +173,7 @@ int load_camera ( GXCamera_t **pp_camera, const char *path )
 
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -181,7 +181,7 @@ int load_camera ( GXCamera_t **pp_camera, const char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -251,7 +251,7 @@ int load_camera_as_json_text ( GXCamera_t **pp_camera, char *text )
 
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -259,7 +259,7 @@ int load_camera_as_json_text ( GXCamera_t **pp_camera, char *text )
 
 			no_object_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -405,7 +405,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_location->list, pp_elements, 0 );
+				array_get(p_location->list, (void **)pp_elements, 0 );
 			}
 
 			// Set the location
@@ -449,7 +449,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_target->list, pp_elements, 0 );
+				array_get(p_target->list, (void **)pp_elements, 0 );
 			}
 
 			// Set the target
@@ -493,7 +493,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 					goto no_mem;
 
 				// Populate the elements of the vector
-				array_get(p_up->list, pp_elements, 0);
+				array_get(p_up->list, (void **)pp_elements, 0);
 			}
 
 			// Set the up vector
@@ -565,7 +565,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -573,7 +573,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			no_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -593,7 +593,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to construct Camera in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Not enough properties to construct camera in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json", __FUNCTION__);
 				#endif
 
 				// Error
@@ -788,7 +788,7 @@ int print_camera ( GXCamera_t *p_camera )
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -829,7 +829,7 @@ int destroy_camera ( GXCamera_t **pp_camera )
 		{
 			no_camera:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Null pointer provided for parameter\"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

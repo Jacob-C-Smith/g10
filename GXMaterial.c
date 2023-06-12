@@ -39,7 +39,7 @@ int create_material ( GXMaterial_t** material )
 		{
 			no_material:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Material] Null pointer provided for parameter\"material\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Material] Null pointer provided for parameter \"material\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -100,7 +100,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 		{
 			no_material:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Material] Null pointer provided for parameter\"pp_material\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Material] Null pointer provided for parameter \"pp_material\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Erorr
@@ -108,7 +108,7 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Material] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Material] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Erorr
@@ -194,7 +194,7 @@ int load_material_as_json_text ( GXMaterial_t **material, char* text )
 		{
 			no_material:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Material] Null pointer provided for parameter\"pp_material\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Material] Null pointer provided for parameter \"pp_material\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -202,7 +202,7 @@ int load_material_as_json_text ( GXMaterial_t **material, char* text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Material] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Material] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

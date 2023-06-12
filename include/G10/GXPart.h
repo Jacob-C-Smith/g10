@@ -86,11 +86,6 @@ DLLEXPORT int load_part ( GXPart_t   **pp_part, char *path );
 DLLEXPORT int load_part_as_json_text ( GXPart_t **pp_part, char *text );
 DLLEXPORT int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value );
 
-// Drawing
-
-// TODO: Document
-DLLEXPORT int draw_part ( GXPart_t *p_part );
-
 // Info
 
 // TODO: Document

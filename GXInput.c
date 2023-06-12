@@ -545,7 +545,7 @@ int create_bind ( GXBind_t **pp_bind )
 		{
 			no_bind:
 			    #ifndef NDEBUG
-			    	printf("[G10] [Bind] Null pointer provided for parameter\"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+			    	printf("[G10] [Bind] Null pointer provided for parameter \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
 			    #endif
 
                 // Error
@@ -688,7 +688,7 @@ int load_input_as_json_text ( GXInput_t **pp_input, char *text )
         {
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -823,7 +823,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 			    	goto no_mem;
 
 			    // Populate the elements of the array
-			    array_get(p_binds->list, pp_elements, 0 );
+			    array_get(p_binds->list, (void **)pp_elements, 0 );
             }
 
             // TODO: Check return
@@ -860,7 +860,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
     return 1;
 
     // TODO:
-    
+    missing_properties:
         return 0;
 
     // Error handling
@@ -889,7 +889,6 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
         // TODO: G10 errors
         {
             failed_to_load_input_from_path:
-            missing_properties:
             failed_to_load_input:
             failed_to_load_bind_as_json_value:
                 return 0;
@@ -897,6 +896,9 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
         // JSON errors
         {
+
+            
+
             wrong_value_type:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Input] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"", __FUNCTION__);
@@ -1025,14 +1027,10 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
 				goto no_mem;
 
 			// Populate the elements of the array
-			array_get(p_keys, pp_elements, 0 );
+			array_get(p_keys, (void **)pp_elements, 0 );
 
             // Allocate memory for an array of keys
             p_keys_array = calloc(key_count+1, sizeof(char *));
-
-            // Error checking
-			if ( keys == (void *) 0 )
-				goto no_mem;
 
 			// Iterate over each element
             for (size_t i = 0; i < key_count; i++)
@@ -1161,7 +1159,7 @@ int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null pointer provided for parameter\"bind\" in call to function \"%s\"\n",__FUNCTION__);
+                g_print_error("[G10] [Input] Null pointer provided for parameter \"bind\" in call to function \"%s\"\n",__FUNCTION__);
             #endif
 
             // Error
@@ -1169,7 +1167,7 @@ int register_bind_callback ( GXBind_t *p_bind, void *function_pointer )
 
         no_function_pointer:
             #ifndef NDEBUG
-                g_print_warning("[G10] [Input] Null pointer provided for parameter\"function_pointer\" in call to function \"%s\"\n",__FUNCTION__);
+                g_print_warning("[G10] [Input] Null pointer provided for parameter \"function_pointer\" in call to function \"%s\"\n",__FUNCTION__);
             #endif
 
             // Error
@@ -1509,7 +1507,7 @@ int process_input ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_instance\" in call to \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"p_instance\" in call to \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1598,7 +1596,7 @@ int input_info ( GXInput_t *p_input )
         goto no_mem;
 
     // Get an array of binds
-    dict_values(p_input->binds, binds);
+    dict_values(p_input->binds, (void **)binds);
 
     // TODO: Better formatting, like the scene_info function
     // Iterate over each bind
@@ -1638,7 +1636,7 @@ int input_info ( GXInput_t *p_input )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input} Null pointer provided for parameter\"input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input} Null pointer provided for parameter \"input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error handling
@@ -1691,7 +1689,7 @@ int call_bind ( GXBind_t *p_bind, callback_parameter_t input )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Bind] Null pointer provided for parameter\"bind\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Bind] Null pointer provided for parameter \"bind\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1720,7 +1718,7 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"p_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1728,7 +1726,7 @@ GXBind_t *find_bind ( GXInput_t *p_input, char *name )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1752,7 +1750,7 @@ int remove_bind ( GXInput_t *p_input, char *name, GXBind_t **pp_bind )
     GXBind_t *p_bind = 0;
 
     // Remove the bind
-    dict_pop(p_input->binds, name, &p_bind);
+    dict_pop(p_input->binds, name, (void **)&p_bind);
 
     // Did the caller specify a return?
     if ( pp_bind )
@@ -1778,7 +1776,7 @@ int remove_bind ( GXInput_t *p_input, char *name, GXBind_t **pp_bind )
         {
             no_input:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"p_input\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"p_input\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1786,7 +1784,7 @@ int remove_bind ( GXInput_t *p_input, char *name, GXBind_t **pp_bind )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Input] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1839,7 +1837,7 @@ int destroy_bind ( GXBind_t **pp_bind )
     {
         no_bind:
             #ifndef NDEBUG
-                g_print_error("[G10] [Input] Null pointer provided for parameter\"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Input] Null pointer provided for parameter \"p_bind\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -1882,7 +1880,7 @@ int destroy_input ( GXInput_t **pp_input )
     free(p_input->name);
 
     // Get each bind
-    dict_values(p_input->binds, pp_binds);
+    dict_values(p_input->binds, (void **)pp_binds);
 
     // Iterate over each bind
     for (size_t i = 0; i < bind_count; i++)

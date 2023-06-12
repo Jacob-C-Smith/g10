@@ -31,7 +31,7 @@ int create_server(GXServer_t** pp_server)
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -93,7 +93,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -101,7 +101,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -246,7 +246,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 		{
 			no_server:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"pp_server\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -412,7 +412,7 @@ int server_recv(GXClient_t *client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"client\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -443,7 +443,7 @@ int server_send(GXClient_t* client)
 		{
 			no_client:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Server] Null pointer provided for parameter\"client\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Server] Null pointer provided for parameter \"client\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -653,14 +653,14 @@ int server_wait    ( GXInstance_t* p_instance )
 		client->actors = actor_list;
 
 		// Get a list of actors from the active scene
-		dict_values(p_instance->context.scene->actors, actor_list);
+		dict_values(p_instance->context.scene->actors, (void **)actor_list);
 
 		// Iterate over each actor in the active scene
 		for (size_t i = 0; i < active_scene_actors_count; i++)
 		{
 
 			// Get an entity from the actor list
-			GXEntity_t *entity              = actor_list[i];
+			GXEntity_t *entity = actor_list[i];
 
 			// Allocate a command
 			GXCommand_t *actor_init_command = calloc(1, sizeof(GXCommand_t));
@@ -675,7 +675,6 @@ int server_wait    ( GXInstance_t* p_instance )
 				actor_init_command->actor_initialize.index      = (u16) i;
 
 				client->actors[i] = entity;
-
 
 				// Increment the actor count
 				client->actor_count++;
@@ -712,7 +711,7 @@ int server_wait    ( GXInstance_t* p_instance )
 
 	// TODO:
 no_instance:
-	g_print_error("[G10] [Server] Null pointer provided for parameter\"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+	g_print_error("[G10] [Server] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
 
 	return 0;
 no_socket:
@@ -807,7 +806,7 @@ int connect_client(char* name)
 		}
 
 		// Write the command to the send buffer
-		connect_command_len = (size_t) data_from_command(&i_client->send_data, connect_command);
+		connect_command_len = (size_t) data_from_command((void **)&i_client->send_data, connect_command);
 	}
 
 	// Send the connect command to the server
@@ -822,7 +821,7 @@ int connect_client(char* name)
 		// Load a scheduler thread for the client
 		//load_thread_as_json_value(&client_thread, "G10/client thread.json");
 
-		sprintf(client_thread->name, "Network thread\0");
+		sprintf(client_thread->name, "Network thread");
 
 		// Set the client thread
 		{
@@ -857,7 +856,7 @@ int connect_client(char* name)
 		{
 			no_client_name:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Client] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Client] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -923,7 +922,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 			{
 
 				// Initialized data
-				size_t      name_len = strlen( ((u8 *)data) + 0x34 );
+				size_t      name_len = strlen( ((const char *)data) + 0x34 );
 				char       *name     = (char *)data + 0x34;
 				GXEntity_t *actor    = 0;
 
@@ -1096,7 +1095,7 @@ int destroy_client ( GXClient_t **pp_client )
 	//
 	//free(client);
 	//
-	//return 0;
+	return 0;
 }
 
 int destroy_command(GXCommand_t** pp_command)
@@ -1144,5 +1143,5 @@ int destroy_command(GXCommand_t** pp_command)
 	//free(command);
 	//
 	//no_command:
-	//	return 0;
+	return 0;
 }

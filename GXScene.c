@@ -40,7 +40,7 @@ int create_scene ( GXScene_t **pp_scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("Null pointer provided for parameter\"pp_scene\" in call to function \"%s\"", __FUNCTION__);
+                    g_print_error("Null pointer provided for parameter \"pp_scene\" in call to function \"%s\"", __FUNCTION__);
                 #endif
 
                 // Error
@@ -203,7 +203,7 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -211,7 +211,7 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 
             no_text:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"no_text\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"no_text\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -316,7 +316,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                 JSONValue_t **pp_entities            = 0;
 
                 // This is used when creating loading threads
-                extern int load_entity_from_queue(GXInstance_t *p_instance);
+                extern int load_entity_from_queue(void *vp_instance);
 
                 // Get the array contents
                 {
@@ -332,7 +332,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                         goto no_mem;
 
                     // Get list of entities
-                    array_get(p_entities_value->list, pp_entities, 0);
+                    array_get(p_entities_value->list, (void **)pp_entities, 0);
                 }
 
                 // Empty the active instances -> entity loading queue
@@ -367,7 +367,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
                     // TODO: Fix
                     // Spawn a thread
-                    //thread->thread = SDL_CreateThread(load_entity_from_queue, 0, p_instance);
+                    thread->thread = SDL_CreateThread(load_entity_from_queue, 0, p_instance);
 
                 }
 
@@ -414,7 +414,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                         goto no_mem;
 
                     // Get list of entities
-                    array_get(p_cameras_value->list, pp_cameras, 0);
+                    array_get(p_cameras_value->list, (void **)pp_cameras, 0);
                 }
 
                 // Construct a camera dict
@@ -490,7 +490,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -498,7 +498,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             no_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -619,7 +619,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -635,7 +635,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
 
             no_entity:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"entity\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"entity\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -681,7 +681,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera)
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -697,7 +697,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera)
 
             no_camera:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"camera\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"camera\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -740,7 +740,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light)
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -756,7 +756,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light)
 
             no_light:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"light\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"light\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -801,7 +801,7 @@ int scene_info ( GXScene_t *p_scene )
     }
 
     dict_keys(p_scene->entities, entity_names);
-    dict_values(p_scene->entities, entity_pointers);
+    dict_values(p_scene->entities, (void **)entity_pointers);
 
     for (size_t i = 0; i < entity_count; i++)
     {
@@ -846,7 +846,7 @@ GXEntity_t *get_entity ( GXScene_t *scene, const char name[] )
     {
         no_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -854,7 +854,7 @@ GXEntity_t *get_entity ( GXScene_t *scene, const char name[] )
 
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -879,14 +879,14 @@ GXCamera_t *get_camera ( GXScene_t *scene, const char name[])
     {
         no_scene:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
             return 0;
         no_name:
             #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
@@ -914,7 +914,7 @@ GXLight_t *get_light ( GXScene_t *scene, const char name[] )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -922,7 +922,7 @@ GXLight_t *get_light ( GXScene_t *scene, const char name[] )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -966,7 +966,7 @@ int set_active_camera ( GXScene_t *scene, const char name[])
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -974,7 +974,7 @@ int set_active_camera ( GXScene_t *scene, const char name[])
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1084,7 +1084,7 @@ int destroy_scene ( GXScene_t **pp_scene )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter\"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"pp_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

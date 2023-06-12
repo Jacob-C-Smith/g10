@@ -117,7 +117,7 @@ int create_task ( GXTask_t **pp_task )
 		{
 			no_task:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -167,7 +167,7 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -217,7 +217,7 @@ int create_thread ( GXThread_t **pp_thread )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 			// Error
@@ -277,7 +277,7 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for parameter\"schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for parameter \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -285,7 +285,7 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_log("[G10] [Scheduler] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_log("[G10] [Scheduler] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -363,14 +363,14 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
 				return 0;
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -501,7 +501,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 					goto no_mem;
 
 				// Populate the elements of the threads
-				array_get(p_threads->list, pp_elements, 0 );
+				array_get(p_threads->list, (void **)pp_elements, 0 );
 			}
 
 			// Construct a thread dict
@@ -580,7 +580,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to construct schedule in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct schedule in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
 				#endif
 
 				// Error
@@ -612,7 +612,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		{
 			no_schedule:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -885,7 +885,7 @@ int start_schedule ( GXSchedule_t *p_schedule )
 	//copy_state(p_instance);
 
 	// Get a list of threads
-	dict_values(p_schedule->threads, schedule_threads);
+	dict_values(p_schedule->threads, (void **)schedule_threads);
 
 	// Iterate over each thread
 	for (size_t i = 0; i < schedule_thread_count; i++)
@@ -945,7 +945,7 @@ int stop_schedule ( GXSchedule_t *schedule )
 	GXThread_t  **schedule_threads      = calloc(schedule_thread_count+1, sizeof(void *));
 
 	// Get a list of threads
-	dict_values(schedule->threads, schedule_threads);
+	dict_values(schedule->threads, (void **)schedule_threads);
 
 	// Iterate over each thread
 	for (size_t i = 0; i < schedule_thread_count; i++)
@@ -1045,19 +1045,23 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 			// Initialized data
 			JSONValue_t **pp_elements  = 0;
 
-			// Get the quantity of elements
-			array_get(p_tasks, 0, &task_count);
+			// Dump the array contents
+			{
 
-			// Allocate an array for the elements
-			pp_elements = calloc(task_count+1, sizeof(JSONValue_t *));
+				// Get the quantity of elements
+				array_get(p_tasks, 0, &task_count);
 
-			// Error check
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+				// Allocate an array for the elements
+				pp_elements = calloc(task_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the tasks
-			array_get(p_tasks, pp_elements, 0 );
+				// Error check
+				if ( pp_elements == (void *) 0 )
+					goto no_mem;
 
+				// Populate the elements of the tasks
+				array_get(p_tasks, (void **)pp_elements, 0 );
+			}
+			
 			// Construct a task dict
 			dict_construct(&d_tasks, task_count);
 
@@ -1147,7 +1151,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to construct schedule in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct thread in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1187,7 +1191,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 		{
 			no_thread:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1195,7 +1199,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1238,11 +1242,11 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 		     *wait_task   = 0;
 
 	// Allocate memory for the task struct
-	if ( create_task(&p_task) == (void *) 0 )
+	if ( create_task(&p_task) == 0 )
 		goto failed_to_create_task;
 
 	// Parse the task JSON
-	if (p_value->type == JSONobject)
+	if ( p_value->type == JSONobject )
 	{
 
 		// Initialized data
@@ -1261,6 +1265,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 		if ( ( task_name ) == 0 )
 			goto missing_properties;
 	}
+	// Default
 	else
 		goto wrong_type;
 
@@ -1346,7 +1351,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to construct schedule in call to function \"%s\". Missing properties!\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct task in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
 				#endif
 
 				// Error

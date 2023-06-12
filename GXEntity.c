@@ -37,7 +37,7 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -97,7 +97,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -105,7 +105,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 
 			no_path:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"path\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -180,7 +180,7 @@ int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -188,7 +188,7 @@ int load_entity_as_json_text ( GXEntity_t** pp_entity, char* text )
 
 			no_text:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"text\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -282,6 +282,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			// Copy the name
 			strncpy(p_entity->name, p_name_value->string, name_len);
 		}
+		// Default
 		else
 			goto wrong_name_type;
 
@@ -314,7 +315,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 						goto no_mem;
 
 					// Get each array element
-					array_get(p_parts_value->list, parts, &part_count);
+					array_get(p_parts_value->list, (void **)parts, &part_count);
 				}
 
 				// Iterate over each array element
@@ -335,10 +336,11 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 				// Clean the scope
 				free(parts);
 			}
+			// Default
 			else
 				goto wrong_parts_type;
 		}
-		
+
 		// Materials
 		// TODO
 
@@ -346,7 +348,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		if ( p_shader_name_value )
 		{
 
-			// Get the name of the shader
+			// Copy the name of the shader
 			if ( p_shader_name_value->type == JSONstring )
 			{
 				
@@ -363,24 +365,20 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 				// Copy the name of the shader
 				strncpy(p_entity->shader_name, p_shader_name_value->string, len);
 			}
+			// Default
 			else
-				goto wrong_shader_type;
+				goto wrong_shader_name_type;
 		}
 		
 		// Transform
 		if ( p_transform_value )
-		{
-			if ( p_transform_value->type == JSONobject )
-			{
-				if ( load_transform_as_json_value(&p_entity->transform, p_transform_value) == 0 )
-					goto failed_to_load_transform_as_json_value;
-			}
-			else
-				goto wrong_transform_type;
-		}
+			if ( load_transform_as_json_value(&p_entity->transform, p_transform_value) == 0 )
+				goto failed_to_load_transform_as_json_value;
 
 		// Rigidbody
-		// TODO
+		if ( p_rigidbody_value )
+			if ( load_transform_as_json_value(&p_entity->transform, p_transform_value) == 0 )
+				goto failed_to_load_transform_as_json_value;
 
 		// Collider
 		// TODO
@@ -399,14 +397,6 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 	// Error handling
 	{
-
-		
-		failed_to_load_part:
-		wrong_parts_type:
-		failed_to_load_shader_as_json_value:
-		wrong_shader_type:
-		wrong_transform_type:
-			return 0;
 
 		// Argument errors
 		{
@@ -431,7 +421,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		{
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Missing properties to parse entity as JSON value in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] Not enough properties to construct entity in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json", __FUNCTION__);
 				#endif
 
 				// Error
@@ -445,6 +435,18 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 				// Error
 				return 0;
 
+			failed_to_load_part:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Failed to load part in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+				
+		}
+
+		// JSON errors
+		{
 			wrong_name_type:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Entity] Property \"name\" must be of type [ string ] in call to function in call to function \"%s\"\n", __FUNCTION__);
@@ -452,10 +454,30 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 				// Error
 				return 0;
-		}
 
-		// JSON errors
-		{
+			wrong_parts_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Property \"parts\" must be of type [ array ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+			
+			wrong_shader_name_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Property \"shader name\" must be of type [ string ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_transform_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Property \"transform\" must be of type [ object ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 
 			failed_to_load_transform_as_json_value:
 				#ifndef NDEBUG
@@ -645,7 +667,7 @@ int get_model_matrix ( void* ret )
 		{
 			no_return:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"ret\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"ret\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -692,7 +714,7 @@ vec3 calculate_force_normal ( GXEntity_t *p_entity )
                   *b        = 0;
     GXCollision_t *c        = 0;
 
-    dict_values(a->collisions, &c);
+    dict_values(a->collisions, (void **)&c);
 
     if ( c )
 	{
@@ -740,14 +762,15 @@ vec3 calculate_force_spring ( GXEntity_t *p_entity )
 	return ret;
 }
 
-int load_entity_from_queue ( GXInstance_t *p_instance )
+int load_entity_from_queue ( void *vp_instance )
 {
 
 	// Initialized data
-	size_t        i        = 0;
-	JSONValue_t  *p_value  = 0;
-	GXEntity_t   *p_entity = 0;
-	GXScene_t    *p_scene  = p_instance->context.loading_scene;
+	GXInstance_t *p_instance = vp_instance;
+	size_t        i          = 0;
+	JSONValue_t  *p_value    = 0;
+	GXEntity_t   *p_entity   = 0;
+	GXScene_t    *p_scene    = p_instance->context.loading_scene;
 
 	// TODO: Fix
 	while ( queue_empty(p_instance->queues.load_entity) == false )
@@ -769,7 +792,7 @@ int load_entity_from_queue ( GXInstance_t *p_instance )
 
 		// TODO: Fix
 		// text is either a path -OR- a JSON object
-		queue_dequeue(p_instance->queues.load_entity,&p_value);
+		queue_dequeue(p_instance->queues.load_entity, (void **)&p_value);
 
 		// Unlock the mutex
 		SDL_UnlockMutex(p_instance->mutexes.load_entity);
@@ -873,7 +896,7 @@ int draw_entity ( GXEntity_t *p_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -926,7 +949,7 @@ int destroy_entity ( GXEntity_t **pp_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1023,7 +1046,7 @@ int entity_info ( GXEntity_t *p_entity )
 		{
 			no_entity:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Null pointer provided for parameter\"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

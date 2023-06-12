@@ -41,52 +41,52 @@ struct GXRenderer_s
 
 struct GXRenderPass_s
 {
-	char             *name;
+	char *name;
 
-	dict             *subpasses,
-	                 *draw_queue_types,
-	                 *attachments; // type: char *
+	dict *subpasses,
+	     *draw_queue_types,
+	     *attachments; // type: char *
 
-	size_t            subpasses_count,
-	                  attachments_count;
+	size_t subpasses_count,
+	       attachments_count;
 
-	GXSubpass_t     **subpasses_data;
-	VkFramebuffer    *framebuffers;
-	GXAttachment_t  **attachments_data;
+	GXSubpass_t **subpasses_data;
+	VkFramebuffer *framebuffers;
+	GXAttachment_t **attachments_data;
 	
-	VkRenderPass      render_pass;
-	VkImageView      *attachment_image_views;
+	VkRenderPass render_pass;
+	VkImageView *attachment_image_views;
 };
 
 struct GXSubpass_s
 {
-	char                  *name,
-	                     **shader_names;
-	size_t                 shader_count;
-	VkSubpassDescription   subpass_description;
+	char  *name,
+	     **shader_names;
+	size_t shader_count;
+	VkSubpassDescription subpass_description;
 };
 
 struct GXImage_s
 {
-	char           *name;
-	VkImage         image;
-	VkDeviceMemory  image_memory;
+	char *name;
+	VkImage image;
+	VkDeviceMemory image_memory;
 };
 
 struct GXAttachment_s
 {
-	char                    *name;
-	VkAttachmentDescription  attachment_description;
-	GXImage_t               *p_image;
-	VkImageView              image_view;
+	char *name;
+	VkAttachmentDescription attachment_description;
+	GXImage_t *p_image;
+	VkImageView image_view;
 };
 
 struct GXTexture_s
 {
-	char        *name;
-	GXImage_t   *p_image;
-	VkImageView  image_view;
-	VkSampler    sampler;
+	char *name;
+	GXImage_t *p_image;
+	VkImageView image_view;
+	VkSampler sampler;
 };
 
 // Allocators
@@ -415,6 +415,17 @@ DLLEXPORT int add_subpass_callback ( char *name, void (*function_pointer)());
  */
 DLLEXPORT int render_frame ( GXInstance_t *p_instance );
 
+// Draw operations
+/** !
+ *  Draw a part in a subpass
+ *
+ * @param p_instance : The active instance
+ * @param p_part : The part
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT void draw_part ( void *vp_part );
+
 /** !
  *  Presents the last frame, after the current frame is done drawing
  *
@@ -423,7 +434,6 @@ DLLEXPORT int render_frame ( GXInstance_t *p_instance );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int present_frame ( GXInstance_t *p_instance );
-
 
 // Destructors
 /** !

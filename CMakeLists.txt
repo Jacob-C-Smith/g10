@@ -105,37 +105,14 @@ if(WIN32)
     source_group("source" REGULAR_EXPRESSION "source/*")
 endif(WIN32)
 
-# "APS_3rdPersonCtrl.c" "GXAudio.c" "GXDiscordIntegration.c"
-
-# Add source to this project's executable.
+# G10 executable
 add_executable (g10_internal_example "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c" "main.c") 
 add_dependencies(g10_internal_example json array dict stack queue)
 target_include_directories(g10_internal_example PUBLIC include ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ) 
 target_link_libraries(g10_internal_example PUBLIC json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
 
-# Add source to this project's tester
-#add_executable (g10_tester "G10_tester.c" "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c") 
-#add_dependencies(g10_tester json array dict stack queue)
-
-# Add source to this project's 
-#add_library    (g10 SHARED  "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c")
-#add_dependencies(g10 json array dict stack queue)
-#target_include_directories(g10 PUBLIC "include/" "json/include/")
-#target_link_libraries(g10 PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_LIBRARIES} ${VULKAN_LIB_LIST})
-#target_link_libraries(g10 PRIVATE SDL2_net::SDL2_net SDL2_image::SDL2_image)
-add_library (g10 SHARED "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c" "main.c") 
+# G10 library
+add_library (g10 SHARED "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c") 
 add_dependencies(g10 json array dict stack queue)
 target_include_directories(g10 PUBLIC include ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ) 
 target_link_libraries(g10 PRIVATE json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
-
-#target_link_libraries(g10_example PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
-#target_link_libraries(g10_tester PUBLIC queue array stack dict json  ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST})
-#
-#target_link_libraries(g10_example PRIVATE )
-#target_link_libraries(g10_tester PRIVATE SDL2_image::SDL2_image)
-#
-#target_link_libraries(g10_example PRIVATE )
-#target_link_libraries(g10_tester PRIVATE SDL2_net::SDL2_net)
-#
-## Define targets
-#target_include_directories(g10_tester PUBLIC "include/" "json/include/")
