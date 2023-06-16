@@ -1,4 +1,4 @@
-#include <G10/GXTexture.h>
+//#include <G10/GXTexture.h>
 
 int create_texture ( GXTexture_t **pp_texture )
 {
@@ -242,6 +242,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
                          *p_sampler_json_object    = 0,
                          *p_path                   = 0;
 
+    // TODO: Refactor to use JSONValue_t *
     // Parse the JSON
     if ( p_value->type == JSONobject )
     {

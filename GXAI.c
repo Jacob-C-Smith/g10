@@ -426,7 +426,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Property \"name\" must be of type [ string ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -434,7 +434,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			wrong_initial_state_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Property \"initial state\" must be of type [ string ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Property \"initial state\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -442,7 +442,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			wrong_states_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] Property \"states\" must be of type [ array ] in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] Property \"states\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -450,7 +450,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 
 			name_too_long:
 				#ifndef NDEBUG
-					g_print_error("[G10] [AI] \"name\" property's length must be less than 256 in call to function \"%s\". Expected a string\n", __FUNCTION__);
+					g_print_error("[G10] [AI] \"name\" property's length must be less than 256 in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

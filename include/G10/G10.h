@@ -10,7 +10,10 @@
 
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
-//#define BUILD_G10_WITH_ANSI_COLOR
+#define BUILD_G10_WITH_ANSI_COLOR
+#define G10_VERSION_MAJOR 1
+#define G10_VERSION_MINOR 0
+#define G10_VERSION_PATCH 0
 
 // Standard library
 #include <stdio.h>

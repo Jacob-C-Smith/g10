@@ -73,17 +73,36 @@ void *task_function_pointers[TASK_COUNT] = {
 	0
 };
 
-void init_scheduler ( void )
+int init_scheduler ( void )
 {
 
 	// Construct a function lookup table
-	dict_construct(&scheduler_tasks, TASK_COUNT);
+	if ( dict_construct(&scheduler_tasks, TASK_COUNT) == 0 )
+		goto failed_to_construct_scheduler_tasks_lookup_table;
 
 	// Iterate over each task
 	for (size_t i = 0; i < TASK_COUNT; i++)
 
 		// Add each task to the lookup table
 		dict_add(scheduler_tasks, task_names[i], task_function_pointers[i]);
+
+	// Success
+	return 1;
+
+	// Error handling
+	{
+
+		// G10 errors
+		{
+			failed_to_construct_scheduler_tasks_lookup_table:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to construct scheduler tasks lookup table in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+	}
 
 }
 
@@ -120,8 +139,8 @@ int create_task ( GXTask_t **pp_task )
 					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_task\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 
 		// Standard library errors
@@ -131,8 +150,8 @@ int create_task ( GXTask_t **pp_task )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 	}
 }
@@ -170,8 +189,8 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 
 		// Standard library errors
@@ -181,8 +200,8 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 	}
 }
@@ -220,8 +239,8 @@ int create_thread ( GXThread_t **pp_thread )
 					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"pp_schedule\" in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 
 		// Standard library errors
@@ -231,8 +250,8 @@ int create_thread ( GXThread_t **pp_thread )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 	}
 }
@@ -253,7 +272,7 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 	char   *text = calloc(len+1, sizeof(char));
 
 	// Error checking
-	if (text == (void *) 0 )
+	if ( text == (void *) 0 )
 		goto no_mem;
 
 	// Load the file
@@ -349,9 +368,8 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 	if ( load_schedule_as_json_value(pp_schedule, p_value) == 0 )
 		goto failed_to_create_schedule;
 
-	// TODO:
 	// Deallocate the JSON value
-	//free_json_value(p_value);
+	free_json_value(p_value);
 
 	// Success
 	return 1;
@@ -368,6 +386,7 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 
 				// Error
 				return 0;
+
 			no_text:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"text\" in call to function \"%s\"\n", __FUNCTION__);
@@ -384,17 +403,16 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 					g_print_error("[G10] [Scheduler] Failed to create schedule in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 
 			failed_to_load_thread:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Scheduler] Failed to load thread in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
-
+				// Error
+				return 0;
 		}
 
 		// JSON Errors
@@ -404,9 +422,8 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
-
+				// Error
+				return 0;
 		}
 	}
 }
@@ -427,8 +444,8 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 	JSONValue_t  *p_name        = 0,
 	             *p_threads     = 0;
 
-	// Parse the schedule JSON
-	if (p_value->type == JSONobject)
+	// Parse the schedule as an object
+	if ( p_value->type == JSONobject )
 	{
 
 		// Initialized data
@@ -439,17 +456,24 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		p_threads = dict_get(p_dict, "threads");
 
 		// Error checking
-		if ( ( p_name && p_threads ) == 0 )
+		if ( ! ( 
+			p_name    &&
+			p_threads 
+		) )
 			goto missing_properties;
 	}
-	else if (p_value->type == JSONstring)
+	// Parse the schedule as a path
+	else if ( p_value->type == JSONstring )
 	{
 
+		// Load the schedule from the path
 		if ( load_schedule(pp_schedule, p_value->string) == 0 )
 			goto failed_to_load_schedule;
 
+		// Success
 		return 1;
 	}
+	// Default
 	else
 		goto wrong_type;
 
@@ -467,6 +491,10 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			// Initialized data
 			size_t name_len = strlen(p_name->string);
+
+			// Error checking
+			if ( name > 255 )
+				goto name_too_long;
 
 			// Allocate for the name
 			name = calloc(name_len+1, sizeof(char));
@@ -517,7 +545,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 				// Type check
 				if ( p_thread_json_value->type != JSONobject )
-					return 0; // TODO: Error handling
+					goto wrong_thread_type;
 
 				// Load the thread
 				if ( load_thread_as_json_value(&p_thread, p_thread_json_value) == 0 )
@@ -525,37 +553,30 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 				// Add the thread to the thread dict
 				dict_add(threads, p_thread->name, p_thread);
-
 			}
 
 			// Clean the scope
 			free(pp_elements);
-
 		}
 
+		// Allocate the schedule
 		if ( create_schedule(&p_schedule) == 0 )
 			goto failed_to_create_schedule;
 
-		// Construct the transform
+		// Construct the schedule
 		*p_schedule = (GXSchedule_t)
 		{
 			.name    = name,
 			.threads = threads
 		};
 
-		// Return the transform to the caller
+		// Return the schedule to the caller
 		*pp_schedule = p_schedule;
 
 	}
 
-	// TODO: Fix Deallocate the JSON value
-	//FREE_VALUE(p_value);
-
 	// Success
 	return 1;
-
-	failed_to_load_schedule:
-		return 0;
 
 	// Error handling
 	{
@@ -578,9 +599,25 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				// Error
 				return 0;
 
+			name_too_long:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] \"name\" property's length must be less than 256 in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
 			missing_properties:
 				#ifndef NDEBUG
 					g_print_error("[G10] [Scheduler] Not enough properties to construct schedule in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
+			wrong_thread_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] Element in property \"threads\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -606,6 +643,13 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				// Error
 				return 0;
 
+			failed_to_load_schedule:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Failed to load scheduler as path in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 		}
 
 		// Argument errors
@@ -618,6 +662,13 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				// Error
 				return 0;
 
+			no_value:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
 		}
 
 		// Standard library errors
@@ -630,9 +681,6 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 				// Error handling
 				return 0;
 		}
-
-		no_value:
-		return 0;
 	}
 }
 
@@ -677,7 +725,6 @@ int client_work ( GXClient_t *p_client )
 
 				// Wait for the task to finish
 				while (wait_thread->complete_tasks[i] == 0);
-
 			}
 
 			// Declare the task function
@@ -699,8 +746,20 @@ int client_work ( GXClient_t *p_client )
 	// Success
 	return 1;
 
-	no_client:
-	return 0;
+	// Error handling
+	{
+
+		// Argument errors
+		{
+			no_client:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Scheduler] Null pointer provided for parameter \"p_client\" in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+				
+				// Error
+				return 0;
+		}
+	}
 }
 
 int work ( void *vp_thread )
@@ -992,6 +1051,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 	size_t       task_count  = 0;
 	array       *p_tasks     = 0;
 
+	// TODO: Refactor to use JSONValue_t *
 	// Parse the thread JSON
 	if (p_value->type == JSONobject)
 	{
@@ -1105,7 +1165,6 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			// Clean the scope
 			free(pp_elements);
-
 		}
 
 		// Allocate the thread
@@ -1245,13 +1304,14 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 	if ( create_task(&p_task) == 0 )
 		goto failed_to_create_task;
 
+	// TODO: Refactor to use JSONValue_t *
 	// Parse the task JSON
 	if ( p_value->type == JSONobject )
 	{
 
 		// Initialized data
 		dict *p_dict = p_value->object;
-
+		
 		// Parse the JSON values into constructor parameters
 		task_name   = ((JSONValue_t *)dict_get(p_dict, "task"))->string;
 

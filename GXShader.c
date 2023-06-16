@@ -264,56 +264,167 @@ typedef struct {
     size_t index;
 } GXDescriptor_s;
 
-void init_shader ( void )
+int init_shader ( void )
 {
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
 
     // Construct lookup tables
-    dict_construct(&format_types                 , FORMATS_COUNT);
-    dict_construct(&format_sizes                 , FORMATS_COUNT);
-    dict_construct(&descriptor_types             , DESCRIPTOR_TYPE_COUNT);
-    dict_construct(&push_constant_getters        , PUSH_CONSTANT_GETTERS_COUNT);
-    dict_construct(&polygon_modes                , RASTERIZER_POLYGON_MODE_COUNT);
-    dict_construct(&blend_operations             , BLEND_OPERATIONS_COUNT);
-    dict_construct(&blend_factors                , BLEND_FACTORS_COUNT);
-    dict_construct(&shader_stagesD               , SHADER_STAGES_COUNT);
-    dict_construct(&pipeline_loader_lookup_tables, SHADER_PIPELINE_CONSTRUCTORS);
-
-    // Populate lookup tables
-    for (size_t i = 0; i < FORMATS_COUNT; i++)
     {
-        dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
-        dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);
+        if ( dict_construct(&format_types                 , FORMATS_COUNT)                 == 0 ) goto failed_to_allocate_format_types_lut;
+        if ( dict_construct(&format_sizes                 , FORMATS_COUNT)                 == 0 ) goto failed_to_allocate_format_sizes_lut;
+        if ( dict_construct(&descriptor_types             , DESCRIPTOR_TYPE_COUNT)         == 0 ) goto failed_to_allocate_descriptor_types_lut;
+        if ( dict_construct(&push_constant_getters        , PUSH_CONSTANT_GETTERS_COUNT)   == 0 ) goto failed_to_allocate_push_constant_getters_lut;
+        if ( dict_construct(&polygon_modes                , RASTERIZER_POLYGON_MODE_COUNT) == 0 ) goto failed_to_allocate_polygon_modes_lut;
+        if ( dict_construct(&blend_operations             , BLEND_OPERATIONS_COUNT)        == 0 ) goto failed_to_allocate_blend_operations_lut;
+        if ( dict_construct(&blend_factors                , BLEND_FACTORS_COUNT)           == 0 ) goto failed_to_allocate_blend_factors_lut;
+        if ( dict_construct(&shader_stagesD               , SHADER_STAGES_COUNT)           == 0 ) goto failed_to_allocate_shader_stagesD_lut;
+        if ( dict_construct(&pipeline_loader_lookup_tables, SHADER_PIPELINE_CONSTRUCTORS)  == 0 ) goto failed_to_allocate_pipeline_loader_lookup_tables_lut;
     }
 
-    for (size_t i = 0; i < DESCRIPTOR_TYPE_COUNT; i++)
-        dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]);
+    // Populate lookup tables
+    {
 
-    // Initialize push constant getters
-    for (size_t i = 0; i < PUSH_CONSTANT_GETTERS_COUNT; i++)
-        dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
+        // Iterate over format counts
+        for (size_t i = 0; i < FORMATS_COUNT; i++)
+        {
 
-    for (size_t i = 0; i < RASTERIZER_POLYGON_MODE_COUNT; i++)
-        dict_add(polygon_modes, rasterizer_polygon_mode_names[i], (void*)rasterizer_polygon_mode_enum[i]);
+            // Add the enumeration
+            dict_add(format_types , format_type_names[i]    , (void *)format_type_enums[i]);
 
-    for (size_t i = 0; i < BLEND_OPERATIONS_COUNT; i++)
-        dict_add(blend_operations, blend_operation_names[i], (void*)blend_operation_enums[i]);
+            // Add the type
+            dict_add(format_sizes , format_type_names[i]    , (void *)format_type_sizes[i]);
+        }
 
-    for (size_t i = 0; i < SHADER_STAGES_COUNT; i++)
-        dict_add(shader_stagesD, shader_stages_names[i], (void*)shader_stages_enum[i]);
+        // Iterate over descriptor types
+        for (size_t i = 0; i < DESCRIPTOR_TYPE_COUNT; i++)
 
-    for (size_t i = 0; i < BLEND_FACTORS_COUNT; i++)
-        dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
+            // Add the enumeration
+            dict_add(descriptor_types, descriptor_type_names[i], (void*)descriptor_type_enums[i]);
 
-    for (size_t i = 0; i < SHADER_PIPELINE_CONSTRUCTORS; i++)
-        dict_add(pipeline_loader_lookup_tables, shader_pipeline_names[i], graphics_pipeline_type_constructors[i]);
+        // Iterate over push constant getters
+        for (size_t i = 0; i < PUSH_CONSTANT_GETTERS_COUNT; i++)
 
+            // Add the push constant getter 
+            dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
 
+        // Iterate over rasterizer polygon modes
+        for (size_t i = 0; i < RASTERIZER_POLYGON_MODE_COUNT; i++)
+
+            // Add the enumeration
+            dict_add(polygon_modes, rasterizer_polygon_mode_names[i], (void*)rasterizer_polygon_mode_enum[i]);
+
+        // Iterate over blend operations
+        for (size_t i = 0; i < BLEND_OPERATIONS_COUNT; i++)
+
+            // Add the enumeration
+            dict_add(blend_operations, blend_operation_names[i], (void*)blend_operation_enums[i]);
+
+        // Iterate over shader stages
+        for (size_t i = 0; i < SHADER_STAGES_COUNT; i++)
+
+            // Add the enumeration
+            dict_add(shader_stagesD, shader_stages_names[i], (void*)shader_stages_enum[i]);
+
+        // Iterate over blend factors
+        for (size_t i = 0; i < BLEND_FACTORS_COUNT; i++)
+
+            // Add the enumeration
+            dict_add(blend_factors, blend_factor_names[i], (void*)blend_factor_enums[i]);
+
+        // Iterate over pipeline constructors
+        for (size_t i = 0; i < SHADER_PIPELINE_CONSTRUCTORS; i++)
+
+            // Add the functions
+            dict_add(pipeline_loader_lookup_tables, shader_pipeline_names[i], graphics_pipeline_type_constructors[i]);
+
+    }
+    
     // Create a shader cache mutex
     p_instance->mutexes.shader_cache = SDL_CreateMutex();
 
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // G10 errors
+        {
+            failed_to_allocate_format_types_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate format types lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_format_sizes_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate format sizes lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_descriptor_types_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate descriptor types lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_push_constant_getters_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate push constant getters lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_polygon_modes_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate polygon modes lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_blend_operations_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate blend operations lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_blend_factors_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate blend factors lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_shader_stagesD_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate shader stages lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+
+            failed_to_allocate_pipeline_loader_lookup_tables_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Shader] Failed to allocate pipeline loader lookup tables lookup table in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+        }
+    }
 }
 
 int create_shader_module ( char *code, size_t code_len, VkShaderModule *shader_module )
@@ -2970,6 +3081,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         else
             goto no_compute_shader_path;
 
+        // Load the layout
         if ( p_layout )
         {
             if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 )
@@ -3012,10 +3124,10 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
                 .basePipelineIndex  = 0,
             };
 
-            // TODO: Construct the compute pipeline
-            //if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, 0, &p_shader->compute.pipeline) != VK_SUCCESS )
-            //    g_print_error("failed to create compute pipeline!\n");
-
+            // Construct the compute pipeline
+            if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, 0, &p_shader->compute.pipeline) != VK_SUCCESS )
+                goto failed_to_create_compute_pipeline;
+                
         }
 
         // Cache the shader
@@ -3058,6 +3170,13 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
                 // Error
                 return 0;
 
+            failed_to_create_compute_pipeline:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Failed to create compute pipeline in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
         // G10 errors
@@ -4083,7 +4202,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                     .binding            = p_descriptor->index,
                     .descriptorType     = p_descriptor->type,
                     .descriptorCount    = 1,
-                    .stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS,
+                    .stageFlags         = VK_SHADER_STAGE_ALL,
                     .pImmutableSamplers = 0
                 };
             }
@@ -4422,13 +4541,13 @@ int destroy_compute_shader ( GXShader_t **pp_shader )
     vkDestroyPipeline(p_instance->vulkan.device, p_shader->compute.pipeline, 0);
 
     // Destroy the pipeline layout
-    vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->compute.pipeline_layout, 0);
+    //vkDestroyPipelineLayout(p_instance->vulkan.device, p_shader->layout->pipeline_layout, 0);
 
     // Destroy the compute shader module
     vkDestroyShaderModule(p_instance->vulkan.device, p_shader->compute.compute_shader_module, 0);
 
     // Destroy the descriptor set layout
-    vkDestroyDescriptorSetLayout(p_instance->vulkan.device, p_shader->compute.set_layout, 0);
+    //vkDestroyDescriptorSetLayout(p_instance->vulkan.device, p_shader->compute.set_layout, 0);
 
     // Success
     return 1;

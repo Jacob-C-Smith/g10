@@ -661,7 +661,7 @@ dict *attachment_load_operations  = 0,
      *aspect_lut                  = 0;
 
 int print_subpass ( GXSubpass_t *p_subpass );
-int update_image_layout ( GXImage_t *p_image, char *format, char *old_layout, char *new_layout );
+int update_image_layout ( GXImage_t *p_image, char *format, char *new_layout );
 
 int init_renderer ( void )
 {
@@ -1342,7 +1342,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
         goto failed_to_construct_renderer_from_json_value;
 
     // Clean the scope
-    free_json_value(p_value);
+    //free_json_value(p_value);
 
     // Success
     return 1;
@@ -1942,7 +1942,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     size_t           subpass_count         = 0;
 
     // Parse the render pass JSON value
-    if (p_value->type == JSONobject)
+    if ( p_value->type == JSONobject )
     {
 
         p_name         = dict_get(p_value->object, "name");
@@ -2544,7 +2544,6 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                             .dependencyFlags = dependency_flags,
                             .viewOffset      = 0
                         };
-                        printf("");
                     }
                 }
             }
@@ -2574,12 +2573,13 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
             .pCorrelatedViewMasks    = correlated_mask_views
         };
 
-        // Create a render pass
+        // Create a render pass2
         if ( vkCreateRenderPass2(p_instance->vulkan.device, &render_pass_2_create_info, 0, &p_render_pass->render_pass) != VK_SUCCESS )
             goto failed_to_create_render_pass;
 
     }
 
+    // Set the render pass
     p_instance->context.loading_renderer->current_render_pass = p_render_pass;
 
     // Construct a dictionary
@@ -2692,11 +2692,18 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         dict_keys(p_render_pass->attachments, attachment_names);
 
         // Iterate over each attachment
-        for (size_t i = 0; i < attachment_count; i++)
-            {GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, attachment_names[i]);}
+        //for (size_t i = 0; i < attachment_count; i++)
+        //    {
+        //        GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, attachment_names[i]);
+        //        if ( strcmp(p_attachment->name, "depth") != 0 )
+        //            update_image_layout(p_attachment->p_image, "unorm b8g8r8a8", "color attachment");
+        //        else
+        //            update_image_layout(p_attachment->p_image, "unorm d24 uint s8", "depth stencil attachment");
+        //    }
+        
         attachment_views[0] = p_instance->vulkan.swap_chain_image_views[i];
         attachment_views[1] = ((GXAttachment_t*)dict_get(p_instance->context.loading_renderer->attachments, "depth"))->image_view;
-
+        
         // TODO: allocate attachments
         // TODO: iterate over this render passes attachments
         // TODO: Get each image view, store in attachments
@@ -3080,27 +3087,14 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
         size_t                  input_attachment_count          = 0,
                                 color_attachment_count          = 0,
                                 preserved_attachment_count      = 0;
-        VkAttachmentReference2 *input_attachment_references     = calloc(input_attachment_count, sizeof(VkAttachmentReference)),
-                               *color_attachment_references     = calloc(color_attachment_count, sizeof(VkAttachmentReference)),
-                               *preserved_attachment_references = calloc(preserved_attachment_count, sizeof(VkAttachmentReference)),
-                               *depth_attachment_reference      = calloc(1, sizeof(VkAttachmentReference));
+        VkAttachmentReference2 *input_attachment_references     = 0,
+                               *color_attachment_references     = 0,
+                               *preserved_attachment_references = 0,
+                               *depth_attachment_reference      = 0;
         JSONValue_t           **pp_input_attachments            = 0,
                               **pp_color_attachments            = 0,
                               **pp_preserved_attachments        = 0;
         char                  *name                             = 0;
-
-        // Error checking
-        if ( input_attachment_references == (void *) 0 )
-            goto no_mem; 
-
-        if ( color_attachment_references == (void *) 0 )
-            goto no_mem;
-
-        if ( preserved_attachment_references == (void *) 0 )
-            goto no_mem;
-
-        if ( depth_attachment_reference == (void *) 0 )
-            goto no_mem; 
 
         // Parse the JSON value
         {
@@ -3211,14 +3205,48 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
             // Parse input attachments
             if ( pp_input_attachments )
             {
+                input_attachment_references = calloc(input_attachment_count, sizeof(VkAttachmentReference));
+
+                // Error checking
+                if ( input_attachment_references == (void *) 0 )
+                    goto no_mem; 
+
+                // Error checking
+                if ( input_attachment_references == (void *) 0 )
+                    goto no_mem;
+
+                // Iterate over each attachment name
+                for (size_t i = 0; i < input_attachment_count; i++)
+                {
+
+                    // Initialized data
+                    JSONValue_t *p_input_attachment = pp_color_attachments[i];
+
+                    if (p_input_attachment->type == JSONstring)
+                    {
+                        GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, p_input_attachment->string);
+
+                        input_attachment_references[i] = (VkAttachmentReference2)
+                        {
+                            .sType      = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2,
+                            .pNext      = 0,
+                            .attachment = (u32)i,
+                            // TODO: Set the image layout
+                            .layout = p_attachment->attachment_description2.initialLayout,
+                            .aspectMask = 0
+                        };
+                    }
+                }
             }
-            // Default
-            else
-                ;
 
             // Parse color attachments
             if ( pp_color_attachments )
             {
+                color_attachment_references = calloc(color_attachment_count, sizeof(VkAttachmentReference));
+                
+                // Error checking
+                if ( color_attachment_references == (void *) 0 )
+                    goto no_mem;
 
                 // Iterate over each attachment name
                 for (size_t i = 0; i < color_attachment_count; i++)
@@ -3243,21 +3271,49 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                     }
                 }
             }
-            // Default
-            else
-                ;
 
             // Parse preserved attachments
             if ( pp_preserved_attachments )
             {
+                
+                preserved_attachment_references = calloc(preserved_attachment_count, sizeof(VkAttachmentReference));
+
+                // Error checking
+                if ( preserved_attachment_references == (void *) 0 )
+                    goto no_mem;
+
+                // Iterate over each attachment name
+                for (size_t i = 0; i < preserved_attachment_count; i++)
+                {
+
+                    // Initialized data
+                    JSONValue_t *p_preserved_attachment = pp_preserved_attachments[i];
+
+                    if (p_preserved_attachment->type == JSONstring)
+                    {
+                        GXAttachment_t *p_attachment = dict_get(p_instance->context.loading_renderer->attachments, p_preserved_attachment->string);
+
+                        preserved_attachment_references[i] = (VkAttachmentReference2)
+                        {
+                            .sType      = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2,
+                            .pNext      = 0,
+                            .attachment = (u32)i,
+                            // TODO: Set the image layout
+                            .layout = p_attachment->attachment_description2.initialLayout,
+                            .aspectMask = 0
+                        };
+                    }
+                }
             }
-            // Default
-            else
-                ;
 
             // Parse depth attachments
             if ( p_depth_attachment )
             {
+                depth_attachment_reference = calloc(1, sizeof(VkAttachmentReference));
+
+                // Error checking
+                if ( depth_attachment_reference == (void *) 0 )
+                    goto no_mem;
 
                 *depth_attachment_reference = (VkAttachmentReference2)
                 {
@@ -3268,9 +3324,6 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                     .aspectMask = 0
                 };
             }
-            // Default
-            else
-                ;
         }
 
         // TODO: Finish attachments
@@ -3286,13 +3339,13 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                 .pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS,
                 .viewMask                = 0,
                 .inputAttachmentCount    = (u32)input_attachment_count,
-                .pInputAttachments       = 0,
+                .pInputAttachments       = input_attachment_references,
                 .colorAttachmentCount    = (u32)color_attachment_count,
                 .pColorAttachments       = color_attachment_references,
                 .pResolveAttachments     = 0,
                 .pDepthStencilAttachment = depth_attachment_reference,
                 .preserveAttachmentCount = (u32)preserved_attachment_count,
-                .pPreserveAttachments    = 0
+                .pPreserveAttachments    = preserved_attachment_references
             }
         };
     }
@@ -4296,6 +4349,108 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
     }
 }
 
+int update_image_layout ( GXImage_t *p_image, char *format, char *new_layout )
+{
+
+    // Argument check
+    {
+
+    }
+
+    // Initialized data
+    GXInstance_t *p_instance = g_get_active_instance();
+    VkCommandBuffer command_buffer = 0;
+    VkImageMemoryBarrier2 memory_barrier2 = 
+    {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .pNext = 0,
+        .srcStageMask = 0,
+        .srcAccessMask = 0,
+        .dstStageMask = 0,
+        .dstAccessMask = 0,
+        .oldLayout = p_image->image_layout,
+        .newLayout = (VkImageLayout) (u32) (dict_get(image_layouts, new_layout)),
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = p_image->image,
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1
+        }
+    };
+    VkDependencyInfo dependency_info = 
+    {
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .pNext = 0,
+        .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT ,
+        .memoryBarrierCount = 0,
+        .pMemoryBarriers = 0,
+        .bufferMemoryBarrierCount = 0,
+        .pBufferMemoryBarriers = 0,
+        .imageMemoryBarrierCount = 1,
+        .pImageMemoryBarriers = &memory_barrier2,
+    };
+
+    VkPipelineStageFlags source_stage_mask = 0,
+                         destination_stage_mask = 0;
+    VkDependencyFlags dependency_flags = 0;  
+    
+    VkCommandBufferAllocateInfo alloc_info =
+    {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = 0,
+        .commandPool = p_instance->vulkan.command_pool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1
+    };
+    VkCommandBufferBeginInfo begin_info = 
+    {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = 0, // Zero or pointer to VkDeviceGroupCommandBufferBeginInfo struct
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .pInheritanceInfo = 0
+    };
+    VkCommandBufferSubmitInfo submit_info = { 0 };
+    
+
+    vkAllocateCommandBuffers(p_instance->vulkan.device, &alloc_info, &command_buffer);
+    
+    vkBeginCommandBuffer(command_buffer, &begin_info);
+
+    vkCmdPipelineBarrier2(command_buffer, &dependency_info);
+
+    vkEndCommandBuffer(command_buffer);
+
+    submit_info = (VkCommandBufferSubmitInfo)
+    {
+        .sType    = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext    = 0,
+        .commandBuffer = command_buffer,
+        .deviceMask = 0
+    };
+
+    vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    
+    vkQueueWaitIdle(p_instance->vulkan.graphics_queue);
+
+    vkFreeCommandBuffers(p_instance->vulkan.device, p_instance->vulkan.command_pool, 1, &command_buffer);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+
+        }
+    }
+}
+
 int print_renderer ( GXRenderer_t *p_renderer )
 {
 
@@ -4672,13 +4827,24 @@ int render_frame ( GXInstance_t *p_instance )
                 
                 // Initialized data
                 GXSubpass_t *p_subpass = p_render_pass->subpasses_data[i];
-                
+                VkSubpassBeginInfo subpass_begin_info = 
+                {
+                    .sType = VK_STRUCTURE_TYPE_SUBPASS_BEGIN_INFO,
+                    .pNext = 0,
+                    .contents = VK_SUBPASS_CONTENTS_INLINE
+                };
+                VkSubpassEndInfo subpass_end_info = 
+                {
+                    .sType = VK_STRUCTURE_TYPE_SUBPASS_END_INFO,
+                    .pNext = 0
+                };
+               
                 // Iterate over each shader
-                for (size_t i = 0; i < p_subpass->shader_count; i++)
+                for (size_t k = 0; k < p_subpass->shader_count; k++)
                 {
 
                     // Initialized data
-                    GXShader_t *p_shader = g_find_shader(p_instance, p_subpass->shader_names[i]);
+                    GXShader_t *p_shader = g_find_shader(p_instance, p_subpass->shader_names[k]);
                     queue *draw_item_queue = dict_get(draw_item_queues, p_shader->name);
 
                     // Set up the pipeline
@@ -4758,6 +4924,10 @@ int render_frame ( GXInstance_t *p_instance )
                          */
                     }
                 }
+
+                //
+                if ( p_render_pass->subpasses_count-1 != j )
+                    vkCmdNextSubpass2(command_buffer, &subpass_begin_info, &subpass_end_info);
             }
             
             // End the render pass
@@ -5367,7 +5537,7 @@ int destroy_texture ( GXTexture_t **pp_texture )
     vkDestroyImageView(p_instance->vulkan.device, p_texture->image_view, 0);
 
     // Free the image
-    destroy_image(p_texture->p_image);
+    destroy_image(&p_texture->p_image);
 
     // Free the texture
     free(p_texture);

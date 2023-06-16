@@ -70,6 +70,7 @@ struct GXImage_s
 {
 	char *name;
 	VkImage image;
+	VkImageLayout image_layout;
 	VkDeviceMemory image_memory;
 };
 

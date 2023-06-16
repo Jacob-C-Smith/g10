@@ -963,6 +963,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     size_t     key_count = 0;
     char     **p_keys_array = 0;
 
+    // TODO: Refactor to use JSONValue_t *
     // Parse the bind as an object
     if ( p_value->type == JSONobject )
     {

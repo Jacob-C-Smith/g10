@@ -77,7 +77,7 @@ int main ( int argc, const char *argv[] )
         add_user_code_callback(p_instance, &user_code_callback);
     }
     */
-
+    
     // Start the game
     (void)g_start_schedule(p_instance, schedule_name);
 

@@ -95,9 +95,7 @@ struct GXShader_s
 
         struct {
             VkPipeline            pipeline;
-            VkPipelineLayout      pipeline_layout;
             VkShaderModule        compute_shader_module;
-            VkDescriptorSetLayout set_layout;
             u32                   x_groups,
                                   y_groups,
                                   z_groups;
