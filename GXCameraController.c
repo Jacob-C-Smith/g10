@@ -120,7 +120,8 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
     }
 
     // Set the camera controller
-    *ret = (GXCameraController_t) {
+    *ret = (GXCameraController_t)
+    {
         .camera = camera,
         .spdlim = 0.0025f
     };

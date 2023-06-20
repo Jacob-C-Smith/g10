@@ -1,5 +1,11 @@
 #include <G10/GXRigidbody.h>
 
+#define FORCE_CALCULATOR_COUNT 1
+
+dict *force_calculators = 0;
+
+
+
 int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
 {
 
@@ -56,7 +62,13 @@ int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
 
 int update_force ( GXRigidbody_t *rigidbody )
 {
-	rigidbody->forces[0] = (vec3){ 0.f, 0.f, 0.f, 0.f };
+	rigidbody->forces[0] = (vec3)
+	{
+		.x = 0.f,
+		.y = 0.f,
+		.z = 0.f,
+		.w = 0.f
+	};
 
 	// Newtons first law; summate forces
 	for (size_t i = 1; i < rigidbody->force_count; i++)

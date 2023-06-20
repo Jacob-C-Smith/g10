@@ -612,7 +612,7 @@ void transform_model_matrix ( GXTransform_t *p_transform, mat4 *r )
     }
 }
 
-int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float theta)
+int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float theta )
 {
 
     // Argument check
@@ -630,13 +630,21 @@ int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float
     * to complex multiplication.
     */
 
+    // Initialized
     float      halfAngle = theta / 2,
                cosHalf   = cosf(halfAngle),
                sinHalf   = sinf(halfAngle);
     vec3       newIJK    = { p_transform->rotation.i, p_transform->rotation.j, p_transform->rotation.k };
 
     rotate_vec3_by_quaternion(&newIJK, newIJK, axis);
-	p_transform->rotation = (quaternion){ cosHalf, sinHalf * newIJK.x, sinHalf * newIJK.y, sinHalf * newIJK.z };
+	
+	p_transform->rotation = (quaternion)
+	{ 
+		.u = cosHalf,
+		.i = sinHalf * newIJK.x,
+		.j = sinHalf * newIJK.y,
+		.k = sinHalf * newIJK.z
+	};
 
 	// Success
     return 1;
@@ -644,10 +652,12 @@ int rotate_about_quaternion ( GXTransform_t *p_transform, quaternion axis, float
     // Error handling
     {
         no_transform:
-        #ifndef NDEBUG
-            g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
-        #endif
-        return 0;
+    	    #ifndef NDEBUG
+	            g_print_error("[G10] [Transform] Null pointer provided for parameter \"transform\" in call to function \"%s\"\n",__FUNCTION__);
+        	#endif
+		
+			// Error
+        	return 0;
     }
 
 }

@@ -584,7 +584,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     }
 }
 
-int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
+int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
 {
 
     // Argument check
@@ -653,7 +653,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity)
 
 }
 
-int append_camera ( GXScene_t *scene, GXCamera_t *camera)
+int append_camera ( GXScene_t *scene, GXCamera_t *camera )
 {
 
     // Argument check
@@ -714,7 +714,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera)
     }
 }
 
-int append_light ( GXScene_t *scene, GXLight_t *light)
+int append_light ( GXScene_t *scene, GXLight_t *light )
 {
     // Argument check
     {
@@ -773,7 +773,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light)
     }
 }
 
-int append_collision ( GXScene_t *scene, GXCollision_t *collision)
+int append_collision ( GXScene_t *scene, GXCollision_t *collision )
 {
     size_t i = 0;
 
@@ -828,7 +828,7 @@ int scene_info ( GXScene_t *p_scene )
     return 1;
 }
 
-GXEntity_t *get_entity ( GXScene_t *scene, const char name[] )
+GXEntity_t *get_entity ( GXScene_t *scene, char *name )
 {
 
     // Argument check
@@ -862,7 +862,7 @@ GXEntity_t *get_entity ( GXScene_t *scene, const char name[] )
     }
 }
 
-GXCamera_t *get_camera ( GXScene_t *scene, const char name[])
+GXCamera_t *get_camera ( GXScene_t *scene, char *name )
 {
 
     // Argument check
@@ -894,7 +894,7 @@ GXCamera_t *get_camera ( GXScene_t *scene, const char name[])
     }
 }
 
-GXLight_t *get_light ( GXScene_t *scene, const char name[] )
+GXLight_t *get_light ( GXScene_t *scene, char *name )
 {
 
     // Argument check
@@ -931,7 +931,7 @@ GXLight_t *get_light ( GXScene_t *scene, const char name[] )
     }
 }
 
-int set_active_camera ( GXScene_t *scene, const char name[])
+int set_active_camera ( GXScene_t *scene, char *name)
 {
 
     // Argument check

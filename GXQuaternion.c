@@ -102,12 +102,25 @@ mat4 rotation_mat4_from_quaternion ( quaternion q )
 
 void rotate_vec3_by_quaternion ( vec3* r, vec3 v, quaternion q )
 {
-    quaternion p  = (quaternion){ 0.f, v.x, v.y, v.z };
-    quaternion pP = normalize_quaternion(multiply_quaternion_quaternion(multiply_quaternion_quaternion(q, p), quaternion_inverse(q)));
+    quaternion p  = (quaternion)
+    { 
+        0.f,
+        v.x,
+        v.y,
+        v.z
+    };
+    quaternion pP = normalize_quaternion(
+        multiply_quaternion_quaternion(
+            multiply_quaternion_quaternion(q, p), quaternion_inverse(q)
+        )
+    );
 
-    r->x = pP.i,
-    r->y = pP.j,
-    r->z = pP.k;
+    *r = (vec3)
+    {
+        .x = pP.i,
+        .y = pP.j,
+        .z = pP.k
+    };
 }
 
 quaternion normalize_quaternion ( quaternion q )

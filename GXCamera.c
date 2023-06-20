@@ -4,12 +4,12 @@ mat4 perspective_matrix ( float fov, float aspect, float near_clip, float far_cl
 {
 	/*
 	 * Compute perspective projection, where f = fov, a = aspect, n = near, and r = far
-	 * ┌                                                      ┐
+	 * ╭                                                      ╮
 	 * │ (a*tan(f/2))^-1, 0,             0,                0, │
 	 * │ 0,               (tan(f/2))^-1, 0,                0  │
 	 * │ 0,               0,             -((r+n)/(r-n)),  -1  │
 	 * │ 0,               0,             -((2*r*n)/(r-n)), 0  │
-	 * └                                                      ┘
+	 * ╰                                                      ╯
 	 */
 
 	return (mat4)
@@ -60,12 +60,14 @@ int get_camera_position ( void *ret )
 mat4 look_at ( vec3 eye, vec3 target, vec3 up )
 {
     // Compute forward direction
-    vec3 f = normalize((vec3)
-	{
-        .x = eye.x - target.x,
-        .y = eye.y - target.y,
-        .z = eye.z - target.z
-    });
+    vec3 f = normalize(
+		(vec3)
+		{
+    	    .x = eye.x - target.x,
+        	.y = eye.y - target.y,
+	        .z = eye.z - target.z
+    	}
+	);
 
     // Compute left direction as cross product of up and forward
     vec3 l = normalize(cross_product_vec3(up, f));

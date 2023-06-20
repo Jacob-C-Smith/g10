@@ -1,6 +1,6 @@
 #include <G10/GXServer.h>
 
-int create_server(GXServer_t** pp_server)
+int create_server ( GXServer_t **pp_server )
 {
 
 	// Argument check
@@ -122,7 +122,7 @@ int load_server ( GXServer_t **pp_server, char *path )
 	}
 }
 
-int load_server_as_json(GXServer_t** pp_server, char* text )
+int load_server_as_json ( GXServer_t **pp_server, char *text )
 {
 
 	// Argument check
@@ -256,7 +256,7 @@ int load_server_as_json(GXServer_t** pp_server, char* text )
 	}
 };
 
-int start_server()
+int start_server ( void )
 {
 
 	// Initialized data
@@ -274,7 +274,7 @@ int start_server()
 	return 0;
 }
 
-int process_command(GXClient_t *client, GXCommand_t* p_command)
+int process_command ( GXClient_t *client, GXCommand_t *p_command )
 {
 
 	// Initialized data
@@ -384,7 +384,7 @@ int process_command(GXClient_t *client, GXCommand_t* p_command)
 
 }
 
-int server_recv(GXClient_t *client)
+int server_recv ( GXClient_t *client )
 {
 
 	// Argument check
@@ -421,7 +421,7 @@ int server_recv(GXClient_t *client)
 	}
 }
 
-int server_send(GXClient_t* client)
+int server_send ( GXClient_t *client )
 {
 
 	// Argument check
@@ -452,7 +452,7 @@ int server_send(GXClient_t* client)
 	}
 }
 
-int server_parse     ( GXClient_t *client )
+int server_parse ( GXClient_t *client )
 {
 
 	// Argument errors
@@ -519,7 +519,7 @@ int server_serialize ( GXClient_t *client )
 	return 1;
 }
 
-int server_process   ( GXClient_t *client )
+int server_process ( GXClient_t *client )
 {
 	GXInstance_t *p_instance = g_get_active_instance();
 
@@ -564,7 +564,7 @@ int server_process   ( GXClient_t *client )
 	return 0;
 }
 
-int server_wait    ( GXInstance_t* p_instance )
+int server_wait ( GXInstance_t *p_instance )
 {
 
 	// Argument check
@@ -622,7 +622,7 @@ int server_wait    ( GXInstance_t* p_instance )
 		command_from_data(&connect_command, client->recv_data);
 
 		// Make sure it's a connect command
-		if(connect_command->type == connect_CMD)
+		if ( connect_command->type == connect_CMD )
 			printf("%s connected\n", connect_command->connect.name);
 
 		client_name_len = strlen(connect_command->connect.name);
@@ -718,7 +718,7 @@ no_socket:
 	return 0;
 }
 
-int create_client  ( GXClient_t** client)
+int create_client ( GXClient_t **client)
 {
 	GXClient_t* c = calloc(1, sizeof(GXClient_t));
 	*client = c;
@@ -735,7 +735,7 @@ int create_client  ( GXClient_t** client)
 	return 0;
 }
 
-int connect_client(char* name)
+int connect_client ( char *name)
 {
 
 	// Argument check
@@ -873,7 +873,7 @@ int connect_client(char* name)
 	}
 }
 
-int command_from_data(GXCommand_t** ret, void* data)
+int command_from_data ( GXCommand_t **ret, void *data )
 {
 	// TODO: Argument check
 
@@ -1005,7 +1005,7 @@ int command_from_data(GXCommand_t** ret, void* data)
 	return (int)ret_len;
 }
 
-int data_from_command(void** ret, GXCommand_t* command)
+int data_from_command ( void **ret, GXCommand_t *command )
 {
 	size_t ret_len = 0;
 	u8 *retn = *(u8**)ret;
@@ -1098,7 +1098,7 @@ int destroy_client ( GXClient_t **pp_client )
 	return 0;
 }
 
-int destroy_command(GXCommand_t** pp_command)
+int destroy_command ( GXCommand_t **pp_command )
 {
 	//// Argument check
 	//{

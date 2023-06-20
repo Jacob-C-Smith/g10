@@ -7,6 +7,37 @@ FILE* log_file;
 static GXInstance_t *active_instance = 0;
 
 // Forward declared functions
+/** !
+ * Find a physical device that conforms to the properties described by the
+ * p_value parameter, or find the best possible device as evaluated by 
+ * criteria specified by Jake. 
+ * 
+ * @param p_value : The "vulkan" property of the G10 instance JSON object -or- a null pointer
+ *
+ * @return 1 on success, 0 on error
+*/
+int  g_pick_physical_device ( JSONValue_t *p_value );
+
+/** !
+ * Create a logical device
+ * 
+ * @param p_value : The "vulkan" property of the G10 instance JSON object -or- a null pointer
+ *
+ * @return 1 on success, 0 on error
+*/
+int  g_create_logical_device ( JSONValue_t *p_value );
+
+/** !
+ * Evaluate a VkPhysicalDevice. Better devices return larger floating points.
+ * Worse devices return smaller floating points. Unusable devices return 0.0f
+ * 
+ * @param physical_device : The VkPhysicalDevice to be evaluated
+ * @param p_value : The "vulkan" property of the G10 instance JSON object -or- a null pointer
+ * 
+ * @return 0.0 for incompatible devices / errors. Higher floats are better devices. Lower floats are worse devices. 
+*/
+float g_vulkan_evaluate_physical_device ( VkPhysicalDevice physical_device, JSONValue_t *p_value );
+
 int  pick_physical_device   ( char **required_extension_names );
 int  create_logical_device  ( char **required_extension_names );
 void create_swap_chain      ( void );
@@ -1577,6 +1608,547 @@ void setup_debug_messenger ( VkDebugUtilsMessengerCreateInfoEXT **debug_messenge
     return;
 }
 
+int g_pick_physical_device ( JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_value == (void *) 0 ) goto no_value;
+        #endif
+    }
+    
+
+    // Initialized data
+    GXInstance_t     *p_instance   = g_get_active_instance();
+    u32               device_count = 0;
+    VkPhysicalDevice *devices      = 0;
+
+    // Get the number of physical devices
+    switch (
+        vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, (void *) 0)
+    )
+    {
+        case VK_SUCCESS:
+            break;
+        default:
+            goto failed_to_enumerate_physical_devices;
+    }
+
+    // Error check
+    if ( device_count == 0 )
+        goto no_devices;
+
+    // Allocate memory for devices list
+    devices = calloc(device_count + 1, sizeof(VkPhysicalDevice));
+
+    // Error checking
+    if ( devices == (void *) 0 )
+        goto no_mem;
+    
+    // Enumerate physical devices
+    switch (
+        vkEnumeratePhysicalDevices(p_instance->vulkan.instance, (unsigned int *)&device_count, devices)
+    )
+    {
+        case VK_SUCCESS:
+            break;
+        case VK_INCOMPLETE:
+            g_print_warning("[G10] [Vulkan] Not all physical devices have been enumerated in call to function \"vkEnumeratePhysicalDevices\"\n", );
+            break;
+        default:
+            goto failed_to_enumerate_physical_devices;
+    }
+
+    // Iterate over each device
+    for (size_t i = 0; i < device_count; i++)
+    {
+
+        // Initialized data
+        float device_value = g_vulkan_evaluate_physical_device( devices[i], p_value);
+
+        // Is this device better?
+        if ( device_value > best_device_value )
+        {
+            best_device_value  = device_value;
+            best_device_handle = physical_device;
+        }
+    }
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
+
+        // Vulkan errors
+        {
+            no_devices:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Machine has no Vulkan devices!\n");
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_enumerate_physical_devices:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Failed to call vkEnumeratePhysicalDevices in call to function \"%s\"\n\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+    }
+}
+
+int g_create_logical_device ( JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_value == (void *) 0 ) goto no_value;
+        #endif
+    }
+
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+float g_vulkan_evaluate_physical_device ( VkPhysicalDevice physical_device, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( physical_device == VK_NULL_HANDLE ) goto no_physical_device_handle;
+            if ( p_value         == (void *) 0     ) goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    float ret = 0.0;
+
+    //vkGetPhysicalDeviceProperties2
+    //VkPhysicalDeviceProperties2                             = { 0 };
+    //VkPhysicalDeviceVulkan11Properties                      = { 0 };
+    //VkPhysicalDeviceVulkan12Properties                      = { 0 };
+    //VkPhysicalDeviceVulkan13Properties                      = { 0 };
+    //VkPhysicalDeviceDescriptorBufferDensityMapPropertiesEXT = { 0 };
+    //VkPhysicalDeviceDescriptorBufferPropertiesEXT           = { 0 };
+    //VkPhysicalDevicePCIBusInfoPropertiesEXT                 = { 0 };
+    //VkPhysicalDevicePushDescriptorPropertiesKHR             = { 0 };
+    //VkPhysicalDeviceRayTracingPipelinePropertiesKHR         = { 0 };
+    //VkPhysicalDeviceMeshShaderPropertiesEXT                 = { 0 };
+    //VkPhysicalDeviceTransformFeedbackPropertiesEXT          = { 0 };
+    //VkPhysicalDeviceExtendedDynamicState3PropertiesEXT      = { 0 };
+    //VkPhysicalDevicePipelineRobustnessPropertiesEXT         = { 0 };
+    //VkPhysicalDeviceRobustness2PropertiesEXT                = { 0 };
+    //VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT     = { 0 };
+    //VkPhysicalDeviceFragmentShaderBarycentricPropertiesKHR  = { 0 };
+    //VkPhysicalDeviceFragmentShadingRatePropertiesKHR        = { 0 };
+    //VkPhysicalDeviceAccelerationStructurePropertiesKHR      = { 0 };
+    //VkPhysicalDeviceMaintenance3Properties                  = { 0 };
+    //VkPhysicalDeviceMaintenance4Properties                  = { 0 };
+    //VkPhysicalDeviceDriverProperties                        = { 0 };
+    //VkPhysicalDeviceDepthStencilResolveProperties           = { 0 };
+    //VkPhysicalDeviceLineRasterizationPropertiesEXT          = { 0 };
+
+
+    // Success
+    return ret;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_physical_device_handle:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Vulkan] Parameter \"physical_device\" was \"VK_NULL_HANDLE\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0.f;
+            
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
+                #endif
+
+                // Error
+                return 0.f;
+        }
+    }
+}
+
+float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONValue_t *p_value )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( physical_device == VK_NULL_HANDLE ) goto no_physical_device_handle;
+            if ( p_value         == (void *) 0     ) goto no_value;
+        #endif
+    }
+
+    // Initialized data
+    float ret = 0.f;
+    VkPhysicalDeviceProperties2 physical_device_properties2 = { 0 };
+    JSONValue_t *p_image       = 0,
+                *p_shader      = 0,
+                *p_draw        = 0,
+                *p_framebuffer = 0;
+    boolean      passes_image_limits       = true,
+                 passes_shader_limits      = true,
+                 passes_draw_limits        = true,
+                 passes_framebuffer_limits = true;
+
+    // Parse the limits
+    if ( p_value->type == JSONobject )
+    {
+
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        p_image       = dict_get(p_dict, "image");
+        p_shader      = dict_get(p_dict, "shader");
+        p_draw        = dict_get(p_dict, "draw");
+        p_framebuffer = dict_get(p_dict, "framebuffer");
+    }
+    // Default
+    else
+        goto wrong_limits_type;
+
+    // Get the physical device properties
+    vkGetPhysicalDeviceProperties2(physical_device, &physical_device_properties2);
+
+    // Evaluate the image limits
+    {
+
+        // Initialized data
+        JSONValue_t *p_image_dimensions = 0,
+                    *p_image_cube       = 0,
+                    *p_image_layers     = 0;
+
+        // Parse the JSON 
+        if ( p_image->type == JSONobject )
+        {
+
+            // Initialized data
+            dict *p_dict = p_image->object;
+
+            p_image_dimensions = dict_get(p_dict, "dimensions");
+            p_image_cube       = dict_get(p_dict, "cube");
+            p_image_layers     = dict_get(p_dict, "layers");
+        }
+
+        // Check the image dimensions
+        if ( p_image_dimensions )
+        {
+
+            // Check for the right type
+            if ( p_image_dimensions->type == JSONarray )
+            {
+                
+                // Initialized data
+                JSONValue_t **pp_dimensions   = 0;
+                size_t        dimension_count = 0;
+                
+                size_t min_width  = 0,
+                       min_height = 0,
+                       min_depth  = 0;
+
+                // Dump the contents of the array
+                {
+                    
+                    // Get the dimensions count
+                    array_get(p_image->list, 0, &dimension_count);
+
+                    // Error checking
+                    if ( dimension_count != 3 )
+                        goto wrong_image_dimension_count;
+
+                    // Allocate memory for image dimension values
+                    pp_dimensions = calloc(dimension_count, sizeof(JSONValue_t *));
+
+                    // Error checking
+                    if ( pp_dimensions == (void *) 0 )
+                        goto no_mem;
+
+                    // Dump the contents
+                    array_get(p_image->list, pp_dimensions, 0);
+                }
+
+                // Get the width
+                if ( pp_dimensions[0]->type == JSONinteger )
+                    min_width = pp_dimensions[0]->integer;
+                // Default
+                else
+                    goto wrong_image_dimension_limits_element_type;
+
+                // Get the height
+                if ( pp_dimensions[1]->type == JSONinteger )
+                    min_height = pp_dimensions[1]->integer;
+                // Default
+                else
+                    goto wrong_image_dimension_limits_element_type;
+
+                // Get the depth
+                if ( pp_dimensions[2]->type == JSONinteger )
+                    min_depth = pp_dimensions[2]->integer;
+                // Default
+                else
+                    goto wrong_image_dimension_limits_element_type;
+
+                // Check the width
+                if ( physical_device_properties2.properties.limits.maxImageDimension1D < min_width )
+                    passes_image_limits = false;
+                
+                // Check the height
+                if ( physical_device_properties2.properties.limits.maxImageDimension2D < min_height )
+                    passes_image_limits = false;
+                
+                // Check the depth
+                if ( physical_device_properties2.properties.limits.maxImageDimension3D < min_depth )
+                    passes_image_limits = false;
+
+                // Clean the scope
+                free(pp_dimensions);
+            }
+            // Default
+            else
+                goto wrong_image_dimensions_type;
+        }
+
+        // Check the cube dimensions
+        if ( p_image_cube )
+        {
+
+            // Check for the right type
+            if ( p_image_cube->type == JSONinteger )
+            {
+                
+                // Check the cube dimension
+                if ( physical_device_properties2.properties.limits.maxImageDimensionCube < p_image_cube->integer )
+                    passes_image_limits = false;
+                
+            }
+            // Default
+            else
+                goto wrong_image_cube_type;
+        }
+
+        // Check the image layers
+        if ( p_image_layers )
+        {
+
+            // Check for the right type
+            if ( p_image_layers->type == JSONinteger )
+            {
+                
+                // Check the image layer count
+                if ( physical_device_properties2.properties.limits.maxImageArrayLayers < p_image_layers->integer )
+                    passes_image_limits = false;
+                
+            }
+            // Default
+            else
+                goto wrong_image_layers_type;
+        }
+    }
+
+    // Evaluate the shader limits
+    {
+
+        // Initialized data
+        JSONValue_t *p_shader_vertex        = 0,
+                    *p_shader_tessellation  = 0,
+                    *p_shader_geometry      = 0,
+                    *p_shader_fragment      = 0,
+                    *p_shader_compute       = 0,
+                    *p_shader_push constant = 0;
+
+        // Parse the JSON 
+        if ( p_image->type == JSONobject )
+        {
+
+            // Initialized data
+            dict *p_dict = p_image->object;
+
+            p_shader_vertex        = dict_get(p_dict, "vertex");
+            p_shader_tessellation  = dict_get(p_dict, "tessellation");
+            p_shader_geometry      = dict_get(p_dict, "geometry");
+            p_shader_fragment      = dict_get(p_dict, "fragment");
+            p_shader_compute       = dict_get(p_dict, "compute");
+            p_shader_push constant = dict_get(p_dict, "push constant");
+            
+        }
+
+        // Check the vertex dimensions
+        if ( p_shader_vertex )
+        {
+
+            // Check for the right type
+            if ( p_shader_vertex->type == JSONobject )
+            {
+                
+                // Initialized data
+                JSONValue_t *p_shader_vertex_input      = 0,
+                            *p_shader_vertex_attributes = 0,
+                            *p_shader_vertex_bindings   = 0;
+                
+                // Parse the JSON
+                {
+
+                    // Initialized data
+                    dict *p_dict = p_shader_vertex->object;
+
+                    p_shader_vertex_input = dict_get(p_dict, "input");
+                }
+
+                // Parse the vertex input limits
+                if ( p_shader_vertex_input )
+                {
+
+                    // Error checking
+                    if ( p_shader_vertex_input->type != JSONobject )
+                        goto wrong_shader_vertex_input_type;
+                    
+                    // Parse the JSON
+                    {
+                        // Initialized data
+                        dict *p_dict = p_shader_vertex_input->object;
+
+                        p_shader_vertex_attributes = dict_get(p_dict, "quantity")
+                        p_shader_vertex_bindings   = dict_get(p_dict, "offset")
+                    }
+
+                    // Parse the quantity
+                    if ( p_shader_vertex_attributes )
+                    {
+
+                        // Parse the vertex attributes quantity as an integer
+                        if ( p_shader_vertex_attributes->type == JSONinteger )
+                        {
+
+                            // Check the maximum number of vertex input attributes that can be specified for a graphics pipeline.
+                            if ( physical_device_properties2.properties.limits.maxVertexInputAttributes < p_shader_vertex_attributes->integer )
+                                passes_image_limits = false;
+                        }
+                        // Default
+                        else
+                            goto wrong_shader_vertex_attributes_type;
+                    }
+
+                    // Parse the offset
+                    if ( p_shader_vertex_bindings )
+                    {
+
+                        // Parse the vertex attributes quantity as an integer
+                        if ( p_shader_vertex_bindings->type == JSONinteger )
+                        {
+
+                            // Check the maximum vertex input attribute offset that can be added to the vertex input binding stride. 
+                            if ( physical_device_properties2.properties.limits.maxVertexInputAttributeOffset < p_shader_vertex_bindings->integer )
+                                passes_image_limits = false;
+                        }
+                        // Default
+                        else
+                            goto wrong_shader_vertex_attributes_offset_type;
+                    }
+                }
+            }
+            // Default
+            else
+                goto wrong_image_dimensions_type;
+        }
+    }
+
+    // Success
+    return ret;
+
+    no_mem:
+    wrong_image_dimension_count:
+    wrong_image_dimensions_type:
+    wrong_image_cube_type:
+    wrong_image_layers_type:
+    wrong_image_dimension_limits_element_type:
+    wrong_shader_vertex_input:
+        return 0;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_physical_device_handle:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Vulkan] Parameter \"physical_device\" was \"VK_NULL_HANDLE\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0.f;
+            
+            no_value:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
+                #endif
+
+                // Error
+                return 0.f;
+        }
+
+        // JSON errors
+        {
+            wrong_value_type:
+            wrong_limits_type:
+                return 0.f;
+        }
+    }
+}
+
 int pick_physical_device ( char **required_extension_names )
 {
 
@@ -2153,12 +2725,8 @@ int check_vulkan_device ( GXInstance_t *p_instance, VkPhysicalDevice physical_de
         // TODO: What the hell is this continuation condition?
         for (size_t i = 0; i < required_extension_names[i]; i++)
             for (size_t j = 0; j < device_extension_count; j++)
-                if (strcmp(required_extension_names[i], available_device_extension_names[j]) == 0)
-                {
-                    char *t = 0;
-                    dict_pop(device_extension_name_dict, required_extension_names[i], (void **)&t);
-                    break;
-                }
+                if (strcmp(required_extension_names[i], available_device_extension_names[j]))
+                { break; }
 
         if ( dict_keys(device_extension_name_dict, 0) == 0 )
             has_extensions = true;

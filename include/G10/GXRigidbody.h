@@ -17,27 +17,45 @@
 #include <G10/G10.h>
 #include <G10/GXLinear.h>
 
+typedef enum forces_flag_bits 
+{
+	force_gravity                   = 0b000001,
+	force_applied                   = 0b000010,
+	force_normal                    = 0b000100,
+	force_friction                  = 0b001000,
+	force_tension                   = 0b010000,
+	force_spring                    = 0b100000,
+	force_collision                 = 0b001111,
+	force_collision_no_grav         = force_collision ^ force_gravity,
+	force_collision_tension         = force_collision | force_tension,
+	force_collision_tension_no_grav = force_collision_tension ^ force_gravity
+} forces_flag_bits;
+
 struct GXRigidbody_s
 {
-	bool        active;                 // Apply displacement and rotational forces?
 
-	float       mass;                   // ( kg )
-	vec3        radius;                 // ( m )
+	forces_flag_bits  flags;                  // Used to quickly compute forces
 
-	vec3        acceleration;           // ( m / s^2 )
-	vec3        velocity;               // ( m / s )
-	vec3        momentum;               // ( kg * m / s )
+	bool              active;                 // Apply displacement and rotational forces?
 
-	quaternion  angular_acceleration;   // ( rad / s^2 )
-	quaternion  angular_velocity;       // ( rad / s )
-	quaternion  angular_momentum;       // ( kg * m^2 / s )
+	float             mass;                   // ( kg )
+	vec3              radius;                 // ( m )
 
-	vec3       *forces;                 // ( kg * m / s^2 )
-	size_t      force_count;
+	vec3              acceleration;           // ( m / s^2 )
+	vec3              velocity;               // ( m / s )
+	vec3              momentum;               // ( kg * m / s )
 
-	quaternion *torques;                // ( kg * m^2 / s^2 )
-	size_t      torque_count;
+	quaternion        angular_acceleration;   // ( rad / s^2 )
+	quaternion        angular_velocity;       // ( rad / s )
+	quaternion        angular_momentum;       // ( kg * m^2 / s )
+
+	vec3             *forces;                 // ( kg * m / s^2 )
+	size_t            force_count;
+
+	quaternion       *torques;                // ( kg * m^2 / s^2 )
+	size_t            torque_count;			  
 };
+
 
 // Allocators
 /** !
@@ -49,7 +67,7 @@ struct GXRigidbody_s
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int create_rigidbody       ( GXRigidbody_t **pp_rigidbody );
+DLLEXPORT int create_rigidbody ( GXRigidbody_t **pp_rigidbody );
 
 // Constructors
 /** !
@@ -63,7 +81,7 @@ DLLEXPORT int create_rigidbody       ( GXRigidbody_t **pp_rigidbody );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int load_rigidbody         ( GXRigidbody_t **pp_rigidbody, const char *path );
+DLLEXPORT int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path );
 
 /** !
  *  Load a rigidbody from JSON text

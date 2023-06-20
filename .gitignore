@@ -7,7 +7,7 @@ lib/
 G10/*
 *.dll
 Level 1/
-
+G10.code-workspace
 RelWithDebInfo/
 
 include/JSON/*

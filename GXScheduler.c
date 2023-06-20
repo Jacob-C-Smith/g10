@@ -120,10 +120,10 @@ int create_task ( GXTask_t **pp_task )
 	GXTask_t *p_task = calloc(1, sizeof(GXTask_t));
 
 	// Error check
-	if ( p_task == (void *)0 )
+	if ( p_task == (void *) 0 )
 		goto no_mem;
 
-	// Return a pointer to the allocated memory
+	// Return a pointer to the caller
 	*pp_task = p_task;
 
 	// Success
@@ -173,7 +173,7 @@ int create_schedule ( GXSchedule_t **pp_schedule )
 	if ( p_scheduler == (void *) 0 )
 		goto no_mem;
 
-	// Return a pointer to the allocated memory
+	// Return a pointer to the caller
 	*pp_schedule = p_scheduler;
 
 	// Success
@@ -223,7 +223,7 @@ int create_thread ( GXThread_t **pp_thread )
 	if ( p_thread == (void *) 0 )
 		goto no_mem;
 
-	// Return a pointer to the allocated memory
+	// Return a pointer to the caller
 	*pp_thread = p_thread;
 
 	// Success

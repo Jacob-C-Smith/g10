@@ -142,7 +142,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
          * group has an associated byte code. The vertex groups metadata value is used to create a
          * vertex array object, vertex buffer object, and element buffer object.
          *
-         * ┌─────────────────────┬──────────────────────────────────────────────────┬──────┐
+         * ╭─────────────────────┬──────────────────────────────────────────────────┬──────╮
          * │ Vertex group name   │ Vertex properties as they appear in the PLY file │ Code │
          * ├─────────────────────┼──────────────────────────────────────────────────┼──────┤
          * │ Geometric vertices  │ ( x, y, z )                                      │ 0x01 │
@@ -153,7 +153,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
          * │ Vertex colors       │ ( red, green, blue, alpha ) or ( r, g, b, a )    │ 0x20 │
          * │ Bone groups         │ ( b0, b1, b2, b3 )                               │ 0x40 │
          * │ Bone weights        │ ( w0, w1, w2, w3 )                               │ 0x80 │
-         * └─────────────────────┴──────────────────────────────────────────────────┴──────┘
+         * ╰─────────────────────┴──────────────────────────────────────────────────┴──────╯
          *
          * NOTE: The function can be modified to read two more vertex groups, supporting a
          * maximum of 8 vertex groups.

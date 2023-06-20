@@ -522,7 +522,13 @@ int calculate_entity_force ( GXEntity_t *p_entity )
 	// Initialized data
 	vec3* forces = p_entity->rigidbody->forces;
 
-	forces[0] = (vec3){0.f, 0.f, 0.f, 0.f};
+	forces[0] = (vec3)
+	{
+		.x = 0.f, 
+		.y = 0.f,
+		.z = 0.f,
+		.w = 0.f
+	};
 
 	// Calculate each forces effect on the entity
 	forces[1] = calculate_force_gravitational ( p_entity );

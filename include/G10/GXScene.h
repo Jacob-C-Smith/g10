@@ -192,7 +192,7 @@ DLLEXPORT int scene_info ( GXScene_t   *p_scene );
  *
  * @return a pointer to the entity, if the scene contains the entity, else 0
  */
-DLLEXPORT GXEntity_t *get_entity ( GXScene_t *p_scene, const char* name );
+DLLEXPORT GXEntity_t *get_entity ( GXScene_t *p_scene, char *name );
 
 /** !
  *  Get a camera from the scene by it's name
@@ -202,7 +202,7 @@ DLLEXPORT GXEntity_t *get_entity ( GXScene_t *p_scene, const char* name );
  *
  * @return a pointer to the camera, if the scene contains the camera, else 0
  */
-DLLEXPORT GXCamera_t *get_camera ( GXScene_t *p_scene, const char* name );
+DLLEXPORT GXCamera_t *get_camera ( GXScene_t *p_scene, char *name );
 
 /** !
  *  Get an light from the scene by it's name
@@ -212,7 +212,7 @@ DLLEXPORT GXCamera_t *get_camera ( GXScene_t *p_scene, const char* name );
  *
  * @return a pointer to the light, if the scene contains the light, else 0
  */
-DLLEXPORT GXLight_t *get_light ( GXScene_t *p_scene, const char* name );
+DLLEXPORT GXLight_t *get_light ( GXScene_t *p_scene, char *name );
 
 // Mutators
 /** !
@@ -226,7 +226,7 @@ DLLEXPORT GXLight_t *get_light ( GXScene_t *p_scene, const char* name );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int set_active_camera ( GXScene_t   *scene, const char    name[] );
+DLLEXPORT int set_active_camera ( GXScene_t   *scene, char *name );
 
 // Scheduler tasks
 /** !

@@ -139,31 +139,35 @@ AVXCrossProduct ENDP
 PUBLIC AVXmat4xmat4
 AVXmat4xmat4 PROC
 
-    ; Save a copy of rcx, rsi, and rdi
-    push rcx
-    push rsi
-    push rdi
+    
+    push rcx ; Copy rcx
+    push rsi ; Copy rsi
+    push rdi ; Copy rdi
 
-    mov rsi, rdx
-    mov rdi, rcx
+    mov rsi, rdx ; rsi <- rdi
+    mov rdi, rcx ; rdi <- rcx
 
-    xor rax, rax
-    mov rcx, 4
-    vzeroall
+    xor rax, rax ; rax = 0
+    mov rcx, 4   ; rcx = 4
+
+    vzeroall ; zero vector registers
+
+    ; loop 4 times
     l:
-    vmovaps xmm0, [rsi]
 
-    vbroadcastss xmm1, REAL4 ptr [rdi+rax+0]
-    vfmadd231ps xmm2, xmm1, xmm0
+    vmovaps xmm0, [rsi]                            ;
 
-    vbroadcastss xmm1, REAL4 ptr [rdi+rax+16]
-    vfmadd231ps xmm3, xmm1, xmm0
+    vbroadcastss xmm1, REAL4 ptr [rdi+rax+0]       ;
+    vfmadd231ps xmm2, xmm1, xmm0                   ;
 
-    vbroadcastss xmm1, REAL4 ptr [rdi+rax+32]
-    vfmadd231ps xmm4, xmm1, xmm0
+    vbroadcastss xmm1, REAL4 ptr [rdi+rax+0x10]    ;
+    vfmadd231ps xmm3, xmm1, xmm0                   ;
 
-    vbroadcastss xmm1, REAL4 ptr [rdi+rax+48]
-    vfmadd231ps xmm5, xmm1, xmm0
+    vbroadcastss xmm1, REAL4 ptr [rdi+rax+0x20]    ;
+    vfmadd231ps xmm4, xmm1, xmm0                   ;
+
+    vbroadcastss xmm1, REAL4 ptr [rdi+rax+0x30]    ;
+    vfmadd231ps xmm5, xmm1, xmm0                   ;
 
     add rax, 4
     add rsi, 16
@@ -174,10 +178,10 @@ AVXmat4xmat4 PROC
     pop rsi
     pop rcx
 
-    vmovaps [r8],xmm2
-    vmovaps [r8+16],xmm3
-    vmovaps [r8+32],xmm4
-    vmovaps [r8+48],xmm5
+    vmovaps [r8]   , xmm2
+    vmovaps [r8+0x10], xmm3
+    vmovaps [r8+0x20], xmm4
+    vmovaps [r8+0x30], xmm5
 
     leave
     ret
