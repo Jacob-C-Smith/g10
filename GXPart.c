@@ -226,6 +226,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 		// Initialized data
 		dict *part_json = p_value->object;
 
+		// Required properties
 		p_name = dict_get(part_json, "name");
 		p_path = dict_get(part_json, "path");
 

@@ -4083,18 +4083,25 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         // Initialzed data
         dict *p_dict = p_value->object;
 
-        // 
+        // Required parameters
         p_name            = dict_get(p_dict, "name");
         p_samples         = dict_get(p_dict, "samples");
         p_format          = dict_get(p_dict, "format");
-        
         p_initial_layout  = dict_get(p_dict, "initial layout");
         p_final_layout    = dict_get(p_dict, "final layout");
-        p_load_operation  = dict_get(p_dict, "load operation");
-        p_store_operation = dict_get(p_dict, "store operation");
+
+        // Optional parameters
+        p_load_operation  = dict_get(p_dict, "load operation");  // Default to VK_ATTACHMENT_LOAD_OP_DONT_CARE
+        p_store_operation = dict_get(p_dict, "store operation"); // Default to VK_ATTACHMENT_STORE_OP_DONT_CARE
 
         // Check for missing parameters
-        if ( ! ( p_name && p_samples && p_format && p_initial_layout && p_final_layout ) )
+        if ( ! (
+            p_name           && 
+            p_samples        &&
+            p_format         &&
+            p_initial_layout &&
+            p_final_layout
+        ) )
             goto missing_properties;
     }
     // Default

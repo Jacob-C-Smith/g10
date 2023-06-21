@@ -326,7 +326,15 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 		p_up        = dict_get(p_dict, "up");
 
 		// Error checking
-		if ( ! ( p_name && p_near_clip && p_far_clip && p_fov && p_location && p_target && p_up ) )
+		if ( ! ( 
+			p_name      &&
+			p_near_clip &&
+			p_far_clip  &&
+			p_fov       &&
+			p_location  &&
+			p_target    &&
+			p_up
+		) )
 			goto missing_properties;
 	}
 	// Parse the camera as a path

@@ -4344,8 +4344,6 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
     // Success
     return 1;
 
-    
-    
     failed_to_load_descriptor_as_json_value:
     wrong_descriptors_type:
     missing_descriptor_properties:
@@ -4429,6 +4427,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
         }
     }
 }
+
 /*
 int load_descriptor_as_json_value ( GXDescriptor_t **pp_descriptor, JSONValue_t *p_value )
 {
