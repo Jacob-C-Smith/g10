@@ -211,7 +211,7 @@ DLLEXPORT int register_bind_callback ( GXBind_t *p_bind, void *function_pointer 
  */
 DLLEXPORT int unregister_bind_callback ( GXBind_t *p_bind, void *function_pointer );
 
-// Keycode finder
+// Scancode finder
 DLLEXPORT SDL_Scancode find_key ( const char *name );
 
 // Key information

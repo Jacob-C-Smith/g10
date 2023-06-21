@@ -15,6 +15,17 @@ int user_code_callback ( GXInstance_t *p_instance )
     return 1;
 }
 
+// This gets called after g_init and before g_start_schedule
+int game_initialization ( GXInstance_t *p_instance )
+{
+    
+    // Set the user code callback
+    add_user_code_callback(p_instance, &user_code_callback);
+
+    // Success
+    return 1;
+}
+
 // Entry point
 int main ( int argc, const char *argv[] )
 {
@@ -24,9 +35,7 @@ int main ( int argc, const char *argv[] )
     GXEntity_t   *p_entity          = 0;
     GXAI_t       *p_ai              = 0;
     const char   *instance_path     = "G10/debug client instance.json",
-                 *schedule_name     = "Client Schedule",
-                 *client_name       = 0;
-    bool          connect_to_server = false;
+                 *schedule_name     = "Client Schedule";
 
     // Parse command line arguments
     for ( size_t i = 0; i < argc; i++ )
@@ -44,39 +53,9 @@ int main ( int argc, const char *argv[] )
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
         goto failed_to_initialize_g10;
-   
-    /*
-    // Game setup
-    {
-
-        // Set up input
-        {
-
-            // Initialized data
-            GXBind_t *exit_bind  = find_bind(p_instance->input, "QUIT"),
-                     *lock_mouse = find_bind(p_instance->input, "TOGGLE LOCK MOUSE"),
-                     *play_sound = find_bind(p_instance->input, "PLAY SOUND"),
-                     *mouse_up   = find_bind(p_instance->input, "MOUSE UP"),
-                     *mouse_down = find_bind(p_instance->input, "MOUSE DOWN");
-
-            // If quit is called, exit the game loop
-            register_bind_callback(exit_bind, &g_user_exit);
-
-            // Set up the camera controller
-            {
-                // First person controller
-                // camera_controller_from_camera(instance, instance->context.scene->active_camera);
-
-                // Third person controller. Thanks Aiden :)
-                // aps_3rdpersonctrl_from_camera_and_entity(instance, instance->active_scene->active_camera, get_entity(instance->active_scene, "player1"));
-            }
-
-        }
-
-        // Set up user code
-        add_user_code_callback(p_instance, &user_code_callback);
-    }
-    */
+    
+    // Set up the game itself
+    (void)game_initialization(p_instance);
     
     // Start the game
     (void)g_start_schedule(p_instance, schedule_name);

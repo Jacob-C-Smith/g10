@@ -228,10 +228,6 @@ const kn_t keys[] =
         "PERIOD"
     },
     {
-        SDL_SCANCODE_PERIOD,
-        "PERIOD"
-    },
-    {
         SDL_SCANCODE_SLASH,
         "SLASH"
     },
@@ -443,6 +439,110 @@ const kn_t keys[] =
         0,
         0
     }
+};
+
+const char *scancodes[] =
+{
+    "",
+    "",
+    "",
+    "",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "0",
+    "RETURN",
+    "ESCAPE",
+    "BACKSPACE",
+    "TAB",
+    "SPACE",
+    "MINUS",
+    "EQUALS",
+    "LEFT BRACKET",
+    "RIGHT BRACKET",
+    "BACKSLASH",
+    "",
+    "SEMICOLON",
+    "APOSTROPHE",
+    "TILDE",
+    "COMMA",
+    "PERIOD",
+    "SLASH",
+    "CAPS LOCK",
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8",
+    "F9",
+    "F10",
+    "F11",
+    "F12",
+    "PRINT SCREEN",
+    "SCROLL LOCK",
+    "PAUSE",
+    "INSERT",
+    "HOME",
+    "PAGE UP",
+    "DELETE",
+    "END",
+    "PAGE DOWN",
+    "RIGHT",
+    "LEFT",
+    "DOWN",
+    "UP",
+    "NUMLOCK",
+    "KEYPAD DIVIDE",
+    "KEYPAD MULTIPLY",
+    "KEYPAD MINUS",
+    "KEYPAD PLUS",
+    "KEYPAD ENTER",
+    "KEYPAD 1",
+    "KEYPAD 2",
+    "KEYPAD 3",
+    "KEYPAD 4",
+    "KEYPAD 5",
+    "KEYPAD 6",
+    "KEYPAD 7",
+    "KEYPAD 8",
+    "KEYPAD 9",
+    "KEYPAD 0",
+    "KEYPAD PERIOD"
 };
 
 dict *key_dict = 0;
@@ -851,8 +951,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                     goto failed_to_load_bind_as_json_value;
 
                 // Add the bind to the input
-                dict_add(p_input->binds, p_bind->name, p_bind);
-                dict_add(p_input->bind_lut, p_bind->name, p_bind);
+                //dict_add(p_input->binds, p_bind->name, p_bind);
+                //dict_add(p_input->bind_lut, p_bind->name, p_bind);
             }
 
 			// Clean the scope
@@ -1236,9 +1336,11 @@ int process_input ( GXInstance_t *p_instance )
     while ( SDL_PollEvent(&p_instance->sdl2.event) ) 
     {
 
-        // 
+        // Switch the event
         switch (p_instance->sdl2.event.type)
         {
+            
+            // Process mouse motion
             case SDL_MOUSEMOTION:
             {
                 bool mouse_lock = SDL_GetRelativeMouseMode();
@@ -1253,18 +1355,21 @@ int process_input ( GXInstance_t *p_instance )
                     .inputs.mouse_state.button = 0 // TODO
                 };
 
+                //printf(" <%.2f, %.2f >                \r", (float) input.inputs.mouse_state.xrel, (float) input.inputs.mouse_state.yrel);
+                //fflush(stdout);
+
                 //// -X, mouse left
                 //if ( x_rel < 0 )
                 //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
-//
+
                 //// +X, mouse right
                 //if ( 0 < x_rel )
                 //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
-//
+
                 //// -Y, mouse up
                 //if ( y_rel < 0 )
                 //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
-//
+
                 //// +Y, mouse down
                 //if ( 0 < y_rel )
                 //    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
@@ -1285,130 +1390,6 @@ int process_input ( GXInstance_t *p_instance )
 
             }
             break;
-            case SDL_WINDOWEVENT:
-            {
-                switch (p_instance->sdl2.event.window.event)
-                {
-                    case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    {
-                        // TODO: Uncomment
-                        g_window_resize(p_instance);
-                        break;
-                    }
-                }
-            }
-            break;
-            case SDL_DROPFILE:
-            {
-
-            }
-            break;
-            case SDL_QUIT:
-            {
-
-            }
-            break;
-            default:
-                break;
-        }
-    }
-
-    // TODO: Reimplement for other libraries?
-    /*
-    // Poll for events
-    while ( SDL_PollEvent(&p_instance->sdl2.event) )
-    {
-
-        // Switch on the event type
-        switch (p_instance->sdl2.event.type)
-        {
-
-            // Mouse events
-            case SDL_MOUSEMOTION:
-            {
-
-                // TODO: Uncomment
-                // Don't call binds if the mouse isn't lockced
-                //if (!SDL_GetRelativeMouseMode())
-                //    break;
-
-                // Initialized data
-                u8                   button = 0;
-                int                  x_rel  = p_instance->sdl2.event.motion.xrel,
-                                     y_rel  = p_instance->sdl2.event.motion.yrel;
-                callback_parameter_t input  = (callback_parameter_t)
-                {
-                    .input_state               = MOUSE,
-                    .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
-                    .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
-                    .inputs.mouse_state.button = 0
-                };
-
-                // TODO: call binds
-                //printf("%3d %3d \r", x_rel, y_rel);
-                
-                
-                // -X, mouse left
-                if ( x_rel < 0 )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE LEFT");
-
-                // +X, mouse right
-                if ( 0 < x_rel )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE RIGHT");
-
-                // -Y, mouse up
-                if ( y_rel < 0 )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE UP");
-
-                // +Y, mouse down
-                if ( 0 < y_rel )
-                    queue_enqueue(p_instance->input->p_key_queue, "MOUSE DOWN");
-                
-            }
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-            {
-
-                // Don't call binds if the mouse isn't lockced
-                if ( !SDL_GetRelativeMouseMode() )
-                    break;
-
-                // Initialized data
-                u8 button = 0;
-                int x_rel = p_instance->sdl2.event.motion.xrel,
-                    y_rel = p_instance->sdl2.event.motion.yrel;
-                callback_parameter_t input = (callback_parameter_t)
-                {
-                    .input_state               = MOUSE,
-                    .inputs.mouse_state.xrel   = (s32) (x_rel * p_instance->input->mouse_sensitivity),
-                    .inputs.mouse_state.yrel   = (s32) (y_rel * p_instance->input->mouse_sensitivity),
-                    .inputs.mouse_state.button = button
-                };
-            }
-            break;
-
-            // Keyboard events
-
-            // Key up
-            // Key down
-            case SDL_KEYDOWN:
-            {
-
-            }
-
-            // Window resize
-            case SDL_WINDOWEVENT:
-                switch (p_instance->sdl2.event.window.event)
-                {
-                    case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    {
-                        // TODO: Uncomment
-                        g_window_resize(p_instance);
-                        break;
-                    }
-                }
-                break;
-
             // File drop
             case SDL_DROPFILE:
             {
@@ -1422,17 +1403,31 @@ int process_input ( GXInstance_t *p_instance )
                 );
                 SDL_free(dropped_filedir);    // Free dropped_filedir memory
             }
-
-
-            // Quit
+            case SDL_WINDOWEVENT:
+            {
+                switch (p_instance->sdl2.event.window.event)
+                {
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    {
+                        // TODO: Uncomment
+                        g_window_resize(p_instance);
+                        break;
+                    }
+                }
+            }
+            break;
             case SDL_QUIT:
             {
-                g_user_exit( (callback_parameter_t) { 0, {0} }, p_instance);
-                break;
+                g_user_exit((callback_parameter_t){ 0 }, p_instance);
             }
+            break;
+            default:
+                break;
         }
     }
+   
     const u8* keyboard_state = SDL_GetKeyboardState(NULL);
+    printf("[ ");
 
     // Iterate over each key
     for (size_t i = 0; i < 110; i++)
@@ -1442,19 +1437,20 @@ int process_input ( GXInstance_t *p_instance )
         if ( keyboard_state[i] )
         {
 
-            // Initialized data
-            GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
+            printf("%s, ", scancodes[i]);
+            fflush(stdout);
 
-
-            if ( bind )
-            {
-                bind->active = true;
-                p_instance.input.inputs.key.depressed = true;
-                call_bind(bind, p_input, p_instance);
-            }
+            //// Initialized data
+            //GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
+            //if ( bind )
+            //{
+            //    bind->active = true;
+            //    p_instance.input.inputs.key.depressed = true;
+            //    call_bind(bind, p_input, p_instance);
+            //}
         }
-    }*/
-
+    }
+    printf(" ]                                                                    \r");
     // Game controller
     if ( controller )
     {

@@ -8,13 +8,15 @@
 // Include guard
 #pragma once
 
-//#define BUILD_G10_WITH_DISCORD
-//#define BUILD_G10_WITH_FMOD
-#define BUILD_G10_WITH_ANSI_COLOR
 #define G10_VERSION_MAJOR 1
 #define G10_VERSION_MINOR 0
 #define G10_VERSION_PATCH 0
-#define G10_LOG_PHYSICAL_DEVICES
+
+#define BUILD_G10_WITH_ANSI_COLOR
+#define BUILD_G10_WITH_SDL_NET
+//#define BUILD_G10_WITH_DISCORD
+//#define BUILD_G10_WITH_FMOD
+
 
 // Standard library
 #include <stdio.h>
@@ -87,7 +89,7 @@ struct GXInstance_s
         SDL_Window        *window;
         SDL_Event          event;
         SDL_AudioDeviceID  audio_device;
-    }           sdl2;
+    } sdl2;
 
     // Vulkan
     struct {
@@ -128,7 +130,7 @@ struct GXInstance_s
         #pragma pack(pop)
 
         struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
-    }           vulkan;
+    } vulkan;
 
     // Window parameters
     struct {
@@ -137,7 +139,7 @@ struct GXInstance_s
               height;
         bool  fullscreen;
 
-    }           window;
+    } window;
 
     // Context
     struct {
@@ -147,19 +149,19 @@ struct GXInstance_s
         GXRenderer_t  *renderer,
                       *loading_renderer;
         int          (*user_code_callback) (GXInstance_t *instance);
-    }           context;
+    } context;
 
     // Data
     struct {
         dict *schedules,
              *scenes;
-    }           data;
+    } data;
 
     // Networking
     struct {
         GXServer_t *server;
         GXClient_t *client;
-    }           networking;
+    } networking;
 
     // Cache
     struct {
@@ -167,7 +169,7 @@ struct GXInstance_s
              *materials,
              *shaders,
              *ais;
-    }           cache;
+    } cache;
 
     // Queues
     struct {
@@ -178,7 +180,7 @@ struct GXInstance_s
               *actor_force,
               *ai_preupdate,
               *ai_update;
-    }           queues;
+    } queues;
 
     // Mutexes
     struct {
@@ -192,7 +194,7 @@ struct GXInstance_s
                   *resolve_collision,
                   *ai_preupdate,
                   *ai_update;
-    }           mutexes;
+    } mutexes;
 
     // Time
     struct {
@@ -201,7 +203,7 @@ struct GXInstance_s
                last_time;
         u64    clock_div;
         float  delta_time;
-    }           time;
+    } time;
 
     // Discord integration
     #ifdef BUILD_G10_WITH_DISCORD
@@ -216,7 +218,7 @@ struct GXInstance_s
         struct IDiscordLobbyManager        *lobbies;
         struct DiscordUser                  user;
         DiscordUserId                       user_id;
-    }           discord_integration;
+    } discord_integration;
 
     #endif
 
@@ -227,17 +229,17 @@ struct GXInstance_s
         FMOD_SYSTEM* system;
 
 
-    }           fmod;
+    } fmod;
 
     #endif
 
     // Input
-    GXInput_t  *input;
+    GXInput_t *input;
 
     // How many threads should be used to load a scene
-    size_t      loading_thread_count;
+    size_t     loading_thread_count;
 
-    bool        running;
+    bool       running;
 };
 
 // Allocators

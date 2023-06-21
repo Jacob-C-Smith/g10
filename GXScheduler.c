@@ -493,7 +493,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 			size_t name_len = strlen(p_name->string);
 
 			// Error checking
-			if ( name > 255 )
+			if ( name_len > 255 )
 				goto name_too_long;
 
 			// Allocate for the name

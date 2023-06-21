@@ -1983,7 +1983,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         size_t                    attachment_count          = 0,
                                   dependency_count          = 0,
                                   correlated_mask_count     = 0;
-        int                      *correlated_mask_views     = 0;
+        unsigned int             *correlated_mask_views     = 0;
         VkAttachmentDescription2 *attachments               = 0;
         VkAttachmentReference    *attachment_references     = 0;
         VkSubpassDescription2    *subpasses                 = 0;
@@ -3102,7 +3102,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
     {
 
         // Initialized data
-        dict *p_dict = 0;
+        dict *p_dict = p_value->object;
         
         // Required properties
         p_name                  = dict_get(p_dict, "name");
@@ -3390,7 +3390,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
                 .pResolveAttachments     = 0,
                 .pDepthStencilAttachment = depth_attachment_reference,
                 .preserveAttachmentCount = (u32)preserved_attachment_count,
-                .pPreserveAttachments    = preserved_attachment_references
+                .pPreserveAttachments    = 0
             }
         };
     }
@@ -4817,7 +4817,12 @@ int render_frame ( GXInstance_t *p_instance )
     { 
         p_instance->vulkan.swap_chain
     };
-    
+
+    // TODO: remove
+
+    // Success
+    return 1;
+
     // Get the microsecond counter
     start = SDL_GetPerformanceCounter();
 
