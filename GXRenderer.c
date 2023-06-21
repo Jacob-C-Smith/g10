@@ -919,15 +919,15 @@ int create_renderer ( GXRenderer_t **pp_renderer )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -969,15 +969,15 @@ int create_render_pass ( GXRenderPass_t **pp_render_pass )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1019,15 +1019,15 @@ int create_subpass ( GXSubpass_t **pp_subpass )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1119,15 +1119,15 @@ int create_attachment ( GXAttachment_t **pp_attachment )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1169,15 +1169,15 @@ int create_texture ( GXTexture_t **pp_texture )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1219,15 +1219,15 @@ int create_framebuffer ( GXFramebuffer_t **pp_framebuffer )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1306,15 +1306,15 @@ int load_renderer ( GXRenderer_t **pp_renderer, char *path )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1385,7 +1385,7 @@ int load_renderer_as_json_text ( GXRenderer_t **pp_renderer, char *text )
         {
             failed_to_parse_json:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to parse JSON text in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Failed to parse JSON text in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1669,7 +1669,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         {
             wrong_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"p_value\" must be of type [ string | object ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"p_value\" must be of type [ string | object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1677,7 +1677,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1685,7 +1685,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             wrong_attachments_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"attachments\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"attachments\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1693,7 +1693,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             wrong_renderer_clear_color_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"clear color\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"clear color\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1701,7 +1701,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             wrong_passes_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"passes\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"passes\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1709,7 +1709,7 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 
             missing_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Missing properties in parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Missing properties in parameter \"p_value\" in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1752,15 +1752,15 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1839,15 +1839,15 @@ int load_render_pass ( GXRenderPass_t **pp_render_pass, char *path )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -2791,7 +2791,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         {
             wrong_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Can not parse render pass. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Can not parse render pass. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2799,7 +2799,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2807,7 +2807,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             missing_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Not enough properties to construct remder pass in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json", __FUNCTION__);
+                    g_print_error("[G10] Not enough properties to construct remder pass in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2815,7 +2815,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_source_subpass_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2823,7 +2823,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_destination_subpass_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2831,7 +2831,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_source_stage_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2839,7 +2839,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_destination_stage_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2847,7 +2847,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_source_access_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2855,7 +2855,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             wrong_dependency_destination_access_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"\" must be of type [ string | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2863,7 +2863,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             failed_to_load_subpass_as_json_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to load subpass from JSON value in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Failed to load subpass from JSON value in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2884,16 +2884,15 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-
-        }
+				// Error
+				return 0;
+		}
 
         // Vulkan errors
         {
@@ -2984,15 +2983,15 @@ int load_subpass ( GXSubpass_t **pp_subpass, char *path )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -3066,7 +3065,7 @@ int load_subpass_as_json_text ( GXSubpass_t **pp_subpass, char *text )
         {
             failed_to_parse_json_as_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to parse JSON text in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Failed to parse JSON text in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3428,7 +3427,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
         {
             missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Renderer] Not enough properties to construct subpass in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json", __FUNCTION__);
+					g_print_error("[G10] [Renderer] Not enough properties to construct subpass in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -3436,7 +3435,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3444,7 +3443,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
             wrong_input_attachments_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"input attachments\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"input attachments\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3452,7 +3451,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
             wrong_color_attachments_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"color attachments\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"color attachments\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3460,7 +3459,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
             wrong_preserved_attachments_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"preserved attachments\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"preserved attachments\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3468,7 +3467,7 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
 
             wrong_depth_attachments_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"depth attachment\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"depth attachment\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3803,7 +3802,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
         {
             wrong_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Attachment JSON value is of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Attachment JSON value is of wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3811,7 +3810,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             missing_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Missing JSON parameters in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Missing JSON parameters in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3819,7 +3818,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Wrong \"format\" VkFormat value in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Wrong \"format\" VkFormat value in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3827,7 +3826,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3835,7 +3834,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_format_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3843,7 +3842,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_load_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3851,7 +3850,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_store_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3859,7 +3858,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_initial_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3867,7 +3866,7 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
 
             wrong_final_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4288,7 +4287,10 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
     // Success
     return 1;
-
+    
+    missing_properties:
+        return 0;
+        
     // Error handling
     {
 
@@ -4327,17 +4329,15 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         {
             wrong_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
 
-            missing_properties:
-                
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4345,18 +4345,15 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             wrong_samples_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"samples\" must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"samples\" must be of type [ integer ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
-
-
-            // vvvvv TODO: FIX  vvvvvv
             
             wrong_format:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4364,17 +4361,15 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             wrong_format_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"format\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
 
-            // ^^^^^^^^^^^^^^^^^^^^^^^
-
             wrong_load_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"load operation\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4382,7 +4377,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             wrong_store_operation_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"store operation\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4390,7 +4385,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             wrong_initial_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"initial layout\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4398,7 +4393,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
 
             wrong_final_layout_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Property \"final layout\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4409,7 +4404,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         {
             failed_to_create_image:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Renderer] Failed to allocate memory for image in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Renderer] Failed to allocate memory for image in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/renderer.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -5067,8 +5062,8 @@ fail:
 
     end = SDL_GetPerformanceCounter();
     p_instance->time.delta_time = (float)(((double)(end - start)) / (double)(p_instance->time.clock_div));
-    if (p_instance->time.ticks % 1000 == 1)
-        printf("Render time: %dms                           \r", (int)(p_instance->time.delta_time * 1000.f));
+    //if (p_instance->time.ticks % 1000 == 1)
+        //printf("Render time: %dms                           \r", (int)(p_instance->time.delta_time * 1000.f));
     p_instance->time.ticks += 1;
 
     // Success

@@ -8,34 +8,22 @@
 #include <G10/GXEntity.h>
 
 // This gets called once a frame
-int user_code_callback ( GXInstance_t *p_instance )
-{
-
-    // Success
-    return 1;
-}
+int user_code_callback ( GXInstance_t *p_instance );
 
 // This gets called after g_init and before g_start_schedule
-int game_initialization ( GXInstance_t *p_instance )
-{
-    
-    // Set the user code callback
-    add_user_code_callback(p_instance, &user_code_callback);
+int game_initialization ( GXInstance_t *p_instance );
 
-    // Success
-    return 1;
-}
+// Log some stuff
+int game_log ( GXInstance_t *p_instance );
 
 // Entry point
 int main ( int argc, const char *argv[] )
 {
 
     // Initialized data
-    GXInstance_t *p_instance        = 0;
-    GXEntity_t   *p_entity          = 0;
-    GXAI_t       *p_ai              = 0;
-    const char   *instance_path     = "G10/debug client instance.json",
-                 *schedule_name     = "Client Schedule";
+    GXInstance_t *p_instance    = 0;
+    const char   *instance_path = "G10/debug client instance.json",
+                 *schedule_name = "Client Schedule";
 
     // Parse command line arguments
     for ( size_t i = 0; i < argc; i++ )
@@ -52,11 +40,32 @@ int main ( int argc, const char *argv[] )
 
     // Create an instance
     if ( g_init(&p_instance, instance_path) == 0 )
-        goto failed_to_initialize_g10;
+    {
+
+        // Write an error message
+        (void)g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
+        
+        // Error
+        return EXIT_FAILURE;
+    }
     
     // Set up the game itself
-    (void)game_initialization(p_instance);
+    if ( game_initialization(p_instance) == 0 )
+    {
+
+        // Write an error message
+        (void)g_print_error("Failed to initialize game in call to function \"%s\"\n", __FUNCTION__);
+        
+        // Exit
+        (void)g_exit(&p_instance);
+
+        // Error
+        return EXIT_FAILURE;
+    }
     
+    // Log some details about the game and G10
+    (void)game_log(p_instance);
+
     // Start the game
     (void)g_start_schedule(p_instance, schedule_name);
 
@@ -66,21 +75,54 @@ int main ( int argc, const char *argv[] )
     // Exit
     (void)g_exit(&p_instance);
 
-    // Return
+    // Success
     return EXIT_SUCCESS;
+}
+
+int user_code_callback ( GXInstance_t *p_instance )
+{
+    
+    // Whatever code you want
+    
+    // Success
+    return 1;
+}
+
+int game_initialization ( GXInstance_t *p_instance )
+{
+    
+    // Set the user code callback
+    if ( add_user_code_callback(p_instance, &user_code_callback) == 0 )
+        goto failed_to_add_user_code_callback;
+
+    // Success
+    return 1;
 
     // Error handling
     {
 
-        // G10 Errors
+        // G10 errors
         {
-            failed_to_initialize_g10:
+            failed_to_add_user_code_callback:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("Failed to set user code callback in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
-                return EXIT_FAILURE;
+                return 0;
         }
     }
+}
+
+int game_log ( GXInstance_t *p_instance )
+{
+    
+    // Print the input
+    (void)input_info(p_instance->input);
+
+    // Flush standard out
+    (void)fflush(stdout);
+
+    // Success
+    return 1;
 }

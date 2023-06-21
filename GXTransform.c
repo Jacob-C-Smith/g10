@@ -236,7 +236,7 @@ int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
 
 			failed_to_parse_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Failed to parse JSON in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[G10] [Transform] Failed to parse JSON in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n",__FUNCTION__);
 				#endif
 
 				// Error
@@ -479,12 +479,12 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 				return 0;
 		}
 
-		// JSON Errors
+		// JSON errors
 		{
 
 			missing_properties:
 				#ifndef NDEBUG
-                    g_print_error("[G10] [Transform] Not enough properties to construct transform in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json", __FUNCTION__);
+                    g_print_error("[G10] [Transform] Not enough properties to construct transform in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -492,7 +492,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 			wrong_location_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Property \"location\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Property \"location\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -500,7 +500,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 			wrong_rotation_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Property \"rotation\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Property \"rotation\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -508,7 +508,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 
 			wrong_scale_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Transform] Property \"scale\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Transform] Property \"scale\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n", __FUNCTION__);
 				#endif
 
 				// Error

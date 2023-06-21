@@ -1324,7 +1324,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             missing_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Not enough properties to construct instance in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json", __FUNCTION__);
+                    g_print_error("[G10] Not enough properties to construct instance in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1332,7 +1332,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_log_file_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"log file\" property. Wrong type in call to function \"%s\".\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"log file\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1340,7 +1340,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_window_width_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"width\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"width\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1348,7 +1348,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_window_height_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"height\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"height\" property of \"window\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1356,7 +1356,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_window_title_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"title\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"title\" property of \"window\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1364,7 +1364,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_window_fullscreen_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"fullscreen\" property of \"window\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"fullscreen\" property of \"window\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1372,7 +1372,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"vulkan\" property. Wrong property type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"vulkan\" property. Wrong property type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1380,7 +1380,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             no_vulkan_property:
                 #ifndef NDEBUG
-                    g_print_error("[G10] No \"vulkan\" property provided in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] No \"vulkan\" property provided in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1388,14 +1388,14 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_requested_instance_extensions_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"instance extensions\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"instance extensions\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
             wrong_requested_validation_layers_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"validation layers\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"validation layers\" property of \"vulkan\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1403,7 +1403,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_material_cache_count_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"material count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"material count\" property of \"cache\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1411,7 +1411,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_part_cache_count_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"part count\" property of \"cache\" property. Wron type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"part count\" property of \"cache\" property. Wron type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1419,7 +1419,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_shader_cache_count_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"shader count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"shader count\" property of \"cache\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1427,7 +1427,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_ai_cache_count_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"ai count\" property of \"cache\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"ai count\" property of \"cache\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1435,7 +1435,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_loading_thread_count_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Failed to parse \"loading thread count\" property. Wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Failed to parse \"loading thread count\" property. Wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1443,7 +1443,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             missing_vulkan_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"vulkan\" is missing properties in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"vulkan\" is missing properties in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1451,7 +1451,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             missing_vulkan_instance_properties:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"instance\" of property \"vulkan\" is missing properties in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"instance\" of property \"vulkan\" is missing properties in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1459,7 +1459,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_application_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"name\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"name\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1467,7 +1467,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_application_version_array_len:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of length 3 in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of length 3 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1475,7 +1475,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_application_version_element_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Element in property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Element in property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1483,7 +1483,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_requested_instance_extension_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Element in property \"extensions\" of property \"instance\" of property \"vulkan\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Element in property \"extensions\" of property \"instance\" of property \"vulkan\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1491,7 +1491,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_application_version_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"version\" of property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1499,7 +1499,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"instance\" of property \"vulkan\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"instance\" of property \"vulkan\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1507,7 +1507,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_max_buffered_frames_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"max buffered frames\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"max buffered frames\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1515,7 +1515,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
             wrong_vulkan_instance_application_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] Property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] Property \"application\" of property \"instance\" of property \"vulkan\" must be of type [ integer ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1523,7 +1523,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             
             name_propery_too_long:
                 #ifndef NDEBUG
-					g_print_error("[G10] \"name\" property's length must be less than 256 in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] Property \"name\" must be less than 256 characters long in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/instance.json \n", __FUNCTION__);
                 #endif
 
                 // Error

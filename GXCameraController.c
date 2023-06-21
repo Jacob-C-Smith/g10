@@ -22,13 +22,16 @@ GXCameraController_t* create_camera_controller ( void )
 
     // Error handling
     {
-        no_mem:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Camera controller] Unable to allocate memory for camera controller\n");
-            #endif
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-            // Error
-            return 0;
+				// Error
+				return 0;
+		}
     }
 }
 

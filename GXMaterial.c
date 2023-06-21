@@ -50,7 +50,7 @@ int create_material ( GXMaterial_t** material )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -119,10 +119,10 @@ int load_material ( GXMaterial_t **pp_material, const char *path )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Erorr
+				// Error
 				return 0;
 		}
 	}
@@ -211,9 +211,9 @@ int load_material_as_json_text ( GXMaterial_t **material, char* text )
 
 		// Standard library errors
 		{
-			//no_mem:
+			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard Library] Out of memory in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

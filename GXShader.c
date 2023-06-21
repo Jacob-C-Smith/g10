@@ -625,15 +625,15 @@ int create_layout ( GXLayout_t **pp_layout )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -675,15 +675,15 @@ int create_set ( GXSet_t **pp_set )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -725,15 +725,15 @@ int create_descriptor ( GXDescriptor_t **pp_descriptor )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -1077,7 +1077,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
         {
             wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1085,7 +1085,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
 
             unrecognized_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Unrecognized type property value in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Unrecognized type property value in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2699,7 +2699,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             missing_properties:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Not enough properties to construct graphics shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json", __FUNCTION__);
+					g_print_error("[G10] [Shader] Not enough properties to construct graphics shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2707,7 +2707,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             name_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2715,7 +2715,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             vertex_group_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"vertex attributes\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse \"vertex attributes\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2723,7 +2723,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_multisampler_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"multisampler\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse \"multisampler\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2731,7 +2731,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_multisampler_samples:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse multisampler \"samples\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse multisampler \"samples\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2739,7 +2739,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_multisampler_sample_shading_enable:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse multisampler \"sample shading enable\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse multisampler \"sample shading enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2747,7 +2747,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_multisampler_alpha_to_coverage_enable:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse multisampler \"alpha to coverage enable\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse multisampler \"alpha to coverage enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2755,7 +2755,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_multisampler_alpha_to_one_enable:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse multisampler \"alpha to one enable\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse multisampler \"alpha to one enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2763,7 +2763,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_minimum_sample_shading:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse multisampler \"minimum sample shading\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse multisampler \"minimum sample shading\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2771,7 +2771,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_rasterizer_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"rasterizer\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse \"rasterizer\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2795,7 +2795,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_depth_bias_clamp:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias clamp\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias clamp\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2803,7 +2803,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_depth_bias_slope_factor:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias slope factor\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias slope factor\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2811,7 +2811,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_depth_clamp_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth clamp enable\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth clamp enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2819,7 +2819,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_rasterizer_discard_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"rasterizer discard enable\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"rasterizer discard enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2827,7 +2827,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_clockwise:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"clockwise\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"clockwise\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2835,7 +2835,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_depth_bias_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias enable\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -2843,7 +2843,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_vertex_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load vertex shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load vertex shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2851,7 +2851,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_vertex_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create vertex shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create vertex shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2859,7 +2859,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_vertex_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse vertex shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse vertex shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2867,7 +2867,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_tessellation_control_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load tessellation control shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load tessellation control shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2875,7 +2875,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_tessellation_control_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create tessellation control shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create tessellation control shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2883,7 +2883,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_tessellation_control_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse tessellation control shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse tessellation control shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2891,7 +2891,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_tessellation_evaluation_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load tessellation evaluation shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load tessellation evaluation shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2899,7 +2899,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_tessellation_evaluation_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create tessellation evaluation shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create tessellation evaluation shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2907,7 +2907,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_tessellation_evaluation_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse tessellation evaluation shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse tessellation evaluation shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2915,7 +2915,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_geometry_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load geometry shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load geometry shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2923,7 +2923,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_geometry_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create geometry shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create geometry shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2931,7 +2931,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_geometry_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse geometry shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse geometry shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2939,7 +2939,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_task_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load task shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load task shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2947,7 +2947,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_task_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create task shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create task shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2955,7 +2955,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_task_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse task shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse task shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2963,7 +2963,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_mesh_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load mesh shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load mesh shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2971,7 +2971,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_mesh_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create mesh shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create mesh shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2979,7 +2979,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_mesh_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse vertex shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse vertex shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2987,7 +2987,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_load_fragment_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load fragment shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load fragment shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -2995,7 +2995,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             failed_to_create_fragment_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create fragment shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create fragment shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3003,7 +3003,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_fragment_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse fragment shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse fragment shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3282,7 +3282,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             name_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
 				#endif
 
                 // Error
@@ -3290,7 +3290,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             wrong_compute_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse \"compute shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse \"compute shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3298,7 +3298,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             failed_to_load_compute_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load compute shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load compute shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3306,7 +3306,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             failed_to_create_compute_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create compute shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create compute shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3744,7 +3744,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         return 0;
 
     failed_to_allocate_shader:
-    no_mem:
+    
     name_wrong_type:
 
     // Error handling
@@ -3774,7 +3774,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         {
             wrong_ray_generation_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse generation ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse generation ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3782,7 +3782,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             wrong_ray_any_hit_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse any hit ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse any hit ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3790,7 +3790,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             wrong_ray_closest_hit_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse closest hit ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse closest hit ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3798,7 +3798,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             wrong_ray_miss_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse miss ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse miss ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3806,7 +3806,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             wrong_ray_intersection_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse intersection ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse intersection ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3814,7 +3814,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             wrong_ray_callable_shader_path_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to parse callable ray shader path in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to parse callable ray shader path in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3822,7 +3822,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_generation_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"generation shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"generation shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3830,7 +3830,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_any_hit_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"any hit shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"any hit shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3838,7 +3838,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_closest_hit_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"closest_hit shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"closest_hit shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3846,7 +3846,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_miss_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"miss shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"miss shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3854,7 +3854,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_intersection_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"intersection shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"intersection shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3862,7 +3862,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             no_ray_callable_shader_path:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] No \"callable shader path\" property in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] No \"callable shader path\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3870,7 +3870,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_generation_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load generation ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load generation ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3878,7 +3878,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_any_hit_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load any hit ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load any hit ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3886,7 +3886,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_closest_hit_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load closest hit ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load closest hit ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3894,7 +3894,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_miss_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load miss ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load miss ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3902,7 +3902,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_intersection_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load intersection ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load intersection ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3910,7 +3910,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_load_ray_callable_shader_binary:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to load callable ray shader binary in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to load callable ray shader binary in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3918,7 +3918,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_generation_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create generation ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create generation ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3926,7 +3926,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_any_hit_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create any hit ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create any hit ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3934,7 +3934,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_closest_hit_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create closest hit ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create closest hit ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3942,7 +3942,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_miss_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create miss ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create miss ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3950,7 +3950,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_intersection_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create intersection ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create intersection ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -3958,12 +3958,23 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 
             failed_to_create_ray_callable_shader_module:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Failed to create callable ray shader module in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Failed to create callable ray shader module in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
                 return 0;
         }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -4106,7 +4117,6 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
         return 0;
     wrong_type:
     failed_to_allocate_layout:
-    no_mem:
     failed_to_load_set_as_json_value:
     vulkan_failed_to_create_pipeline_layout:
         return 0;
@@ -4133,6 +4143,17 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
                 return 0;
 
         }
+
+        // Standard library errors
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -4402,7 +4423,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
         {
             wrong_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Value was of wrong type in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Value was of wrong type in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -4418,7 +4439,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
             
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Shader] Not enough properties to construct set in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Shader] Not enough properties to construct set in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
                 #endif
 
                 // Error

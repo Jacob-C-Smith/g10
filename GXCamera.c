@@ -130,7 +130,7 @@ int create_camera ( GXCamera_t **pp_camera )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -598,7 +598,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -606,7 +606,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Not enough properties to construct camera in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json", __FUNCTION__);
+					g_print_error("[G10] [Camera] Not enough properties to construct camera in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -614,7 +614,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			location_len_error:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"location\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Property \"location\" must have length of 3 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -622,7 +622,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			target_len_error:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"target\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Property \"target\" must have length of 3 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -630,7 +630,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			up_len_error:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Failed to parse \"up\" property in call to function \"%s\". Expected array of length 3\n", __FUNCTION__);
+					g_print_error("[G10] [Camera] Property \"up\" must have length of 3 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -638,7 +638,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"name\" must be of type [ string ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -646,7 +646,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_location_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"location\" must be of type [ array ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"location\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -654,7 +654,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_target_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"target\" must be of type [ array ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"target\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -662,7 +662,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_up_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"up\" must be of type [ array ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"up\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -670,7 +670,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_near_clip_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"near clip\" must be of type [ float ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"near clip\" must be of type [ float ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -678,7 +678,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_far_clip_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"far clip\" must be of type [ float ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"far clip\" must be of type [ float ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -686,7 +686,7 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 
 			wrong_fov_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Camera] Property \"fov\" must be of type [ float ] in call to function \"%s\"\n");
+					g_print_error("[G10] [Camera] Property \"fov\" must be of type [ float ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/camera.json \n", __FUNCTION__);
 				#endif
 
 				// Error

@@ -48,7 +48,7 @@ int create_entity ( GXEntity_t **pp_entity )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -117,7 +117,7 @@ int load_entity ( GXEntity_t** pp_entity, char* path )
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -262,6 +262,9 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		if ( ! ( p_name_value /*&& [REQUIRED PROPERTEIS]*/ ) )
 			goto missing_properties;
 	}
+	// Default
+	else
+		goto wrong_value_type;
 
 	// Construct the entity
 	{
@@ -426,7 +429,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		{
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] Not enough properties to construct entity in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json", __FUNCTION__);
+					g_print_error("[G10] Not enough properties to construct entity in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -452,9 +455,17 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 		// JSON errors
 		{
+			wrong_value_type:
+				#ifndef NDEBUG
+					g_print_error("[G10] [Entity] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
+				#endif
+
+				// Error
+				return 0;
+
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Property \"name\" must be of type [ string ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -462,7 +473,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			wrong_parts_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Property \"parts\" must be of type [ array ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Property \"parts\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -470,7 +481,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 			
 			wrong_shader_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Property \"shader name\" must be of type [ string ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Property \"shader name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -478,7 +489,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			wrong_transform_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Property \"transform\" must be of type [ object ] in call to function in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Property \"transform\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/entity.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -486,7 +497,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			failed_to_load_transform_as_json_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Failed to load transform in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Failed to load transform in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/transform.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -494,7 +505,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 
 			failed_to_load_ai_as_json_value:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Entity] Failed to load AI in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Entity] Failed to load AI in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -502,15 +513,15 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 		}
 
 		// Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [Entity] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
 				// Error
-                return 0;
-        }
+				return 0;
+		}
 	}
 }
 

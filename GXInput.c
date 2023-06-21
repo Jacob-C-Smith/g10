@@ -605,12 +605,12 @@ int create_input ( GXInput_t **pp_input )
 		// Standard library errors
 		{
 			no_mem:
-			    #ifndef NDEBUG
-			    	printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-			    #endif
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-			    return 0;
+				// Error
+				return 0;
 		}
 	}
 }
@@ -655,12 +655,12 @@ int create_bind ( GXBind_t **pp_bind )
 		// Standard library errors
 		{
 			no_mem:
-			    #ifndef NDEBUG
-			    	printf("[Standard library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-			    #endif
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-			    return 0;
+				// Error
+				return 0;
 		}
 	}
 }
@@ -951,8 +951,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                     goto failed_to_load_bind_as_json_value;
 
                 // Add the bind to the input
-                //dict_add(p_input->binds, p_bind->name, p_bind);
-                //dict_add(p_input->bind_lut, p_bind->name, p_bind);
+                dict_add(p_input->binds, p_bind->name, p_bind);
+                dict_add(p_input->bind_lut, p_bind->name, p_bind);
             }
 
 			// Clean the scope
@@ -1008,7 +1008,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
             wrong_value_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Property \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"p_value\" must be of type [ object ] in call to function \"%s\"\n\"Refer to gschema: https://schema.g10.app/input.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1016,7 +1016,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Property \"name\" must be of type [ string ] in call to function \"%s\"\n\"", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"name\" must be of type [ string ] in call to function \"%s\"\n\"Refer to gschema: https://schema.g10.app/input.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1024,7 +1024,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
             wrong_mouse_sensitivity_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Property \"mouse sensitivity\" must be of type [ float ] in call to function \"%s\"\n\"", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"mouse sensitivity\" must be of type [ float ] in call to function \"%s\"\n\"Refer to gschema: https://schema.g10.app/input.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1032,7 +1032,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
             wrong_binds_type:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Input] Property \"binds\" must be of type [ array ] in call to function \"%s\"\n\"", __FUNCTION__);
+                    g_print_error("[G10] [Input] Property \"binds\" must be of type [ array ] in call to function \"%s\"\n\"Refer to gschema: https://schema.g10.app/input.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1068,7 +1068,6 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     JSONValue_t *p_name = 0,
                 *p_keys = 0;
 
-    // TODO: Refactor to use JSONValue_t *
     // Parse the bind as an object
     if ( p_value->type == JSONobject )
     {
@@ -1088,11 +1087,17 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
             goto missing_properties;
 
     }
-
-    // TODO: Fix
-    /*
+    // Default
+    else
+        goto wrong_value_type;
+    
     // Construct the bind
     {
+
+        // Initialized data
+        char    *name       = 0;
+        char   **keys_array = 0;
+        size_t   keys_count = 0;
 
         // Allocate memory for an bind
         if ( create_bind(pp_bind) == 0 )
@@ -1102,47 +1107,55 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
         p_bind = *pp_bind;
 
         // Copy the name
+        if ( p_name->type == JSONstring )
         {
 
             // Initialized data
-            size_t name_len = strlen(name);
+            size_t name_len = strlen(p_name->string);
 
             // Allocate memory for the name
-            p_bind->name = calloc(name_len+1, sizeof(char));
+            name = calloc(name_len+1, sizeof(char));
 
             // Error checking
-            if ( p_bind->name == (void *) 0 )
+            if ( name == (void *) 0 )
                 goto no_mem;
 
             // Copy the string
-            strncpy(p_bind->name, name, name_len);
+            strncpy(name, p_name->string, name_len);
         }
+        // Default
+        else
+            goto wrong_name_type;
 
         // Parse the keys
+        if ( p_keys->type == JSONarray )
         {
 
 			// Initialized data
 			JSONValue_t **pp_elements  = 0;
-			size_t        key_count    = 0;
 
-			// Get the quantity of elements
-			array_get(p_keys, 0, &key_count );
+            // Dump the array
+            {
 
-			// Allocate an array for the elements
-			pp_elements = calloc(key_count+1, sizeof(JSONValue_t *));
+			    // Get the quantity of elements
+			    array_get(p_keys->list, 0, &keys_count );
 
-			// Error checking
-			if ( pp_elements == (void *) 0 )
-				goto no_mem;
+			    // Allocate an array for the elements
+			    pp_elements = calloc(keys_count+1, sizeof(JSONValue_t *));
 
-			// Populate the elements of the array
-			array_get(p_keys, (void **)pp_elements, 0 );
+			    // Error checking
+			    if ( pp_elements == (void *) 0 )
+			    	goto no_mem;
+
+			    // Populate the elements of the array
+			    array_get(p_keys->list, (void **)pp_elements, 0 );
+            }
 
             // Allocate memory for an array of keys
-            p_keys_array = calloc(key_count+1, sizeof(char *));
+            keys_array = calloc(keys_count+1, sizeof(char *));
 
 			// Iterate over each element
-            for (size_t i = 0; i < key_count; i++)
+            for (size_t i = 0; i < keys_count; i++)
             {
 
                 // Initialized data
@@ -1150,24 +1163,28 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
                 size_t  key_len = 0;
                 char   *key     = 0;
 
+                // Error check
                 if ( i_element->type != JSONstring )
                     goto failed_to_parse_key;
 
-                // Compute the length of the string
-                key_len = strlen(i_element->string);
+                // Copy the name
+                {
+                    // Compute the length of the string
+                    key_len = strlen(i_element->string);
 
-                // Allocate memory for a copy of the string
-                key = calloc(key_len+1, sizeof(char));
+                    // Allocate memory for a copy of the string
+                    key = calloc(key_len+1, sizeof(char));
 
-                // Error checking
-			    if ( key == (void *) 0 )
-				    goto no_mem;
+                    // Error checking
+			        if ( key == (void *) 0 )
+				        goto no_mem;
 
-                // Copy the string
-                strncpy(key, i_element->string, key_len);
+                    // Copy the string
+                    strncpy(key, i_element->string, key_len);
+                }
 
                 // Store the key pointer in the list of keys
-                p_keys_array[i] = key;
+                keys_array[i] = key;
             }
 
 			// Clean the scope
@@ -1176,17 +1193,24 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
 
         *p_bind = (GXBind_t)
         {
-            .name = name,
-            .keys = p_keys_array,
-            .key_count = key_count,
-            .callback_max = 2,
-            .callbacks    = calloc(2, sizeof(void *))
+            .name           = name,
+            .active         = false,
+            .keys           = keys_array,
+            .key_count      = keys_count,
+            .callback_max   = 2,
+            .callback_count = 0,
+            .callbacks      = calloc(2, sizeof(void *)),
+            .next           = 0
         };
     }
-    */
     
     // Success
     return 1;
+
+    // TODO:
+    wrong_value_type:
+    wrong_name_type:
+        return 0;
 
     // Error handling
     {
@@ -1427,30 +1451,29 @@ int process_input ( GXInstance_t *p_instance )
     }
    
     const u8* keyboard_state = SDL_GetKeyboardState(NULL);
-    printf("[ ");
+    
+    //printf("[ ");
+    //// Iterate over each key
+    //for (size_t i = 0; i < 110; i++)
+    //{
+    //    // If the key is down...
+    //    if ( keyboard_state[i] )
+    //    {
+    //        printf("%s, ", scancodes[i]);
+    //        fflush(stdout);
+    //        //// Initialized data
+    //        //GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
+    //        //if ( bind )
+    //        //{
+    //        //    bind->active = true;
+    //        //    p_instance.input.inputs.key.depressed = true;
+    //        //    call_bind(bind, p_input, p_instance);
+    //        //}
+    //    }
+    //}
+    //printf(" ]                                                                    \r");
 
-    // Iterate over each key
-    for (size_t i = 0; i < 110; i++)
-    {
 
-        // If the key is down...
-        if ( keyboard_state[i] )
-        {
-
-            printf("%s, ", scancodes[i]);
-            fflush(stdout);
-
-            //// Initialized data
-            //GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
-            //if ( bind )
-            //{
-            //    bind->active = true;
-            //    p_instance.input.inputs.key.depressed = true;
-            //    call_bind(bind, p_input, p_instance);
-            //}
-        }
-    }
-    printf(" ]                                                                    \r");
     // Game controller
     if ( controller )
     {
@@ -1604,14 +1627,13 @@ int input_info ( GXInput_t *p_input )
     // Get an array of binds
     dict_values(p_input->binds, (void **)binds);
 
-    // TODO: Better formatting, like the scene_info function
     // Iterate over each bind
     for (size_t i = 0; i < l; i++)
     {
         
         // Format
         g_print_log("                   [%d] \"%s\": \n", i, binds[i]->name);
-        g_print_log("                         [ ", i, binds[i]->name);
+        g_print_log("                   \t[ ", i, binds[i]->name);
 
         // Print key binds
         if ( binds[i]->key_count )
@@ -1624,9 +1646,11 @@ int input_info ( GXInput_t *p_input )
             for (size_t j = 1; j < binds[i]->key_count; j++)
                 g_print_log(", %s", binds[i]->keys[j]);
 
-            // Format
-            g_print_log(" ]\n");
+            
         }
+
+        // Format
+        g_print_log(" ]\n");
     }
 
     // Format

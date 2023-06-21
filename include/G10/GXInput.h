@@ -47,12 +47,12 @@ enum input_state_e
 struct GXBind_s
 {
 	bool              active;
-	char             *name,
-	   	            **keys;
-	void            **callbacks;
 	size_t            key_count,
 		              callback_count,
 		              callback_max;
+	char             *name,
+	   	            **keys;
+	void            **callbacks;
 	struct GXBind_s  *next;
 };
 

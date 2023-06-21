@@ -318,8 +318,8 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 
 		// G10 Errors
@@ -415,11 +415,11 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
 				return 0;
 		}
 
-		// JSON Errors
+		// JSON errors
 		{
 			failed_to_parse_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -585,7 +585,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 		{
 			failed_to_parse_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -593,7 +593,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			wrong_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -601,7 +601,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			name_too_long:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] \"name\" property's length must be less than 256 in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] \"name\" property's length must be less than 256 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -609,7 +609,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Not enough properties to construct schedule in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct schedule in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -617,7 +617,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 
 			wrong_thread_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] Element in property \"threads\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] Element in property \"threads\" must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -678,7 +678,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error handling
+				// Error
 				return 0;
 		}
 	}
@@ -1194,7 +1194,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 		{
 			failed_to_parse_json:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Failed to parse JSON in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1202,7 +1202,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			wrong_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1210,7 +1210,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Not enough properties to construct thread in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct thread in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1273,7 +1273,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-				// Error handling
+				// Error
 				return 0;
 		}
 
@@ -1403,7 +1403,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 		{
 			wrong_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Expected a JSON object in call to function \"%s\"\n Refer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1411,7 +1411,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Scheduler] Not enough properties to construct task in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json", __FUNCTION__);
+					g_print_error("[G10] [Scheduler] Not enough properties to construct task in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/schedule.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -1425,8 +1425,8 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
 					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
-			// Error
-			return 0;
+				// Error
+				return 0;
 		}
 	}
 	failed_to_create_task:;

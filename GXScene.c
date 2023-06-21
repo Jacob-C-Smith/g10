@@ -48,15 +48,15 @@ int create_scene ( GXScene_t **pp_scene )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -135,15 +135,15 @@ int load_scene ( GXScene_t **pp_scene, const char *path )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -183,7 +183,7 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
         {
             failed_to_load_scene_as_json_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Failed to load scene in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Failed to load scene in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -191,7 +191,7 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 
             failed_to_parse_json_value:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Failed to parse JSON text in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Failed to parse JSON text in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -267,7 +267,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
         // Error checking
         if ( ! ( p_name_value ) )
-            goto not_enough_properties;
+            goto missing_properties;
     }
     // Parse the scene as a file path
     else if ( p_value->type == JSONstring )
@@ -488,7 +488,6 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     wrong_type:
     no_renderer:
     failed_to_load_initial_scene:
-        return 0;
 
     // Error handling
     {
@@ -516,9 +515,17 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         // JSON errors
         {
 
+            missing_properties:
+        	    #ifndef NDEBUG
+	            	g_print_error("[G10] [Scene] Not enough properties to construct scene in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
+	            #endif
+
+	            // Error
+	            return 0;
+
             name_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -526,7 +533,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             entities_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"entities\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"entities\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -534,7 +541,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             cameras_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"cameras\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"cameras\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -542,7 +549,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             lights_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"lights\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"lights\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -550,7 +557,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             light_probes_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"light probes\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"light probes\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -579,15 +586,15 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 

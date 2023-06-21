@@ -37,11 +37,11 @@ int create_texture ( GXTexture_t **pp_texture )
 				return 0;
 		}
 
-		// Standard library errors
+        // Standard library errors
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[Standard library] Failed to allocate memory in call to function \"%s\"\n",__FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -536,6 +536,9 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
     not_enough_swizzle:
     g_print_error("[G10] [Texture] Failed to create image view in call to function \"%s\"\n", __FUNCTION__);
     return 0;
+    
+    // Error handling
+    {
         // Standard library errors
 		{
 			no_mem:
@@ -546,5 +549,6 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
 				// Error
 				return 0;
 		}
+    }
 
 }

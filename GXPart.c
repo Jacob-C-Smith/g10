@@ -362,7 +362,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 			
 			missing_properties:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Not enough properties to construct part in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json", __FUNCTION__);
+					g_print_error("[G10] [Part] Not enough properties to construct part in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -370,7 +370,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 				
 			wrong_value_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Property \"p_value\" must be of type [ object | string ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Property \"p_value\" must be of type [ object | string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -378,7 +378,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 
 			wrong_name_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Property \"name\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json \n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -386,7 +386,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
 
 			wrong_path_type:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Part] Property \"path\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[G10] [Part] Property \"path\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/part.json \n", __FUNCTION__);
 				#endif
 
 				// Error

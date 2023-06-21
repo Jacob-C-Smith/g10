@@ -38,15 +38,15 @@ int create_bv ( GXBV_t **pp_bv )
         }
 
         // Standard library errors
-        {
-            no_mem:
-                #ifndef NDEBUG
-                    g_print_error("[G10] [BVH] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-                #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-                // Error
-                return 0;
-        }
+				// Error
+				return 0;
+		}
     }
 }
 
@@ -310,16 +310,15 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
     {
 
         // Standard library errors
-        {
-            no_mem:
-            #ifndef NDEBUG
-                g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-            #endif
+		{
+			no_mem:
+				#ifndef NDEBUG
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+				#endif
 
-            // Error
-            return 0;
-
-        }
+				// Error
+				return 0;
+		}
 
         // Argument errors
         {

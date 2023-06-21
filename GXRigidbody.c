@@ -47,11 +47,11 @@ int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
 				return 0;
 		}
 
-		// Standard library
+		// Standard library errors
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"pp_rigidbody\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error
@@ -130,11 +130,11 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
 
 		}
 
-		// Standard library
+		// Standard library errors
 		{
 			no_mem:
 				#ifndef NDEBUG
-					g_print_error("[G10] [Rigidbody] Null pointer provided for parameter \"pp_rigidbody\" in call to function \"%s\"\n", __FUNCTION__);
+					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
 				#endif
 
 				// Error

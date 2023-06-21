@@ -49,7 +49,6 @@ int create_server ( GXServer_t **pp_server )
 				// Error
 				return 0;
 		}
-
 	}
 }
 
