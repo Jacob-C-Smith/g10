@@ -10,7 +10,7 @@ static GXInstance_t *active_instance = 0;
 /** !
  * Find a physical device that conforms to the properties described by the
  * p_value parameter, or find the best possible device as evaluated by 
- * criteria specified by Jake. 
+ * criteria specified by Jake. This device is stored internally.
  * 
  * @param p_value : The "vulkan" property of the G10 instance JSON object -or- a null pointer
  *
@@ -141,40 +141,22 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         // Initialized data
 		dict *p_dict = p_value->object;
 
-        // Parse the name of the game
+        // Required properties
         p_name = dict_get(p_dict, "name");
 
-        // Window
-        p_window = dict_get(p_dict, "window");
-
-        // Input
-        p_input = dict_get(p_dict, "input");
-
-        // Log file
-        p_log_file_i = dict_get(p_dict, "log file");
-
-        // Path to initial scene
-        p_initial_scene = dict_get(p_dict, "initial scene");
-
-        // Caches
-        p_cache = dict_get(p_dict, "cache");
-
-        // Loading thread count
+        // Optional properties
+        p_window               = dict_get(p_dict, "window");
+        p_input                = dict_get(p_dict, "input");
+        p_log_file_i           = dict_get(p_dict, "log file");
+        p_initial_scene        = dict_get(p_dict, "initial scene");
+        p_cache                = dict_get(p_dict, "cache");
         p_loading_thread_count = dict_get(p_dict, "loading thread count");
+        p_vulkan               = dict_get(p_dict, "vulkan");
+        p_renderer             = dict_get(p_dict, "renderer");
+        p_server               = dict_get(p_dict, "server");
+        p_schedules            = dict_get(p_dict, "schedules");
 
-        // Vulkan
-        p_vulkan = dict_get(p_dict, "vulkan");
-
-        // Renderer
-        p_renderer = dict_get(p_dict, "renderer");
-
-        // Server
-        p_server = dict_get(p_dict, "server");
-
-        // Schedules
-        p_schedules = dict_get(p_dict, "schedules");
-
-        // Property check
+        // Error check
         if ( ! ( p_name /* && p_schedule, so on */ ) )
             goto missing_properties;
 
@@ -216,11 +198,18 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Parse the JSON
                 {
-                    p_window_width      = dict_get(p_window->object, "width");
-                    p_window_height     = dict_get(p_window->object, "height");
-                    p_window_title      = dict_get(p_window->object, "title");
-                    p_window_fullscreen = dict_get(p_window->object, "fullscreen");
 
+                    dict *p_dict = p_window->object;
+
+                    // Required properties
+                    p_window_width  = dict_get(p_dict, "width");
+                    p_window_height = dict_get(p_dict, "height");
+                    p_window_title  = dict_get(p_dict, "title");
+                    
+                    // Optional properties
+                    p_window_fullscreen = dict_get(p_dict, "fullscreen");
+
+                    // Error checking
                     if ( ! ( p_window_width && p_window_height && p_window_title ) )
                         goto missing_properties;
                 }
@@ -344,8 +333,11 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     // Initialized data
                     dict *p_dict = p_vulkan->object;                    
 
+                    // Required properties
                     p_vulkan_instance     = dict_get(p_dict, "instance");
                     p_vulkan_device       = dict_get(p_dict, "device");
+                    
+                    // Optional properties
                     p_max_buffered_frames = dict_get(p_dict, "max buffered frames");
 
                     // Check for missing properties
@@ -386,6 +378,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                         // Initialized data
                         dict *p_dict = p_vulkan_instance->object;
 
+                        // Required properties
                         p_vulkan_instance_extensions        = dict_get(p_dict, "extensions");
                         p_vulkan_instance_validation_layers = dict_get(p_dict, "validation layers");
                         p_vulkan_instance_application       = dict_get(p_dict, "application");
@@ -413,6 +406,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                             // Initialized data
                             dict *p_dict = p_vulkan_instance_application->object;
 
+                            // Optional properties
                             p_vulkan_instance_application_name    = dict_get(p_dict, "name");
                             p_vulkan_instance_application_version = dict_get(p_dict, "version");
 
@@ -793,10 +787,13 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                         // Initialized data
                         dict *p_dict = p_vulkan_device->object;
 
+                        // Required properties
+                        p_extensions = dict_get(p_dict, "extensions");
+
+                        // Optional properties
                         p_device_name = dict_get(p_dict, "name");
-                        p_extensions  = dict_get(p_dict, "extensions");
                         
-                        // Check for missing properties
+                        // Error checking
                         if ( ! (
                             p_extensions
                         ) )
@@ -978,10 +975,14 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Parse the JSON value
                 {
-                    p_material_cache_count = dict_get(p_cache->object, "material count");
-                    p_part_cache_count     = dict_get(p_cache->object, "part count");
-                    p_shader_cache_count   = dict_get(p_cache->object, "shader count");
-                    p_ai_cache_count       = dict_get(p_cache->object, "ai count");
+
+                    dict *p_dict = p_cache->object;
+
+                    // Optional properties
+                    p_material_cache_count = dict_get(p_dict, "material count");
+                    p_part_cache_count     = dict_get(p_dict, "part count");
+                    p_shader_cache_count   = dict_get(p_dict, "shader count");
+                    p_ai_cache_count       = dict_get(p_dict, "ai count");
                 }
 
                 // Construct the material cache
@@ -1822,7 +1823,7 @@ float g_vulkan_evaluate_physical_device ( VkPhysicalDevice physical_device, JSON
     }
 }
 
-float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONValue_t *p_value )
+float g_vulkan_evaluate_physical_device_limits ( VkPhysicalDevice physical_device, JSONValue_t *p_value )
 {
 
     // Argument check
@@ -1835,15 +1836,15 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
 
     // Initialized data
     float ret = 0.f;
-    VkPhysicalDeviceProperties2 physical_device_properties2 = { 0 };
-    JSONValue_t *p_image       = 0,
-                *p_shader      = 0,
-                *p_draw        = 0,
-                *p_framebuffer = 0;
-    boolean      passes_image_limits       = true,
-                 passes_shader_limits      = true,
-                 passes_draw_limits        = true,
-                 passes_framebuffer_limits = true;
+    VkPhysicalDeviceProperties2  physical_device_properties2 = { 0 };
+    JSONValue_t                 *p_image                     = 0,
+                                *p_shader                    = 0,
+                                *p_draw                      = 0,
+                                *p_framebuffer               = 0;
+    bool                         ok_image                    = true,
+                                 ok_shader                   = true,
+                                 ok_draw                     = true,
+                                 ok_framebuffer              = true;
 
     // Parse the limits
     if ( p_value->type == JSONobject )
@@ -1852,6 +1853,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
         // Initialized data
         dict *p_dict = p_value->object;
 
+        // Optional properties
         p_image       = dict_get(p_dict, "image");
         p_shader      = dict_get(p_dict, "shader");
         p_draw        = dict_get(p_dict, "draw");
@@ -1879,6 +1881,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
             // Initialized data
             dict *p_dict = p_image->object;
 
+            // Optional properties
             p_image_dimensions = dict_get(p_dict, "dimensions");
             p_image_cube       = dict_get(p_dict, "cube");
             p_image_layers     = dict_get(p_dict, "layers");
@@ -1893,7 +1896,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
             {
                 
                 // Initialized data
-                JSONValue_t **pp_dimensions   = 0;
+                JSONValue_t **pp_dimensions   = 0; 
                 size_t        dimension_count = 0;
                 
                 size_t min_width  = 0,
@@ -1922,37 +1925,49 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                 }
 
                 // Get the width
-                if ( pp_dimensions[0]->type == JSONinteger )
-                    min_width = pp_dimensions[0]->integer;
-                // Default
-                else
-                    goto wrong_image_dimension_limits_element_type;
-
+                {
+                    
+                    // Check for the right type
+                    if ( pp_dimensions[0]->type == JSONinteger )
+                        min_width = pp_dimensions[0]->integer;
+                    // Default
+                    else
+                        goto wrong_image_dimension_limits_element_type;
+                }
+                
                 // Get the height
-                if ( pp_dimensions[1]->type == JSONinteger )
-                    min_height = pp_dimensions[1]->integer;
-                // Default
-                else
-                    goto wrong_image_dimension_limits_element_type;
+                {
 
+                    // Check for the right type
+                    if ( pp_dimensions[1]->type == JSONinteger )
+                        min_height = pp_dimensions[1]->integer;
+                    // Default
+                    else
+                        goto wrong_image_dimension_limits_element_type;
+                }
+                
                 // Get the depth
-                if ( pp_dimensions[2]->type == JSONinteger )
-                    min_depth = pp_dimensions[2]->integer;
-                // Default
-                else
-                    goto wrong_image_dimension_limits_element_type;
+                {
+
+                    // Check for the right type
+                    if ( pp_dimensions[2]->type == JSONinteger )
+                        min_depth = pp_dimensions[2]->integer;
+                    // Default
+                    else
+                        goto wrong_image_dimension_limits_element_type;
+                }
 
                 // Check the width
                 if ( physical_device_properties2.properties.limits.maxImageDimension1D < min_width )
-                    passes_image_limits = false;
+                    ok_image = false;
                 
                 // Check the height
                 if ( physical_device_properties2.properties.limits.maxImageDimension2D < min_height )
-                    passes_image_limits = false;
+                    ok_image = false;
                 
                 // Check the depth
                 if ( physical_device_properties2.properties.limits.maxImageDimension3D < min_depth )
-                    passes_image_limits = false;
+                    ok_image = false;
 
                 // Clean the scope
                 free(pp_dimensions);
@@ -1972,7 +1987,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                 
                 // Check the cube dimension
                 if ( physical_device_properties2.properties.limits.maxImageDimensionCube < p_image_cube->integer )
-                    passes_image_limits = false;
+                    ok_image = false;
                 
             }
             // Default
@@ -1990,7 +2005,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                 
                 // Check the image layer count
                 if ( physical_device_properties2.properties.limits.maxImageArrayLayers < p_image_layers->integer )
-                    passes_image_limits = false;
+                    ok_image = false;
                 
             }
             // Default
@@ -2008,7 +2023,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                     *p_shader_geometry      = 0,
                     *p_shader_fragment      = 0,
                     *p_shader_compute       = 0,
-                    *p_shader_push constant = 0;
+                    *p_shader_push_constant = 0;
 
         // Parse the JSON 
         if ( p_image->type == JSONobject )
@@ -2017,12 +2032,13 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
             // Initialized data
             dict *p_dict = p_image->object;
 
+            // Optional properties
             p_shader_vertex        = dict_get(p_dict, "vertex");
             p_shader_tessellation  = dict_get(p_dict, "tessellation");
             p_shader_geometry      = dict_get(p_dict, "geometry");
             p_shader_fragment      = dict_get(p_dict, "fragment");
             p_shader_compute       = dict_get(p_dict, "compute");
-            p_shader_push constant = dict_get(p_dict, "push constant");
+            p_shader_push_constant = dict_get(p_dict, "push constant");
             
         }
 
@@ -2045,6 +2061,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                     // Initialized data
                     dict *p_dict = p_shader_vertex->object;
 
+                    // Optional properties
                     p_shader_vertex_input = dict_get(p_dict, "input");
                 }
 
@@ -2058,11 +2075,13 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
                     
                     // Parse the JSON
                     {
+
                         // Initialized data
                         dict *p_dict = p_shader_vertex_input->object;
 
-                        p_shader_vertex_attributes = dict_get(p_dict, "quantity")
-                        p_shader_vertex_bindings   = dict_get(p_dict, "offset")
+                        // Optional properties
+                        p_shader_vertex_attributes = dict_get(p_dict, "attributes");
+                        p_shader_vertex_bindings   = dict_get(p_dict, "bindings");
                     }
 
                     // Parse the quantity
@@ -2075,7 +2094,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
 
                             // Check the maximum number of vertex input attributes that can be specified for a graphics pipeline.
                             if ( physical_device_properties2.properties.limits.maxVertexInputAttributes < p_shader_vertex_attributes->integer )
-                                passes_image_limits = false;
+                                ok_image = false;
                         }
                         // Default
                         else
@@ -2092,7 +2111,7 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
 
                             // Check the maximum vertex input attribute offset that can be added to the vertex input binding stride. 
                             if ( physical_device_properties2.properties.limits.maxVertexInputAttributeOffset < p_shader_vertex_bindings->integer )
-                                passes_image_limits = false;
+                                ok_image = false;
                         }
                         // Default
                         else
@@ -2116,6 +2135,9 @@ float g_vulkan_evaluate_device_limits ( VkPhysicalDevice physical_device, JSONVa
     wrong_image_layers_type:
     wrong_image_dimension_limits_element_type:
     wrong_shader_vertex_input:
+    wrong_shader_vertex_input_type:
+    wrong_shader_vertex_attributes_type:
+    wrong_shader_vertex_attributes_offset_type:
         return 0;
 
     // Error handling

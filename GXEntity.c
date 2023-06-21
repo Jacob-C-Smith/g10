@@ -243,17 +243,22 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
 	if ( p_value->type == JSONobject )
 	{
 
-		// Parse the object properties into constructor parameters
-		p_name_value        = dict_get(p_value->object, "name");
-		p_parts_value       = dict_get(p_value->object, "parts");
-		p_materials_value   = dict_get(p_value->object, "materials");
-		p_shader_name_value = dict_get(p_value->object, "shader");
-		p_transform_value   = dict_get(p_value->object, "transform");
-		p_rigidbody_value   = dict_get(p_value->object, "rigidbody");
-		p_collider_value    = dict_get(p_value->object, "collider");
-		p_ai_value          = dict_get(p_value->object, "ai");
+		// Initialized data
+		dict *p_dict = p_value->object;
 
-		// Check for required data
+		// Required properties
+		p_name_value        = dict_get(p_dict, "name");
+
+		// Optional properties
+		p_parts_value       = dict_get(p_dict, "parts");
+		p_materials_value   = dict_get(p_dict, "materials");
+		p_shader_name_value = dict_get(p_dict, "shader");
+		p_transform_value   = dict_get(p_dict, "transform");
+		p_rigidbody_value   = dict_get(p_dict, "rigidbody");
+		p_collider_value    = dict_get(p_dict, "collider");
+		p_ai_value          = dict_get(p_dict, "ai");
+
+		// Error checking
 		if ( ! ( p_name_value /*&& [REQUIRED PROPERTEIS]*/ ) )
 			goto missing_properties;
 	}

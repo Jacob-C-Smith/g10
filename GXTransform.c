@@ -262,22 +262,30 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
 		        *p_scale    = 0;
 
 	// Parse the transform JSON
-    if (p_value->type == JSONobject)
+    if ( p_value->type == JSONobject )
     {
 
-        // Parse the transform
-        p_location   = dict_get(p_value->object, "location");
-        p_rotation   = dict_get(p_value->object, "rotation");
-        p_scale      = dict_get(p_value->object, "scale");
+		// Initialized data
+		dict *p_dict = p_value->object;
+
+        // Required properties
+        p_location   = dict_get(p_dict, "location");
+        p_scale      = dict_get(p_dict, "scale");
+		p_rotation   = dict_get(p_dict, "rotation");
 
 		// Quaternion?
 		if ( p_rotation == 0 )
-			p_rotation = dict_get(p_value->object, "quaternion");
+			p_rotation = dict_get(p_dict, "quaternion");
 
 		// Error checking
-		if ( ( p_location && p_rotation && p_scale ) == 0 )
+		if ( ! ( 
+			p_location &&
+			p_rotation &&
+			p_scale
+		 ) )
 			goto missing_properties;
 	}
+	// Default
 	else
 		goto wrong_type;
 

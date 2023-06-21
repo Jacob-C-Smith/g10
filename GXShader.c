@@ -951,24 +951,33 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
     if ( p_value->type == JSONobject )
     {
 
+        // Initialized data
+        dict *p_dict = p_value->object;
+
         // Get the pipeline type
-        p_name = dict_get(p_value->object, "name");
-        p_type = dict_get(p_value->object, "type");
+        p_name = dict_get(p_dict, "name");
+        p_type = dict_get(p_dict, "type");
 
         if ( p_name )
         {
+            
+            // Check for the right type
             if ( p_name->type == JSONstring )
             {
                 
                 // Initialized data
                 GXShader_t *p_shader = dict_get(p_instance->cache.shaders, p_name->string);
-
+                
                 if ( p_shader )
                 {
+
+                    // Return a pointer to the caller
                     *pp_shader = p_shader;
                     
+                    // Increment the users
                     p_shader->users++;
 
+                    // Success
                     return 1;
                 }
                 
@@ -1792,18 +1801,26 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
             {
 
                 // Initialized data
-                size_t vertex_group_count = 0,
-                       stride = 0,
-                       binding_description_count = 0;
-                JSONValue_t *p_vertex_attributes = 0;
+                size_t       vertex_group_count        = 0,
+                             stride                    = 0,
+                             binding_description_count = 0;
+                JSONValue_t *p_vertex_attributes       = 0;
 
                 // Parse the JSON object
                 {
 
-                    p_vertex_attributes = dict_get(p_in->object, "vertex attributes");
-                    p_topology = dict_get(p_in->object, "topology");
+                    // Initialized data
+                    dict *p_dict = p_in->object;
 
-                    if ( ! ( p_vertex_attributes && p_topology ) )
+                    // Required properties
+                    p_vertex_attributes = dict_get(p_dict, "vertex attributes");
+                    p_topology          = dict_get(p_dict, "topology");
+
+                    // Error checking
+                    if ( ! (
+                        p_vertex_attributes &&
+                        p_topology
+                    ) )
                         goto missing_properties;
                 }
 
@@ -1849,10 +1866,14 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         // Parse the JSON value
                         if ( p_vertex_group->type == JSONobject )
                         {
+                            
+                            // Initialized data
+                            dict *p_dict = p_vertex_group->object;
 
-                            p_input_attribute_type = dict_get(p_vertex_group->object, "type");
+                            // Required properties
+                            p_input_attribute_type = dict_get(p_dict, "type");
 
-                            // Check properties
+                            // Error checking
                             if ( ! ( p_input_attribute_type ) )
                                 goto wrong_input_attribute_properties;
 
@@ -1996,79 +2017,110 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     // Parse the rasterizer
                     {
 
-                        p_line_width                 = dict_get(p_rasterizer->object, "line width");
-                        p_depth_bias_constant_factor = dict_get(p_rasterizer->object, "depth bias constant factor");
-                        p_depth_bias_clamp           = dict_get(p_rasterizer->object, "depth bias clamp");
-                        p_depth_bias_slope_factor    = dict_get(p_rasterizer->object, "depth bias slope factor");
-                        p_depth_clamp_enable         = dict_get(p_rasterizer->object, "depth clamp enable");
-                        p_rasterizer_discard_enable  = dict_get(p_rasterizer->object, "rasterizer discard enable");
-                        p_clockwise                  = dict_get(p_rasterizer->object, "clockwise");
-                        p_depth_bias_enable          = dict_get(p_rasterizer->object, "depth bias enable");
+                        // Initialized data
+                        dict *p_dict = p_rasterizer->object;
 
+                        // Optional properties
+                        p_line_width                 = dict_get(p_dict, "line width");                 // Default to 1.0
+                        p_depth_bias_constant_factor = dict_get(p_dict, "depth bias constant factor"); // Default to 0.0
+                        p_depth_bias_clamp           = dict_get(p_dict, "depth bias clamp");           // Default to 0.0
+                        p_depth_bias_slope_factor    = dict_get(p_dict, "depth bias slope factor");    // Default to 0.0
+                        p_depth_clamp_enable         = dict_get(p_dict, "depth clamp enable");         // Default to false
+                        p_rasterizer_discard_enable  = dict_get(p_dict, "rasterizer discard enable");  // Default to false
+                        p_clockwise                  = dict_get(p_dict, "clockwise");                  // Default to false
+                        p_depth_bias_enable          = dict_get(p_dict, "depth bias enable");          // Default to false
+                    }
+
+                    // Construct the rasterizer
+                    {
+                                                
                         if ( p_line_width )
                         {
+
+                            // Check for the right type
                             if ( p_line_width->type == JSONfloat ) 
                                 line_width = (float) p_line_width->floating;
+                            // Default
                             else
                                 goto no_rasterizer_line_width;
                         }
-
+                        
                         if ( p_depth_bias_constant_factor )
                         {
+
+                            // Check for the right type
                             if ( p_depth_bias_constant_factor->type == JSONfloat )
                                 depth_bias_constant_factor = (float) p_depth_bias_constant_factor->floating;
+                            // Default
                             else
                                 goto no_rasterizer_depth_bias_constant_factor;
                         }
-
+                        
                         if ( p_depth_bias_clamp )
                         {
+
+                            // Check for the right type
                             if ( p_depth_bias_clamp->type == JSONfloat )
                                 depth_bias_clamp = (float) p_depth_bias_clamp->floating;
+                            // Default
                             else
                                 goto no_rasterizer_depth_bias_clamp;
                         }
-
+                        
                         if ( p_depth_bias_slope_factor )
                         {
+
+                            // Check for the right type
                             if ( p_depth_bias_slope_factor->type == JSONfloat )
                                 depth_bias_slope_factor = (float) p_depth_bias_slope_factor->floating;
+                            // Default
                             else
                                 goto no_rasterizer_depth_bias_slope_factor;
                         }
-
+                        
                         if ( p_depth_clamp_enable )
                         {
+
+                            // Check for the right type
                             if ( p_depth_clamp_enable->type == JSONboolean )
                                 depth_clamp_enable = p_depth_clamp_enable->boolean;
+                            // Default
                             else
                                 goto no_depth_clamp_enable;
                         }
-
+                        
                         if ( p_rasterizer_discard_enable )
                         {
+
+                            // Check for the right type
                             if ( p_rasterizer_discard_enable->type == JSONboolean )
                                 rasterizer_discard_enable = p_rasterizer_discard_enable->boolean;
+                            // Default
                             else
                                 goto no_rasterizer_rasterizer_discard_enable;
                         }
-
+                        
                         if ( p_clockwise )
                         {
+
+                            // Check for the right type
                             if ( p_clockwise->type == JSONboolean )
                                 clockwise = p_clockwise->boolean;
+                            // Default
                             else
                                 goto no_rasterizer_clockwise;
                         }
-
+                        
                         if ( p_depth_bias_enable )
                         {
+
+                            // Check for the right type
                             if ( p_depth_bias_enable->type == JSONboolean )
                                 depth_bias_enable = p_depth_bias_enable->boolean;
+                            // Default
                             else
                                 goto no_rasterizer_depth_bias_enable;
                         }
-
                     }
 
                     // Populate the rasterizer create struct
@@ -2127,16 +2179,30 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 {
 
                     // Initialized data
-                    JSONValue_t *p_samples                  = dict_get(p_multisampler->object, "samples"),
-                                *p_sample_shading_enable    = dict_get(p_multisampler->object, "sample shading enable"),
-                                *p_minimum_sample_shading   = dict_get(p_multisampler->object, "minimum sample shading"),
-                                *p_alpha_to_coverage_enable = dict_get(p_multisampler->object, "alpha to coverage enable"),
-                                *p_alpha_to_one_enable      = dict_get(p_multisampler->object, "alpha to one enable");
+                    JSONValue_t *p_samples                  = 0,
+                                *p_sample_shading_enable    = 0,
+                                *p_minimum_sample_shading   = 0,
+                                *p_alpha_to_coverage_enable = 0,
+                                *p_alpha_to_one_enable      = 0;
                     bool         sample_shading_enable      = false,
                                  alpha_to_coverage_enable   = false,
                                  alpha_to_one_enable        = false;
                     signed       samples                    = 1;
                     float        minimum_sample_shading     = 0.0;
+
+                    // Parse the JSON
+                    {
+
+                        // Initialized data
+                        dict *p_dict = p_multisampler->object;
+
+                        // Optional properties
+                        p_samples                  = dict_get(p_dict, "samples");                  // Default to 1          
+                        p_sample_shading_enable    = dict_get(p_dict, "sample shading enable");    // Default to false
+                        p_minimum_sample_shading   = dict_get(p_dict, "minimum sample shading");   // Default to 0.0
+                        p_alpha_to_coverage_enable = dict_get(p_dict, "alpha to coverage enable"); // Default to false
+                        p_alpha_to_one_enable      = dict_get(p_dict, "alpha to one enable");      // Default to false
+                    }
 
                     // Parse the multisampler
                     {
@@ -2293,13 +2359,18 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
                     // Parse the JSON
                     {
-                        p_blend_enable                   = dict_get(i_attachment_value->object, "blend enable");
-                        p_source_color_blend_factor      = dict_get(i_attachment_value->object, "source color blend factor");
-                        p_destination_color_blend_factor = dict_get(i_attachment_value->object, "destination color blend factor");
-                        p_color_blend_operation          = dict_get(i_attachment_value->object, "color blend operation");
-                        p_source_alpha_blend_factor      = dict_get(i_attachment_value->object, "source alpha blend factor");
-                        p_destination_alpha_blend_factor = dict_get(i_attachment_value->object, "destination alpha blend factor");
-                        p_alpha_blend_operation          = dict_get(i_attachment_value->object, "alpha blend operation");
+
+                        // Initialized data
+                        dict *p_dict = i_attachment_value->object;
+
+                        // Required properties
+                        p_blend_enable                   = dict_get(p_dict, "blend enable");
+                        p_source_color_blend_factor      = dict_get(p_dict, "source color blend factor");
+                        p_destination_color_blend_factor = dict_get(p_dict, "destination color blend factor");
+                        p_color_blend_operation          = dict_get(p_dict, "color blend operation");
+                        p_source_alpha_blend_factor      = dict_get(p_dict, "source alpha blend factor");
+                        p_destination_alpha_blend_factor = dict_get(p_dict, "destination alpha blend factor");
+                        p_alpha_blend_operation          = dict_get(p_dict, "alpha blend operation");
 
                         // Error check
                         if ( ! (
@@ -2986,13 +3057,21 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
     // Parse the JSON value
     {
+        
+        // Initialized data
+        dict *p_dict = p_value->object;
 
-        p_name                = dict_get(p_value->object, "name");
-        p_compute_shader_path = dict_get(p_value->object, "compute shader path");
-        p_layout              = dict_get(p_value->object, "layout");
+        // Required properties
+        p_name                = dict_get(p_dict, "name");
+        p_compute_shader_path = dict_get(p_dict, "compute shader path");
+        p_layout              = dict_get(p_dict, "layout");
 
         // Check properties
-        if ( !( p_name && p_compute_shader_path ) )
+        if ( ! (
+            p_name                &&
+            p_compute_shader_path && 
+            p_layout
+        ) )
             goto missing_properties;
     }
 
@@ -3275,16 +3354,28 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
     // Parse the JSON value
     {
 
-        p_name                         = dict_get(p_value->object, "name");
-        p_ray_generation_shader_path   = dict_get(p_value->object, "generation shader path");
-        p_ray_any_hit_shader_path      = dict_get(p_value->object, "any hit shader path");
-        p_ray_closest_hit_shader_path  = dict_get(p_value->object, "closest hit shader path");
-        p_ray_miss_shader_path         = dict_get(p_value->object, "miss shader path");
-        p_ray_intersection_shader_path = dict_get(p_value->object, "intersection shader path");
-        p_ray_callable_shader_path     = dict_get(p_value->object, "callable shader path");
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        // Required properties
+        p_name                         = dict_get(p_dict, "name");
+        p_ray_generation_shader_path   = dict_get(p_dict, "generation shader path");
+        p_ray_any_hit_shader_path      = dict_get(p_dict, "any hit shader path");
+        p_ray_closest_hit_shader_path  = dict_get(p_dict, "closest hit shader path");
+        p_ray_miss_shader_path         = dict_get(p_dict, "miss shader path");
+        p_ray_intersection_shader_path = dict_get(p_dict, "intersection shader path");
+        p_ray_callable_shader_path     = dict_get(p_dict, "callable shader path");
 
         // Check properties
-        if ( !( p_name && p_ray_generation_shader_path && p_ray_any_hit_shader_path && p_ray_closest_hit_shader_path && p_ray_miss_shader_path && p_ray_intersection_shader_path && p_ray_callable_shader_path) )
+        if ( ! (
+            p_name                         &&
+            p_ray_generation_shader_path   &&
+            p_ray_any_hit_shader_path      &&
+            p_ray_closest_hit_shader_path  &&
+            p_ray_miss_shader_path         &&
+            p_ray_intersection_shader_path &&
+            p_ray_callable_shader_path
+        ) )
             goto missing_properties;
     }
 
@@ -3897,11 +3988,17 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
     if ( p_value->type == JSONobject )
     {
 
-        p_sets          = dict_get(p_value->object, "sets");
-        p_push_constant = dict_get(p_value->object, "push constant");
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        // Required properties
+        p_sets          = dict_get(p_dict, "sets");
+
+        // Optional properties
+        p_push_constant = dict_get(p_dict, "push constant");
 
         // Check properties
-        if ( !( p_sets ) )
+        if ( ! ( p_sets ) )
             goto missing_properties;
     }
     else
@@ -4062,11 +4159,19 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
     // Parse the JSON value
     if ( p_value->type == JSONobject )
     {
+        
+        // Initialized data
+        dict *p_dict = p_value->object;
 
-        p_name        = dict_get(p_value->object, "name");
-        p_descriptors = dict_get(p_value->object, "descriptors");
-
-        if ( ! ( p_name && p_descriptors ) )
+        // Required properties
+        p_name        = dict_get(p_dict, "name");
+        p_descriptors = dict_get(p_dict, "descriptors");
+        
+        // Error check
+        if ( ! (
+            p_name        &&
+            p_descriptors 
+        ) )
             goto missing_properties;
     }
     // Default
@@ -4151,11 +4256,18 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                 if ( p_descriptor_value->type == JSONobject )
                 {
 
-                    p_descriptor_name = dict_get(p_descriptor_value->object, "name");
-                    p_descriptor_type = dict_get(p_descriptor_value->object, "type");
+                    // Initialized data
+                    dict *p_dict = p_descriptor_value->object;
+
+                    // Required properties
+                    p_descriptor_name = dict_get(p_dict, "name");
+                    p_descriptor_type = dict_get(p_dict, "type");
 
                     // Check for missing properties
-                    if ( ! ( p_descriptor_name && p_descriptor_type ) )
+                    if ( ! (
+                        p_descriptor_name &&
+                        p_descriptor_type
+                    ) )
                         goto missing_descriptor_properties;
                 }
 

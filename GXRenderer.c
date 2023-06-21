@@ -1417,10 +1417,16 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
     if ( p_value->type == JSONobject )
     {
 
-        p_name        = dict_get(p_value->object, "name");
-        p_passes      = dict_get(p_value->object, "passes");
-        p_clear_color = dict_get(p_value->object, "clear color");
-        p_attachments = dict_get(p_value->object, "attachments");
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        // Required properties
+        p_name        = dict_get(p_dict, "name");
+        p_passes      = dict_get(p_dict, "passes");
+        p_clear_color = dict_get(p_dict, "clear color");
+
+        // Optional properties
+        p_attachments = dict_get(p_dict, "attachments");
 
         if ( ! ( p_name && p_passes && p_clear_color ) )
             goto missing_properties;
@@ -1945,14 +1951,23 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
     if ( p_value->type == JSONobject )
     {
 
-        p_name         = dict_get(p_value->object, "name");
-        p_attachments  = dict_get(p_value->object, "attachments");
-        p_shaders      = dict_get(p_value->object, "shaders");
-        p_subpasses    = dict_get(p_value->object, "subpasses");
-        p_dependencies = dict_get(p_value->object, "dependencies");
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        // Required properties
+        p_name      = dict_get(p_dict, "name");
+        p_subpasses = dict_get(p_dict, "subpasses");
+
+        // Optional properties
+        p_shaders      = dict_get(p_dict, "shaders");
+        p_attachments  = dict_get(p_dict, "attachments");
+        p_dependencies = dict_get(p_dict, "dependencies");
 
         // Check for missing properties
-        if ( ! ( p_name && p_subpasses ) )
+        if ( ! ( 
+            p_name      && 
+            p_subpasses 
+        ) )
             goto missing_properties;
     }
     // Default
@@ -1970,9 +1985,9 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                                   correlated_mask_count     = 0;
         int                      *correlated_mask_views     = 0;
         VkAttachmentDescription2 *attachments               = 0;
-        VkAttachmentReference    *attachment_references      = 0;
-        VkSubpassDescription2    *subpasses                  = 0;
-        VkSubpassDependency2     *dependencies               = 0;
+        VkAttachmentReference    *attachment_references     = 0;
+        VkSubpassDescription2    *subpasses                 = 0;
+        VkSubpassDependency2     *dependencies              = 0;
 
         // Allocate memory for a render pass
         if ( create_render_pass(&p_render_pass) == 0 )
@@ -2175,13 +2190,20 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
                     // Parse the JSON
                     {
-                        p_dependency_flags               = dict_get(p_dependency->object, "flags");
-                        p_dependency_source_subpass      = dict_get(p_dependency->object, "source subpass");
-                        p_dependency_destination_subpass = dict_get(p_dependency->object, "destination subpass");
-                        p_dependency_source_stage        = dict_get(p_dependency->object, "source stage");
-                        p_dependency_destination_stage   = dict_get(p_dependency->object, "destination stage");
-                        p_dependency_source_access       = dict_get(p_dependency->object, "source access");
-                        p_dependency_destination_access  = dict_get(p_dependency->object, "destination access");
+
+                        // Initialized data
+                        dict *p_dict = p_dependency->object;
+
+                        // Required properties
+                        p_dependency_flags               = dict_get(p_dict, "flags");
+                        p_dependency_destination_subpass = dict_get(p_dict, "destination subpass");
+                        p_dependency_source_stage        = dict_get(p_dict, "source stage");
+                        p_dependency_destination_stage   = dict_get(p_dict, "destination stage");
+                        p_dependency_destination_access  = dict_get(p_dict, "destination access");
+
+                        // Optional properties
+                        p_dependency_source_subpass      = dict_get(p_dict, "source subpass");
+                        p_dependency_source_access       = dict_get(p_dict, "source access");
 
                         // Check properties
                         if ( ! (
@@ -2601,10 +2623,18 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         if ( p_subpass_value->type == JSONobject )
         {
 
-            p_name          = dict_get(p_subpass_value->object, "name");
-            p_shaders_value = dict_get(p_subpass_value->object, "shaders");
+            // Initialized data
+            dict *p_dict = p_subpass_value->object;
+            
+            // Required properties
+            p_name          = dict_get(p_dict, "name");
+            p_shaders_value = dict_get(p_dict, "shaders");
 
-            if ( ! ( p_name && p_shaders_value ) )
+            // Error checking
+            if ( ! (
+                p_name          &&
+                p_shaders_value
+            ) )
                 goto missing_properties;
         }
 
@@ -3071,30 +3101,39 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
     if ( p_value->type == JSONobject )
     {
 
-        p_name                  = dict_get(p_value->object, "name");
-        p_shaders               = dict_get(p_value->object, "shaders");
-        p_input_attachments     = dict_get(p_value->object, "input attachments");
-        p_color_attachments     = dict_get(p_value->object, "color attachments");
-        p_preserved_attachments = dict_get(p_value->object, "preserved attachments");
-        p_depth_attachment      = dict_get(p_value->object, "depth attachment");
+        // Initialized data
+        dict *p_dict = 0;
+        
+        // Required properties
+        p_name                  = dict_get(p_dict, "name");
 
+        // Optional properties
+        p_shaders               = dict_get(p_dict, "shaders");
+        p_input_attachments     = dict_get(p_dict, "input attachments");
+        p_color_attachments     = dict_get(p_dict, "color attachments");
+        p_preserved_attachments = dict_get(p_dict, "preserved attachments");
+        p_depth_attachment      = dict_get(p_dict, "depth attachment");
+
+        // Error check
         if ( ! ( p_name ) )
             goto missing_properties;
     }
 
     // Construct the subpass
     {
-        size_t                  input_attachment_count          = 0,
-                                color_attachment_count          = 0,
-                                preserved_attachment_count      = 0;
-        VkAttachmentReference2 *input_attachment_references     = 0,
-                               *color_attachment_references     = 0,
-                               *preserved_attachment_references = 0,
-                               *depth_attachment_reference      = 0;
-        JSONValue_t           **pp_input_attachments            = 0,
-                              **pp_color_attachments            = 0,
-                              **pp_preserved_attachments        = 0;
-        char                  *name                             = 0;
+
+        // Initialized data
+        size_t                   input_attachment_count          = 0,
+                                 color_attachment_count          = 0,
+                                 preserved_attachment_count      = 0;
+        char                    *name                            = 0;
+        VkAttachmentReference2  *input_attachment_references     = 0,
+                                *color_attachment_references     = 0,
+                                *preserved_attachment_references = 0,
+                                *depth_attachment_reference      = 0;
+        JSONValue_t            **pp_input_attachments            = 0,
+                               **pp_color_attachments            = 0,
+                               **pp_preserved_attachments        = 0;
 
         // Parse the JSON value
         {
@@ -3130,14 +3169,20 @@ int load_subpass_as_json_value ( GXSubpass_t **pp_subpass, JSONValue_t *p_value 
             {
 
                 // Parse the color attachments as an array
-                if (p_color_attachments->type == JSONarray)
+                if ( p_color_attachments->type == JSONarray )
                 {
+
+                    // Get the size of the array
                     array_get(p_color_attachments->list, 0, &color_attachment_count);
+
+                    // Allocate memory for array
                     pp_color_attachments = calloc(color_attachment_count, sizeof(JSONValue_t *));
 
-                    if (pp_color_attachments == (void *)0)
+                    // Error checking
+                    if ( pp_color_attachments == (void *) 0 )
                         goto no_mem;
 
+                    // Dump the array contents
                     array_get(p_color_attachments->list, (void **)pp_color_attachments, 0);
                 }
                 // Type error
@@ -3482,16 +3527,28 @@ int load_attachment_as_json_value ( GXAttachment_t **pp_attachment, JSONValue_t 
     if ( p_value->type == JSONobject )
     {
 
-        p_name            = dict_get(p_value->object, "name");
-        p_samples         = dict_get(p_value->object, "samples");
-        p_format          = dict_get(p_value->object, "format");
-        p_load_operation  = dict_get(p_value->object, "load operation");
-        p_store_operation = dict_get(p_value->object, "store operation");
-        p_initial_layout  = dict_get(p_value->object, "initial layout");
-        p_final_layout    = dict_get(p_value->object, "final layout");
+        // Initialized data
+        dict *p_dict = p_value->object;
+
+        // Required properties
+        p_name            = dict_get(p_dict, "name");
+        p_samples         = dict_get(p_dict, "samples");
+        p_format          = dict_get(p_dict, "format");
+        p_initial_layout  = dict_get(p_dict, "initial layout");
+        p_final_layout    = dict_get(p_dict, "final layout");
+
+        // Optional properties
+        p_load_operation  = dict_get(p_dict, "load operation");  // Default to VK_ATTACHMENT_LOAD_OP_DONT_CARE
+        p_store_operation = dict_get(p_dict, "store operation"); // Default to VK_ATTACHMENT_STORE_OP_DONT_CARE
 
         // Check for missing parameters
-        if ( ! ( p_name && p_samples && p_format && p_initial_layout && p_final_layout ) )
+        if ( ! ( 
+            p_name           &&
+            p_samples        &&
+            p_format         &&
+            p_initial_layout &&
+            p_final_layout
+        ) )
             goto missing_properties;
     }
     else
@@ -4023,13 +4080,18 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
     if ( p_value->type == JSONobject )
     {
 
-        p_name            = dict_get(p_value->object, "name");
-        p_samples         = dict_get(p_value->object, "samples");
-        p_format          = dict_get(p_value->object, "format");
-        p_load_operation  = dict_get(p_value->object, "load operation");
-        p_store_operation = dict_get(p_value->object, "store operation");
-        p_initial_layout  = dict_get(p_value->object, "initial layout");
-        p_final_layout    = dict_get(p_value->object, "final layout");
+        // Initialzed data
+        dict *p_dict = p_value->object;
+
+        // 
+        p_name            = dict_get(p_dict, "name");
+        p_samples         = dict_get(p_dict, "samples");
+        p_format          = dict_get(p_dict, "format");
+        
+        p_initial_layout  = dict_get(p_dict, "initial layout");
+        p_final_layout    = dict_get(p_dict, "final layout");
+        p_load_operation  = dict_get(p_dict, "load operation");
+        p_store_operation = dict_get(p_dict, "store operation");
 
         // Check for missing parameters
         if ( ! ( p_name && p_samples && p_format && p_initial_layout && p_final_layout ) )

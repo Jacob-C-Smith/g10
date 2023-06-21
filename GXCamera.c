@@ -313,14 +313,17 @@ int load_camera_as_json_value ( GXCamera_t **pp_camera, JSONValue_t *p_value )
 	if ( p_value->type == JSONobject )
 	{
 
-		// Parse the JSON value into constructor parameters
-		p_name      = dict_get(p_value->object, "name");
-		p_near_clip = dict_get(p_value->object, "near");
-		p_far_clip  = dict_get(p_value->object, "far");
-		p_fov       = dict_get(p_value->object, "fov");
-		p_location  = dict_get(p_value->object, "location");
-		p_target    = dict_get(p_value->object, "front");
-		p_up        = dict_get(p_value->object, "up");
+		// Initialized data
+		dict *p_dict = p_value->object;
+
+		// Required properties
+		p_name      = dict_get(p_dict, "name");
+		p_near_clip = dict_get(p_dict, "near");
+		p_far_clip  = dict_get(p_dict, "far");
+		p_fov       = dict_get(p_dict, "fov");
+		p_location  = dict_get(p_dict, "location");
+		p_target    = dict_get(p_dict, "front");
+		p_up        = dict_get(p_dict, "up");
 
 		// Error checking
 		if ( ! ( p_name && p_near_clip && p_far_clip && p_fov && p_location && p_target && p_up ) )

@@ -255,22 +255,29 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         // Initialized data
         dict *p_dict = p_value->object;
 
-        p_name_value         = (JSONValue_t *)dict_get(p_dict, "name");
-        p_entities_value     = (JSONValue_t *)dict_get(p_dict, "entities");
-        p_cameras_value      = (JSONValue_t *)dict_get(p_dict, "cameras");
-        p_lights_value       = (JSONValue_t *)dict_get(p_dict, "lights");
-        p_skyboxes_value     = (JSONValue_t *)dict_get(p_dict, "skyboxes");
-        p_light_probes_value = (JSONValue_t *)dict_get(p_dict, "light probes");
+        // Required properties
+        p_name_value         = dict_get(p_dict, "name");
 
+        // Optional properties
+        p_entities_value     = dict_get(p_dict, "entities");
+        p_cameras_value      = dict_get(p_dict, "cameras");
+        p_lights_value       = dict_get(p_dict, "lights");
+        p_skyboxes_value     = dict_get(p_dict, "skyboxes");
+        p_light_probes_value = dict_get(p_dict, "light probes");
+
+        // Error checking
         if ( ! ( p_name_value ) )
             goto not_enough_properties;
     }
     // Parse the scene as a file path
     else if ( p_value->type == JSONstring )
     {
+
+        // Load the scene as a path
         if ( load_scene(pp_scene, p_value->string) == 0 )
             goto failed_to_load_initial_scene;
 
+        // Success
         return 1;
     }
     // Failed to parse. Wrong type

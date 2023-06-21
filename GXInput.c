@@ -733,17 +733,24 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 *p_mouse_sensitivity = 0,
                 *p_binds             = 0;
 
-    // Parse the input as a JSON object
+    // Parse the JSON
     if ( p_value->type == JSONobject )
     {
 
-        // Get each property
-        p_name              = dict_get(p_value->object, "name");
-        p_mouse_sensitivity = dict_get(p_value->object, "mouse sensitivity");
-        p_binds             = dict_get(p_value->object, "binds");
+        // Initialized data
+        dict *p_dict = p_value->object;
 
-        // Check for missing data
-        if ( ! ( p_name && p_mouse_sensitivity && p_binds ) )
+        // Required properties
+        p_name              = dict_get(p_dict, "name");
+        p_mouse_sensitivity = dict_get(p_dict, "mouse sensitivity");
+        p_binds             = dict_get(p_dict, "binds");
+
+        // Error checking
+        if ( ! (
+            p_name              &&
+            p_mouse_sensitivity &&
+            p_binds
+        ) )
             goto missing_properties;
 
     }
@@ -957,11 +964,9 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
     }
 
     // Initialized data
-    GXBind_t  *p_bind    = 0;
-    char      *name      = 0;
-    array     *p_keys    = 0;
-    size_t     key_count = 0;
-    char     **p_keys_array = 0;
+    GXBind_t    *p_bind = 0;
+    JSONValue_t *p_name = 0,
+                *p_keys = 0;
 
     // TODO: Refactor to use JSONValue_t *
     // Parse the bind as an object
@@ -971,18 +976,21 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
         // Initialized data
         dict *p_dict = p_value->object;
 
-        // Get the name
-        name = (char *) ((JSONValue_t *)dict_get(p_dict, "name"))->string;
-
-        // Get an array of binds for the bind
-        p_keys = (array *) ((JSONValue_t *)dict_get(p_dict, "keys"))->list;
+        // Required properties
+        p_name = dict_get(p_dict, "name");
+        p_keys = dict_get(p_dict, "keys");
 
         // Check for missing data
-        if ( !(name && p_keys) )
+        if ( ! ( 
+            p_name &&
+            p_keys
+        ) )
             goto missing_properties;
 
     }
 
+    // TODO: Fix
+    /*
     // Construct the bind
     {
 
@@ -1075,7 +1083,8 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
             .callbacks    = calloc(2, sizeof(void *))
         };
     }
-
+    */
+    
     // Success
     return 1;
 

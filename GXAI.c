@@ -252,10 +252,13 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
 	if ( p_value->type == JSONobject )
 	{
 
-		// Parse the JSON values into constructor parameters
-		p_name          = dict_get(p_value->object, "name");
-		p_states        = dict_get(p_value->object, "states");
-		p_initial_state = dict_get(p_value->object, "initial state");
+		// Initialized data
+		dict *p_dict = p_value->object;
+
+		// Required properties
+		p_name          = dict_get(p_dict, "name");
+		p_states        = dict_get(p_dict, "states");
+		p_initial_state = dict_get(p_dict, "initial state");
 
 		// Error checking
 		if ( ! ( p_name && p_states && p_initial_state ) )
