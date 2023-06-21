@@ -443,10 +443,10 @@ const kn_t keys[] =
 
 const char *scancodes[] =
 {
-    "",
-    "",
-    "",
-    "",
+    " ",
+    " ",
+    " ",
+    " ",
     "A",
     "B",
     "C",
@@ -493,7 +493,7 @@ const char *scancodes[] =
     "LEFT BRACKET",
     "RIGHT BRACKET",
     "BACKSLASH",
-    "",
+    " ",
     "SEMICOLON",
     "APOSTROPHE",
     "TILDE",
@@ -542,7 +542,8 @@ const char *scancodes[] =
     "KEYPAD 8",
     "KEYPAD 9",
     "KEYPAD 0",
-    "KEYPAD PERIOD"
+    "KEYPAD PERIOD",
+    0
 };
 
 dict *key_dict = 0;
@@ -933,10 +934,13 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 			    array_get(p_binds->list, (void **)pp_elements, 0 );
             }
 
+            // Construct a hash table to quickly look up binds
+            // from their scancodes
+            dict_from_keys(&p_input->bind_lut, scancodes, 128);
+
             // TODO: Check return
             // Allocate dictionaries
             dict_construct(&p_input->binds, vector_element_count);
-            dict_construct(&p_input->bind_lut, vector_element_count);
 
 			// Iterate over each element
             for (size_t i = 0; i < vector_element_count; i++)
@@ -950,9 +954,8 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 if ( load_bind_as_json_value(&p_bind, i_element) == 0 )
                     goto failed_to_load_bind_as_json_value;
 
-                // Add the bind to the input
-                dict_add(p_input->binds, p_bind->name, p_bind);
-                dict_add(p_input->bind_lut, p_bind->name, p_bind);
+                // Add the bind to the input                
+                append_bind(p_input, p_bind);
             }
 
 			// Clean the scope
@@ -1003,8 +1006,6 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
 
         // JSON errors
         {
-
-            
 
             wrong_value_type:
                 #ifndef NDEBUG
@@ -1452,27 +1453,26 @@ int process_input ( GXInstance_t *p_instance )
    
     const u8* keyboard_state = SDL_GetKeyboardState(NULL);
     
-    //printf("[ ");
-    //// Iterate over each key
-    //for (size_t i = 0; i < 110; i++)
-    //{
-    //    // If the key is down...
-    //    if ( keyboard_state[i] )
-    //    {
-    //        printf("%s, ", scancodes[i]);
-    //        fflush(stdout);
-    //        //// Initialized data
-    //        //GXBind_t* bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, (char*)keys[i].name);
-    //        //if ( bind )
-    //        //{
-    //        //    bind->active = true;
-    //        //    p_instance.input.inputs.key.depressed = true;
-    //        //    call_bind(bind, p_input, p_instance);
-    //        //}
-    //    }
-    //}
-    //printf(" ]                                                                    \r");
+    // Iterate over each key
+    for (size_t i = 0; i < 110; i++)
+    {
 
+        // If the key is down...
+        if ( keyboard_state[i] )
+        {
+            printf("%s", scancodes[i]);
+
+            // Initialized data
+            GXBind_t *p_bind = (GXBind_t *) dict_get(p_instance->input->bind_lut, scancodes[i]);
+
+            if ( p_bind )
+            {
+                p_bind->active = true;
+                
+                call_bind(p_bind, (callback_parameter_t){ .input_state = KEYBOARD, .inputs = { .key = { .depressed = true } } });
+            }
+        }
+    }
 
     // Game controller
     if ( controller )
@@ -1565,7 +1565,34 @@ int append_bind ( GXInput_t *p_input, GXBind_t *p_bind )
         #endif
     }
 
-    // TODO:
+    // Add the bind to the binds
+    dict_add(p_input->binds, p_bind->name, p_bind);
+    
+    // Iterate over each key
+    for (size_t i = 0; i < p_bind->key_count; i++)
+    {
+
+        // Initialized data
+        GXBind_t *base = dict_get(p_input->bind_lut, p_bind->keys[i]);
+
+        // If this scancode doesn't have a bind, add it
+        if ( base == (void *) 0 )
+            dict_add(p_input->bind_lut, p_bind->keys[i], p_bind);
+
+        // Add the bind to the linked list
+        else
+        {
+
+            // Walk to the end of the linked list
+            while(base->next) { base = base->next; };
+
+            // This avoids a potential bug
+            p_bind->next = 0;
+
+            // Set the next bind
+            base->next = p_bind;
+        }
+    }
 
     // Success
     return 1;
@@ -1704,12 +1731,11 @@ int call_bind ( GXBind_t *p_bind, callback_parameter_t input )
     {
 
         // Initialized data
-        void (*function)(GXInput_t *a, GXInstance_t *b) = p_bind->callbacks[i];
+        void (*function)(callback_parameter_t input, GXInstance_t *b) = p_bind->callbacks[i];
 
-        // TODO: Fix
         // Call the function
-        //if ( function )
-        //    function(input, p_instance);
+        if ( function )
+            function(input, p_instance);
     }
 
     // Success

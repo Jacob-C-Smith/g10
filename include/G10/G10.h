@@ -374,6 +374,18 @@ DLLEXPORT int copy_state ( GXInstance_t *p_instance );
  */
 DLLEXPORT GXInstance_t* g_get_active_instance ( void );
 
+// Input
+/** !
+ * Find a bind in the instance's active input structure
+ * 
+ * @param p_instance : the instance
+ * @param bind_name  : the name of the bind
+ * @param pp_bind    : return        
+ * 
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int g_find_bind ( GXInstance_t *p_instance, char *bind_name, GXBind_t **pp_bind );
+
 // Cache operations
 /** !
  * Cache a material. Caching a material adds it to the garbage collector.

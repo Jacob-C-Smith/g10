@@ -93,25 +93,27 @@ int game_initialization ( GXInstance_t *p_instance )
     
     // Set the user code callback
     if ( add_user_code_callback(p_instance, &user_code_callback) == 0 )
-        goto failed_to_add_user_code_callback;
+    {
+        g_print_error("Failed to set user code callback!\n");
+
+        return 0;
+    }
+
+    // Set the binds
+    {
+        
+        // Initialized data
+        GXBind_t *p_quit = 0;
+
+        // Get the quit bind
+        g_find_bind(p_instance, "QUIT", &p_quit);
+
+        // Set the user exit bind
+        register_bind_callback(p_quit, &g_user_exit);
+    }
 
     // Success
     return 1;
-
-    // Error handling
-    {
-
-        // G10 errors
-        {
-            failed_to_add_user_code_callback:
-                #ifndef NDEBUG
-                    g_print_error("Failed to set user code callback in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-        }
-    }
 }
 
 int game_log ( GXInstance_t *p_instance )

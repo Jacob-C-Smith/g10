@@ -3073,6 +3073,59 @@ GXInstance_t *g_get_active_instance ( void )
     return active_instance;
 }
 
+int g_find_bind ( GXInstance_t *p_instance, char *bind_name, GXBind_t **pp_bind )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_instance == (void *) 0 ) goto no_instance;
+            if ( bind_name  == (void *) 0 ) goto no_bind_name;
+            if ( pp_bind    == (void *) 0 ) goto no_bind;
+        #endif
+    }
+
+    // Initialized data
+    GXBind_t *p_bind = find_bind(p_instance->input, bind_name);
+
+    // Return a pointer to the caller
+    *pp_bind = p_bind;
+
+    // Success
+    return (bool)p_bind;
+
+    // Erorr handling
+    {
+        
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error 
+                return 0;
+
+            no_bind_name:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"bind_name\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error 
+                return 0;
+
+            no_bind:
+                #ifndef NDEBUG
+                    g_print_error("[G10] Null pointer provided for parameter \"pp_bind\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error 
+                return 0;
+        }
+    }
+}
+
 int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *material )
 {
     // Argument check
