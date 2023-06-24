@@ -1110,14 +1110,14 @@ int use_shader ( GXShader_t *p_shader )
     {
         .offset.x = 0,
         .offset.y = 0,
-        .extent   = p_instance->vulkan.swap_chain_extent
+        .extent   = p_instance->vulkan.swap_chain.extent
     };
     VkViewport viewport =
     {
         .x        = 0.f,
         .y        = 0.f,
-        .width    = (float)p_instance->vulkan.swap_chain_extent.width,
-        .height   = (float)p_instance->vulkan.swap_chain_extent.height,
+        .width    = (float)p_instance->vulkan.swap_chain.extent.width,
+        .height   = (float)p_instance->vulkan.swap_chain.extent.height,
         .minDepth = 0.f,
         .maxDepth = 1.f
     };
@@ -1958,8 +1958,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 {
                     .x        = 0.f,
                     .y        = 0.f,
-                    .width    = (float)p_instance->vulkan.swap_chain_extent.width,
-                    .height   = (float)p_instance->vulkan.swap_chain_extent.height,
+                    .width    = (float)p_instance->vulkan.swap_chain.extent.width,
+                    .height   = (float)p_instance->vulkan.swap_chain.extent.height,
                     .minDepth = 0.0f,
                     .maxDepth = 1.0f
                 };
@@ -1970,7 +1970,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 {
                     .offset.x = 0,
                     .offset.y = 0,
-                    .extent   = p_instance->vulkan.swap_chain_extent
+                    .extent   = p_instance->vulkan.swap_chain.extent
                 };
 
                 // Populate the viewport state create struct
@@ -2436,7 +2436,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         
                         // Set the alpha blend operation
                         if ( p_alpha_blend_operation->type == JSONstring )
-                            alpha_blend_op = (VkBlendOp)  (size_t) dict_get(blend_operations, p_alpha_blend_operation->string);
+                            alpha_blend_op = (VkBlendOp) (size_t) dict_get(blend_operations, p_alpha_blend_operation->string);
                         else
                             goto wrong_alpha_blend_op;
                         

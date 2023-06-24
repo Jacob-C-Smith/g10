@@ -75,6 +75,8 @@ int main ( int argc, const char *argv[] )
     // Exit
     (void)g_exit(&p_instance);
 
+    
+
     // Success
     return EXIT_SUCCESS;
 }
@@ -103,13 +105,20 @@ int game_initialization ( GXInstance_t *p_instance )
     {
         
         // Initialized data
-        GXBind_t *p_quit = 0;
+        GXBind_t *p_quit = 0,
+                 *p_help = 0;
 
         // Get the quit bind
         g_find_bind(p_instance, "QUIT", &p_quit);
 
+        // Get the help bind
+        g_find_bind(p_instance, "HELP", &p_help);
+
         // Set the user exit bind
         register_bind_callback(p_quit, &g_user_exit);
+
+        // Set the help bind
+        register_bind_callback(p_help, &g_user_help);
     }
 
     // Success

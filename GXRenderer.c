@@ -1,6 +1,7 @@
 ﻿#include <G10/GXRenderer.h>
 
 // Constants
+#define PRESENTATION_MODES_COUNT 4
 #define ATTACHMENT_LOAD_OPERATION_COUNT 3
 #define ATTACHMENT_STORE_OPERATION_COUNT 3
 #define IMAGE_LAYOUTS_COUNT 18
@@ -16,6 +17,21 @@
 #define VIEW_TYPE_COUNT 7
 #define SWIZZLE_COUNT 7
 #define ASPECT_COUNT 4
+
+VkPresentModeKHR presentation_mode_enums[PRESENTATION_MODES_COUNT] = 
+{
+    VK_PRESENT_MODE_IMMEDIATE_KHR,
+    VK_PRESENT_MODE_MAILBOX_KHR,
+    VK_PRESENT_MODE_FIFO_KHR,
+    VK_PRESENT_MODE_FIFO_RELAXED_KHR
+};
+char *presentation_mode_names[PRESENTATION_MODES_COUNT] = 
+{
+    "immediate",
+    "mailbox",
+    "FIFO",
+    "FIFO relaxed"
+};
 
 VkAttachmentLoadOp attachment_load_operation_enums[ATTACHMENT_LOAD_OPERATION_COUNT] =
 {
@@ -644,7 +660,8 @@ enum VkImageAspectFlagBits aspect_enums [ASPECT_COUNT] =
     VK_IMAGE_ASPECT_METADATA_BIT
 };
 
-dict *attachment_load_operations  = 0,
+dict *presentation_modes_lut      = 0,
+     *attachment_load_operations  = 0,
      *image_layouts               = 0,
      *subpass_functions           = 0,
      *attachment_store_operations = 0,
@@ -668,6 +685,7 @@ int init_renderer ( void )
 
     // Construct lookup tables
     {
+        if ( dict_construct(&presentation_modes_lut, PRESENTATION_MODES_COUNT)              == 0 ) goto failed_to_construct_presentation_modes_lut;
         if ( dict_construct(&attachment_load_operations, ATTACHMENT_LOAD_OPERATION_COUNT)   == 0 ) goto failed_to_construct_attachment_load_operations_lut;
         if ( dict_construct(&attachment_store_operations, ATTACHMENT_STORE_OPERATION_COUNT) == 0 ) goto failed_to_construct_attachment_store_operations_lut;
         if ( dict_construct(&image_layouts, IMAGE_LAYOUTS_COUNT)                            == 0 ) goto failed_to_construct_image_layouts_lut;
@@ -687,6 +705,10 @@ int init_renderer ( void )
 
     // Populate lookup tables
     {
+
+        // Populate the presentation modes
+        for (size_t i = 0; i < PRESENTATION_MODES_COUNT; i++)
+            dict_add(presentation_modes_lut, presentation_mode_names[i], (void *)presentation_mode_enums[i]);        
 
         // Populate attachment load operations
         for (size_t i = 0; i < ATTACHMENT_LOAD_OPERATION_COUNT; i++)
@@ -757,6 +779,13 @@ int init_renderer ( void )
         
         // Dictionary errors
         {
+            failed_to_construct_presentation_modes_lut:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Renderer] Failed to construct presentation_modes_lut dict in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
 
             failed_to_construct_attachment_load_operations_lut:
                 #ifndef NDEBUG
@@ -1435,8 +1464,8 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
     // Parse the value as a path
     else if ( p_value->type == JSONstring )
     {
-        if ( load_renderer(pp_renderer, p_value->string) == 0 )
-            goto faild_to_load_renderer;
+        //if ( load_renderer(pp_renderer, p_value->string) == 0 )
+        //    goto faild_to_load_renderer;
 
         // Success
         return 1;
@@ -1639,6 +1668,42 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
         *pp_renderer = p_renderer;
     }
 
+    // Construct a command pool for the renderer
+    {
+
+        // Initialized data
+        VkQueue queue = VK_NULL_HANDLE;
+        VkCommandPoolCreateInfo command_pool_create_info = 
+        {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .pNext = 0,
+            .flags = 0,
+            .queueFamilyIndex = 0 // TODO: Some type of g_get_vulkan_queue_family_index function?
+        };
+
+        // Create the command pool
+        if ( vkCreateCommandPool(p_instance->vulkan.device, &command_pool_create_info, (void *) 0, &p_renderer->command_pool) != VK_SUCCESS )
+            goto failed_to_create_command_pool;
+    }
+
+    // Allocate command buffer(s) for the renderer
+    {
+
+        // Initialized data
+        VkCommandBufferAllocateInfo command_buffer_allocate_info =
+        {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .pNext = 0,
+            .commandPool = p_renderer->command_pool,
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY, // TODO: change this contingent on something.
+            .commandBufferCount = p_instance->vulkan.max_buffered_frames
+        };
+        
+        // Allocate command buffers
+        if ( vkAllocateCommandBuffers(p_instance->vulkan.device, &command_buffer_allocate_info, &p_renderer->command_buffers) != VK_SUCCESS )
+            goto failed_to_allocate_command_buffers;
+    }
+
     // Success
     return 1;
 
@@ -1761,6 +1826,25 @@ int load_renderer_as_json_value ( GXRenderer_t **pp_renderer, JSONValue_t *p_val
 				// Error
 				return 0;
 		}
+
+        // Vulkan errors
+        {
+            failed_to_create_command_pool:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to function \"vkCreateCommandPool\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_allocate_command_buffers:
+                #ifndef NDEBUG
+                    g_print_error("[Vulkan] Call to function \"vkAllocateCommandBuffers\" returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -2116,13 +2200,14 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
 
             // Construct a dictionary
             dict_construct(&p_render_pass->subpasses, array_len);
-
+            // Initialized data
+            GXSubpass_t *p_subpass = 0;
+            
             // Iterate over each subpass JSON object text
             for (size_t i = 0; i < array_len; i++)
             {
 
-                // Initialized data
-                GXSubpass_t *p_subpass = 0;
+                
 
                 // Load the subpass as a JSON value
                 if ( load_subpass_as_json_value(&p_subpass, pp_subpasses_contents[i]) == 0 )
@@ -2409,7 +2494,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
                                     array_get(p_dependency_destination_stage->list, 0, &flags_count);
 
                                     // Allocate memory for the array
-                                    pp_flags = calloc(flags_count, sizeof(JSONValue_t *));
+                                    pp_flags = calloc(flags_count+1, sizeof(JSONValue_t *));
 
                                     // Error handling
                                     if ( pp_flags == (void *) 0 )
@@ -2731,7 +2816,7 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
         //            update_image_layout(p_attachment->p_image, "unorm d24 uint s8", "depth stencil attachment");
         //    }
         
-        attachment_views[0] = p_instance->vulkan.swap_chain_image_views[i];
+        attachment_views[0] = p_instance->vulkan.swap_chain.image_views[i];
         attachment_views[1] = ((GXAttachment_t*)dict_get(p_instance->context.loading_renderer->attachments, "depth"))->image_view;
         
         // TODO: allocate attachments
@@ -2744,8 +2829,8 @@ int load_render_pass_as_json_value ( GXRenderPass_t **pp_render_pass, JSONValue_
             .renderPass      = p_render_pass->render_pass,
             .attachmentCount = attachment_count,
             .pAttachments    = attachment_views,
-            .width           = p_instance->vulkan.swap_chain_extent.width,
-            .height          = p_instance->vulkan.swap_chain_extent.height,
+            .width           = p_instance->vulkan.swap_chain.extent.width,
+            .height          = p_instance->vulkan.swap_chain.extent.height,
             .layers          = 1
         };
 
@@ -4149,7 +4234,7 @@ int load_image_as_json_value ( GXImage_t **pp_image, JSONValue_t *p_value )
         // Set the format
         if ( p_format->type == JSONstring )
         {
-            format = (VkFormat)  (size_t) dict_get(format_enumeration_lookup, p_format->string);
+            format = (VkFormat) (size_t) dict_get(format_enumeration_lookup, p_format->string);
 
             if (format == 0)
                 goto wrong_format;
@@ -4496,9 +4581,9 @@ int update_image_layout ( GXImage_t *p_image, char *format, char *new_layout )
         .deviceMask = 0
     };
 
-    vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    //vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
     
-    vkQueueWaitIdle(p_instance->vulkan.graphics_queue);
+    //vkQueueWaitIdle(p_instance->vulkan.graphics_queue);
 
     vkFreeCommandBuffers(p_instance->vulkan.device, p_instance->vulkan.command_pool, 1, &command_buffer);
 
@@ -4792,10 +4877,20 @@ int add_subpass_callback ( char *name, void (*function_pointer)() )
 int render_frame ( GXInstance_t *p_instance )
 {
 
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_instance                   == (void *) 0 ) goto no_instance;
+            if ( p_instance->context.renderer == (void *) 0 ) goto no_instance_context_renderer;
+        #endif
+    }
+
     // Initialized data
-    VkResult result = 0;
-    u64      start  = 0,
-             end    = 0;
+    u64           start  = 0,
+                  end    = 0;
+    VkResult      result = 0;
+    GXRenderer_t *p_renderer = p_instance->context.renderer;
+    VkCommandBuffer command_buffer = p_renderer->command_buffers[p_instance->vulkan.current_frame];
     VkSemaphore wait_semaphores [ ] =
     {
         p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame]
@@ -4810,20 +4905,11 @@ int render_frame ( GXInstance_t *p_instance )
     };
     VkSwapchainKHR swap_chains [ ] =
     { 
-        p_instance->vulkan.swap_chain
+        p_instance->vulkan.swap_chain.swap_chain
     };
-
-    // TODO: remove
-
-    // Success
-    return 1;
-
+    
     // Get the microsecond counter
     start = SDL_GetPerformanceCounter();
-
-    // TODO: Prepare draw queues
-    // if ( dict_values(p_instance->context.scene->entities,0) )
-    //     dict_foreach(p_instance->context.scene->entities, &add_draw_item);
 
     // Prepare the command buffer for rendering
     {
@@ -4832,7 +4918,7 @@ int render_frame ( GXInstance_t *p_instance )
         vkWaitForFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame], VK_TRUE, 0xffffffffffffffff);
         
         // Grab an image from the swapchain
-        result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain, 0xffffffffffffffff, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
+        result = vkAcquireNextImageKHR(p_instance->vulkan.device, p_instance->vulkan.swap_chain.swap_chain, 0xffffffffffffffff, p_instance->vulkan.image_available_semaphores[p_instance->vulkan.current_frame], VK_NULL_HANDLE, &p_instance->vulkan.image_index);
 
         // Make sure the image is usable
         if ( result == VK_ERROR_OUT_OF_DATE_KHR )
@@ -4846,11 +4932,11 @@ int render_frame ( GXInstance_t *p_instance )
             goto fail;
         }
 
-        // Only reset the fence if we are submitting work
+        // Only reset the fence if the program is submitting work
         vkResetFences(p_instance->vulkan.device, 1, &p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]);
 
         // Clear out the command buffer
-        vkResetCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0);
+        vkResetCommandBuffer(command_buffer, 0);
     }
 
     // Draw the frame
@@ -4858,14 +4944,13 @@ int render_frame ( GXInstance_t *p_instance )
 
         // Initialized data
         GXRenderer_t *active_renderer = p_instance->context.renderer;
-        VkCommandBuffer command_buffer = p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame];
         VkCommandBufferBeginInfo begin_info =
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
         };
 
         // Begin the command buffer
-        vkBeginCommandBuffer(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], &begin_info);
+        vkBeginCommandBuffer(command_buffer, &begin_info);
 
         // Iterate over each render pass
         for (size_t i = 0; i < active_renderer->render_pass_count; i++)
@@ -4881,7 +4966,7 @@ int render_frame ( GXInstance_t *p_instance )
                 .framebuffer         = p_render_pass->framebuffers[p_instance->vulkan.current_frame],
                 .renderArea.offset.x = 0,
                 .renderArea.offset.y = 0,
-                .renderArea.extent   = p_instance->vulkan.swap_chain_extent,
+                .renderArea.extent   = p_instance->vulkan.swap_chain.extent,
                 .clearValueCount     = (u32)active_renderer->current_render_pass->attachments_count,
                 .pClearValues        = active_renderer->clear_colors
             };
@@ -4918,7 +5003,8 @@ int render_frame ( GXInstance_t *p_instance )
 
                     // Set up the pipeline
                     {
-                        
+
+                        // Graphics pipeline                        
                         if ( p_shader->type == g10_pipeline_graphics )
                         {
 
@@ -4927,14 +5013,14 @@ int render_frame ( GXInstance_t *p_instance )
                             {
                                 .offset.x = 0,
                                 .offset.y = 0,
-                                .extent   = p_instance->vulkan.swap_chain_extent
+                                .extent   = p_instance->vulkan.swap_chain.extent
                             };
                             VkViewport viewport =
                             {
                                 .x        = 0.f,
                                 .y        = 0.f,
-                                .width    = (float)p_instance->vulkan.swap_chain_extent.width,
-                                .height   = (float)p_instance->vulkan.swap_chain_extent.height,
+                                .width    = (float)p_instance->vulkan.swap_chain.extent.width,
+                                .height   = (float)p_instance->vulkan.swap_chain.extent.height,
                                 .minDepth = 0.f,
                                 .maxDepth = 1.f
                             };
@@ -4942,20 +5028,24 @@ int render_frame ( GXInstance_t *p_instance )
                             // Bind the pipeline
                             vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, p_shader->graphics.pipeline);
 
-                            // Set the viewport
-                            vkCmdSetViewport(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &viewport);
+                            // Set the viewport state
+                            vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
-                            // Set the scissors
-                            vkCmdSetScissor(p_instance->vulkan.command_buffers[p_instance->vulkan.current_frame], 0, 1, &scissor);
+                            // Set the scissors state
+                            vkCmdSetScissor(command_buffer, 0, 1, &scissor);
                         }
+                        // Compute pipeline
                         else if ( p_shader->type == g10_pipeline_compute )
                             vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, p_shader->compute.pipeline);
+                        // Ray pipeline
                         else if ( p_shader->type == g10_pipeline_ray )
                             vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, p_shader->ray.pipeline);
+                        // Default
                         else 
                             goto wrong_pipeline_type;
                     }
 
+                    // Use the graphics pipeline
                     if ( p_shader->type == g10_pipeline_graphics )
                     {
 
@@ -4974,10 +5064,12 @@ int render_frame ( GXInstance_t *p_instance )
 
                         }
                     }
+                    // Use the compute pipeline
                     else if ( p_shader->type == g10_pipeline_compute )
                     {
                         //vkCmdDispatch(command_buffer,p_shader->compute.x_groups,p_shader->compute.y_groups,p_shader->compute.z_groups);
                     }
+                    // Use the ray pipeline
                     else if ( p_shader->type == g10_pipeline_ray )
                     {
 
@@ -4994,7 +5086,7 @@ int render_frame ( GXInstance_t *p_instance )
                     }
                 }
 
-                //
+                // Next subpass, if this is not the last subpass
                 if ( p_render_pass->subpasses_count-1 != j )
                     vkCmdNextSubpass2(command_buffer, &subpass_begin_info, &subpass_end_info);
             }
@@ -5034,11 +5126,11 @@ int render_frame ( GXInstance_t *p_instance )
         };
 
         // Submit the draw commands
-        if ( vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]) )
-            g_print_error("Failed to submit draw command buffer!\n");
+        //if ( vkQueueSubmit(p_instance->vulkan.graphics_queue, 1, &submit_info, p_instance->vulkan.in_flight_fences[p_instance->vulkan.current_frame]) )
+        //    g_print_error("Failed to submit draw command buffer!\n");
 
         // Present the image to the swapchain
-        result = vkQueuePresentKHR(p_instance->vulkan.present_queue, &present_info);
+        //result = vkQueuePresentKHR(p_instance->vulkan.present_queue, &present_info);
 
         // Does the window need to be resized?
         switch (result)
@@ -5082,6 +5174,18 @@ fail:
 
                 // Error
                 return 0;
+        }
+
+        // Context errors
+        {
+            no_instance_context_renderer:
+                #ifndef NDEBUG
+                    //g_print_error("[G10] [Renderer] Parameter \"p_instance->context.renderer\" points to null pointer in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+            
         }
 
         // G10 errors

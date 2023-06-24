@@ -1468,7 +1468,7 @@ int process_input ( GXInstance_t *p_instance )
             if ( p_bind )
             {
                 p_bind->active = true;
-                
+
                 call_bind(p_bind, (callback_parameter_t){ .input_state = KEYBOARD, .inputs = { .key = { .depressed = true } } });
             }
         }
@@ -1517,14 +1517,18 @@ int process_input ( GXInstance_t *p_instance )
     }
 
     // Call each bind
-    //while ( !queue_empty(p_instance->input->p_bind_queue) )
-    //{
+    /*
+    while ( !queue_empty(p_instance->input->p_bind_queue) )
+    {
+
         // Initialized data
-        //GXBind_t *p_bind = 0;
+        GXBind_t *p_bind = 0;
+
         // Dequeue a bind
-        // queue_dequeue(p_instance->input->p_bind_queue, &p_bind);
-        //call_bind(p_bind, callback_parameter, p_instance)
-    //}
+        queue_dequeue(p_instance->input->p_bind_queue, &p_bind);
+        call_bind(p_bind, callback_parameter, p_instance)
+    }
+    */
 
     // Success
     return 1;

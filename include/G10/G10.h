@@ -82,7 +82,7 @@ struct GXInstance_s
 {
 
     // Name
-    char       *name;
+    char *name;
 
     // SDL2
     struct {
@@ -101,16 +101,6 @@ struct GXInstance_s
         VkPhysicalDevice          physical_device;
         VkDevice                  device;
 
-        VkQueue                   graphics_queue;
-        VkQueue                   present_queue;
-
-        VkSwapchainKHR            swap_chain;
-        VkImage                  *swap_chain_images;
-        VkFormat                  swap_chain_image_format;
-        VkExtent2D                swap_chain_extent;
-        VkImageView              *swap_chain_image_views;
-        VkFramebuffer            *swap_chain_framebuffers;
-
         VkCommandPool             command_pool;
         VkCommandBuffer          *command_buffers;
 
@@ -124,12 +114,46 @@ struct GXInstance_s
                                   image_index;
         float                     priority;
 
+        char                     *requested_device_name;
+        dict                     *device_extensions;
+
         #pragma pack(push)
         #pragma pack (4)
         struct { int g, p; }      queue_family_indices;
-        #pragma pack(pop)
+        #pragma pack(pop)  
 
-        struct { VkSurfaceCapabilitiesKHR capabilities; VkSurfaceFormatKHR* formats; VkPresentModeKHR* present_modes; } swap_chain_details;
+        struct {
+            VkSwapchainKHR  swap_chain;
+            VkImage        *images;
+            VkFormat        image_format;
+            VkExtent2D      extent;
+            VkImageView    *image_views;
+            VkFramebuffer  *framebuffers;
+            
+            struct { 
+                VkSurfaceCapabilitiesKHR capabilities;
+                size_t format_count,
+                       present_mode_count;
+                VkSurfaceFormatKHR* formats;
+                VkPresentModeKHR* present_modes;
+            } details;
+        } swap_chain;
+
+        struct {
+            VkQueue *graphics_queues,
+                    *compute_queues,
+                    *transfer_queues,
+                     present_queue;
+            u32     *graphics_family_indicies,
+                    *compute_family_indicies,
+                    *transfer_family_indicies;
+            size_t   graphics_count,
+                     compute_count,
+                     transfer_count,
+                     graphics_family_count,
+                     compute_family_count,
+                     transfer_family_count;
+        } queues;
     } vulkan;
 
     // Window parameters
@@ -390,8 +414,8 @@ DLLEXPORT int g_find_bind ( GXInstance_t *p_instance, char *bind_name, GXBind_t 
 /** !
  * Cache a material. Caching a material adds it to the garbage collector.
  *
- * @param instance: The active instance
- * @param material: A pointer to a material
+ * @param instance : The active instance
+ * @param material : A pointer to a material
  *
  * @sa g_find_material
  *
@@ -402,8 +426,8 @@ DLLEXPORT int g_cache_material ( GXInstance_t *p_instance, GXMaterial_t *p_mater
 /** !
  * Cache a part. Caching a part adds it to the garbage collector.
  *
- * @param p_instance: The active instance
- * @param p_part    : A pointer to a part
+ * @param p_instance : The active instance
+ * @param p_part     : A pointer to a part
  *
  * @sa g_find_part
  *
@@ -414,8 +438,8 @@ DLLEXPORT int g_cache_part ( GXInstance_t *p_instance, GXPart_t *p_part );
 /** !
  * Cache a shader. Caching a shader adds it to the garbage collector.
  *
- * @param p_instance: The active instance
- * @param p_shader  : A pointer to a shader
+ * @param p_instance : The active instance
+ * @param p_shader   : A pointer to a shader
  *
  * @sa g_find_shader
  *
@@ -501,6 +525,16 @@ DLLEXPORT GXAI_t *g_find_ai ( GXInstance_t *p_instance, char *name );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT void g_user_exit         ( callback_parameter_t state, GXInstance_t *p_instance );
+
+/** !
+ * Open the G10 website in the web browser
+ * 
+ * @param input      : Input state
+ * @param p_instance : The active instance
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT void g_user_help ( callback_parameter_t input, GXInstance_t* p_instance );
 
 /** !
  * Toggle mouse lock

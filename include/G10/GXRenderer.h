@@ -31,12 +31,17 @@ struct GXRenderer_s
 	     *attachments; // value is of type GXAttachment_t *
 	
 	size_t render_pass_count,
-	       clear_color_count;
+	       clear_color_count,
+		   command_buffers_count;
 
 	GXRenderPass_t **render_passes_data,
 	                *current_render_pass;
 
 	VkClearValue *clear_colors;
+
+	VkCommandPool command_pool;
+
+	VkCommandBuffer *command_buffers;
 };
 
 struct GXRenderPass_s

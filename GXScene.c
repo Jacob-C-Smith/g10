@@ -196,7 +196,6 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 
                 // Error
                 return 0;
-
         }
 
         // Argument errors
@@ -216,7 +215,6 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 
                 // Error
                 return 0;
-
         }
     }
 }
@@ -241,12 +239,6 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                  *p_lights_value       = 0,
                  *p_skyboxes_value     = 0,
                  *p_light_probes_value = 0;
-
-    // State check
-    {
-        if ( p_instance->context.renderer == (void *) 0 )
-            goto no_renderer;
-    }
 
     // Parse the scene as a JSON value
     if ( p_value->type == JSONobject )
@@ -275,14 +267,14 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
         // Load the scene as a path
         if ( load_scene(pp_scene, p_value->string) == 0 )
-            goto failed_to_load_initial_scene;
+            goto failed_to_load_scene_as_path;
 
         // Success
         return 1;
     }
-    // Failed to parse. Wrong type
+    // Default
     else
-        goto wrong_type;
+        goto wrong_value_type;
 
     // Construct the scene
     {
@@ -308,12 +300,15 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
             // Copy the name
             strncpy(p_scene->name, p_name_value->string, name_len);
         }
+        // Default
         else
             goto name_type_error;
 
         // Load entities
         if ( p_entities_value )
         {
+
+            // Parse the entities as an array
             if ( p_entities_value->type == JSONarray )
             {
 
@@ -370,9 +365,9 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     if ( create_thread(&thread) == 0 )
                         goto failed_to_create_thread;
 
+                    // Store the thread
                     entity_loading_threads[i] = thread;
 
-                    // TODO: Fix
                     // Spawn a thread
                     thread->thread = SDL_CreateThread(load_entity_from_queue, 0, p_instance);
 
@@ -393,6 +388,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     SDL_WaitThread(entity_loading_threads[i]->thread, &r_stat);
                 }
             }
+            // Default
             else
                 goto entities_type_error;
         }
@@ -400,6 +396,8 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         // Load cameras
         if ( p_cameras_value )
         {
+
+            // Parse the cameras as an array
             if ( p_cameras_value->type == JSONarray )
             {
 
@@ -442,6 +440,25 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     dict_add(p_scene->cameras, p_camera->name, p_camera);
                 }
             }
+            // Parse the cameras as an object
+            else if ( p_cameras_value->type == JSONobject )
+            {
+
+                // Initialized data
+                GXCamera_t *p_camera = 0;
+
+                // Construct a camera dict
+                // TODO: Replace with a constant?
+                dict_construct(&p_scene->cameras, 16);
+
+                // Load a camera as a JSON value
+                if ( load_camera_as_json_value(&p_camera, p_cameras_value->object) == 0 )
+                    goto failed_to_load_camera_as_json_value;
+
+                // Add the camera to the camera dictionary
+                dict_add(p_scene->cameras, p_camera->name, p_camera);
+            }
+            // Default
             else
                 goto cameras_type_error;
         }
@@ -449,10 +466,13 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         // Load lights
         if ( p_lights_value )
         {
+            
+            // Parse the lights as an array
             if ( p_lights_value->type == JSONarray )
             {
-
+                // TODO:
             }
+            // Default
             else
                 goto lights_type_error;
         }
@@ -460,10 +480,13 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         // Load light probes
         if ( p_light_probes_value )
         {
+
+            // Parse the light probes as an array
             if ( p_lights_value->type == JSONarray )
             {
-
+                // TODO: 
             }
+            // Default
             else
                 goto light_probes_type_error;
         }
@@ -473,6 +496,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         //construct_bvh_from_scene(&p_scene->bvh, p_scene);
 
         // Allocate a list to store collisions
+        // TODO: Replace with a constant?
         p_scene->collisions = calloc(16, sizeof (GXCollision_t *));
 
         // Return a pointer to the caller
@@ -480,14 +504,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     }
 
     // Success
-    return 1;
-
-    // TODO:
-    not_enough_properties:
-    failed_to_create_thread:
-    wrong_type:
-    no_renderer:
-    failed_to_load_initial_scene:
+    return 1;    
 
     // Error handling
     {
@@ -522,6 +539,14 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
 	            // Error
 	            return 0;
+            
+            wrong_value_type:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
 
             name_type_error:
                 #ifndef NDEBUG
@@ -541,7 +566,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
             cameras_type_error:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Property \"cameras\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Property \"cameras\" must be of type [ object | array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -582,7 +607,22 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 
                 // Error
                 return 0;
+            
+            failed_to_load_scene_as_path:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Failed to load scene from path in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
+                // Error
+                return 0;
+            
+            failed_to_create_thread:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Failed to allocate thread in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
         // Standard library errors
@@ -613,15 +653,18 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
     }
 
     // Add the entity to the scene
-    dict_add(p_scene->entities, entity->name, entity);
+    (void) dict_add(p_scene->entities, entity->name, entity);
 
     // If the entity has a rigidbody, add it to the actor list
-    if (entity->rigidbody)
-        dict_add(p_scene->actors, entity->name, entity);
+    if ( entity->rigidbody )
+        (void) dict_add(p_scene->actors, entity->name, entity);
 
     // If the entity has an AI, add it to the AI list
-    if (entity->ai)
-        dict_add(p_scene->ais, entity->name, entity);
+    if ( entity->ai )
+        (void) dict_add(p_scene->ais, entity->name, entity);
+
+    // TODO: Additional state updates
+    //
 
     // Success
     return 1;
@@ -649,7 +692,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
 
             no_entity:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"entity\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -657,7 +700,7 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] \"entity\" has no name in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Parameter \"entity\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -667,23 +710,23 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
 
 }
 
-int append_camera ( GXScene_t *scene, GXCamera_t *camera )
+int append_camera ( GXScene_t *p_scene, GXCamera_t *p_camera )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( scene          == (void *) 0 ) goto no_scene;
-            if ( scene->cameras == (void *) 0 ) goto no_cameras;
-            if ( camera         == (void *) 0 ) goto no_camera;
+            if ( p_scene          == (void *) 0 ) goto no_scene;
+            if ( p_scene->cameras == (void *) 0 ) goto no_cameras;
+            if ( p_camera         == (void *) 0 ) goto no_camera;
         #endif
 
-        if (camera->name == 0)
+        if (p_camera->name == 0)
             goto no_name;
     }
 
     // Add the camera to the scene
-    dict_add(scene->cameras, camera->name, camera);
+    (void) dict_add(p_scene->cameras, p_camera->name, p_camera);
 
     // Success
     return 1;
@@ -695,7 +738,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -703,7 +746,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera )
 
             no_cameras:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No camera dictionary in scene, in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] No camera dictionary in parameter \"p_scene\", in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -711,7 +754,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera )
 
             no_camera:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"camera\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -719,7 +762,7 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] \"camera\" has no name in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Parameter \"camera\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -728,21 +771,21 @@ int append_camera ( GXScene_t *scene, GXCamera_t *camera )
     }
 }
 
-int append_light ( GXScene_t *scene, GXLight_t *light )
+int append_light ( GXScene_t *p_scene, GXLight_t *p_light )
 {
     // Argument check
     {
         #ifndef NDEBUG
-            if ( scene         == (void *) 0 ) goto no_scene;
-            if ( scene->lights == (void *) 0 ) goto no_lights;
-            if ( light         == (void *) 0 ) goto no_light;
+            if ( p_scene         == (void *) 0 ) goto no_scene;
+            if ( p_scene->lights == (void *) 0 ) goto no_lights;
+            if ( p_light         == (void *) 0 ) goto no_light;
         #endif
-        if ( light->name == 0 )
+        if ( p_light->name == 0 )
             goto no_name;
     }
 
     // Add the entity to the scene
-    dict_add(scene->lights, light->name, light);
+    (void) dict_add(p_scene->lights, p_light->name, p_light);
 
     // Success
     return 1;
@@ -754,7 +797,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -762,7 +805,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light )
 
             no_lights:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] No light dictionary in scene, in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] No light dictionary in parameter \"p_scene\", in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -770,7 +813,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light )
 
             no_light:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"light\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_light\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -778,7 +821,7 @@ int append_light ( GXScene_t *scene, GXLight_t *light )
 
             no_name:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] \"light\" has no name in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Parameter \"p_light\" has no name in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -787,139 +830,22 @@ int append_light ( GXScene_t *scene, GXLight_t *light )
     }
 }
 
-int append_collision ( GXScene_t *scene, GXCollision_t *collision )
+int append_collision ( GXScene_t *p_scene, GXCollision_t *p_collision )
 {
-    size_t i = 0;
 
-    while (scene->collisions[++i]);
-
-    scene->collisions[i-1] = collision;
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_scene     == (void *) 0 ) goto no_scene;
+            if ( p_collision == (void *) 0 ) goto no_collision;
+        #endif
+    }
+    
+    // TODO:
+    //
 
     // Success
     return 1;
-}
-
-int scene_info ( GXScene_t *p_scene )
-{
-    size_t       entity_count    = dict_keys(p_scene->entities, 0),
-                 re              = entity_count,
-                 fs              = 1,
-                 le              = 0;
-    char       **entity_names    = calloc(entity_count, sizeof(void *));
-    GXEntity_t **entity_pointers = calloc(entity_count, sizeof(void *));
-
-    while (re >= 10)
-    {
-        re /= 10;
-        fs++;
-    }
-
-    dict_keys(p_scene->entities, entity_names);
-    dict_values(p_scene->entities, (void **)entity_pointers);
-
-    for (size_t i = 0; i < entity_count; i++)
-    {
-        size_t el = strlen(entity_names[i]);
-
-        le = (el > le) ? el : le;
-    }
-
-    g_print_log("\n - Scene info -\n");
-    g_print_log("name     : \"%s\"\n", p_scene->name);
-    g_print_log("entities :\n");
-
-    // TODO: Fix
-    //dict_foreach(p_scene->entities, entity_info);
-
-    printf("\n");
-    g_print_log("cameras  :\n");
-
-    // TODO: Fix
-    //dict_foreach(p_scene->cameras, print_camera);
-
-    printf("\n");
-
-    return 1;
-}
-
-GXEntity_t *get_entity ( GXScene_t *scene, char *name )
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if ( scene == (void *) 0 ) goto no_scene;
-            if ( name  == (void *) 0 ) goto no_name;
-        #endif
-    }
-
-    // Success OR null pointer if name is not in scene->entities
-    return (GXEntity_t *) dict_get(scene->entities, (char *)name);
-
-    // Error handling
-    {
-        no_scene:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
-
-        no_name:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
-    }
-}
-
-GXCamera_t *get_camera ( GXScene_t *scene, char *name )
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if ( scene == (void *) 0 ) goto no_scene;
-            if ( name  == (void *) 0 ) goto no_name;
-        #endif
-    }
-
-    return (GXCamera_t *) dict_get(scene->cameras, (char *)name);
-
-    // Error handling
-    {
-        no_scene:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
-        no_name:
-            #ifndef NDEBUG
-                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
-            #endif
-
-            // Error
-            return 0;
-    }
-}
-
-GXLight_t *get_light ( GXScene_t *scene, char *name )
-{
-
-    // Argument check
-    {
-        #ifndef NDEBUG
-            if ( scene == (void *) 0 ) goto no_scene;
-            if ( name  == (void *) 0 ) goto no_name;
-        #endif
-    }
-
-    return (GXLight_t *) dict_get(scene->lights, (char *) name);
 
     // Error handling
     {
@@ -928,7 +854,191 @@ GXLight_t *get_light ( GXScene_t *scene, char *name )
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_collision:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_collision\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+    }
+}
+
+int scene_info ( GXScene_t *p_scene )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_scene == (void *) 0 ) goto no_scene;
+        #endif
+    }
+
+    // Initialized data
+    size_t       entity_count            = dict_keys(p_scene->entities, 0),
+                 re                      = entity_count,
+                 fs                      = 1,
+                 longest_entity_name_len = 0;
+    char       **entity_names            = calloc(entity_count, sizeof(void *));
+    GXEntity_t **entity_pointers         = calloc(entity_count, sizeof(void *));
+
+    // Compute decimal places through repeated division
+    while ( re >= 10 ) { re /= 10; fs++; }
+
+    // Get the name of each entity
+    dict_keys(p_scene->entities, entity_names);
+
+    // Get a pointer to each entity
+    dict_values(p_scene->entities, (void **)entity_pointers);
+
+    // Get the longest entity name
+    for (size_t i = 0; i < entity_count; i++)
+    {
+
+        // Initialized data
+        size_t entity_name_len = strlen(entity_names[i]);
+
+        // Check for a longer entity name
+        longest_entity_name_len = (entity_name_len > longest_entity_name_len) ? entity_name_len : longest_entity_name_len;
+    }
+
+    // Formatting
+    g_print_log("\n - Scene info -\n");
+
+    // Print the name of the scene
+    g_print_log("name     : \"%s\"\n", p_scene->name);
+    
+    // Formatting
+    g_print_log("entities :\n");
+
+    // Print each entity
+    // TODO: Fix
+    //dict_foreach(p_scene->entities, entity_info);
+
+    // Formatting
+    g_print_log("\ncameras  :\n");
+
+    // Print each camera
+    // TODO: Fix
+    //dict_foreach(p_scene->cameras, print_camera);
+
+    // Formatting
+    g_print_log("\n");
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+        
+        // Argument errors
+        {
+            no_scene:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+GXEntity_t *get_entity ( GXScene_t *p_scene, char *name )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_scene == (void *) 0 ) goto no_scene;
+            if ( name    == (void *) 0 ) goto no_name;
+        #endif
+    }
+
+    // Success OR null pointer if name is not in scene->entities
+    return (GXEntity_t *) dict_get(p_scene->entities, (char *)name);
+
+    // Error handling
+    {
+        no_scene:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+
+        no_name:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+    }
+}
+
+GXCamera_t *get_camera ( GXScene_t *p_scene, char *name )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_scene == (void *) 0 ) goto no_scene;
+            if ( name    == (void *) 0 ) goto no_name;
+        #endif
+    }
+
+    return (GXCamera_t *) dict_get(p_scene->cameras, (char *)name);
+
+    // Error handling
+    {
+        no_scene:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+        no_name:
+            #ifndef NDEBUG
+                g_print_error("[G10] [Scene] Null pointer provided for parameter \"name\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+    }
+}
+
+GXLight_t *get_light ( GXScene_t *p_scene, char *name )
+{
+
+    // Argument check
+    {
+        #ifndef NDEBUG
+            if ( p_scene == (void *) 0 ) goto no_scene;
+            if ( name    == (void *) 0 ) goto no_name;
+        #endif
+    }
+
+    return (GXLight_t *) dict_get(p_scene->lights, (char *) name);
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_scene:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -945,25 +1055,25 @@ GXLight_t *get_light ( GXScene_t *scene, char *name )
     }
 }
 
-int set_active_camera ( GXScene_t *scene, char *name)
+int set_active_camera ( GXScene_t *p_scene, char *name )
 {
 
     // Argument check
     {
         #ifndef NDEBUG
-            if ( scene == (void *) 0 ) goto no_scene;
-            if ( name  == (void *) 0 ) goto no_name;
+            if ( p_scene == (void *) 0 ) goto no_scene;
+            if ( name    == (void *) 0 ) goto no_name;
         #endif
     }
 
     // Initialized data
-    GXCamera_t *c = (GXCamera_t *) dict_get(scene->cameras, (char *) name);
+    GXCamera_t *c = (GXCamera_t *) dict_get(p_scene->cameras, (char *) name);
 
     // Is the requested camera real?
     if (c)
 
         // Set the active camera
-        scene->active_camera = c;
+        p_scene->active_camera = c;
 
     else
 
@@ -980,7 +1090,7 @@ int set_active_camera ( GXScene_t *scene, char *name)
         {
             no_scene:
                 #ifndef NDEBUG
-                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"scene\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_error("[G10] [Scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -1036,7 +1146,7 @@ int destroy_scene ( GXScene_t **pp_scene )
     {
 
         // TODO: Fix
-        // Clear the dictionary and free every value
+        // Free the dictionary and free every value
         //dict_free_clear(p_scene->entities, destroy_entity);
 
         // Destroy the entity dictionary
