@@ -25,7 +25,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libsdl2-dev libsdl2-image-dev cmake ninja-build
+        sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-net-dev cmake ninja-build
         
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
