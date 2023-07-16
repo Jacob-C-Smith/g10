@@ -11,7 +11,7 @@ int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
 
     // Argument check
     #ifndef NDEBUG
-        f ( pp_rigidbody == (void *) 0 ) goto no_rigidbody;
+        if ( pp_rigidbody == (void *) 0 ) goto no_rigidbody;
     #endif
 
     // Initialized data

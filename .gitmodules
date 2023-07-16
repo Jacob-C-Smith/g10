@@ -13,3 +13,6 @@
 [submodule "extern/stack"]
 	path = extern/stack
 	url = https://github.com/Jacob-C-Smith/stack
+[submodule "extern/sync"]
+	path = extern/sync
+	url = https://github.com/Jacob-C-Smith/sync
