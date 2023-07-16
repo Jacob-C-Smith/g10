@@ -1,14 +1,14 @@
-;	x86 calling conventions
-;	rcx/xmm0
-;	rdx/xmm1
-;	r8/xmm2
-;	r9/xmm3
-;	RTL (C)
+;    x86 calling conventions
+;    rcx/xmm0
+;    rdx/xmm1
+;    r8/xmm2
+;    r9/xmm3
+;    RTL (C)
 ;
-;	Stack aligned on 16 bytes. 32 bytes shadow space on stack.
-;	The specified 8 registers can only be used for parameters
-;	1 through 4. For C++ classes, the hidden this parameter
-;	is the first parameter, and is passed in RCX.
+;    Stack aligned on 16 bytes. 32 bytes shadow space on stack.
+;    The specified 8 registers can only be used for parameters
+;    1 through 4. For C++ classes, the hidden this parameter
+;    is the first parameter, and is passed in RCX.
 ;
 
 _DATA SEGMENT

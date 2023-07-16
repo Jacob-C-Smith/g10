@@ -306,7 +306,7 @@ int init_shader ( void )
         // Iterate over push constant getters
         for (size_t i = 0; i < PUSH_CONSTANT_GETTERS_COUNT; i++)
 
-            // Add the push constant getter 
+            // Add the push constant getter
             dict_add(push_constant_getters, push_constant_getter_names[i], (void*)push_constant_getter_functions[i]);
 
         // Iterate over rasterizer polygon modes
@@ -340,7 +340,7 @@ int init_shader ( void )
             dict_add(pipeline_loader_lookup_tables, shader_pipeline_names[i], graphics_pipeline_type_constructors[i]);
 
     }
-    
+
     // Create a shader cache mutex
     p_instance->mutexes.shader_cache = SDL_CreateMutex();
 
@@ -356,7 +356,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate format types lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -364,7 +364,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate format sizes lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -372,7 +372,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate descriptor types lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -380,7 +380,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate push constant getters lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -388,7 +388,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate polygon modes lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -396,7 +396,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate blend operations lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -404,7 +404,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate blend factors lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -412,7 +412,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate shader stages lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
@@ -420,7 +420,7 @@ int init_shader ( void )
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Failed to allocate pipeline loader lookup tables lookup table in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
         }
@@ -431,13 +431,11 @@ int create_shader_module ( char *code, size_t code_len, VkShaderModule *shader_m
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( code          == (void *) 0 ) goto no_code;
-            if ( code_len      == 0 )          goto no_code_len;
-            if ( shader_module == (void *) 0 ) goto no_shader_module;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( code          == (void *) 0 ) goto no_code;
+        if ( code_len      ==          0 ) goto no_code_len;
+        if ( shader_module == (void *) 0 ) goto no_shader_module;
+    #endif
 
     // Initialized data
     GXInstance_t             *p_instance                = g_get_active_instance();
@@ -445,11 +443,11 @@ int create_shader_module ( char *code, size_t code_len, VkShaderModule *shader_m
     {
         .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = code_len,
-        .pCode    = (const unsigned int*)code
+        .pCode    = code
     };
     VkResult r = vkCreateShaderModule(p_instance->vulkan.device, &shader_module_create_info, (void*)0, shader_module);
 
-    // Error checking
+    // Error check
     switch ( r )
     {
         case VK_SUCCESS:
@@ -541,18 +539,15 @@ int create_shader ( GXShader_t **pp_shader )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXShader_t *p_shader = calloc(1, sizeof(GXShader_t));
 
     // Check memory
-    if ( p_shader == (void *) 0 )
-        goto no_mem;
+    if ( p_shader == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_shader = p_shader;
@@ -575,15 +570,15 @@ int create_shader ( GXShader_t **pp_shader )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -591,18 +586,15 @@ int create_layout ( GXLayout_t **pp_layout )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_layout == (void *) 0 ) goto no_layout;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_layout == (void *) 0 ) goto no_layout;
+    #endif
 
     // Initialized data
     GXLayout_t *p_layout = calloc(1, sizeof(GXLayout_t));
 
-    // Error checking
-    if ( p_layout == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( p_layout == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_layout = p_layout;
@@ -625,15 +617,15 @@ int create_layout ( GXLayout_t **pp_layout )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -641,18 +633,15 @@ int create_set ( GXSet_t **pp_set )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_set == (void *) 0 ) goto no_set;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_set == (void *) 0 ) goto no_set;
+    #endif
 
     // Initialized data
     GXSet_t *p_set = calloc(1, sizeof(GXSet_t));
 
-    // Error checking
-    if ( p_set == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( p_set == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_set = p_set;
@@ -675,15 +664,15 @@ int create_set ( GXSet_t **pp_set )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -691,18 +680,15 @@ int create_descriptor ( GXDescriptor_t **pp_descriptor )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_descriptor == (void *) 0 ) goto no_descriptor;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_descriptor == (void *) 0 ) goto no_descriptor;
+    #endif
 
     // Initialized data
     GXDescriptor_t *p_descriptor = calloc(1, sizeof(GXDescriptor_t));
 
-    // Error checking
-    if ( p_descriptor == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( p_descriptor == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_descriptor = p_descriptor;
@@ -725,15 +711,15 @@ int create_descriptor ( GXDescriptor_t **pp_descriptor )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -741,12 +727,10 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-            if ( path      == (void *) 0 ) goto no_path;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+        if ( path      == (void *) 0 ) goto no_path;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
@@ -759,7 +743,7 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
 
         // Return a pointer to the caller
         *pp_shader = p_shader;
-        
+
         // Increment the users
         p_shader->users++;
 
@@ -767,20 +751,17 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
         return 1;
     }
 
-    len  = g_load_file(path, (void *) 0, true);
+    len  = g_load_file(path, (void *) 0, false);
     text = calloc(len + 1, sizeof(char));
 
     // Error check
-    if ( text == (void *) 0 )
-        goto no_mem;
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load a file
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, false) == 0 ) goto failed_to_load_file;
 
     // Load a shader as JSON text
-    if ( load_shader_as_json_text(pp_shader, text) == 0 )
-        goto failed_to_load_shader_as_json_text;
+    if ( load_shader_as_json_text(pp_shader, text) == 0 ) goto failed_to_load_shader_as_json_text;
 
     // Clean the scope
     free(text);
@@ -814,54 +795,51 @@ int load_shader ( GXShader_t **pp_shader, const char *path )
         {
             failed_to_load_file:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
 
             failed_to_load_shader_as_json_text:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader as JSON text in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load shader as JSON text in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
 int load_shader_as_json_text ( GXShader_t **pp_shader, char *text )
 {
+
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-            if ( text      == (void *) 0 ) goto no_text;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+        if ( text      == (void *) 0 ) goto no_text;
+    #endif
 
     // Initialized data
     JSONValue_t *p_value = 0;
 
     // Parse the JSON text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto no_mem;
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto no_mem;
 
     // Load a shader as JSON text
-    if ( load_shader_as_json_value(pp_shader, p_value) == 0 )
-        goto failed_to_load_shader_as_json_value;
+    if ( load_shader_as_json_value(pp_shader, p_value) == 0 ) goto failed_to_load_shader_as_json_value;
 
     // Clean the scope
     // free_json_value(p_value);
@@ -896,23 +874,23 @@ int load_shader_as_json_text ( GXShader_t **pp_shader, char *text )
 
             failed_to_load_shader_as_json_value:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader as JSON value in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load shader as JSON value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -920,12 +898,10 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-            if ( p_value   == (void *) 0 ) goto no_value;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+        if ( p_value   == (void *) 0 ) goto no_value;
+    #endif
 
     // Initialized data
     GXInstance_t  *p_instance                  = g_get_active_instance();
@@ -960,27 +936,27 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
 
         if ( p_name )
         {
-            
+
             // Check for the right type
             if ( p_name->type == JSONstring )
             {
-                
+
                 // Initialized data
                 GXShader_t *p_shader = dict_get(p_instance->cache.shaders, p_name->string);
-                
+
                 if ( p_shader )
                 {
 
                     // Return a pointer to the caller
                     *pp_shader = p_shader;
-                    
+
                     // Increment the users
                     p_shader->users++;
 
                     // Success
                     return 1;
                 }
-                
+
             }
             else
                 goto wrong_name_type;
@@ -999,8 +975,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
             if ( pipeline_load_as_json_value )
 
                 // ... call the function
-                if ( pipeline_load_as_json_value(pp_shader, p_value) == 0 )
-                    goto failed_to_parse_shader_pipeline;
+                if ( pipeline_load_as_json_value(pp_shader, p_value) == 0 ) goto failed_to_parse_shader_pipeline;
         }
         else
             goto unrecognized_type;
@@ -1010,8 +985,7 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
     {
 
         // Load the shader as a path
-        if ( load_shader(pp_shader, p_value->string) == 0 )
-            goto failed_to_load_shader_as_path;
+        if ( load_shader(pp_shader, p_value->string) == 0 ) goto failed_to_load_shader_as_path;
 
         // Success
         return 1;
@@ -1057,31 +1031,31 @@ int load_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value )
 
             failed_to_load_shader_as_path:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader from path in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load shader from path in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
 
             // TODO: More specific
             failed_to_parse_shader_pipeline:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
         }
 
         // JSON errors
         {
             wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to load shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
 
             unrecognized_type:
                 #ifndef NDEBUG
@@ -1098,11 +1072,9 @@ int use_shader ( GXShader_t *p_shader )
 {
 
     // Argument errors
-    {
-        #ifndef NDEBUG
-            if ( p_shader ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_shader ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
@@ -1180,7 +1152,7 @@ int add_shader_push_constant_getter ( char *getter_name, int(*getter_function)(v
         #endif
     }
 
-    // Error checking
+    // Error check
     {
         #ifndef NDEBUG
             if (dict_get(push_constant_getters, getter_name))
@@ -1291,11 +1263,9 @@ int destroy_shader ( GXShader_t **pp_shader )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // TODO: Cache destruction
 
@@ -1304,8 +1274,7 @@ int destroy_shader ( GXShader_t **pp_shader )
     GXShader_t   *p_shader = *pp_shader;
 
     // Error check
-    if ( p_shader == (void *) 0 )
-        goto pointer_to_null_pointer;
+    if ( p_shader == (void *) 0 ) goto pointer_to_null_pointer;
 
     // Destroy the pipeline
     vkDestroyPipeline(p_instance->vulkan.device, p_shader->graphics.pipeline, 0);
@@ -1357,11 +1326,9 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
     // p_value will always be valid. p_value->type will always be JSONobject
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance                            = g_get_active_instance();
@@ -1387,7 +1354,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
         // Initialized data
         dict *p_dict = p_value->object;
-        
+
         p_name                                = dict_get(p_dict, "name");
         p_vertex_shader_path                  = dict_get(p_dict, "vertex shader path");
         p_tessellation_control_shader_path    = dict_get(p_dict, "tessellation control shader path");
@@ -1403,17 +1370,10 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         p_rasterizer                          = dict_get(p_dict, "rasterizer");
 
         // Check properties
-        if ( ! ( p_name && p_fragment_shader_path ) )
-            goto missing_properties;
-
-        if ( p_in == (void *) 0 )
-            goto missing_properties;
-
-        if ( p_vertex_shader_path && p_task_shader_path && p_mesh_shader_path )
-            goto missing_properties;
-
-        if ( ( (bool)(p_vertex_shader_path) ^ (bool)(p_task_shader_path && p_mesh_shader_path) ) == 0 )
-            goto missing_properties;
+        if ( ! ( p_name && p_fragment_shader_path ) )                                                   goto missing_properties;
+        if ( p_in == (void *) 0 )                                                                       goto missing_properties;
+        if ( p_vertex_shader_path && p_task_shader_path && p_mesh_shader_path )                         goto missing_properties;
+        if ( ( (bool)(p_vertex_shader_path) ^ (bool)(p_task_shader_path && p_mesh_shader_path) ) == 0 ) goto missing_properties;
     }
 
     // TODO: Cache check
@@ -1422,8 +1382,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
     {
 
         // Allocate memory for a shader
-        if ( create_shader(&p_shader) == 0 )
-            goto failed_to_allocate_shader;
+        if ( create_shader(&p_shader) == 0 ) goto failed_to_allocate_shader;
 
         // Set the shader type
         p_shader->type = g10_pipeline_graphics;
@@ -1439,8 +1398,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
             p_shader->name = calloc(name_len + 1, sizeof(char));
 
             // Error check
-            if ( p_shader->name == (void *) 0 )
-                goto no_mem;
+            if ( p_shader->name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_shader->name, p_name->string, name_len);
@@ -1451,8 +1409,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         // Load the layout
         if ( p_layout )
         {
-            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 )
-                goto failed_to_load_layout_as_json_value;
+            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 ) goto failed_to_load_layout_as_json_value;
         }
 
         // Load the shader binaries
@@ -1470,16 +1427,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char *vertex_shader_data = calloc(vertex_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( vertex_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( vertex_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the vertex shader binary file
-                    if ( g_load_file(p_vertex_shader_path->string, vertex_shader_data, true) == 0 )
-                        goto failed_to_load_vertex_shader_binary;
+                    if ( g_load_file(p_vertex_shader_path->string, vertex_shader_data, true) == 0 ) goto failed_to_load_vertex_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(vertex_shader_data, vertex_shader_data_len, &p_shader->graphics.vertex_shader_module) == 0 )
-                        goto failed_to_create_vertex_shader_module;
+                    if ( create_shader_module(vertex_shader_data, vertex_shader_data_len, &p_shader->graphics.vertex_shader_module) == 0 ) goto failed_to_create_vertex_shader_module;
 
                     // Clean the scope
                     free(vertex_shader_data);
@@ -1500,16 +1454,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* tessellation_control_shader_data = calloc(tessellation_control_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( tessellation_control_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( tessellation_control_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the tessellation_control shader binary file
-                    if ( g_load_file(p_tessellation_control_shader_path->string, tessellation_control_shader_data, true) == 0 )
-                        goto failed_to_load_tessellation_control_shader_binary;
+                    if ( g_load_file(p_tessellation_control_shader_path->string, tessellation_control_shader_data, true) == 0 ) goto failed_to_load_tessellation_control_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(tessellation_control_shader_data, tessellation_control_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 )
-                        goto failed_to_create_tessellation_control_shader_module;
+                    if ( create_shader_module(tessellation_control_shader_data, tessellation_control_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 ) goto failed_to_create_tessellation_control_shader_module;
 
                     // Clean the scope
                     free(tessellation_control_shader_data);
@@ -1530,16 +1481,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* tessellation_evaluation_shader_data = calloc(tessellation_evaluation_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( tessellation_evaluation_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( tessellation_evaluation_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the tessellation evaluation shader binary file
-                    if ( g_load_file(p_tessellation_evaluation_shader_path->string, tessellation_evaluation_shader_data, true) == 0 )
-                        goto failed_to_load_tessellation_evaluation_shader_binary;
+                    if ( g_load_file(p_tessellation_evaluation_shader_path->string, tessellation_evaluation_shader_data, true) == 0 ) goto failed_to_load_tessellation_evaluation_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(tessellation_evaluation_shader_data, tessellation_evaluation_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 )
-                        goto failed_to_create_tessellation_evaluation_shader_module;
+                    if ( create_shader_module(tessellation_evaluation_shader_data, tessellation_evaluation_shader_data_len, &p_shader->graphics.tessellation_control_shader_module) == 0 ) goto failed_to_create_tessellation_evaluation_shader_module;
 
                     // Clean the scope
                     free(tessellation_evaluation_shader_data);
@@ -1560,16 +1508,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* geometry_shader_data = calloc(geometry_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( geometry_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( geometry_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the geometry shader binary file
-                    if ( g_load_file(p_geometry_shader_path->string, geometry_shader_data, true) == 0 )
-                        goto failed_to_load_geometry_shader_binary;
+                    if ( g_load_file(p_geometry_shader_path->string, geometry_shader_data, true) == 0 ) goto failed_to_load_geometry_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(geometry_shader_data, geometry_shader_data_len, &p_shader->graphics.geometry_shader_module) == 0 )
-                        goto failed_to_create_geometry_shader_module;
+                    if ( create_shader_module(geometry_shader_data, geometry_shader_data_len, &p_shader->graphics.geometry_shader_module) == 0 ) goto failed_to_create_geometry_shader_module;
 
                     // Clean the scope
                     free(geometry_shader_data);
@@ -1590,16 +1535,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* task_shader_data = calloc(task_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( task_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( task_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the task shader binary file
-                    if ( g_load_file(p_task_shader_path->string, task_shader_data, true) == 0 )
-                        goto failed_to_load_task_shader_binary;
+                    if ( g_load_file(p_task_shader_path->string, task_shader_data, true) == 0 ) goto failed_to_load_task_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(task_shader_data, task_shader_data_len, &p_shader->graphics.task_shader_module) == 0 )
-                        goto failed_to_create_task_shader_module;
+                    if ( create_shader_module(task_shader_data, task_shader_data_len, &p_shader->graphics.task_shader_module) == 0 ) goto failed_to_create_task_shader_module;
 
                     // Clean the scope
                     free(task_shader_data);
@@ -1620,16 +1562,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* mesh_shader_data = calloc(mesh_shader_data_len, sizeof(char));
 
                     // Error check
-                    if ( mesh_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( mesh_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the mesh shader binary file
-                    if ( g_load_file(p_mesh_shader_path->string, mesh_shader_data, true) == 0 )
-                        goto failed_to_load_mesh_shader_binary;
+                    if ( g_load_file(p_mesh_shader_path->string, mesh_shader_data, true) == 0 ) goto failed_to_load_mesh_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(mesh_shader_data, mesh_shader_data_len, &p_shader->graphics.mesh_shader_module) == 0 )
-                        goto failed_to_create_mesh_shader_module;
+                    if ( create_shader_module(mesh_shader_data, mesh_shader_data_len, &p_shader->graphics.mesh_shader_module) == 0 ) goto failed_to_create_mesh_shader_module;
 
                     // Clean the scope
                     free(mesh_shader_data);
@@ -1650,16 +1589,13 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     char* fragment_shader_data = calloc(fragment_shader_data_len + 1, sizeof(char));
 
                     // Error check
-                    if ( fragment_shader_data == (void *) 0 )
-                        goto no_mem;
+                    if ( fragment_shader_data == (void *) 0 ) goto no_mem;
 
                     // Load the fragment shader binary file
-                    if ( g_load_file(p_fragment_shader_path->string, fragment_shader_data, true) == 0 )
-                        goto failed_to_load_fragment_shader_binary;
+                    if ( g_load_file(p_fragment_shader_path->string, fragment_shader_data, true) == 0 ) goto failed_to_load_fragment_shader_binary;
 
                     // Create a shader module
-                    if ( create_shader_module(fragment_shader_data, fragment_shader_data_len, &p_shader->graphics.fragment_shader_module) == 0 )
-                        goto failed_to_create_fragment_shader_module;
+                    if ( create_shader_module(fragment_shader_data, fragment_shader_data_len, &p_shader->graphics.fragment_shader_module) == 0 ) goto failed_to_create_fragment_shader_module;
 
                     // Clean the scope
                     free(fragment_shader_data);
@@ -1718,7 +1654,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 // Set up the tessellation control shader
                 if ( p_shader->graphics.tessellation_control_shader_module )
                 {
-                    shader_stages[shader_stage_iterator++] = 
+                    shader_stages[shader_stage_iterator++] =
                     (VkPipelineShaderStageCreateInfo)
                     {
                         .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1783,7 +1719,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 // Set up the fragment shader
                 if ( p_shader->graphics.fragment_shader_module )
                 {
-                    shader_stages[shader_stage_iterator++] = 
+                    shader_stages[shader_stage_iterator++] =
                     (VkPipelineShaderStageCreateInfo)
                     {
                         .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -1816,7 +1752,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     p_vertex_attributes = dict_get(p_dict, "vertex attributes");
                     p_topology          = dict_get(p_dict, "topology");
 
-                    // Error checking
+                    // Error check
                     if ( ! (
                         p_vertex_attributes &&
                         p_topology
@@ -1841,9 +1777,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         // Allocate for vertex group JSON values
                         pp_vertex_groups = calloc(vertex_group_count+1, sizeof(JSONValue_t *));
 
-                        // Error checking
-                        if ( pp_vertex_groups == (void *) 0 )
-                            goto no_mem;
+                        // Error check
+                        if ( pp_vertex_groups == (void *) 0 ) goto no_mem;
 
                         // Get the array contents
                         array_get(p_vertex_attributes->list, (void **)pp_vertex_groups, 0);
@@ -1866,16 +1801,15 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         // Parse the JSON value
                         if ( p_vertex_group->type == JSONobject )
                         {
-                            
+
                             // Initialized data
                             dict *p_dict = p_vertex_group->object;
 
                             // Required properties
                             p_input_attribute_type = dict_get(p_dict, "type");
 
-                            // Error checking
-                            if ( ! ( p_input_attribute_type ) )
-                                goto wrong_input_attribute_properties;
+                            // Error check
+                            if ( ! ( p_input_attribute_type ) ) goto wrong_input_attribute_properties;
 
                         }
                         else
@@ -2033,18 +1967,18 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
                     // Construct the rasterizer
                     {
-                                                
+
                         if ( p_line_width )
                         {
 
                             // Check for the right type
-                            if ( p_line_width->type == JSONfloat ) 
+                            if ( p_line_width->type == JSONfloat )
                                 line_width = (float) p_line_width->floating;
                             // Default
                             else
                                 goto no_rasterizer_line_width;
                         }
-                        
+
                         if ( p_depth_bias_constant_factor )
                         {
 
@@ -2055,7 +1989,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_rasterizer_depth_bias_constant_factor;
                         }
-                        
+
                         if ( p_depth_bias_clamp )
                         {
 
@@ -2066,7 +2000,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_rasterizer_depth_bias_clamp;
                         }
-                        
+
                         if ( p_depth_bias_slope_factor )
                         {
 
@@ -2077,7 +2011,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_rasterizer_depth_bias_slope_factor;
                         }
-                        
+
                         if ( p_depth_clamp_enable )
                         {
 
@@ -2088,7 +2022,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_depth_clamp_enable;
                         }
-                        
+
                         if ( p_rasterizer_discard_enable )
                         {
 
@@ -2099,7 +2033,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_rasterizer_rasterizer_discard_enable;
                         }
-                        
+
                         if ( p_clockwise )
                         {
 
@@ -2110,7 +2044,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             else
                                 goto no_rasterizer_clockwise;
                         }
-                        
+
                         if ( p_depth_bias_enable )
                         {
 
@@ -2197,7 +2131,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                         dict *p_dict = p_multisampler->object;
 
                         // Optional properties
-                        p_samples                  = dict_get(p_dict, "samples");                  // Default to 1          
+                        p_samples                  = dict_get(p_dict, "samples");                  // Default to 1
                         p_sample_shading_enable    = dict_get(p_dict, "sample shading enable");    // Default to false
                         p_minimum_sample_shading   = dict_get(p_dict, "minimum sample shading");   // Default to 0.0
                         p_alpha_to_coverage_enable = dict_get(p_dict, "alpha to coverage enable"); // Default to false
@@ -2315,16 +2249,15 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
                 // Get the array
                 {
-                    
+
                     // Get the array size
                     attachments_count = array_get(p_attachments->list, 0, &attachments_count);
 
                     // Allocate memory for an array
                     pp_attachments = calloc(attachments_count, sizeof(JSONValue_t *));
 
-                    // Error checking
-                    if ( pp_attachments == (void *) 0 )
-                        goto no_mem;
+                    // Error check
+                    if ( pp_attachments == (void *) 0 ) goto no_mem;
 
                     // Get the array contents
                     array_get(p_attachments->list, (void **)pp_attachments, 0);
@@ -2335,18 +2268,17 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 attachment_count = attachments_count;
                 dict_values(attachments, (void **) pp_attachment_names);
                 pp_attachment_names    = calloc(attachments_count, sizeof(GXAttachment_t *));
-                
+
                 // TODO: Allocate pAttachments (color_blend_attachment_create_info)
                 color_blend_attachment_create_infos = calloc(attachments_count, sizeof(VkPipelineColorBlendAttachmentState));
 
                 // Error check
-                if ( color_blend_attachment_create_infos == (void *) 0 )
-                    goto no_mem;
+                if ( color_blend_attachment_create_infos == (void *) 0 ) goto no_mem;
 
                 // Iterate over each attachment
                 for (size_t i = 0; i < attachments_count; i++)
                 {
-                    
+
                     // Initialized data
                     JSONValue_t *i_attachment_value               = pp_attachments[i],
                                 *p_blend_enable                   = 0,
@@ -2385,8 +2317,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             goto missing_properties;
                     }
 
-                    // Construct a color blend state 
-                    { 
+                    // Construct a color blend state
+                    {
 
                         // Initialized data
                         VkBool32 blend_enable                        = 0;
@@ -2403,43 +2335,43 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                             blend_enable = p_blend_enable->boolean;
                         else
                             goto wrong_blend_enable_type;
-                        
+
                         // Set the source color blend factor
                         if ( p_source_color_blend_factor->type == JSONstring )
                             source_color_blend_factor = (VkBlendFactor) (size_t) dict_get(blend_factors, p_source_color_blend_factor->string);
                         else
                             goto wrong_source_color_blend_factor_type;
-                        
+
                         // Set the destination color blend factor
                         if ( p_destination_color_blend_factor->type == JSONstring )
                             destination_color_blend_factor = (VkBlendFactor) (size_t) dict_get(blend_factors, p_destination_color_blend_factor->string);
                         else
                             goto wrong_destination_color_blend_factor;
-                        
+
                         // Set the color blend operation
                         if ( p_color_blend_operation->type == JSONstring )
                             color_blend_op = (VkBlendOp) (size_t) dict_get(blend_operations, p_color_blend_operation->string);
                         else
                             goto wrong_color_blend_operation_type;
-                        
+
                         // Set the source alpha blend factor
                         if ( p_source_alpha_blend_factor->type == JSONstring )
                             source_alpha_blend_factor = (VkBlendFactor) (size_t) dict_get(blend_factors, p_source_alpha_blend_factor->string);
                         else
                             goto wrong_source_alpha_blend_factor;
-                        
+
                         // Set the destination alpha blend factor
                         if ( p_destination_alpha_blend_factor->type == JSONstring )
                             destination_alpha_blend_factor = (VkBlendFactor) (size_t) dict_get(blend_factors, p_destination_alpha_blend_factor->string);
                         else
                             goto wrong_destination_alpha_blend_factor;
-                        
+
                         // Set the alpha blend operation
                         if ( p_alpha_blend_operation->type == JSONstring )
                             alpha_blend_op = (VkBlendOp) (size_t) dict_get(blend_operations, p_alpha_blend_operation->string);
                         else
                             goto wrong_alpha_blend_op;
-                        
+
                         // Populate the color blend attachment struct
                         color_blend_attachment_create_infos[i] =
                         (VkPipelineColorBlendAttachmentState)
@@ -2456,7 +2388,7 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                     }
                 }
             }
-            
+
             //////////////////////////////////
             // Set up the color blend state //
             //////////////////////////////////
@@ -2506,7 +2438,14 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
                 };
 
                 // Create a pipeline layout
-                if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_shader->graphics.pipeline_layout) != VK_SUCCESS )
+                if (
+                    vkCreatePipelineLayout(
+                        p_instance->vulkan.device,
+                        &pipeline_layout_create_info,
+                        0,
+                        &p_shader->graphics.pipeline_layout
+                    ) != VK_SUCCESS
+                )
                     goto failed_to_create_pipeline_layout;
             }
 
@@ -2637,7 +2576,16 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
             /////////////////////////////////////
             // Construct the graphics pipeline //
             /////////////////////////////////////
-            if ( vkCreateGraphicsPipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, 0, &p_shader->graphics.pipeline ) != VK_SUCCESS )
+            if (
+                vkCreateGraphicsPipelines(
+                    p_instance->vulkan.device,
+                    VK_NULL_HANDLE,
+                    1,
+                    &graphics_pipeline_create_info,
+                    0,
+                    &p_shader->graphics.pipeline
+                ) != VK_SUCCESS
+            )
                 goto failed_to_create_graphics_pipeline;
         }
 
@@ -2699,32 +2647,32 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             missing_properties:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Not enough properties to construct graphics shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Not enough properties to construct graphics shader in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             name_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             vertex_group_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"vertex attributes\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse \"vertex attributes\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             wrong_multisampler_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"multisampler\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse \"multisampler\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
@@ -2771,8 +2719,8 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             wrong_rasterizer_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"rasterizer\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse \"rasterizer\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
@@ -2787,56 +2735,56 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
 
             no_rasterizer_depth_bias_constant_factor:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias constant factor\" property in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias constant factor\" property in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_rasterizer_depth_bias_clamp:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias clamp\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias clamp\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_rasterizer_depth_bias_slope_factor:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias slope factor\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias slope factor\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_depth_clamp_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth clamp enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth clamp enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_rasterizer_rasterizer_discard_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"rasterizer discard enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"rasterizer discard enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_rasterizer_clockwise:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"clockwise\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"clockwise\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
 
             no_rasterizer_depth_bias_enable:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse rasterizer \"depth bias enable\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
@@ -3014,23 +2962,23 @@ int load_graphics_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_
         {
             failed_to_allocate_shader:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to allocate shader in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to allocate shader in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -3041,23 +2989,21 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
     // p_value will always be valid. p_value->type will always be JSONobject
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t  *p_instance            = g_get_active_instance();
     GXShader_t    *p_shader              = 0,
-     		      *p_cache_shader        = 0;
+                   *p_cache_shader        = 0;
     JSONValue_t   *p_name                = 0,
                   *p_compute_shader_path = 0,
                   *p_layout              = 0;
 
     // Parse the JSON value
     {
-        
+
         // Initialized data
         dict *p_dict = p_value->object;
 
@@ -3069,27 +3015,27 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         // Check properties
         if ( ! (
             p_name                &&
-            p_compute_shader_path && 
+            p_compute_shader_path &&
             p_layout
         ) )
             goto missing_properties;
     }
 
-	// Lock the shader cache mutex
-	SDL_LockMutex(p_instance->mutexes.shader_cache);
+    // Lock the shader cache mutex
+    SDL_LockMutex(p_instance->mutexes.shader_cache);
 
-	// Search the cache for the shader
-	p_cache_shader = g_find_shader(p_instance, p_name->string);
+    // Search the cache for the shader
+    p_cache_shader = g_find_shader(p_instance, p_name->string);
 
-	// If the shader is in the cache ...
-	if ( p_cache_shader )
-	{
+    // If the shader is in the cache ...
+    if ( p_cache_shader )
+    {
 
         // TODO
 
-	}
+    }
 
-	// ... the shader is not in the cache
+    // ... the shader is not in the cache
 
     // Construct the shader
     {
@@ -3098,8 +3044,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         VkShaderModule compute_shader_module = 0;
 
         // Allocate memory for a shader
-        if ( create_shader(&p_shader) == 0 )
-            goto failed_to_allocate_shader;
+        if ( create_shader(&p_shader) == 0 ) goto failed_to_allocate_shader;
 
         // Set the shader type
         p_shader->type = g10_pipeline_compute;
@@ -3118,8 +3063,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
             p_shader->name = calloc(name_len + 1, sizeof(char));
 
             // Error check
-            if ( p_shader->name == (void *) 0 )
-                goto no_mem;
+            if ( p_shader->name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_shader->name, p_name->string, name_len);
@@ -3140,16 +3084,13 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
                 char* compute_shader_data = calloc(compute_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( compute_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( compute_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the compute shader binary file
-                if ( g_load_file(p_compute_shader_path->string, compute_shader_data, true) == 0 )
-                    goto failed_to_load_compute_shader_binary;
+                if ( g_load_file(p_compute_shader_path->string, compute_shader_data, true) == 0 ) goto failed_to_load_compute_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(compute_shader_data, compute_shader_data_len, &compute_shader_module) == 0 )
-                    goto failed_to_create_compute_shader_module;
+                if ( create_shader_module(compute_shader_data, compute_shader_data_len, &compute_shader_module) == 0 ) goto failed_to_create_compute_shader_module;
 
                 // Clean the scope
                 free(compute_shader_data);
@@ -3162,10 +3103,7 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
         // Load the layout
         if ( p_layout )
-        {
-            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 )
-                goto failed_to_load_layout_as_json_value;
-        }
+            if ( load_layout_as_json_value(&p_shader->layout, p_layout) == 0 ) goto failed_to_load_layout_as_json_value;
 
         // Construct the compute shader
         {
@@ -3204,9 +3142,16 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
             };
 
             // Construct the compute pipeline
-            if ( vkCreateComputePipelines(p_instance->vulkan.device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, 0, &p_shader->compute.pipeline) != VK_SUCCESS )
-                goto failed_to_create_compute_pipeline;
-                
+            if (
+                vkCreateComputePipelines(
+                    p_instance->vulkan.device,
+                    VK_NULL_HANDLE,
+                    1,
+                    &compute_pipeline_create_info,
+                    0,
+                    &p_shader->compute.pipeline
+                ) != VK_SUCCESS
+            ) goto failed_to_create_compute_pipeline;
         }
 
         // Cache the shader
@@ -3262,11 +3207,11 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         {
             failed_to_allocate_shader:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to allocate shader in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to allocate shader in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
+                // Error
+                return 0;
         }
 
         // JSON errors
@@ -3282,8 +3227,8 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
 
             name_wrong_type:
                 #ifndef NDEBUG
-					g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
-				#endif
+                    g_print_error("[G10] [Shader] Failed to parse \"name\" property in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
+                #endif
 
                 // Error
                 return 0;
@@ -3314,15 +3259,15 @@ int load_compute_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_v
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -3333,12 +3278,10 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
     // p_value will always be valid. p_value->type will always be JSONobject
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-            if ( p_value   == (void *) 0 ) goto no_value;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+        if ( p_value   == (void *) 0 ) goto no_value;
+    #endif
 
     // Initialized data
     GXInstance_t  *p_instance                     = g_get_active_instance();
@@ -3393,8 +3336,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                        ray_callable_shader_module     = 0;
 
         // Allocate memory for a shader
-        if ( create_shader(&p_shader) == 0 )
-            goto failed_to_allocate_shader;
+        if ( create_shader(&p_shader) == 0 ) goto failed_to_allocate_shader;
 
         // Set the shader type
         p_shader->type = g10_pipeline_ray;
@@ -3410,8 +3352,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
             p_shader->name = calloc(name_len + 1, sizeof(char));
 
             // Error check
-            if ( p_shader->name == (void *) 0 )
-                goto no_mem;
+            if ( p_shader->name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_shader->name, p_name->string, name_len);
@@ -3432,16 +3373,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_generation_shader_data = calloc(ray_generation_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_generation_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_generation_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray generation shader binary file
-                if ( g_load_file(p_ray_generation_shader_path->string, ray_generation_shader_data, true) == 0 )
-                    goto failed_to_load_ray_generation_shader_binary;
+                if ( g_load_file(p_ray_generation_shader_path->string, ray_generation_shader_data, true) == 0 ) goto failed_to_load_ray_generation_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_generation_shader_data, ray_generation_shader_data_len, &ray_generation_shader_module) == 0 )
-                    goto failed_to_create_ray_generation_shader_module;
+                if ( create_shader_module(ray_generation_shader_data, ray_generation_shader_data_len, &ray_generation_shader_module) == 0 ) goto failed_to_create_ray_generation_shader_module;
 
                 // Clean the scope
                 free(ray_generation_shader_data);
@@ -3465,16 +3403,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_any_hit_shader_data = calloc(ray_any_hit_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_any_hit_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_any_hit_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray any hit shader binary file
-                if ( g_load_file(p_ray_any_hit_shader_path->string, ray_any_hit_shader_data, true) == 0 )
-                    goto failed_to_load_ray_any_hit_shader_binary;
+                if ( g_load_file(p_ray_any_hit_shader_path->string, ray_any_hit_shader_data, true) == 0 ) goto failed_to_load_ray_any_hit_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_any_hit_shader_data, ray_any_hit_shader_data_len, &ray_any_hit_shader_module) == 0 )
-                    goto failed_to_create_ray_any_hit_shader_module;
+                if ( create_shader_module(ray_any_hit_shader_data, ray_any_hit_shader_data_len, &ray_any_hit_shader_module) == 0 ) goto failed_to_create_ray_any_hit_shader_module;
 
                 // Clean the scope
                 free(ray_any_hit_shader_data);
@@ -3498,16 +3433,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_closest_hit_shader_data = calloc(ray_closest_hit_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_closest_hit_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_closest_hit_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray closest hit shader binary file
-                if ( g_load_file(p_ray_closest_hit_shader_path->string, ray_closest_hit_shader_data, true) == 0 )
-                    goto failed_to_load_ray_closest_hit_shader_binary;
+                if ( g_load_file(p_ray_closest_hit_shader_path->string, ray_closest_hit_shader_data, true) == 0 ) goto failed_to_load_ray_closest_hit_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_closest_hit_shader_data, ray_closest_hit_shader_data_len, &ray_closest_hit_shader_module) == 0 )
-                    goto failed_to_create_ray_closest_hit_shader_module;
+                if ( create_shader_module(ray_closest_hit_shader_data, ray_closest_hit_shader_data_len, &ray_closest_hit_shader_module) == 0 ) goto failed_to_create_ray_closest_hit_shader_module;
 
                 // Clean the scope
                 free(ray_closest_hit_shader_data);
@@ -3530,16 +3462,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_miss_shader_data = calloc(ray_miss_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_miss_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_miss_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray miss shader binary file
-                if ( g_load_file(p_ray_miss_shader_path->string, ray_miss_shader_data, true) == 0 )
-                    goto failed_to_load_ray_miss_shader_binary;
+                if ( g_load_file(p_ray_miss_shader_path->string, ray_miss_shader_data, true) == 0 ) goto failed_to_load_ray_miss_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_miss_shader_data, ray_miss_shader_data_len, &ray_miss_shader_module) == 0 )
-                    goto failed_to_create_ray_miss_shader_module;
+                if ( create_shader_module(ray_miss_shader_data, ray_miss_shader_data_len, &ray_miss_shader_module) == 0 ) goto failed_to_create_ray_miss_shader_module;
 
                 // Clean the scope
                 free(ray_miss_shader_data);
@@ -3562,16 +3491,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_intersection_shader_data = calloc(ray_intersection_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_intersection_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_intersection_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray intersection shader binary file
-                if ( g_load_file(p_ray_intersection_shader_path->string, ray_intersection_shader_data, true) == 0 )
-                    goto failed_to_load_ray_intersection_shader_binary;
+                if ( g_load_file(p_ray_intersection_shader_path->string, ray_intersection_shader_data, true) == 0 ) goto failed_to_load_ray_intersection_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_intersection_shader_data, ray_intersection_shader_data_len, &ray_intersection_shader_module) == 0 )
-                    goto failed_to_create_ray_intersection_shader_module;
+                if ( create_shader_module(ray_intersection_shader_data, ray_intersection_shader_data_len, &ray_intersection_shader_module) == 0 ) goto failed_to_create_ray_intersection_shader_module;
 
                 // Clean the scope
                 free(ray_intersection_shader_data);
@@ -3595,16 +3521,13 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
                 char* ray_callable_shader_data = calloc(ray_callable_shader_data_len, sizeof(char));
 
                 // Error check
-                if ( ray_callable_shader_data == (void *) 0 )
-                    goto no_mem;
+                if ( ray_callable_shader_data == (void *) 0 ) goto no_mem;
 
                 // Load the ray callable shader binary file
-                if ( g_load_file(p_ray_callable_shader_path->string, ray_callable_shader_data, true) == 0 )
-                    goto failed_to_load_ray_callable_shader_binary;
+                if ( g_load_file(p_ray_callable_shader_path->string, ray_callable_shader_data, true) == 0 ) goto failed_to_load_ray_callable_shader_binary;
 
                 // Create a shader module
-                if ( create_shader_module(ray_callable_shader_data, ray_callable_shader_data_len, &ray_callable_shader_module) == 0 )
-                    goto failed_to_create_ray_callable_shader_module;
+                if ( create_shader_module(ray_callable_shader_data, ray_callable_shader_data_len, &ray_callable_shader_module) == 0 ) goto failed_to_create_ray_callable_shader_module;
 
                 // Clean the scope
                 free(ray_callable_shader_data);
@@ -3744,7 +3667,7 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         return 0;
 
     failed_to_allocate_shader:
-    
+
     name_wrong_type:
 
     // Error handling
@@ -3966,15 +3889,15 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -4009,8 +3932,7 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
         p_push_constant = dict_get(p_dict, "push constant");
 
         // Check properties
-        if ( ! ( p_sets ) )
-            goto missing_properties;
+        if ( ! ( p_sets ) ) goto missing_properties;
     }
     else
         goto wrong_type;
@@ -4024,8 +3946,7 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
         VkDescriptorSetLayout  *p_set_layouts = 0;
 
         // Allocate memory for a shader layout
-        if ( create_layout(&p_layout) == 0 )
-            goto failed_to_allocate_layout;
+        if ( create_layout(&p_layout) == 0 ) goto failed_to_allocate_layout;
 
         // Construct sets
         if ( p_sets->type == JSONarray )
@@ -4041,8 +3962,7 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
                 pp_sets = calloc(set_count, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_sets == (void *) 0 )
-                    goto no_mem;
+                if ( pp_sets == (void *) 0 ) goto no_mem;
 
                 // Get the array contents
                 array_get(p_sets->list, (void **)pp_sets, 0);
@@ -4054,12 +3974,8 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
             p_set_layouts  = calloc(set_count, sizeof(VkDescriptorSetLayout));
 
             // Error check
-            if ( p_layout->sets  == (void *) 0 )
-                goto no_mem;
-
-            // Error check
-            if ( p_set_layouts  == (void *) 0 )
-                goto no_mem;
+            if ( p_layout->sets  == (void *) 0 ) goto no_mem;
+            if ( p_set_layouts   == (void *) 0 ) goto no_mem;
 
             // Iterate over each JSONValue
             for (size_t i = 0; i < set_count; i++)
@@ -4070,8 +3986,7 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
                 GXSet_t                         *p_set = 0;
 
                 // Construct a set from a JSON value
-                if ( load_set_as_json_value(&p_set, i_set) == 0 )
-                    goto failed_to_load_set_as_json_value;
+                if ( load_set_as_json_value(&p_set, i_set) == 0 ) goto failed_to_load_set_as_json_value;
 
                 // I don't like this specific line. -Jake +
                                                        // |
@@ -4099,7 +4014,14 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
         };
 
         // Create a pipeline layout
-        if ( vkCreatePipelineLayout(p_instance->vulkan.device, &pipeline_layout_create_info, 0, &p_layout->pipeline_layout) != VK_SUCCESS )
+        if (
+            vkCreatePipelineLayout(
+                p_instance->vulkan.device,
+                &pipeline_layout_create_info,
+                0,
+                &p_layout->pipeline_layout
+            ) != VK_SUCCESS
+        )
             goto vulkan_failed_to_create_pipeline_layout;
 
         *pp_layout = p_layout;
@@ -4145,15 +4067,15 @@ int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -4161,12 +4083,10 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_set == (void *) 0 ) goto no_set;
-            if ( p_value == (void *) 0 ) goto no_value;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_set == (void *) 0 ) goto no_set;
+        if ( p_value == (void *) 0 ) goto no_value;
+    #endif
 
     // Initialized data
     GXInstance_t                     *p_instance                          = g_get_active_instance();
@@ -4180,18 +4100,18 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
     // Parse the JSON value
     if ( p_value->type == JSONobject )
     {
-        
+
         // Initialized data
         dict *p_dict = p_value->object;
 
         // Required properties
         p_name        = dict_get(p_dict, "name");
         p_descriptors = dict_get(p_dict, "descriptors");
-        
+
         // Error check
         if ( ! (
             p_name        &&
-            p_descriptors 
+            p_descriptors
         ) )
             goto missing_properties;
     }
@@ -4201,13 +4121,12 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
 
     // Construct the set
     {
-        
+
         // Initialized data
         VkDescriptorSetLayoutCreateInfo set_layout_create_info = { 0 };
 
         // Allocate memory for the set
-        if ( create_set(&p_set) == 0 )
-            goto failed_to_create_set;
+        if ( create_set(&p_set) == 0 ) goto failed_to_create_set;
 
         // Set the name
         if ( p_name->type == JSONstring )
@@ -4220,8 +4139,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
             p_set->name = calloc(len+1, sizeof(char));
 
             // Error handling
-            if ( p_set->name == 0 )
-                goto no_mem;
+            if ( p_set->name == 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_set->name, p_name->string, len);
@@ -4244,8 +4162,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                 pp_descriptors = calloc(descriptor_count, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_descriptors == (void *) 0 )
-                    goto no_mem;
+                if ( pp_descriptors == (void *) 0 ) goto no_mem;
 
                 // Get the array contents
                 array_get(p_descriptors->list, (void **)pp_descriptors, 0);
@@ -4258,10 +4175,9 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
             // Allocate memory
             p_set->descriptors_data = calloc(descriptor_count+1, sizeof(GXDescriptor_t *));
             p_set->p_bindings       = calloc(descriptor_count, sizeof(VkDescriptorSetLayoutBinding));
-            
-            // Error checking
-            if ( p_set->descriptors_data == (void *) 0 )
-                goto no_mem;
+
+            // Error check
+            if ( p_set->descriptors_data == (void *) 0 ) goto no_mem;
 
             // Iterate over each descriptor
             for (size_t i = 0; i < descriptor_count; i++)
@@ -4296,8 +4212,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                 {
 
                     // Allocate memory for a descriptor
-                    if ( create_descriptor(&p_descriptor) == 0)
-                        goto failed_to_allocate_descriptor;
+                    if ( create_descriptor(&p_descriptor) == 0 ) goto failed_to_allocate_descriptor;
 
                     // Copy the name
                     if ( p_descriptor_name->type == JSONstring )
@@ -4310,8 +4225,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                         p_descriptor->name = calloc(descriptor_name_len+1, sizeof(char));
 
                         // Error check
-                        if ( p_descriptor->name == (void *) 0 )
-                            goto failed_to_allocate_descriptor_name;
+                        if ( p_descriptor->name == (void *) 0 ) goto failed_to_allocate_descriptor_name;
 
                         // Copy the string
                         strncpy(p_descriptor->name, p_descriptor_name->string, descriptor_name_len);
@@ -4320,11 +4234,9 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
                     // Set the type
                     if ( p_descriptor_type->type == JSONstring )
                         p_descriptor->type = (VkDescriptorType) (size_t) dict_get(descriptor_types, p_descriptor_type->string);
-                    
+
                     // Set the index
                     p_descriptor->index = i;
-
-
                 }
 
                 // Store the descriptor
@@ -4355,7 +4267,14 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
         };
 
         // Construct a set layout
-        if ( vkCreateDescriptorSetLayout(p_instance->vulkan.device,&set_layout_create_info,0,&p_set->set_layout) != VK_SUCCESS )
+        if ( 
+            vkCreateDescriptorSetLayout(
+                p_instance->vulkan.device,
+                &set_layout_create_info,
+                0,
+                &p_set->set_layout
+            ) != VK_SUCCESS
+        )
             goto failed_to_create_set_layout;
 
         // Return a pointer to the caller
@@ -4409,15 +4328,15 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
 
         // JSON errors
         {
@@ -4436,7 +4355,7 @@ int load_set_as_json_value ( GXSet_t **pp_set, JSONValue_t *p_value )
 
                 // Error
                 return 0;
-            
+
             wrong_name_type:
                 #ifndef NDEBUG
                     g_print_error("[G10] [Shader] Not enough properties to construct set in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/shader.json \n", __FUNCTION__);
@@ -4554,15 +4473,15 @@ int load_descriptor_as_json_value ( GXDescriptor_t **pp_descriptor, JSONValue_t 
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 */
@@ -4571,19 +4490,16 @@ int destroy_graphics_shader ( GXShader_t **pp_shader )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
     GXShader_t   *p_shader   = *pp_shader;
 
-    // Error checking
-    if ( p_shader == (void *) 0 )
-        goto pointer_to_null_pointer;
+    // Error check
+    if ( p_shader == (void *) 0 ) goto pointer_to_null_pointer;
 
     // Destroy the pipeline
     vkDestroyPipeline(p_instance->vulkan.device, p_shader->graphics.pipeline, 0);
@@ -4655,19 +4571,16 @@ int destroy_compute_shader ( GXShader_t **pp_shader )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
     GXShader_t   *p_shader   = *pp_shader;
 
-    // Error checking
-    if ( p_shader == (void *) 0 )
-        goto pointer_to_null_pointer;
+    // Error check
+    if ( p_shader == (void *) 0 ) goto pointer_to_null_pointer;
 
     // Destroy the pipeline
     vkDestroyPipeline(p_instance->vulkan.device, p_shader->compute.pipeline, 0);
@@ -4712,19 +4625,16 @@ int destroy_ray_shader ( GXShader_t **pp_shader )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_shader == (void *) 0 ) goto no_shader;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_shader == (void *) 0 ) goto no_shader;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
     GXShader_t   *p_shader   = *pp_shader;
 
-    // Error checking
-    if ( p_shader == (void *) 0 )
-        goto pointer_to_null_pointer;
+    // Error check
+    if ( p_shader == (void *) 0 ) goto pointer_to_null_pointer;
 
     // Destroy the pipeline
     vkDestroyPipeline(p_instance->vulkan.device, p_shader->ray.pipeline, 0);

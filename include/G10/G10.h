@@ -112,7 +112,7 @@ struct GXInstance_s
         u32                       current_frame,
                                   image_count,
                                   image_index;
-        float                     priority;
+        
 
         char                     *requested_device_name;
         dict                     *device_extensions;
@@ -146,13 +146,15 @@ struct GXInstance_s
                      present_queue;
             u32     *graphics_family_indicies,
                     *compute_family_indicies,
-                    *transfer_family_indicies;
+                    *transfer_family_indicies,
+                     present_family_index;
             size_t   graphics_count,
                      compute_count,
                      transfer_count,
                      graphics_family_count,
                      compute_family_count,
                      transfer_family_count;
+            float    priority[8];
         } queues;
     } vulkan;
 
@@ -222,11 +224,11 @@ struct GXInstance_s
 
     // Time
     struct {
-        size_t ticks;
-        u32    d,
-               last_time;
-        u64    clock_div;
-        float  delta_time;
+        size_t  ticks;
+        u32     d,
+                last_time;
+        u64     clock_div;
+        double  delta_time;
     } time;
 
     // Discord integration

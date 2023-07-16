@@ -4,18 +4,15 @@ int create_bv ( GXBV_t **pp_bv )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_bv == (void *) 0 ) goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_bv == (void *) 0 ) goto no_bv;
+    #endif
 
     // Initialized data
     GXBV_t *p_bv = calloc(1, sizeof(GXBV_t));
 
     // Check if the memory was allocated
-    if ( p_bv == (void *) 0 )
-        goto no_mem;
+    if ( p_bv == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_bv = p_bv;
@@ -38,15 +35,15 @@ int create_bv ( GXBV_t **pp_bv )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -54,18 +51,15 @@ int construct_bv ( GXBV_t **pp_bv, vec3 min, vec3 max )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_bv == (void *) 0 ) goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_bv == (void *) 0 ) goto no_bv;
+    #endif
 
     // Initialized data
     GXBV_t *p_bv = 0;
 
     // Try to create the BV
-    if ( create_bv(pp_bv) == 0 )
-        goto failed_to_create_bv;
+    if ( create_bv(pp_bv) == 0 ) goto failed_to_create_bv;
 
     // Return the BV
     p_bv = *pp_bv;
@@ -108,20 +102,17 @@ int construct_bv_from_bvs ( GXBV_t **pp_bv, GXBV_t *p_a, GXBV_t* p_b )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_bv == (void *) 0 ) goto no_bv;
-            if ( p_a   == (void *) 0 ) goto no_a;
-            if ( p_b   == (void *) 0 ) goto no_b;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_bv == (void *) 0 ) goto no_bv;
+        if ( p_a   == (void *) 0 ) goto no_a;
+        if ( p_b   == (void *) 0 ) goto no_b;
+    #endif
 
     // Initialized data
     GXBV_t* p_bv = 0;
 
     // Allocate memory for the bounding volume
-    if ( create_bv(&p_bv) == 0 )
-        goto failed_to_create_bv;
+    if ( create_bv(&p_bv) == 0 ) goto failed_to_create_bv;
 
     // Set the bounding volume
     *p_bv = (GXBV_t)
@@ -194,12 +185,10 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
     }
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_bv == (void *) 0 ) goto no_bv;
-            if ( scene == (void *) 0 ) goto no_scene;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_bv == (void *) 0 ) goto no_bv;
+        if ( scene == (void *) 0 ) goto no_scene;
+    #endif
 
     // Uninitialized data
     GXEntity_t **actor_list        = 0; // List of entities
@@ -214,23 +203,18 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
                  best_j                = 0;                           //                ...
     GXBV_t      *ret                   = 0;
 
-    if (actors_in_scene == 0)
-        goto no_actors;
+    if ( actors_in_scene == 0 ) goto no_actors;
 
     // Allocate a double pointer list
     actor_list       = calloc(actors_in_scene, sizeof(void*));
     bounding_volumes = calloc(actors_in_scene, sizeof(void*));
     dict_values(scene->actors, (void **)actor_list);
 
-    // Error checking
-    {
-        #ifndef NDEBUG
-            if ( actor_list        == (void *) 0 )
-                goto no_mem;
-            if ( bounding_volumes  == (void *) 0 )
-                goto no_mem;
-        #endif
-    }
+    // Error check
+    #ifndef NDEBUG
+        if ( actor_list        == (void *) 0 ) goto no_mem;
+        if ( bounding_volumes  == (void *) 0 ) goto no_mem;
+    #endif
 
     // Populate the double pointer list with bounding volumes
     for (i = 0; i < actors_in_scene; i++)
@@ -310,15 +294,15 @@ int construct_bvh_from_scene ( GXBV_t **pp_bv, GXScene_t *scene )
     {
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
 
         // Argument errors
         {
@@ -393,11 +377,9 @@ int insert_bv ( GXBV_t *bvh, GXBV_t *bv )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( bvh == 0 ) goto no_bvh;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( bvh == 0 ) goto no_bvh;
+    #endif
 
     // Branching
     {
@@ -480,11 +462,9 @@ int resize_bv ( GXBV_t *bv )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( bv == 0 ) goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( bv == 0 ) goto no_bv;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
@@ -493,19 +473,16 @@ int resize_bv ( GXBV_t *bv )
     {
 
         // Resize the parent from the two childern
-        if (bv->left && bv->right)
-            goto left_and_right;
+        if ( bv->left  && bv->right ) goto left_and_right;
 
         // Remove the unneccisary bounding volume
-        else if (bv->left  && bv->right == 0)
-            goto no_right;
+        else if ( bv->left  && bv->right == 0 ) goto no_right;
 
         // Remove the unneccisary bounding volume
-        else if (bv->right && bv->left  == 0)
-            goto no_left;
+        else if ( bv->right && bv->left  == 0 ) goto no_left;
 
-        else if (bv->entity)
-            goto entity;
+        // Recompute the size of the entity
+        else if ( bv->entity ) goto entity;
 
         // Remove the node
         else
@@ -769,11 +746,9 @@ int bv_info ( GXBV_t *p_bv, size_t d )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_bv == (void *) 0 ) goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_bv == (void *) 0 ) goto no_bv;
+    #endif
 
     // Base case, print out a header
     if (d == 0)
@@ -828,11 +803,9 @@ size_t get_entities_from_bv ( GXBV_t *bv, queue *entity_queue )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( bv == (void *) 0 ) goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( bv == (void *) 0 ) goto no_bv;
+    #endif
 
     // If the bounding volume is an entity, print the entities name
     if (bv->entity)
@@ -862,12 +835,10 @@ bool aabb_intersect ( GXBV_t *p_a, GXBV_t *p_b )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_a == (void *) 0 ) goto no_a;
-            if ( p_b == (void *) 0 ) goto no_b;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_a == (void *) 0 ) goto no_a;
+        if ( p_b == (void *) 0 ) goto no_b;
+    #endif
 
     // Initialized data
     vec3 a_min = p_a->minimum,
@@ -909,12 +880,9 @@ int destroy_bv ( GXBV_t **pp_bv )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_bv == (void *) 0 )
-                goto no_bv;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_bv == (void *) 0 ) goto no_bv;
+    #endif
 
     // Initialized data
     GXBV_t *p_bv = *pp_bv;

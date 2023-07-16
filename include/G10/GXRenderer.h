@@ -42,6 +42,12 @@ struct GXRenderer_s
 	VkCommandPool command_pool;
 
 	VkCommandBuffer *command_buffers;
+
+	struct
+	{
+		dict *binary_semaphores,
+		     *fences;
+	} synchronization;
 };
 
 struct GXRenderPass_s

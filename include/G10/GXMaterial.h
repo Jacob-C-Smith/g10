@@ -21,6 +21,7 @@ struct GXMaterial_s {
     dict   *textures;
 	dict   *mutable_ints;
     dict   *mutable_floats;
+    size_t  users; 
 };
 
 // Allocators

@@ -4,79 +4,71 @@ int create_texture ( GXTexture_t **pp_texture )
 {
 
     // Argument check
-	{
-		#ifndef NDEBUG
-			if ( pp_texture == (void *) 0 ) goto no_texture;
-		#endif
-	}
+    #ifndef NDEBUG
+        if ( pp_texture == (void *) 0 ) goto no_texture;
+    #endif
 
-	// Initialized data
-	GXTexture_t *p_texture = calloc(1, sizeof(GXTexture_t));
+    // Initialized data
+    GXTexture_t *p_texture = calloc(1, sizeof(GXTexture_t));
 
-	// Error checking
-    if ( p_texture == (void *) 0 )
-	    goto no_mem;
+    // Error check
+    if ( p_texture == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
-	*pp_texture = p_texture;
+    *pp_texture = p_texture;
 
     // Success
-	return 1;
+    return 1;
 
-	// Error handling
-	{
+    // Error handling
+    {
 
-		// Argument errors
-		{
-			no_texture:
-				#ifndef NDEBUG
-					g_print_error("[G10] [Texture] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        // Argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Texture] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
-	}
+                // Error
+                return 0;
+        }
+    }
 }
 
 int load_texture ( GXTexture_t **pp_texture, char *path )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_texture == (void *) 0 ) goto no_texture;
-            if ( path       == (void *) 0 ) goto no_path;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_texture == (void *) 0 ) goto no_texture;
+        if ( path       == (void *) 0 ) goto no_path;
+    #endif
 
     // Initialized data
     GXInstance_t  *p_instance  = g_get_active_instance();
     size_t         len         = g_load_file(path, 0, true);
     char          *text        = calloc(len+1, sizeof(char));
 
-    // Memory checking
-    if ( text == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Load the texture
-    if ( load_texture_as_json_text(pp_texture, text) == 0 )
-        goto failed_to_load_texture_as_json_text;
+    if ( load_texture_as_json_text(pp_texture, text) == 0 ) goto failed_to_load_texture_as_json_text;
 
     // Success
     return 1;
@@ -104,15 +96,15 @@ int load_texture ( GXTexture_t **pp_texture, char *path )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
 
         // G10 Errors
         {
@@ -140,23 +132,19 @@ int load_texture_as_json_text ( GXTexture_t **pp_texture, char *text )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_texture == (void *) 0 ) goto no_texture;
-            if ( text       == (void *) 0 ) goto no_text;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_texture == (void *) 0 ) goto no_texture;
+        if ( text       == (void *) 0 ) goto no_text;
+    #endif
 
     // Initialized data
     JSONValue_t *p_value = 0;
 
     // Parse the JSON text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json;
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto failed_to_parse_json;
 
     // Construct a texture
-    if ( load_texture_as_json_value(pp_texture, p_value) == 0 )
-        goto failed_to_load_texture;
+    if ( load_texture_as_json_value(pp_texture, p_value) == 0 ) goto failed_to_load_texture;
 
     // Success
     return 1;
@@ -208,12 +196,10 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_texture == (void *) 0 ) goto no_texture;
-            if ( p_value    == (void *) 0 ) goto no_value;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_texture == (void *) 0 ) goto no_texture;
+        if ( p_value    == (void *) 0 ) goto no_value;
+    #endif
 
     // External functions
     extern u32 find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
@@ -253,7 +239,11 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
         p_path                   = ((JSONValue_t *)dict_get(json_data, "path"))->string;
 
         // Check properties
-        if ( p_image_json_object && p_image_view_json_object && p_sampler_json_object && p_path )
+        if ( ! (
+            p_image_json_object &&
+            p_image_view_json_object &&
+            p_sampler_json_object &&
+            p_path ) )
             goto missing_properties;
     }
     else
@@ -263,8 +253,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
     {
 
         // Allocate a texture
-        if ( create_texture(&p_texture) == 0 )
-            goto no_texture;
+        if ( create_texture(&p_texture) == 0 ) goto no_texture;
 
         // Load the texture
         if ( p_path )
@@ -299,7 +288,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
                 vkUnmapMemory(p_instance->vulkan.device, staging_buffer_memory);
 
                 // Popultate image create info struct
-                construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
+                construct_image(p_texture, 0, VK_IMAGE_TYPE_2D, VK_FORMAT_B8G8R8A8_SRGB, (int)width, (int)height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT,VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SHARING_MODE_EXCLUSIVE, VK_IMAGE_LAYOUT_UNDEFINED);
             }
             else
                 goto failed_to_load_texture;
@@ -372,8 +361,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
 
                         pp_usage_strings = calloc(usage_string_count+1, sizeof(JSONValue_t *));
 
-                        if ( pp_usage_strings == (void *) 0 )
-                            goto no_mem;
+                        if ( pp_usage_strings == (void *) 0 ) goto no_mem;
 
                         array_get(p_usage->list, 0, &usage_string_count);
                     }
@@ -390,8 +378,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
 
                     pp_extents = calloc(extent_count+1, sizeof(JSONValue_t *));
 
-                    if ( pp_extents == (void *) 0 )
-                        goto no_mem;
+                    if ( pp_extents == (void *) 0 ) goto no_mem;
 
                     array_get(p_extent->list, pp_extents, 0);
                 }
@@ -400,7 +387,7 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
                     p_texture,
                     0,
                     (p_view_type->string)    ? (VkImageType)(size_t)dict_get(view_type_lut, p_view_type->string) : VK_IMAGE_TYPE_2D,
-                    (p_format->string)       ? (VkFormat)(size_t)dict_get(format_types, p_format->string) : VK_FORMAT_B8G8R8A8_UNORM,
+                    (p_format->string)       ? (VkFormat)(size_t)dict_get(format_types, p_format->string) : VK_FORMAT_B8G8R8A8_SRGB,
                     (pp_extents[0]->integer) ? pp_extents[0]->integer  : 1,
                     (pp_extents[1]->integer) ? pp_extents[1]->integer  : 1,
                     (pp_extents[2]->integer) ? pp_extents[2]->integer  : 1,
@@ -540,15 +527,15 @@ int load_texture_as_json_value ( GXTexture_t **pp_texture, JSONValue_t *p_value 
     // Error handling
     {
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 
 }

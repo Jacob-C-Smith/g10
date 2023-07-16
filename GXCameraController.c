@@ -13,9 +13,8 @@ GXCameraController_t* create_camera_controller ( void )
     // Initialized data
     GXCameraController_t *ret = calloc(1, sizeof(GXCameraController_t));
 
-    // Error checking
-    if ( ret == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( ret == (void *) 0 ) goto no_mem;
 
     // Success
     return ret;
@@ -23,15 +22,15 @@ GXCameraController_t* create_camera_controller ( void )
     // Error handling
     {
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -77,12 +76,10 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_instance == (void *) 0 ) goto no_instance;
-            if ( camera     == (void *) 0 ) goto no_camera;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_instance == (void *) 0 ) goto no_instance;
+        if ( camera     == (void *) 0 ) goto no_camera;
+    #endif
 
     // Initialized data
     GXCameraController_t *ret    = create_camera_controller();
@@ -97,7 +94,7 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
              // Orientation binds
              * mouse   = find_bind(p_instance->input, "MOUSE");
 
-    // Error checking
+    // Error check
     {
         // This error checking is a little bit unorthadox, so I figure its worth explaining whats going on.
         // 8 binds are required to set up a camera controller, and there are eight bits in a byte. If one of
@@ -106,20 +103,12 @@ int camera_controller_from_camera ( GXInstance_t* p_instance, GXCamera_t *camera
         // The error byte is checked for nonzero value at the end. If there is a nonzero value, the program
         // branches to error handling. Else, continue
 
-        #ifndef NDEBUG
-            if (forward == (void*)0)
-                errors |= 0x1;
-            if (backward == (void*)0)
-                errors |= 0x2;
-            if (left == (void*)0)
-                errors |= 0x4;
-            if (right == (void*)0)
-                errors |= 0x8;
-            if (mouse == (void*)0)
-                errors |= 0x10;
-            if (errors)
-                goto missing_binds;
-        #endif
+        if ( forward  == (void *) 0 ) errors |= 0b00000001;
+        if ( backward == (void *) 0 ) errors |= 0b00000010;
+        if ( left     == (void *) 0 ) errors |= 0b00000100;
+        if ( right    == (void *) 0 ) errors |= 0b00001000;
+        if ( mouse    == (void *) 0 ) errors |= 0b11110000;
+        if ( errors ) goto missing_binds;
     }
 
     // Set the camera controller
@@ -193,11 +182,10 @@ int update_controlee_camera ( void )
 {
 
     // Context check
-    {
-        if (camera_controller == 0)
-            goto no_active_camera_controller;
-    }
-
+    #ifndef NDEBUG
+        if ( camera_controller == 0 ) goto no_active_camera_controller;
+    #endif
+    
     // Initialized data
     vec2        l_orient = { 0 };
     GXCamera_t *camera   = camera_controller->camera;

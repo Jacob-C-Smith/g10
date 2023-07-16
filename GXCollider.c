@@ -37,16 +37,15 @@ int create_collider ( GXCollider_t **pp_collider )
 {
 
     // Argument check
-    {
+    #ifndef NDEBUG
         if ( pp_collider == (void *) 0 ) goto no_collider;
-    }
+    #endif
 
     // Initialized data
     GXCollider_t * p_collider = calloc(1, sizeof(GXCollider_t));
 
     // Error check
-    if ( pp_collider == (void *) 0 )
-        goto no_mem;
+    if ( pp_collider == (void *) 0 ) goto no_mem;
 
     // Write the return value
     *pp_collider = p_collider;
@@ -69,15 +68,15 @@ int create_collider ( GXCollider_t **pp_collider )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -85,22 +84,20 @@ int load_collider ( GXCollider_t **pp_collider, const char *path )
 {
 
     // Argument check
-    {
+    #ifndef NDEBUG
         if ( pp_collider == (void *) 0 ) goto no_collider;
         if ( path        == (void *) 0 ) goto no_path;
-    }
+    #endif
 
     // Initialized data
     size_t  len  = g_load_file(path, 0, true);
     char   *text = calloc(len+1, sizeof(char));
 
     // Load the file contents into a text buffer
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Load the collider as JSON text
-    if ( load_collider_as_json_text(pp_collider, text) == 0 )
-        goto failed_to_construct_collider;
+    if ( load_collider_as_json_text(pp_collider, text) == 0 ) goto failed_to_construct_collider;
 
     // Clean the scope
     free(text);

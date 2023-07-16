@@ -18,11 +18,9 @@ int detect_collisions ( GXInstance_t *p_instance )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_instance == (void *) 0 ) goto no_instance;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_instance == (void *) 0 ) goto no_instance;
+    #endif
 
     // Initialized data
     GXEntity_t *entity = 0;
@@ -71,11 +69,9 @@ int move_objects ( GXInstance_t* p_instance )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_instance == (void *) 0 ) goto no_instance;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_instance == (void *) 0 ) goto no_instance;
+    #endif
 
     // Initialized data
     GXEntity_t *entity = 0;
@@ -128,11 +124,9 @@ int update_forces ( GXInstance_t *p_instance )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_instance == (void *) 0 ) goto no_instance;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_instance == (void *) 0 ) goto no_instance;
+    #endif
 
     // Initialized data
     GXEntity_t* entity = 0;

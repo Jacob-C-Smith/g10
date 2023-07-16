@@ -232,8 +232,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     GXply_file_t   *ply_file            = calloc(1, sizeof(GXply_file_t));
 
     // Load the file
-    if ( g_load_file(path, data, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, data, true) == 0 ) goto failed_to_load_file;
 
     // Reset counter
     i = 0;
@@ -242,8 +241,7 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
     {
 
         // Make sure the header isn't corrupted
-        if ( *(u32*)data != GXPLY_HSignature )
-            goto invalidHeader;
+        if ( *(u32*)data != GXPLY_HSignature ) goto invalidHeader;
 
         // Copy of data pointer
         c_data = data;
@@ -307,6 +305,8 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                         while (c_data[++i] != '\n'); // Skip to the end of the line
                         c_data = &c_data[i + 1];      // Set the pointer
                     }
+
+                    
                     goto p2propertyExit;
 
                     // TODO: Copy out the name, count, and veretx count

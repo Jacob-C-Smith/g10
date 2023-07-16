@@ -43,7 +43,7 @@ int main ( int argc, const char *argv[] )
     {
 
         // Write an error message
-        (void)g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
+        (void) g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
         
         // Error
         return EXIT_FAILURE;
@@ -54,28 +54,26 @@ int main ( int argc, const char *argv[] )
     {
 
         // Write an error message
-        (void)g_print_error("Failed to initialize game in call to function \"%s\"\n", __FUNCTION__);
+        (void) g_print_error("Failed to initialize game in call to function \"%s\"\n", __FUNCTION__);
         
         // Exit
-        (void)g_exit(&p_instance);
+        (void) g_exit(&p_instance);
 
         // Error
         return EXIT_FAILURE;
     }
     
     // Log some details about the game and G10
-    (void)game_log(p_instance);
-
+    (void) game_log(p_instance);
+    
     // Start the game
-    (void)g_start_schedule(p_instance, schedule_name);
+    (void) g_start_schedule(p_instance, schedule_name);
 
     // Stop the game
-    (void)g_stop_schedule(p_instance);
+    (void) g_stop_schedule(p_instance);
 
     // Exit
-    (void)g_exit(&p_instance);
-
-    
+    (void) g_exit(&p_instance);
 
     // Success
     return EXIT_SUCCESS;
@@ -85,6 +83,7 @@ int user_code_callback ( GXInstance_t *p_instance )
 {
     
     // Whatever code you want
+    fflush(stdout);
     
     // Success
     return 1;
@@ -96,8 +95,9 @@ int game_initialization ( GXInstance_t *p_instance )
     // Set the user code callback
     if ( add_user_code_callback(p_instance, &user_code_callback) == 0 )
     {
-        g_print_error("Failed to set user code callback!\n");
+        (void) g_print_error("Failed to set user code callback!\n");
 
+        // Error
         return 0;
     }
 
@@ -109,16 +109,16 @@ int game_initialization ( GXInstance_t *p_instance )
                  *p_help = 0;
 
         // Get the quit bind
-        g_find_bind(p_instance, "QUIT", &p_quit);
+        (void) g_find_bind(p_instance, "QUIT", &p_quit);
 
         // Get the help bind
-        g_find_bind(p_instance, "HELP", &p_help);
+        (void) g_find_bind(p_instance, "HELP", &p_help);
 
         // Set the user exit bind
-        register_bind_callback(p_quit, &g_user_exit);
+        (void) register_bind_callback(p_quit, &g_user_exit);
 
         // Set the help bind
-        register_bind_callback(p_help, &g_user_help);
+        (void) register_bind_callback(p_help, &g_user_help);
     }
 
     // Success
@@ -129,10 +129,16 @@ int game_log ( GXInstance_t *p_instance )
 {
     
     // Print the input
-    (void)input_info(p_instance->input);
+    (void) input_info(p_instance->input);
+
+    // Print the renderer
+    (void) print_renderer(p_instance->context.renderer);
+
+    // Print the scene
+    (void) scene_info(p_instance->context.scene);
 
     // Flush standard out
-    (void)fflush(stdout);
+    (void) fflush(stdout);
 
     // Success
     return 1;

@@ -107,6 +107,7 @@ endif(WIN32)
 
 # G10 executable
 add_executable (g10_internal_example "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c" "main.c") 
+#add_executable (g10_internal_example "Resource.rc")
 add_dependencies(g10_internal_example json array dict stack queue)
 target_include_directories(g10_internal_example PUBLIC include ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ) 
 target_link_libraries(g10_internal_example PUBLIC json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
@@ -115,4 +116,4 @@ target_link_libraries(g10_internal_example PUBLIC json array dict stack queue ${
 add_library (g10 SHARED "G10.c" "GXAI.c" "GXBV.c" "GXCamera.c" "GXCameraController.c" "GXCollider.c" "GXCollision.c" "GXEntity.c" "GXInput.c" "GXLinear.c" "GXMaterial.c" "GXPart.c" "GXPhysics.c" "GXPLY.c" "GXQuaternion.c" "GXRenderer.c" "GXRigidbody.c" "GXScene.c" "GXScheduler.c" "GXServer.c" "GXShader.c" "GXTransform.c" "GXUserCode.c") 
 add_dependencies(g10 json array dict stack queue)
 target_include_directories(g10 PUBLIC include ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ) 
-target_link_libraries(g10 PRIVATE json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
+target_link_libraries(g10 PUBLIC json array dict stack queue ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )

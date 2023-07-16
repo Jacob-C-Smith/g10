@@ -706,12 +706,9 @@ size_t load_file ( const char *path, void *buffer, bool binary_mode )
 {
 
     // Argument checking
-    {
-        #ifndef NDEBUG
-            if ( path == 0 )
-                goto no_path;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( path == 0 ) goto no_path;
+    #endif
 
     // Initialized data
     size_t  ret = 0;

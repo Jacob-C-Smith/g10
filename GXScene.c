@@ -14,18 +14,15 @@ int create_scene ( GXScene_t **pp_scene )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 ) goto no_scene;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_scene == (void *) 0 ) goto no_scene;
+    #endif
 
     // Initialized data
     GXScene_t *p_scene = calloc(1, sizeof(GXScene_t));
 
-    // Error checking
-    if ( p_scene == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( p_scene == (void *) 0 ) goto no_mem;
 
     // Return the allocated memory
     *pp_scene = p_scene;
@@ -48,15 +45,15 @@ int create_scene ( GXScene_t **pp_scene )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -64,28 +61,23 @@ int load_scene ( GXScene_t **pp_scene, const char *path )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 ) goto no_scene;
-            if ( path     == (void *) 0 ) goto no_path;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_scene == (void *) 0 ) goto no_scene;
+        if ( path     == (void *) 0 ) goto no_path;
+    #endif
 
     // Initialized data
     size_t  len  = g_load_file(path, 0, true);
     char   *text = calloc(len + 1, sizeof(char));
 
-    // Error checking
-    if ( text == (void *) 0 )
-        goto no_mem;
+    // Error check
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file from the file system
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Load the scene as a JSON token
-    if ( load_scene_as_json_text(pp_scene, text) == 0 )
-        goto failed_to_load_scene;
+    if ( load_scene_as_json_text(pp_scene, text) == 0 ) goto failed_to_load_scene;
 
     // Clean the scope
     free(text);
@@ -135,15 +127,15 @@ int load_scene ( GXScene_t **pp_scene, const char *path )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -163,12 +155,10 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
     JSONValue_t  *p_value    = 0;
 
     // Parse the JSON text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json_value;
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto failed_to_parse_json_value;
 
     // Parse the JSON value into a scene
-    if ( load_scene_as_json_value(pp_scene, p_value) == 0 )
-        goto failed_to_load_scene_as_json_value;
+    if ( load_scene_as_json_value(pp_scene, p_value) == 0 ) goto failed_to_load_scene_as_json_value;
 
     // Clean the scope
     free_json_value(p_value);
@@ -223,12 +213,10 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 ) goto no_scene;
-            if ( p_value  == (void *) 0 ) goto no_value;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_scene == (void *) 0 ) goto no_scene;
+        if ( p_value  == (void *) 0 ) goto no_value;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance           = g_get_active_instance();
@@ -257,8 +245,10 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         p_skyboxes_value     = dict_get(p_dict, "skyboxes");
         p_light_probes_value = dict_get(p_dict, "light probes");
 
-        // Error checking
-        if ( ! ( p_name_value ) )
+        // Error check
+        if ( ! ( 
+            p_name_value
+        ) )
             goto missing_properties;
     }
     // Parse the scene as a file path
@@ -266,8 +256,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     {
 
         // Load the scene as a path
-        if ( load_scene(pp_scene, p_value->string) == 0 )
-            goto failed_to_load_scene_as_path;
+        if ( load_scene(pp_scene, p_value->string) == 0 ) goto failed_to_load_scene_as_path;
 
         // Success
         return 1;
@@ -280,8 +269,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
     {
 
         // Allocate a scene
-        if ( create_scene(&p_scene) == 0 )
-            goto failed_to_allocate_scene;
+        if ( create_scene(&p_scene) == 0 ) goto failed_to_allocate_scene;
 
         // Set the name
         if ( p_name_value->type == JSONstring )
@@ -293,9 +281,8 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
             // Allocate memory
             p_scene->name = calloc(name_len + 1, sizeof(char));
 
-            // Error checking
-            if ( p_scene->name == (void *) 0 )
-                goto no_mem;
+            // Error check
+            if ( p_scene->name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_scene->name, p_name_value->string, name_len);
@@ -329,9 +316,8 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     // Allocate memory for entities
                     pp_entities = calloc(len+1, sizeof(JSONValue_t *));
 
-                    // Error checking
-                    if ( pp_entities == (void *) 0 )
-                        goto no_mem;
+                    // Error check
+                    if ( pp_entities == (void *) 0 ) goto no_mem;
 
                     // Get list of entities
                     array_get(p_entities_value->list, (void **)pp_entities, 0);
@@ -362,8 +348,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     GXThread_t *thread = 0;
 
                     // Allocate a thread
-                    if ( create_thread(&thread) == 0 )
-                        goto failed_to_create_thread;
+                    if ( create_thread(&thread) == 0 ) goto failed_to_create_thread;
 
                     // Store the thread
                     entity_loading_threads[i] = thread;
@@ -414,9 +399,8 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     // Allocate memory for entities
                     pp_cameras = calloc(len+1, sizeof(JSONValue_t *));
 
-                    // Error checking
-                    if ( pp_cameras == (void *) 0 )
-                        goto no_mem;
+                    // Error check
+                    if ( pp_cameras == (void *) 0 ) goto no_mem;
 
                     // Get list of entities
                     array_get(p_cameras_value->list, (void **)pp_cameras, 0);
@@ -433,8 +417,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                     GXCamera_t *p_camera = 0;
 
                     // Load a camera as a JSON value
-                    if ( load_camera_as_json_value(&p_camera, pp_cameras[i]) == 0 )
-                        goto failed_to_load_camera_as_json_value;
+                    if ( load_camera_as_json_value(&p_camera, pp_cameras[i]) == 0 ) goto failed_to_load_camera_as_json_value;
 
                     // Add the camera to the camera dictionary
                     dict_add(p_scene->cameras, p_camera->name, p_camera);
@@ -452,8 +435,7 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
                 dict_construct(&p_scene->cameras, 16);
 
                 // Load a camera as a JSON value
-                if ( load_camera_as_json_value(&p_camera, p_cameras_value->object) == 0 )
-                    goto failed_to_load_camera_as_json_value;
+                if ( load_camera_as_json_value(&p_camera, p_cameras_value->object) == 0 ) goto failed_to_load_camera_as_json_value;
 
                 // Add the camera to the camera dictionary
                 dict_add(p_scene->cameras, p_camera->name, p_camera);
@@ -533,12 +515,12 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         {
 
             missing_properties:
-        	    #ifndef NDEBUG
-	            	g_print_error("[G10] [Scene] Not enough properties to construct scene in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
-	            #endif
+                #ifndef NDEBUG
+                    g_print_error("[G10] [Scene] Not enough properties to construct scene in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/scene.json \n", __FUNCTION__);
+                #endif
 
-	            // Error
-	            return 0;
+                // Error
+                return 0;
             
             wrong_value_type:
                 #ifndef NDEBUG
@@ -626,15 +608,15 @@ int load_scene_as_json_value ( GXScene_t **pp_scene, JSONValue_t *p_value )
         }
 
         // Standard library errors
-		{
-			no_mem:
-				#ifndef NDEBUG
-					g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
-				#endif
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    g_print_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-				// Error
-				return 0;
-		}
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -642,16 +624,14 @@ int append_entity ( GXScene_t *p_scene, GXEntity_t *entity )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene           == (void *) 0 ) goto no_scene;
-            if ( p_scene->entities == (void *) 0 ) goto no_entities;
-            if ( entity            == (void *) 0 ) goto no_entity;
-        #endif
+    #ifndef NDEBUG
+        if ( p_scene           == (void *) 0 ) goto no_scene;
+        if ( p_scene->entities == (void *) 0 ) goto no_entities;
+        if ( entity            == (void *) 0 ) goto no_entity;
+        if ( entity->name      == (void *) 0 ) goto no_name;
+    #endif
 
-        if ( entity->name == 0 ) goto no_name;
-    }
-
+        
     // Add the entity to the scene
     (void) dict_add(p_scene->entities, entity->name, entity);
 
@@ -714,16 +694,12 @@ int append_camera ( GXScene_t *p_scene, GXCamera_t *p_camera )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene          == (void *) 0 ) goto no_scene;
-            if ( p_scene->cameras == (void *) 0 ) goto no_cameras;
-            if ( p_camera         == (void *) 0 ) goto no_camera;
-        #endif
-
-        if (p_camera->name == 0)
-            goto no_name;
-    }
+    #ifndef NDEBUG
+        if ( p_scene          == (void *) 0 ) goto no_scene;
+        if ( p_scene->cameras == (void *) 0 ) goto no_cameras;
+        if ( p_camera         == (void *) 0 ) goto no_camera;
+        if ( p_camera->name   == (void *) 0 ) goto no_name;
+    #endif
 
     // Add the camera to the scene
     (void) dict_add(p_scene->cameras, p_camera->name, p_camera);
@@ -773,16 +749,14 @@ int append_camera ( GXScene_t *p_scene, GXCamera_t *p_camera )
 
 int append_light ( GXScene_t *p_scene, GXLight_t *p_light )
 {
+
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene         == (void *) 0 ) goto no_scene;
-            if ( p_scene->lights == (void *) 0 ) goto no_lights;
-            if ( p_light         == (void *) 0 ) goto no_light;
-        #endif
-        if ( p_light->name == 0 )
-            goto no_name;
-    }
+    #ifndef NDEBUG
+        if ( p_scene         == (void *) 0 ) goto no_scene;
+        if ( p_scene->lights == (void *) 0 ) goto no_lights;
+        if ( p_light         == (void *) 0 ) goto no_light;
+        if ( p_light->name   == (void *) 0 ) goto no_name;
+    #endif
 
     // Add the entity to the scene
     (void) dict_add(p_scene->lights, p_light->name, p_light);
@@ -834,12 +808,10 @@ int append_collision ( GXScene_t *p_scene, GXCollision_t *p_collision )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene     == (void *) 0 ) goto no_scene;
-            if ( p_collision == (void *) 0 ) goto no_collision;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene     == (void *) 0 ) goto no_scene;
+        if ( p_collision == (void *) 0 ) goto no_collision;
+    #endif
     
     // TODO:
     //
@@ -876,11 +848,9 @@ int scene_info ( GXScene_t *p_scene )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene == (void *) 0 ) goto no_scene;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene == (void *) 0 ) goto no_scene;
+    #endif
 
     // Initialized data
     size_t       entity_count            = dict_keys(p_scene->entities, 0),
@@ -921,14 +891,15 @@ int scene_info ( GXScene_t *p_scene )
 
     // Print each entity
     // TODO: Fix
-    //dict_foreach(p_scene->entities, entity_info);
+    
+    // Get the callback function associated with the current state
+    dict_foreach(p_scene->entities, ( void (*)(void*) ) entity_info);
 
     // Formatting
     g_print_log("\ncameras  :\n");
 
     // Print each camera
-    // TODO: Fix
-    //dict_foreach(p_scene->cameras, print_camera);
+    dict_foreach(p_scene->cameras, ( void (*)(void*) ) print_camera);
 
     // Formatting
     g_print_log("\n");
@@ -956,12 +927,10 @@ GXEntity_t *get_entity ( GXScene_t *p_scene, char *name )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene == (void *) 0 ) goto no_scene;
-            if ( name    == (void *) 0 ) goto no_name;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene == (void *) 0 ) goto no_scene;
+        if ( name    == (void *) 0 ) goto no_name;
+    #endif
 
     // Success OR null pointer if name is not in scene->entities
     return (GXEntity_t *) dict_get(p_scene->entities, (char *)name);
@@ -990,12 +959,10 @@ GXCamera_t *get_camera ( GXScene_t *p_scene, char *name )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene == (void *) 0 ) goto no_scene;
-            if ( name    == (void *) 0 ) goto no_name;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene == (void *) 0 ) goto no_scene;
+        if ( name    == (void *) 0 ) goto no_name;
+    #endif
 
     return (GXCamera_t *) dict_get(p_scene->cameras, (char *)name);
 
@@ -1022,13 +989,12 @@ GXLight_t *get_light ( GXScene_t *p_scene, char *name )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene == (void *) 0 ) goto no_scene;
-            if ( name    == (void *) 0 ) goto no_name;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene == (void *) 0 ) goto no_scene;
+        if ( name    == (void *) 0 ) goto no_name;
+    #endif
 
+    // Return 
     return (GXLight_t *) dict_get(p_scene->lights, (char *) name);
 
     // Error handling
@@ -1059,12 +1025,10 @@ int set_active_camera ( GXScene_t *p_scene, char *name )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( p_scene == (void *) 0 ) goto no_scene;
-            if ( name    == (void *) 0 ) goto no_name;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_scene == (void *) 0 ) goto no_scene;
+        if ( name    == (void *) 0 ) goto no_name;
+    #endif
 
     // Initialized data
     GXCamera_t *c = (GXCamera_t *) dict_get(p_scene->cameras, (char *) name);
@@ -1075,9 +1039,8 @@ int set_active_camera ( GXScene_t *p_scene, char *name )
         // Set the active camera
         p_scene->active_camera = c;
 
+    // Default
     else
-
-        // Error
         goto failed_to_find_camera;
 
     // Success
@@ -1122,18 +1085,15 @@ int destroy_scene ( GXScene_t **pp_scene )
 {
 
     // Argument check
-    {
-        #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 ) goto no_scene;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_scene == (void *) 0 ) goto no_scene;
+    #endif
 
     // Initialized data
     GXScene_t *p_scene = *pp_scene;
 
     // Check for valid pointer
-    if ( p_scene == (void *) 0 )
-        goto pointer_to_null_pointer;
+    if ( p_scene == (void *) 0 ) goto pointer_to_null_pointer;
 
     // No more pointer for caller
     *pp_scene = 0;
@@ -1175,7 +1135,7 @@ int destroy_scene ( GXScene_t **pp_scene )
         size_t light_count = dict_keys(p_scene->lights, 0);
         GXLight_t** lights = calloc(light_count, sizeof(void*));
 
-        // Erorr checking
+        // Error checking
         if ( lights == (void *) 0 )
             goto no_mem;
 

@@ -78,6 +78,7 @@ APS_3rdPersonCtrl_t* create_aps_3rdpersonctrl()
 
 int aps_3rdpersonctrl_from_camera_and_entity(GXInstance_t* instance, GXCamera_t* camera, GXEntity_t* entity)
 {
+    
     // Argument check
     {
     #ifndef NDEBUG
