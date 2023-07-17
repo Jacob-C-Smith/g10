@@ -320,8 +320,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
                     GXPart_t *p_part = 0;
 
                     // Load the part
-                    if ( load_part_as_json_value(&p_part, parts[i]) == 0 )
-                        goto failed_to_load_part;
+                    if ( load_part_as_json_value(&p_part, parts[i]) == 0 ) goto failed_to_load_part;
 
                     // Add the part to the dictionary
                     dict_add(p_entity->parts, p_part->name, p_part);
@@ -353,8 +352,7 @@ int load_entity_as_json_value ( GXEntity_t **pp_entity, JSONValue_t *p_value )
                 p_entity->shader_name = calloc(len+1, sizeof(char));
 
                 // Error check
-                if ( p_entity->shader_name == (void *) 0 )
-                    goto no_mem;
+                if ( p_entity->shader_name == (void *) 0 ) goto no_mem;
                 
                 // Copy the name of the shader
                 strncpy(p_entity->shader_name, p_shader_name_value->string, len);
@@ -920,8 +918,8 @@ int load_entity_from_queue ( void *vp_instance )
         // Unlock the mutex
         SDL_UnlockMutex(p_instance->mutexes.load_entity);
 
-        if ( load_entity_as_json_value(&p_entity, p_value) == 0 )
-            goto failed_to_load_entity_as_json;
+        // Load the entity as a JSON value
+        if ( load_entity_as_json_value(&p_entity, p_value) == 0 ) goto failed_to_load_entity_as_json;
 
         // Add the entity to the active scene
         append_entity(p_scene, p_entity);

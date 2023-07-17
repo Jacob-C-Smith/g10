@@ -836,7 +836,6 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
             p_binds
         ) )
             goto missing_properties;
-
     }
 
     // Parse the input as a path
@@ -907,8 +906,7 @@ int load_input_as_json_value ( GXInput_t **pp_input, JSONValue_t *p_value )
                 pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the array
                 array_get(p_binds->list, (void **)pp_elements, 0 );
@@ -1121,8 +1119,7 @@ int load_bind_as_json_value ( GXBind_t **pp_bind, JSONValue_t *p_value )
                 pp_elements = calloc(keys_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the array
                 array_get(p_keys->list, (void **)pp_elements, 0 );

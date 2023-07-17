@@ -27,8 +27,7 @@ int create_ai ( GXAI_t **pp_ai )
     GXAI_t *p_ai = calloc(1, sizeof(GXAI_t));
 
     // Error check
-    if ( p_ai == (void *) 0 )
-        goto no_mem;
+    if ( p_ai == (void *) 0 ) goto no_mem;
 
     // Write the return value
     *pp_ai = p_ai;
@@ -78,16 +77,13 @@ int load_ai ( GXAI_t **pp_ai, char *path )
     char   *text = calloc(len+1, sizeof(char));
 
     // Error check
-    if ( text == (void *) 0 )
-        goto no_mem;
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file contents into memory
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Parse the file contents into an AI struct
-    if ( load_ai_as_json_text(pp_ai, text) == 0)
-        goto failed_to_construct_ai_from_file_json;
+    if ( load_ai_as_json_text(pp_ai, text) == 0 ) goto failed_to_construct_ai_from_file_json;
 
     // Free the file data
     free(text);
@@ -164,11 +160,9 @@ int load_ai_as_json_text ( GXAI_t **pp_ai, char *text )
     JSONValue_t *p_value = 0;
 
     // Parse the text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json;
+    if ( parse_json_value(text, 0, &p_value)   == 0 ) goto failed_to_parse_json;
 
-    if ( load_ai_as_json_value(pp_ai, p_value) == 0 )
-        goto failed_to_load_ai_as_json_value;
+    if ( load_ai_as_json_value(pp_ai, p_value) == 0 ) goto failed_to_load_ai_as_json_value;
 
     // Clean the scope
     free_json_value(p_value);
@@ -254,7 +248,11 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
         p_initial_state = dict_get(p_dict, "initial state");
 
         // Error check
-        if ( ! ( p_name && p_states && p_initial_state ) )
+        if ( ! ( 
+            p_name          &&
+            p_states        &&
+            p_initial_state 
+        ) )
             goto missing_properties;
     }
     else
@@ -265,8 +263,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
     {
 
         // Error check
-        if ( p_initial_state->type == JSONstring )
-            goto wrong_initial_state_type;
+        if ( p_initial_state->type == JSONstring ) goto wrong_initial_state_type;
 
         // Initialized data
         GXAI_t* p_ai = 0;
@@ -295,8 +292,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
         // ... the AI is not in the cache
 
         // Allocate memory for an AI
-        if ( create_ai(&p_ai) == 0 )
-            goto failed_to_allocate_ai;
+        if ( create_ai(&p_ai) == 0 ) goto failed_to_allocate_ai;
 
         // Copy the AI name
         {
@@ -305,19 +301,16 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
             size_t name_len = strlen(p_name->string);
 
             // Error check
-            if ( name_len > 255 )
-                goto name_too_long;
+            if ( name_len > 255 ) goto name_too_long;
 
             // Allocate for the name
             p_ai->name = calloc(name_len+1, sizeof(char));
 
             // Error check
-            if ( p_ai->name == (void *)0 )
-                goto no_mem;
+            if ( p_ai->name == (void *)0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_ai->name, p_name->string, name_len);
-
         }
 
         // Initialize each AI state, and set the initial state
@@ -337,8 +330,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
                 pp_states = calloc(state_count, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_states == (void *) 0 )
-                    goto no_mem;
+                if ( pp_states == (void *) 0 ) goto no_mem;
 
                 // Populate the states array
                 array_get(p_states->list, (void **)pp_states, 0 );
@@ -356,8 +348,7 @@ int load_ai_as_json_value ( GXAI_t **pp_ai, JSONValue_t *p_value )
                 char   *state_name = calloc(state_len + 1, sizeof(char));
 
                 // Error check
-                if ( state_name == (void *) 0 )
-                    goto no_mem;
+                if ( state_name == (void *) 0 ) goto no_mem;
 
                 // Copy the name of the state from the array
                 strncpy(state_name, ((JSONValue_t *)pp_states[i])->string, state_len);
@@ -699,8 +690,7 @@ int copy_ai ( GXAI_t **pp_ai, GXAI_t *p_ai )
     GXAI_t *dest_ai = 0;
 
     // Allocate a new AI
-    if ( create_ai(&dest_ai) == 0 )
-        goto failed_to_allocate_ai;
+    if ( create_ai(&dest_ai) == 0 ) goto failed_to_allocate_ai;
 
     // Return the copy to the caller
     *dest_ai = (GXAI_t)

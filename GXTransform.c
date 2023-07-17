@@ -12,8 +12,7 @@ int create_transform ( GXTransform_t **pp_transform )
     GXTransform_t *p_transform = calloc(1, sizeof(GXTransform_t));
 
     // Memory check
-    if ( p_transform == (void *) 0 )
-        goto no_mem;
+    if ( p_transform == (void *) 0 ) goto no_mem;
 
     // Return the allocated memory
     *pp_transform = p_transform;
@@ -60,8 +59,7 @@ int construct_transform ( GXTransform_t **pp_transform, vec3 location, quaternio
     GXTransform_t *p_transform = 0;
 
     // Allocate the transform
-    if ( create_transform(&p_transform) == 0 )
-        goto failed_to_create_transform;
+    if ( create_transform(&p_transform) == 0 ) goto failed_to_create_transform;
 
     // Return the transform
     *p_transform = (GXTransform_t)
@@ -121,12 +119,10 @@ int load_transform ( GXTransform_t **pp_transform, const char *path )
     char          *file_buffer = calloc(file_size + 1, sizeof(char));
 
     // Load the file
-    if ( g_load_file(path, file_buffer, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, file_buffer, true)                   == 0 ) goto failed_to_load_file;
 
     // Load the transform as a json string
-    if ( load_transform_as_json_text(pp_transform, file_buffer) == 0 )
-        goto failed_to_load_transform;
+    if ( load_transform_as_json_text(pp_transform, file_buffer) == 0 ) goto failed_to_load_transform;
 
     // Free up the memory
     free(file_buffer);
@@ -188,12 +184,10 @@ int load_transform_as_json_text ( GXTransform_t **pp_transform, char *text )
     #endif
 
     // Initialized data
-    JSONValue_t *p_value    = 0;
+    JSONValue_t *p_value = 0;
 
     // Parse the transform JSON
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json;
-
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto failed_to_parse_json;
 
     // Deallocate the JSON value
     FREE_VALUE(p_value);
@@ -302,15 +296,13 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
                 array_get(p_location->list, 0, &element_count);
 
                 // Error check
-                if ( element_count != 3 )
-                    goto location_len_error;
+                if ( element_count != 3 ) goto location_len_error;
 
                 // Allocate an array for the elements
                 pp_elements = calloc(element_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the vector
                 array_get(p_location->list, (void **)pp_elements, 0 );
@@ -347,15 +339,13 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
                 array_get(p_rotation->list, 0, &element_count );
 
                 // Error check
-                if ( ! ( element_count == 3 || element_count == 4 ) )
-                    goto rotation_len_error;
+                if ( ! ( element_count == 3 || element_count == 4 ) ) goto rotation_len_error;
 
                 // Allocate an array for the elements
                 pp_elements = calloc(element_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the vector
                 array_get(p_rotation->list, (void **)pp_elements, 0 );
@@ -410,15 +400,13 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
                 array_get(p_scale->list, 0, &vector_element_count );
 
                 // Error check
-                if ( vector_element_count != 3 )
-                    goto scale_len_error;
+                if ( vector_element_count != 3 ) goto scale_len_error;
 
                 // Allocate an array for the elements
                 pp_elements = calloc(vector_element_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the vector
                 array_get(p_scale->list, (void **)pp_elements, 0 );
@@ -440,8 +428,7 @@ int load_transform_as_json_value ( GXTransform_t **pp_transform, JSONValue_t *p_
             goto wrong_scale_type;
 
         // Construct the transform
-        if ( construct_transform(pp_transform, location, rotation, scale) == 0 )
-            goto failed_to_create_transform;
+        if ( construct_transform(pp_transform, location, rotation, scale) == 0 ) goto failed_to_create_transform;
     }
 
     // Success

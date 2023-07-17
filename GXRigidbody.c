@@ -18,12 +18,9 @@ int create_rigidbody ( GXRigidbody_t** pp_rigidbody )
     GXRigidbody_t *p_rigidbody = calloc(1, sizeof(GXRigidbody_t));
 
     // Error check
-    {
-        #ifndef NDEBUG
-            if ( p_rigidbody == (void *) 0 )
-                goto no_mem;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( p_rigidbody == (void *) 0 ) goto no_mem;
+    #endif
 
     // Write the return value
     *pp_rigidbody = p_rigidbody;
@@ -89,16 +86,13 @@ int load_rigidbody ( GXRigidbody_t **pp_rigidbody, const char *path )
     char   *text = calloc(len+1, sizeof(char));
 
     // Error check
-    if ( text == (void *) 0 )
-        goto no_mem;
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Load the rigidbody from the JSON text
-    if ( load_rigidbody_as_json_text(pp_rigidbody, text) == 0 )
-        goto failed_to_load_rigidbody_as_json;
+    if ( load_rigidbody_as_json_text(pp_rigidbody, text) == 0 ) goto failed_to_load_rigidbody_as_json;
 
     // Success
     return 1;
@@ -266,8 +260,7 @@ int destroy_rigidbody ( GXRigidbody_t **pp_rigidbody )
     GXRigidbody_t *p_rigidbody = *pp_rigidbody;
     
     // Error check
-    if ( p_rigidbody == (void *) 0 )
-        goto pointer_to_null;
+    if ( p_rigidbody == (void *) 0 ) goto pointer_to_null;
 
     // No more pointer for caller
     *pp_rigidbody = 0;

@@ -23,8 +23,7 @@ int create_part ( GXPart_t **pp_part )
     GXPart_t *p_part = calloc(1, sizeof(GXPart_t));
 
     // Error check
-    if ( p_part == (void *) 0 )
-        goto no_mem;
+    if ( p_part == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_part = p_part;
@@ -76,16 +75,13 @@ int load_part ( GXPart_t **pp_part, char* path )
     char   *text = calloc(len + 1, sizeof(char));
 
     // Error check
-    if ( text == (void *)0 )
-        goto no_mem;
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file into the buffer
-    if ( g_load_file(path, text, true) == 0 )
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0 ) goto failed_to_load_file;
 
     // Load the part as JSON text
-    if ( load_part_as_json_text(pp_part, text) == 0 )
-        goto failed_to_load_part;
+    if ( load_part_as_json_text(pp_part, text) == 0 ) goto failed_to_load_part;
 
     // Free the token text
     free(text);
@@ -162,12 +158,10 @@ int load_part_as_json_text ( GXPart_t **pp_part, char* text )
     JSONValue_t  *p_value     = 0;
 
     // Parse the JSON text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json;
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto failed_to_parse_json;
 
     // Parse the JSON value into a part
-    if ( load_part_as_json_value(pp_part, p_value) == 0 )
-        goto failed_to_load_part;
+    if ( load_part_as_json_value(pp_part, p_value) == 0 ) goto failed_to_load_part;
 
     // Success
     return 1;
@@ -256,8 +250,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
     {
 
         // Load a part from a JSON file
-        if ( load_part(pp_part, p_value->string) == 0 )
-            goto failed_to_load_part_from_file;
+        if ( load_part(pp_part, p_value->string) == 0 ) goto failed_to_load_part_from_file;
 
         // Success
         return 1;
@@ -302,8 +295,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
     {
 
         // Allocate a part
-        if ( create_part(pp_part) == 0 )
-            goto failed_to_create_part;
+        if ( create_part(pp_part) == 0 ) goto failed_to_create_part;
 
         p_part = *pp_part;
 
@@ -317,8 +309,7 @@ int load_part_as_json_value ( GXPart_t **pp_part, JSONValue_t *p_value )
             p_part->name = calloc(name_len + 1, sizeof(char));
 
             // Error handling
-            if ( p_part->name == (void *) 0 )
-                goto no_mem;
+            if ( p_part->name == (void *) 0 ) goto no_mem;
 
             // Copy the string
             strncpy(p_part->name, p_name->string, name_len);
@@ -492,8 +483,7 @@ int destroy_part ( GXPart_t **pp_part )
     // Argument chack
     {
         #ifndef NDEBUG
-            if ( pp_part == (void *) 0 )
-                goto no_part;
+            if ( pp_part == (void *) 0 ) goto no_part;
         #endif
     }
 

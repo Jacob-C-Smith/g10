@@ -306,7 +306,6 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
                         c_data = &c_data[i + 1];      // Set the pointer
                     }
 
-                    
                     goto p2propertyExit;
 
                     // TODO: Copy out the name, count, and veretx count

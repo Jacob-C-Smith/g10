@@ -77,8 +77,7 @@ int init_scheduler ( void )
 {
 
     // Construct a function lookup table
-    if ( dict_construct(&scheduler_tasks, TASK_COUNT) == 0 )
-        goto failed_to_construct_scheduler_tasks_lookup_table;
+    if ( dict_construct(&scheduler_tasks, TASK_COUNT) == 0 ) goto failed_to_construct_scheduler_tasks_lookup_table;
 
     // Iterate over each task
     for (size_t i = 0; i < TASK_COUNT; i++)
@@ -118,8 +117,7 @@ int create_task ( GXTask_t **pp_task )
     GXTask_t *p_task = calloc(1, sizeof(GXTask_t));
 
     // Error check
-    if ( p_task == (void *) 0 )
-        goto no_mem;
+    if ( p_task == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_task = p_task;
@@ -166,8 +164,7 @@ int create_schedule ( GXSchedule_t **pp_schedule )
     GXSchedule_t *p_scheduler = calloc(1, sizeof(GXSchedule_t));
 
     // Error check
-    if ( p_scheduler == (void *) 0 )
-        goto no_mem;
+    if ( p_scheduler == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_schedule = p_scheduler;
@@ -214,8 +211,7 @@ int create_thread ( GXThread_t **pp_thread )
     GXThread_t *p_thread = calloc(1, sizeof(GXThread_t));
 
     // Error check
-    if ( p_thread == (void *) 0 )
-        goto no_mem;
+    if ( p_thread == (void *) 0 ) goto no_mem;
 
     // Return a pointer to the caller
     *pp_thread = p_thread;
@@ -264,16 +260,13 @@ int load_schedule ( GXSchedule_t **pp_schedule, char* path )
     char   *text = calloc(len+1, sizeof(char));
 
     // Error check
-    if ( text == (void *) 0 )
-        goto no_mem;
+    if ( text == (void *) 0 ) goto no_mem;
 
     // Load the file
-    if ( g_load_file(path, text, true) == 0)
-        goto failed_to_load_file;
+    if ( g_load_file(path, text, true) == 0) goto failed_to_load_file;
 
     // Construct the schedule from the file contents
-    if ( load_schedule_as_json_text(pp_schedule, text) == 0 )
-        goto failed_to_load_schedule;
+    if ( load_schedule_as_json_text(pp_schedule, text) == 0 ) goto failed_to_load_schedule;
 
     // Free the file contents
     free(text);
@@ -352,12 +345,10 @@ int load_schedule_as_json_text ( GXSchedule_t **pp_schedule, char *text )
     JSONValue_t   *p_value       = 0;
 
     // Parse the text into a JSON value
-    if ( parse_json_value(text, 0, &p_value) == 0 )
-        goto failed_to_parse_json;
+    if ( parse_json_value(text, 0, &p_value) == 0 ) goto failed_to_parse_json;
 
     // Load the schedule as a JSON value
-    if ( load_schedule_as_json_value(pp_schedule, p_value) == 0 )
-        goto failed_to_create_schedule;
+    if ( load_schedule_as_json_value(pp_schedule, p_value) == 0 ) goto failed_to_create_schedule;
 
     // Deallocate the JSON value
     free_json_value(p_value);
@@ -456,8 +447,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
     {
 
         // Load the schedule from the path
-        if ( load_schedule(pp_schedule, p_value->string) == 0 )
-            goto failed_to_load_schedule;
+        if ( load_schedule(pp_schedule, p_value->string) == 0 ) goto failed_to_load_schedule;
 
         // Success
         return 1;
@@ -482,15 +472,13 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
             size_t name_len = strlen(p_name->string);
 
             // Error check
-            if ( name_len > 255 )
-                goto name_too_long;
+            if ( name_len > 255 ) goto name_too_long;
 
             // Allocate for the name
             name = calloc(name_len+1, sizeof(char));
 
             // Error check
-            if ( name == (void *) 0 )
-                goto no_mem;
+            if ( name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(name, p_name->string, name_len);
@@ -514,8 +502,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
                 pp_elements = calloc(thread_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the threads
                 array_get(p_threads->list, (void **)pp_elements, 0 );
@@ -533,12 +520,10 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
                 GXThread_t  *p_thread            = 0;
 
                 // Type check
-                if ( p_thread_json_value->type != JSONobject )
-                    goto wrong_thread_type;
+                if ( p_thread_json_value->type != JSONobject ) goto wrong_thread_type;
 
                 // Load the thread
-                if ( load_thread_as_json_value(&p_thread, p_thread_json_value) == 0 )
-                    goto failed_to_load_thread;
+                if ( load_thread_as_json_value(&p_thread, p_thread_json_value) == 0 ) goto failed_to_load_thread;
 
                 // Add the thread to the thread dict
                 dict_add(threads, p_thread->name, p_thread);
@@ -549,8 +534,7 @@ int load_schedule_as_json_value ( GXSchedule_t **pp_schedule, JSONValue_t *p_val
         }
 
         // Allocate the schedule
-        if ( create_schedule(&p_schedule) == 0 )
-            goto failed_to_create_schedule;
+        if ( create_schedule(&p_schedule) == 0 ) goto failed_to_create_schedule;
 
         // Construct the schedule
         *p_schedule = (GXSchedule_t)
@@ -1044,8 +1028,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
         p_tasks     = ((JSONValue_t *)dict_get(p_dict, "tasks"))->list;
 
         // Error check
-        if ( ( name && description && p_tasks ) == 0 )
-            goto missing_properties;
+        if ( ( name && description && p_tasks ) == 0 ) goto missing_properties;
     }
     else
         goto wrong_type;
@@ -1070,8 +1053,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
             p_name = calloc(name_len+1, sizeof(char));
 
             // Error check
-            if ( p_name == (void *) 0 )
-                goto no_mem;
+            if ( p_name == (void *) 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_name, name, name_len);
@@ -1094,8 +1076,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
                 pp_elements = calloc(task_count+1, sizeof(JSONValue_t *));
 
                 // Error check
-                if ( pp_elements == (void *) 0 )
-                    goto no_mem;
+                if ( pp_elements == (void *) 0 ) goto no_mem;
 
                 // Populate the elements of the tasks
                 array_get(p_tasks, (void **)pp_elements, 0 );
@@ -1108,15 +1089,13 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
             tasks = calloc(task_count+1, sizeof(GXTask_t *));
 
             // Error check
-            if ( tasks == (void *) 0 )
-                goto no_mem;
+            if ( tasks == (void *) 0 ) goto no_mem;
 
             // Construct a list of size_t s
             complete_tasks = calloc(task_count+1, sizeof(size_t));
 
             // Error check
-            if ( complete_tasks == (void *) 0 )
-                goto no_mem;
+            if ( complete_tasks == (void *) 0 ) goto no_mem;
 
             // Set up the tasks
             for (size_t i = 0; i < task_count; i++)
@@ -1131,8 +1110,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
                     return 0; // TODO: Error handling
 
                 // Load the thread
-                if ( load_task_as_json_value(&p_task, p_thread_json_value) == 0 )
-                    goto failed_to_load_thread;
+                if ( load_task_as_json_value(&p_task, p_thread_json_value) == 0 ) goto failed_to_load_thread;
 
                 // Add the thread to the thread dict
                 dict_add(d_tasks, p_task->name, p_task);
@@ -1147,8 +1125,7 @@ int load_thread_as_json_value ( GXThread_t **pp_thread, JSONValue_t *p_value )
         }
 
         // Allocate the thread
-        if ( create_thread(&p_thread) == 0)
-            goto failed_to_create_thread;
+        if ( create_thread(&p_thread) == 0 ) goto failed_to_create_thread;
 
         // Return the transform to the caller
         *p_thread = (GXThread_t)
@@ -1278,8 +1255,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
              *wait_task   = 0;
 
     // Allocate memory for the task struct
-    if ( create_task(&p_task) == 0 )
-        goto failed_to_create_task;
+    if ( create_task(&p_task) == 0 ) goto failed_to_create_task;
 
     // TODO: Refactor to use JSONValue_t *
     // Parse the task JSON
@@ -1299,8 +1275,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
             wait_task   = ((JSONValue_t *)dict_get(p_dict, "wait task"))->string;
 
         // Error check
-        if ( ( task_name ) == 0 )
-            goto missing_properties;
+        if ( ( task_name ) == 0 ) goto missing_properties;
     }
     // Default
     else
@@ -1319,8 +1294,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
             p_task->name = calloc(task_name_len+1, sizeof(char));
 
             // Error handling
-            if ( p_task->name == 0 )
-                goto no_mem;
+            if ( p_task->name == 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_task->name, task_name, task_name_len);
@@ -1337,8 +1311,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
             p_task->wait_thread = calloc(wait_thread_name_len+1, sizeof(char));
 
             // Error handling
-            if ( p_task->wait_thread == 0 )
-                goto no_mem;
+            if ( p_task->wait_thread == 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_task->wait_thread, wait_thread, wait_thread_name_len);
@@ -1355,8 +1328,7 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
             p_task->wait_task = calloc(wait_task_name_len+1, sizeof(char));
 
             // Error handling
-            if ( p_task->name == 0 )
-                goto no_mem;
+            if ( p_task->name == 0 ) goto no_mem;
 
             // Copy the name
             strncpy(p_task->wait_task, wait_task, wait_task_name_len);
@@ -1409,6 +1381,4 @@ int load_task_as_json_value ( GXTask_t **pp_task, JSONValue_t *p_value )
     failed_to_create_task:;
 
     return 0;
-
-
 }
