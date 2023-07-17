@@ -1,5 +1,6 @@
 /** !
  * @file G10/GXRenderer.h
+ * 
  * @author Jacob Smith
  *
  * Renderer

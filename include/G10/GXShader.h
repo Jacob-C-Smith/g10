@@ -57,10 +57,12 @@ struct GXLayout_s
 struct GXShader_s
 {
 
-    char                *name;
-    size_t               users;
-    enum g10_pipeline_e  type;
-    GXLayout_t          *layout;
+    char                 *name;
+    size_t                users;
+    enum g10_pipeline_e   type;
+    GXLayout_t           *layout;
+
+    int                 (*pfn_draw_item)(void *, GXRenderer_t *, GXRenderPass_t *, GXSubpass_t *, GXShader_t *);
 
     union
     {

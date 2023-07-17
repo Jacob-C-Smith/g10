@@ -4970,12 +4970,10 @@ int print_image ( GXImage_t *p_image )
 int print_attachment ( GXAttachment_t *p_attachment )
 {
 
-    // Argument errors
-    {
-        #ifndef NDEBUG
-            if ( p_attachment == (void *) 0 ) goto no_attachment;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( p_attachment == (void *) 0 ) goto no_attachment;
+    #endif
 
     // Formatting
     g_print_log(" - Attachment info - \n");
@@ -5374,7 +5372,7 @@ fail:
     p_instance->time.delta_time = (double)(((double)(end - start)) / (double)(p_instance->time.clock_div));
     //if (p_instance->time.ticks % 1000 == 1)
     //{
-        printf("Render time: %.5fms \n", (double)(p_instance->time.delta_time * 1000.0));
+        printf("Render time: %.5fms \r", (double)(p_instance->time.delta_time * 1000.0));
         fflush(stdout);
     //}
     p_instance->time.ticks += 1;

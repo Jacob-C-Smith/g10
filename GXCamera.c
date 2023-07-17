@@ -24,12 +24,10 @@ mat4 perspective_matrix ( float fov, float aspect, float near_clip, float far_cl
 int get_camera_position ( void *ret )
 {
 
-    // Argument errors
-    {
-        #ifndef NDEBUG
-            if ( ret == (void *) 0 ) goto no_return;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( ret == (void *) 0 ) goto no_return;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance        = g_get_active_instance();

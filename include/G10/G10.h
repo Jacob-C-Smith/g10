@@ -1,5 +1,6 @@
 ﻿/** !
  * @file G10/G10.h
+ * 
  * @author Jacob Smith
  *
  * Include header for G10.
@@ -8,15 +9,16 @@
 // Include guard
 #pragma once
 
+// Build version
 #define G10_VERSION_MAJOR 1
 #define G10_VERSION_MINOR 0
 #define G10_VERSION_PATCH 0
 
+// Build options. 
 #define BUILD_G10_WITH_ANSI_COLOR
 #define BUILD_G10_WITH_SDL_NET
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
-
 
 // Standard library
 #include <stdio.h>
@@ -41,11 +43,14 @@
 // Dictionary submodule
 #include <dict/dict.h>
 
+// Arrary submodule
+#include <array/array.h>
+
 // Queue submodule
 #include <queue/queue.h>
 
-// Arrary submodule
-#include <array/array.h>
+// Stack submodule
+#include <stack/stack.h>
 
 // JSON submodule
 #include <json/json.h>
@@ -77,6 +82,42 @@
 // Uncomment when implementing UI
 //#include <UI/UI.h>
 
+
+// Set the reallocator for the dict submodule
+#ifdef DICT_REALLOC
+    #undef DICT_REALLOC
+    #define DICT_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+// Set the reallocator for the array submodule
+#ifdef ARRAY_REALLOC
+    #undef ARRAY_REALLOC
+    #define ARRAY_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+// Set the reallocator for the stack submodule
+#ifdef STACK_REALLOC
+    #undef STACK_REALLOC
+    #define STACK_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+// Set the reallocator for the queue submodule
+#ifdef QUEUE_REALLOC
+    #undef QUEUE_REALLOC
+    #define QUEUE_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+// Set the reallocator for the JSON submodule
+#ifdef JSON_REALLOC
+    #undef JSON_REALLOC
+    #define JSON_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+// Memory management macro
+#ifndef G10_REALLOC
+#define G10_REALLOC(p, sz) realloc(p,sz)
+#endif
+
 // Structures
 struct GXInstance_s
 {
@@ -85,14 +126,16 @@ struct GXInstance_s
     char *name;
 
     // SDL2
-    struct {
+    struct
+    {
         SDL_Window        *window;
         SDL_Event          event;
         SDL_AudioDeviceID  audio_device;
     } sdl2;
 
     // Vulkan
-    struct {
+    struct
+    {
         VkInstance                instance;
 
         VkDebugUtilsMessengerEXT  debug_messenger;
@@ -122,7 +165,8 @@ struct GXInstance_s
         struct { int g, p; }      queue_family_indices;
         #pragma pack(pop)  
 
-        struct {
+        struct
+        {
             VkSwapchainKHR  swap_chain;
             VkImage        *images;
             VkFormat        image_format;
@@ -139,7 +183,8 @@ struct GXInstance_s
             } details;
         } swap_chain;
 
-        struct {
+        struct
+        {
             VkQueue *graphics_queues,
                     *compute_queues,
                     *transfer_queues,
@@ -159,7 +204,8 @@ struct GXInstance_s
     } vulkan;
 
     // Window parameters
-    struct {
+    struct
+    {
         char *title;
         u32   width,
               height;
@@ -168,7 +214,8 @@ struct GXInstance_s
     } window;
 
     // Context
-    struct {
+    struct
+    {
         GXSchedule_t  *schedule;
         GXScene_t     *scene,
                       *loading_scene;
@@ -178,19 +225,22 @@ struct GXInstance_s
     } context;
 
     // Data
-    struct {
+    struct
+    {
         dict *schedules,
              *scenes;
     } data;
 
     // Networking
-    struct {
+    struct
+    {
         GXServer_t *server;
         GXClient_t *client;
     } networking;
 
     // Cache
-    struct {
+    struct 
+    {
         dict *parts,
              *materials,
              *shaders,
@@ -198,7 +248,8 @@ struct GXInstance_s
     } cache;
 
     // Queues
-    struct {
+    struct
+    {
         queue *load_entity,
               *load_light_probe,
               *actor_move,
@@ -209,7 +260,8 @@ struct GXInstance_s
     } queues;
 
     // Mutexes
-    struct {
+    struct
+    {
         SDL_mutex *load_entity,
                   *shader_cache,
                   *part_cache,
@@ -223,7 +275,8 @@ struct GXInstance_s
     } mutexes;
 
     // Time
-    struct {
+    struct
+    {
         size_t  ticks;
         u32     d,
                 last_time;
@@ -234,7 +287,8 @@ struct GXInstance_s
     // Discord integration
     #ifdef BUILD_G10_WITH_DISCORD
 
-    struct {
+    struct
+    {
         struct IDiscordCore                *core;
         struct IDiscordUserManager         *users;
         struct IDiscordAchievementManager  *achievements;
@@ -251,7 +305,8 @@ struct GXInstance_s
     // FMOD Integratdion
     #ifdef BUILD_G10_WITH_FMOD
 
-    struct {
+    struct
+    {
         FMOD_SYSTEM* system;
 
 

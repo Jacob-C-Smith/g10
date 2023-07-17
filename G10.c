@@ -349,7 +349,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             SDL_ShowWindow(p_instance->sdl2.window);
 
             // Focus the game window
-            SDL_SetWindowInputFocus(p_instance->sdl2.window);
+            (void)SDL_SetWindowInputFocus(p_instance->sdl2.window);
 
             // Get the clock divisor for high precision timing
             p_instance->time.clock_div = SDL_GetPerformanceFrequency();
@@ -407,8 +407,8 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 {
 
                     // Initialized data
-                    extern int  init_renderer   ( void );
-                    extern int  init_shader     ( void );
+                    extern int init_renderer ( void );
+                    extern int init_shader   ( void );
 
                     // Renderer initialization
                     if ( init_renderer() == 0 ) goto failed_to_initialize_renderer;
@@ -464,10 +464,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 strncpy(p_instance->name, p_name->string, name_len);
             }
 
-            // Subsystem initialization
+            // Initialize subsystems
             {
 
-                // Initialized data
+                // External functions
                 extern void init_texture    ( void );
                 extern void init_input      ( void );
                 extern void init_part       ( void );
@@ -491,7 +491,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 // Default
                 else
                     p_instance->loading_thread_count = 4;
-
 
                 // Input initialization
                 init_input();
@@ -525,10 +524,10 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             {
 
                 // Construct a dictionary for schedules
-                dict_construct(&p_instance->data.scenes, 16);
+                (void)dict_construct(&p_instance->data.scenes, 16);
 
                 // Construct a dictionary for schedules
-                dict_construct(&p_instance->data.schedules, 8);
+                (void)dict_construct(&p_instance->data.schedules, 8);
             }
 
             // Caches
@@ -606,28 +605,28 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
             {
 
                 // Construct the cache
-                dict_construct(&p_instance->cache.materials, 128);
-                dict_construct(&p_instance->cache.parts, 128);
-                dict_construct(&p_instance->cache.shaders, 32);
-                dict_construct(&p_instance->cache.ais, 16);
+                (void)dict_construct(&p_instance->cache.materials, 128);
+                (void)dict_construct(&p_instance->cache.parts, 128);
+                (void)dict_construct(&p_instance->cache.shaders, 32);
+                (void)dict_construct(&p_instance->cache.ais, 16);
             }
 
             // Queues
             {
 
                 // Queue for entities with colliders
-                queue_construct(&p_instance->queues.actor_collision);
+                (void)queue_construct(&p_instance->queues.actor_collision);
 
                 // Queues for entities with rigidbodies
-                queue_construct(&p_instance->queues.actor_force);
-                queue_construct(&p_instance->queues.actor_move);
+                (void)queue_construct(&p_instance->queues.actor_force);
+                (void)queue_construct(&p_instance->queues.actor_move);
 
                 // Queues for entities with AIs
-                queue_construct(&p_instance->queues.ai_preupdate);
-                queue_construct(&p_instance->queues.ai_update);
+                (void)queue_construct(&p_instance->queues.ai_preupdate);
+                (void)queue_construct(&p_instance->queues.ai_update);
 
                 // Queue for entities to load
-                queue_construct(&p_instance->queues.load_entity);
+                (void)queue_construct(&p_instance->queues.load_entity);
             }
 
             // Load a renderer
@@ -664,7 +663,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                 {
 
                     // Get the quantity of elements
-                    array_get(p_schedules->list, 0, &schedule_count );
+                    (void)array_get(p_schedules->list, 0, &schedule_count );
 
                     // Allocate an array for the elements
                     pp_elements = calloc(schedule_count+1, sizeof(JSONValue_t *));
@@ -673,7 +672,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     if ( pp_elements == (void *) 0 ) goto no_mem;
 
                     // Populate the elements of the threads
-                    array_get(p_schedules->list, (void **)pp_elements, 0 );
+                    (void)array_get(p_schedules->list, (void **)pp_elements, 0 );
                 }
 
                 // Set up the schedules
@@ -688,7 +687,7 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
                     if ( load_schedule_as_json_value(&i_schedule, p_element) == 0 ) goto failed_to_load_schedule;
 
                     // Add the schedule into the schedule dictionary
-                    dict_add(p_instance->data.schedules, i_schedule->name, i_schedule);
+                    (void)dict_add(p_instance->data.schedules, i_schedule->name, i_schedule);
                 }
             }
 
@@ -825,8 +824,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
         // Vulkan errors
         {
 
-
-
             layer_not_present:
                 #ifndef NDEBUG
                     g_print_error("[Vulkan] Missing validation layers to construct Vulkan instance in call to function \"%s\"\n", __FUNCTION__);
@@ -850,8 +847,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Error
                 return 0;
-
-
         }
 
         // User errors
@@ -949,9 +944,6 @@ int g_init ( GXInstance_t **pp_instance, const char *path )
 
                 // Error
                 return 0;
-
-
-
 
             wrong_material_cache_count_type:
                 #ifndef NDEBUG
@@ -1293,7 +1285,6 @@ int g_construct_vulkan_instance ( JSONValue_t *p_value )
                 // Optional properties
                 p_application_name    = dict_get(p_dict, "name");
                 p_application_version = dict_get(p_dict, "version");
-
             }
 
             // Parse the application name
@@ -3749,12 +3740,10 @@ void create_buffer ( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProper
 size_t g_load_file ( const char *path, void *buffer, bool binary_mode )
 {
 
-    // Argument checking
-    {
-        #ifndef NDEBUG
-            if ( path == 0 ) goto no_path;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( path == 0 ) goto no_path;
+    #endif
 
     // Initialized data
     size_t  ret = 0;
@@ -4179,22 +4168,21 @@ int copy_state ( GXInstance_t *p_instance )
         while ( queue_empty(p_instance->queues.actor_move) == false )
             queue_dequeue(p_instance->queues.actor_move, 0);
 
-        while ( queue_empty(p_instance->queues.actor_force) == false )
+        while ( queue_empty(p_instance->queues.actor_force) == false)
             queue_dequeue(p_instance->queues.actor_force, 0);
 
-        while ( queue_empty(p_instance->queues.actor_collision) == false )
+        while ( queue_empty(p_instance->queues.actor_collision) == false)
             queue_dequeue(p_instance->queues.actor_collision, 0);
 
         // AI
-        while ( queue_empty(p_instance->queues.ai_preupdate) == false )
-            queue_dequeue(p_instance->queues.ai_preupdate, 0);
+        while ( queue_empty(p_instance->queues.ai_preupdate) == false ) { queue_dequeue(p_instance->queues.ai_preupdate, 0); };
 
-        while ( queue_empty(p_instance->queues.ai_update) == false )
-            queue_dequeue(p_instance->queues.ai_update, 0);
+        while ( queue_empty(p_instance->queues.ai_update)    == false ) { queue_dequeue(p_instance->queues.ai_update   , 0); };
 
         // Draw
 
         // Iterate over each render pass
+        /*
         for (size_t i = 0; i < p_instance->context.renderer->render_pass_count; i++)
         {
 
@@ -4212,6 +4200,7 @@ int copy_state ( GXInstance_t *p_instance )
                 while( queue_empty(p_queue) == false ) { (void) queue_dequeue(p_queue, 0); }; 
             }
         }
+        */
     }
 
     // Populate the new queues
@@ -4233,8 +4222,9 @@ int copy_state ( GXInstance_t *p_instance )
         }
 
         // Draw
-
+        
         // Iterate over each render pass
+        /*
         for (size_t i = 0; i < p_instance->context.renderer->render_pass_count; i++)
         {
 
@@ -4255,6 +4245,7 @@ int copy_state ( GXInstance_t *p_instance )
                     queue_enqueue(p_queue, draw[j]);
             }
         }
+        */
     }
 
     // Clean the scope

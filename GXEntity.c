@@ -599,6 +599,47 @@ int preupdate_entity_ai ( GXEntity_t *p_entity )
     }
 }
 
+int draw_entity (
+	void           *vp_entity,
+	GXRenderer_t   *p_renderer,
+	GXRenderPass_t *p_render_pass,
+	GXSubpass_t    *p_subpass,
+	GXShader_t     *p_shader
+)
+{
+
+    // Argument check
+    #ifndef NDEBUG
+
+    #endif
+
+    // Initialized data
+    GXEntity_t     *p_entity       = vp_entity;
+    GXTransform_t  *p_transform    = p_entity->transform;
+    size_t          part_count     = dict_values(p_entity->parts, 0),
+                    material_count = dict_values(p_entity->materials, 0);
+    GXPart_t      **pp_part        = G10_REALLOC(0, part_count     * sizeof(GXPart_t *));
+    GXMaterial_t  **pp_material    = G10_REALLOC(0, material_count * sizeof(GXPart_t *));
+
+    // TODO: Bind the part
+    // TODO: Bind the transform
+    // TODO: Bind the material
+    // TODO: Draw the entity
+    //
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            
+        }
+    }
+}
+
 int update_entity_ai ( GXEntity_t* p_entity )
 {
 

@@ -130,6 +130,25 @@ DLLEXPORT int entity_info ( GXEntity_t  *p_entity );
 DLLEXPORT int preupdate_entity_ai ( GXEntity_t *p_entity );
 
 /** !
+ * Draw the entity
+ * 
+ * @param vp_entity void pointer to entity
+ * @param p_renderer
+ * @param p_render_pass,
+ * @param p_subpass,
+ * @param p_shader
+ *
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int pfn_draw_item (
+	void           *vp_entity,
+	GXRenderer_t   *p_renderer,
+	GXRenderPass_t *p_render_pass,
+	GXSubpass_t    *p_subpass,
+	GXShader_t     *p_shader
+);
+
+/** !
  * Run state update function
  *
  * @param p_entity : Pointer to entity

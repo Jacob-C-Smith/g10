@@ -203,13 +203,11 @@ GXPart_t *load_ply ( GXPart_t *part, const char *path )
          */
     }
 
-    // Argument checking
-    {
-        #ifndef NDEBUG
-            if ( part == (void *) 0 ) goto no_part;
-            if ( path == (void *) 0 ) goto no_path;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( part == (void *) 0 ) goto no_part;
+        if ( path == (void *) 0 ) goto no_path;
+    #endif
 
     // Uninitialized data
     GXInstance_t  *p_instance  = g_get_active_instance();

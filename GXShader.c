@@ -3904,13 +3904,11 @@ int load_ray_shader_as_json_value ( GXShader_t **pp_shader, JSONValue_t *p_value
 int load_layout_as_json_value ( GXLayout_t **pp_layout, JSONValue_t *p_value )
 {
 
-    // Argument errors
-    {
-        #ifndef NDEBUG
-            if ( pp_layout == (void *) 0 ) goto no_layout;
-            if ( p_value   == (void *) 0 ) goto no_value;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( pp_layout == (void *) 0 ) goto no_layout;
+        if ( p_value   == (void *) 0 ) goto no_value;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance      = g_get_active_instance();

@@ -12,12 +12,10 @@ void init_part ( void )
 int create_part ( GXPart_t **pp_part )
 {
 
-    // Initialized data
-    {
-        #ifndef NDEBUG
-            if ( pp_part == (void*) 0 ) goto no_part;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( pp_part == (void*) 0 ) goto no_part;
+    #endif
 
     // Initialized data
     GXPart_t *p_part = calloc(1, sizeof(GXPart_t));
@@ -62,13 +60,11 @@ int create_part ( GXPart_t **pp_part )
 int load_part ( GXPart_t **pp_part, char* path )
 {
 
-    // Argument error
-    {
-        #ifndef NDEBUG
-            if (pp_part == (void *) 0 ) goto no_part;
-            if (path    == (void *) 0 ) goto no_path;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if (pp_part == (void *) 0 ) goto no_part;
+        if (path    == (void *) 0 ) goto no_path;
+    #endif
 
     // Initialized data
     size_t  len  = g_load_file(path, 0, true);
@@ -480,12 +476,10 @@ int part_info ( GXPart_t *p_part )
 int destroy_part ( GXPart_t **pp_part )
 {
 
-    // Argument chack
-    {
-        #ifndef NDEBUG
-            if ( pp_part == (void *) 0 ) goto no_part;
-        #endif
-    }
+    // Argument check
+    #ifndef NDEBUG
+        if ( pp_part == (void *) 0 ) goto no_part;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();

@@ -143,12 +143,10 @@ int load_scene_as_json_text ( GXScene_t **pp_scene, char *text )
 {
 
     // Argument checking
-    {
-        #ifndef NDEBUG
-            if ( pp_scene == (void *) 0 ) goto no_scene;
-            if ( text     == (void *) 0 ) goto no_text;
-        #endif
-    }
+    #ifndef NDEBUG
+        if ( pp_scene == (void *) 0 ) goto no_scene;
+        if ( text     == (void *) 0 ) goto no_text;
+    #endif
 
     // Initialized data
     GXInstance_t *p_instance = g_get_active_instance();
