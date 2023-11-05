@@ -1,13 +1,37 @@
-﻿#include <g10/g10.h>
+﻿/** !
+ * Implements general G10 functionality
+ * 
+ * @file g10.c
+ * @author Jacob Smith
+ */
 
-// Uninitialized data
-FILE* log_file;
+// Headers
+#include <g10/g10.h>
 
-// Initialized data
+// Static initialized data
 static g_instance *active_instance = 0;
+
+/** !
+ * Initialize libraries
+ * 
+ * @param void
+ * @return void
+ */
+u0 g_init_early ( void )
+{
+
+    // Initialize log library
+    log_init(0, BUILD_G10_WITH_ANSI_COLOR);
+
+    // Done
+    return;
+}
 
 int g_init ( g_instance **pp_instance, const char *p_path )
 {
+
+    // Early 
+    g_init_early( );
 
     // Argument Check
     if ( pp_instance == (void *) 0 ) goto no_instance;
@@ -29,7 +53,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         {
             no_instance:
                 #ifndef NDEBUG
-                    printf("[g10] Null pointer provided for \"pp_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] Null pointer provided for \"pp_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -37,7 +61,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
             no_path:
                 #ifndef NDEBUG
-                    printf("[g10] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] Null pointer provided for parameter \"p_path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -48,7 +72,38 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         {
             no_mem:
                 #ifndef NDEBUG
-                    printf("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[Standard Library] Memory allocator returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int g_exit ( g_instance **pp_instance )
+{
+
+    // Argument Check
+    if ( pp_instance == (void *) 0 ) goto no_instance;
+
+    // Initialized data
+    g_instance *p_instance = *pp_instance;
+    
+    // No more pointer for caller
+    *pp_instance = 0;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[g10] Null pointer provided for \"pp_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

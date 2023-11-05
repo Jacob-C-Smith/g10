@@ -48,6 +48,6 @@ target_link_libraries(g10_internal_example g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c") 
-#add_dependencies(g10 json array dict stack queue sync)
+add_dependencies(g10 log)
 target_include_directories(g10 PUBLIC include include/g10) #${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
-#target_link_libraries(g10 PUBLIC json array dict stack queue sync ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_NET_INCLUDE_DIRS} ${VULKAN_LIB_LIST} PRIVATE SDL2_image::SDL2_image SDL2_net::SDL2_net )
+target_link_libraries(g10 PUBLIC log)

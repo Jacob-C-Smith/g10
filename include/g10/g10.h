@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// log submodule
+#include <log/log.h>
+
 // g10
 #include <g10/gtypedef.h>
 
@@ -72,7 +75,7 @@
 #define G10_VERSION_PATCH 0
 
 // Build options
-#define BUILD_G10_WITH_ANSI_COLOR
+#define BUILD_G10_WITH_ANSI_COLOR true
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
 
@@ -81,10 +84,10 @@ struct g_instance_s
 {
 
     // Name
-    char *name;
+    const char *const name; 
 
     // Running?
-    bool running;
+    bool running; 
 };
 
 // Allocators
