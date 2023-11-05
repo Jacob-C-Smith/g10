@@ -14,8 +14,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-// log submodule
+// log module
 #include <log/log.h>
+
+// sync module
+#include <sync/sync.h>
+
+// crypto module
+#include <crypto/crypto.h>
+
+// array module
+#include <array/array.h>
+
+// dict module
+#include <dict/dict.h>
+
+// json module
+#include <json/json.h>
 
 // g10
 #include <g10/gtypedef.h>
@@ -84,7 +99,7 @@ struct g_instance_s
 {
 
     // Name
-    const char *const name; 
+    char _name[255+1]; 
 
     // Running?
     bool running; 
@@ -103,6 +118,18 @@ struct g_instance_s
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
+
+// File
+/** !
+ * Return the size of a file IF buffer == 0 ELSE read a file into buffer
+ * 
+ * @param path path to the file
+ * @param buffer buffer
+ * @param binary_mode "wb" IF true ELSE "w"
+ * 
+ * @return 1 on success, 0 on error
+ */
+size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode );
 
 // Destructors
 /** !
