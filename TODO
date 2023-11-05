@@ -1,3 +1,0 @@
-Make a GXBuffer object for vulkan buffers
-regenerate framebuffer on window resize
-GXShader->layout->sets must hadve shader stages flag (supply w JSON)

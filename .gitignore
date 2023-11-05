@@ -3,20 +3,22 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-lib/
-G10/*
-*.dll
-Level 1/
-G10.code-workspace
-RelWithDebInfo/
-
-include/JSON/*
 # User-specific files
 *.rsuser
 *.suo
 *.user
+*.so
 *.userosscache
 *.sln.docstates
+CMakeFiles/
+cmake_install.cmake
+*.dylib
+CMakeCache.txt
+build/
+Makefile
+.vscode/
+.gituhb/
+.DS_Store
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -369,23 +371,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-*.gfxr
-time partitioning.txt
-
-build/
-extern/SDL2-*
-extern/SDL2_image-*
-extern/SDL2_net-*
-
-.vscode/
-*.lnk
-queue_example.exe
-queue_test.exe
-stack_example.exe
-stack_test.exe
-desktop.ini
-CMakeSettings.json
-RCa09924
-
-resource.h
-Resource.rc
+*.ini
+*.ico
