@@ -17,6 +17,19 @@ if (${IS_DEBUG_BUILD})
     add_compile_definitions(NDEBUG)
 endif()
 
+# Find the log module
+if ( NOT "${HAS_LOG}")
+    
+    # Log
+    message("[g10] Adding log project")
+    
+    # Add the log directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/log ${CMAKE_SOURCE_DIR}/build/log)
+
+    # Let any parent project know that this project has log
+    set(HAS_LOG true PARENT_SCOPE)
+endif()
+
 # Add the g10 project
 if ( NOT "${HAS_G10}")
     
