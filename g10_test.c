@@ -81,6 +81,7 @@ size_t   load_file           ( const char   *path         , void         *buffer
 void test_g10_g_init ( const char *name );
 void test_g10_g_get_active_instance ( const char *name );
 void test_g10_user_code ( const char *name );
+void test_g10_linear_vectors ( const char *name );
 
 bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
 bool test_g_get_active_instance ( char *test_file, result_t expected );
@@ -193,6 +194,8 @@ void run_tests ( void )
     // Initialized data
     timestamp g10_core_t0      = 0,
               g10_core_t1      = 0,
+              g10_linear_t0    = 0,
+              g10_linear_t1    = 0,
               g10_user_code_t0 = 0,
               g10_user_code_t1 = 0;
 
@@ -217,6 +220,20 @@ void run_tests ( void )
     print_time_pretty ( (double)(g10_core_t1-g10_core_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n");
 
+    // Start timing linear algebra code
+    g10_linear_t0 = timer_high_precision();
+
+        // Test linear
+        test_g10_linear_vectors("g10 linear");
+
+    // Stop timing user code
+    g10_linear_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear algebra code took ");
+    print_time_pretty ( (double)(g10_linear_t1-g10_linear_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n");
+
     // Start timing user code
     g10_user_code_t0 = timer_high_precision();
 
@@ -230,7 +247,6 @@ void run_tests ( void )
     log_info("g10 user code took ");
     print_time_pretty ( (double)(g10_user_code_t1-g10_user_code_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n");
-
 
     // Done
     return;
@@ -388,6 +404,26 @@ void test_g10_g_get_active_instance ( const char *name )
     return;
 }
 
+void test_g10_linear_vectors ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
+    // TODO: Test 2D vectors
+    // TODO: Test 3D vectors
+    // TODO: Test 4D vectors
+
+    // TODO: Test 2x2 matrix
+    // TODO: Test 4x4 matrix
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
 void test_g10_user_code ( const char *name )
 {
     
@@ -408,7 +444,6 @@ void test_g10_user_code ( const char *name )
     // Success
     return;
 }
-
 
 int construct_minimal_g10_instance ( g_instance **pp_instance ) {
     
@@ -433,7 +468,6 @@ void print_test ( const char *scenario_name, const char *test_name, bool passed 
     else 
         log_fail("%s %s\n", scenario_name, test_name);
     
-    printf("\r");
     // Increment the pass/fail counter
     if (passed)
         ephemeral_passes++;

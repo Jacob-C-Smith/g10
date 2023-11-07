@@ -29,9 +29,21 @@ typedef          long long i64;
 typedef float  f32;
 typedef double f64;
 
+// Vectors
+typedef struct { float x, y; }       vec2;
+typedef struct { float x, y, z, w; } vec4;
+typedef vec4                         vec3;
+
+// 2x2 Matrix
+typedef struct { float a, b, c, d; } mat2;
+
+// 4x4 Matrix
+typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
+
 // Forward declarations
 struct g_instance_s;
 
 // Type definitions
 typedef struct g_instance_s g_instance;
+
 typedef int (*fn_user_code_callback)( g_instance *p_instance );

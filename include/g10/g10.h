@@ -26,6 +26,9 @@
 // array module
 #include <array/array.h>
 
+// queue module
+#include <queue/queue.h>
+
 // dict module
 #include <dict/dict.h>
 
