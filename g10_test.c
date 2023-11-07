@@ -295,7 +295,7 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
     // Parse the instance json
     g_init( &p_return_instance, test_file );
 
-    result = g_get_active_instance();
+    result = (result_t) g_get_active_instance();
 
     // Free the instance value
     g_exit(&p_return_instance);

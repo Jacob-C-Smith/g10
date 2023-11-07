@@ -10,6 +10,24 @@
 
 // g10
 #include <g10/g10.h>
+#include <g10/user_code.h>
+
+/** !
+ *  This gets called once per frame
+ * 
+ * @param p_instance : the instance
+ * 
+ * @return 1 
+*/
+int user_code_main ( g_instance *const p_instance )
+{
+
+    // Print the name of the instance
+    printf("%s\n", p_instance->_name);
+
+    // Success
+    return 1;
+}
 
 // Entry point
 int main ( int argc, const char *const argv[] )
@@ -20,6 +38,15 @@ int main ( int argc, const char *const argv[] )
 
     // Set up g10
     if ( g_init(&p_instance, "instance.json") == 0 ) goto failed_to_initialize_g10;
+
+    // Set a user code callback
+    user_code_callback_set(p_instance, user_code_main);
+
+    // Call the user code function manually
+    p_instance->context.pfn_user_code_callback(p_instance);
+
+    // Call the user code
+    user_code_callback(p_instance);
 
     // Clean up g10
     if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;

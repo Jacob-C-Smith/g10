@@ -118,7 +118,7 @@ target_include_directories(g10_test PUBLIC include include/g10)
 target_link_libraries(g10_test g10)
 
 # g10 library
-add_library (g10 SHARED "g10.c") 
+add_library (g10 SHARED "g10.c" "user_code.c") 
 add_dependencies(g10 log sync crypto array dict tuple stack queue json)
 target_include_directories(g10 PUBLIC include include/g10) #${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
 target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json)
