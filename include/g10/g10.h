@@ -34,6 +34,7 @@
 
 // g10
 #include <g10/gtypedef.h>
+#include <g10/user_code.h>
 
 // 3rd party
 
@@ -99,14 +100,19 @@ struct g_instance_s
 {
 
     // Name
-    char _name[255+1]; 
+    char _name[255+1];
+
+    // Context
+    struct
+    {
+        fn_user_code_callback pfn_user_code_callback;
+    } context;
 
     // Running?
     bool running; 
 };
 
 // Allocators
-
 /** !
  *  Construct a g10 instance
  *
@@ -119,9 +125,19 @@ struct g_instance_s
  */
 DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
 
+// Accessors
+/** !
+ *  Get a pointer to the instance singleton
+ * 
+ * @param void
+ * 
+ * @return pointer to g10 instance singleton on success, null pointer on error
+ */
+g_instance *g_get_active_instance ( void );
+
 // File
 /** !
- * Return the size of a file IF buffer == 0 ELSE read a file into buffer
+ *  Return the size of a file IF buffer == 0 ELSE read a file into buffer
  * 
  * @param path path to the file
  * @param buffer buffer
@@ -133,7 +149,7 @@ size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary
 
 // Destructors
 /** !
- * Destroy a g10 instance
+ *  Destroy a g10 instance
  *
  * @param p_instance : pointer to the instance pointer
  *

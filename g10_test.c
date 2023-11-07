@@ -9,13 +9,15 @@
 // Header
 #include <sync/sync.h>
 #include <log/log.h>
+#undef NDEBUG
 #include <g10/g10.h>
 
 // Enumeration definitions
 enum result_e {
-    zero  = 0,
-    one   = 1,
-    match = 0,
+    zero     = 0,
+    one      = 1,
+    match    = 2,
+    not_null = 3
 };
 
 // Type definitions
@@ -75,8 +77,16 @@ result_t save_json           ( char         *path         , json_value   *p_valu
 bool     value_equals        ( json_value   *a            , json_value   *b );
 size_t   load_file           ( const char   *path         , void         *buffer                                      , bool     binary_mode );
 
-bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
 void test_g10_g_init ( const char *name );
+void test_g10_g_get_active_instance ( const char *name );
+
+
+bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
+bool test_g_get_active_instance ( char *test_file, result_t expected );
+
+
+// Constructors
+int construct_minimal_g10_instance ( g_instance **pp_instance );
 
 // Entry point
 int main ( int argc, const char* argv[] )
@@ -183,6 +193,9 @@ void run_tests ( void )
     // Test g_init
     test_g10_g_init("g10_core_g_init");
 
+    // Test g_get_active_instance
+    test_g10_g_get_active_instance("g10_core_g_get_active_instance");
+
     // Stop
     g10_t1 = timer_high_precision();
 
@@ -201,11 +214,35 @@ void test_g10_g_init ( const char *name )
     // Formatting
     log_info("Scenario: %s\n", name);
 
+    // Test null values
+    print_test(name, "null"            , test_g_init(0, (void *) 0, match));
+    print_test(name, "empty"           , test_g_init("test\ cases/core/empty.json", (void *) 0, match));
+    print_test(name, "empty object"    , test_g_init("test\ cases/core/empty_object.json", (void *) 0, match));
+
+    // Test the minimal instance
+    print_test(name, "minimal", test_g_init("test\ cases/core/minimal_instance.json", construct_minimal_g10_instance, match));
+
+    // Test the name property
+    print_test(name, "name too long", test_g_init("test\ cases/core/instance_name_too_long.json", (void *) 0, match));
+    print_test(name, "name too short", test_g_init("test\ cases/core/instance_name_too_short.json", (void *) 0, match));
+    print_test(name, "name wrong type", test_g_init("test\ cases/core/instance_name_wrong_type.json", (void *) 0, match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_g_get_active_instance ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
     // Test an empty file
-    print_test(name, "null", test_g_init(0, (void *) 0, match));
-    print_test(name, "empty", test_g_init("test cases/core/empty.json", (void *) 0, match));
-    print_test(name, "empty_object", test_g_init("test cases/core/empty_object.json", (void *) 0, match));
-    //print_test(name, "null", test_g_init("test cases/core/empty.json", (void *) 0, zero));
+    print_test(name, "before_ginit", test_g_get_active_instance(0, zero));
+    print_test(name, "after_ginit", test_g_get_active_instance("test cases/core/minimal_instance.json", not_null));
 
     // Print the summary of this test
     print_final_summary();
@@ -229,17 +266,58 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
     // Construct the expected json value
     if (expected_g_instance_constructor) expected_g_instance_constructor(&p_expected_instance);
 
-    // Parse the json value
-    result = g_init ( &p_return_instance, test_file );
-
-    // Free the json value
-    if ( result ) g_exit(&p_return_instance);
+    // Parse the instance json
+    result = g_init( &p_return_instance, test_file );
     
-    // Match
-    if ( p_expected_instance == p_return_instance ) result = match;
+    // Null pointer match
+    if ( p_expected_instance == p_return_instance ) return match == expected;
+
+    if ( p_return_instance == (void *) 0 ) return zero == expected;
+
+    // Name match
+    if ( strcmp(p_expected_instance->_name, p_return_instance->_name) == 0 ) result = match;
+
+    // Free the instance value
+    g_exit(&p_return_instance);
 
     // Success
     return (result == expected);
+}
+
+bool test_g_get_active_instance ( char *test_file, result_t expected )
+{
+
+    // Initialized data
+    result_t result = 0,
+             value_eq = 0;
+    g_instance *p_return_instance = 0;
+
+    // Parse the instance json
+    g_init( &p_return_instance, test_file );
+
+    result = g_get_active_instance();
+
+    // Free the instance value
+    g_exit(&p_return_instance);
+    
+    result = (result) ? not_null : zero;
+
+    // Success
+    return (result == expected);
+}
+
+int construct_minimal_g10_instance ( g_instance **pp_instance ) {
+    
+    g_instance *p_instance = malloc(sizeof(g_instance));
+
+    *p_instance = (g_instance) {
+        ._name = "g10 instance",
+        .running = false
+    };
+
+    *pp_instance = p_instance;
+
+    return 1;
 }
 
 void print_test ( const char *scenario_name, const char *test_name, bool passed )
@@ -247,11 +325,11 @@ void print_test ( const char *scenario_name, const char *test_name, bool passed 
 
     // Initialized data
     if ( passed )
-        log_pass("%s %s %s\n","[PASS]", scenario_name, test_name);
+        log_pass("%s %s\n",scenario_name, test_name);
     else 
-        log_fail("%s %s %s\n","[FAIL]", scenario_name, test_name);
+        log_fail("%s %s\n", scenario_name, test_name);
     
-
+    printf("\r");
     // Increment the pass/fail counter
     if (passed)
         ephemeral_passes++;

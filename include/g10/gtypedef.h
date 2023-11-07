@@ -34,3 +34,4 @@ struct g_instance_s;
 
 // Type definitions
 typedef struct g_instance_s g_instance;
+typedef int (*fn_user_code_callback)( g_instance *p_instance );
