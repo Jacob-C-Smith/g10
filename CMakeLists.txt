@@ -17,20 +17,6 @@ if (${IS_DEBUG_BUILD})
     add_compile_definitions(NDEBUG)
 endif()
 
-# Find the json module
-if ( NOT "${HAS_JSON}")
-    
-    # Log
-    message("[g10] Adding json project")
-    
-    # Add the json directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/json ${CMAKE_SOURCE_DIR}/build/json)
-
-    # Let any parent project know that this project has json
-    set(HAS_JSON true PARENT_SCOPE)
-endif()
-
-
 # Find the array module
 if ( NOT "${HAS_ARRAY}")
     
@@ -57,17 +43,56 @@ if ( NOT "${HAS_DICT}")
     set(HAS_DICT true PARENT_SCOPE)
 endif()
 
-# Find the log module
-if ( NOT "${HAS_LOG}")
+# Find the tuple module
+if ( NOT "${HAS_TUPLE}")
     
     # Log
-    message("[g10] Adding log project")
+    message("[g10] Adding tuple project")
     
-    # Add the log directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/log ${CMAKE_SOURCE_DIR}/build/log)
+    # Add the tuple directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/tuple ${CMAKE_SOURCE_DIR}/build/tuple)
 
-    # Let any parent project know that this project has log
-    set(HAS_LOG true PARENT_SCOPE)
+    # Let any parent project know that this project has tuple
+    set(HAS_TUPLE true PARENT_SCOPE)
+endif()
+
+# Find the stack module
+if ( NOT "${HAS_STACK}")
+    
+    # Log
+    message("[g10] Adding stack project")
+    
+    # Add the stack directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/stack ${CMAKE_SOURCE_DIR}/build/stack)
+
+    # Let any parent project know that this project has stack
+    set(HAS_STACK true PARENT_SCOPE)
+endif()
+
+# Find the queue module
+if ( NOT "${HAS_QUEUE}")
+    
+    # Log
+    message("[g10] Adding queue project")
+    
+    # Add the queue directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/queue ${CMAKE_SOURCE_DIR}/build/queue)
+
+    # Let any parent project know that this project has queue
+    set(HAS_QUEUE true PARENT_SCOPE)
+endif()
+
+# Find the json module
+if ( NOT "${HAS_JSON}")
+    
+    # Log
+    message("[g10] Adding json project")
+    
+    # Add the json directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/json ${CMAKE_SOURCE_DIR}/build/json)
+
+    # Let any parent project know that this project has json
+    set(HAS_JSON true PARENT_SCOPE)
 endif()
 
 # Add the g10 project
@@ -94,6 +119,6 @@ target_link_libraries(g10_test g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c") 
-add_dependencies(g10 log sync crypto array dict json)
+add_dependencies(g10 log sync crypto array dict tuple stack queue json)
 target_include_directories(g10 PUBLIC include include/g10) #${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
-target_link_libraries(g10 PUBLIC log sync crypto array dict json)
+target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json)

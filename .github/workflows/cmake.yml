@@ -44,7 +44,10 @@ jobs:
         cp -r ${{github.workspace}}/extern/json/parse\ test\ cases/ ${{github.workspace}}/build/parse\ test\ cases/
         cp -r ${{github.workspace}}/extern/json/serial\ test\ cases/ ${{github.workspace}}/build/serial\ test\ cases/
         cp -r ${{github.workspace}}/test\ cases/ ${{github.workspace}}/build/test\ cases/
-        ${{github.workspace}}/build/dict_test
         ${{github.workspace}}/build/array_test
+        ${{github.workspace}}/build/dict_test
+        ${{github.workspace}}/build/stack_test
+        ${{github.workspace}}/build/queue_test
+        ${{github.workspace}}/build/tuple_test    
         ${{github.workspace}}/build/json_test
         ${{github.workspace}}/build/g10_test

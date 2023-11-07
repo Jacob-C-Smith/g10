@@ -91,8 +91,11 @@ int main ( int argc, const char* argv[] )
     log_init(0, false);
 
     // Formatting
-    log_info("|============|\n| G10 TESTER |\n|============|\n\n");
-
+    printf(
+        "╭────────────╮\n"\
+        "│ g10 tester │\n"\
+        "╰────────────╯\n\n"
+    );
     // Start
     t0 = timer_high_precision();
 
