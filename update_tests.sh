@@ -1,0 +1,1 @@
+cp -r test\ cases/ build/test\ cases/
