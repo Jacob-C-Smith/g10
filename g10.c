@@ -143,7 +143,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
             instance_value_is_wrong_type:
                 #ifndef NDEBUG
-                    log_error("[g10] Value must be of type [ object ] in call to function \"%s\"\n\tRefer to gschema: https://schema.g10.app/instance.json\n", __FUNCTION__);
+                    log_error("[g10] Value must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
                 // Error
@@ -151,7 +152,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             
             missing_properties:
                 #ifndef NDEBUG
-                    log_error("[g10] Missing required properties in call to function \"%s\"\n\tRefer to gschema: https://schema.g10.app/instance.json\n", __FUNCTION__);
+                    log_error("[g10] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
                 // Error
@@ -159,7 +161,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             
             name_property_is_wrong_type:
                 #ifndef NDEBUG
-                    log_error("[g10] \"name\" property of instance object must be of type [ string ] in call to function \"%s\"\n\tRefer to gschema: https://schema.g10.app/instance.json\n", __FUNCTION__);
+                    log_error("[g10] \"name\" property of instance object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
                 // Error
@@ -167,7 +170,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             
             name_property_is_too_long:
                 #ifndef NDEBUG
-                    log_error("[g10] \"name\" property of instance object must be less than 255 characters in call to function \"%s\"\n\tRefer to gschema: https://schema.g10.app/instance.json\n", __FUNCTION__);
+                    log_error("[g10] \"name\" property of instance object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
                 // Error
@@ -175,7 +179,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             
             name_property_is_too_short:
                 #ifndef NDEBUG
-                    log_error("[g10] \"name\" property of instance object must be at least 1 character long in call to function \"%s\"\n\tRefer to gschema: https://schema.g10.app/instance.json\n", __FUNCTION__);
+                    log_error("[g10] \"name\" property of instance object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
                 // Error

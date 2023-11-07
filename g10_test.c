@@ -11,6 +11,7 @@
 #include <log/log.h>
 #undef NDEBUG
 #include <g10/g10.h>
+#include <g10/user_code.h>
 
 // Enumeration definitions
 enum result_e {
@@ -79,14 +80,24 @@ size_t   load_file           ( const char   *path         , void         *buffer
 
 void test_g10_g_init ( const char *name );
 void test_g10_g_get_active_instance ( const char *name );
-
+void test_g10_user_code ( const char *name );
 
 bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
 bool test_g_get_active_instance ( char *test_file, result_t expected );
 
-
 // Constructors
 int construct_minimal_g10_instance ( g_instance **pp_instance );
+
+// Functions used by the tester
+int user_code_callback_function ( g_instance *p_instance ) {
+
+    strncpy(p_instance->_name, "G10 tester", 11);
+
+    p_instance->_name[11] = '\0';
+
+    // Success
+    return 1;
+}
 
 // Entry point
 int main ( int argc, const char* argv[] )
@@ -180,74 +191,48 @@ void run_tests ( void )
 {
 
     // Initialized data
-    timestamp g10_t0 = 0,
-              g10_t1 = 0;
+    timestamp g10_core_t0      = 0,
+              g10_core_t1      = 0,
+              g10_user_code_t0 = 0,
+              g10_user_code_t1 = 0;
 
     ///////////////////
     // Test the core //
     ///////////////////
 
-    // Start
-    g10_t0 = timer_high_precision();
+    // Start timing core 
+    g10_core_t0 = timer_high_precision();
 
-    // Test g_init
-    test_g10_g_init("g10_core_g_init");
+        // Test g_init
+        test_g10_g_init("g10 core g_init");
 
-    // Test g_get_active_instance
-    test_g10_g_get_active_instance("g10_core_g_get_active_instance");
+        // Test g_get_active_instance
+        test_g10_g_get_active_instance("g10 core g_get_active_instance");
 
-    // Stop
-    g10_t1 = timer_high_precision();
+    // Stop timing core
+    g10_core_t1 = timer_high_precision();
 
     // Report the time it took to run the core tests
     log_info("g10 core took ");
-    print_time_pretty ( (double)(g10_t1-g10_t0)/(double)timer_seconds_divisor() );
+    print_time_pretty ( (double)(g10_core_t1-g10_core_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n");
 
+    // Start timing user code
+    g10_user_code_t0 = timer_high_precision();
+
+        // Test user_code
+        test_g10_user_code("g10 usercode");
+
+    // Stop timing user code
+    g10_user_code_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 user code took ");
+    print_time_pretty ( (double)(g10_user_code_t1-g10_user_code_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n");
+
+
     // Done
-    return;
-}
-
-void test_g10_g_init ( const char *name )
-{
-    
-    // Formatting
-    log_info("Scenario: %s\n", name);
-
-    // Test null values
-    print_test(name, "null"            , test_g_init(0, (void *) 0, match));
-    print_test(name, "empty"           , test_g_init("test\ cases/core/empty.json", (void *) 0, match));
-    print_test(name, "empty object"    , test_g_init("test\ cases/core/empty_object.json", (void *) 0, match));
-
-    // Test the minimal instance
-    print_test(name, "minimal", test_g_init("test\ cases/core/minimal_instance.json", construct_minimal_g10_instance, match));
-
-    // Test the name property
-    print_test(name, "name too long", test_g_init("test\ cases/core/instance_name_too_long.json", (void *) 0, match));
-    print_test(name, "name too short", test_g_init("test\ cases/core/instance_name_too_short.json", (void *) 0, match));
-    print_test(name, "name wrong type", test_g_init("test\ cases/core/instance_name_wrong_type.json", (void *) 0, match));
-
-    // Print the summary of this test
-    print_final_summary();
-
-    // Success
-    return;
-}
-
-void test_g10_g_get_active_instance ( const char *name )
-{
-    
-    // Formatting
-    log_info("Scenario: %s\n", name);
-
-    // Test an empty file
-    print_test(name, "before_ginit", test_g_get_active_instance(0, zero));
-    print_test(name, "after_ginit", test_g_get_active_instance("test cases/core/minimal_instance.json", not_null));
-
-    // Print the summary of this test
-    print_final_summary();
-
-    // Success
     return;
 }
 
@@ -305,6 +290,125 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
     // Success
     return (result == expected);
 }
+
+bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback, result_t expected )
+{
+
+    result_t result = zero;
+    g_instance *p_return_instance = 0;
+
+    // Parse the instance json
+    g_init( &p_return_instance, "test\ cases/core/minimal_instance.json" );
+
+    // Set the user code callback
+    result = user_code_callback_set(p_return_instance, pfn_user_code_callback);
+
+    // Test for error
+    if ( result == zero ) goto done;
+
+    // Test for equality
+    if ( pfn_user_code_callback == p_return_instance->context.pfn_user_code_callback )
+        result = match;
+
+    done:
+    // Free the instance value
+    g_exit(&p_return_instance);
+
+    return (result == expected);
+}
+
+bool test_user_code_callback ( const char *const path, fn_user_code_callback pfn_user_code_callback, const char *const new_instance_name, result_t expected )
+{
+
+    result_t result = zero;
+    g_instance *p_return_instance = 0;
+
+    // Parse the instance json
+    g_init(&p_return_instance, path);
+
+    // Set the user code callback
+    user_code_callback_set(p_return_instance, pfn_user_code_callback);
+
+    // Run the callback
+    result = user_code_callback(p_return_instance);
+
+    // Test for error
+    if ( result == zero ) goto done;
+
+    // Test for equality
+    if ( strcmp(p_return_instance->_name, new_instance_name) == 0 ) result = match;
+
+    done:
+    // Free the instance value
+    g_exit(&p_return_instance);
+
+    return (result == expected);
+}
+
+void test_g10_g_init ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
+    // Test null values
+    print_test(name, "null"            , test_g_init(0, (void *) 0, match));
+    print_test(name, "empty"           , test_g_init("test\ cases/core/empty.json", (void *) 0, match));
+    print_test(name, "empty object"    , test_g_init("test\ cases/core/empty_object.json", (void *) 0, match));
+
+    // Test the minimal instance
+    print_test(name, "minimal", test_g_init("test\ cases/core/minimal_instance.json", construct_minimal_g10_instance, match));
+
+    // Test the name property
+    print_test(name, "name too long", test_g_init("test\ cases/core/instance_name_too_long.json", (void *) 0, match));
+    print_test(name, "name too short", test_g_init("test\ cases/core/instance_name_too_short.json", (void *) 0, match));
+    print_test(name, "name wrong type", test_g_init("test\ cases/core/instance_name_wrong_type.json", (void *) 0, match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_g_get_active_instance ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
+    // Test an empty file
+    print_test(name, "before_ginit", test_g_get_active_instance(0, zero));
+    print_test(name, "after_ginit", test_g_get_active_instance("test cases/core/minimal_instance.json", not_null));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_user_code ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
+    // Test callback setter
+    print_test(name, "set_null_callback", test_user_code_callback_set(0, zero));
+    print_test(name, "set_callback", test_user_code_callback_set(user_code_callback_function, match));
+
+    // Test callback
+    print_test(name, "run_callback_null_instance", test_user_code_callback(0, user_code_callback_function, (void *)0, zero));
+    print_test(name, "run_callback", test_user_code_callback("test cases/core/minimal_instance.json", user_code_callback_function, "G10 tester", match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
 
 int construct_minimal_g10_instance ( g_instance **pp_instance ) {
     
