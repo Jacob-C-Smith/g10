@@ -16,3 +16,12 @@
 [submodule "extern/json"]
 	path = extern/json
 	url = https://github.com/Jacob-C-Smith/json
+[submodule "extern/queue"]
+	path = extern/queue
+	url = https://github.com/Jacob-C-Smith/queue
+[submodule "extern/stack"]
+	path = extern/stack
+	url = https://github.com/Jacob-C-Smith/stack
+[submodule "extern/tuple"]
+	path = extern/tuple
+	url = https://github.com/Jacob-C-Smith/tuple
