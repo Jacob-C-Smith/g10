@@ -25,7 +25,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-net-dev cmake ninja-build
+        sudo apt-get install valgrind libsdl2-dev libsdl2-image-dev libsdl2-net-dev cmake ninja-build
         
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -44,10 +44,11 @@ jobs:
         cp -r ${{github.workspace}}/extern/json/parse\ test\ cases/ ${{github.workspace}}/build/parse\ test\ cases/
         cp -r ${{github.workspace}}/extern/json/serial\ test\ cases/ ${{github.workspace}}/build/serial\ test\ cases/
         cp -r ${{github.workspace}}/test\ cases/ ${{github.workspace}}/build/test\ cases/
-        ${{github.workspace}}/build/array_test
-        ${{github.workspace}}/build/dict_test
-        ${{github.workspace}}/build/stack_test
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/array_test
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/dict_test
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/stack_test
         ${{github.workspace}}/build/queue_test
-        ${{github.workspace}}/build/tuple_test    
-        ${{github.workspace}}/build/json_test
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/tuple_test    
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/json_test
         ${{github.workspace}}/build/g10_test
+        

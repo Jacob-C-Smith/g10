@@ -73,7 +73,6 @@ void print_test ( const char *scenario_name, const char *test_name, bool passed 
 
 bool     test_parse_json     ( char         *test_file    , int         (*expected_value_constructor) (json_value **), result_t expected );
 bool     test_serial_json    ( char         *test_file    , char         *expected_file                               , int(*expected_value_constructor) (json_value **), result_t expected );
-result_t load_json           ( json_value  **pp_value     , char         *test_file );
 result_t save_json           ( char         *path         , json_value   *p_value );
 bool     value_equals        ( json_value   *a            , json_value   *b );
 size_t   load_file           ( const char   *path         , void         *buffer                                      , bool     binary_mode );

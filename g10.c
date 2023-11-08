@@ -106,6 +106,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     // Return an instance pointer to the caller
     *pp_instance = p_instance;
 
+    // Clean up
+    free_json_value(p_value);
+    G10_REALLOC(p_file_contents, 0);
+
     // Success
     return 1;
 
@@ -139,7 +143,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_file_allocated;
 
             instance_value_is_wrong_type:
                 #ifndef NDEBUG
@@ -148,7 +152,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_json_parsed;
             
             missing_properties:
                 #ifndef NDEBUG
@@ -157,7 +161,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_json_parsed;
             
             name_property_is_wrong_type:
                 #ifndef NDEBUG
@@ -166,7 +170,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_json_parsed;
             
             name_property_is_too_long:
                 #ifndef NDEBUG
@@ -175,7 +179,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_json_parsed;
             
             name_property_is_too_short:
                 #ifndef NDEBUG
@@ -184,7 +188,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_json_parsed;
         }
 
         // Standard library errors
@@ -203,8 +207,16 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #endif
 
                 // Error
-                return 0;
+                goto error_after_file_allocated;
         }
+
+        // Clean up
+        error_after_json_parsed:
+            free_json_value(p_value);
+        error_after_file_allocated:
+            G10_REALLOC(p_file_contents, 0);
+
+        return 0;
     }
 }
 
@@ -283,6 +295,8 @@ int g_exit ( g_instance **pp_instance )
 
     // No more pointer for caller
     *pp_instance = 0;
+
+    G10_REALLOC(p_instance, 0);
 
     // Success
     return 1;
