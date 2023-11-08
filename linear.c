@@ -1,5 +1,41 @@
 #include <g10/linear.h>
 
+u0 add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
+{
+    *p_result = (vec2)
+    {
+        .x = a.x + b.x,
+        .y = a.y + b.y
+    };
+}
+
+u0 sub_vec2 ( vec2 *p_result, vec2 a, vec2 b )
+{
+    *p_result = (vec2)
+    {
+        .x = a.x - b.x,
+        .y = a.y - b.y
+    };
+}
+
+u0 mul_vec2 ( vec2 *p_result, vec2 a, vec2 b )
+{
+    *p_result = (vec2)
+    {
+        .x = a.x * b.x,
+        .y = a.y * b.y
+    };
+}
+
+u0 div_vec2 ( vec2 *p_result, vec2 a, vec2 b )
+{
+    *p_result = (vec2)
+    {
+        .x = a.x / b.x,
+        .y = a.y / b.y
+    };
+}
+
 u0 add_vec3 ( vec3 *p_result, vec3 a, vec3 b )
 {
     *p_result = (vec3)
@@ -20,6 +56,20 @@ u0 sub_vec3 ( vec3 *p_result, vec3 a, vec3 b )
     };
 }
 
+u0 mul_vec3 ( vec3 *p_result, vec3 a, vec3 b )
+{
+    p_result->x = a.x * b.x,
+    p_result->y = a.y * b.y,
+    p_result->z = a.z * b.z;
+}
+
+u0 div_vec3 ( vec3 *p_result, vec3 a, vec3 b )
+{
+    p_result->x = a.x / b.x,
+    p_result->y = a.y / b.y,
+    p_result->z = a.z / b.z;
+}
+
 float length ( vec3 a )
 {
     return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
@@ -38,13 +88,6 @@ vec3 cross_product_vec3 ( vec3 a, vec3 b )
         a.z * b.x - a.x * b.z,
         a.x * b.y - a.y * b.x
     };
-}
-
-u0 mul_vec3_vec3 ( vec3 *r, vec3 a, vec3 b )
-{
-    r->x = a.x * b.x,
-    r->y = a.y * b.y,
-    r->z = a.z * b.z;
 }
 
 u0 div_vec3_f( vec3 *r, vec3 a, float s )

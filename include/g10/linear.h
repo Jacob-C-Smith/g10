@@ -25,6 +25,50 @@
  * @param a : a
  * @param b : b
  *
+ * @sa sub_vec2
+ */
+DLLEXPORT u0 add_vec2 ( vec2 *r, vec2 a, vec2 b );
+
+/** !
+ * Subtracts vector a from vector b. Returns new vector
+ *
+ * @param r : return ( a - b )
+ * @param a : a
+ * @param b : b
+ *
+ * @sa sub_vec2
+ */
+DLLEXPORT u0 sub_vec2 ( vec2 *r, vec2 a, vec2 b );
+
+/** !
+ * Multiplies vector a by vector b. Returns new vector
+ *
+ * @param r : return ( a * b )
+ * @param a : a
+ * @param b : b
+ *
+ * @sa sub_vec2
+ */
+DLLEXPORT u0 mul_vec2 ( vec2 *p_result, vec2 a, vec2 b );
+
+/** !
+ * Divides vector a from vector b. Returns new vector
+ *
+ * @param r : return ( a / b )
+ * @param a : a
+ * @param b : b
+ *
+ * @sa sub_vec2
+ */
+DLLEXPORT u0 div_vec2 ( vec2 *p_result, vec2 a, vec2 b );
+
+/** !
+ * Adds vector a to vector b. Returns new vector
+ *
+ * @param r : return ( a + b )
+ * @param a : a
+ * @param b : b
+ *
  * @sa sub_vec3
  */
 DLLEXPORT u0 add_vec3 ( vec3 *r, vec3 a, vec3 b );
@@ -39,6 +83,28 @@ DLLEXPORT u0 add_vec3 ( vec3 *r, vec3 a, vec3 b );
  * @sa add_vec3
  */
 DLLEXPORT u0 sub_vec3 ( vec3 *r, vec3 a, vec3 b );
+
+/** !
+ * Multiply vector a by vector b. Returns new vector
+ *
+ * @param p_result : return ( a * b )
+ * @param a        : a
+ * @param b        : b
+ *
+ * @sa add_vec3
+ */
+DLLEXPORT u0 mul_vec3 ( vec3 *p_result, vec3 a, vec3 b );
+
+/** !
+ * Divide vector a by vector b. Returns new vector
+ *
+ * @param p_result : return ( a / b )
+ * @param a        : a
+ * @param b        : b
+ *
+ * @sa add_vec3
+ */
+DLLEXPORT u0 div_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 
 /** !
  * Computes the dot product of a 3D vector
@@ -68,7 +134,6 @@ DLLEXPORT float dot_product_vec3(vec3 a, vec3 b);
  * @return a CROSS b
  */
 DLLEXPORT vec3 cross_product_vec3 ( vec3 a, vec3 b );
-
 
 /** !
  * Multiplies the components of one vector by the components of another, writes to return

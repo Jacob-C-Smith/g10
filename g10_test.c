@@ -319,6 +319,138 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
     return (result == expected);
 }
 
+bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
+{
+
+    vec2 result_vec = (vec2) { 0 };
+    
+    add_vec2(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec2_sub ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
+{
+
+    vec2 result_vec = (vec2) { 0 };
+    
+    sub_vec2(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec2_mul ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
+{
+
+    vec2 result_vec = (vec2) { 0 };
+    
+    mul_vec2(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec2_div ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
+{
+
+    vec2 result_vec = (vec2) { 0 };
+    
+    div_vec2(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec3_add ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
+{
+
+    vec3 result_vec = (vec3) { 0 };
+    
+    add_vec3(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
+        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1) 
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec3_sub ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
+{
+
+    vec3 result_vec = (vec3) { 0 };
+    
+    sub_vec3(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
+        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec3_mul ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
+{
+
+    vec3 result_vec = (vec3) { 0 };
+    
+    mul_vec3(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
+        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
+bool test_vec3_div ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
+{
+
+    vec3 result_vec = (vec3) { 0 };
+    
+    div_vec3(&result_vec, a, b);
+
+    if (
+        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
+        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
+        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
+    )
+        return (expected_result == match);
+
+    return (expected_result == zero);
+}
+
 bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback, result_t expected )
 {
 
@@ -381,17 +513,17 @@ void test_g10_g_init ( const char *name )
 
     // Test null values
     print_test(name, "null"            , test_g_init(0, (void *) 0, match));
-    print_test(name, "empty"           , test_g_init("test\ cases/core/empty.json", (void *) 0, match));
-    print_test(name, "empty number"    , test_g_init("test\ cases/core/empty_number.json", (void *) 0, match));
-    print_test(name, "empty object"    , test_g_init("test\ cases/core/empty_object.json", (void *) 0, match));
+    print_test(name, "empty"           , test_g_init("test cases/core/empty.json", (void *) 0, match));
+    print_test(name, "empty number"    , test_g_init("test cases/core/empty_number.json", (void *) 0, match));
+    print_test(name, "empty object"    , test_g_init("test cases/core/empty_object.json", (void *) 0, match));
 
     // Test the minimal instance
-    print_test(name, "minimal", test_g_init("test\ cases/core/minimal_instance.json", construct_minimal_g10_instance, match));
+    print_test(name, "minimal", test_g_init("test cases/core/minimal_instance.json", construct_minimal_g10_instance, match));
 
     // Test the name property
-    print_test(name, "name too long", test_g_init("test\ cases/core/instance_name_too_long.json", (void *) 0, match));
-    print_test(name, "name too short", test_g_init("test\ cases/core/instance_name_too_short.json", (void *) 0, match));
-    print_test(name, "name wrong type", test_g_init("test\ cases/core/instance_name_wrong_type.json", (void *) 0, match));
+    print_test(name, "name too long", test_g_init("test cases/core/instance_name_too_long.json", (void *) 0, match));
+    print_test(name, "name too short", test_g_init("test cases/core/instance_name_too_short.json", (void *) 0, match));
+    print_test(name, "name wrong type", test_g_init("test cases/core/instance_name_wrong_type.json", (void *) 0, match));
 
     // Print the summary of this test
     print_final_summary();
@@ -417,21 +549,118 @@ void test_g10_g_get_active_instance ( const char *name )
     return;
 }
 
-void test_g10_linear_vectors ( const char *name )
+void test_g10_linear_vec2 ( const char *name )
 {
     
     // Formatting
     log_info("Scenario: %s\n", name);
 
-    // TODO: Test 2D vectors
-    // TODO: Test 3D vectors
-    // TODO: Test 4D vectors
+    // Accumulate
+    print_test(name, "<1.23, 2.46> + <3.69, 2.46>"  , test_vec2_add((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.92f, 4.92f }, match));
+    print_test(name, "<3.21, 6.54> + <-1.23, -3.21>", test_vec2_add((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 1.98f, 3.33f }, match));
+    print_test(name, "<0, 0>       + <0, 0>\n"      , test_vec2_add((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
 
-    // TODO: Test 2x2 matrix
-    // TODO: Test 4x4 matrix
+    // Difference
+    print_test(name, "<1.23, 2.46> - <3.69, 2.46>"  , test_vec2_sub((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ -2.46f, 0.f } , match));
+    print_test(name, "<3.21, 6.54> - <-1.23, -3.21>", test_vec2_sub((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 4.44f, 9.75f }, match));
+    print_test(name, "<0, 0>       - <0, 0>\n"      , test_vec2_sub((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
+
+    // Product
+    print_test(name, "<1.23, 2.46> × <3.69, 2.46>"  , test_vec2_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
+    print_test(name, "<3.21, 3.14> × <-1.23, -3.14>", test_vec2_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
+    print_test(name, "<0, 0>       × <0, 0>\n"      , test_vec2_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
+
+    // Quotient
+    print_test(name, "<9.99, 3.33> ÷ <3.33, 1.11>"  , test_vec2_div((vec2){ 9.99f, 3.33f }, (vec2){ 3.33f, 1.11f }  , (vec2){ 3.f, 3.f }     , match));
+    print_test(name, "<17.38, 4.2> ÷ <2, 2>"        , test_vec2_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
+    
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_linear_vec3 ( const char *name )
+{
+    
+    // Formatting
+    log_info("Scenario: %s\n", name);
+
+    // Accumulate 
+    print_test(name, "<1.1, 2.2, 3.3> + <1.1, 2.2, 3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ 1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4, 6.6 }, match));
+    print_test(name, "<1.1, 2.2, 3.3> + <-3.3, -2.2, -1.1>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ -2.2f, 0.f, 2.2f }, match));
+    //print_test(name, "<0, 0>       + <0, 0>\n"      , test_vec3_add((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
+    
+    // Difference
+    //print_test(name, "<1.23, 2.46> - <3.69, 2.46>"  , test_vec3_sub((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ -2.46f, 0.f } , match));
+    //print_test(name, "<3.21, 6.54> - <-1.23, -3.21>", test_vec3_sub((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 4.44f, 9.75f }, match));
+    //print_test(name, "<0, 0>       - <0, 0>\n"      , test_vec3_sub((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
+    
+    // Product
+    //print_test(name, "<1.23, 2.46> × <3.69, 2.46>"  , test_vec3_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
+    //print_test(name, "<3.21, 3.14> × <-1.23, -3.14>", test_vec3_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
+    //print_test(name, "<0, 0>       × <0, 0>\n"      , test_vec3_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
+
+    // Quotient
+    print_test(name, "<8.88, 4.44, 2.22> ÷ <1.11, 2.22, 4.44>"  , test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
+    //print_test(name, "<17.38, 4.2> ÷ <2, 2>"        , test_vec3_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
 
     // Print the summary of this test
     print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_linear_vectors ( const char *name )
+{
+    
+    // Initialized data
+    timestamp g10_vec2_t0 = 0,
+              g10_vec2_t1 = 0,
+              g10_vec3_t0 = 0,
+              g10_vec3_t1 = 0;
+
+    ///////////////
+    // Test vec2 //
+    ///////////////
+
+    // Start timing core 
+    g10_vec2_t0 = timer_high_precision();
+
+        // Test g_init
+        test_g10_linear_vec2("g10 linear vec2");
+
+    // Stop timing core
+    g10_vec2_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear vec2 took ");
+    print_time_pretty ( (double)(g10_vec2_t1-g10_vec2_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n");
+    
+    ///////////////
+    // Test vec2 //
+    ///////////////
+
+    // Start timing core 
+    g10_vec3_t0 = timer_high_precision();
+
+        // Test g_init
+        test_g10_linear_vec3("g10 linear vec3");
+
+    // Stop timing core
+    g10_vec3_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear vec3 took ");
+    print_time_pretty ( (double)(g10_vec3_t1-g10_vec3_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n");
+
+    // TODO: Test 4D vectors
+    // TODO: Test 2x2 matrix
+    // TODO: Test 4x4 matrix
 
     // Success
     return;
