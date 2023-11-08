@@ -270,15 +270,28 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
     result = g_init( &p_return_instance, test_file );
     
     // Null pointer match
-    if ( p_expected_instance == p_return_instance ) return match == expected;
+    if ( p_expected_instance == p_return_instance )
+    {
+        result=match;
+        goto done;
+    }
 
-    if ( p_return_instance == (void *) 0 ) return zero == expected;
+    if ( p_return_instance == (void *) 0 )
+    {
+        result = zero;
+        goto done;
+    }
 
     // Name match
     if ( strcmp(p_expected_instance->_name, p_return_instance->_name) == 0 ) result = match;
 
+    done:
+
     // Free the instance value
-    g_exit(&p_return_instance);
+    if (p_return_instance)
+        g_exit(&p_return_instance);
+    if(p_expected_instance)
+        g_exit(&p_expected_instance);
 
     // Success
     return (result == expected);
@@ -369,6 +382,7 @@ void test_g10_g_init ( const char *name )
     // Test null values
     print_test(name, "null"            , test_g_init(0, (void *) 0, match));
     print_test(name, "empty"           , test_g_init("test\ cases/core/empty.json", (void *) 0, match));
+    print_test(name, "empty number"    , test_g_init("test\ cases/core/empty_number.json", (void *) 0, match));
     print_test(name, "empty object"    , test_g_init("test\ cases/core/empty_object.json", (void *) 0, match));
 
     // Test the minimal instance
@@ -446,7 +460,7 @@ void test_g10_user_code ( const char *name )
 
 int construct_minimal_g10_instance ( g_instance **pp_instance ) {
     
-    g_instance *p_instance = malloc(sizeof(g_instance));
+    g_instance *p_instance = G10_REALLOC(0, sizeof(g_instance));
 
     *p_instance = (g_instance) {
         ._name = "g10 instance",
