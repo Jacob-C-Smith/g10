@@ -33,10 +33,6 @@ int user_code_main ( g_instance *const p_instance )
 int main ( int argc, const char *const argv[] )
 {
 
-    // Supress compiler warnings
-    (void) argc;
-    (void) argv;
-
     // Initialized data
     g_instance *p_instance = 0;
 
@@ -45,9 +41,6 @@ int main ( int argc, const char *const argv[] )
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
-
-    // Call the user code function manually
-    p_instance->context.pfn_user_code_callback(p_instance);
 
     // Call the user code
     user_code_callback(p_instance);
