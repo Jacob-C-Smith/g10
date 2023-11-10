@@ -37,6 +37,9 @@ typedef struct { float x, y, z, w; } vec4;
 // 2x2 Matrix
 typedef struct { float a, b, c, d; } mat2;
 
+// 3x3 Matrix
+typedef struct { float a, b, c, d, e, f, g, h, i; } mat3;
+
 // 4x4 Matrix
 typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
 
