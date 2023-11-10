@@ -72,16 +72,12 @@ void print_final_summary ( void );
  */
 void print_test ( const char *scenario_name, const char *test_name, bool passed );
 
-bool     test_parse_json     ( char         *test_file    , int         (*expected_value_constructor) (json_value **), result_t expected );
-bool     test_serial_json    ( char         *test_file    , char         *expected_file                               , int(*expected_value_constructor) (json_value **), result_t expected );
-result_t save_json           ( char         *path         , json_value   *p_value );
-bool     value_equals        ( json_value   *a            , json_value   *b );
-size_t   load_file           ( const char   *path         , void         *buffer                                      , bool     binary_mode );
-
 void test_g10_g_init ( const char *name );
 void test_g10_g_get_active_instance ( const char *name );
 void test_g10_user_code ( const char *name );
 void test_g10_linear_vectors ( const char *name );
+void test_g10_linear_matrices ( const char *name );
+void test_g10_quaternion ( const char *name );
 
 bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
 bool test_g_get_active_instance ( char *test_file, result_t expected );
@@ -128,9 +124,9 @@ int main ( int argc, const char* argv[] )
     t1 = timer_high_precision();
 
     // Report the time it took to run the tests
-    log_info("\ng10 tests took ");
+    log_info("g10 tests took ");
     print_time_pretty ( (double) ( t1 - t0 ) / (double) timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
 
     // Exit
     return ( total_passes == total_tests ) ? EXIT_SUCCESS : EXIT_FAILURE;
@@ -192,12 +188,14 @@ void run_tests ( void )
 {
 
     // Initialized data
-    timestamp g10_core_t0      = 0,
-              g10_core_t1      = 0,
-              g10_linear_t0    = 0,
-              g10_linear_t1    = 0,
-              g10_user_code_t0 = 0,
-              g10_user_code_t1 = 0;
+    timestamp g10_core_t0       = 0,
+              g10_core_t1       = 0,
+              g10_linear_t0     = 0,
+              g10_linear_t1     = 0,
+              g10_quaternion_t0 = 0,
+              g10_quaternion_t1 = 0,
+              g10_user_code_t0  = 0,
+              g10_user_code_t1  = 0;
 
     ///////////////////
     // Test the core //
@@ -218,21 +216,38 @@ void run_tests ( void )
     // Report the time it took to run the core tests
     log_info("g10 core took ");
     print_time_pretty ( (double)(g10_core_t1-g10_core_t0)/(double)timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
 
     // Start timing linear algebra code
     g10_linear_t0 = timer_high_precision();
 
-        // Test linear
-        test_g10_linear_vectors("g10 linear");
+        // Test vectors
+        test_g10_linear_vectors("g10 vectors");
+        
+        // Test matricies
+        test_g10_linear_matrices("g10 matricies");
 
     // Stop timing user code
     g10_linear_t1 = timer_high_precision();
 
     // Report the time it took to run the core tests
-    log_info("g10 linear algebra code took ");
+    log_info("g10 linear algebra took ");
     print_time_pretty ( (double)(g10_linear_t1-g10_linear_t0)/(double)timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
+
+    // Start timing user code
+    g10_quaternion_t0 = timer_high_precision();
+
+        // Test quaternion
+        test_g10_quaternion("g10 quaternion");
+
+    // Stop timing user code
+    g10_quaternion_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 quaternion took ");
+    print_time_pretty ( (double)(g10_quaternion_t1-g10_quaternion_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
 
     // Start timing user code
     g10_user_code_t0 = timer_high_precision();
@@ -246,7 +261,7 @@ void run_tests ( void )
     // Report the time it took to run the core tests
     log_info("g10 user code took ");
     print_time_pretty ( (double)(g10_user_code_t1-g10_user_code_t0)/(double)timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
 
     // Done
     return;
@@ -510,7 +525,7 @@ void test_g10_g_init ( const char *name )
 {
     
     // Formatting
-    log_info("Scenario: %s\n", name);
+    log_scenario("%s\n", name);
 
     // Test null values
     print_test(name, "null"            , test_g_init(0, (void *) 0, match));
@@ -537,7 +552,7 @@ void test_g10_g_get_active_instance ( const char *name )
 {
     
     // Formatting
-    log_info("Scenario: %s\n", name);
+    log_scenario("%s\n", name);
 
     // Test an empty file
     print_test(name, "before_ginit", test_g_get_active_instance(0, zero));
@@ -554,7 +569,7 @@ void test_g10_linear_vec2 ( const char *name )
 {
     
     // Formatting
-    log_info("Scenario: %s\n", name);
+    log_scenario("%s\n", name);
 
     // Accumulate
     print_test(name, "<1.23, 2.46> + <3.69, 2.46>"  , test_vec2_add((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.92f, 4.92f }, match));
@@ -586,7 +601,7 @@ void test_g10_linear_vec3 ( const char *name )
 {
     
     // Formatting
-    log_info("Scenario: %s\n", name);
+    log_scenario("%s\n", name);
 
     // Accumulate 
     print_test(name, "<1.1, 2.2, 3.3> + <1.1, 2.2, 3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ 1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4, 6.6 }, match));
@@ -614,6 +629,64 @@ void test_g10_linear_vec3 ( const char *name )
     return;
 }
 
+void test_g10_linear_vec4 ( const char *name )
+{
+    
+    // TODO: 
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_linear_mat2 ( const char *name )
+{
+    
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // TODO: 
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_linear_mat3 ( const char *name )
+{
+    
+    // TODO: 
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_linear_mat4 ( const char *name )
+{
+    
+    // TODO: 
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+
 void test_g10_linear_vectors ( const char *name )
 {
     
@@ -621,7 +694,9 @@ void test_g10_linear_vectors ( const char *name )
     timestamp g10_vec2_t0 = 0,
               g10_vec2_t1 = 0,
               g10_vec3_t0 = 0,
-              g10_vec3_t1 = 0;
+              g10_vec3_t1 = 0,
+              g10_vec4_t0 = 0,
+              g10_vec4_t1 = 0;
 
     ///////////////
     // Test vec2 //
@@ -630,7 +705,7 @@ void test_g10_linear_vectors ( const char *name )
     // Start timing core 
     g10_vec2_t0 = timer_high_precision();
 
-        // Test g_init
+        // Test vec2
         test_g10_linear_vec2("g10 linear vec2");
 
     // Stop timing core
@@ -639,16 +714,16 @@ void test_g10_linear_vectors ( const char *name )
     // Report the time it took to run the core tests
     log_info("g10 linear vec2 took ");
     print_time_pretty ( (double)(g10_vec2_t1-g10_vec2_t0)/(double)timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
     
     ///////////////
-    // Test vec2 //
+    // Test vec3 //
     ///////////////
 
     // Start timing core 
     g10_vec3_t0 = timer_high_precision();
 
-        // Test g_init
+        // Test vec3
         test_g10_linear_vec3("g10 linear vec3");
 
     // Stop timing core
@@ -657,9 +732,25 @@ void test_g10_linear_vectors ( const char *name )
     // Report the time it took to run the core tests
     log_info("g10 linear vec3 took ");
     print_time_pretty ( (double)(g10_vec3_t1-g10_vec3_t0)/(double)timer_seconds_divisor() );
-    log_info(" to test\n");
+    log_info(" to test\n\n");
 
-    // TODO: Test 4D vectors
+    ///////////////
+    // Test vec4 //
+    ///////////////
+
+    // Start timing core 
+    g10_vec4_t0 = timer_high_precision();
+
+        // Test vec4
+        test_g10_linear_vec4("g10 linear vec4");
+
+    // Stop timing core
+    g10_vec4_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear vec4 took ");
+    print_time_pretty ( (double)(g10_vec4_t1-g10_vec4_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
 
     // Success
     return;
@@ -667,9 +758,82 @@ void test_g10_linear_vectors ( const char *name )
 
 void test_g10_linear_matrices ( const char *name )
 {
-    // TODO: Test 2x2 matrix
-    // TODO: Test 3x3 matrix
-    // TODO: Test 4x4 matrix
+
+    // Initialized data
+    timestamp g10_mat2_t0 = 0,
+              g10_mat2_t1 = 0,
+              g10_mat3_t0 = 0,
+              g10_mat3_t1 = 0,
+              g10_mat4_t0 = 0,
+              g10_mat4_t1 = 0;
+
+    ///////////////
+    // Test mat2 //
+    ///////////////
+
+    // Start timing core 
+    g10_mat2_t0 = timer_high_precision();
+
+        // Test mat2
+        test_g10_linear_mat2("g10 linear mat2");
+
+    // Stop timing core
+    g10_mat2_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear mat2 took ");
+    print_time_pretty ( (double)(g10_mat2_t1-g10_mat2_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
+    
+    ///////////////
+    // Test mat3 //
+    ///////////////
+
+    // Start timing core 
+    g10_mat3_t0 = timer_high_precision();
+
+        // Test mat3
+        test_g10_linear_mat3("g10 linear mat3");
+
+    // Stop timing core
+    g10_mat3_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear mat3 took ");
+    print_time_pretty ( (double)(g10_mat3_t1-g10_mat3_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
+
+    ///////////////
+    // Test mat4 //
+    ///////////////
+
+    // Start timing core 
+    g10_mat4_t0 = timer_high_precision();
+
+        // Test mat4
+        test_g10_linear_mat4("g10 linear mat4");
+
+    // Stop timing core
+    g10_mat4_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 linear mat4 took ");
+    print_time_pretty ( (double)(g10_mat4_t1-g10_mat4_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
+
+    // Success
+    return;
+}
+
+void test_g10_quaternion ( const char *name )
+{
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // TODO:
+    
+    // Print the summary of this test
+    print_final_summary();
 
     // Success
     return;
@@ -679,7 +843,7 @@ void test_g10_user_code ( const char *name )
 {
     
     // Formatting
-    log_info("Scenario: %s\n", name);
+    log_scenario("%s\n", name);
 
     // Test callback setter
     print_test(name, "set_null_callback", test_user_code_callback_set(0, zero));
@@ -751,59 +915,4 @@ void print_final_summary ( void )
 
     // Done
     return;
-}
-
-size_t load_file ( const char *path, void *buffer, bool binary_mode )
-{
-
-    // Argument checking 
-    if ( path == 0 ) goto no_path;
-
-    // Initialized data
-    size_t  ret = 0;
-    FILE   *f   = fopen(path, (binary_mode) ? "rb" : "r");
-    
-    // Check if file is valid
-    if ( f == NULL ) goto invalid_file;
-
-    // Find file size and prep for read
-    fseek(f, 0, SEEK_END);
-    ret = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    
-    // Read to data
-    if ( buffer ) 
-        ret = fread(buffer, 1, ret, f);
-
-    // The file is no longer needed
-    fclose(f);
-    
-    // Success
-    return ret;
-
-    // Error handling
-    {
-
-        // Argument errors
-        {
-            no_path:
-                #ifndef NDEBUG
-
-                #endif
-
-            // Error
-            return 0;
-        }
-
-        // File errors
-        {
-            invalid_file:
-                #ifndef NDEBUG
-
-                #endif
-
-            // Error
-            return 0;
-        }
-    }
 }
