@@ -33,6 +33,10 @@ int user_code_main ( g_instance *const p_instance )
 int main ( int argc, const char *const argv[] )
 {
 
+    // Supress compiler warnings
+    (void) argc;
+    (void) argv;
+
     // Initialized data
     g_instance *p_instance = 0;
 
