@@ -1,5 +1,5 @@
 /** !
- * Linear algebra operations
+ * Linear algebra
  * 
  * @file g10/linear.h
  * @author Jacob Smith
@@ -18,12 +18,13 @@
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
 
+// 2D vectors
 /** !
  * Add vector a to vector b; Store result
  *
- * @param p_result : a + b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a + b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec2_sub_vec2
  * @sa vec2_mul_vec2
@@ -31,14 +32,14 @@
  * 
  * @return void
  */
-DLLEXPORT u0 vec2_add_vec2 ( vec2 *r, vec2 a, vec2 b );
+DLLEXPORT u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b );
 
 /** !
  * Subtract vector a from vector b; Store result
  *
- * @param p_result : a - b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a - b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec2_add_vec2
  * @sa vec2_mul_vec2
@@ -46,14 +47,14 @@ DLLEXPORT u0 vec2_add_vec2 ( vec2 *r, vec2 a, vec2 b );
  * 
  * @return void
  */
-DLLEXPORT u0 vec2_sub_vec2 ( vec2 *r, vec2 a, vec2 b );
+DLLEXPORT u0 vec2_sub_vec2 ( vec2 *p_result, vec2 a, vec2 b );
 
 /** !
  * Multiply vector a by vector b; Store result
  *
- * @param p_result : a * b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a * b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec2_add_vec2
  * @sa vec2_sub_vec2
@@ -66,9 +67,9 @@ DLLEXPORT u0 vec2_mul_vec2 ( vec2 *p_result, vec2 a, vec2 b );
 /** !
  * Divide vector a from vector b; Store result
  *
- * @param p_result : a / b 
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a / b 
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec2_add_vec2
  * @sa vec2_sub_vec2
@@ -79,11 +80,47 @@ DLLEXPORT u0 vec2_mul_vec2 ( vec2 *p_result, vec2 a, vec2 b );
 DLLEXPORT u0 vec2_div_vec2 ( vec2 *p_result, vec2 a, vec2 b );
 
 /** !
+ * Scale a vector; Store result
+ * 
+ * @param p_result return
+ * @param v        the vector
+ * @param s        the scalar
+ * 
+ * @return void
+*/
+DLLEXPORT u0 vec2_mul_scalar ( vec2 *p_result, vec2 v, float s );
+
+/** !
+ * Promote a vec2 to a vec3; Store result
+ *
+ * @param p_result return
+ * @param v        the vec2
+ *
+ * @sa vec2_to_vec4
+ * 
+ * @return void
+ */
+DLLEXPORT u0 vec2_to_vec3 ( vec3 *p_result, vec2 v );
+
+/** !
+ * Promote a vec2 to a vec4; Store result
+ *
+ * @param p_result return
+ * @param v        the vec2
+ *
+ * @sa vec2_to_vec3
+ * 
+ * @return void
+ */
+DLLEXPORT u0 vec2_to_vec4 ( vec4 *p_result, vec2 v );
+
+// 3D vectors
+/** !
  * Add vector a to vector b; Store result
  *
- * @param p_result : a + b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a + b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa sub_vec3
  */
@@ -92,9 +129,9 @@ DLLEXPORT u0 vec3_add_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 /** !
  * Subtract vector a from vector b; Store result
  *
- * @param p_result : a - b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a - b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec3_add_vec3
  * @sa vec3_mul_vec3
@@ -102,14 +139,14 @@ DLLEXPORT u0 vec3_add_vec3 ( vec3 *p_result, vec3 a, vec3 b );
  * 
  * @return void
  */
-DLLEXPORT u0 vec3_sub_vec3 ( vec3 *r, vec3 a, vec3 b );
+DLLEXPORT u0 vec3_sub_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 
 /** !
  * Multiply vector a by vector b; Store result
  *
- * @param p_result : a * b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a * b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec3_add_vec3
  * @sa vec3_sub_vec3
@@ -122,9 +159,9 @@ DLLEXPORT u0 vec3_mul_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 /** !
  * Divide vector a by vector b; Store result
  *
- * @param p_result : a / b
- * @param a        : vector a
- * @param b        : vector b
+ * @param p_result a / b
+ * @param a        vector a
+ * @param b        vector b
  *
  * @sa vec3_add_vec3
  * @sa vec3_sub_vec3
@@ -135,164 +172,277 @@ DLLEXPORT u0 vec3_mul_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 DLLEXPORT u0 vec3_div_vec3 ( vec3 *p_result, vec3 a, vec3 b );
 
 /** !
+ * Scale a vector; Store result
+ * 
+ * @param p_result return
+ * @param v        the vector
+ * @param s        the scalar
+ * 
+ * @return void
+*/
+DLLEXPORT u0 vec3_mul_scalar ( vec3 *p_result, vec3 v, float s );
+
+/** !
+ * Demote a vec3 to a vec2; Store result
+ *
+ * @param p_result return
+ * @param v        the vec3
+ *
+ * @sa vec3_to_vec4
+ * 
+ * @return void
+ */
+DLLEXPORT u0 vec3_to_vec2 ( vec2 *p_result, vec3 v );
+
+/** !
+ * Promote a vec3 to a vec4; Store result
+ *
+ * @param p_result return
+ * @param v        the vec3
+ *
+ * @sa vec3_to_vec2
+ * 
+ * @return void
+ */
+DLLEXPORT u0 vec3_to_vec4 ( vec4 *p_result, vec3 v );
+
+/** !
+ * Compute the dot product of a and b
+ *
+ * @param p_result return
+ * @param a        first vector
+ * @param b        second vector
+ *
+ * @return void
+ */
+DLLEXPORT u0 vec3_dot_product ( float *p_result, vec3 a, vec3 b );
+
+/** !
+ * Compute the cross product of a and b; Store result 
+ *
+ * @param p_result return
+ * @param a        first vector
+ * @param b        second vector
+ *
+ * @return void
+ */
+DLLEXPORT u0 vec3_cross_product ( vec3 *p_result, vec3 a, vec3 b );
+
+/** !
+ * Scale a vector; Store result
+ *
+ * @param p_result return
+ * @param v        vector
+ * @param s        scalar
+ *
+ * @return void
+ */
+DLLEXPORT u0 vec3_mul_scalar ( vec3 *p_result, vec3 v, float s );
+
+/** !
  * Compute the dot product of a vec3
  *
- * @param a : the vec3
+ * @param v the vec3
  *
  * @return magnitude of a
  */
-DLLEXPORT float length ( vec3 a );
+DLLEXPORT u0 vec3_length ( float *p_result, vec3 v );
 
 /** !
- * Computes the dot product of two 3D vectors
+ * Normailize a vector; Store result
  *
- * @param a : first vector
- * @param b : second vector
+ * @param v vector
  *
- * @return a DOT b
+ * @return void
  */
-DLLEXPORT float dot_product_vec3 ( vec3 a, vec3 b );
+DLLEXPORT u0 vec3_normalize ( vec3 *p_result, vec3 v );
 
-/** !
- * Computes the cross product of 2 3D vectors
- *
- * @param a : first vector
- * @param b : second vector
- *
- * @return a CROSS b
- */
-DLLEXPORT u0 vec3_cross_product ( vec3 a, vec3 b );
+// 4D vector
+// TODO: 
+/*
+DLLEXPORT u0 vec4_div_vec4 ( vec4 *p_result, vec4 a, vec4 b );
+DLLEXPORT u0 vec4_div_vec4 ( vec4 *p_result, vec4 a, vec4 b );
+DLLEXPORT u0 vec4_div_vec4 ( vec4 *p_result, vec4 a, vec4 b );
+DLLEXPORT u0 vec4_div_vec4 ( vec4 *p_result, vec4 a, vec4 b );
+DLLEXPORT float vec4_length ( vec4 v );
 
-/** !
- * Multiplies the components of one vector by the components of another, writes to return
- *
- * @param r : return
- * @param a : first vector
- * @param b : second vector
- *
- */
-DLLEXPORT u0 mul_vec3_vec3 ( vec3 *r, vec3 a, vec3 b );
+*/
 
-/** !
- * Divides the components of a vector by a scalar
- *
- * @param r : return
- * @param a : vector
- * @param s : scalar
- *
- */
-DLLEXPORT u0 div_vec3_f( vec3 *p_result, vec3 a, float s );
+// TODO: 
+/*
+DLLEXPORT float vec2_length ( vec2 v );
+*/
 
+// 2x2 matrix
 /** !
- * Multiplies a vector by a scalar value
- *
- * @param v : vector
- * @param s : scalar
- *
- * @return vector multiplied by scalar
- */
-DLLEXPORT u0 mul_vec3_f ( vec3 *p_result, vec3 v, float s );
-
-/** !
- * Normailizes a vector
- *
- * @param v : vector
- *
- * @return normalized vector
- */
-DLLEXPORT vec3 normalize ( vec3 v );
-
-/** !
- * Multiplies a 2x2 matrix by a vector
+ * Multiplies a 2x2 matrix by a vector; Store result
  *
  * |1 2| . | 1, 1 | = | 3, 7 |
  * |3 4|
  *
- * @param m : 2x2 matrix
- * @param v : vector
+ * @param m 2x2 matrix
+ * @param v vector
  *
  * @return vector times matrix
  */
 DLLEXPORT vec2 mul_mat2_vec2 ( mat2 m, vec2 v );
 
 /** !
- * Multiplies a matrix by a vector
+ * Multiply m by n; Store result
  *
- * @param m : 4x4 matrix
- * @param v : vector
- *
- * @return vector times matrix
- */
-DLLEXPORT u0 mul_mat4_vec4 ( vec4 *p_result, mat4 m, vec4 v );
-
-/** !
- * Multiplies a matrix by a matrix
- *
- * @param m : 2x2 matrix
- * @param n : 2x2 matrix
+ * @param m mat2
+ * @param n mat2
  *
  * @return m times n
  */
 DLLEXPORT u0 mat2_mul_mat2 ( mat2 *p_result, mat2 m, mat2 n );
 
 /** !
- * Multiplies a matrix by a matrix
+ * Compute the transpose of a 2x2 matrix; Store result
  *
- * @param m : 4x4 matrix
- * @param n : 4x4 matrix
+ * @param p_result return
+ * @param m        the matrix
+ * 
+ * @sa mat4_transpose
+ *
+ * @return void
+ */
+DLLEXPORT u0 mat2_transpose ( mat2 *p_result, mat2 m );
+
+/**
+ * Store a 2x2 identity matrix
+ *
+ * @param p_result return
+ * 
+ * @sa mat3_identity
+ * @sa mat4_identity
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat2_identity ( mat2 *p_result );
+
+/** !
+ * Promote a mat2 to a mat3; Store result
+ *
+ * @param p_result return
+ * @param v        the mat2
+ *
+ * @sa mat2_to_mat4
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat2_to_mat3 ( mat3 *p_result, mat2 m );
+
+/** !
+ * Promote a mat2 to a mat4; Store result
+ *
+ * @param p_result return
+ * @param v        the mat2
+ *
+ * @sa mat2_to_mat3
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat2_to_mat4 ( mat4 *p_result, mat2 m );
+
+// 3x3 matrix
+/**
+ * Store a 3x3 identity matrix
+ *
+ * @param p_result return
+ * 
+ * @sa mat2_identity
+ * @sa mat4_identity
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat3_identity ( mat3 *p_result );
+
+/** !
+ * Demote a mat3 to a mat2; Store result
+ *
+ * @param p_result return
+ * @param v        the mat3
+ *
+ * @sa mat3_to_mat4
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat3_to_mat2 ( mat2 *p_result, mat3 m );
+
+/** !
+ * Promote a mat3 to a mat4; Store result
+ *
+ * @param p_result return
+ * @param v        the mat3
+ *
+ * @sa mat3_to_mat2
+ * 
+ * @return void
+ */
+DLLEXPORT u0 mat3_to_mat4 ( mat4 *p_result, mat3 m );
+
+// 4x4 matrix
+/** !
+ * Multiply a matrix by a vector; Store result
+ *
+ * @param m mat4
+ * @param v vector
+ *
+ * @return vector times matrix
+ */
+DLLEXPORT u0 mat4_mul_vec4 ( vec4 *p_result, mat4 m, vec4 v );
+
+/** !
+ * Multipy m by n; Store result
+ *
+ * @param m 4x4 matrix
+ * @param n 4x4 matrix
  *
  * @return m times n
  */
 DLLEXPORT u0 mat4_mul_mat4 ( mat4 *p_result, mat4 m, mat4 n );
 
-/** !
- * Computes the inverse of a matrix
+/**
+ * Store a 4x4 identity matrix
  *
- * @param m : 2x2 matrix
- *
- * @return inverse of m
+ * @param p_result return
+ * 
+ * @sa mat2_identity
+ * @sa mat3_identity
+ * 
+ * @return void
  */
-DLLEXPORT u0 mat2_transpose ( mat2 *p_result, mat2 m );
+DLLEXPORT u0 mat4_identity ( mat4 *p_result );
 
 /** !
- * Computes the inverse of a matrix
+ * Compute the transpose of a 4x4 matrix; Store result
  *
- * @param m : 4x4 matrix
+ * @param p_result return
+ * @param m        the matrix
  *
- * @return inverse of m
+ * @return void
  */
 DLLEXPORT u0 mat4_transpose ( mat4 *p_result, mat4 m );
 
 /**
- * Returns the identity matrix
+ * Compute a translation matrix from a location vector; Store result
  *
- * @return 2x2 identity matrix
- */
-DLLEXPORT u0 mat2_identity ( mat2 *p_result );
-
-/**
- * Returns the identity matrix
- *
- * @return 4x4 identity matrix
- */
-DLLEXPORT u0 mat4_identity ( mat4 *p_result );
-
-/**
- * Computes a translation matrix from a translation vector
- *
- * @param v : translation vector
+ * @param p_result return 
+ * @param location location vector
  *
  * @sa scale_mat4
  * @sa rotation_mat4_from_vec3
  *
  * @return 4x4 translation matrix
  */
-DLLEXPORT u0 mat4_translation ( mat4 *p_result, vec3 v );
+DLLEXPORT u0 mat4_translation ( mat4 *p_result, vec3 location );
 
 /**
- * Computes a scale matrix from a scale vector
+ * Compute a scale matrix from a scale vector; Store result
  *
- * @param scale : scale vector
+ * @param p_result return 
+ * @param scale    scale vector
  *
  * @sa translation_mat4
  * @sa rotation_mat4_from_vec3
@@ -302,24 +452,26 @@ DLLEXPORT u0 mat4_translation ( mat4 *p_result, vec3 v );
 DLLEXPORT u0 mat4_scale ( mat4 *p_result, vec3 scale );
 
 /**
- * Computes a rotation matrix from a rotation vector
+ * Compute a rotation matrix from a rotation vector; Store result
  *
- * @param rotation : rotation vector
+ * @param p_result return
+ * @param rotation rotation vector
  *
  * @sa translation_mat4
  * @sa scale_mat4
  *
- * @return 4x4 rotation matrix
+ * @return void
  */
 DLLEXPORT u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation );
 
 /**!
- * Computes a model matrix from a location, rotation, and scale vector.
+ * Compute a model matrix from a location, rotation, and scale vector; Store result
  *
- * @param location : location
- * @param rotation : rotation
- * @param scale    : scale
+ * @param p_result return
+ * @param location location vector
+ * @param rotation rotation vector
+ * @param scale    scale vector
  *
- * @return 4x4 model matrix
+ * @return void
  */
 DLLEXPORT u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 scale );
