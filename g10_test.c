@@ -11,6 +11,7 @@
 #include <log/log.h>
 #undef NDEBUG
 #include <g10/g10.h>
+#include <g10/linear.h>
 #include <g10/user_code.h>
 
 // Enumeration definitions
@@ -324,7 +325,7 @@ bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
 
     vec2 result_vec = (vec2) { 0 };
     
-    add_vec2(&result_vec, a, b);
+    vec2_add_vec2(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -340,7 +341,7 @@ bool test_vec2_sub ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
 
     vec2 result_vec = (vec2) { 0 };
     
-    sub_vec2(&result_vec, a, b);
+    vec2_sub_vec2(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -356,7 +357,7 @@ bool test_vec2_mul ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
 
     vec2 result_vec = (vec2) { 0 };
     
-    mul_vec2(&result_vec, a, b);
+    vec2_mul_vec2(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -372,7 +373,7 @@ bool test_vec2_div ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
 
     vec2 result_vec = (vec2) { 0 };
     
-    div_vec2(&result_vec, a, b);
+    vec2_div_vec2(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -388,7 +389,7 @@ bool test_vec3_add ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
 
     vec3 result_vec = (vec3) { 0 };
     
-    add_vec3(&result_vec, a, b);
+    vec3_add_vec3(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -405,7 +406,7 @@ bool test_vec3_sub ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
 
     vec3 result_vec = (vec3) { 0 };
     
-    sub_vec3(&result_vec, a, b);
+    vec3_sub_vec3(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -422,7 +423,7 @@ bool test_vec3_mul ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
 
     vec3 result_vec = (vec3) { 0 };
     
-    mul_vec3(&result_vec, a, b);
+    vec3_mul_vec3(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -439,7 +440,7 @@ bool test_vec3_div ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
 
     vec3 result_vec = (vec3) { 0 };
     
-    div_vec3(&result_vec, a, b);
+    vec3_div_vec3(&result_vec, a, b);
 
     if (
         ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
@@ -659,7 +660,15 @@ void test_g10_linear_vectors ( const char *name )
     log_info(" to test\n");
 
     // TODO: Test 4D vectors
+
+    // Success
+    return;
+}
+
+void test_g10_linear_matrices ( const char *name )
+{
     // TODO: Test 2x2 matrix
+    // TODO: Test 3x3 matrix
     // TODO: Test 4x4 matrix
 
     // Success

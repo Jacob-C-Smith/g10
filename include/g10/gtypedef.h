@@ -31,8 +31,8 @@ typedef double f64;
 
 // Vectors
 typedef struct { float x, y; }       vec2;
+typedef struct { float x, y, z; }    vec3;
 typedef struct { float x, y, z, w; } vec4;
-typedef vec4                         vec3;
 
 // 2x2 Matrix
 typedef struct { float a, b, c, d; } mat2;
