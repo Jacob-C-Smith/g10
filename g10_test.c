@@ -1,5 +1,5 @@
 /** !
- * Tester for g10
+ * G10 tester
  * 
  * @file g10_test.c
  * 
@@ -9,7 +9,6 @@
 // Header
 #include <sync/sync.h>
 #include <log/log.h>
-#undef NDEBUG
 #include <g10/g10.h>
 #include <g10/linear.h>
 #include <g10/user_code.h>
@@ -85,8 +84,11 @@ bool test_g_get_active_instance ( char *test_file, result_t expected );
 // Constructors
 int construct_minimal_g10_instance ( g_instance **pp_instance );
 
+int get_mat4_from_list ( mat4 *p_mat4 );
+
 // Functions used by the tester
-int user_code_callback_function ( g_instance *p_instance ) {
+int user_code_callback_function ( g_instance *p_instance )
+{
 
     strncpy(p_instance->_name, "G10 tester", 11);
 
@@ -604,23 +606,24 @@ void test_g10_linear_vec3 ( const char *name )
     log_scenario("%s\n", name);
 
     // Accumulate 
-    print_test(name, "<1.1, 2.2, 3.3> + <1.1, 2.2, 3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ 1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4, 6.6 }, match));
-    print_test(name, "<1.1, 2.2, 3.3> + <-3.3, -2.2, -1.1>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ -2.2f, 0.f, 2.2f }, match));
-    //print_test(name, "<0, 0>       + <0, 0>\n"      , test_vec3_add((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
-    
+    print_test(name, "< 1.1, 2.2, 3.3 > + < 1.1,  2.2,  3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4, 6.6 }, match));
+    print_test(name, "< 1.1, 2.2, 3.3 > + <-3.3, -2.2, -1.1>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ -2.2f, 0.f, 2.2f }, match));
+    print_test(name, "<-3.3, 2.2,-1.1 > + <2.2 , -4.4,  6.6>\n"  , test_vec3_add((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -1.1f, -2.2f, 5.5f }, match));
+
     // Difference
-    //print_test(name, "<1.23, 2.46> - <3.69, 2.46>"  , test_vec3_sub((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ -2.46f, 0.f } , match));
-    //print_test(name, "<3.21, 6.54> - <-1.23, -3.21>", test_vec3_sub((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 4.44f, 9.75f }, match));
-    //print_test(name, "<0, 0>       - <0, 0>\n"      , test_vec3_sub((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
-    
+    print_test(name, "< 1.1, 2.2, 3.3 > - < 1.1,  2.2,  3.3>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 0.0f, 0.0f, 0.0f }, match));
+    print_test(name, "< 1.1, 2.2, 3.3 > - <-3.3, -2.2, -1.1>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ 4.4f, 4.4f, 4.4f }, match));
+    print_test(name, "<-3.3, 2.2,-1.1 > - <2.2 , -4.4,  6.6>\n"  , test_vec3_sub((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -5.5f, 6.6f, -7.7f }, match));
+
     // Product
     //print_test(name, "<1.23, 2.46> × <3.69, 2.46>"  , test_vec3_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
     //print_test(name, "<3.21, 3.14> × <-1.23, -3.14>", test_vec3_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
     //print_test(name, "<0, 0>       × <0, 0>\n"      , test_vec3_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
 
     // Quotient
-    print_test(name, "<8.88, 4.44, 2.22> ÷ <1.11, 2.22, 4.44>"  , test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
-    //print_test(name, "<17.38, 4.2> ÷ <2, 2>"        , test_vec3_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
+    print_test(name, "<-8.88 , 4.44, -2.22 > ÷ <-1.11, 2.22, 4.44>", test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
+    print_test(name, "<4.0  , -6.0 , 5.0   > ÷ <2.0  , 3.0 , 2.5 >", test_vec3_div((vec3){ 4.0f, 6.0f, 5.0f }, (vec3){ 2.0f, 3.0f, 2.5f }, (vec3){ 2.f, 2.f, 2.0f }     , match));
+    // print_test(name, "<-18.58, 0.2 , -60.75> ÷ <5.3  , 7.6 , 9.2 >", test_vec3_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
 
     // Print the summary of this test
     print_final_summary();
@@ -685,7 +688,6 @@ void test_g10_linear_mat4 ( const char *name )
     // Success
     return;
 }
-
 
 void test_g10_linear_vectors ( const char *name )
 {
@@ -827,6 +829,7 @@ void test_g10_linear_matrices ( const char *name )
 
 void test_g10_quaternion ( const char *name )
 {
+
     // Formatting
     log_scenario("%s\n", name);
 
@@ -871,6 +874,159 @@ int construct_minimal_g10_instance ( g_instance **pp_instance ) {
 
     *pp_instance = p_instance;
 
+    return 1;
+}
+
+int get_mat4_from_list ( mat4 *p_mat4 )
+{
+    
+    // Static data
+    static int l = 0;
+    static const mat4 _matricies[32] = 
+    {
+        [0] = (mat4)
+        {
+            .a = 3.982f, .b = 0.124f, .c = 8.716f, .d = 2.587f,
+            .e = 1.439f, .f = 4.773f, .g = 9.281f, .h = 0.875f,
+            .i = 0.621f, .j = 1.852f, .k = 4.268f, .l = 0.098f,
+            .m = 6.905f, .n = 0.612f, .o = 7.318f, .p = 8.489f
+        },
+        [1] = (mat4)
+        {
+            
+        },
+        [2] = (mat4)
+        {
+            
+        },
+        [3] = (mat4)
+        {
+            
+        },
+        [4] = (mat4)
+        {
+            
+        },
+        [5] = (mat4)
+        {
+            
+        },
+        [6] = (mat4)
+        {
+            
+        },
+        [7] = (mat4)
+        {
+            
+        },
+        [8] = (mat4)
+        {
+            
+        },
+        [9] = (mat4)
+        {
+            
+        },
+        [10] = (mat4)
+        {
+            
+        },
+        [11] = (mat4)
+        {
+            
+        },
+        [12] = (mat4)
+        {
+            
+        },
+        [13] = (mat4)
+        {
+            
+        },
+        [14] = (mat4)
+        {
+            
+        },
+        [15] = (mat4)
+        {
+            
+        },
+        [16] = (mat4)
+        {
+            
+        },
+        [17] = (mat4)
+        {
+            
+        },
+        [18] = (mat4)
+        {
+            
+        },
+        [19] = (mat4)
+        {
+            
+        },
+        [20] = (mat4)
+        {
+            
+        },
+        [21] = (mat4)
+        {
+            
+        },
+        [22] = (mat4)
+        {
+            
+        },
+        [23] = (mat4)
+        {
+            
+        },
+        [24] = (mat4)
+        {
+            
+        },
+        [25] = (mat4)
+        {
+            
+        },
+        [26] = (mat4)
+        {
+            
+        },
+        [27] = (mat4)
+        {
+            
+        },
+        [28] = (mat4)
+        {
+            
+        },
+        [29] = (mat4)
+        {
+            
+        },
+        [30] = (mat4)
+        {
+            
+        },
+        [31] = (mat4)
+        {
+            
+        }
+    };
+
+    // Write the matrix to the return
+    *p_mat4 = _matricies[l];
+
+    // Increment the index
+    l++;
+
+    // Wrap the index
+    l = l % 32;
+
+    // Success
     return 1;
 }
 
