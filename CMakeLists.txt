@@ -122,19 +122,6 @@ if ( NOT "${HAS_WEB}")
     set(HAS_WEB true PARENT_SCOPE)
 endif()
 
-# Find the parallel module
-if ( NOT "${HAS_PARALLEL}")
-    
-    # Log
-    message("[g10] Adding parallel project")
-    
-    # Add the parallel directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/parallel ${CMAKE_SOURCE_DIR}/build/parallel)
-
-    # Let any parent project know that this project has parallel
-    set(HAS_PARALLEL true PARENT_SCOPE)
-endif()
-
 # Add the g10 project
 if ( NOT "${HAS_G10}")
     
@@ -159,6 +146,6 @@ target_link_libraries(g10_test g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c" "linear.c" "net.c" "server.c" "user_code.c") 
-add_dependencies(g10 log sync crypto array dict tuple stack queue json http web socket parallel)
+add_dependencies(g10 log sync crypto array dict tuple stack queue json http web socket)
 target_include_directories(g10 PUBLIC include include/g10) #${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
-target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json http web socket parallel m)
+target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json http web socket m)

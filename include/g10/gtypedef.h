@@ -45,8 +45,10 @@ typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
 
 // Forward declarations
 struct g_instance_s;
+struct server_s;
 
 // Type definitions
 typedef struct g_instance_s g_instance;
+typedef struct server_s server;
 
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
