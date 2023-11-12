@@ -96,6 +96,45 @@ if ( NOT "${HAS_JSON}")
     set(HAS_JSON true PARENT_SCOPE)
 endif()
 
+# Find the http module
+if ( NOT "${HAS_HTTP}")
+    
+    # Log
+    message("[g10] Adding http project")
+    
+    # Add the http directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/http ${CMAKE_SOURCE_DIR}/build/http)
+
+    # Let any parent project know that this project has http
+    set(HAS_HTTP true PARENT_SCOPE)
+endif()
+
+# Find the http module
+if ( NOT "${HAS_WEB}")
+    
+    # Log
+    message("[g10] Adding web project")
+    
+    # Add the web directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/web ${CMAKE_SOURCE_DIR}/build/web)
+
+    # Let any parent project know that this project has web
+    set(HAS_WEB true PARENT_SCOPE)
+endif()
+
+# Find the parallel module
+if ( NOT "${HAS_PARALLEL}")
+    
+    # Log
+    message("[g10] Adding parallel project")
+    
+    # Add the parallel directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/parallel ${CMAKE_SOURCE_DIR}/build/parallel)
+
+    # Let any parent project know that this project has parallel
+    set(HAS_PARALLEL true PARENT_SCOPE)
+endif()
+
 # Add the g10 project
 if ( NOT "${HAS_G10}")
     
@@ -107,10 +146,10 @@ if ( NOT "${HAS_G10}")
 endif()
 
 # g10 example
-add_executable (g10_internal_example "main.c") 
-add_dependencies(g10_internal_example g10)
-target_include_directories(g10_internal_example PUBLIC include include/g10) # ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
-target_link_libraries(g10_internal_example g10)
+add_executable (g10_example "main.c") 
+add_dependencies(g10_example g10)
+target_include_directories(g10_example PUBLIC include include/g10) # ${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
+target_link_libraries(g10_example g10)
 
 ## Add source to the tester
 add_executable (g10_test "g10_test.c")
@@ -119,7 +158,7 @@ target_include_directories(g10_test PUBLIC include include/g10)
 target_link_libraries(g10_test g10)
 
 # g10 library
-add_library (g10 SHARED "g10.c" "linear.c" "user_code.c") 
-add_dependencies(g10 log sync crypto array dict tuple stack queue json)
+add_library (g10 SHARED "g10.c" "linear.c" "net.c" "server.c" "user_code.c") 
+add_dependencies(g10 log sync crypto array dict tuple stack queue json http web socket parallel)
 target_include_directories(g10 PUBLIC include include/g10) #${CMAKE_SOURCE_DIR}/extern/json/include/ ${CMAKE_SOURCE_DIR}/extern/array/include/ ${CMAKE_SOURCE_DIR}/extern/dict/include/ ${CMAKE_SOURCE_DIR}/extern/stack/include/ ${CMAKE_SOURCE_DIR}/extern/queue/include/ ${CMAKE_SOURCE_DIR}/extern/sync/include/) 
-target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json m)
+target_link_libraries(g10 PUBLIC log sync crypto array dict tuple stack queue json http web socket parallel m)
