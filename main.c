@@ -10,6 +10,8 @@
 
 // g10
 #include <g10/g10.h>
+
+// Callback registration
 #include <g10/user_code.h>
 
 /** !
@@ -67,7 +69,7 @@ int main ( int argc, const char *const argv[] )
             failed_to_teardown_g10:
                 
                 // Write an error message to standard out
-                printf("Error: Failed to teardown G10\n");
+                log_warning("Error: Failed to teardown G10\n");
 
                 // Error
                 return EXIT_FAILURE;
