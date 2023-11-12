@@ -45,6 +45,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     char *const p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
     const json_value *p_value = 0;
 
+    // Error check
+    if ( file_len == 0 ) goto failed_to_load_file;
+
     // Load the file
     if ( g_load_file(p_path, p_file_contents, true) == 0 ) goto failed_to_load_file;
 
@@ -59,13 +62,11 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Initialized data
         const dict *const p_dict = p_value->object;
-        const json_value *p_name_value = 0;
+        const json_value *p_name_value = dict_get(p_dict, "name"),
+                         *p_server_value = dict_get(p_dict, "server");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance config\n");
-
-        // Get the name
-        p_name_value = dict_get(p_dict, "name");
 
         // Check for missing properties
         if ( ! ( p_name_value ) ) goto missing_properties;
@@ -89,6 +90,11 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Store a null terminator
             _instance._name[len] = '\0';
         }
+
+        // Construct a server
+        if ( server_from_json_value(&_instance.context.p_server, p_server_value) == 0 ) goto no_server;
+        no_server:
+
     }
 
     // Allocate memory for the instance

@@ -37,6 +37,7 @@
 
 // g10
 #include <g10/gtypedef.h>
+#include <g10/server.h>
 #include <g10/user_code.h>
 
 // 3rd party
@@ -109,6 +110,7 @@ struct g_instance_s
     struct
     {
         fn_user_code_callback pfn_user_code_callback;
+        server *p_server;
     } context;
 
     // Running?
