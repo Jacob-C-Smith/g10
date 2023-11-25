@@ -373,3 +373,5 @@ MigrationBackup/
 FodyWeavers.xsd
 *.ini
 *.ico
+Icon?
+
