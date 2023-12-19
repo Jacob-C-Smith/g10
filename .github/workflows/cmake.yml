@@ -45,6 +45,7 @@ jobs:
         cp -r ${{github.workspace}}/extern/json/serial\ test\ cases/ ${{github.workspace}}/build/serial\ test\ cases/
         cp -r ${{github.workspace}}/test\ cases/ ${{github.workspace}}/build/test\ cases/
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/array_test
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/base64_test
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/dict_test
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/stack_test
         ${{github.workspace}}/build/queue_test
