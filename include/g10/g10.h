@@ -35,6 +35,9 @@
 // json module
 #include <json/json.h>
 
+// parallel module
+#include <parallel/parallel.h>
+
 // g10
 #include <g10/gtypedef.h>
 #include <g10/server.h>
@@ -111,6 +114,7 @@ struct g_instance_s
     {
         fn_user_code_callback pfn_user_code_callback;
         server *p_server;
+        u16 fixed_tick_rate;
     } context;
 
     // Running?
@@ -139,6 +143,8 @@ DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
  * @return pointer to g10 instance singleton on success, null pointer on error
  */
 g_instance *g_get_active_instance ( void );
+
+int g_start_server ( g_instance *p_instance );
 
 // File
 /** !

@@ -22,7 +22,7 @@ int server_from_json_value ( const server **pp_server, const json_value *const p
         const json_value *p_web_value = 0;
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance config\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [server] Consider adding a \"$schema\" property to the server config\n");
 
         // Get the name
         p_web_value = dict_get(p_dict, "web");
