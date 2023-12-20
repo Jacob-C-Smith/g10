@@ -43,6 +43,9 @@ typedef struct { float a, b, c, d, e, f, g, h, i; } mat3;
 // 4x4 Matrix
 typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
 
+// Quaternions
+typedef struct { float u, i, j, k; } quaternion;
+
 // Forward declarations
 struct g_instance_s;
 struct server_s;

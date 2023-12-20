@@ -853,6 +853,38 @@ bool test_mat4_demote_mat3 ( mat4 m, mat3 expected_mat, result_t expected_result
     return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
 }
 
+bool quaternion_equals_quaternion ( quaternion a, quaternion b )
+{
+
+    // -0 == 0 
+    a.u = (a.u == -0.f) ? 0.f : a.u;
+    a.i = (a.i == -0.f) ? 0.f : a.i;
+    a.j = (a.j == -0.f) ? 0.f : a.j;
+    a.k = (a.k == -0.f) ? 0.f : a.k;
+
+    b.u = (b.u == -0.f) ? 0.f : b.u;
+    b.i = (b.i == -0.f) ? 0.f : b.i;
+    b.j = (b.j == -0.f) ? 0.f : b.j;
+    b.k = (b.k == -0.f) ? 0.f : b.k;
+
+    return 
+    (
+        ( (*(unsigned long*)&a.u) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.u) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.i) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.i) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.j) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.j) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.k) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.k) & 0xFFFFFFF8)
+    );
+} 
+
+bool test_quaternion_identity ( quaternion expected_quaternion, result_t expected_result )
+{
+    quaternion result_quaternion = { 0 };
+
+    quaternion_identity(&result_quaternion);
+
+    return expected_result == ( quaternion_equals_quaternion(expected_quaternion, result_quaternion) ? match : zero); 
+} 
+
 bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback, result_t expected )
 {
 
@@ -1477,8 +1509,9 @@ void test_g10_quaternion ( const char *name )
     // Formatting
     log_scenario("%s\n", name);
 
-    // TODO:
-    
+    // Identity quaternion
+    print_test(name, "identity", test_quaternion_identity((quaternion){.u=1.f,.i=0.f,.j=0.f,.k=0.f}, match));
+
     // Print the summary of this test
     print_final_summary();
 
