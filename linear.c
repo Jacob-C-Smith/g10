@@ -1,5 +1,14 @@
+/** !
+ * Linear algebra for g10
+ * 
+ * @author Jacob Smith
+ * @file linear.c
+ */
+
+// Header
 #include <g10/linear.h>
 
+// Function definitions
 u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
 {
 
@@ -96,6 +105,19 @@ u0 vec2_to_vec4 ( vec4 *p_result, vec2 v )
         .z = 0,
         .w = 0
     };
+
+    // Done
+    return;
+}
+
+u0 vec2_length ( float *p_result, vec2 v )
+{
+
+    // Store the length of the vector
+    *p_result = sqrtf(
+        v.x * v.x +
+        v.y * v.y
+    );
 
     // Done
     return;
@@ -270,7 +292,111 @@ u0 vec3_normalize ( vec3 *p_result, vec3 v )
     return;
 }
 
-u0 mat2_mul_vec2 ( vec2 *p_result, mat2 m, vec2 v)
+u0 vec4_add_vec4 ( vec4 *p_result, vec4 a, vec4 b )
+{
+    // Store the sum
+    *p_result = (vec4)
+    {
+        .x = a.x + b.x,
+        .y = a.y + b.y,
+        .z = a.z + b.z,
+        .w = a.w + b.w
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_sub_vec4 ( vec4 *p_result, vec4 a, vec4 b )
+{
+
+    // Store the difference
+    *p_result = (vec4)
+    {
+        .x = a.x - b.x,
+        .y = a.y - b.y,
+        .z = a.z - b.z,
+        .w = a.w - b.w
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_mul_vec4 ( vec4 *p_result, vec4 a, vec4 b )
+{
+
+    // Store the product
+    *p_result = (vec4)
+    {
+        .x = a.x * b.x,
+        .y = a.y * b.y,
+        .z = a.z * b.z,
+        .w = a.w * b.w
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_div_vec4 ( vec4 *p_result, vec4 a, vec4 b )
+{
+
+    // Store the quotient
+    *p_result = (vec4)
+    {
+        .x = a.x / b.x,
+        .y = a.y / b.y,
+        .z = a.z / b.z,
+        .w = a.w / b.w
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_to_vec2 ( vec2 *p_result, vec4 v )
+{
+    // Store the vec4 as a vec2
+    *p_result = (vec2)
+    {
+        .x = v.x,
+        .y = v.y
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_to_vec3 ( vec3 *p_result, vec4 v )
+{
+    // Store the vec4 as a vec3
+    *p_result = (vec3)
+    {
+        .x = v.x,
+        .y = v.y,
+        .z = v.z
+    };
+
+    // Done
+    return;
+}
+
+u0 vec4_length ( float *p_result, vec4 v )
+{
+    // Store the length of the vector
+    *p_result = sqrtf(
+        v.x * v.x +
+        v.y * v.y +
+        v.z * v.z +
+        v.w * v.w 
+    );
+
+    // Done
+    return;
+}
+
+u0 mat2_mul_vec2 ( vec2 *p_result, mat2 m, vec2 v )
 {
 
     // Store the product
@@ -281,6 +407,7 @@ u0 mat2_mul_vec2 ( vec2 *p_result, mat2 m, vec2 v)
     };
 
     // Done
+    return;
 }
 
 u0 mat2_mul_mat2 ( mat2 *p_result, mat2 m, mat2 n )
@@ -356,6 +483,51 @@ u0 mat2_to_mat4 ( mat4 *p_result, mat2 m )
     return;
 }
 
+u0 mat3_mul_vec3 ( vec3 *p_result, mat3 m, vec3 v )
+{
+
+    // Store the product
+    *p_result = (vec3)
+    {
+        .x = m.a * v.x + m.b * v.y + m.c * v.z,
+        .y = m.d * v.x + m.e * v.y + m.f * v.z,
+        .z = m.g * v.x + m.h * v.y + m.i * v.z
+    };
+
+    // Done
+    return;
+}
+
+u0 mat3_mul_mat3 ( mat3 *p_result, mat3 m, mat3 n )
+{
+
+    // Store the product
+    *p_result = (mat3)
+    {
+        .a = (m.a * n.a + m.b * n.d + m.c * n.g), .b = (m.a * n.b + m.b * n.e + m.c * n.h), .c = (m.a * n.c + m.b * n.f + m.c * n.i),
+        .d = (m.d * n.a + m.e * n.d + m.f * n.g), .e = (m.d * n.b + m.e * n.e + m.f * n.h), .f = (m.d * n.c + m.e * n.f + m.f * n.i),
+        .g = (m.g * n.a + m.h * n.d + m.i * n.g), .h = (m.g * n.b + m.h * n.e + m.i * n.h), .i = (m.g * n.c + m.h * n.f + m.i * n.i),
+    };
+
+    // Done
+    return;
+}
+
+u0 mat3_transpose ( mat3 *p_result, mat3 m )
+{
+    
+    // Store the transpose
+    *p_result = (mat3)
+    {
+        .a = m.a, .b = m.d, .c = m.g,
+        .d = m.b, .e = m.e, .f = m.h,
+        .g = m.c, .h = m.f, .i = m.i,
+    };
+
+    // Done
+    return;
+}
+
 u0 mat3_identity ( mat3 *p_result )
 {
 
@@ -403,6 +575,8 @@ u0 mat3_to_mat4 ( mat4 *p_result, mat3 m )
 
 u0 mat4_mul_vec4 ( vec4 *p_result, mat4 m, vec4 v )
 {
+
+    // Store the product
     *p_result = (vec4)
     {
         .x = m.a * v.x + m.b * v.y + m.c * v.z + m.d * v.w,
@@ -410,6 +584,9 @@ u0 mat4_mul_vec4 ( vec4 *p_result, mat4 m, vec4 v )
         .z = m.i * v.x + m.j * v.y + m.k * v.z + m.l * v.w,
         .w = m.m * v.x + m.n * v.y + m.o * v.z + m.p * v.w
     };
+
+    // Done
+    return;
 }
 
 u0 mat4_mul_mat4 ( mat4 *p_result, mat4 m, mat4 n )
@@ -422,6 +599,22 @@ u0 mat4_mul_mat4 ( mat4 *p_result, mat4 m, mat4 n )
         .e = (m.e * n.a + m.f * n.e + m.g * n.i + m.h * n.m), .f = (m.e * n.b + m.f * n.f + m.g * n.j + m.h * n.n), .g = (m.e * n.c + m.f * n.g + m.g * n.k + m.h * n.o), .h = (m.e * n.d + m.f * n.h + m.g * n.l + m.h * n.p),
         .i = (m.i * n.a + m.j * n.e + m.k * n.i + m.l * n.m), .j = (m.i * n.b + m.j * n.f + m.k * n.j + m.l * n.n), .k = (m.i * n.c + m.j * n.g + m.k * n.k + m.l * n.o), .l = (m.i * n.d + m.j * n.h + m.k * n.l + m.l * n.p),
         .m = (m.m * n.a + m.n * n.e + m.o * n.i + m.p * n.m), .n = (m.m * n.b + m.n * n.f + m.o * n.j + m.p * n.n), .o = (m.m * n.c + m.n * n.g + m.o * n.k + m.p * n.o), .p = (m.m * n.d + m.n * n.h + m.o * n.l + m.p * n.p)
+    };
+
+    // Done
+    return;
+}
+
+u0 mat4_transpose ( mat4 *p_result, mat4 m )
+{
+
+    // Store the transpose
+    *p_result = (mat4)
+    {
+        .a = m.a, .b = m.e, .c = m.i, .d = m.m,
+        .e = m.b, .f = m.f, .g = m.j, .h = m.n,
+        .i = m.c, .j = m.g, .k = m.k, .l = m.o,
+        .m = m.d, .n = m.h, .o = m.l, .p = m.p
     };
 
     // Done
@@ -444,16 +637,29 @@ u0 mat4_identity ( mat4 *p_result )
     return;
 }
 
-u0 mat4_transpose ( mat4 *p_result, mat4 m )
+u0 mat4_to_mat2 ( mat2 *p_result, mat4 m )
 {
 
-    // Store the transpose
-    *p_result = (mat4)
+    // Store the mat4 as a mat2
+    *p_result = (mat2)
     {
-        .a = m.a, .b = m.e, .c = m.i, .d = m.m,
-        .e = m.b, .f = m.f, .g = m.j, .h = m.n,
-        .i = m.c, .j = m.g, .k = m.k, .l = m.o,
-        .m = m.d, .n = m.h, .o = m.l, .p = m.p
+        .a = m.a, .b = m.b,
+        .c = m.e, .d = m.f
+    };
+
+    // Done
+    return;
+}
+
+u0 mat4_to_mat3 ( mat3 *p_result, mat4 m )
+{
+    
+    // Store the mat4 as a mat3
+    *p_result = (mat3)
+    {
+        .a = m.a, .b = m.b, .c = m.c, 
+        .d = m.e, .e = m.f, .f = m.g, 
+        .g = m.i, .h = m.j, .i = m.k
     };
 
     // Done

@@ -1,8 +1,7 @@
 /** !
- * G10 tester
+ * g10 tester
  * 
  * @file g10_test.c
- * 
  * @author Jacob Smith
  */
 
@@ -11,6 +10,7 @@
 #include <log/log.h>
 #include <g10/g10.h>
 #include <g10/linear.h>
+#include <g10/quaternion.h>
 #include <g10/user_code.h>
 
 // Enumeration definitions
@@ -337,6 +337,186 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
     return (result == expected);
 }
 
+bool vec2_equals_vec2 ( vec2 a, vec2 b )
+{
+
+    // -0 == 0 
+    a.x = (a.x == -0.f) ? 0.f : a.x;
+    a.y = (a.y == -0.f) ? 0.f : a.y;
+
+    b.x = (b.x == -0.f) ? 0.f : b.x;
+    b.y = (b.y == -0.f) ? 0.f : b.y;
+
+    return 
+    (
+        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8)
+    );
+}
+
+bool vec3_equals_vec3 ( vec3 a, vec3 b )
+{
+
+    // -0 == 0 
+    a.x = (a.x == -0.f) ? 0.f : a.x;
+    a.y = (a.y == -0.f) ? 0.f : a.y;
+    a.z = (a.z == -0.f) ? 0.f : a.z;
+
+    b.x = (b.x == -0.f) ? 0.f : b.x;
+    b.y = (b.y == -0.f) ? 0.f : b.y;
+    b.z = (b.z == -0.f) ? 0.f : b.z;
+    
+    return 
+    (
+        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.z) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.z) & 0xFFFFFFF8)
+    );
+}
+
+bool vec4_equals_vec4 ( vec4 a, vec4 b )
+{
+
+    // -0 == 0 
+    a.x = (a.x == -0.f) ? 0.f : a.x;
+    a.y = (a.y == -0.f) ? 0.f : a.y;
+    a.z = (a.z == -0.f) ? 0.f : a.z;
+    a.w = (a.w == -0.f) ? 0.f : a.w;
+
+    b.x = (b.x == -0.f) ? 0.f : b.x;
+    b.y = (b.y == -0.f) ? 0.f : b.y;
+    b.z = (b.z == -0.f) ? 0.f : b.z;
+    b.w = (b.w == -0.f) ? 0.f : b.w;
+
+    return 
+    (
+        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.z) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.z) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&a.w) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.w) & 0xFFFFFFF8)
+    );
+}
+
+bool mat2_equals_mat2 ( mat2 m, mat2 n )
+{
+
+    // -0 == 0 
+    m.a = (m.a == -0.f) ? 0.f : m.a;
+    m.b = (m.b == -0.f) ? 0.f : m.b;
+    m.c = (m.c == -0.f) ? 0.f : m.c;
+    m.d = (m.d == -0.f) ? 0.f : m.d;
+
+    n.a = (n.a == -0.f) ? 0.f : n.a;
+    n.b = (n.b == -0.f) ? 0.f : n.b;
+    n.c = (n.c == -0.f) ? 0.f : n.c;
+    n.d = (n.d == -0.f) ? 0.f : n.d;
+
+    return 
+    (
+        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) 
+    );
+}
+
+bool mat3_equals_mat3 ( mat3 m, mat3 n )
+{
+
+    // -0 == 0 
+    m.a = (m.a == -0.f) ? 0.f : m.a;
+    m.b = (m.b == -0.f) ? 0.f : m.b;
+    m.c = (m.c == -0.f) ? 0.f : m.c;
+    m.d = (m.d == -0.f) ? 0.f : m.d;
+    m.e = (m.e == -0.f) ? 0.f : m.e;
+    m.f = (m.f == -0.f) ? 0.f : m.f;
+    m.g = (m.g == -0.f) ? 0.f : m.g;
+    m.h = (m.h == -0.f) ? 0.f : m.h;
+    m.i = (m.i == -0.f) ? 0.f : m.i;
+
+    n.a = (n.a == -0.f) ? 0.f : n.a;
+    n.b = (n.b == -0.f) ? 0.f : n.b;
+    n.c = (n.c == -0.f) ? 0.f : n.c;
+    n.d = (n.d == -0.f) ? 0.f : n.d;
+    n.e = (n.e == -0.f) ? 0.f : n.e;
+    n.f = (n.f == -0.f) ? 0.f : n.f;
+    n.g = (n.g == -0.f) ? 0.f : n.g;
+    n.h = (n.h == -0.f) ? 0.f : n.h;
+    n.i = (n.i == -0.f) ? 0.f : n.i;
+
+    return 
+    (
+        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.e) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.e) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.f) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.f) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.g) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.g) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.h) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.h) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.i) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.i) & 0xFFFFFFF8) 
+    );
+}
+
+bool mat4_equals_mat4 ( mat4 m, mat4 n )
+{
+
+    // -0 == 0 
+    m.a = (m.a == -0.f) ? 0.f : m.a;
+    m.b = (m.b == -0.f) ? 0.f : m.b;
+    m.c = (m.c == -0.f) ? 0.f : m.c;
+    m.d = (m.d == -0.f) ? 0.f : m.d;
+    m.e = (m.e == -0.f) ? 0.f : m.e;
+    m.f = (m.f == -0.f) ? 0.f : m.f;
+    m.g = (m.g == -0.f) ? 0.f : m.g;
+    m.h = (m.h == -0.f) ? 0.f : m.h;
+    m.i = (m.i == -0.f) ? 0.f : m.i;
+    m.j = (m.j == -0.f) ? 0.f : m.j;
+    m.k = (m.k == -0.f) ? 0.f : m.k;
+    m.l = (m.l == -0.f) ? 0.f : m.l;
+    m.m = (m.m == -0.f) ? 0.f : m.m;
+    m.n = (m.n == -0.f) ? 0.f : m.n;
+    m.o = (m.o == -0.f) ? 0.f : m.o;
+    m.p = (m.p == -0.f) ? 0.f : m.p;
+
+    n.a = (n.a == -0.f) ? 0.f : n.a;
+    n.b = (n.b == -0.f) ? 0.f : n.b;
+    n.c = (n.c == -0.f) ? 0.f : n.c;
+    n.d = (n.d == -0.f) ? 0.f : n.d;
+    n.e = (n.e == -0.f) ? 0.f : n.e;
+    n.f = (n.f == -0.f) ? 0.f : n.f;
+    n.g = (n.g == -0.f) ? 0.f : n.g;
+    n.h = (n.h == -0.f) ? 0.f : n.h;
+    n.i = (n.i == -0.f) ? 0.f : n.i;
+    n.j = (n.j == -0.f) ? 0.f : n.j;
+    n.k = (n.k == -0.f) ? 0.f : n.k;
+    n.l = (n.l == -0.f) ? 0.f : n.l;
+    n.m = (n.m == -0.f) ? 0.f : n.m;
+    n.n = (n.n == -0.f) ? 0.f : n.n;
+    n.o = (n.o == -0.f) ? 0.f : n.o;
+    n.p = (n.p == -0.f) ? 0.f : n.p;
+
+    return 
+    (
+        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.e) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.e) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.f) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.f) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.g) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.g) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.h) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.h) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.i) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.i) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.j) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.j) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.k) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.k) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.l) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.l) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.m) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.m) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.n) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.n) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.o) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.o) & 0xFFFFFFF8) &&
+        ( (*(unsigned long*)&m.p) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.p) & 0xFFFFFFF8) 
+    );
+}
+
 bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
@@ -344,13 +524,7 @@ bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
     
     vec2_add_vec2(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_sub ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
@@ -360,13 +534,7 @@ bool test_vec2_sub ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
     
     vec2_sub_vec2(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_mul ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
@@ -376,13 +544,7 @@ bool test_vec2_mul ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
     
     vec2_mul_vec2(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_div ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
@@ -392,13 +554,34 @@ bool test_vec2_div ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result
     
     vec2_div_vec2(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1)
-    )
-        return (expected_result == match);
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
+}
 
-    return (expected_result == zero);
+bool test_vec2_length ( vec2 v, float expected_length, result_t expected_result )
+{
+    float result = 0.f;
+    
+    vec2_length(&result, v);
+
+    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+}
+
+bool test_vec2_promote_vec3 ( vec2 v, vec3 expected_vec, result_t expected_result )
+{
+    vec3 result_vec = { 0 };
+
+    vec2_to_vec3(&result_vec, v);
+
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec2_promote_vec4 ( vec2 v, vec4 expected_vec, result_t expected_result )
+{
+    vec4 result_vec = { 0 };
+
+    vec2_to_vec4(&result_vec, v);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_add ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
@@ -408,14 +591,7 @@ bool test_vec3_add ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
     
     vec3_add_vec3(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
-        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1) 
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_sub ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
@@ -425,14 +601,7 @@ bool test_vec3_sub ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
     
     vec3_sub_vec3(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
-        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_mul ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
@@ -442,14 +611,7 @@ bool test_vec3_mul ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
     
     vec3_mul_vec3(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
-        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
-    )
-        return (expected_result == match);
-
-    return (expected_result == zero);
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_div ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
@@ -459,14 +621,236 @@ bool test_vec3_div ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result
     
     vec3_div_vec3(&result_vec, a, b);
 
-    if (
-        ( (int)(expected_vec.x) & ~1) == ((int)(result_vec.x) & ~1) &&
-        ( (int)(expected_vec.y) & ~1) == ((int)(result_vec.y) & ~1) &&
-        ( (int)(expected_vec.z) & ~1) == ((int)(result_vec.z) & ~1)
-    )
-        return (expected_result == match);
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
+}
 
-    return (expected_result == zero);
+bool test_vec3_length ( vec3 v, float expected_length, result_t expected_result )
+{
+    float result = 0.f;
+    
+    vec3_length(&result, v);
+
+    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+}
+
+bool test_vec3_demote_vec2 ( vec3 v, vec2 expected_vec, result_t expected_result )
+{
+    vec2 result_vec = { 0 };
+
+    vec3_to_vec2(&result_vec, v);
+
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec3_promote_vec4 ( vec3 v, vec4 expected_vec, result_t expected_result )
+{
+    vec4 result_vec = { 0 };
+
+    vec3_to_vec4(&result_vec, v);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_add ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
+{
+
+    vec4 result_vec = (vec4) { 0 };
+    
+    vec4_add_vec4(&result_vec, a, b);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_sub ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
+{
+
+    vec4 result_vec = (vec4) { 0 };
+    
+    vec4_sub_vec4(&result_vec, a, b);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_mul ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
+{
+
+    vec4 result_vec = (vec4) { 0 };
+    
+    vec4_mul_vec4(&result_vec, a, b);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_div ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
+{
+
+    vec4 result_vec = (vec4) { 0 };
+    
+    vec4_div_vec4(&result_vec, a, b);
+
+    return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_length ( vec4 v, float expected_length, result_t expected_result )
+{
+    float result = 0.f;
+    
+    vec4_length(&result, v);
+
+    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+}
+
+bool test_vec4_demote_vec2 ( vec4 v, vec2 expected_vec, result_t expected_result )
+{
+    vec2 result_vec = { 0 };
+
+    vec4_to_vec2(&result_vec, v);
+
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_vec4_demote_vec3 ( vec4 v, vec3 expected_vec, result_t expected_result )
+{
+    vec3 result_vec = { 0 };
+
+    vec4_to_vec3(&result_vec, v);
+
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_mat2_identity ( mat2 expected_mat, result_t expected_result)
+{
+    mat2 result_mat = { 0 };
+
+    mat2_identity(&result_mat);
+
+    return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat2_mul_vec2 ( mat2 m, vec2 v, vec2 expected_vec, result_t expected_result )
+{
+    vec2 result_vec = { 0 };
+
+    mat2_mul_vec2(&result_vec, m, v);
+
+    return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_mat2_mul_mat2 ( mat2 m, mat2 n, mat2 expected_mat, result_t expected_result )
+{
+    mat2 result_mat = { 0 };
+
+    mat2_mul_mat2(&result_mat, m, n);
+
+    return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat2_transpose ( mat2 m, mat2 expected_mat, result_t expected_result )
+{
+    mat2 result_mat = { 0 };
+
+    mat2_transpose(&result_mat, m);
+
+    return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat2_promote_mat3 ( mat2 m, mat3 expected_mat, result_t expected_result )
+{
+    mat3 result_mat = { 0 };
+
+    mat2_to_mat3(&result_mat, m);
+
+    return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat2_promote_mat4 ( mat2 m, mat4 expected_mat, result_t expected_result )
+{
+    mat4 result_mat = { 0 };
+
+    mat2_to_mat4(&result_mat, m);
+
+    return expected_result == ( mat4_equals_mat4(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat3_identity ( mat3 expected_mat, result_t expected_result)
+{
+    mat3 result_mat = { 0 };
+
+    mat3_identity(&result_mat);
+
+    return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat3_mul_vec3 ( mat3 m, vec3 v, vec3 expected_vec, result_t expected_result )
+{
+    vec3 result_vec = { 0 };
+
+    mat3_mul_vec3(&result_vec, m, v);
+
+    return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
+}
+
+bool test_mat3_mul_mat3 ( mat3 m, mat3 n, mat3 expected_mat, result_t expected_result )
+{
+    mat3 result_mat = { 0 };
+
+    mat3_mul_mat3(&result_mat, m, n);
+
+    return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat3_transpose ( mat3 m, mat3 expected_mat, result_t expected_result )
+{
+    mat3 result_mat = { 0 };
+
+    mat3_transpose(&result_mat, m);
+
+    return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat3_demote_mat2 ( mat3 m, mat2 expected_mat, result_t expected_result )
+{
+    mat2 result_mat = { 0 };
+
+    mat3_to_mat2(&result_mat, m);
+
+    return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat3_promote_mat4 ( mat3 m, mat4 expected_mat, result_t expected_result )
+{
+    mat4 result_mat = { 0 };
+
+    mat3_to_mat4(&result_mat, m);
+
+    return expected_result == ( mat4_equals_mat4(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat4_identity ( mat4 expected_mat, result_t expected_result)
+{
+    mat4 result_mat = { 0 };
+
+    mat4_identity(&result_mat);
+
+    return expected_result == ( mat4_equals_mat4(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat4_demote_mat2 ( mat4 m, mat2 expected_mat, result_t expected_result )
+{
+    mat2 result_mat = { 0 };
+
+    mat4_to_mat2(&result_mat, m);
+
+    return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
+}
+
+bool test_mat4_demote_mat3 ( mat4 m, mat3 expected_mat, result_t expected_result )
+{
+    mat3 result_mat = { 0 };
+
+    mat4_to_mat3(&result_mat, m);
+
+    return expected_result == ( mat3_equals_mat3(expected_mat, result_mat) ? match : zero); 
 }
 
 bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback, result_t expected )
@@ -574,24 +958,41 @@ void test_g10_linear_vec2 ( const char *name )
     log_scenario("%s\n", name);
 
     // Accumulate
-    print_test(name, "<1.23, 2.46> + <3.69, 2.46>"  , test_vec2_add((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.92f, 4.92f }, match));
-    print_test(name, "<3.21, 6.54> + <-1.23, -3.21>", test_vec2_add((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 1.98f, 3.33f }, match));
-    print_test(name, "<0, 0>       + <0, 0>\n"      , test_vec2_add((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
+    print_test(name, "add <1.23, 2.46> + <3.69, 2.46>"  , test_vec2_add((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.92f, 4.92f }, match));
+    print_test(name, "add <3.21, 6.54> + <-1.23, -3.21>", test_vec2_add((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 1.98f, 3.33f }, match));
+    print_test(name, "add <0, 0>       + <0, 0>\n"      , test_vec2_add((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
 
     // Difference
-    print_test(name, "<1.23, 2.46> - <3.69, 2.46>"  , test_vec2_sub((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ -2.46f, 0.f } , match));
-    print_test(name, "<3.21, 6.54> - <-1.23, -3.21>", test_vec2_sub((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 4.44f, 9.75f }, match));
-    print_test(name, "<0, 0>       - <0, 0>\n"      , test_vec2_sub((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
+    print_test(name, "sub <1.23, 2.46> - <3.69, 2.46>"  , test_vec2_sub((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ -2.46f, 0.f } , match));
+    print_test(name, "sub <3.21, 6.54> - <-1.23, -3.21>", test_vec2_sub((vec2){ 3.21f, 6.54f }, (vec2){ -1.23f, -3.21f }, (vec2){ 4.44f, 9.75f }, match));
+    print_test(name, "sub <0, 0>       - <0, 0>\n"      , test_vec2_sub((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }    , match));
 
     // Product
-    print_test(name, "<1.23, 2.46> × <3.69, 2.46>"  , test_vec2_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
-    print_test(name, "<3.21, 3.14> × <-1.23, -3.14>", test_vec2_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
-    print_test(name, "<0, 0>       × <0, 0>\n"      , test_vec2_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
+    print_test(name, "mul <1.23, 2.46> × <3.69, 2.46>"  , test_vec2_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
+    print_test(name, "mul <3.21, 3.14> × <-1.23, -3.14>", test_vec2_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
+    print_test(name, "mul <0, 0>       × <0, 0>\n"      , test_vec2_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
 
     // Quotient
-    print_test(name, "<9.99, 3.33> ÷ <3.33, 1.11>"  , test_vec2_div((vec2){ 9.99f, 3.33f }, (vec2){ 3.33f, 1.11f }  , (vec2){ 3.f, 3.f }     , match));
-    print_test(name, "<17.38, 4.2> ÷ <2, 2>"        , test_vec2_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
+    print_test(name, "div <9.99, 3.33> ÷ <3.33, 1.11>"  , test_vec2_div((vec2){ 9.99f, 3.33f }, (vec2){ 3.33f, 1.11f }  , (vec2){ 3.f, 3.f }     , match));
+    print_test(name, "div <17.38, 4.2> ÷ <-2, -2>"        , test_vec2_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.1f }, match));
+    print_test(name, "div <3.45, 9.0>  ÷ <0.5, 2>\n"      , test_vec2_div((vec2){ 3.45f, 9.0f } , (vec2){ 0.5f, 2.f }     , (vec2){ 6.9f, 4.5f }   , match));
     
+    // Length
+    print_test(name, "length ||<0.0, 0.0>||"  , test_vec2_length((vec2){ 0.0f, 0.0f }, 0.0f, match));
+    print_test(name, "length ||<1.0, 0.0>||"  , test_vec2_length((vec2){ 1.0f, 0.0f }, 1.0f, match));
+    print_test(name, "length ||<0.0, 1.0>||"  , test_vec2_length((vec2){ 0.0f, 1.0f }, 1.0f, match));
+    print_test(name, "length ||<1.0, 1.0>||\n", test_vec2_length((vec2){ 1.0f, 1.0f } , (M_SQRT1_2 * 2), match));
+    
+    // Promote 3D
+    print_test(name, "to vec3 < 1.0, 2.0> -> <1.0, 2.0, 0.0>", test_vec2_promote_vec3((vec2){1.0f, 2.0f}, (vec3){1.0f, 2.0f, 0.0f}, match));
+    print_test(name, "to vec3 < 0.0, 0.0> -> <0.0, 0.0, 0.0>", test_vec2_promote_vec3((vec2){0.0f, 0.0f}, (vec3){0.0f, 0.0f, 0.0f}, match));
+    print_test(name, "to vec3 <-6.0, 3.0> -> <-6.0, 3.0, 0.0>\n", test_vec2_promote_vec3((vec2){-6.0f, 3.0f}, (vec3){-6.0f, 3.0f, 0.0f}, match));
+
+    // Promote 4D
+    print_test(name, "to vec4 < 1.0, 2.0> -> <1.0, 2.0, 0.0, 0.0>", test_vec2_promote_vec4((vec2){1.0f, 2.0f}, (vec4){1.0f, 2.0f, 0.0f, 0.0f}, match));
+    print_test(name, "to vec4 < 0.0, 0.0> -> <0.0, 0.0, 0.0, 0.0>", test_vec2_promote_vec4((vec2){0.0f, 0.0f}, (vec4){0.0f, 0.0f, 0.0f, 0.0f}, match));
+    print_test(name, "to vec4 <-6.0, 3.0> -> <-6.0, 3.0, 0.0, 0.0>\n", test_vec2_promote_vec4((vec2){-6.0f, 3.0f}, (vec4){-6.0f, 3.0f, 0.0f, 0.0f}, match));
+
     // Print the summary of this test
     print_final_summary();
 
@@ -606,24 +1007,39 @@ void test_g10_linear_vec3 ( const char *name )
     log_scenario("%s\n", name);
 
     // Accumulate 
-    print_test(name, "< 1.1, 2.2, 3.3 > + < 1.1,  2.2,  3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4, 6.6 }, match));
-    print_test(name, "< 1.1, 2.2, 3.3 > + <-3.3, -2.2, -1.1>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ -2.2f, 0.f, 2.2f }, match));
-    print_test(name, "<-3.3, 2.2,-1.1 > + <2.2 , -4.4,  6.6>\n"  , test_vec3_add((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -1.1f, -2.2f, 5.5f }, match));
+    print_test(name, "add < 1.1, 2.2, 3.3 > + < 1.1,  2.2,  3.3>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 2.2f, 4.4f, 6.6f }, match));
+    print_test(name, "add < 1.1, 2.2, 3.3 > + <-3.3, -2.2, -1.1>"  , test_vec3_add((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ -2.2f, 0.f, 2.2f }, match));
+    print_test(name, "add <-3.3, 2.2,-1.1 > + <2.2 , -4.4,  6.6>\n"  , test_vec3_add((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -1.1f, -2.2f, 5.5f }, match));
 
     // Difference
-    print_test(name, "< 1.1, 2.2, 3.3 > - < 1.1,  2.2,  3.3>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 0.0f, 0.0f, 0.0f }, match));
-    print_test(name, "< 1.1, 2.2, 3.3 > - <-3.3, -2.2, -1.1>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ 4.4f, 4.4f, 4.4f }, match));
-    print_test(name, "<-3.3, 2.2,-1.1 > - <2.2 , -4.4,  6.6>\n"  , test_vec3_sub((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -5.5f, 6.6f, -7.7f }, match));
+    print_test(name, "sub < 1.1, 2.2, 3.3 > - < 1.1,  2.2,  3.3>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){  1.1f, 2.2f, 3.3f }  , (vec3){ 0.0f, 0.0f, 0.0f }, match));
+    print_test(name, "sub < 1.1, 2.2, 3.3 > - <-3.3, -2.2, -1.1>"  , test_vec3_sub((vec3){ 1.1f, 2.2f, 3.3f }, (vec3){ -3.3f, -2.2f, -1.1f }  , (vec3){ 4.4f, 4.4f, 4.4f }, match));
+    print_test(name, "sub <-3.3, 2.2,-1.1 > - <2.2 , -4.4,  6.6>\n"  , test_vec3_sub((vec3){-3.3f, 2.2f,-1.1f }, (vec3){  2.2f, -4.4f, 6.6f }  , (vec3){ -5.5f, 6.6f, -7.7f }, match));
 
     // Product
-    //print_test(name, "<1.23, 2.46> × <3.69, 2.46>"  , test_vec3_mul((vec2){ 1.23f, 2.46f }, (vec2){ 3.69f, 2.46f }  , (vec2){ 4.5387f, 6.0516f }  , match));
-    //print_test(name, "<3.21, 3.14> × <-1.23, -3.14>", test_vec3_mul((vec2){ 3.21f, 3.14f }, (vec2){ -1.23f, -3.14f }, (vec2){ -3.9483f, -9.8596f }, match));
-    //print_test(name, "<0, 0>       × <0, 0>\n"      , test_vec3_mul((vec2){ 0.f, 0.f }    , (vec2){ 0.f, 0.f }      , (vec2){ 0.f, 0.f }          , match));
+    print_test(name, "mul <1.23, 4.56, 7.89>  × <9.87, 6.54, 3.21>"  , test_vec3_mul((vec3){ 1.23f, 4.56f, 7.89f }    , (vec3){ 9.87f, 6.54f, 3.21f }      , (vec3){ 12.1401f, 29.8224f, 25.3269f }          , match));
+    print_test(name, "mul <3.21, 10.0, 20.50> × <5, 6, 7>", test_vec3_mul((vec3){ 3.21f, 10.0f, 20.50f }    , (vec3){ 5.0f, 6.0f, 7.0f }      , (vec3){ 16.05f, 60.0f, 143.5f }          , match));
+    print_test(name, "mul <0, 0, 0>           × <0, 0, 0>\n"      , test_vec3_mul((vec3){ 0.f, 0.f, 0.f }    , (vec3){ 0.f, 0.f, 0.f }      , (vec3){ 0.f, 0.f, 0.f }          , match));
 
     // Quotient
-    print_test(name, "<-8.88 , 4.44, -2.22 > ÷ <-1.11, 2.22, 4.44>", test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
-    print_test(name, "<4.0  , -6.0 , 5.0   > ÷ <2.0  , 3.0 , 2.5 >", test_vec3_div((vec3){ 4.0f, 6.0f, 5.0f }, (vec3){ 2.0f, 3.0f, 2.5f }, (vec3){ 2.f, 2.f, 2.0f }     , match));
-    // print_test(name, "<-18.58, 0.2 , -60.75> ÷ <5.3  , 7.6 , 9.2 >", test_vec3_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
+    print_test(name, "div <-8.88 , 4.44, -2.22 > ÷ <-1.11, 2.22, 4.44>", test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
+    print_test(name, "div <4.0  , -6.0 , 5.0   > ÷ <2.0  , 3.0 , 2.5 >", test_vec3_div((vec3){ 4.0f, 6.0f, 5.0f }, (vec3){ 2.0f, 3.0f, 2.5f }, (vec3){ 2.f, 2.f, 2.0f }     , match));
+    print_test(name, "div <-18.58, 0.2 , -60.75> ÷ <5.3  , 7.6 , 9.2 >\n", test_vec3_div((vec3){ -18.58f, 0.2f, -60.75f }, (vec3){ 5.3f, 7.6f, 9.2f }    , (vec3){ -3.50566f, 0.02631578f, -6.60326f}, match));
+
+    // Length
+    print_test(name, "length ||<0.0, 0.0, 0.0>||"  , test_vec3_length((vec3){ 0.0f, 0.0f, 0.f }, 0.0f, match));
+    print_test(name, "length ||<2.0, 0.0, 1.0>||"  , test_vec3_length((vec3){ 2.0f, 0.f, 1.f }, 2.2360679775f, match));
+    print_test(name, "length ||<1.0, 1.0, 1.0>||\n", test_vec3_length((vec3){ 1.0f, 1.0f, 1.0f } , 1.7320507f, match));
+    
+    // Demote 2D
+    print_test(name, "to vec2 < 1.0,  2.0, 3.0> -> < 1.0, 2.0>", test_vec3_demote_vec2((vec3){1.0f, 2.0f, 3.0f}, (vec2){1.0f, 2.0f}, match));
+    print_test(name, "to vec2 < 0.0,  0.0, 0.0> -> < 0.0, 0.0>", test_vec3_demote_vec2((vec3){0.0f, 0.0f, 0.0f}, (vec2){0.0f, 0.0f}, match));
+    print_test(name, "to vec2 <-6.0, -3.0, 2.0> -> <-6.0, -3.0>\n", test_vec3_demote_vec2((vec3){-6.0f, -3.0f, 2.0f}, (vec2){-6.0f, -3.0f}, match));
+
+    // Promote 4D
+    print_test(name, "to vec4 < 1.0,  2.0, 3.0> -> < 1.0, 2.0, 3.0, 0.0>", test_vec3_promote_vec4((vec3){1.0f, 2.0f, 3.0f}, (vec4){1.0f, 2.0f, 3.0f, 0.0f}, match));
+    print_test(name, "to vec4 < 0.0,  0.0, 0.0> -> < 0.0, 0.0, 0.0, 0.0>", test_vec3_promote_vec4((vec3){0.0f, 0.0f, 0.0f}, (vec4){0.0f, 0.0f, 0.f, 0.f}, match));
+    print_test(name, "to vec4 <-6.0, -3.0, 2.0> -> <-6.0, -3.0, 2.0, 0.0>\n", test_vec3_promote_vec4((vec3){-6.0f, -3.0f, 2.0f}, (vec4){-6.0f, -3.0f, 2.0f, 0.0f}, match));
 
     // Print the summary of this test
     print_final_summary();
@@ -635,9 +1051,43 @@ void test_g10_linear_vec3 ( const char *name )
 void test_g10_linear_vec4 ( const char *name )
 {
     
-    // TODO: 
-    // Formatting
+     // Formatting
     log_scenario("%s\n", name);
+
+    // Accumulate 
+    print_test(name, "add <  1.1, 2.2,  3.3, 4.4 > + < 1.1,  2.2,  3.3, 4.4 >"  , test_vec4_add((vec4){ 1.1f, 2.2f, 3.3f, 4.4f }, (vec4){  1.1f,  2.2f,  3.3f,  4.4f }  , (vec4){ 2.2f, 4.4f, 6.6f, 8.8f }, match));
+    print_test(name, "add <  1.1, 2.2,  3.3, 4.4 > + <-4.4, -3.3, -2.2, -1.1>"  , test_vec4_add((vec4){ 1.1f, 2.2f, 3.3f, 4.4f }, (vec4){ -4.4f, -3.3f, -2.2f, -1.1f }  , (vec4){ -3.3f, -1.1f, 1.1f, 3.3f }, match));
+    print_test(name, "add < -1.1, 2.2, -3.3, 4.4 > + < 5.5, -6.6,  7.7, -8.8>\n"  , test_vec4_add((vec4){ -1.1f, 2.2f, -3.3f, 4.4f }, (vec4){ 5.5f, -6.6f, 7.7f, -8.8f }  , (vec4){ 4.4f, -4.4f, 4.4f, -4.4f }, match));
+
+    // Difference
+    print_test(name, "sub <  0.0, 0.0,  0.0, 0.0 > - < 0.0,  0.0, 0.0,  0.0 >" , test_vec4_sub((vec4){ 0.0f, 0.0f, 0.0f, 0.0f }, (vec4){  0.0f, 0.0f, 0.0f, 0.0f }  , (vec4){ 0.0f, 0.0f, 0.0f, 0.0f}, match));
+    print_test(name, "sub <  1.1, 2.2,  3.3, 4.4 > - < 1.1,  2.2, 3.3,  4.4>"  , test_vec4_sub((vec4){ 1.1f, 2.2f, 3.3f, 4.4f }, (vec4){ 1.1f, 2.2f, 3.3f, 4.4f }  , (vec4){ 0.0f, 0.0f, 0.0f, 0.0f }, match));
+    print_test(name, "sub < -1.1, 2.2, -3.3, 4.4 > - < 5.5, -6.6, 7.7, -8.8>\n", test_vec4_sub((vec4){ -1.1f, 2.2f, -3.3f, 4.4f }, (vec4){ 5.5f, -6.6f, 7.7f, -8.8f }  , (vec4){ -6.6f, 8.8f, -11.0f, 13.2f }, match));
+
+    // Product
+    print_test(name, "mul <0, 0, 0, 0>  × <0, 0, 0, 0>"      , test_vec4_mul((vec4){ 0.f, 0.f, 0.f, 0.f }    , (vec4){ 0.f, 0.f, 0.f, 0.f }      , (vec4){ 0.f, 0.f, 0.f, 0.f }          , match));
+    print_test(name, "mul <1, 2, 3, 4>  × <4, 3, 2, 1>"      , test_vec4_mul((vec4){ 1.f, 2.f, 3.f, 4.f }    , (vec4){ 4.f, 3.f, 2.f, 1.f }      , (vec4){ 4.0f, 6.0f, 6.0f, 4.0f }          , match));
+    print_test(name, "mul <12, 9, 6, 3> × <3, 6, 6, 3>\n"      , test_vec4_mul((vec4){ 12.f, 9.f, 6.f, 3.f }   , (vec4){ 3.f, 6.f, 6.f, 3.f }      , (vec4){ 36.0f, 54.0f, 36.0f, 9.0f }          , match));
+
+    // TODO: Quotient
+    //print_test(name, "div <-8.88 , 4.44, -2.22 > ÷ <-1.11, 2.22, 4.44>", test_vec3_div((vec3){ 8.88f, 4.44f, 2.22f }, (vec3){ 1.11f, 2.22f, 4.44f }, (vec3){ 8.f, 2.f, 0.5f }     , match));
+    //print_test(name, "div <4.0  , -6.0 , 5.0   > ÷ <2.0  , 3.0 , 2.5 >", test_vec3_div((vec3){ 4.0f, 6.0f, 5.0f }, (vec3){ 2.0f, 3.0f, 2.5f }, (vec3){ 2.f, 2.f, 2.0f }     , match));
+    //print_test(name, "div <-18.58, 0.2 , -60.75> ÷ <5.3  , 7.6 , 9.2 >", test_vec3_div((vec2){ 17.38f, 4.2f }, (vec2){ -2.f, -2.f }    , (vec2){ -8.69f, -2.2f }, match));
+
+    // Length
+    print_test(name, "length ||<0.0, 0.0, 0.0, 0,0>||"  , test_vec4_length((vec4){ 0.0f, 0.0f, 0.0f, 0.0f }, 0.0f, match));
+    print_test(name, "length ||<2.0, 0.0, 1.0, 3.0>||"  , test_vec4_length((vec4){ 2.0f, 0.0f, 1.0f, 3.0f }, 3.74165739f, match));
+    print_test(name, "length ||<1.0, 1.0, 1.0, 1.0>||\n", test_vec4_length((vec4){ 1.0f, 1.0f, 1.0f, 1.0f }, 2.0f, match));
+    
+    // Demote 2D
+    print_test(name, "to vec2 < 1.0,  2.0, 3.0, 4.0> -> < 1.0, 2.0>", test_vec4_demote_vec2((vec4){1.0f, 2.0f, 3.0f, 4.0f}, (vec2){1.0f, 2.0f}, match));
+    print_test(name, "to vec2 < 0.0,  0.0, 0.0, 0.0> -> < 0.0, 0.0>", test_vec4_demote_vec2((vec4){0.0f, 0.0f, 0.0f, 0.0f}, (vec2){0.0f, 0.0f}, match));
+    print_test(name, "to vec2 <-6.0, -3.0, 2.0, -8.0> -> <-6.0, -3.0>\n", test_vec4_demote_vec2((vec4){-6.0f, -3.0f, 2.0f, -8.0f}, (vec2){-6.0f, -3.0f}, match));
+
+    // Demote 3D
+    print_test(name, "to vec3 < 1.0,  2.0, 3.0, 4.0> -> < 1.0, 2.0, 3.0>", test_vec4_demote_vec3((vec4){1.0f, 2.0f, 3.0f, 4.0f}, (vec3){1.0f, 2.0f, 3.0f}, match));
+    print_test(name, "to vec3 < 0.0,  0.0, 0.0, 0.0> -> < 0.0, 0.0, 0.0>", test_vec4_demote_vec3((vec4){0.0f, 0.0f, 0.0f, 0.0f}, (vec3){0.0f, 0.0f, 0.f}, match));
+    print_test(name, "to vec3 <-6.0, -3.0, 2.0, -8.0> -> <-6.0, -3.0, 2.0>\n", test_vec4_demote_vec3((vec4){-6.0f, -3.0f, 2.0f, -8.0f}, (vec3){-6.0f, -3.0f, 2.0f}, match));
 
     // Print the summary of this test
     print_final_summary();
@@ -652,7 +1102,91 @@ void test_g10_linear_mat2 ( const char *name )
     // Formatting
     log_scenario("%s\n", name);
 
-    // TODO: 
+    // Identity matrix
+    print_test(name, "identity\n", test_mat2_identity((mat2){.a=1.0f,.b=0.0f,.c=0.0f,.d=1.0f}, match));
+
+    // Matrix vector multiplication
+    print_test(name, "mul vec2 [[ 0,  0], [ 0,  0]] * <1, 1>", test_mat2_mul_vec2((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f}, (vec2){1.0f,1.0f}, (vec2){0.0f,0.0f}, match));
+    
+    print_test(name, "mul vec2 [[ 1,  0], [ 0,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){5.0f,0.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  1], [ 0,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=1.f,.c=0.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){10.0f,0.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  0], [ 1,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=0.f,.c=1.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){0.0f,5.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  0], [ 0,  1]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=0.f,.c=0.f,.d=1.f}, (vec2){5.0f,10.0f}, (vec2){0.0f,10.0f}, match));
+    
+    print_test(name, "mul vec2 [[-1,  0], [ 0,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){-5.0f, 0.f}, match));
+    print_test(name, "mul vec2 [[ 0, -1], [ 0,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=-1.f,.c=0.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){-10.0f, 0.f}, match));
+    print_test(name, "mul vec2 [[ 0,  0], [-1,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=0.f,.c=-1.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){0.0f,-5.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  0], [ 0, -1]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=0.f,.c=0.f,.d=-1.f}, (vec2){5.0f,10.0f}, (vec2){.0f,-10.0f}, match));
+
+    print_test(name, "mul vec2 [[ 1,  0], [ 0,  1]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, (vec2){5.0f,10.0f}, (vec2){5.0f,10.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  1], [ 1,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){10.0f,5.0f}, match));
+    print_test(name, "mul vec2 [[-1,  0], [ 0  -1]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, (vec2){5.0f,10.0f}, (vec2){-5.0f,-10.0f}, match));
+    print_test(name, "mul vec2 [[ 0, -1], [-1,  0]] * <5, 10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, (vec2){5.0f,10.0f}, (vec2){-10.0f,-5.0f}, match));
+
+    print_test(name, "mul vec2 [[ 1,  0], [ 0,  1]] * <-5, -10>", test_mat2_mul_vec2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, (vec2){-5.0f,-10.0f}, (vec2){-5.0f,-10.0f}, match));
+    print_test(name, "mul vec2 [[ 0,  1], [ 1,  0]] * <-5, -10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, (vec2){-5.0f,-10.0f}, (vec2){-10.0f,-5.0f}, match));
+    print_test(name, "mul vec2 [[-1,  0], [ 0, -1]] * <-5, -10>", test_mat2_mul_vec2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, (vec2){-5.0f,-10.0f}, (vec2){5.0f,10.0f}, match));
+    print_test(name, "mul vec2 [[ 0, -1], [-1,  0]] * <-5, -10>", test_mat2_mul_vec2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, (vec2){-5.0f,-10.0f}, (vec2){10.0f,5.0f}, match));
+
+    print_test(name, "mul vec2 [[ 1,  2], [ 3,  4]] * <5, 7>\n", test_mat2_mul_vec2((mat2){.a=1.f,.b=2.f,.c=3.f,.d=4.f}, (vec2){5.0f,7.0f}, (vec2){19.f, 43.f}, match));
+ 
+    // Matrix matrix multiplication
+    print_test(name, "mul mat2 [[ 0,  0], [ 0,  0]] * [[ 0,  0], [ 0,  0]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 1,  2], [ 3,  4]] * [[ 0,  0], [ 0,  0]]", test_mat2_mul_mat2((mat2){.a=1.f,.b=2.f,.c=3.f,.d=4.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 0,  0], [ 0,  0]] * [[-4, -3], [-2, -1]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=-4.f,.b=-3.f,.c=-2.f,.d=-1.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f}, match));
+    
+    print_test(name, "mul mat2 [[ 1,  0], [ 0,  1]] * [[ 1,  0], [ 0,  1]]", test_mat2_mul_mat2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, match));
+    print_test(name, "mul mat2 [[ 1,  0], [ 0,  1]] * [[ 0,  1], [ 1,  0]]", test_mat2_mul_mat2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 1,  0], [ 0,  1]] * [[-1,  0], [ 0, -1]]", test_mat2_mul_mat2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, match));
+    print_test(name, "mul mat2 [[ 1,  0], [ 0,  1]] * [[ 0, -1], [-1,  0]]", test_mat2_mul_mat2((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=-0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, match));
+
+    print_test(name, "mul mat2 [[ 0,  1], [ 1,  0]] * [[ 1,  0], [ 0,  1]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 0,  1], [ 1,  0]] * [[ 0,  1], [ 1,  0]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, match));
+    print_test(name, "mul mat2 [[ 0,  1], [ 1,  0]] * [[-1,  0], [ 0, -1]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 0,  1], [ 1,  0]] * [[ 0, -1], [-1,  0]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, match));
+
+    print_test(name, "mul mat2 [[-1,  0], [ 0, -1]] * [[ 1,  0], [ 0,  1]]", test_mat2_mul_mat2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, match));
+    print_test(name, "mul mat2 [[-1,  0], [ 0, -1]] * [[ 0,  1], [ 1,  0]]", test_mat2_mul_mat2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[-1,  0], [ 0, -1]] * [[-1,  0], [ 0, -1]]", test_mat2_mul_mat2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, match));
+    print_test(name, "mul mat2 [[-1,  0], [ 0, -1]] * [[ 0, -1], [-1,  0]]", test_mat2_mul_mat2((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=-0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, match));
+
+    print_test(name, "mul mat2 [[ 0, -1], [-1,  0]] * [[ 1,  0], [ 0,  1]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 0, -1], [-1,  0]] * [[ 0,  1], [ 1,  0]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f}, match));
+    print_test(name, "mul mat2 [[ 0, -1], [-1,  0]] * [[-1,  0], [ 0, -1]]", test_mat2_mul_mat2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f}, match));
+    print_test(name, "mul mat2 [[ 0, -1], [-1,  0]] * [[ 0, -1], [-1,  0]]\n", test_mat2_mul_mat2((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f}, match));
+
+    // Transpose tests
+    print_test(name, "transpose [[ 0,  0], [ 0,  0]]", test_mat2_transpose((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},match));
+
+    print_test(name, "transpose [[ 1,  0], [ 0,  0]]", test_mat2_transpose((mat2){.a=1.f,.b=0.f,.c=0.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=0.f},match));
+    print_test(name, "transpose [[ 0,  1], [ 0,  0]]", test_mat2_transpose((mat2){.a=0.f,.b=1.f,.c=0.f,.d=0.f},(mat2){.a=0.f,.b=0.f,.c=1.f,.d=0.f},match));
+    print_test(name, "transpose [[ 0,  0], [ 1,  0]]", test_mat2_transpose((mat2){.a=0.f,.b=0.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=0.f,.d=0.f},match));
+    print_test(name, "transpose [[ 0,  0], [ 0,  1]]", test_mat2_transpose((mat2){.a=0.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=1.f},match));
+
+    print_test(name, "transpose [[ 1,  0], [ 0,  1]]", test_mat2_transpose((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},match));
+    print_test(name, "transpose [[ 0,  1], [ 1,  0]]", test_mat2_transpose((mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},(mat2){.a=0.f,.b=1.f,.c=1.f,.d=0.f},match));
+    print_test(name, "transpose [[-1,  0], [ 0, -1]]", test_mat2_transpose((mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},(mat2){.a=-1.f,.b=0.f,.c=0.f,.d=-1.f},match));
+    print_test(name, "transpose [[ 0, -1], [-1,  0]]", test_mat2_transpose((mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},(mat2){.a=0.f,.b=-1.f,.c=-1.f,.d=0.f},match));
+    
+    print_test(name, "transpose [[ 1,  1], [ 0,  0]]", test_mat2_transpose((mat2){.a=1.f,.b=1.f,.c=0.f,.d=0.f},(mat2){.a=1.f,.b=0.f,.c=1.f,.d=0.f},match));
+    print_test(name, "transpose [[ 0,  0], [ 1,  1]]", test_mat2_transpose((mat2){.a=0.f,.b=0.f,.c=1.f,.d=1.f},(mat2){.a=0.f,.b=1.f,.c=0.f,.d=1.f},match));
+    print_test(name, "transpose [[ 1,  0], [ 1,  0]]", test_mat2_transpose((mat2){.a=1.f,.b=0.f,.c=1.f,.d=0.f},(mat2){.a=1.f,.b=1.f,.c=0.f,.d=0.f},match));
+    print_test(name, "transpose [[ 0,  1], [ 0,  1]]", test_mat2_transpose((mat2){.a=0.f,.b=1.f,.c=0.f,.d=1.f},(mat2){.a=0.f,.b=0.f,.c=1.f,.d=1.f},match));
+
+    print_test(name, "transpose [[ 1,  2], [ 3,  4]]", test_mat2_transpose((mat2){.a=1.f,.b=2.f,.c=3.f,.d=4.f},(mat2){.a=1.f,.b=3.f,.c=2.f,.d=4.f},match));
+    print_test(name, "transpose [[ 4,  1], [ 2,  3]]", test_mat2_transpose((mat2){.a=4.f,.b=1.f,.c=2.f,.d=3.f},(mat2){.a=4.f,.b=2.f,.c=1.f,.d=3.f},match));
+    print_test(name, "transpose [[ 3,  4], [ 1,  2]]", test_mat2_transpose((mat2){.a=3.f,.b=4.f,.c=1.f,.d=2.f},(mat2){.a=3.f,.b=1.f,.c=4.f,.d=2.f},match));
+    print_test(name, "transpose [[ 2,  3], [ 4,  1]]\n", test_mat2_transpose((mat2){.a=2.f,.b=3.f,.c=4.f,.d=1.f},(mat2){.a=2.f,.b=4.f,.c=3.f,.d=1.f},match));
+
+    // Promote 3x3
+    print_test(name, "to mat3 [[0, 0], [0, 0]] -> [[0, 0, 0], [0, 0, 0], [0, 0, 1]]", test_mat2_promote_mat3((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+    print_test(name, "to mat3 [[1, 0], [0, 1]] -> [[1, 0, 0], [0, 1, 0], [0, 0, 1]]", test_mat2_promote_mat3((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+    print_test(name, "to mat3 [[1, 2], [3, 4]] -> [[1, 2, 0], [3, 4, 0], [0, 0, 1]]\n", test_mat2_promote_mat3((mat2){.a=1.f,.b=2.f,.c=3.f,.d=4.f},(mat3){.a=1.f,.b=2.f,.c=0.f,.d=3.f,.e=4.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+
+    // Promote 4x4
+    print_test(name, "to mat4 [[0, 0], [0, 0]] -> [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]", test_mat2_promote_mat4((mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},(mat4){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
+    print_test(name, "to mat4 [[1, 0], [0, 1]] -> [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]", test_mat2_promote_mat4((mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},(mat4){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
+    print_test(name, "to mat4 [[1, 2], [3, 4]] -> [[1, 2, 0, 0], [3, 4, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]", test_mat2_promote_mat4((mat2){.a=1.f,.b=2.f,.c=3.f,.d=4.f},(mat4){.a=1.f,.b=2.f,.c=0.f,.d=0.f,.e=3.f,.f=4.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
 
     // Print the summary of this test
     print_final_summary();
@@ -664,9 +1198,98 @@ void test_g10_linear_mat2 ( const char *name )
 void test_g10_linear_mat3 ( const char *name )
 {
     
-    // TODO: 
     // Formatting
     log_scenario("%s\n", name);
+
+    // Identity matrix
+    print_test(name, "identity\n", test_mat3_identity((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f}, match));
+
+    // Matrix vector multiplication
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 0,  0,  0]] * <1, 1, 1>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){1.0f,1.0f,1.0f}, (vec3){0.0f,0.0f,0.0f}, match));
+    
+    print_test(name, "mul vec3 [[ 1,  0,  0], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){5.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  1,  0], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=1.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){10.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  1], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){15.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 1,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=1.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,5.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  1,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,10.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  1], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,15.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 1,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,5.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 0,  1,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=1.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,10.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 0,  0,  1]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,15.0f}, match));
+
+    print_test(name, "mul vec3 [[-1,  0,  0], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=-1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){-5.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0, -1,  0], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=-1.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){-10.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0, -1], [ 0,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=-1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){-15.0f,0.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [-1,  0,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=-1.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,-5.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0, -1,  0], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=-1.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,-10.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0, -1], [ 0,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=-1.f,.g=0.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,-15.0f,0.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [-1,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=-1.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,-5.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 0, -1,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=-1.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,-10.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  0], [ 0,  0,  0], [ 0,  0, -1]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=-1.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){0.0f,0.0f,-15.0f}, match));
+
+    print_test(name, "mul vec3 [[ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){5.0f,10.0f,15.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  1], [ 0,  1,  0], [ 1,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=1.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){15.0f,10.0f,5.0f}, match));
+    print_test(name, "mul vec3 [[-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=-1.f,.b=0.f,.c=0.f,.d=0.f,.e=-1.f,.f=0.f,.g=0.f,.h=0.f,.i=-1.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){-5.0f,-10.0f,-15.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0, -1], [ 0, -1,  0], [-1,  0,  0]] * <5, 10, 15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=-1.f,.d=0.f,.e=-1.f,.f=0.f,.g=-1.f,.h=0.f,.i=0.f}, (vec3){5.0f,10.0f,15.0f}, (vec3){-15.0f,-10.0f,-5.0f}, match));
+
+    print_test(name, "mul vec3 [[ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1]] * <-5, -10, -15>", test_mat3_mul_vec3((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f}, (vec3){-5.0f,-10.0f,-15.0f}, (vec3){-5.0f,-10.0f,-15.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0,  1], [ 0,  1,  0], [ 1,  0,  0]] * <-5, -10, -15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=1.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f}, (vec3){-5.0f,-10.0f,-15.0f}, (vec3){-15.0f,-10.0f,-5.0f}, match));
+    print_test(name, "mul vec3 [[-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]] * <-5, -10, -15>", test_mat3_mul_vec3((mat3){.a=-1.f,.b=0.f,.c=0.f,.d=0.f,.e=-1.f,.f=0.f,.g=0.f,.h=0.f,.i=-1.f}, (vec3){-5.0f,-10.0f,-15.0f}, (vec3){5.0f,10.0f,15.0f}, match));
+    print_test(name, "mul vec3 [[ 0,  0, -1], [ 0, -1,  0], [-1,  0,  0]] * <-5, -10, -15>", test_mat3_mul_vec3((mat3){.a=0.f,.b=0.f,.c=-1.f,.d=0.f,.e=-1.f,.f=0.f,.g=-1.f,.h=0.f,.i=0.f}, (vec3){-5.0f,-10.0f,-15.0f}, (vec3){15.0f,10.0f,5.0f}, match));
+    
+    print_test(name, "mul vec3 [[ 1,  2,  3], [ 4,  5,  6], [ 7,  8,  9]] * <5, 7, 9>\n", test_mat3_mul_vec3((mat3){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f}, (vec3){5.0f,7.0f,9.0f}, (vec3){46.f, 109.f, 172.f}, match));
+    
+    // Matrix matrix multiplication
+    log_info("[TODO]: g10 linear mat3 mul mat3\n\n");
+
+    // Transpose tests
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+
+    print_test(name, "transpose [[ 1,  0,  0], [ 0,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  1,  0], [ 0,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=1.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=1.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  1], [ 0,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 1,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=1.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=1.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  1,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  1], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=1.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  0], [ 1,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  0], [ 0,  1,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=1.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  0], [ 0,  0,  1]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+
+    print_test(name, "transpose [[ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1]]", test_mat3_transpose((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},(mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+    print_test(name, "transpose [[ 0,  0,  1], [ 0,  1,  0], [ 1,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=1.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=1.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]]", test_mat3_transpose((mat3){.a=-1.f,.b=0.f,.c=0.f,.d=0.f,.e=-1.f,.f=0.f,.g=0.f,.h=0.f,.i=-1.f},(mat3){.a=-1.f,.b=0.f,.c=0.f,.d=0.f,.e=-1.f,.f=0.f,.g=0.f,.h=0.f,.i=-1.f},match));
+    print_test(name, "transpose [[ 0,  0, -1], [ 0, -1,  0], [-1,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=-1.f,.d=0.f,.e=-1.f,.f=0.f,.g=-1.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=-1.f,.d=0.f,.e=-1.f,.f=0.f,.g=-1.f,.h=0.f,.i=0.f},match));
+    
+    print_test(name, "transpose [[ 1,  1,  1], [ 0,  0,  0], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=1.f,.b=1.f,.c=1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=1.f,.b=0.f,.c=0.f,.d=1.f,.e=0.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 1,  1,  1], [ 0,  0,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=1.f,.e=1.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f},(mat3){.a=0.f,.b=1.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=1.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  0], [ 0,  0,  0], [ 1,  1,  1]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=1.f,.h=1.f,.i=1.f},(mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=1.f},match));
+
+    print_test(name, "transpose [[ 1,  0,  0], [ 1,  0,  0], [ 1,  0,  0]]", test_mat3_transpose((mat3){.a=1.f,.b=0.f,.c=0.f,.d=1.f,.e=0.f,.f=0.f,.g=1.f,.h=0.f,.i=0.f},(mat3){.a=1.f,.b=1.f,.c=1.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  1,  0], [ 0,  1,  0], [ 0,  1,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=1.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=1.f,.i=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=1.f,.e=1.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  0,  1], [ 0,  0,  1], [ 0,  0,  1]]", test_mat3_transpose((mat3){.a=0.f,.b=0.f,.c=1.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=1.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=1.f,.h=1.f,.i=1.f},match));
+
+    print_test(name, "transpose [[ 0,  2,  2], [ 4,  0,  2], [ 4,  4,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=2.f,.c=2.f,.d=4.f,.e=0.f,.f=2.f,.g=4.f,.h=4.f,.i=0.f},(mat3){.a=0.f,.b=4.f,.c=4.f,.d=2.f,.e=0.f,.f=4.f,.g=2.f,.h=2.f,.i=0.f},match));
+    print_test(name, "transpose [[ 0,  4,  4], [ 2,  0,  4], [ 2,  2,  0]]", test_mat3_transpose((mat3){.a=0.f,.b=4.f,.c=4.f,.d=2.f,.e=0.f,.f=4.f,.g=2.f,.h=2.f,.i=0.f},(mat3){.a=0.f,.b=2.f,.c=2.f,.d=4.f,.e=0.f,.f=2.f,.g=4.f,.h=4.f,.i=0.f},match));
+
+    print_test(name, "transpose [[ 1,  2,  3], [ 4,  5,  6], [ 7,  8,  9]]", test_mat3_transpose((mat3){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f},(mat3){.a=1.f,.b=4.f,.c=7.f,.d=2.f,.e=5.f,.f=8.f,.g=3.f,.h=6.f,.i=9.f},match));
+    print_test(name, "transpose [[ 2,  3,  4], [ 5,  6,  7], [ 8,  9,  1]]", test_mat3_transpose((mat3){.a=2.f,.b=3.f,.c=4.f,.d=5.f,.e=6.f,.f=7.f,.g=8.f,.h=9.f,.i=1.f},(mat3){.a=2.f,.b=5.f,.c=8.f,.d=3.f,.e=6.f,.f=9.f,.g=4.f,.h=7.f,.i=1.f},match));
+    print_test(name, "transpose [[ 3,  4,  5], [ 6,  7,  8], [ 9,  1,  2]]", test_mat3_transpose((mat3){.a=3.f,.b=4.f,.c=5.f,.d=6.f,.e=7.f,.f=8.f,.g=9.f,.h=1.f,.i=2.f},(mat3){.a=3.f,.b=6.f,.c=9.f,.d=4.f,.e=7.f,.f=1.f,.g=5.f,.h=8.f,.i=2.f},match));
+    print_test(name, "transpose [[ 4,  5,  6], [ 7,  8,  9], [ 1,  2,  3]]", test_mat3_transpose((mat3){.a=4.f,.b=5.f,.c=6.f,.d=7.f,.e=8.f,.f=9.f,.g=1.f,.h=2.f,.i=3.f},(mat3){.a=4.f,.b=7.f,.c=1.f,.d=5.f,.e=8.f,.f=2.f,.g=6.f,.h=9.f,.i=3.f},match));
+    print_test(name, "transpose [[ 5,  6,  7], [ 8,  9,  1], [ 2,  3,  4]]", test_mat3_transpose((mat3){.a=5.f,.b=6.f,.c=7.f,.d=8.f,.e=9.f,.f=1.f,.g=2.f,.h=3.f,.i=4.f},(mat3){.a=5.f,.b=8.f,.c=2.f,.d=6.f,.e=9.f,.f=3.f,.g=7.f,.h=1.f,.i=4.f},match));
+    print_test(name, "transpose [[ 6,  7,  8], [ 9,  1,  2], [ 3,  4,  5]]", test_mat3_transpose((mat3){.a=6.f,.b=7.f,.c=8.f,.d=9.f,.e=1.f,.f=2.f,.g=3.f,.h=4.f,.i=5.f},(mat3){.a=6.f,.b=9.f,.c=3.f,.d=7.f,.e=1.f,.f=4.f,.g=8.f,.h=2.f,.i=5.f},match));
+    print_test(name, "transpose [[ 7,  8,  9], [ 1,  2,  3], [ 4,  5,  6]]", test_mat3_transpose((mat3){.a=7.f,.b=8.f,.c=9.f,.d=1.f,.e=2.f,.f=3.f,.g=4.f,.h=5.f,.i=6.f},(mat3){.a=7.f,.b=1.f,.c=4.f,.d=8.f,.e=2.f,.f=5.f,.g=9.f,.h=3.f,.i=6.f},match));
+    print_test(name, "transpose [[ 8,  9,  1], [ 2,  3,  4], [ 5,  6,  7]]", test_mat3_transpose((mat3){.a=8.f,.b=9.f,.c=1.f,.d=2.f,.e=3.f,.f=4.f,.g=5.f,.h=6.f,.i=7.f},(mat3){.a=8.f,.b=2.f,.c=5.f,.d=9.f,.e=3.f,.f=6.f,.g=1.f,.h=4.f,.i=7.f},match));
+    print_test(name, "transpose [[ 9,  1,  2], [ 3,  4,  5], [ 6,  7,  8]]\n", test_mat3_transpose((mat3){.a=9.f,.b=1.f,.c=2.f,.d=3.f,.e=4.f,.f=5.f,.g=6.f,.h=7.f,.i=8.f},(mat3){.a=9.f,.b=3.f,.c=6.f,.d=1.f,.e=4.f,.f=7.f,.g=2.f,.h=5.f,.i=8.f},match));
+
+    // Demomote 2x2
+    print_test(name, "to mat2 [[0, 0, 0], [0, 0, 0], [0, 0, 0]] -> [[0, 0], [0, 0]]", test_mat3_demote_mat2((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},match));
+    print_test(name, "to mat2 [[1, 0, 0], [0, 1, 0], [0, 0, 1]] -> [[1, 0], [0, 1]]", test_mat3_demote_mat2((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},match));
+    print_test(name, "to mat2 [[1, 2, 3], [4, 5, 6], [7, 8, 9]] -> [[1, 2], [4, 5]]\n", test_mat3_demote_mat2((mat3){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f},(mat2){.a=1.f,.b=2.f,.c=4.f,.d=5.f},match));
+    
+    // Promote 4x4
+    print_test(name, "to mat4 [[0, 0, 0], [0, 0, 0], [0, 0, 0]] -> [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]", test_mat3_promote_mat4((mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},(mat4){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=0.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
+    print_test(name, "to mat4 [[1, 0, 0], [0, 1, 0], [0, 0, 1]] -> [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]", test_mat3_promote_mat4((mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},(mat4){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
+    print_test(name, "to mat4 [[1, 2, 3], [4, 5, 6], [7, 8, 9]] -> [[1, 2, 3, 0], [4, 5, 6, 0], [7, 8, 9, 0], [0, 0, 0, 1]]", test_mat3_promote_mat4((mat3){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f},(mat4){.a=1.f,.b=2.f,.c=3.f,.d=0.f,.e=4.f,.f=5.f,.g=6.f,.h=0.f,.i=7.f,.j=8.f,.k=9.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},match));
 
     // Print the summary of this test
     print_final_summary();
@@ -678,9 +1301,30 @@ void test_g10_linear_mat3 ( const char *name )
 void test_g10_linear_mat4 ( const char *name )
 {
     
-    // TODO: 
     // Formatting
     log_scenario("%s\n", name);
+
+    // Identity matrix
+    print_test(name, "identity\n", test_mat4_identity((mat4){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f}, match));
+
+    // Matrix vector multiplication
+    log_info("[TODO]: g10 linear mat4 mul vec4\n\n");
+
+    // Matrix matrix multiplication
+    log_info("[TODO]: g10 linear mat4 mul mat4\n\n");
+
+    // Transpose tests
+    log_info("[TODO]: g10 linear mat4 transpose\n\n");
+
+    // Demote 2x2
+    print_test(name, "to mat2 [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]   , [0, 0, 0, 0]]     -> [[0, 0, 0], [0, 0, 0], [0, 0, 0]]", test_mat4_demote_mat2((mat4){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},(mat2){.a=0.f,.b=0.f,.c=0.f,.d=0.f},match));
+    print_test(name, "to mat2 [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]   , [0, 0, 0, 1]]     -> [[1, 0, 0], [0, 1, 0], [0, 0, 1]]", test_mat4_demote_mat2((mat4){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},(mat2){.a=1.f,.b=0.f,.c=0.f,.d=1.f},match));
+    print_test(name, "to mat2 [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]] -> [[1, 2, 3], [5, 6, 7], [9, 10, 11]]\n", test_mat4_demote_mat2((mat4){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f,.j=10.f,.k=11.f,.l=12.f,.m=13.f,.n=14.f,.o=15.f,.p=16.f},(mat2){.a=1.f,.b=2.f,.c=5.f,.d=6.f},match));
+
+    // Demomote 3x3
+    print_test(name, "to mat3 [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]   , [0, 0, 0, 0]]     -> [[0, 0], [0, 0]]", test_mat4_demote_mat3((mat4){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=0.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=0.f},(mat3){.a=0.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=0.f,.g=0.f,.h=0.f,.i=0.f},match));
+    print_test(name, "to mat3 [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]   , [0, 0, 0, 1]]     -> [[1, 0], [0, 1]]", test_mat4_demote_mat3((mat4){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=0.f,.f=1.f,.g=0.f,.h=0.f,.i=0.f,.j=0.f,.k=1.f,.l=0.f,.m=0.f,.n=0.f,.o=0.f,.p=1.f},(mat3){.a=1.f,.b=0.f,.c=0.f,.d=0.f,.e=1.f,.f=0.f,.g=0.f,.h=0.f,.i=1.f},match));
+    print_test(name, "to mat3 [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]] -> [[1, 2], [5, 6]]", test_mat4_demote_mat3((mat4){.a=1.f,.b=2.f,.c=3.f,.d=4.f,.e=5.f,.f=6.f,.g=7.f,.h=8.f,.i=9.f,.j=10.f,.k=11.f,.l=12.f,.m=13.f,.n=14.f,.o=15.f,.p=16.f},(mat3){.a=1.f,.b=2.f,.c=3.f,.d=5.f,.e=6.f,.f=7.f,.g=9.f,.h=10.f,.i=11.f},match));
 
     // Print the summary of this test
     print_final_summary();
@@ -874,159 +1518,6 @@ int construct_minimal_g10_instance ( g_instance **pp_instance ) {
 
     *pp_instance = p_instance;
 
-    return 1;
-}
-
-int get_mat4_from_list ( mat4 *p_mat4 )
-{
-    
-    // Static data
-    static int l = 0;
-    static const mat4 _matricies[32] = 
-    {
-        [0] = (mat4)
-        {
-            .a = 3.982f, .b = 0.124f, .c = 8.716f, .d = 2.587f,
-            .e = 1.439f, .f = 4.773f, .g = 9.281f, .h = 0.875f,
-            .i = 0.621f, .j = 1.852f, .k = 4.268f, .l = 0.098f,
-            .m = 6.905f, .n = 0.612f, .o = 7.318f, .p = 8.489f
-        },
-        [1] = (mat4)
-        {
-            
-        },
-        [2] = (mat4)
-        {
-            
-        },
-        [3] = (mat4)
-        {
-            
-        },
-        [4] = (mat4)
-        {
-            
-        },
-        [5] = (mat4)
-        {
-            
-        },
-        [6] = (mat4)
-        {
-            
-        },
-        [7] = (mat4)
-        {
-            
-        },
-        [8] = (mat4)
-        {
-            
-        },
-        [9] = (mat4)
-        {
-            
-        },
-        [10] = (mat4)
-        {
-            
-        },
-        [11] = (mat4)
-        {
-            
-        },
-        [12] = (mat4)
-        {
-            
-        },
-        [13] = (mat4)
-        {
-            
-        },
-        [14] = (mat4)
-        {
-            
-        },
-        [15] = (mat4)
-        {
-            
-        },
-        [16] = (mat4)
-        {
-            
-        },
-        [17] = (mat4)
-        {
-            
-        },
-        [18] = (mat4)
-        {
-            
-        },
-        [19] = (mat4)
-        {
-            
-        },
-        [20] = (mat4)
-        {
-            
-        },
-        [21] = (mat4)
-        {
-            
-        },
-        [22] = (mat4)
-        {
-            
-        },
-        [23] = (mat4)
-        {
-            
-        },
-        [24] = (mat4)
-        {
-            
-        },
-        [25] = (mat4)
-        {
-            
-        },
-        [26] = (mat4)
-        {
-            
-        },
-        [27] = (mat4)
-        {
-            
-        },
-        [28] = (mat4)
-        {
-            
-        },
-        [29] = (mat4)
-        {
-            
-        },
-        [30] = (mat4)
-        {
-            
-        },
-        [31] = (mat4)
-        {
-            
-        }
-    };
-
-    // Write the matrix to the return
-    *p_mat4 = _matricies[l];
-
-    // Increment the index
-    l++;
-
-    // Wrap the index
-    l = l % 32;
-
-    // Success
     return 1;
 }
 
