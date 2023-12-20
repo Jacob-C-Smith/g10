@@ -32,7 +32,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 {
 
     // Early 
-    g_init_early( );
+    g_init_early();
 
     // Argument Check
     if ( pp_instance == (void *) 0 ) goto no_instance;
@@ -62,8 +62,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Initialized data
         const dict *const p_dict = p_value->object;
-        const json_value *p_name_value = dict_get(p_dict, "name"),
-                         *p_server_value = dict_get(p_dict, "server");
+        const json_value *p_name_value      = dict_get(p_dict, "name"),
+                         *p_server_value    = dict_get(p_dict, "server"),
+                         *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance config\n");
@@ -92,9 +93,22 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         }
 
         // Construct a server
-        if ( server_from_json_value(&_instance.context.p_server, p_server_value) == 0 ) goto no_server;
-        no_server:
+        if ( p_server_value == (void *) 0 ) goto no_server;
 
+        //Construct a server
+        if ( server_from_json_value(&_instance.context.p_server, p_server_value) == 0 ) goto no_server;
+        no_server:;
+
+        // Set the fixed tick rate
+        if ( p_fixed_tick_rate )
+        {
+
+            // Error checking
+            if ( p_fixed_tick_rate->type != JSON_VALUE_INTEGER ) goto fixed_tick_rate_is_wrong_type;
+
+            // Store the fixed tick rate
+            _instance.context.fixed_tick_rate = p_fixed_tick_rate->integer;
+        }
     }
 
     // Allocate memory for the instance
@@ -159,7 +173,16 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
                 // Error
                 goto error_after_json_parsed;
-            
+
+            fixed_tick_rate_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] Value must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // Error
+                goto error_after_json_parsed;
+
             missing_properties:
                 #ifndef NDEBUG
                     log_error("[g10] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
@@ -287,6 +310,34 @@ size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary
     }
 }
 
+int g_start_server ( g_instance *p_instance )
+{
+
+    // Argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+
+    // Start a thread
+    parallel_thread_start(&p_active_instance->context.p_server->p_web_server_thread, server_listen, g_get_active_instance());
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    // TODO: 
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int g_exit ( g_instance **pp_instance )
 {
 
@@ -302,6 +353,7 @@ int g_exit ( g_instance **pp_instance )
     // No more pointer for caller
     *pp_instance = 0;
 
+    // Clean up
     G10_REALLOC(p_instance, 0);
 
     // Success
