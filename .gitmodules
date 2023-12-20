@@ -31,12 +31,12 @@
 [submodule "extern/socket"]
 	path = extern/socket
 	url = https://github.com/Jacob-C-Smith/socket
-[submodule "extern/web"]
-	path = extern/web
-	url = https://github.com/Jacob-C-Smith/web
 [submodule "extern/parallel"]
 	path = extern/parallel
 	url = https://github.com/Jacob-C-Smith/parallel
 [submodule "extern/base64"]
 	path = extern/base64
 	url = https://github.com/Jacob-C-Smith/base64
+[submodule "extern/web"]
+	path = extern/web
+	url = https://github.com/Jacob-C-Smith/web
