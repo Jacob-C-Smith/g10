@@ -10,8 +10,14 @@
 #include <stdbool.h>
 #include <time.h>
 
+// sync module
+#include <sync/sync.h>
+
 // http module
 #include <http/http.h>
+
+// json module
+#include <json/json.h>
 
 // web module
 #include <web/web.h>
@@ -19,6 +25,7 @@
 
 // g10
 #include <g10/g10.h>
+#include <g10/entity.h>
 #include <g10/user_code.h>
 
 /** !
@@ -55,7 +62,8 @@ int main ( int argc, const char *const argv[] )
 
     // Initialized data
     g_instance *p_instance = 0;
-
+    mat4        _mat       = { 0 };
+    
     // Set up g10
     if ( g_init(&p_instance, "instance.json") == 0 ) goto failed_to_initialize_g10;
 
@@ -66,17 +74,21 @@ int main ( int argc, const char *const argv[] )
     user_code_callback(p_instance);
 
     // Start the server
-    g_start_server(p_instance);
+    //g_start_server(p_instance);
 
     // Set the running flag
     p_instance->running = true;
+    
+    entity *p_entity = (void *) 0;
+    json_value *p_value = (void *) 0;
+    char p_buf[4096] = {0};
+    g_load_file("entity.json", p_buf, false);
+    parse_json_value(p_buf, (void *) 0, &p_value);
 
+    entity_from_json(&p_entity, p_value);
     // Main loop
-    while (p_instance->running)
+    //while ( p_instance->running )
     {
-        sleep(1);
-        //printf("%d        \r", z);
-        //z++;
 
     }
     
