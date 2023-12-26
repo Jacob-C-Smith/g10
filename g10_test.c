@@ -11,6 +11,7 @@
 #include <g10/g10.h>
 #include <g10/linear.h>
 #include <g10/quaternion.h>
+#include <g10/transform.h>
 #include <g10/user_code.h>
 
 // Enumeration definitions
@@ -71,11 +72,14 @@ void print_final_summary ( void );
  */
 void print_test ( const char *scenario_name, const char *test_name, bool passed );
 
+bool transform_equals_transform ( transform *p_a, transform *p_b );
+
 void test_g10_g_init ( const char *name );
 void test_g10_g_get_active_instance ( const char *name );
 void test_g10_user_code ( const char *name );
 void test_g10_linear_vectors ( const char *name );
 void test_g10_linear_matrices ( const char *name );
+void test_g10_transform ( const char *name );
 void test_g10_quaternion ( const char *name );
 
 bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_instance **), result_t expected );
@@ -83,6 +87,7 @@ bool test_g_get_active_instance ( char *test_file, result_t expected );
 
 // Constructors
 int construct_minimal_g10_instance ( g_instance **pp_instance );
+int construct_identity_transform ( transform **pp_transform );
 
 int get_mat4_from_list ( mat4 *p_mat4 );
 
@@ -90,8 +95,10 @@ int get_mat4_from_list ( mat4 *p_mat4 );
 int user_code_callback_function ( g_instance *p_instance )
 {
 
+    // Set a new instance name
     strncpy(p_instance->_name, "G10 tester", 11);
 
+    // Store a null terminator
     p_instance->_name[11] = '\0';
 
     // Success
@@ -196,6 +203,8 @@ void run_tests ( void )
               g10_linear_t1     = 0,
               g10_quaternion_t0 = 0,
               g10_quaternion_t1 = 0,
+              g10_transform_t0  = 0,
+              g10_transform_t1  = 0,
               g10_user_code_t0  = 0,
               g10_user_code_t1  = 0;
 
@@ -220,6 +229,10 @@ void run_tests ( void )
     print_time_pretty ( (double)(g10_core_t1-g10_core_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n\n");
 
+    /////////////////////////
+    // Test linear algebra //
+    /////////////////////////
+
     // Start timing linear algebra code
     g10_linear_t0 = timer_high_precision();
 
@@ -229,7 +242,7 @@ void run_tests ( void )
         // Test matricies
         test_g10_linear_matrices("g10 matricies");
 
-    // Stop timing user code
+    // Stop timing linear algebra code
     g10_linear_t1 = timer_high_precision();
 
     // Report the time it took to run the core tests
@@ -237,19 +250,45 @@ void run_tests ( void )
     print_time_pretty ( (double)(g10_linear_t1-g10_linear_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n\n");
 
-    // Start timing user code
+    /////////////////////
+    // Test quaternion //
+    /////////////////////
+
+    // Start timing quaternion code
     g10_quaternion_t0 = timer_high_precision();
 
         // Test quaternion
         test_g10_quaternion("g10 quaternion");
 
-    // Stop timing user code
+    // Stop timing quaternion code
     g10_quaternion_t1 = timer_high_precision();
 
     // Report the time it took to run the core tests
     log_info("g10 quaternion took ");
     print_time_pretty ( (double)(g10_quaternion_t1-g10_quaternion_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n\n");
+
+    ////////////////////
+    // Test transform //
+    ////////////////////
+
+    // Start timing transform code
+    g10_transform_t0 = timer_high_precision();
+
+        // Test transform
+        test_g10_transform("g10 transform");
+
+    // Stop timing transform code
+    g10_transform_t1 = timer_high_precision();
+
+    // Report the time it took to run the core tests
+    log_info("g10 transform took ");
+    print_time_pretty ( (double)(g10_transform_t1-g10_transform_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
+
+    ////////////////////
+    // Test user code //
+    ////////////////////
 
     // Start timing user code
     g10_user_code_t0 = timer_high_precision();
@@ -310,6 +349,25 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
         g_exit(&p_return_instance);
     if(p_expected_instance)
         g_exit(&p_expected_instance);
+
+    // Success
+    return (result == expected);
+}
+
+bool test_transform_from_json ( char *test_file, int(*expected_transform_constructor) (transform **), result_t expected )
+{
+    result_t result = zero;
+    transform *p_transform_result = (void *) 0;
+    transform *p_transform_expected = (void *) 0;
+
+    char _buf[4096] = { 0 };
+    json_value *p_value = 0;
+    g_load_file(test_file, _buf, false);
+    transform_from_json(&p_transform_result, p_value);
+    if ( expected_transform_constructor )
+        expected_transform_constructor(&p_transform_expected);
+
+    result = (transform_equals_transform(p_transform_result, p_transform_expected)) ? match : zero;
 
     // Success
     return (result == expected);
@@ -514,6 +572,19 @@ bool mat4_equals_mat4 ( mat4 m, mat4 n )
         ( (*(unsigned long*)&m.n) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.n) & 0xFFFFFFF8) &&
         ( (*(unsigned long*)&m.o) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.o) & 0xFFFFFFF8) &&
         ( (*(unsigned long*)&m.p) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.p) & 0xFFFFFFF8) 
+    );
+}
+
+bool transform_equals_transform ( transform *p_a, transform *p_b )
+{
+
+    if ( p_a == p_b ) return true;
+    
+
+    return 
+    (
+        vec3_equals_vec3(p_a->location, p_b->location) && 
+        vec3_equals_vec3(p_a->scale, p_b->scale)     
     );
 }
 
@@ -1511,6 +1582,56 @@ void test_g10_quaternion ( const char *name )
 
     // Identity quaternion
     print_test(name, "identity", test_quaternion_identity((quaternion){.u=1.f,.i=0.f,.j=0.f,.k=0.f}, match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_transform ( const char *name )
+{
+    
+    // Formatting
+    log_scenario("%s\n", name);
+    
+    // Transform
+    print_test(name, "empty", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
+    print_test(name, "empty array", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
+    print_test(name, "empty object", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
+
+    // Location property
+    print_test(name, "location too long", test_transform_from_json("test cases/transform/location_too_long.json", (void *) 0, match));
+    print_test(name, "location too short", test_transform_from_json("test cases/transform/location_too_short.json", (void *) 0, match));
+    print_test(name, "location wrong type", test_transform_from_json("test cases/transform/location_wrong_type.json", (void *) 0, match));
+
+    // Rotation property
+    print_test(name, "rotation too long", test_transform_from_json("test cases/transform/location_too_long.json", (void *) 0, match));
+    print_test(name, "rotation too short", test_transform_from_json("test cases/transform/location_too_short.json", (void *) 0, match));
+    print_test(name, "rotation wrong type", test_transform_from_json("test cases/transform/location_wrong_type.json", (void *) 0, match));
+
+    // Quaternion property
+    print_test(name, "quaternion too long", test_transform_from_json("test cases/transform/quaternion_too_long.json", (void *) 0, match));
+    print_test(name, "quaternion too short", test_transform_from_json("test cases/transform/quaternion_too_short.json", (void *) 0, match));
+    print_test(name, "quaternion wrong type", test_transform_from_json("test cases/transform/quaternion_wrong_type.json", (void *) 0, match));
+    
+    // Scale property
+    print_test(name, "scale too long", test_transform_from_json("test cases/transform/scale_too_long.json", (void *) 0, match));
+    print_test(name, "scale too short", test_transform_from_json("test cases/transform/scale_too_short.json", (void *) 0, match));
+    print_test(name, "scale wrong type", test_transform_from_json("test cases/transform/scale_wrong_type.json", (void *) 0, match));
+
+    // Missing properties
+    print_test(name, "missing location", test_transform_from_json("test cases/transform/missing_location.json", (void *) 0, match));
+    print_test(name, "missing rotation", test_transform_from_json("test cases/transform/missing_rotation.json", (void *) 0, match));
+    print_test(name, "missing scale", test_transform_from_json("test cases/transform/missing_scale.json", (void *) 0, match));
+    print_test(name, "missing location rotation", test_transform_from_json("test cases/transform/missing_location_rotation.json", (void *) 0, match));
+    print_test(name, "missing location scale", test_transform_from_json("test cases/transform/missing_location_scale.json", (void *) 0, match));
+    print_test(name, "missing rotation scale", test_transform_from_json("test cases/transform/missing_rotation_scale.json", (void *) 0, match));
+    print_test(name, "missing location rotation scale", test_transform_from_json("test cases/transform/missing_location_rotation_scale.json", (void *) 0, match));
+
+    // Valid transform
+    print_test(name, "valid", test_transform_from_json("test cases/transform/valid.json", (void *) 0, match));
 
     // Print the summary of this test
     print_final_summary();
