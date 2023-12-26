@@ -40,3 +40,6 @@
 [submodule "extern/web"]
 	path = extern/web
 	url = https://github.com/Jacob-C-Smith/web
+[submodule "extern/set"]
+	path = extern/set
+	url = https://github.com/Jacob-C-Smith/set
