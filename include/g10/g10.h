@@ -112,10 +112,24 @@ struct g_instance_s
     // Context
     struct
     {
-        fn_user_code_callback pfn_user_code_callback;
-        server *p_server;
-        u16 fixed_tick_rate;
+        fn_user_code_callback  pfn_user_code_callback;
+        server                *p_server;
+        u16                    fixed_tick_rate;
     } context;
+
+    // Locks
+    //struct
+    //{
+    //    
+    //} locks;
+
+    // Time
+    struct
+    {
+        timestamp init;
+        timestamp exit;
+    } time;
+    
 
     // Running?
     bool running; 
@@ -142,27 +156,34 @@ DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
  * 
  * @return pointer to g10 instance singleton on success, null pointer on error
  */
-g_instance *g_get_active_instance ( void );
+DLLEXPORT g_instance *g_get_active_instance ( void );
 
-int g_start_server ( g_instance *p_instance );
+/** ! 
+ * Spawn an HTTP server on another thread 
+ * 
+ * @param p_instance active instance
+ * 
+ * @return 1 on success, 0 on errpr
+*/
+DLLEXPORT int g_start_server ( g_instance *p_instance );
 
 // File
 /** !
  *  Return the size of a file IF buffer == 0 ELSE read a file into buffer
  * 
- * @param path path to the file
- * @param buffer buffer
+ * @param path        path to the file
+ * @param buffer      buffer
  * @param binary_mode "wb" IF true ELSE "w"
  * 
  * @return 1 on success, 0 on error
  */
-size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode );
+DLLEXPORT size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode );
 
 // Destructors
 /** !
  *  Destroy a g10 instance
  *
- * @param p_instance : pointer to the instance pointer
+ * @param p_instance pointer to the instance pointer
  *
  * @sa g_init
  *
