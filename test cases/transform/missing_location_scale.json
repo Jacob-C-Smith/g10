@@ -1,0 +1,4 @@
+{
+    "$schema": "https://schema.g10.app/transform.json",
+    "rotation": [ 90, 45, 0 ]
+}

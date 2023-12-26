@@ -42,14 +42,26 @@ int transform_create ( transform **pp_transform )
                 // Error
                 return 0;
         }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
 }
 
-int transform_construct (
+ int transform_construct (
     transform **pp_transform,
     vec3        location,
     vec3        rotation,
-    vec3        scale
+    vec3        scale,
+    transform  *p_parent
 )
 {
     // Argument check
@@ -72,7 +84,7 @@ int transform_construct (
 
     // Compute the model matrix
     mat4_model_from_vec3(
-        p_transform->model_matrix,
+        &p_transform->model,
         p_transform->location,
         p_transform->rotation,
         p_transform->scale
@@ -123,6 +135,7 @@ int transform_from_path
     if ( p_path       == (void *) 0 ) goto no_path;
 
     // Initialized data
+    transform *p_transform = (void *) 0;
     size_t len = g_load_file(p_path, 0, false);
     char *p_text = G10_REALLOC(0, sizeof(char) * len);
     json_value *p_value = (void *) 0;
@@ -174,9 +187,11 @@ int transform_from_json
 
     // Initialized data
     transform *p_transform = (void *) 0;
+    transform _transform = { 0 };
     vec3 location;
     vec3 rotation;
     vec3 scale;
+    mat4 model;
 
     // Parse the json value as a path
     if ( p_value->type == JSON_VALUE_STRING ) 
@@ -186,7 +201,7 @@ int transform_from_json
         const char *const p_path = p_value->string;
 
         // Construct a transform
-        if ( transform_from_path(&p_transform) == 0 ) goto failed_to_construct_transform;
+        //if ( transform_from_path(&p_transform, ) == 0 ) goto failed_to_construct_transform;
 
         // Done
         goto done;
@@ -226,7 +241,7 @@ int transform_from_json
             for (size_t i = 0; i < len; i++) 
             {
                 if ( p_scratch[i]       == 0 ) goto location_element_was_wrong_type;
-                if ( p_scratch[i]->type == JSON_VALUE_NUMBER ) goto location_element_was_wrong_type;  
+                if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto location_element_was_wrong_type;  
             }
 
             // Store the vector
@@ -235,14 +250,14 @@ int transform_from_json
                 .x = p_scratch[0]->number,
                 .y = p_scratch[1]->number,
                 .z = p_scratch[2]->number                
-            }
+            };
         }
 
         // Default
         else goto wrong_location_type;
     
         // Parse the scale
-        if ( p_scale->type != JSON_VALUE_ARRAY )
+        if ( p_scale->type == JSON_VALUE_ARRAY )
         {
 
             // Initialized data
@@ -259,7 +274,7 @@ int transform_from_json
             for (size_t i = 0; i < len; i++) 
             {
                 if ( p_scratch[i]       == 0 ) goto scale_element_was_wrong_type;
-                if ( p_scratch[i]->type == JSON_VALUE_NUMBER ) goto scale_element_was_wrong_type;  
+                if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto scale_element_was_wrong_type;  
             }
 
             // Store the vector
@@ -268,7 +283,7 @@ int transform_from_json
                 .x = p_scratch[0]->number,
                 .y = p_scratch[1]->number,
                 .z = p_scratch[2]->number                
-            }
+            };
         }
         
         // Default
@@ -277,6 +292,26 @@ int transform_from_json
 
     // Default
     else goto wrong_type;
+    
+    // Calculate the model matrix
+    mat4_model_from_vec3(&model, location, (vec3){ 0, 0, 0 }, scale);
+
+    // Construct a transform
+    _transform = (transform)
+    {
+        .location = location,
+        .scale    = scale,
+        .model    = model
+    };
+
+    // Allocate memory for transform
+    transform_create(&p_transform);
+
+    // Error check
+    if ( p_transform == (void *) 0 ) goto no_mem;
+
+    // Copy the transform 
+    memcpy(p_transform, &_transform, sizeof(transform));
 
     // Done
     done:
@@ -291,6 +326,13 @@ int transform_from_json
     wrong_type:
     wrong_location_type:
     wrong_scale_type:
+    missing_properties:
+    wrong_location_len:
+    failed_to_slice:
+    location_element_was_wrong_type:
+    wrong_scale_len:
+    scale_element_was_wrong_type:
+    no_mem:
         return 0;
 
     // Error handling
@@ -300,7 +342,7 @@ int transform_from_json
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n")
+                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n");
                 #endif
 
                 // Error
@@ -308,7 +350,7 @@ int transform_from_json
             
             no_value:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n")
+                    printf("[g10] [transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
                 #endif
 
                 // Error
@@ -317,43 +359,141 @@ int transform_from_json
     }
 }
 
-
-int transform_get_matrix ( 
+int transform_get_matrix_local ( 
     transform *p_transform, 
-    mat4      *p_model_matrix
+    mat4 *p_model_matrix
 )
 {
-
+    
     // Argument check
     if ( p_transform    == (void *) 0 ) goto no_transform;
     if ( p_model_matrix == (void *) 0 ) goto no_return;
 
-    // Copy the model matrix
-    memcpy(p_model_matrix, &p_transform->model_matrix, sizeof(mat4));
+    // Copy the local matrix
+    memcpy(p_model_matrix, &p_transform->model, sizeof(mat4));
 
     // Success
     return 1;
-    
+
     // Error handling
     {
 
-        // Argument errors
+        // Argument error
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
 
             no_return:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"p_model_matrix\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_model_matrix\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
-                
+
                 // Error
                 return 0;
+
+        }
+    }
+}
+
+int transform_get_matrix_world_recursive ( 
+    transform *p_transform,
+    mat4 *p_model_matrix
+)
+{
+    
+    // Argument check
+    if ( p_model_matrix == (void *) 0 ) goto no_return;
+
+    // Base case
+    if ( p_transform == (void *) 0 ) goto no_transform;
+
+    // Initialized data
+    mat4 parent_model = { 0 };
+
+    //transform_get_matrix_world_recursive(p_transform->parent_model, &parent_model)
+
+    // Apply the transform
+    mat4_mul_mat4(p_model_matrix, parent_model, p_transform->model);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_return:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_model_matrix\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+        }
+    }
+}
+
+int transform_get_matrix_world ( 
+    transform *p_transform, 
+    mat4 *p_model_matrix
+)
+{
+    
+    // Argument check
+    if ( p_transform    == (void *) 0 ) goto no_transform;
+    if ( p_model_matrix == (void *) 0 ) goto no_return;
+
+    // Initialized data
+    mat4 matrix_world = { 0 };
+
+    // Identity matrix
+    mat4_identity(&matrix_world);
+
+    // Recursively build the world matrix
+    transform_get_matrix_world_recursive(p_transform, &matrix_world);
+
+    // Copy the local matrix
+    memcpy(p_model_matrix, &p_transform->model, sizeof(mat4));
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument error
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_return:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_model_matrix\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
         }
     }
 }
