@@ -30,6 +30,8 @@
 #include <g10/gtypedef.h>
 #include <g10/linear.h>
 
+#define G10_TRANSFORM_CHILD_MAX 64
+
 // Structure definitions
 struct transform_s
 {
@@ -38,6 +40,9 @@ struct transform_s
     vec3 scale;
 
     mat4 model;
+
+    transform *p_parent;
+    transform *p_childern[G10_TRANSFORM_CHILD_MAX];
 };
 
 // Function definitions
@@ -67,21 +72,42 @@ DLLEXPORT int transform_construct (
     transform **pp_transform,
     vec3        location,
     vec3        rotation,
-    vec3        scale
+    vec3        scale,
+    transform  *p_parent
+);
+
+DLLEXPORT int transform_from_json
+(
+    transform  **pp_transform,
+    json_value  *p_value
 );
 
 // Accessors
 /** !
- * Get the 4x4 model matrix from a transform
+ * Get the local 4x4 model matrix from a transform
  * 
  * @param p_transform    the transform
- * @param p_model_matrix the model matrix
+ * @param p_model_matrix return
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int transform_get_matrix ( 
+DLLEXPORT int transform_get_matrix_local ( 
     transform *p_transform, 
-    mat4 *p_model_matrix
+    mat4      *p_model_matrix
+);
+
+/** !
+ * Get the world 4x4 model matrix from a transform by
+ * applying each parent transformation
+ * 
+ * @param p_transform    the transform
+ * @param p_model_matrix return
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int transform_get_matrix_world ( 
+    transform *p_transform, 
+    mat4      *p_model_matrix
 );
 
 // 
