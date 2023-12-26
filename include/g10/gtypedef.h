@@ -49,9 +49,13 @@ typedef struct { float u, i, j, k; } quaternion;
 // Forward declarations
 struct g_instance_s;
 struct server_s;
+struct entity_s;
+struct transform_s;
 
 // Type definitions
 typedef struct g_instance_s g_instance;
 typedef struct server_s server;
+typedef struct entity_s entity;
+typedef struct transform_s transform;
 
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
