@@ -63,7 +63,10 @@ int main ( int argc, const char *const argv[] )
     // Initialized data
     g_instance *p_instance = 0;
     mat4        _mat       = { 0 };
-    
+    entity *p_entity = (void *) 0;
+    json_value *p_value = (void *) 0;
+    char p_buf[4096] = {0};
+
     // Set up g10
     if ( g_init(&p_instance, "instance.json") == 0 ) goto failed_to_initialize_g10;
 
@@ -78,18 +81,20 @@ int main ( int argc, const char *const argv[] )
 
     // Set the running flag
     p_instance->running = true;
-    
-    entity *p_entity = (void *) 0;
-    json_value *p_value = (void *) 0;
-    char p_buf[4096] = {0};
+
     g_load_file("entity.json", p_buf, false);
     parse_json_value(p_buf, (void *) 0, &p_value);
 
     entity_from_json(&p_entity, p_value);
+    
+    extern int g_sdl2_poll_window ( g_instance *p_instance );
+
     // Main loop
-    //while ( p_instance->running )
+    while ( p_instance->running )
     {
 
+        // Input
+        g_sdl2_poll_window (p_instance );
     }
     
     // Clean up g10

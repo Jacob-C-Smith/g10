@@ -18,13 +18,21 @@ int entity_create ( entity **pp_entity )
     // Initialized data
     entity *p_entity = G10_REALLOC(0, sizeof(entity));
 
-    
+    // Error check
+    if ( p_entity == (void *) 0 ) goto no_mem;
+
+    // Zero set
+    memset(p_entity, 0, sizeof(entity));
+
+    // Return a pointer to the caller
+    *pp_entity = p_entity;
 
     // Success
     return 1;
 
     no_entity:
-
+    no_mem:
+    
         // Error
         return 0;
 }
@@ -33,7 +41,8 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 {
 
     // Initialized data
-    entity _entity = { 0 };
+    entity   _entity = { 0 },
+           *p_entity = (void *) 0;
 
     // Error check
     if ( p_value->type != JSON_VALUE_OBJECT ) goto entity_value_is_wrong_type;
@@ -52,7 +61,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         // Check for missing properties
         if ( ! ( p_name_value ) ) goto missing_properties;
 
-        // Error checking
+        // Error check
         if ( p_name_value->type != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
 
         // Store the name
@@ -77,6 +86,14 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
     }
 
+    // Allocate memory on the heap
+    if ( entity_create(&p_entity) == (void *) 0 ) goto failed_to_allocate_entity;
+
+    // Copy the struct to the heap
+    memcpy(p_entity, &_entity, sizeof(entity));
+
+    // Return a pointer to the caller
+    *pp_entity = p_entity;
 
     // Success
     return 1;
@@ -87,6 +104,8 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     missing_properties:
     name_property_is_wrong_type:
     failed_to_construct_transform:
+    failed_to_allocate_entity:
+
         // Error
         return 0;
 }

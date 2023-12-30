@@ -237,7 +237,7 @@ int transform_from_json
             // Dump the location values
             if ( array_slice(p_array, &p_scratch, 0, 2) == 0 ) goto failed_to_slice;
 
-            // Error checking
+            // Error check
             for (size_t i = 0; i < len; i++) 
             {
                 if ( p_scratch[i]       == 0 ) goto location_element_was_wrong_type;
@@ -270,7 +270,7 @@ int transform_from_json
             // Dump the p_scale values
             if ( array_slice(p_array, &p_scratch, 0, 2) == 0 ) goto failed_to_slice;
 
-            // Error checking
+            // Error check
             for (size_t i = 0; i < len; i++) 
             {
                 if ( p_scratch[i]       == 0 ) goto scale_element_was_wrong_type;

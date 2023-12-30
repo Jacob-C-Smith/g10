@@ -76,6 +76,14 @@ DLLEXPORT int transform_construct (
     transform  *p_parent
 );
 
+/** !
+ * Construct a transform from a json value
+ * 
+ * @param pp_transform return
+ * @param p_value      the json value
+ * 
+ * @return 1 on success, 0 on error
+*/
 DLLEXPORT int transform_from_json
 (
     transform  **pp_transform,
@@ -110,7 +118,7 @@ DLLEXPORT int transform_get_matrix_world (
     mat4      *p_model_matrix
 );
 
-// 
+// Destructorss
 /** !
  * Destroy and deallocate a transform
  * 

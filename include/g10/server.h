@@ -29,7 +29,7 @@
 #include <web/route.h>
 
 // parallel module
-#include <parallel/parallel.h>
+#include <parallel/parallelize.h>
 #include <parallel/thread.h>
 
 // g10

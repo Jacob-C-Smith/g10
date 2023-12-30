@@ -28,7 +28,24 @@
  */
 DLLEXPORT u0 quaternion_identity ( quaternion *p_result );
 
+/** !
+ * Construct a quaternion from an euler angle
+ * 
+ * @param p_result    return
+ * @param euler_angle the euler angle
+ * 
+ * @return void
+*/
 DLLEXPORT u0 quaternion_from_euler_angle ( quaternion *p_result, vec3 euler_angle );
+
+/** !
+ * Construct an euler angle from a quaternion
+ * 
+ * @param p_result return
+ * @param q        the quaternion
+ * 
+ * @return void
+*/
 DLLEXPORT u0 quaternion_to_euler_angle ( vec3 *p_result, quaternion q );
 DLLEXPORT u0 quaternion_inverse ( quaternion *p_result, quaternion q );
 DLLEXPORT u0 quaternion_multiply_quaternion ( quaternion *p_result, quaternion q1, quaternion q2 );
