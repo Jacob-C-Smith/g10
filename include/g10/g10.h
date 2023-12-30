@@ -36,24 +36,12 @@
 #include <json/json.h>
 
 // parallel module
-#include <parallel/parallel.h>
+#include <parallel/parallelize.h>
 
 // g10
 #include <g10/gtypedef.h>
 #include <g10/server.h>
 #include <g10/user_code.h>
-
-// 3rd party
-
-// Discord
-#ifdef BUILD_G10_WITH_DISCORD
-    #include <discord_game_sdk.h>
-#endif
-
-// FMOD
-#ifdef BUILD_G10_WITH_FMOD
-    #include <FMOD-core/fmod.h>
-#endif
 
 // Platform dependent macros
 #ifdef _WIN64
@@ -101,6 +89,34 @@
 #define BUILD_G10_WITH_ANSI_COLOR true
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
+#define BUILD_G10_WITH_SDL2 true
+#define BUILD_G10_WITH_VULKAN true
+//#define BUILD_G10_WITH_OPENGL true
+#define BUILD_G10_WITH_NETWORKING true
+#define BUILD_G10_WITH_AVX2 true
+#define BUILD_G10_WITH_AVX512 true
+
+// 3rd party
+
+// Discord
+#ifdef BUILD_G10_WITH_DISCORD
+    #include <discord_game_sdk.h>
+#endif
+
+// FMOD
+#ifdef BUILD_G10_WITH_FMOD
+    #include <FMOD-core/fmod.h>
+#endif
+
+// SDL2
+#ifdef BUILD_G10_WITH_SDL2
+    #include <SDL2/SDL.h>
+#endif
+
+// Vulkan
+#ifdef BUILD_G10_WITH_VULKAN
+    #include <vulkan/vulkan.h>
+#endif
 
 // Structures
 struct g_instance_s
@@ -116,6 +132,66 @@ struct g_instance_s
         server                *p_server;
         u16                    fixed_tick_rate;
     } context;
+
+    // Graphics
+    union
+    {
+        #ifdef BUILD_G10_WITH_VULKAN
+            struct
+            {
+                VkInstance instance;
+                VkPhysicalDevice physical_device;
+                VkDevice device;
+                
+                struct 
+                {
+                    u32 graphics_index,
+                        compute_index,
+                        transfer_index,
+                        sparse_index;
+                } queue_families;
+
+                struct
+                {
+                    VkQueue graphics,
+                            compute,
+                            transfer;
+                } queue;
+            } vulkan;
+        #elif defined BUILD_G10_WITH_OPENGL
+            struct
+            {
+                int openGL;
+            } opengl;
+        #endif
+    } graphics;
+
+    // Version
+    struct
+    {
+        u16 major,
+            minor,
+            patch;
+    } version;
+    
+    // Window
+    struct 
+    {
+        u32 width;
+        u32 height;
+        char *title;
+        union
+        {
+            #ifdef BUILD_G10_WITH_SDL2
+            struct
+            {
+                SDL_Window *window;
+                SDL_Event event;
+            } sdl2;
+            #endif
+        };
+    } window;
+
 
     // Locks
     //struct
@@ -165,7 +241,7 @@ DLLEXPORT g_instance *g_get_active_instance ( void );
  * 
  * @return 1 on success, 0 on errpr
 */
-DLLEXPORT int g_start_server ( g_instance *p_instance );
+// DLLEXPORT int g_start_server ( g_instance *p_instance );
 
 // File
 /** !
