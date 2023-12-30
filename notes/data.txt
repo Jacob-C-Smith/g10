@@ -1,0 +1,10 @@
+Buffers - Many buffers can map to the same memory
+    + Uniform buffer - Read only, 
+    + Storage buffer - Contrasts uniform buffer, read & write, cheap atomic
+    + Texel buffer   - Formatted reading of uniform / storage buffer data, a la vertex attribute. 
+    + Dynamic buffer - Change offsets with no cost to performance
+Images
+    + Storage image    - load, store, atomic image
+    + Sampler          - Read only, sample an image
+    + Input attachment - Read only, used in render pass
+    + Image view       - 
