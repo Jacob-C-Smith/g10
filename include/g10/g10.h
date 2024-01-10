@@ -36,7 +36,7 @@
 #include <json/json.h>
 
 // parallel module
-#include <parallel/parallelize.h>
+#include <parallel/parallel.h>
 
 // g10
 #include <g10/gtypedef.h>
