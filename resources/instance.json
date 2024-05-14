@@ -1,0 +1,39 @@
+{
+    "name" : "g10 example",
+    "version" :
+    {
+        "major" : 0,
+        "minor" : 0,
+        "patch" : 1
+    },
+    "window" : 
+    {
+        "width"  : 800,
+        "height" : 600,
+        "title"  : "G10 Example"
+    },
+    "schedule" :
+    {
+        "name" : "schedule",
+        "threads" :
+        {
+            "main" : 
+            [
+                { "task" : "pre ai" },
+                { "task" : "ai" },
+                { "task" : "user code" }
+            ]
+        }
+    },
+    "vulkan" :
+    {
+        "validation" : 
+        {
+            
+        },
+        "device" : 
+        {
+
+        }
+    }
+}

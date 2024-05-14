@@ -1,0 +1,172 @@
+{
+    "name" : "g10 example",
+    "version" :
+    {
+        "major" : 0,
+        "minor" : 0,
+        "patch" : 1
+    },
+    "window" : 
+    {
+        "width"  : 800,
+        "height" : 600,
+        "title"  : "G10 Example"
+    },
+    "schedule" :
+    {
+        "name" : "schedule",
+        "threads" :
+        {
+            "render" : 
+            [
+                { "task" : "render" },
+                { "task" : "present" }
+            ],
+            "main" : 
+            [
+                { "task" : "sdl2 poll" },
+                { "task" : "ui" },
+                { "task" : "pre ai" },
+                { "task" : "ai" },
+                { "task" : "user code" },
+                { "task" : "resolve collisions" },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                { "task" : "move objects" }
+            ],
+            "worker 1" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 2:update forces",
+                        "worker 3:animation",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 2" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 3:animation",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 3" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "animation",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 2:update forces",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 4" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "animation",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 2:update forces",
+                        "worker 3:animation"
+                    ]
+                }
+            ],
+            "network" :
+            [
+                { "task" : "server recieve" },
+                { "task" : "server process" },
+                { "task" : "server send" }
+            ]
+        }
+    },
+    "vulkan" :
+    {
+        "validation" : 
+        {
+            
+        },
+        "device" : 
+        {
+
+        }
+    }
+}
