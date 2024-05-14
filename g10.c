@@ -2,6 +2,7 @@
  * Implements general G10 functionality
  * 
  * @file g10.c
+ * 
  * @author Jacob Smith
  */
 
@@ -16,8 +17,6 @@ extern int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_valu
 extern int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value );
 #endif
 
-
-
 // Static initialized data
 static g_instance *p_active_instance = 0;
 
@@ -31,8 +30,24 @@ static g_instance *p_active_instance = 0;
 u0 g_init_early ( void )
 {
 
+    // Initialize parallel
+    parallel_init();
+
     // Initialize log library
     log_init(0, BUILD_G10_WITH_ANSI_COLOR);
+
+    // Add core scheduler tasks
+    parallel_register_task("user code", (fn_parallel_task *) user_code_callback);
+    parallel_register_task("pre ai"   , (fn_parallel_task *) ai_preupdate);
+    parallel_register_task("ai"       , (fn_parallel_task *) ai_update);
+
+    // Add 3rd party scheduler tasks
+    #ifdef BUILD_G10_WITH_SDL2
+
+        // External functions
+        extern int g_sdl2_poll_window ( g_instance *p_instance );
+        parallel_register_task("sdl2 poll", (fn_parallel_task *) g_sdl2_poll_window);
+    #endif
 
     // Done
     return;
@@ -49,11 +64,11 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     if ( p_path      == (void *) 0 ) goto no_path;
 
     // Initialized data
-    g_instance  _instance = { 0 },
-               *p_instance = 0;
     size_t file_len = g_load_file(p_path, (void *) 0, true);
     char *const p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
     const json_value *p_value = 0;
+    g_instance  _instance = { 0 },
+               *p_instance = 0;
 
     // Error check
     if ( file_len == 0 ) goto failed_to_load_file;
@@ -73,9 +88,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Initialized data
         const dict *const p_dict = p_value->object;
         const json_value *p_name_value      = dict_get(p_dict, "name"),
-                         *p_server_value    = dict_get(p_dict, "server"),
-                         *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_version         = dict_get(p_dict, "version"),
+                         *p_schedule        = dict_get(p_dict, "schedule"),
+                         *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
                          *p_window          = dict_get(p_dict, "window");
 
@@ -138,9 +153,12 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Default to 1.0.0
         else
-            _instance.version.major = 1, _instance.version.major = 0, _instance.version.patch = 0;
+            _instance.version.major = 1,
+            _instance.version.major = 0,
+            _instance.version.patch = 0;
 
         // Server
+        /*
         {
             // Construct a server
             if ( p_server_value == (void *) 0 ) goto no_server;
@@ -149,6 +167,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             //if ( server_from_json_value(&_instance.context.p_server, p_server_value) == 0 ) goto no_server;
             no_server:;
         }
+        */
 
         // Set the fixed tick rate
         if ( p_fixed_tick_rate )
@@ -186,6 +205,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Others? 
             #endif
         }
+
+        // Initialize the scheduler
+        if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
+        
     }
 
     // Allocate memory for the instance
@@ -342,6 +365,18 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 goto error_after_json_parsed;
         }
 
+        // Parallel errors
+        {
+            failed_to_load_schedule_from_json_value:
+                #ifndef NDEBUG
+                    log_error("[g10] Failed to construct schedule in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+        }
+
         // Standard library errors
         {
             no_mem:
@@ -367,6 +402,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         error_after_file_allocated:
             G10_REALLOC(p_file_contents, 0);
 
+        // Error
         return 0;
     }
 }

@@ -2,6 +2,7 @@
  * Include header for G10.
  * 
  * @file g10/g10.h
+ * 
  * @author Jacob Smith
  */
 
@@ -37,11 +38,13 @@
 
 // parallel module
 #include <parallel/parallel.h>
+#include <parallel/schedule.h>
 
 // g10
 #include <g10/gtypedef.h>
 #include <g10/server.h>
 #include <g10/user_code.h>
+#include <g10/ai.h>
 
 // Platform dependent macros
 #ifdef _WIN64
@@ -125,6 +128,12 @@ struct g_instance_s
     // Name
     char _name[255+1];
 
+    // Running?
+    bool running; 
+
+    // Schedule
+    parallel_schedule *p_schedule;
+
     // Context
     struct
     {
@@ -192,7 +201,6 @@ struct g_instance_s
         };
     } window;
 
-
     // Locks
     //struct
     //{
@@ -204,11 +212,7 @@ struct g_instance_s
     {
         timestamp init;
         timestamp exit;
-    } time;
-    
-
-    // Running?
-    bool running; 
+    } time;  
 };
 
 // Allocators
