@@ -87,19 +87,6 @@ if ( NOT "${HAS_TUPLE}")
     endif()
 endif()
  
-# Find the set module
-if ( NOT "${HAS_SET}")
-    
-    # Add the set directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/set ${CMAKE_SOURCE_DIR}/build/set)
-
-    # Let any parent project know that this project has set
-    if(NOT PROJECT_IS_TOP_LEVEL)
-        set(HAS_SET true PARENT_SCOPE)
-        set(SET_INCLUDE_DIR ${SET_INCLUDE_DIR} PARENT_SCOPE)
-    endif()
-endif()
-
 # Find the stack module
 if ( NOT "${HAS_STACK}")
 
@@ -197,17 +184,17 @@ endif()
 # g10 example
 add_executable (g10_example "main.c") 
 add_dependencies(g10_example g10)
-target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SET_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
+target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
 target_link_libraries(g10_example g10)
 
 # g10 example
 add_executable (g10_test "g10_test.c") 
 add_dependencies(g10_test g10)
-target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SET_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
+target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
 target_link_libraries(g10_test g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c" "linear.c" "entity.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_sdl2.c" "3rd-party/g_vulkan.c") 
-add_dependencies(g10 log sync crypto array dict tuple set stack queue json http web socket)
-target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SET_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
-target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} log sync crypto array dict tuple set stack queue json http parallel web socket m GL vulkan)
+add_dependencies(g10 log sync crypto array dict tuple stack queue json http web socket)
+target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
+target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} log sync crypto array dict tuple stack queue json http parallel web socket m GL vulkan)
