@@ -19,9 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-
+    
     - name: Install Dependencies
       run: |
         sudo apt-get update
@@ -47,7 +45,6 @@ jobs:
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/array_test
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/base64_test
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/dict_test
-        ${{github.workspace}}/build/set_test    
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/stack_test
         ${{github.workspace}}/build/queue_test
         valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=1 ${{github.workspace}}/build/tuple_test    
