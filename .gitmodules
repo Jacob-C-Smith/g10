@@ -1,6 +1,3 @@
-[submodule "extern/array"]
-	path = extern/array
-	url = https://github.com/Jacob-C-Smith/array
 [submodule "extern/hash-cache"]
 	path = extern/hash-cache
 	url = https://github.com/Jacob-C-Smith/hash-cache
@@ -34,3 +31,6 @@
 [submodule "extern/log"]
 	path = extern/log
 	url = https://github.com/Jacob-C-Smith/log
+[submodule "extern/base64"]
+	path = extern/base64
+	url = https://github.com/Jacob-C-Smith/base64
