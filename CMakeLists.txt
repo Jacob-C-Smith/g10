@@ -19,6 +19,8 @@ if (${IS_DEBUG_BUILD})
 endif()
 add_compile_options(-gdwarf-4 -Wall -Wextra -Wpedantic -Wpointer-arith -Wstrict-prototypes -Wformat-security -Wfloat-equal -Wshadow -Wconversion -Wlogical-not-parentheses -Wnull-dereference)
 
+add_compile_definitions(BUILD_G10_WITH_SDL2)
+
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 
@@ -117,6 +119,45 @@ ELSE()
 	message(STATUS ${Vulkan_LIBRARY})
 ENDIF()
 
+# Find the log module
+if ( NOT "${HAS_LOG}")
+    
+    # Add the log directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/log ${CMAKE_SOURCE_DIR}/build/log)
+
+    # Let any parent project know that this project has log
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set(HAS_LOG true PARENT_SCOPE)
+        set(LOG_INCLUDE_DIR ${LOG_INCLUDE_DIR} PARENT_SCOPE)
+    endif()
+endif()
+
+# Find the socket module
+if ( NOT "${HAS_SOCKET}")
+    
+    # Add the socket directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/socket ${CMAKE_SOURCE_DIR}/build/socket)
+
+    # Let any parent project know that this project has socket
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set(HAS_SOCKET true PARENT_SCOPE)
+        set(SOCKET_INCLUDE_DIR ${SOCKET_INCLUDE_DIR} PARENT_SCOPE)
+    endif()
+endif()
+
+# Find the hash cache module
+if ( NOT "${HAS_HASH_CACHE}")
+    
+    # Add the hash cache directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/hash-cache ${CMAKE_SOURCE_DIR}/build/hash-cache)
+
+    # Let any parent project know that this project has hash cache
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set(HAS_HASH_CACHE true PARENT_SCOPE)
+        set(HASH_CACHE_INCLUDE_DIR ${HASH_CACHE_INCLUDE_DIR} PARENT_SCOPE)
+    endif()
+endif()
+
 # Find the array module
 if ( NOT "${HAS_ARRAY}")
 
@@ -154,19 +195,6 @@ if ( NOT "${HAS_DICT}")
     if(NOT PROJECT_IS_TOP_LEVEL)
         set(HAS_DICT true PARENT_SCOPE)
         set(DICT_INCLUDE_DIR ${DICT_INCLUDE_DIR} PARENT_SCOPE)
-    endif()
-endif()
-
-# Find the crypto module
-if ( NOT "${HAS_CRYPTO}")
-
-    # Add the crypto directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/crypto ${CMAKE_SOURCE_DIR}/build/crypto)
-
-    # Let any parent project know that this project has crypto
-    if(NOT PROJECT_IS_TOP_LEVEL)
-        set(HAS_CRYPTO true PARENT_SCOPE)
-        set(CRYPTO_INCLUDE_DIR ${CRYPTO_INCLUDE_DIR} PARENT_SCOPE)
     endif()
 endif()
 
@@ -248,19 +276,6 @@ if ( NOT "${HAS_PARALLEL}")
     endif()
 endif()
 
-# Find the web module
-if ( NOT "${HAS_WEB}")
-    
-    # Add the web directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/web ${CMAKE_SOURCE_DIR}/build/web)
-
-    # Let any parent project know that this project has web
-    if(NOT PROJECT_IS_TOP_LEVEL)
-        set(HAS_WEB true PARENT_SCOPE)
-        set(WEB_INCLUDE_DIR ${WEB_INCLUDE_DIR} PARENT_SCOPE)
-    endif()
-endif()
-
 # Add the g10 project
 if ( NOT "${HAS_G10}")
     
@@ -280,17 +295,17 @@ endif()
 # g10 example
 add_executable (g10_example "main.c") 
 add_dependencies(g10_example g10)
-target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
+target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_example g10)
 
 # g10 example
 add_executable (g10_test "g10_test.c") 
 add_dependencies(g10_test g10)
-target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
+target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR}/ ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_test g10)
 
 # g10 library
-add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "entity.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_sdl2.c" "3rd-party/g_vulkan.c") 
-add_dependencies(g10 log sync crypto array dict tuple stack queue json http web socket)
-target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${CRYPTO_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${WEB_INCLUDE_DIR}) 
-target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} ${Vulkan_LIBRARY} log sync crypto array dict tuple stack queue json http parallel web socket m GL )
+add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "scene.c" "entity.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_sdl2.c" "3rd-party/g_vulkan.c") 
+add_dependencies(g10 log sync array dict tuple stack queue json http socket hash_cache)
+target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
+target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} ${Vulkan_LIBRARY} log sync array dict tuple stack queue json http parallel socket m GL )

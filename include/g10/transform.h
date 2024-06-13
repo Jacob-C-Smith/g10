@@ -2,6 +2,7 @@
  * Include header for transform.
  * 
  * @file g10/transform.h
+ * 
  * @author Jacob Smith
  */
 
@@ -46,16 +47,6 @@ struct transform_s
 };
 
 // Function definitions
-
-// Allocators
-/** !
- * Allocate memory for a transfrom
- * 
- * @param pp_transform return
- * 
- * @return 1 on success, 0 on error
- */
-DLLEXPORT int transform_create ( transform **pp_transform );
 
 // Constructors
 /** !

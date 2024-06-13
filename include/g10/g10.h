@@ -21,8 +21,8 @@
 // sync module
 #include <sync/sync.h>
 
-// crypto module
-#include <crypto/crypto.h>
+// hash cache module
+#include <hash_cache/hash.h>
 
 // array module
 #include <array/array.h>
@@ -42,6 +42,7 @@
 
 // g10
 #include <g10/gtypedef.h>
+#include <g10/scene.h>
 #include <g10/server.h>
 #include <g10/user_code.h>
 #include <g10/ai.h>
@@ -89,15 +90,25 @@
 #define G10_VERSION_PATCH 0
 
 // Build options
-#define BUILD_G10_WITH_ANSI_COLOR true
+#define G10_BUILD_WITH_ANSI_COLOR
+#define G10_BUILD_WITH_SDL2 
+//#define G10_BUILD_WITH_GLFW
+#define G10_BUILD_WITH_VULKAN 
+//#define G10_BUILD_WITH_OPENGL 
+#define G10_BUILD_WITH_NETWORKING 
+#define G10_BUILD_WITH_AVX2 
+#define G10_BUILD_WITH_AVX512 
 //#define BUILD_G10_WITH_DISCORD
 //#define BUILD_G10_WITH_FMOD
-#define BUILD_G10_WITH_SDL2 true
-#define BUILD_G10_WITH_VULKAN true
-//#define BUILD_G10_WITH_OPENGL true
-#define BUILD_G10_WITH_NETWORKING true
-#define BUILD_G10_WITH_AVX2 true
-#define BUILD_G10_WITH_AVX512 true
+
+// Preprocessor error checking
+#if defined G10_BUILD_WITH_VULKAN && defined G10_BUILD_WITH_OPENGL
+    #error "[g10] [preprocessor] g10 builds can only use one graphics API at a time!"
+#endif
+
+#if defined G10_BUILD_WITH_SDL2 && defined G10_BUILD_WITH_GLFW
+    #error "[g10] [preprocessor] g10 builds can only use one WSI at a time!"
+#endif
 
 // 3rd party
 
@@ -112,12 +123,12 @@
 #endif
 
 // SDL2
-#ifdef BUILD_G10_WITH_SDL2
+#ifdef G10_BUILD_WITH_SDL2
     #include <SDL2/SDL.h>
 #endif
 
 // Vulkan
-#ifdef BUILD_G10_WITH_VULKAN
+#ifdef G10_BUILD_WITH_VULKAN
     #include <vulkan/vulkan.h>
 #endif
 
@@ -139,13 +150,14 @@ struct g_instance_s
     {
         fn_user_code_callback  pfn_user_code_callback;
         server                *p_server;
+        scene                 *p_scene;
         u16                    fixed_tick_rate;
     } context;
 
     // Graphics
     union
     {
-        #ifdef BUILD_G10_WITH_VULKAN
+        #ifdef G10_BUILD_WITH_VULKAN
             struct
             {
                 VkInstance instance;
@@ -167,7 +179,7 @@ struct g_instance_s
                             transfer;
                 } queue;
             } vulkan;
-        #elif defined BUILD_G10_WITH_OPENGL
+        #elif defined G10_BUILD_WITH_OPENGL
             struct
             {
                 int openGL;
@@ -191,12 +203,12 @@ struct g_instance_s
         char *title;
         union
         {
-            #ifdef BUILD_G10_WITH_SDL2
-            struct
-            {
-                SDL_Window *window;
-                SDL_Event event;
-            } sdl2;
+            #ifdef G10_BUILD_WITH_SDL2
+                struct
+                {
+                    SDL_Window *window;
+                    SDL_Event event;
+                } sdl2;
             #endif
         };
     } window;
@@ -214,6 +226,15 @@ struct g_instance_s
         timestamp exit;
     } time;  
 };
+
+// Initializers
+/** !
+ * 
+ * 
+ * 
+ * 
+ */
+u0 g_init_early ( void ) __attribute__((constructor));
 
 // Allocators
 /** !
@@ -259,7 +280,7 @@ DLLEXPORT g_instance *g_get_active_instance ( void );
  */
 DLLEXPORT size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode );
 
-// Destructors
+// 
 /** !
  *  Destroy a g10 instance
  *
@@ -270,3 +291,12 @@ DLLEXPORT size_t g_load_file ( const char *const p_path, void *const p_buffer, b
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int g_exit ( g_instance **pp_instance );
+
+// Destructors
+/** !
+ * Clean up
+ * 
+ * 
+ * 
+ */
+u0 g_exit_late ( void ) __attribute__((destructor));

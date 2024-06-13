@@ -52,16 +52,19 @@ int main ( int argc, const char *const argv[] )
     g_instance *p_instance = 0;
 
     // Initialize g10
-    if ( g_init(&p_instance, "instance.json") == 0 ) goto failed_to_initialize_g10;
+    if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
 
     // Set up the example
     game_setup(p_instance);
 
     // Start the schedule
-    //parallel_schedule_start(p_instance->p_schedule);
-    
+    parallel_schedule_start(p_instance->p_schedule, p_instance);
+
+    // Block
+    while ( p_instance->running );
+
     // Stop the schedule
-    //parallel_schedule_stop(p_instance->p_schedule);
+    parallel_schedule_stop(p_instance->p_schedule);
 
     // Clean up g10
     if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;
@@ -77,7 +80,7 @@ int main ( int argc, const char *const argv[] )
             failed_to_initialize_g10:
                 
                 // Write an error message to standard out
-                printf("Error: Failed to initialize G10!\n");
+                log_error("Error: Failed to initialize G10!\n");
 
                 // Error
                 return EXIT_FAILURE;
@@ -97,7 +100,7 @@ int user_code_main ( g_instance *const p_instance )
 {
 
     // Print the name of the instance
-    printf("%s\n", p_instance->_name);
+    //printf("%s\n", p_instance->_name);
 
     // Success
     return 1;
@@ -108,6 +111,9 @@ int game_setup ( g_instance *p_instance )
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
+
+    // Set the running flag
+    p_instance->running = true;
 
     // Success
     return 1;

@@ -2,6 +2,7 @@
  * Transform implementation
  * 
  * @file transform.c
+ * 
  * @author Jacob Smith
  */
 
@@ -20,7 +21,7 @@ int transform_create ( transform **pp_transform )
     // Error check
     if ( p_transform == 0 ) goto no_mem;
 
-    // Zero set
+    // Initialize
     memset(p_transform, 0, sizeof(transform));
 
     // Return a pointer to the caller
@@ -36,7 +37,7 @@ int transform_create ( transform **pp_transform )
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 
                 // Error
@@ -56,7 +57,7 @@ int transform_create ( transform **pp_transform )
     }
 }
 
- int transform_construct (
+int transform_construct (
     transform **pp_transform,
     vec3        location,
     vec3        rotation,
@@ -103,7 +104,7 @@ int transform_create ( transform **pp_transform )
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 
                 // Error
@@ -114,7 +115,7 @@ int transform_create ( transform **pp_transform )
         {
             failed_to_allocate_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Failed to allocate transform in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Failed to allocate transform in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -144,7 +145,7 @@ int transform_from_path
     if ( g_load_file(p_path, p_text, false) == 0 ) goto failed_to_load_file;
 
     // Parse the file into a json value
-    if ( parse_json_value(p_text, 0, &p_value) == 0 ) goto failed_to_parse_json;
+    if ( json_value_parse(p_text, 0, &p_value) == 0 ) goto failed_to_parse_json;
 
     // Construct the transform
     if ( transform_from_json(&p_transform, p_value) == 0 ) goto failed_to_construct_transform;
@@ -342,7 +343,7 @@ int transform_from_json
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n");
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -350,7 +351,7 @@ int transform_from_json
             
             no_value:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n");
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -523,7 +524,7 @@ int transform_destroy ( transform **pp_transform )
         {
             no_transform:
                 #ifndef NDEBUG
-                    printf("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

@@ -2,6 +2,7 @@
  * Linear algebra
  * 
  * @file g10/linear.h
+ * 
  * @author Jacob Smith
  */
 

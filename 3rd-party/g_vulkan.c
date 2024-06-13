@@ -349,9 +349,6 @@ int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value )
         // Get the required instance extensions
         if ( SDL_Vulkan_GetInstanceExtensions(p_instance->window.sdl2.window, &extension_count, extension_names) == SDL_FALSE ) goto failed_to_get_instance_extensions;
 
-    #elif
-        // TODO
-        //
     #endif
 
     // Error check

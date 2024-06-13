@@ -2,6 +2,7 @@
  * Type definitions for g10
  * 
  * @file g10/gtypedef.h
+ * 
  * @author Jacob Smith
  */
 
@@ -54,10 +55,15 @@ struct transform_s;
 struct ai_s;
 
 // Type definitions
+typedef struct ai_s         ai;
+typedef struct bv_s         bv;
+typedef struct camera_s     camera;
 typedef struct g_instance_s g_instance;
 typedef struct server_s     server;
 typedef struct entity_s     entity;
 typedef struct transform_s  transform;
-typedef struct ai_s         ai;
+typedef struct renderer_s   renderer;
+typedef struct scene_s      scene;
 
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
+typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );

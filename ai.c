@@ -29,7 +29,7 @@ int ai_create ( ai **pp_ai )
     // Error check
     if ( p_ai == (void *) 0 ) goto no_mem;
 
-    // Zero set
+    // Initialize
     memset(p_ai, 0, sizeof(ai));
 
     // Return a pointer to the caller

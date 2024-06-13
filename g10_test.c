@@ -2,6 +2,7 @@
  * g10 tester
  * 
  * @file g10_test.c
+ * 
  * @author Jacob Smith
  */
 
@@ -112,10 +113,6 @@ int main ( int argc, const char* argv[] )
     // Initialized data
     timestamp t0 = 0,
               t1 = 0;
-
-    // Initialize the timer library
-    timer_init();
-    log_init(0, false);
 
     // Formatting
     printf(

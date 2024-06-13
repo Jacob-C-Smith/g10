@@ -34,3 +34,6 @@
 [submodule "extern/base64"]
 	path = extern/base64
 	url = https://github.com/Jacob-C-Smith/base64
+[submodule "extern/array"]
+	path = extern/array
+	url = https://github.com/Jacob-C-Smith/array

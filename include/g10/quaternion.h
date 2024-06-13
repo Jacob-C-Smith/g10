@@ -2,6 +2,7 @@
  * Quaternion
  * 
  * @file g10/quaternion.h
+ * 
  * @author Jacob Smith
  */
 

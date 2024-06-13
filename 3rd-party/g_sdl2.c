@@ -57,7 +57,7 @@ int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value )
             // Error check
             if ( p_instance->window.title == (void *) 0 ) goto no_mem;
 
-            // Zero set
+            // Initialize
             memset(p_instance->window.title, 0, sizeof(char) * ( len + 1 ));
 
             // Copy the string
@@ -97,7 +97,6 @@ int g_sdl2_destroy_window ( g_instance *p_instance )
 int g_sdl2_poll_window ( g_instance *p_instance )
 {
 
-
     // Process each event
     while (SDL_PollEvent(&p_instance->window.sdl2.event))
     {
@@ -110,6 +109,16 @@ int g_sdl2_poll_window ( g_instance *p_instance )
             case SDL_QUIT:
             {
                 p_instance->running = false;
+                break;
+            }
+
+            // Mouse moves
+            case SDL_MOUSEMOTION:
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+            {
+                printf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
+                break;
             }
         }
     }

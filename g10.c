@@ -30,11 +30,11 @@ static g_instance *p_active_instance = 0;
 u0 g_init_early ( void )
 {
 
+    // Initialize log library
+    log_init();
+
     // Initialize parallel
     parallel_init();
-
-    // Initialize log library
-    log_init(0, BUILD_G10_WITH_ANSI_COLOR);
 
     // Add core scheduler tasks
     parallel_register_task("user code", (fn_parallel_task *) user_code_callback);
@@ -77,7 +77,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     if ( g_load_file(p_path, p_file_contents, true) == 0 ) goto failed_to_load_file;
 
     // Parse the file into a json value
-    if ( parse_json_value(p_file_contents, 0, &p_value) == 0 ) goto failed_to_parse_json_value;
+    if ( json_value_parse(p_file_contents, 0, &p_value) == 0 ) goto failed_to_json_parse_value;
 
     // Error check
     if ( p_value->type != JSON_VALUE_OBJECT ) goto instance_value_is_wrong_type;
@@ -86,25 +86,24 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     {
 
         // Initialized data
-        const dict *const p_dict = p_value->object;
+        dict *const p_dict = p_value->object;
         const json_value *p_name_value      = dict_get(p_dict, "name"),
                          *p_version         = dict_get(p_dict, "version"),
                          *p_schedule        = dict_get(p_dict, "schedule"),
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
+                         *p_scene           = dict_get(p_dict, "initial scene"),
                          *p_window          = dict_get(p_dict, "window");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance config\n");
-
-        // Error check
-        if ( ! ( p_name_value ) ) goto missing_properties;
-
-        // Error check
-        if ( p_name_value->type != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
+        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance\n");
 
         // Store the name
+        if ( p_name_value )
         {
+
+            // Error check
+            if ( p_name_value->type != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
 
             // Initialized data
             size_t len = strlen(p_name_value->string);
@@ -119,6 +118,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Store a null terminator
             _instance._name[len] = '\0';
         }
+
+        // Default
+        else
+            strncpy(_instance._name, "g10", 4);
 
         // Store the version
         if ( p_version )
@@ -209,6 +212,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Initialize the scheduler
         if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
+        // Load the initial scene
+        if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
     }
 
     // Allocate memory for the instance
@@ -223,11 +228,14 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     // Set the instance singleton
     p_active_instance = p_instance;
 
+    // Store a timestamp
+    p_active_instance->time.init = timer_high_precision();
+
     // Return an instance pointer to the caller
     *pp_instance = p_instance;
 
     // Clean up
-    free_json_value(p_value);
+    json_value_free(p_value);
     G10_REALLOC(p_file_contents, 0);
 
     // Success
@@ -255,9 +263,20 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 return 0;
         }
 
+        // g10 errors
+        {
+            failed_to_load_initial_scene:
+                #ifndef NDEBUG
+                    log_error("[g10] Failed to construct scene in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
         // json errors
         {
-            failed_to_parse_json_value:
+            failed_to_json_parse_value:
                 #ifndef NDEUBG
                     log_error("[g10] Failed to parse file \"%s\" in call to function \"%s\"\n", p_path, __FUNCTION__);
                 #endif
@@ -374,7 +393,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
                 // Error
                 return 0;
-            
         }
 
         // Standard library errors
@@ -398,7 +416,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Clean up
         error_after_json_parsed:
-            free_json_value(p_value);
+            json_value_free(p_value);
         error_after_file_allocated:
             G10_REALLOC(p_file_contents, 0);
 
@@ -468,34 +486,6 @@ size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary
     }
 }
 
-int g_start_server ( g_instance *p_instance )
-{
-
-    // Argument check
-    if ( p_instance == (void *) 0 ) goto no_instance;
-
-    // Start a thread
-    //parallel_thread_start(&p_active_instance->context.p_server->p_web_server_thread, server_listen, g_get_active_instance());
-
-    // Success
-    return 1;
-
-    // Error handling
-    {
-
-        // Argument error
-        {
-            no_instance:
-                #ifndef NDEBUG
-                    // TODO: 
-                #endif
-
-                // Error
-                return 0;
-        }
-    }
-}
-
 int g_exit ( g_instance **pp_instance )
 {
 
@@ -510,6 +500,9 @@ int g_exit ( g_instance **pp_instance )
 
     // No more pointer for caller
     *pp_instance = 0;
+
+    // Store a timestamp
+    //p_instance->time.exit = timer_high_precision();
 
     // Clean up
     G10_REALLOC(p_instance, 0);
@@ -531,4 +524,11 @@ int g_exit ( g_instance **pp_instance )
                 return 0;
         }
     }
+}
+
+u0 g_exit_late ( void ) 
+{
+
+    // Done
+    return;
 }

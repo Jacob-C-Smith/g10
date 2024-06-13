@@ -1,39 +1,132 @@
 {
-    "name" : "g10 example",
-    "version" :
+    "name"    : "g10 example",
+    "version" : 
     {
         "major" : 0,
         "minor" : 0,
         "patch" : 1
     },
-    "window" : 
+    "window" :
     {
         "width"  : 800,
         "height" : 600,
         "title"  : "G10 Example"
     },
+    "input" :
+    {
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT CONTROL" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
+    },
     "schedule" :
     {
-        "name" : "schedule",
+        "name"    : "default schedule",
+        "repeat"  : true,
         "threads" :
         {
             "main" : 
             [
+                { "task" : "sdl2 poll" },
                 { "task" : "pre ai" },
                 { "task" : "ai" },
                 { "task" : "user code" }
             ]
         }
     },
-    "vulkan" :
+    "initial scene" :
     {
-        "validation" : 
+        "name"     : "default scene",
+        "entities" :
+        [
+            {
+                "name"       : "entity",
+                "transform"  : 
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "parts"      : { },
+                "materials"  : { },
+                "ai"         : { },
+                "rigid body" : { }
+            }
+        ],
+        "cameras" :
         {
-            
+            "camera" :
+            {
+                "fov" : 60,
+                "location" : [ 0.0, 0.0, 0.0 ],
+                "rotation" : [ 0.0, 0.0, 0.0 ],
+                "clip" :
+                {
+                    "near" : 0.1,
+                    "far"  : 1000.0
+                }
+            }
         },
-        "device" : 
+        "lights"  : [ ]
+    },
+    "renderer" : 
+    {
+        "name"        : "default deferred",
+        "attachments" :
         {
-
-        }
+            "position" :
+            {
+                "description" : "< X, Y, Z >",
+                "format"      : "r16g16b16a16"
+            },
+            "normal" :
+            {
+                "description" : "< nX, nY, nZ >",
+                "format"      : "r16g16b16a16"
+            },
+            "color + specular" :
+            {
+                "description" : "< R, G, B, E >",
+                "format"      : "r8g8b8a8"
+            }
+        },
+        "passes" :
+        {
+            "geometry" :
+            {
+                "description" : "Render position, normal, color, specular",
+                "shader"      : 
+                {
+                    "source" : 
+                    {
+                        "vertex"   : "resources/shaders/gbuffer/vert.glsl",
+                        "fragment" : "resources/shaders/gbuffer/frag.glsl"
+                    }
+                }
+            },
+            "lighting" :
+            {
+                "description"  : "Calculate lighting",
+                "dependencies" : "geometry",
+                "shader"       : 
+                {
+                    "source" :
+                    {
+                        "vertex"   : "resources/shaders/lighting/vert.glsl",
+                        "fragment" : "resources/shaders/lighting/frag.glsl"
+                    }
+                }
+            }
+        },
+        "clear color" : [ 1.0, 1.0, 1.0, 1.0 ]
     }
 }

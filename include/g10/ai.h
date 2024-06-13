@@ -30,18 +30,6 @@ struct ai_s
 	     _current_state[64];
 };
 
-// Allocators
-/** !
- *  Allocate memory for an AI
- *
- * @param pp_ai return
- *
- * @sa ai_destroy
- *
- * @return 1 on success, 0 on error
- */
-DLLEXPORT int ai_create ( ai **pp_ai );
-
 // Constructors
 /** !
  *  Load an AI from the filesystem

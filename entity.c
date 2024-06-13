@@ -1,8 +1,9 @@
 /** !
  * Entity
  * 
- * @author Jacob Smith
  * @file entity.c
+ * 
+ * @author Jacob Smith
  */
 
 // Header
@@ -21,7 +22,7 @@ int entity_create ( entity **pp_entity )
     // Error check
     if ( p_entity == (void *) 0 ) goto no_mem;
 
-    // Zero set
+    // Initialize
     memset(p_entity, 0, sizeof(entity));
 
     // Return a pointer to the caller
@@ -29,23 +30,45 @@ int entity_create ( entity **pp_entity )
 
     // Success
     return 1;
+        
+    // Error handling
+    {
 
-    no_entity:
-    no_mem:
-    
-        // Error
-        return 0;
+        // Argument errors
+        {
+            no_entity:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+        
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int entity_from_json ( entity **pp_entity, json_value *p_value )
 {
 
+    // Argument check
+    if ( p_value       ==        (void *) 0 ) goto no_entity;
+    if ( pp_entity     ==        (void *) 0 ) goto no_value;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
+
     // Initialized data
     entity   _entity = { 0 },
            *p_entity = (void *) 0;
-
-    // Error check
-    if ( p_value->type != JSON_VALUE_OBJECT ) goto entity_value_is_wrong_type;
 
     // Parse the json value into an instance
     {
@@ -83,7 +106,6 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // Store the transform
         if ( transform_from_json(&_entity.p_transform, p_transform_value) == 0 ) goto failed_to_construct_transform;
-
     }
 
     // Allocate memory on the heap
@@ -98,14 +120,141 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     // Success
     return 1;
 
-    name_property_is_too_short:
-    name_property_is_too_long:
-    entity_value_is_wrong_type:
-    missing_properties:
-    name_property_is_wrong_type:
-    failed_to_construct_transform:
-    failed_to_allocate_entity:
+    // Error handling
+    {
 
-        // Error
-        return 0;
+
+        // Argument errors
+        {
+            no_entity:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"pp_entity\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"no_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            value_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // g10 errors
+        {
+            failed_to_construct_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Failed to construct transform in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            failed_to_allocate_entity:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Failed to allocate entity in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            name_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] \"name\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            name_property_is_too_long:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] \"name\" property of entity object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            name_property_is_too_short:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] \"name\" property of entity object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            missing_properties:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int entity_bounding_box ( entity *p_entity, vec3 *p_min, vec3 *p_max )
+{
+
+    // Argument check
+    if ( p_entity == (void *) 0 ) goto no_entity;
+    if ( p_min    == (void *) 0 ) goto no_min;
+    if ( p_max    == (void *) 0 ) goto no_max;
+    
+    // Initialized data
+    //
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+
+        // Argument errors
+        {
+            no_entity:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_min:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"p_min\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_max:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"p_max\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
