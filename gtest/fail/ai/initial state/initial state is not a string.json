@@ -1,8 +1,0 @@
-{
-    "name" : "Goomba AI",
-    "states" : [
-        "RUN LEFT",
-        "ATTACK"
-    ],
-    "initial state" : 3141
-}

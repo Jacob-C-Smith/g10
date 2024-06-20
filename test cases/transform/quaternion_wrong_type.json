@@ -1,0 +1,6 @@
+{
+    "$schema": "https://schema.g10.app/transform.json",
+    "location": [ 1, 2, 3 ],
+    "quaternion": "Funny 4D number",
+    "scale": [ 1, 1, 1 ]
+}

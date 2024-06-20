@@ -1,144 +1,144 @@
+/** !
+ * Example g10 program
+ * 
+ * @file main.c
+ * 
+ * @author Jacob Smith
+ */
+
 // Standard library
 #include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
 
-// G10
-#include <G10/G10.h>
-#include <G10/GXScheduler.h>
-#include <G10/GXUserCode.h>
-#include <G10/GXEntity.h>
+// sync module
+#include <sync/sync.h>
 
-// This gets called once a frame
-int user_code_callback ( GXInstance_t *p_instance );
+// json module
+#include <json/json.h>
 
-// This gets called after g_init and before g_start_schedule
-int game_initialization ( GXInstance_t *p_instance );
+// g10
+#include <g10/g10.h>
+#include <g10/entity.h>
+#include <g10/user_code.h>
 
-// Log some stuff
-int game_log ( GXInstance_t *p_instance );
+/** !
+ *  This gets called once per frame
+ * 
+ * @param p_instance the active instance
+ * 
+ * @return 1 
+*/
+int user_code_main ( g_instance *const p_instance );
+
+/** !
+ * Set up the example
+ * 
+ * @param p_instance the active instance
+ * 
+ * @return 1
+ */
+int game_setup ( g_instance *p_instance );
+
+// External functions
+extern int g_sdl2_poll_window ( g_instance *p_instance );
 
 // Entry point
-int main ( int argc, const char *argv[] )
+int main ( int argc, const char *const argv[] )
 {
 
+    // Supress compiler warnings
+    (void) argc;
+    (void) argv;
+
     // Initialized data
-    GXInstance_t *p_instance    = 0;
-    const char   *instance_path = "G10/debug client instance.json",
-                 *schedule_name = "Client Schedule";
+    g_instance *p_instance = 0;
 
-    // Parse command line arguments
-    for ( size_t i = 0; i < argc; i++ )
+    // Initialize g10
+    if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
+
+    // Print g10 info
+    g_info(p_instance);
+
+    // Set up the example
+    game_setup(p_instance);
+
+    // Start the schedule
+    //parallel_schedule_start(p_instance->p_schedule, p_instance);
+
+    // Block
+    while ( p_instance->running )
     {
 
-        // Path to instance
-        if ( strcmp("-instance", argv[i]) == 0 )
-            instance_path = argv[++i];
+        // Input
+        g_sdl2_poll_window(p_instance);
 
-        // Name of schedule
-        if ( strcmp("-schedule", argv[i]) == 0 )
-            schedule_name = argv[++i];
+        // Render
+        renderer_render(p_instance);
+
+        // Present
+        renderer_present(p_instance);
     }
 
-    // Create an instance
-    if ( g_init(&p_instance, instance_path) == 0 )
-    {
+    // Stop the schedule
+    //parallel_schedule_stop(p_instance->p_schedule);
 
-        // Write an error message
-        (void) g_print_error("[G10] Failed to initialize G10 in call to function \"%s\"\n", __FUNCTION__);
-        
-        // Error
-        return EXIT_FAILURE;
-    }
-    
-    // Set up the game itself
-    if ( game_initialization(p_instance) == 0 )
-    {
-
-        // Write an error message
-        (void) g_print_error("Failed to initialize game in call to function \"%s\"\n", __FUNCTION__);
-        
-        // Exit
-        (void) g_exit(&p_instance);
-
-        // Error
-        return EXIT_FAILURE;
-    }
-    
-    // Log some details about the game and G10
-    (void) game_log(p_instance);
-    
-    // Start the game
-    (void) g_start_schedule(p_instance, schedule_name);
-
-    // Stop the game
-    (void) g_stop_schedule(p_instance);
-
-    // Exit
-    (void) g_exit(&p_instance);
+    // Clean up g10
+    if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;
 
     // Success
     return EXIT_SUCCESS;
+
+    // Error handling
+    {
+
+        // g10 errors
+        {
+            failed_to_initialize_g10:
+                
+                // Write an error message to standard out
+                log_error("Error: Failed to initialize G10!\n");
+
+                // Error
+                return EXIT_FAILURE;
+
+            failed_to_teardown_g10:
+                
+                // Write an error message to standard out
+                log_warning("Error: Failed to teardown G10!\n");
+
+                // Error
+                return EXIT_FAILURE;
+        }
+    }
 }
 
-int user_code_callback ( GXInstance_t *p_instance )
+int user_code_main ( g_instance *const p_instance )
 {
-    
-    // Whatever code you want
-    fflush(stdout);
-    
-    // Success
-    return 1;
-}
 
-int game_initialization ( GXInstance_t *p_instance )
-{
-    
-    // Set the user code callback
-    if ( add_user_code_callback(p_instance, &user_code_callback) == 0 )
-    {
-        (void) g_print_error("Failed to set user code callback!\n");
-
-        // Error
-        return 0;
-    }
-
-    // Set the binds
-    {
-        
-        // Initialized data
-        GXBind_t *p_quit = 0,
-                 *p_help = 0;
-
-        // Get the quit bind
-        (void) g_find_bind(p_instance, "QUIT", &p_quit);
-
-        // Get the help bind
-        (void) g_find_bind(p_instance, "HELP", &p_help);
-
-        // Set the user exit bind
-        (void) register_bind_callback(p_quit, &g_user_exit);
-
-        // Set the help bind
-        (void) register_bind_callback(p_help, &g_user_help);
-    }
+    // Print the name of the instance
+    printf("%s\n", p_instance->_name);
 
     // Success
     return 1;
 }
 
-int game_log ( GXInstance_t *p_instance )
+int game_setup ( g_instance *p_instance )
 {
-    
-    // Print the input
-    (void) input_info(p_instance->input);
 
-    // Print the renderer
-    (void) print_renderer(p_instance->context.renderer);
+    // Initialized data
+    //entity *p_entity = scene_entity_get(p_instance->context.p_scene->data, "entity");
 
-    // Print the scene
-    (void) scene_info(p_instance->context.scene);
+    // Set a user code callback
+    user_code_callback_set(p_instance, user_code_main);
 
-    // Flush standard out
-    (void) fflush(stdout);
+    //
+
+    // Set the running flag
+    p_instance->running = true;
+
+    // Log
+    log_info("Game setup is complete!\n");
 
     // Success
     return 1;

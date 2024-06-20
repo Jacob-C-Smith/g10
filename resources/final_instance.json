@@ -1,0 +1,273 @@
+{
+    "name" : "g10 example",
+    "version" :
+    {
+        "major" : 0,
+        "minor" : 0,
+        "patch" : 1
+    },
+    "window" : 
+    {
+        "width"  : 800,
+        "height" : 600,
+        "title"  : "G10 Example"
+    },
+    "input" :
+    {
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT CONTROL" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
+    },
+    "schedule" :
+    {
+        "name" : "schedule",
+        "threads" :
+        {
+            "render" : 
+            [
+                { "task" : "render" },
+                { "task" : "present" }
+            ],
+            "main" : 
+            [
+                { "task" : "sdl2 poll" },
+                { "task" : "ui" },
+                { "task" : "pre ai" },
+                { "task" : "ai" },
+                { "task" : "user code" },
+                { "task" : "resolve collisions" },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                { "task" : "move objects" }
+            ],
+            "worker 1" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 2:update forces",
+                        "worker 3:animation",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 2" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "update forces",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 3:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 3:animation",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 3" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "animation",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 4:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 2:update forces",
+                        "worker 4:animation"
+                    ]
+                }
+            ],
+            "worker 4" :
+            [
+                { 
+                    "task" : "resolve collisions",
+                    "wait" : "main:user code"
+                },
+                {
+                    "task" : "animation",
+                    "wait" : 
+                    [
+                        "main:resolve collisions",
+                        "worker 1:resolve collisions",
+                        "worker 2:resolve collisions",
+                        "worker 3:resolve collisions"
+                    ]
+                },
+                {
+                    "task" : "move objects",
+                    "wait" : 
+                    [
+                        "main:update forces",
+                        "worker 1:update forces",
+                        "worker 2:update forces",
+                        "worker 3:animation"
+                    ]
+                }
+            ],
+            "network" :
+            [
+                { "task" : "server recieve" },
+                { "task" : "server process" },
+                { "task" : "server send" }
+            ]
+        }
+    },
+    "initial scene" : "default scene",
+    "scenes" : 
+    {
+        "name"     : "default scene",
+        "entities" :
+        {
+            "entity" :
+            {
+                "$schema"    : "https://schema.g10.app/entity.json",
+                "transform"  : 
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "parts"      : { },
+                "materials"  : { },
+                "ai"         : { },
+                "rigid body" : { }
+            }
+        },
+        "cameras" :
+        {
+            "camera" :
+            {
+                "fov" : 60,
+                "location" : [ 0.0, 0.0, 0.0 ],
+                "rotation" : [ 0.0, 0.0, 0.0 ],
+                "clip" :
+                {
+                    "near" : 0.1,
+                    "far"  : 1000.0
+                }
+            }
+        },
+        "lights"  :
+        {
+            "light" : 
+            {
+                "type"  : "point",
+                "color" : [ 1.0, 1.0, 1.0 ],
+                "power" : 65
+            }
+        }
+    },
+    "renderer" : 
+    {
+        "name"        : "default deferred",
+        "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
+        "attachments" :
+        {
+            "position" :
+            {
+                "description" : "< X, Y, Z >",
+                "format"      : "r16g16b16a16"
+            },
+            "normal" :
+            {
+                "description" : "< nX, nY, nZ >",
+                "format"      : "r16g16b16a16"
+            },
+            "color + specular" :
+            {
+                "description" : "< R, G, B, E >",
+                "format"      : "r8g8b8a8"
+            }
+        },
+        "passes" :
+        {
+            "geometry" :
+            {
+                "description" : "Render position, normal, color, specular",
+                "shader"      : 
+                {
+                    "source" : 
+                    {
+                        "vertex"   : "resources/shaders/gbuffer/vert.glsl",
+                        "fragment" : "resources/shaders/gbuffer/frag.glsl"
+                    }
+                }
+            },
+            "lighting" :
+            {
+                "description"  : "Calculate lighting",
+                "dependencies" : "geometry",
+                "shader"       : 
+                {
+                    "source" :
+                    {
+                        "vertex"   : "resources/shaders/lighting/vert.glsl",
+                        "fragment" : "resources/shaders/lighting/frag.glsl"
+                    }
+                }
+            }
+        }
+    }
+}

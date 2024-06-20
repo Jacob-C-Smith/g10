@@ -1,0 +1,26 @@
+Traditional:    
+    Vertex 
+    Fragment
+
+Modern:
+    Vertex
+    Tessellation control 
+    Tessellation evaluation
+    Geometry
+    Fragment
+
+Full:
+    Conditional rendering
+    Draw indirect
+    Index input
+    Vertex attribute input
+    - Vertex
+    - Tessellation control 
+    - Tessellation evaluation
+    - Geometry
+    Transform feedback
+    Fragment shading rate
+    Early fragment tests
+    - Fragment
+    Late fragment
+    Color attachment output

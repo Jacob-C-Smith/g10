@@ -1,0 +1,108 @@
+{
+    "name"    : "g10 example",
+    "version" : 
+    {
+        "major" : 0,
+        "minor" : 0,
+        "patch" : 1
+    },
+    "window" :
+    {
+        "width"  : 800,
+        "height" : 600,
+        "title"  : "G10 Example"
+    },
+    "input" :
+    {
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT CONTROL" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
+    },
+    "schedule" :
+    {
+        "name"    : "default schedule",
+        "repeat"  : true,
+        "threads" :
+        {
+            "main" : 
+            [
+                { "task" : "sdl2 poll" },
+                { "task" : "pre ai" },
+                { "task" : "ai" },
+                { "task" : "user code" },
+                { "task" : "render" }
+            ]
+        }
+    },
+    "initial scene" :
+    {
+        "$schema"  : "https://schema.g10.app/scene.json",
+        "name"     : "default scene",
+        "entities" :
+        [
+            {
+                "name"      : "entity",
+                "shader"    : "solid color",
+                "transform" : 
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                }
+            }
+        ],
+        "cameras" :
+        {
+            "camera" :
+            {
+                "fov" : 60,
+                "location" : [ 0.0, 0.0, 0.0 ],
+                "rotation" : [ 0.0, 0.0, 0.0 ],
+                "clip" :
+                {
+                    "near" : 0.1,
+                    "far"  : 1000.0
+                }
+            }
+        },
+        "lights"  : [ ]
+    },
+    "renderer" : 
+    {
+        "name"        : "Solid color geometry",
+        "clear color" : [ 0.5, 0.5, 1.0, 1.0 ],
+        "attachments" :
+        {
+            "color" :
+            {
+                "description" : "< R, G, B >",
+                "format"      : "r8g8b8a8"
+            }
+        },
+        "passes" :
+        {
+            "geometry" :
+            {
+                "description" : "Render geometry with solid color",
+                "shaders" : 
+                {
+                    "solid color" : 
+                    {
+                        "vertex"   : "resources/shaders/solid_color/vert.glsl",
+                        "fragment" : "resources/shaders/solid_color/frag.glsl"
+                    }
+                }
+            }
+        }
+    }
+}
