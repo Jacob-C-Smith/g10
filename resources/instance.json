@@ -39,27 +39,26 @@
                 { "task" : "sdl2 poll" },
                 { "task" : "pre ai" },
                 { "task" : "ai" },
-                { "task" : "user code" }
+                { "task" : "user code" },
+                { "task" : "render" }
             ]
         }
     },
     "initial scene" :
     {
+        "$schema"  : "https://schema.g10.app/scene.json",
         "name"     : "default scene",
         "entities" :
         [
             {
-                "name"       : "entity",
-                "transform"  : 
+                "name"      : "entity",
+                "shader"    : "solid color",
+                "transform" : 
                 {
                     "location" : [ 0.0, 0.0, 0.0 ],
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
-                },
-                "parts"      : { },
-                "materials"  : { },
-                "ai"         : { },
-                "rigid body" : { }
+                }
             }
         ],
         "cameras" :
@@ -80,22 +79,13 @@
     },
     "renderer" : 
     {
-        "name"        : "default deferred",
+        "name"        : "Solid color geometry",
+        "clear color" : [ 0.5, 0.5, 1.0, 1.0 ],
         "attachments" :
         {
-            "position" :
+            "color" :
             {
-                "description" : "< X, Y, Z >",
-                "format"      : "r16g16b16a16"
-            },
-            "normal" :
-            {
-                "description" : "< nX, nY, nZ >",
-                "format"      : "r16g16b16a16"
-            },
-            "color + specular" :
-            {
-                "description" : "< R, G, B, E >",
+                "description" : "< R, G, B >",
                 "format"      : "r8g8b8a8"
             }
         },
@@ -103,30 +93,16 @@
         {
             "geometry" :
             {
-                "description" : "Render position, normal, color, specular",
-                "shader"      : 
+                "description" : "Render geometry with solid color",
+                "shaders" : 
                 {
-                    "source" : 
+                    "solid color" : 
                     {
-                        "vertex"   : "resources/shaders/gbuffer/vert.glsl",
-                        "fragment" : "resources/shaders/gbuffer/frag.glsl"
-                    }
-                }
-            },
-            "lighting" :
-            {
-                "description"  : "Calculate lighting",
-                "dependencies" : "geometry",
-                "shader"       : 
-                {
-                    "source" :
-                    {
-                        "vertex"   : "resources/shaders/lighting/vert.glsl",
-                        "fragment" : "resources/shaders/lighting/frag.glsl"
+                        "vertex"   : "resources/shaders/solid_color/vert.glsl",
+                        "fragment" : "resources/shaders/solid_color/frag.glsl"
                     }
                 }
             }
-        },
-        "clear color" : [ 1.0, 1.0, 1.0, 1.0 ]
+        }
     }
 }

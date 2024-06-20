@@ -13,9 +13,9 @@ int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value )
     u32 sdl2_window_flags = SDL_WINDOW_SHOWN;
 
     // Graphics API
-    #ifdef BUILD_G10_WITH_VULKAN
+    #ifdef G10_BUILD_WITH_VULKAN
         sdl2_window_flags |= SDL_WINDOW_VULKAN;
-    #elif defined BUILD_G10_WITH_OPENGL
+    #elif defined G10_BUILD_WITH_OPENGL
         sdl2_window_flags |= SDL_WINDOW_OPENGL;
     #endif
 
@@ -40,10 +40,10 @@ int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value )
         if ( p_title->type  != JSON_VALUE_STRING  ) goto wrong_title_type;
     
         // Store the width
-        p_instance->window.width = p_width->integer;
+        p_instance->window.width = (u32) p_width->integer;
 
         // Store the height
-        p_instance->window.height = p_height->integer;
+        p_instance->window.height = (u32) p_height->integer;
 
         // Copy the title
         {
@@ -66,7 +66,7 @@ int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value )
     }
 
     // Construct the SDL2 window
-    p_instance->window.sdl2.window = SDL_CreateWindow(p_instance->window.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, p_instance->window.width, p_instance->window.height, sdl2_window_flags);
+    p_instance->window.sdl2.window = SDL_CreateWindow(p_instance->window.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, (int) p_instance->window.width, (int) p_instance->window.height, sdl2_window_flags);
 
     // Success
     return 1;

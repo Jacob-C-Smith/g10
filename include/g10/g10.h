@@ -9,6 +9,32 @@
 // Include guard
 #pragma once
 
+// Build version
+#define G10_VERSION_MAJOR 1
+#define G10_VERSION_MINOR 0
+#define G10_VERSION_PATCH 0
+
+// Build options
+#define G10_BUILD_WITH_ANSI_COLOR
+#define G10_BUILD_WITH_SDL2 
+//#define G10_BUILD_WITH_GLFW
+//#define G10_BUILD_WITH_VULKAN 
+#define G10_BUILD_WITH_OPENGL 
+#define G10_BUILD_WITH_NETWORKING 
+#define G10_BUILD_WITH_AVX2 
+//#define G10_BUILD_WITH_AVX512 
+//#define BUILD_G10_WITH_DISCORD
+//#define BUILD_G10_WITH_FMOD
+
+// Preprocessor error checking
+#if defined G10_BUILD_WITH_VULKAN && defined G10_BUILD_WITH_OPENGL
+    #error "[g10] [preprocessor] g10 builds can only use one graphics API at a time!"
+#endif
+
+#if defined G10_BUILD_WITH_SDL2 && defined G10_BUILD_WITH_GLFW
+    #error "[g10] [preprocessor] g10 builds can only use one WSI at a time!"
+#endif
+
 // Standard library
 #include <stdio.h>
 #include <stdbool.h>
@@ -44,6 +70,7 @@
 #include <g10/gtypedef.h>
 #include <g10/scene.h>
 #include <g10/server.h>
+#include <g10/renderer.h>
 #include <g10/user_code.h>
 #include <g10/ai.h>
 
@@ -84,32 +111,6 @@
     #define G10_REALLOC(p, sz) realloc(p,sz)
 #endif
 
-// Build version
-#define G10_VERSION_MAJOR 1
-#define G10_VERSION_MINOR 0
-#define G10_VERSION_PATCH 0
-
-// Build options
-#define G10_BUILD_WITH_ANSI_COLOR
-#define G10_BUILD_WITH_SDL2 
-//#define G10_BUILD_WITH_GLFW
-#define G10_BUILD_WITH_VULKAN 
-//#define G10_BUILD_WITH_OPENGL 
-#define G10_BUILD_WITH_NETWORKING 
-#define G10_BUILD_WITH_AVX2 
-#define G10_BUILD_WITH_AVX512 
-//#define BUILD_G10_WITH_DISCORD
-//#define BUILD_G10_WITH_FMOD
-
-// Preprocessor error checking
-#if defined G10_BUILD_WITH_VULKAN && defined G10_BUILD_WITH_OPENGL
-    #error "[g10] [preprocessor] g10 builds can only use one graphics API at a time!"
-#endif
-
-#if defined G10_BUILD_WITH_SDL2 && defined G10_BUILD_WITH_GLFW
-    #error "[g10] [preprocessor] g10 builds can only use one WSI at a time!"
-#endif
-
 // 3rd party
 
 // Discord
@@ -132,6 +133,10 @@
     #include <vulkan/vulkan.h>
 #endif
 
+#ifdef G10_BUILD_WITH_OPENGL
+    #include <glad/glad.h>
+#endif
+
 // Structures
 struct g_instance_s
 {
@@ -149,6 +154,7 @@ struct g_instance_s
     struct
     {
         fn_user_code_callback  pfn_user_code_callback;
+        renderer              *p_renderer;
         server                *p_server;
         scene                 *p_scene;
         u16                    fixed_tick_rate;
@@ -208,6 +214,10 @@ struct g_instance_s
                 {
                     SDL_Window *window;
                     SDL_Event event;
+                    #ifdef G10_BUILD_WITH_VULKAN
+                    #elif defined G10_BUILD_WITH_OPENGL
+                        SDL_GLContext gl_context;
+                    #endif
                 } sdl2;
             #endif
         };
@@ -218,6 +228,14 @@ struct g_instance_s
     //{
     //    
     //} locks;
+
+    // Cache
+    struct 
+    {
+        dict *p_materials,
+             *p_shaders;
+    } cache;
+    
 
     // Time
     struct
@@ -260,13 +278,13 @@ DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
 DLLEXPORT g_instance *g_get_active_instance ( void );
 
 /** ! 
- * Spawn an HTTP server on another thread 
+ * Print info about a g10 instance
  * 
  * @param p_instance active instance
  * 
- * @return 1 on success, 0 on errpr
+ * @return 1 on success, 0 on error
 */
-// DLLEXPORT int g_start_server ( g_instance *p_instance );
+DLLEXPORT int g_info ( g_instance *p_instance );
 
 // File
 /** !

@@ -79,7 +79,7 @@ DLLEXPORT int camera_construct
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int camera_load_as_json_value ( camera **pp_camera, json_value *p_value );
+DLLEXPORT int camera_from_json ( camera **pp_camera, json_value *p_value );
 
 // Calculations
 /** !

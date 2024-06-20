@@ -12,33 +12,6 @@ enum mesh_shapes_e
     G10_BASE_MESH_QUANTITY
 };
 
-union mesh_data_u
-{
-    #ifdef G10_BUILD_WITH_VULKAN
-        struct
-        {
-            
-        } vulkan;
-    #elif defined G10_BUILD_WITH_OPENGL
-        struct
-        {
-            GLuint vertex_buffers[32];
-            GLuint vertex_arrays[32];
-        } opengl;
-    #endif
-};
-
-struct mesh_s
-{
-    size_t quantity;
-    struct
-    {
-        union mesh_data_u *p_mesh_data;
-        transform _local;
-        //material *p_material;
-    } _meshes[];
-};
-
 // Data
 const struct 
 {
@@ -157,6 +130,85 @@ u0 g_init_mesh ( u0 )
 
     // Done
     return;
+}
+
+int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, transform *p_transform )
+{
+
+    // Argument check
+    if ( pp_mesh_data == (void *) 0 ) goto no_mesh_data;
+
+    // Initialized data
+    mesh_data *p_mesh_data = (void *) 0;
+
+    // Allocate memory for the mesh data
+    p_mesh_data = G10_REALLOC(0, sizeof(mesh_data));
+
+    // Platform dependent implementation
+    #ifdef G10_BUILD_WITH_VULKAN
+        // TODO
+        //
+    #elif defined G10_BUILD_WITH_OPENGL
+        
+        // External functions
+        extern int g_opengl_mesh_construct (
+            mesh_data **pp_mesh_data,
+            mesh_create_info _mesh_ci
+        );
+
+        g_opengl_mesh_construct(
+            &p_mesh_data,
+            (mesh_create_info)
+            {
+                .verticies = 
+                {
+                    .quantity = _base_mesh_data[type].verticies.quantity,
+                    .p_data   = _base_mesh_data[type].verticies._data,
+                },
+                .elements = 
+                {
+                    .quantity = _base_mesh_data[type].elements.quantity,
+                    .p_data   = _base_mesh_data[type].elements._data,
+                }
+            }
+        );
+
+    #endif
+
+    // Error check
+    if ( p_mesh_data == (void *) 0 ) goto no_mem;
+
+    // Return a pointer to the caller
+    *pp_mesh_data = p_mesh_data;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_mesh_data:
+                #ifndef NDEBUG
+                    log_error("[g10] [opengl] Null pointer provided for parameter \"pp_mesh_data\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;   
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 u0 g_exit_mesh ( u0 )

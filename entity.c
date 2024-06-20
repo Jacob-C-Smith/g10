@@ -70,7 +70,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     entity   _entity = { 0 },
            *p_entity = (void *) 0;
 
-    // Parse the json value into an instance
+    // Parse the json value into an entity
     {
 
         // Initialized data

@@ -16,7 +16,7 @@
 #define G_VULKAN_QUEUE_FAMILY_MAX_QUANTITY       8
 #define G_VULKAN_QUEUE_MAX_QUANTITY              256
 
-// Constant
+// Constant data
 static const float _always_one_point_f = 1.f;
 
 // Function declarations

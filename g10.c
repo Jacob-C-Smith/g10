@@ -9,11 +9,11 @@
 // Headers
 #include <g10/g10.h>
 
-#ifdef BUILD_G10_WITH_SDL2
+#ifdef G10_BUILD_WITH_SDL2
 extern int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value );
 #endif
 
-#ifdef BUILD_G10_WITH_VULKAN
+#ifdef G10_BUILD_WITH_VULKAN
 extern int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value );
 #endif
 
@@ -40,6 +40,7 @@ u0 g_init_early ( void )
     parallel_register_task("user code", (fn_parallel_task *) user_code_callback);
     parallel_register_task("pre ai"   , (fn_parallel_task *) ai_preupdate);
     parallel_register_task("ai"       , (fn_parallel_task *) ai_update);
+    parallel_register_task("render"   , (fn_parallel_task *) renderer_render);
 
     // Add 3rd party scheduler tasks
     #ifdef BUILD_G10_WITH_SDL2
@@ -90,6 +91,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         const json_value *p_name_value      = dict_get(p_dict, "name"),
                          *p_version         = dict_get(p_dict, "version"),
                          *p_schedule        = dict_get(p_dict, "schedule"),
+                         *p_renderer        = dict_get(p_dict, "renderer"),
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
                          *p_scene           = dict_get(p_dict, "initial scene"),
@@ -160,18 +162,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             _instance.version.major = 0,
             _instance.version.patch = 0;
 
-        // Server
-        /*
-        {
-            // Construct a server
-            if ( p_server_value == (void *) 0 ) goto no_server;
-
-            //Construct a server
-            //if ( server_from_json_value(&_instance.context.p_server, p_server_value) == 0 ) goto no_server;
-            no_server:;
-        }
-        */
-
         // Set the fixed tick rate
         if ( p_fixed_tick_rate )
         {
@@ -198,20 +188,25 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         {
 
             // Vulkan
-            #ifdef BUILD_G10_WITH_VULKAN
+            #ifdef G10_BUILD_WITH_VULKAN
                 g_vulkan_initialize(&_instance, p_vulkan);
+            #endif
 
             // OpenGL
-            #elif BUILD_G10_WITH_OPENGL
-                g_opengl_initialize(&_instance, p_opengl);
+            #ifdef G10_BUILD_WITH_OPENGL
+                extern int g_opengl_initialize ( g_instance *p_instance, json_value *p_value );
+                g_opengl_initialize(&_instance, (void *) 0);
+            #endif
 
             // Others? 
-            #endif
         }
 
         // Initialize the scheduler
         if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
+        // Load the renderer
+        if ( renderer_from_json(&_instance.context.p_renderer, p_renderer) == 0 ) goto failed_to_load_renderer;
+
         // Load the initial scene
         if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
     }
@@ -240,6 +235,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
     // Success
     return 1;
+
+    failed_to_load_renderer:
+        return 0;
 
     // Error handling
     {
@@ -423,6 +421,28 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Error
         return 0;
     }
+}
+
+int g_info ( g_instance *p_instance )
+{
+
+    // Argument check
+    //
+
+    // Initialized data
+    //
+
+    // Print the name
+    printf("Instance:\n");
+    printf(" - name    : %s\n", p_instance->_name);
+    printf(" - version : v%d.%d.%d\n", p_instance->version.major, p_instance->version.minor, p_instance->version.patch);
+    printf(" - window  :\n");
+    printf("    - width  : %d\n", p_instance->window.width);
+    printf("    - height : %d\n", p_instance->window.height);
+    printf("    - title  : %s\n", p_instance->window.title);
+
+    // Success
+    return 1;
 }
 
 g_instance *g_get_active_instance ( void )

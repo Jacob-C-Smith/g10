@@ -7,6 +7,7 @@
  */
 
 // Header
+#include <math.h>
 #include <sync/sync.h>
 #include <log/log.h>
 #include <g10/g10.h>
@@ -110,6 +111,10 @@ int user_code_callback_function ( g_instance *p_instance )
 int main ( int argc, const char* argv[] )
 {
     
+    // Suppress compiler warnings
+    (void) argc;
+    (void) argv;
+
     // Initialized data
     timestamp t0 = 0,
               t1 = 0;
@@ -309,7 +314,6 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
 {
     
     // Initialized data
-    bool ret = true;
     size_t file_len = 0;
     result_t result = 0,
              value_eq = 0;

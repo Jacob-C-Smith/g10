@@ -19,13 +19,16 @@
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
 #include <g10/linear.h>
+#include <g10/ai.h>
 #include <g10/transform.h>
 
 // Structure definitions
 struct entity_s
 {
     char _name[255+1];
+
     transform *p_transform;
+    ai        *p_ai;
 };
 
 // Constructors

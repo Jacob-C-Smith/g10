@@ -12,6 +12,22 @@
         "height" : 600,
         "title"  : "G10 Example"
     },
+    "input" :
+    {
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT CONTROL" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
+    },
     "schedule" :
     {
         "name" : "schedule",
@@ -158,15 +174,100 @@
             ]
         }
     },
-    "vulkan" :
+    "initial scene" : "default scene",
+    "scenes" : 
     {
-        "validation" : 
+        "name"     : "default scene",
+        "entities" :
         {
-            
+            "entity" :
+            {
+                "$schema"    : "https://schema.g10.app/entity.json",
+                "transform"  : 
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "parts"      : { },
+                "materials"  : { },
+                "ai"         : { },
+                "rigid body" : { }
+            }
         },
-        "device" : 
+        "cameras" :
         {
-
+            "camera" :
+            {
+                "fov" : 60,
+                "location" : [ 0.0, 0.0, 0.0 ],
+                "rotation" : [ 0.0, 0.0, 0.0 ],
+                "clip" :
+                {
+                    "near" : 0.1,
+                    "far"  : 1000.0
+                }
+            }
+        },
+        "lights"  :
+        {
+            "light" : 
+            {
+                "type"  : "point",
+                "color" : [ 1.0, 1.0, 1.0 ],
+                "power" : 65
+            }
+        }
+    },
+    "renderer" : 
+    {
+        "name"        : "default deferred",
+        "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
+        "attachments" :
+        {
+            "position" :
+            {
+                "description" : "< X, Y, Z >",
+                "format"      : "r16g16b16a16"
+            },
+            "normal" :
+            {
+                "description" : "< nX, nY, nZ >",
+                "format"      : "r16g16b16a16"
+            },
+            "color + specular" :
+            {
+                "description" : "< R, G, B, E >",
+                "format"      : "r8g8b8a8"
+            }
+        },
+        "passes" :
+        {
+            "geometry" :
+            {
+                "description" : "Render position, normal, color, specular",
+                "shader"      : 
+                {
+                    "source" : 
+                    {
+                        "vertex"   : "resources/shaders/gbuffer/vert.glsl",
+                        "fragment" : "resources/shaders/gbuffer/frag.glsl"
+                    }
+                }
+            },
+            "lighting" :
+            {
+                "description"  : "Calculate lighting",
+                "dependencies" : "geometry",
+                "shader"       : 
+                {
+                    "source" :
+                    {
+                        "vertex"   : "resources/shaders/lighting/vert.glsl",
+                        "fragment" : "resources/shaders/lighting/frag.glsl"
+                    }
+                }
+            }
         }
     }
 }

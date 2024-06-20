@@ -48,22 +48,42 @@ typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
 typedef struct { float u, i, j, k; } quaternion;
 
 // Forward declarations
-struct g_instance_s;
-struct server_s;
-struct entity_s;
-struct transform_s;
 struct ai_s;
+struct attachment_s;
+struct bv_s;
+struct camera_s;
+struct entity_s;
+struct g_instance_s;
+struct mesh_s;
+union  mesh_data_u;
+struct mesh_create_info_s;
+struct renderer_s;
+struct render_pass_s;
+struct scene_s;
+struct server_s;
+struct shader_s;
+struct transform_s;
 
 // Type definitions
-typedef struct ai_s         ai;
-typedef struct bv_s         bv;
-typedef struct camera_s     camera;
-typedef struct g_instance_s g_instance;
-typedef struct server_s     server;
-typedef struct entity_s     entity;
-typedef struct transform_s  transform;
-typedef struct renderer_s   renderer;
-typedef struct scene_s      scene;
+typedef struct ai_s               ai;
+typedef struct attachment_s       attachment;
+typedef struct bv_s               bv;
+typedef struct camera_s           camera;
+typedef struct entity_s           entity;
+typedef struct g_instance_s       g_instance;
+typedef struct mesh_s             mesh;
+typedef union  mesh_data_u        mesh_data;
+typedef struct mesh_create_info_s mesh_create_info;
+typedef struct renderer_s         renderer;
+typedef struct render_pass_s      render_pass;
+typedef struct scene_s            scene;
+typedef struct server_s           server;
+typedef struct shader_s           shader;
+typedef struct transform_s        transform;
 
-typedef int (*fn_user_code_callback)( g_instance *p_instance );
 typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
+typedef int (*fn_shader_on_bind)( u0 );
+typedef int (*fn_shader_on_material)( u0 );
+typedef int (*fn_shader_on_draw)( u0 );
+typedef int (*fn_user_code_callback)( g_instance *p_instance );
+

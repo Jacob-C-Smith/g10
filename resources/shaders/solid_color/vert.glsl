@@ -1,7 +1,7 @@
 /*
- * Solid color vertex shader
+ * Geometry buffer vertex shader
  *
- * @file resources/shaders/solid_color/vert.glsl
+ * @file resources/shaders/gbuffer/vert.glsl
  *
  * @author Jacob Smith
  */
@@ -11,9 +11,13 @@
 
 // Attributes
 layout (location = 0) in vec3 xyz_in;
+layout (location = 1) in vec3 nxyz_in;
+layout (location = 2) in vec2 uv_in;
 
 // Output
 out vec3 xyz;
+out vec2 uv;
+out vec3 nxyz;
 
 // Uniforms
 uniform mat4 M;
@@ -30,6 +34,12 @@ void main ( )
 
     // Store world coordinates
     xyz = xyz_world.xyz; 
+
+    // Pass through the texture coordinates
+    uv = uv_in;
+    
+    // Compute and store the normal
+    nxyz = normal_matrix * nxyz_in;
 
     // Store the position in clip space
     gl_Position = P * V * xyz_world;

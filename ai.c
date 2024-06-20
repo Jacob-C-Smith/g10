@@ -50,7 +50,6 @@ int ai_create ( ai **pp_ai )
 
                 // Error
                 return 0;
-
         }
 
         // Standard library errors
@@ -96,7 +95,7 @@ int load_ai ( ai **pp_ai, char *path )
         {
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -104,7 +103,7 @@ int load_ai ( ai **pp_ai, char *path )
 
             no_path:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -115,7 +114,7 @@ int load_ai ( ai **pp_ai, char *path )
         {
             failed_to_load_file:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                    log_error("[g10] [ai] Failed to load file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
 
                 // Error
@@ -123,7 +122,7 @@ int load_ai ( ai **pp_ai, char *path )
 
             failed_to_construct_ai_from_file_json:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+                    log_error("[g10] [ai] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
                 #endif
 
                 // Error
@@ -311,7 +310,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             wrong_type:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] JSON value must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] JSON value must be of type [ object ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -319,7 +318,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             missing_properties:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Not enough properties to construct AI in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] Not enough properties to construct AI in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -327,7 +326,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             wrong_name_type:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] Property \"name\" must be of type [ string ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -335,7 +334,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             wrong_initial_state_type:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Property \"initial state\" must be of type [ string ] in call to function \"%s\"\n\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] Property \"initial state\" must be of type [ string ] in call to function \"%s\"\n\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -343,7 +342,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             wrong_states_type:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Property \"states\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] Property \"states\" must be of type [ array ] in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -351,7 +350,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             name_too_long:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] \"name\" property's length must be less than 256 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
+                    log_error("[g10] [ai] \"name\" property's length must be less than 256 in call to function \"%s\"\nRefer to gschema: https://schema.g10.app/ai.json \n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -363,7 +362,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
         {
             failed_to_allocate_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Failed to allocate AI in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Failed to allocate AI in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -374,7 +373,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
         {
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -382,7 +381,7 @@ int load_ai_as_json_value ( ai **pp_ai, JSONValue_t *p_value )
 
             no_value:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -426,7 +425,7 @@ int add_ai_state_callback ( ai *p_ai , char *state_name, int (*function_pointer)
         {
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -434,7 +433,7 @@ int add_ai_state_callback ( ai *p_ai , char *state_name, int (*function_pointer)
 
             no_state_name:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -442,7 +441,7 @@ int add_ai_state_callback ( ai *p_ai , char *state_name, int (*function_pointer)
 
             no_function_pointer:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -476,7 +475,7 @@ int set_ai_state ( ai *p_ai , const char *state_name )
         {
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -484,7 +483,7 @@ int set_ai_state ( ai *p_ai , const char *state_name )
 
             no_state_name:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"state_name\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -516,7 +515,7 @@ int set_ai_pre_update_callback ( ai *p_ai , int (*function_pointer) ( GXEntity_t
         {
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -524,7 +523,7 @@ int set_ai_pre_update_callback ( ai *p_ai , int (*function_pointer) ( GXEntity_t
 
             no_function_pointer:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"function_pointer\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -582,7 +581,7 @@ int pre_update_ai ( GXInstance_t *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    g_print_log("[G10] [AI] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    g_print_log("[g10] [ai] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -624,7 +623,7 @@ int copy_ai ( ai **pp_ai, ai *p_ai )
         {
             no_return:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"pp_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -632,7 +631,7 @@ int copy_ai ( ai **pp_ai, ai *p_ai )
 
             no_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_ai\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -643,7 +642,7 @@ int copy_ai ( ai **pp_ai, ai *p_ai )
         {
             failed_to_allocate_ai:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Failed to create AI in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Failed to create AI in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -657,7 +656,7 @@ int ai_preupdate ( g_instance *p_instance )
 {
 
     // TODO
-    //
+    (void)p_instance;
 
     // Success
     return 1;
@@ -667,7 +666,7 @@ int ai_update ( g_instance *p_instance )
 {
 
     // TODO
-    //
+    (void)p_instance;
 
     // Success
     return 1;
@@ -755,7 +754,7 @@ int update_ai ( g_instance *p_instance )
         {
             no_instance:
                 #ifndef NDEBUG
-                    log_error("[G10] [AI] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [ai] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

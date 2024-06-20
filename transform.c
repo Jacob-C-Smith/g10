@@ -69,27 +69,33 @@ int transform_construct (
     if ( pp_transform == (void *) 0 ) goto no_transform;
 
     // Initialized data
-    transform *p_transform = (void *) 0;
+    transform  _transform  = { 0 },
+              *p_transform = (void *) 0;
+
+    // Populate the transform 
+    _transform = (transform)
+    {
+        .location   = location,
+        .rotation   = rotation,
+        .scale      = scale,
+        .model      = { 0 },
+        .p_childern = 0,
+        .p_parent   = 0
+    };
+
+    // Compute the model matrix
+    mat4_model_from_vec3(
+        &_transform.model,
+        _transform.location,
+        _transform.rotation,
+        _transform.scale
+    );
 
     // Allocate a transform
     if ( transform_create(&p_transform) == 0 ) goto failed_to_allocate_transform;
 
-    // Store the location
-    p_transform->location = location;
-
-    // Store the rotation
-    p_transform->rotation = rotation;
-
-    // Store the scale
-    p_transform->scale = scale;
-
-    // Compute the model matrix
-    mat4_model_from_vec3(
-        &p_transform->model,
-        p_transform->location,
-        p_transform->rotation,
-        p_transform->scale
-    );
+    // Copy the transform from the stack to the heap
+    memcpy(p_transform, &_transform, sizeof(transform));
 
     // Return a pointer to the caller
     *pp_transform = p_transform;
@@ -136,10 +142,10 @@ int transform_from_path
     if ( p_path       == (void *) 0 ) goto no_path;
 
     // Initialized data
-    transform *p_transform = (void *) 0;
-    size_t len = g_load_file(p_path, 0, false);
-    char *p_text = G10_REALLOC(0, sizeof(char) * len);
-    json_value *p_value = (void *) 0;
+    size_t       len         = g_load_file(p_path, 0, false);
+    char        *p_text      = G10_REALLOC(0, sizeof(char) * len);
+    transform   *p_transform = (void *) 0;
+    json_value  *p_value     = (void *) 0;
 
     // Load the file
     if ( g_load_file(p_path, p_text, false) == 0 ) goto failed_to_load_file;
@@ -156,22 +162,60 @@ int transform_from_path
     // Success
     return 1;
 
-    // TODO: Error handling
+    // Error handling
     {
 
         // Argument errors
-        no_transform:
-        no_path:
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-        // JSON errors
-        failed_to_parse_json:
+                // Error
+                return 0;
 
-        // G10 errors
-        failed_to_construct_transform:
+            no_path:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_path\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // g10 errors
+        {
+            failed_to_construct_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Failed to construct transform in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            failed_to_parse_json:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Failed to parse json in call to function \"%s\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
 
         // Standard library errors
-        failed_to_load_file:
-            return 0;
+        {
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Failed to load file \"%s\" in call to function \"%s\"\n", p_path, __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
 }
 
@@ -183,117 +227,93 @@ int transform_from_json
 {
 
     // Argument check
-    if ( pp_transform == (void *) 0 ) goto no_transform;
-    if ( p_value      == (void *) 0 ) goto no_value;
+    if ( pp_transform  ==        (void *) 0 ) goto no_transform;
+    if ( p_value       ==        (void *) 0 ) goto no_value;
+
+    // Accept check
+    if ( p_value->type == JSON_VALUE_STRING ) goto parse_as_path;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // Initialized data
+    size_t i = 0;
     transform *p_transform = (void *) 0;
     transform _transform = { 0 };
-    vec3 location;
-    vec3 rotation;
-    vec3 scale;
+    vec3 location, rotation, scale;
     mat4 model;
+    dict *const p_dict = p_value->object;
+    json_value *p_scratch[4] = { 0 };
+    const json_value *const p_location   = dict_get(p_dict, "location"),
+                     *const p_rotation   = dict_get(p_dict, "rotation"),
+                     *const p_quaternion = dict_get(p_dict, "quaternion"),
+                     *const p_scale      = dict_get(p_dict, "scale");
 
-    // Parse the json value as a path
-    if ( p_value->type == JSON_VALUE_STRING ) 
+    // Property check
+    if ( p_location   == (void *) 0 )       goto no_location_property;
+    if ( ! ( p_rotation || p_quaternion ) ) goto no_rotation_property;
+    if ( p_scale      == (void *) 0 )       goto no_scale_property;
+
+    // Type check
+    if ( p_location->type != JSON_VALUE_ARRAY ) goto wrong_location_type;
+    if ( p_scale->type    != JSON_VALUE_ARRAY ) goto wrong_scale_type;
+
+    // Parse the location
     {
 
         // Initialized data
-        const char *const p_path = p_value->string;
+        array *p_array = p_location->list;
+        size_t len     = array_size(p_array);
 
-        // Construct a transform
-        //if ( transform_from_path(&p_transform, ) == 0 ) goto failed_to_construct_transform;
+        // Error check
+        if ( len != 3 ) goto wrong_location_len;
 
-        // Done
-        goto done;
+        // Dump the location values
+        array_slice(p_array, (void **) &p_scratch, 0, 2);
 
-    } 
-
-    // Parse the json value as an object
-    else if ( p_value->type == JSON_VALUE_OBJECT ) 
-    {
-
-        // Initialized data
-        dict *p_dict = p_value->object;
-        json_value *p_location   = dict_get(p_value->object, "location"),
-                   *p_rotation   = dict_get(p_value->object, "rotation"),
-        //         *p_quaternion = (void *) 0,
-                   *p_scale      = dict_get(p_value->object, "scale");
-        json_value *p_scratch[4] = { 0 };
-
-        // Property check
-        if ( ! ( p_location && p_rotation && p_scale ) ) goto missing_properties;
-
-        // Parse the location
-        if ( p_location->type == JSON_VALUE_ARRAY )
+        // Error check
+        for ( i = 0; i < len; i++ ) 
         {
-
-            // Initialized data
-            array *p_array = p_location->list;
-            size_t len     = array_size(p_array);
-
-            // Error check
-            if ( len != 3 ) goto wrong_location_len;
-
-            // Dump the location values
-            if ( array_slice(p_array, &p_scratch, 0, 2) == 0 ) goto failed_to_slice;
-
-            // Error check
-            for (size_t i = 0; i < len; i++) 
-            {
-                if ( p_scratch[i]       == 0 ) goto location_element_was_wrong_type;
-                if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto location_element_was_wrong_type;  
-            }
-
-            // Store the vector
-            location = (vec3)
-            {
-                .x = p_scratch[0]->number,
-                .y = p_scratch[1]->number,
-                .z = p_scratch[2]->number                
-            };
+            if ( p_scratch[i]       ==        (void *) 0 ) goto location_element_was_wrong_type;
+            if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto location_element_was_wrong_type;  
         }
 
-        // Default
-        else goto wrong_location_type;
-    
-        // Parse the scale
-        if ( p_scale->type == JSON_VALUE_ARRAY )
+        // Store the vector
+        location = (vec3)
         {
-
-            // Initialized data
-            array *p_array = p_scale->list;
-            size_t len     = array_size(p_array);
-
-            // Error check
-            if ( len != 3 ) goto wrong_scale_len;
-
-            // Dump the p_scale values
-            if ( array_slice(p_array, &p_scratch, 0, 2) == 0 ) goto failed_to_slice;
-
-            // Error check
-            for (size_t i = 0; i < len; i++) 
-            {
-                if ( p_scratch[i]       == 0 ) goto scale_element_was_wrong_type;
-                if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto scale_element_was_wrong_type;  
-            }
-
-            // Store the vector
-            scale = (vec3)
-            {
-                .x = p_scratch[0]->number,
-                .y = p_scratch[1]->number,
-                .z = p_scratch[2]->number                
-            };
-        }
-        
-        // Default
-        else goto wrong_scale_type;
+            .x = (float) p_scratch[0]->number,
+            .y = (float) p_scratch[1]->number,
+            .z = (float) p_scratch[2]->number                
+        };
     }
-
-    // Default
-    else goto wrong_type;
     
+    // Parse the scale
+    {
+
+        // Initialized data
+        array *p_array = p_scale->list;
+        size_t len     = array_size(p_array);
+
+        // Error check
+        if ( len != 3 ) goto wrong_scale_len;
+
+        // Dump the p_scale values
+        array_slice(p_array, (void **)&p_scratch, 0, 2);
+
+        // Error check
+        for ( i = 0; i < len; i++ ) 
+        {
+            if ( p_scratch[i]       ==        (void *) 0 ) goto scale_element_was_wrong_type;
+            if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto scale_element_was_wrong_type;  
+        }
+
+        // Store the vector
+        scale = (vec3)
+        {
+            .x = (float) p_scratch[0]->number,
+            .y = (float) p_scratch[1]->number,
+            .z = (float) p_scratch[2]->number
+        };
+    }       
+        
     // Calculate the model matrix
     mat4_model_from_vec3(&model, location, (vec3){ 0, 0, 0 }, scale);
 
@@ -323,18 +343,19 @@ int transform_from_json
     // Success
     return 1;
 
-    // TODO:
-    wrong_type:
-    wrong_location_type:
-    wrong_scale_type:
-    missing_properties:
-    wrong_location_len:
-    failed_to_slice:
-    location_element_was_wrong_type:
-    wrong_scale_len:
-    scale_element_was_wrong_type:
-    no_mem:
-        return 0;
+    // Parse the transform as a path
+    parse_as_path:
+    {
+
+        // Initialized data
+        const char *const p_path = p_value->string;
+
+        // Construct a transform
+        //if ( transform_from_path(&p_transform, ) == 0 ) goto failed_to_construct_transform;
+
+        // Done
+        goto done;
+    } 
 
     // Error handling
     {
@@ -352,6 +373,110 @@ int transform_from_json
             no_value:
                 #ifndef NDEBUG
                     log_error("[g10] [transform] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Parameter \"p_value\" must be of type [ object | string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_location_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Parameter \"p_value\" is missing required property \"location\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_rotation_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Parameter \"p_value\" is missing required property \"rotation\" - OR - \"quaternion\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_scale_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Parameter \"p_value\" is missing required property \"scale\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_location_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] \"location\" property of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_location_len:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"location\" of parameter \"p_value\" must be of length 3 in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            location_element_was_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Element %d of \"location\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_scale_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] \"scale\" property of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_scale_len:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"scale\" of parameter \"p_value\" must be of length 3 in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            scale_element_was_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Element %d of \"scale\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -511,8 +636,8 @@ int transform_destroy ( transform **pp_transform )
     // No more pointer for caller
     *pp_transform = (void *) 0;
 
-    // Free the memory
-    G10_REALLOC(p_transform, 0);
+    // Release the memory
+    p_transform = G10_REALLOC(p_transform, 0);
 
     // Success
     return 1;

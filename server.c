@@ -14,7 +14,7 @@ int server_from_json_value ( const server **pp_server, const json_value *const p
     // Error check
     if ( p_value->type != JSON_VALUE_OBJECT ) goto server_value_is_wrong_type;
 
-    // Parse the json value into an instance
+    // Parse the json value into an server
     {
 
         // Initialized data
