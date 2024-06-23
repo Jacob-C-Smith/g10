@@ -64,14 +64,14 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
 int g_opengl_mesh_construct
 (
     mesh_data        **pp_mesh_data,
-    mesh_create_info  *p_mesh_create_info
+    mesh_create_info   _mesh_create_info
 )
 {
 
     // Argument check
-    if ( pp_mesh_data                         == (void *) 0 ) goto no_mesh;
-    if ( p_mesh_create_info->verticies.p_data == (void *) 0 ) goto no_verticies;
-    if ( p_mesh_create_info->elements.p_data  == (void *) 0 ) goto no_elements;
+    if ( pp_mesh_data                       == (void *) 0 ) goto no_mesh;
+    if ( _mesh_create_info.verticies.p_data == (void *) 0 ) goto no_verticies;
+    if ( _mesh_create_info.elements.p_data  == (void *) 0 ) goto no_elements;
 
     // Initialized data
     mesh_data *p_mesh_data = G10_REALLOC(0, sizeof(mesh_data));
@@ -82,26 +82,34 @@ int g_opengl_mesh_construct
     // Allocate a buffers
     glGenVertexArrays(1, p_mesh_data->opengl.vertex_arrays);
     glGenBuffers(1, p_mesh_data->opengl.vertex_buffers);
+    glGenBuffers(1, p_mesh_data->opengl.element_arrays);
 
     // Bind the vertex array
     glBindVertexArray(p_mesh_data->opengl.vertex_arrays[0]);
 
     // Buffer the verticies
     glBindBuffer(GL_ARRAY_BUFFER, p_mesh_data->opengl.vertex_buffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, p_mesh_create_info->verticies.quantity, p_mesh_create_info->verticies.p_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _mesh_create_info.verticies.quantity * sizeof(f32), _mesh_create_info.verticies.p_data, GL_STATIC_DRAW);
 
     // Buffer the indicies
-    glBindBuffer(GL_ARRAY_BUFFER, p_mesh_data->opengl.element_arrays[0]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, p_mesh_create_info->elements.quantity, p_mesh_create_info->elements.p_data, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_mesh_data->opengl.element_arrays[0]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _mesh_create_info.elements.quantity * sizeof(u32), _mesh_create_info.elements.p_data, GL_STATIC_DRAW);
 
     // Add vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), 0);
 
     // Enable the verticies
     glEnableVertexAttribArray(0);
 
     // Bind the array buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0); 
+
+    // Set the quantity of indices
+    p_mesh_data->opengl.indices = _mesh_create_info.elements.quantity;
+
+    // Return a pointer to the caller
+    *pp_mesh_data = p_mesh_data;
 
     // Success
     return 1;
