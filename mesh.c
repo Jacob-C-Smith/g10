@@ -1,17 +1,6 @@
 // Header
 #include <g10/mesh.h>
 
-enum mesh_shapes_e
-{
-    G10_BASE_MESH_PLANE,
-    G10_BASE_MESH_CUBE,
-    G10_BASE_MESH_CIRCLE,
-    G10_BASE_MESH_SPHERE,
-    G10_BASE_MESH_CYLINDER,
-    G10_BASE_MESH_CONE,
-    G10_BASE_MESH_QUANTITY
-};
-
 // Data
 const struct 
 {
@@ -172,7 +161,6 @@ int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, tr
                 }
             }
         );
-
     #endif
 
     // Error check
@@ -209,6 +197,16 @@ int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, tr
                 return 0;
         }
     }
+}
+
+int mesh_draw ( mesh_data *p_mesh_data )
+{
+
+    glBindVertexArray(p_mesh_data->opengl.vertex_arrays[0]);
+    glDrawElements(GL_TRIANGLES, p_mesh_data->opengl.indices, GL_UNSIGNED_INT, 0);
+
+    // Success
+    return 1;
 }
 
 u0 g_exit_mesh ( u0 )

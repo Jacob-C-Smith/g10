@@ -44,6 +44,18 @@
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
 
+// Enumeration definitions
+enum mesh_shapes_e
+{
+    G10_BASE_MESH_PLANE,
+    G10_BASE_MESH_CUBE,
+    G10_BASE_MESH_CIRCLE,
+    G10_BASE_MESH_SPHERE,
+    G10_BASE_MESH_CYLINDER,
+    G10_BASE_MESH_CONE,
+    G10_BASE_MESH_QUANTITY
+};
+
 // Structure definitions
 struct mesh_s
 {
@@ -79,6 +91,16 @@ union mesh_data_u
             GLuint vertex_buffers[32];
             GLuint vertex_arrays[32];
             GLuint element_arrays[32];
+            int indices;
         } opengl;
     #endif
 };
+
+DLLEXPORT int mesh_shape_construct
+(
+    mesh_data          **pp_mesh_data,
+    enum mesh_shapes_e   type,
+    transform           *p_transform
+);
+
+DLLEXPORT int mesh_draw ( mesh_data *p_mesh_data );
