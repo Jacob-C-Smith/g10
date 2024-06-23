@@ -10,6 +10,7 @@
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
 #include <g10/mesh.h>
+#include <g10/shader.h>
 
 // SDL2
 #include <SDL2/SDL.h>
@@ -23,6 +24,9 @@
 // Function declarations
 int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
 {
+
+    // Suppress compiler warnings
+    (void)p_value;
 
     #ifdef G10_BUILD_WITH_SDL2
         
@@ -149,6 +153,176 @@ int g_opengl_mesh_construct
             no_mem:
                 #ifndef NDEBUG
                     log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int g_opengl_shader_construct
+(
+    shader     **pp_shader,
+    json_value  *p_value
+)
+{
+
+    // Argument check
+    if ( pp_shader     ==        (void *) 0 ) goto no_shader;
+    if ( p_value       ==        (void *) 0 ) goto no_value;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
+
+    // Initialized data
+    shader *p_shader = G10_REALLOC(0, sizeof(shader));
+    size_t vertex_source_len   = 0,
+           fragment_source_len = 0;
+    dict *const p_dict = p_value->object;
+    const json_value *const p_vertex   = dict_get(p_dict, "vertex"),
+                     *const p_fragment = dict_get(p_dict, "fragment");
+
+    // Error check
+    if ( p_shader == (void *) 0 ) goto no_mem;
+    
+    // Property check
+    if ( p_vertex   == (void *) 0 ) goto no_vertex_property;
+    if ( p_fragment == (void *) 0 ) goto no_fragment_property;
+
+    char _vs_src[512] = { 0 };
+    char _fs_src[512] = { 0 };
+    char *p_vs_src = &_vs_src;
+    char *p_fs_src = &_fs_src;
+
+    g_load_file(p_vertex->string, &_vs_src, false);
+    g_load_file(p_fragment->string, &_fs_src, false);
+
+    vertex_source_len = strlen(_vs_src);
+    fragment_source_len = strlen(_fs_src);
+
+    p_shader->opengl.vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    p_shader->opengl.fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(p_shader->opengl.vertex_shader, 1, &p_vs_src, &vertex_source_len);
+    glShaderSource(p_shader->opengl.fragment_shader, 1, &p_fs_src, &fragment_source_len);
+
+    glCompileShader(p_shader->opengl.vertex_shader);
+    glCompileShader(p_shader->opengl.fragment_shader);
+
+    p_shader->opengl.program = glCreateProgram();
+    glAttachShader(
+        p_shader->opengl.program,
+        p_shader->opengl.vertex_shader
+    );
+    glAttachShader(
+        p_shader->opengl.program,
+        p_shader->opengl.fragment_shader
+    );
+    glLinkProgram(p_shader->opengl.program);
+
+    int success;
+
+
+    glGetProgramiv(p_shader->opengl.program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char _log[512] = { 0 };
+        glGetProgramInfoLog(p_shader->opengl.program, 512, NULL, &_log);
+        printf("%s\n", _log);
+    }
+
+    // Return a pointer to the caller
+    *pp_shader = p_shader;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [opengl] Null pointer provided for parameter \"pp_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+            
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [opengl] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [opengl] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            no_vertex_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Parameter \"p_value\" is missing required property \"vertex\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/shader.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_fragment_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Parameter \"p_value\" is missing required property \"fragment\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/shader.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int g_opengl_shader_bind ( shader *p_shader )
+{
+
+    // Argument check
+    if ( p_shader == (void *) 0 ) goto no_shader;
+
+    // Bind the shader
+    glUseProgram(p_shader->opengl.program);
+
+    // Per bind callback
+    //if ( p_shader->functions.pfn_shader_on_bind )
+    //    p_shader->functions.pfn_shader_on_bind();
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [opengl] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
