@@ -30,6 +30,7 @@
 // g10
 #include <g10/gtypedef.h>
 #include <g10/linear.h>
+#include <g10/quaternion.h>
 
 #define G10_TRANSFORM_CHILD_MAX 64
 

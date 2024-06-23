@@ -246,10 +246,14 @@ int transform_from_json
                      *const p_rotation   = dict_get(p_dict, "rotation"),
                      *const p_quaternion = dict_get(p_dict, "quaternion"),
                      *const p_scale      = dict_get(p_dict, "scale");
+    
+    // Extra check
+    if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [transform] Consider adding a \"$schema\" property to the transform\n");
 
     // Property check
     if ( p_location   == (void *) 0 )       goto no_location_property;
     if ( ! ( p_rotation || p_quaternion ) ) goto no_rotation_property;
+    if ( p_rotation && p_quaternion )       goto rotation_and_quaternion_property;
     if ( p_scale      == (void *) 0 )       goto no_scale_property;
 
     // Type check
@@ -285,6 +289,20 @@ int transform_from_json
         };
     }
     
+    // Parse the rotation ...
+    if ( p_rotation )
+
+        // ... as an euler angle ...
+        goto parse_rotation;
+
+    // ... or ...
+    else
+        
+        // ... as a quaternion
+        goto parse_quaternion;
+
+    rotation_parsed:
+
     // Parse the scale
     {
 
@@ -312,7 +330,7 @@ int transform_from_json
             .y = (float) p_scratch[1]->number,
             .z = (float) p_scratch[2]->number
         };
-    }       
+    }
         
     // Calculate the model matrix
     mat4_model_from_vec3(&model, location, (vec3){ 0, 0, 0 }, scale);
@@ -321,6 +339,7 @@ int transform_from_json
     _transform = (transform)
     {
         .location = location,
+        .rotation = { 0, 0, 0 },
         .scale    = scale,
         .model    = model
     };
@@ -356,6 +375,81 @@ int transform_from_json
         // Done
         goto done;
     } 
+
+    parse_rotation:
+    {
+
+        // Type check
+        if ( p_rotation->type != JSON_VALUE_ARRAY ) goto wrong_rotation_type;
+
+        // Initialized data
+        array *p_array = p_rotation->list;
+        size_t len     = array_size(p_array);
+
+        // Error check
+        if ( len != 3 ) goto wrong_rotation_len;
+
+        // Dump the p_rotation values
+        array_slice(p_array, (void **)&p_scratch, 0, 2);
+
+        // Error check
+        for ( i = 0; i < len; i++ ) 
+        {
+            if ( p_scratch[i]       ==        (void *) 0 ) goto rotation_element_was_wrong_type;
+            if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto rotation_element_was_wrong_type;  
+        }
+
+        // Store the vector
+        rotation = (vec3)
+        {
+            .x = (float) p_scratch[0]->number,
+            .y = (float) p_scratch[1]->number,
+            .z = (float) p_scratch[2]->number
+        };
+
+        // Done
+        goto rotation_parsed;
+    }
+
+
+    parse_quaternion:
+    {
+
+        // Type check
+        if ( p_quaternion->type != JSON_VALUE_ARRAY ) goto wrong_quaternion_type;
+
+        // Initialized data
+        array *p_array = p_quaternion->list;
+        size_t len     = array_size(p_array);
+
+        // Error check
+        if ( len != 4 ) goto wrong_quaternion_len;
+
+        // Dump the p_quaternion values
+        array_slice(p_array, (void **)&p_scratch, 0, 3);
+
+        // Error check
+        for ( i = 0; i < len; i++ ) 
+        {
+            if ( p_scratch[i]       ==        (void *) 0 ) goto quaternion_element_was_wrong_type;
+            if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto quaternion_element_was_wrong_type;  
+        }
+
+        // Store the quaternion
+        quaternion _q = (quaternion)
+        {
+            .u = (float) p_scratch[0]->number,
+            .i = (float) p_scratch[1]->number,
+            .j = (float) p_scratch[2]->number,
+            .k = (float) p_scratch[3]->number,
+        };
+
+        // Store the rotation
+        quaternion_to_euler_angle(&rotation, _q);
+
+        // Done
+        goto rotation_parsed;
+    }
 
     // Error handling
     {
@@ -408,6 +502,15 @@ int transform_from_json
                 // Error
                 return 0;
 
+            rotation_and_quaternion_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Parameter \"p_value\" contains mutually exclusive \"rotation\" - AND - \"quaternion\" properties in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
             no_scale_property:
                 #ifndef NDEBUG
                     log_error("[g10] [transform] Parameter \"p_value\" is missing required property \"scale\" in call to function \"%s\"\n", __FUNCTION__);
@@ -419,7 +522,7 @@ int transform_from_json
 
             wrong_location_type:
                 #ifndef NDEBUG
-                    log_error("[g10] [transform] \"location\" property of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Property \"location\" of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
                 #endif
 
@@ -444,9 +547,63 @@ int transform_from_json
                 // Error
                 return 0;
 
+            wrong_rotation_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"rotation\" of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_rotation_len:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"rotation\" of parameter \"p_value\" must be of length 3 in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            rotation_element_was_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Element %d of \"rotation\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_quaternion_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"quaternion\" of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            wrong_quaternion_len:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"quaternion\" of parameter \"p_value\" must be of length 4 in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            quaternion_element_was_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Element %d of \"quaternion\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // Error
+                return 0;
+
             wrong_scale_type:
                 #ifndef NDEBUG
-                    log_error("[g10] [transform] \"scale\" property of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_error("[g10] [transform] Property \"scale\" of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
                 #endif
 
