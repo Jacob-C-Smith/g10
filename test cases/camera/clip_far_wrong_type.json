@@ -1,0 +1,10 @@
+{
+    "location" : [ 0.0, 0.0, 0.0 ],
+    "orientation" : [ 0.0, 0.0, 0.0 ],
+    "fov" : 60,
+    "clip" :
+    {
+        "near" : 0.1,
+        "far"  : "Can't see"
+    }
+}

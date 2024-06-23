@@ -1,0 +1,10 @@
+{
+    "location" : "In the middle",
+    "orientation" : [ 0.0, 0.0, 0.0 ],
+    "fov" : 90.0,
+    "clip" :
+    {
+        "near" : 0.1,
+        "far"  : 1000.0
+    }
+}
