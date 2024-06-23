@@ -81,6 +81,7 @@ void test_g10_g_get_active_instance ( const char *name );
 void test_g10_user_code ( const char *name );
 void test_g10_linear_vectors ( const char *name );
 void test_g10_linear_matrices ( const char *name );
+void test_g10_camera ( const char *name );
 void test_g10_transform ( const char *name );
 void test_g10_quaternion ( const char *name );
 
@@ -90,7 +91,6 @@ bool test_g_get_active_instance ( char *test_file, result_t expected );
 // Constructors
 int construct_minimal_g10_instance ( g_instance **pp_instance );
 int construct_identity_transform ( transform **pp_transform );
-
 int get_mat4_from_list ( mat4 *p_mat4 );
 
 // Functions used by the tester
@@ -207,6 +207,8 @@ void run_tests ( void )
               g10_quaternion_t1 = 0,
               g10_transform_t0  = 0,
               g10_transform_t1  = 0,
+              g10_camera_t0     = 0,
+              g10_camera_t1     = 1,
               g10_user_code_t0  = 0,
               g10_user_code_t1  = 0;
 
@@ -283,9 +285,28 @@ void run_tests ( void )
     // Stop timing transform code
     g10_transform_t1 = timer_high_precision();
 
-    // Report the time it took to run the core tests
+    // Report the time it took to run the transform tests
     log_info("g10 transform took ");
     print_time_pretty ( (double)(g10_transform_t1-g10_transform_t0)/(double)timer_seconds_divisor() );
+    log_info(" to test\n\n");
+
+    /////////////////
+    // Test camera //
+    /////////////////
+
+    // Start timing camera code
+    g10_camera_t0 = timer_high_precision();
+
+        // TODO: Enable these tests
+        // Test camera
+        //test_g10_camera("g10 camera");
+
+    // Stop timing camera code
+    g10_camera_t1 = timer_high_precision();
+
+    // Report the time it took to run the camera tests
+    log_info("g10 camera took ");
+    print_time_pretty ( (double)(g10_camera_t1-g10_camera_t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n\n");
 
     ////////////////////
@@ -355,6 +376,27 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
     return (result == expected);
 }
 
+bool test_camera_from_json ( char *test_file, int(*expected_camera_constructor) (camera **), result_t expected )
+{
+    result_t result = zero;
+    camera *p_camera_result = (void *) 0;
+    camera *p_camera_expected = (void *) 0;
+
+    char _buf[4096] = { 0 };
+    json_value *p_value = 0;
+    /*
+    g_load_file(test_file, _buf, false);
+    json_value_parse(_buf, 0, &p_value);
+    camera_from_json(&p_camera_result, p_value);
+    if ( expected_camera_constructor )
+        expected_camera_constructor(&p_camera_expected);
+
+    result = (camera_equals_camera(p_camera_result, p_camera_expected)) ? match : zero;
+    */
+    // Success
+    return (result == expected);
+}
+
 bool test_transform_from_json ( char *test_file, int(*expected_transform_constructor) (transform **), result_t expected )
 {
     result_t result = zero;
@@ -364,6 +406,7 @@ bool test_transform_from_json ( char *test_file, int(*expected_transform_constru
     char _buf[4096] = { 0 };
     json_value *p_value = 0;
     g_load_file(test_file, _buf, false);
+    json_value_parse(_buf, 0, &p_value);
     transform_from_json(&p_transform_result, p_value);
     if ( expected_transform_constructor )
         expected_transform_constructor(&p_transform_expected);
@@ -581,7 +624,7 @@ bool transform_equals_transform ( transform *p_a, transform *p_b )
 
     if ( p_a == p_b ) return true;
     
-
+    // TODO: Check rotation
     return 
     (
         vec3_equals_vec3(p_a->location, p_b->location) && 
@@ -1437,6 +1480,141 @@ void test_g10_linear_mat4 ( const char *name )
     return;
 }
 
+void test_g10_camera ( const char *name )
+{
+
+    // Formatting
+    log_scenario("%s\n", name);
+    
+    // Type
+    print_test(name, "empty", test_camera_from_json("test cases/camera/empty.json", (void *) 0, match));
+    print_test(name, "empty_object", test_camera_from_json("test cases/camera/empty_object.json", (void *) 0, match));
+    print_test(name, "empty_array", test_camera_from_json("test cases/camera/empty_array.json", (void *) 0, match));
+
+    // Location
+    print_test(name, "location_too_long", test_camera_from_json("test cases/camera/location_too_long.json", (void *) 0, match));
+    print_test(name, "location_too_short", test_camera_from_json("test cases/camera/location_too_short.json", (void *) 0, match));
+    print_test(name, "location_wrong_type", test_camera_from_json("test cases/camera/location_wrong_type.json", (void *) 0, match));
+
+    // Orientation
+    print_test(name, "orientation_too_long", test_camera_from_json("test cases/camera/orientation_too_long.json", (void *) 0, match));
+    print_test(name, "orientation_too_short", test_camera_from_json("test cases/camera/orientation_too_short.json", (void *) 0, match));
+    print_test(name, "orientation_wrong_type", test_camera_from_json("test cases/camera/orientation_wrong_type.json", (void *) 0, match));
+
+    // Clip
+    print_test(name, "clip_wrong_type", test_camera_from_json("test cases/camera/clip_wrong_type.json", (void *) 0, match));
+    print_test(name, "clip_near_wrong_type", test_camera_from_json("test cases/camera/clip_near_wrong_type.json", (void *) 0, match));
+    print_test(name, "clip_far_wrong_type", test_camera_from_json("test cases/camera/clip_far_wrong_type.json", (void *) 0, match));
+    print_test(name, "clip_invalid_range", test_camera_from_json("test cases/camera/clip_invalid_range.json", (void *) 0, match));
+
+    // Field of View
+    print_test(name, "fov_too_large", test_camera_from_json("test cases/camera/fov_too_large.json", (void *) 0, match));
+    print_test(name, "fov_too_small", test_camera_from_json("test cases/camera/fov_too_small.json", (void *) 0, match));
+    print_test(name, "fov_wrong_type", test_camera_from_json("test cases/camera/fov_wrong_type.json", (void *) 0, match));
+
+    // Scale
+    print_test(name, "scale_too_large", test_camera_from_json("test cases/camera/scale_too_large.json", (void *) 0, match));
+    print_test(name, "scale_too_small", test_camera_from_json("test cases/camera/scale_too_small.json", (void *) 0, match));
+    print_test(name, "scale_wrong_type", test_camera_from_json("test cases/camera/scale_wrong_type.json", (void *) 0, match));
+
+    // Missing properties
+    print_test(name, "missing_location", test_camera_from_json("test cases/camera/missing_location.json", (void *) 0, match));
+    print_test(name, "missing_orientation", test_camera_from_json("test cases/camera/missing_orientation.json", (void *) 0, match));
+    print_test(name, "missing_fov_or_scale", test_camera_from_json("test cases/camera/missing_fov_or_scale.json", (void *) 0, match));
+    print_test(name, "missing_clip", test_camera_from_json("test cases/camera/missing_clip.json", (void *) 0, match));
+    print_test(name, "missing_clip_far", test_camera_from_json("test cases/camera/missing_clip_far.json", (void *) 0, match));
+    print_test(name, "missing_clip_near", test_camera_from_json("test cases/camera/missing_clip_near.json", (void *) 0, match));
+
+    // Mutually exclusive properties
+    print_test(name, "fov_and_scale", test_camera_from_json("test cases/camera/fov_and_scale.json", (void *) 0, match));
+
+    // Valid
+    print_test(name, "valid", test_camera_from_json("test cases/camera/valid.json", (void *) 0, match));
+    print_test(name, "valid_ortho", test_camera_from_json("test cases/camera/valid_ortho.json", (void *) 0, match));
+    print_test(name, "valid_no_schema", test_camera_from_json("test cases/camera/valid_no_schema.json", (void *) 0, match));    
+        
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_transform ( const char *name )
+{
+    
+    // Formatting
+    log_scenario("%s\n", name);
+    
+    // Transform
+    print_test(name, "empty", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
+    print_test(name, "empty object", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
+
+    // Location property
+    print_test(name, "location too long", test_transform_from_json("test cases/transform/location_too_long.json", (void *) 0, match));
+    print_test(name, "location too short", test_transform_from_json("test cases/transform/location_too_short.json", (void *) 0, match));
+    print_test(name, "location wrong type", test_transform_from_json("test cases/transform/location_wrong_type.json", (void *) 0, match));
+
+    // Rotation property
+    print_test(name, "rotation too long", test_transform_from_json("test cases/transform/rotation_too_long.json", (void *) 0, match));
+    print_test(name, "rotation too short", test_transform_from_json("test cases/transform/rotation_too_short.json", (void *) 0, match));
+    print_test(name, "rotation wrong type", test_transform_from_json("test cases/transform/rotation_wrong_type.json", (void *) 0, match));
+
+    // Quaternion property
+    print_test(name, "quaternion too long", test_transform_from_json("test cases/transform/quaternion_too_long.json", (void *) 0, match));
+    print_test(name, "quaternion too short", test_transform_from_json("test cases/transform/quaternion_too_short.json", (void *) 0, match));
+    print_test(name, "quaternion wrong type", test_transform_from_json("test cases/transform/quaternion_wrong_type.json", (void *) 0, match));
+    
+    // Scale property
+    print_test(name, "scale too long", test_transform_from_json("test cases/transform/scale_too_long.json", (void *) 0, match));
+    print_test(name, "scale too short", test_transform_from_json("test cases/transform/scale_too_short.json", (void *) 0, match));
+    print_test(name, "scale wrong type", test_transform_from_json("test cases/transform/scale_wrong_type.json", (void *) 0, match));
+
+    // Missing properties
+    print_test(name, "missing location", test_transform_from_json("test cases/transform/missing_location.json", (void *) 0, match));
+    print_test(name, "missing rotation", test_transform_from_json("test cases/transform/missing_rotation.json", (void *) 0, match));
+    print_test(name, "missing scale", test_transform_from_json("test cases/transform/missing_scale.json", (void *) 0, match));
+    print_test(name, "missing location rotation", test_transform_from_json("test cases/transform/missing_location_rotation.json", (void *) 0, match));
+    print_test(name, "missing location scale", test_transform_from_json("test cases/transform/missing_location_scale.json", (void *) 0, match));
+    print_test(name, "missing rotation scale", test_transform_from_json("test cases/transform/missing_rotation_scale.json", (void *) 0, match));
+    print_test(name, "missing location rotation scale", test_transform_from_json("test cases/transform/missing_location_rotation_scale.json", (void *) 0, match));
+
+    // Mutually exclusive properties
+    print_test(name, "rotation and quaternion", test_transform_from_json("test cases/transform/rotation_and_quaternion.json", (void *) 0, match));
+
+    // Valid transform
+    print_test(name, "valid", test_transform_from_json("test cases/transform/valid.json", construct_identity_transform, match));
+    print_test(name, "valid quaternion", test_transform_from_json("test cases/transform/valid_quaternion.json", construct_identity_transform, match));
+    print_test(name, "valid no schema", test_transform_from_json("test cases/transform/valid_no_schema.json", construct_identity_transform, match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
+void test_g10_user_code ( const char *name )
+{
+    
+    // Formatting
+    log_scenario("%s\n", name);
+
+    // Test callback setter
+    print_test(name, "set_null_callback", test_user_code_callback_set(0, zero));
+    print_test(name, "set_callback", test_user_code_callback_set(user_code_callback_function, match));
+
+    // Test callback
+    print_test(name, "run_callback_null_instance", test_user_code_callback(0, user_code_callback_function, (void *)0, zero));
+    print_test(name, "run_callback", test_user_code_callback("test cases/core/minimal_instance.json", user_code_callback_function, "G10 tester", match));
+
+    // Print the summary of this test
+    print_final_summary();
+
+    // Success
+    return;
+}
+
 void test_g10_linear_vectors ( const char *name )
 {
     
@@ -1591,88 +1769,46 @@ void test_g10_quaternion ( const char *name )
     return;
 }
 
-void test_g10_transform ( const char *name )
+int construct_minimal_g10_instance ( g_instance **pp_instance )
 {
     
-    // Formatting
-    log_scenario("%s\n", name);
-    
-    // Transform
-    print_test(name, "empty", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
-    print_test(name, "empty array", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
-    print_test(name, "empty object", test_transform_from_json("test cases/transform/empty.json", (void *) 0, match));
-
-    // Location property
-    print_test(name, "location too long", test_transform_from_json("test cases/transform/location_too_long.json", (void *) 0, match));
-    print_test(name, "location too short", test_transform_from_json("test cases/transform/location_too_short.json", (void *) 0, match));
-    print_test(name, "location wrong type", test_transform_from_json("test cases/transform/location_wrong_type.json", (void *) 0, match));
-
-    // Rotation property
-    print_test(name, "rotation too long", test_transform_from_json("test cases/transform/location_too_long.json", (void *) 0, match));
-    print_test(name, "rotation too short", test_transform_from_json("test cases/transform/location_too_short.json", (void *) 0, match));
-    print_test(name, "rotation wrong type", test_transform_from_json("test cases/transform/location_wrong_type.json", (void *) 0, match));
-
-    // Quaternion property
-    print_test(name, "quaternion too long", test_transform_from_json("test cases/transform/quaternion_too_long.json", (void *) 0, match));
-    print_test(name, "quaternion too short", test_transform_from_json("test cases/transform/quaternion_too_short.json", (void *) 0, match));
-    print_test(name, "quaternion wrong type", test_transform_from_json("test cases/transform/quaternion_wrong_type.json", (void *) 0, match));
-    
-    // Scale property
-    print_test(name, "scale too long", test_transform_from_json("test cases/transform/scale_too_long.json", (void *) 0, match));
-    print_test(name, "scale too short", test_transform_from_json("test cases/transform/scale_too_short.json", (void *) 0, match));
-    print_test(name, "scale wrong type", test_transform_from_json("test cases/transform/scale_wrong_type.json", (void *) 0, match));
-
-    // Missing properties
-    print_test(name, "missing location", test_transform_from_json("test cases/transform/missing_location.json", (void *) 0, match));
-    print_test(name, "missing rotation", test_transform_from_json("test cases/transform/missing_rotation.json", (void *) 0, match));
-    print_test(name, "missing scale", test_transform_from_json("test cases/transform/missing_scale.json", (void *) 0, match));
-    print_test(name, "missing location rotation", test_transform_from_json("test cases/transform/missing_location_rotation.json", (void *) 0, match));
-    print_test(name, "missing location scale", test_transform_from_json("test cases/transform/missing_location_scale.json", (void *) 0, match));
-    print_test(name, "missing rotation scale", test_transform_from_json("test cases/transform/missing_rotation_scale.json", (void *) 0, match));
-    print_test(name, "missing location rotation scale", test_transform_from_json("test cases/transform/missing_location_rotation_scale.json", (void *) 0, match));
-
-    // Valid transform
-    print_test(name, "valid", test_transform_from_json("test cases/transform/valid.json", (void *) 0, match));
-
-    // Print the summary of this test
-    print_final_summary();
-
-    // Success
-    return;
-}
-
-void test_g10_user_code ( const char *name )
-{
-    
-    // Formatting
-    log_scenario("%s\n", name);
-
-    // Test callback setter
-    print_test(name, "set_null_callback", test_user_code_callback_set(0, zero));
-    print_test(name, "set_callback", test_user_code_callback_set(user_code_callback_function, match));
-
-    // Test callback
-    print_test(name, "run_callback_null_instance", test_user_code_callback(0, user_code_callback_function, (void *)0, zero));
-    print_test(name, "run_callback", test_user_code_callback("test cases/core/minimal_instance.json", user_code_callback_function, "G10 tester", match));
-
-    // Print the summary of this test
-    print_final_summary();
-
-    // Success
-    return;
-}
-
-int construct_minimal_g10_instance ( g_instance **pp_instance ) {
-    
+    // Initialized data
     g_instance *p_instance = G10_REALLOC(0, sizeof(g_instance));
 
-    *p_instance = (g_instance) {
+    // Populate the instance
+    *p_instance = (g_instance)
+    {
         ._name = "g10 instance",
         .running = false
     };
 
+    // Return a pointer to the caller
     *pp_instance = p_instance;
 
+    // Success
+    return 1;
+}
+
+int construct_identity_transform ( transform **pp_transform )
+{
+
+    // Initialized data
+    transform *p_transform = 0;
+
+    // Construct the identity transform
+    return transform_construct(pp_transform, (vec3) {0, 0, 0}, (vec3) { 0, 0, 0 }, (vec3) { 1, 1, 1 }, 0);
+}
+
+int construct_identity_camera ( camera **pp_camera )
+{
+
+    // Initialized data
+    camera *p_camera = 0;
+
+    // TODO
+    //
+
+    // Success
     return 1;
 }
 
@@ -1681,14 +1817,10 @@ void print_test ( const char *scenario_name, const char *test_name, bool passed 
 
     // Initialized data
     if ( passed )
-        log_pass("%s %s\n",scenario_name, test_name);
-    else 
-        log_fail("%s %s\n", scenario_name, test_name);
-    
-    // Increment the pass/fail counter
-    if (passed)
+        log_pass("%s %s\n",scenario_name, test_name),
         ephemeral_passes++;
-    else
+    else 
+        log_fail("%s %s\n", scenario_name, test_name),
         ephemeral_fails++;
 
     // Increment the test counter
@@ -1711,8 +1843,8 @@ void print_final_summary ( void )
     log_info("Total: %d, Passed: %d, Failed: %d (%%%.3f)\n\n",  total_tests, total_passes, total_fails, ((float)total_passes/(float)total_tests*100.f));
     
     // Clear test counters for this test
-    ephemeral_tests  = 0;
-    ephemeral_passes = 0;
+    ephemeral_tests  = 0,
+    ephemeral_passes = 0,
     ephemeral_fails  = 0;
 
     // Done
