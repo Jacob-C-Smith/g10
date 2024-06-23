@@ -20,7 +20,18 @@ u0 quaternion_identity ( quaternion *p_result )
 }
 
 u0 quaternion_from_euler_angle ( quaternion *p_result, vec3 euler_angle );
-u0 quaternion_to_euler_angle ( vec3 *p_result, quaternion q );
+u0 quaternion_to_euler_angle ( vec3 *p_result, quaternion q )
+{
+    *p_result = (vec3)
+    {
+        .x = 0,
+        .y = 0,
+        .z = 0
+    };
+
+    // Done
+    return;
+}
 u0 quaternion_inverse ( quaternion *p_result, quaternion q );
 u0 quaternion_multiply_quaternion ( quaternion *p_result, quaternion q1, quaternion q2 );
 u0 quaternion_to_rotation_mat4 ( mat4 *p_result, quaternion q );
