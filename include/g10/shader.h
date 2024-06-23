@@ -36,6 +36,21 @@ struct shader_s
         fn_shader_on_draw     pfn_shader_on_draw;
     } functions;
 
+    #ifdef G10_BUILD_WITH_VULKAN
+        struct
+        {
+            
+        } vulkan;
+    #elif defined G10_BUILD_WITH_OPENGL
+        struct
+        {
+            unsigned int vertex_shader,
+                         fragment_shader,
+                         program;
+
+        } opengl;
+    #endif
+
     void *_p_draw_items[];
 };
 
@@ -49,3 +64,14 @@ struct shader_s
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int shader_from_json ( shader **pp_shader, json_value *p_value );
+
+// Pipeline operations
+/** !
+ * Bind a shader
+ * 
+ * @param p_shader
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int shader_bind ( shader *p_shader );
+
