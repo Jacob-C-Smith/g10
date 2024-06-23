@@ -61,25 +61,31 @@ struct camera_s
  */
 DLLEXPORT int camera_construct
 (
-    camera **pp_camera,
-    vec3 location,
-    vec3 front,
-    vec3 up,
-    float near_clip,
-    float far_clip,
-    float aspect_ratio,
-    float fov
+    camera **const pp_camera,
+    vec3           location,
+    vec3           front,
+    vec3           up,
+    float          near_clip,
+    float          far_clip,
+    float          aspect_ratio,
+    float          fov
 );
 
 /** !
  * Load a camera from a json value
  *
  * @param pp_camera return
+ * @param p_name    the name of the camera -OR- null
  * @param p_value   the camera json value
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int camera_from_json ( camera **pp_camera, json_value *p_value );
+DLLEXPORT int camera_from_json
+(
+    camera           **const pp_camera,
+    const char        *const p_name,
+    const json_value  *const p_value
+);
 
 // Calculations
 /** !
@@ -94,19 +100,33 @@ DLLEXPORT int camera_from_json ( camera **pp_camera, json_value *p_value );
  *
  * @return a view mat4
  */
-DLLEXPORT u0 camera_matrix_view ( mat4 *p_view, vec3 eye, vec3 target, vec3 up );
+DLLEXPORT u0 camera_matrix_view
+(
+    mat4 *const p_view,
+    vec3        eye,
+    vec3        target,
+    vec3        up
+);
 
 /** !
  *  Construct a 4x4 perspective matrix from it's parameters
  *
- * @param fov       the camera's field of view of
- * @param aspect    the viewport width divided by the viewport height
- * @param near_clip distance to the near clipping plane
- * @param far_clip  distance to the far clipping plane
+ * @param p_projection result
+ * @param fov          the camera's field of view of
+ * @param aspect       the viewport width divided by the viewport height
+ * @param near_clip    distance to the near clipping plane
+ * @param far_clip     distance to the far clipping plane
  *
  * @return a 4x4 projection matrix
  */
-DLLEXPORT mat4 camera_matrix_perspective ( float fov, float aspect, float near_clip, float far_clip );
+DLLEXPORT u0 camera_matrix_projection_perspective
+(
+    mat4  *const p_projection,
+    float        fov,
+    float        aspect,
+    float        near_clip,
+    float        far_clip
+);
 
 // Info
 /** !
@@ -116,7 +136,7 @@ DLLEXPORT mat4 camera_matrix_perspective ( float fov, float aspect, float near_c
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int camera_info ( camera *p_camera );
+DLLEXPORT int camera_info ( const camera *const p_camera );
 
 // Destructors
 /** !
@@ -126,4 +146,4 @@ DLLEXPORT int camera_info ( camera *p_camera );
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int cameara_destroy ( camera **pp_camera );
+DLLEXPORT int camera_destroy ( camera **const pp_camera );
