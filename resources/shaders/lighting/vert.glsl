@@ -1,4 +1,4 @@
-/*
+/** !
  * Deferred vertex shader
  *
  * @file resources/shaders/lighting/vert.glsl

@@ -1,4 +1,4 @@
-/*
+/** !
  * Deferred fragment shader
  *
  * @file resources/shaders/lighting/frag.glsl
