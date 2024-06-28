@@ -65,7 +65,7 @@
         {
             "camera" :
             {
-                "fov" : 60,
+                "fov" : 60.0,
                 "location" : [ 0.0, 0.0, 0.0 ],
                 "rotation" : [ 0.0, 0.0, 0.0 ],
                 "clip" :
