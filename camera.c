@@ -71,8 +71,38 @@ int camera_create ( camera **const pp_camera )
 int camera_from_json ( camera **const pp_camera, const char *const p_name, const json_value *const p_value )
 {
 
+    // Argument check
+    if ( pp_camera == (void *) 0 ) goto no_camera;
+    if ( p_value   == (void *) 0 ) goto no_value;
+
+    // Initialized data
+    
+
     // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_camera:
+                #ifndef NDEBUG
+                    log_error("[g10] [camera] Null pointer provided for parameter \"pp_camera\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+                
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [camera] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
