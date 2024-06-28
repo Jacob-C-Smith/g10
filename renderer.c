@@ -235,7 +235,6 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         // Construct attachments
         {
 
-
             // Initialized data
             dict       *p_dict          = p_attachments_value->object;
             const char *p_scratch[32]   = { 0 };
@@ -282,6 +281,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
     return 1;
 
     too_many_attachments:
+    too_many_render_passes:
 
         // Error
         return 0;
@@ -660,8 +660,6 @@ int renderer_render ( g_instance *p_instance )
     renderer *p_renderer = p_instance->context.p_renderer;
     size_t i = 0;
 
-    printf("[render]\n");
-
     // Cull objects
     // cull_scene(&p_result, RENDERER_OBJECT_MAX, p_instance->context.p_scene);
 
@@ -719,9 +717,6 @@ int renderer_present ( g_instance *p_instance )
     // Argument check
     if ( p_instance == (void *) 0 ) goto no_instance;
     
-    // Log
-    printf("[present]\n");
-
     // Present the window
     SDL_GL_SwapWindow(p_instance->window.sdl2.window);
 
@@ -763,7 +758,7 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
 
         // Bind the shader
         //
-
+        
         // Bind each material
         //
         

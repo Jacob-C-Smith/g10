@@ -432,7 +432,7 @@ int g_info ( g_instance *p_instance )
     // Initialized data
     //
 
-    // Print the name
+    // Print the instance
     printf("Instance:\n");
     printf(" - name    : %s\n", p_instance->_name);
     printf(" - version : v%d.%d.%d\n", p_instance->version.major, p_instance->version.minor, p_instance->version.patch);

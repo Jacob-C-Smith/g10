@@ -20,6 +20,8 @@
 // g10
 #include <g10/g10.h>
 #include <g10/entity.h>
+#include <g10/camera.h>
+#include <g10/mesh.h>
 #include <g10/user_code.h>
 
 /** !
@@ -53,6 +55,12 @@ int main ( int argc, const char *const argv[] )
 
     // Initialized data
     g_instance *p_instance = 0;
+    shader     *p_shader = 0;
+    mesh_data *_p_mesh_data[G10_BASE_MESH_QUANTITY] = { 0 };
+    json_value *p_shader_val = 0;
+    camera     *p_camera = 0;
+    
+    char _shader_text[] = "{\"vertex\":\"resources/shaders/solid_color/vert.glsl\",\"fragment\":\"resources/shaders/solid_color/frag.glsl\"}";
 
     // Initialize g10
     if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
@@ -63,18 +71,33 @@ int main ( int argc, const char *const argv[] )
     // Set up the example
     game_setup(p_instance);
 
+    json_value_parse(_shader_text, 0, &p_shader_val);
+
+    shader_from_json(&p_shader, p_shader_val);
+
+    for (size_t i = 0; i < G10_BASE_MESH_QUANTITY; i++)
+        mesh_shape_construct(&_p_mesh_data[i], i, 0);
+
     // Start the schedule
     //parallel_schedule_start(p_instance->p_schedule, p_instance);
+
+    int i = 0;
 
     // Block
     while ( p_instance->running )
     {
-
+        i++;
+        if ( i > 863 ) i = 0;
+        
         // Input
         g_sdl2_poll_window(p_instance);
 
         // Render
         renderer_render(p_instance);
+
+        shader_bind(p_shader);
+
+        mesh_draw(_p_mesh_data[i / 144]);
 
         // Present
         renderer_present(p_instance);
