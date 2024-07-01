@@ -14,6 +14,7 @@
 #include <g10/linear.h>
 #include <g10/quaternion.h>
 #include <g10/transform.h>
+#include <g10/camera.h>
 #include <g10/user_code.h>
 
 // Enumeration definitions
