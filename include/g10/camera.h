@@ -26,7 +26,7 @@
 // Structure definitions
 struct camera_s
 {
-    char _name[255 + 1];
+    char _name[63 + 1];
     bool dirty;
     struct
     {
