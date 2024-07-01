@@ -75,6 +75,7 @@ void print_final_summary ( void );
 void print_test ( const char *scenario_name, const char *test_name, bool passed );
 
 bool transform_equals_transform ( transform *p_a, transform *p_b );
+bool camera_equals_camera ( camera *p_a, camera *p_b );
 
 void test_g10_g_init ( const char *name );
 void test_g10_g_get_active_instance ( const char *name );
@@ -297,9 +298,8 @@ void run_tests ( void )
     // Start timing camera code
     g10_camera_t0 = timer_high_precision();
 
-        // TODO: Enable these tests
         // Test camera
-        //test_g10_camera("g10 camera");
+        test_g10_camera("g10 camera");
 
     // Stop timing camera code
     g10_camera_t1 = timer_high_precision();
@@ -343,7 +343,8 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
                *p_return_instance = 0;
 
     // Construct the expected json value
-    if (expected_g_instance_constructor) expected_g_instance_constructor(&p_expected_instance);
+    if (expected_g_instance_constructor)
+        expected_g_instance_constructor(&p_expected_instance);
 
     // Parse the instance json
     result = g_init( &p_return_instance, test_file );
@@ -384,15 +385,16 @@ bool test_camera_from_json ( char *test_file, int(*expected_camera_constructor) 
 
     char _buf[4096] = { 0 };
     json_value *p_value = 0;
-    /*
+    
     g_load_file(test_file, _buf, false);
     json_value_parse(_buf, 0, &p_value);
-    camera_from_json(&p_camera_result, p_value);
+    camera_from_json(&p_camera_result, 0, p_value);
+
     if ( expected_camera_constructor )
         expected_camera_constructor(&p_camera_expected);
 
     result = (camera_equals_camera(p_camera_result, p_camera_expected)) ? match : zero;
-    */
+    
     // Success
     return (result == expected);
 }
@@ -632,6 +634,29 @@ bool transform_equals_transform ( transform *p_a, transform *p_b )
     );
 }
 
+bool camera_equals_camera ( camera *p_a, camera *p_b )
+{
+
+    if ( p_a == p_b ) return true;
+    if ( p_a ==   0 ) return false;
+    if ( p_b ==   0 ) return false;
+    
+    return 
+    (
+        vec3_equals_vec3(p_a->view.location, p_b->view.location) && 
+        vec3_equals_vec3(p_a->view.target  , p_b->view.target)   &&      
+        vec3_equals_vec3(p_a->view.up      , p_b->view.up)       &&
+        
+        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
+        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
+        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
+        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
+
+        mat4_equals_mat4(p_a->matrix._view, p_b->matrix._view)   &&      
+        mat4_equals_mat4(p_a->matrix._projection, p_b->matrix._projection)
+    );
+}
+
 bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
@@ -833,7 +858,7 @@ bool test_vec4_demote_vec3 ( vec4 v, vec3 expected_vec, result_t expected_result
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
-bool test_mat2_identity ( mat2 expected_mat, result_t expected_result)
+bool test_mat2_identity ( mat2 expected_mat, result_t expected_result )
 {
     mat2 result_mat = { 0 };
 
@@ -1528,10 +1553,10 @@ void test_g10_camera ( const char *name )
     // Mutually exclusive properties
     print_test(name, "fov_and_scale", test_camera_from_json("test cases/camera/fov_and_scale.json", (void *) 0, match));
 
-    // Valid
-    print_test(name, "valid", test_camera_from_json("test cases/camera/valid.json", (void *) 0, match));
-    print_test(name, "valid_ortho", test_camera_from_json("test cases/camera/valid_ortho.json", (void *) 0, match));
-    print_test(name, "valid_no_schema", test_camera_from_json("test cases/camera/valid_no_schema.json", (void *) 0, match));    
+    // TODO: Valid
+    //print_test(name, "valid", test_camera_from_json("test cases/camera/valid.json", (void *) 0, match));
+    //print_test(name, "valid_ortho", test_camera_from_json("test cases/camera/valid_ortho.json", (void *) 0, match));
+    //print_test(name, "valid_no_schema", test_camera_from_json("test cases/camera/valid_no_schema.json", (void *) 0, match));    
         
     // Print the summary of this test
     print_final_summary();

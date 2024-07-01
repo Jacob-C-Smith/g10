@@ -100,6 +100,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance\n");
 
+        // Missing properties
+        if ( p_name_value == (void *) 0 ) goto missing_name_property;
+
         // Store the name
         if ( p_name_value )
         {
@@ -120,10 +123,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Store a null terminator
             _instance._name[len] = '\0';
         }
-
-        // Default
-        else
-            strncpy(_instance._name, "g10", 4);
 
         // Store the version
         if ( p_version )
@@ -174,6 +173,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         }
 
         // Initialize the window
+        if ( p_window )
         {
 
             // SDL2
@@ -202,13 +202,16 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         }
 
         // Initialize the scheduler
-        if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
+        if ( p_schedule )
+            if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
         // Load the renderer
-        if ( renderer_from_json(&_instance.context.p_renderer, p_renderer) == 0 ) goto failed_to_load_renderer;
+        if ( p_renderer )
+            if ( renderer_from_json(&_instance.context.p_renderer, p_renderer) == 0 ) goto failed_to_load_renderer;
 
         // Load the initial scene
-        if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
+        if ( p_scene )
+            if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
     }
 
     // Allocate memory for the instance
@@ -286,6 +289,14 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 #ifndef NDEBUG
                     log_error("[g10] Value must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // Error
+                goto error_after_json_parsed;
+                
+            missing_name_property:
+                #ifndef NDEUBG
+                    log_error("[g10] Parameter \"p_value\" is missing required property \"name\" in call to function \"%s\"\n", p_path, __FUNCTION__);
                 #endif
 
                 // Error
