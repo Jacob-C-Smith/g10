@@ -1,6 +1,6 @@
 {
     "orientation" : [ 0.0, 0.0, 0.0 ],
-    "fov" : 60,
+    "fov" : 60.0,
     "clip" :
     {
         "near" : 0.1,

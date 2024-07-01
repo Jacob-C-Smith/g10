@@ -1,7 +1,7 @@
 {
     "location" : [ 0.0, 0.0, 0.0 ],
     "orientation" : [ 0.0, 0.0, 0.0 ],
-    "fov" : 90,
+    "fov" : 90.0,
     "scale" : 2,
     "clip" :
     {
