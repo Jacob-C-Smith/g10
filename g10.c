@@ -54,6 +54,37 @@ u0 g_init_early ( void )
     return;
 }
 
+/** !
+ * Signal handler
+ * 
+ * @param signal_number the signal number
+ * 
+ * @return void
+*/
+u0 g_signal_handler ( int signal_number )
+{
+
+    // Print the signal
+    log_error("\n[g10] %s shit its pants.\nLog says:\n\n", p_active_instance->_name);
+
+    // Dump the message log
+    while ( circular_buffer_empty(p_active_instance->debug) == false )
+    {
+
+        // Initialized data
+        const char *p_message = (void *) 0;
+
+        // Get the message
+        circular_buffer_pop(p_active_instance->debug, &p_message);
+
+        // Print the message
+        log_error("%s\n", p_message);
+    }
+
+    // Done
+    exit(EXIT_FAILURE);
+}
+
 int g_init ( g_instance **pp_instance, const char *p_path )
 {
 
@@ -212,6 +243,21 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Load the initial scene
         if ( p_scene )
             if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
+    }
+
+    // Set up the debug system
+    {
+
+        // Construct a circular buffer for messages
+        circular_buffer_construct(&_instance.debug, 64);
+
+        // Set up signal handlers
+        signal(SIGINT , g_signal_handler);
+        signal(SIGILL , g_signal_handler);
+        signal(SIGABRT, g_signal_handler);
+        signal(SIGFPE , g_signal_handler);
+        signal(SIGSEGV, g_signal_handler);
+        signal(SIGTERM, g_signal_handler);
     }
 
     // Allocate memory for the instance

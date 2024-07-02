@@ -40,6 +40,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 // log module
 #include <log/log.h>
@@ -61,6 +62,9 @@
 
 // json module
 #include <json/json.h>
+
+// circular buffer module
+#include <circular_buffer/circular_buffer.h>
 
 // parallel module
 #include <parallel/parallel.h>
@@ -105,6 +109,11 @@
 #ifdef JSON_REALLOC
     #undef JSON_REALLOC
     #define JSON_REALLOC(p, sz) realloc(p, sz)
+#endif
+
+#ifdef CIRCULAR_BUFFER_REALLOC
+    #undef CIRCULAR_BUFFER_REALLOC
+    #define CIRCULAR_BUFFER_REALLOC(p, sz) realloc(p, sz)
 #endif
 
 #ifndef G10_REALLOC
@@ -236,13 +245,15 @@ struct g_instance_s
              *p_shaders;
     } cache;
     
-
     // Time
     struct
     {
         timestamp init;
         timestamp exit;
     } time;  
+
+    // Debug
+    circular_buffer *debug;
 };
 
 // Initializers
