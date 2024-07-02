@@ -2,7 +2,7 @@
 [![CMake](https://github.com/Jacob-C-Smith/g10/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/g10/actions/workflows/cmake.yml)
 
 **Dependencies:**\
-[![CMake](https://github.com/Jacob-C-Smith/array/actions/workflows/cmake.yml/badge.svg?branch=main)](https://github.com/Jacob-C-Smith/array/actions/workflows/cmake.yml) [![hash-cache](https://github.com/Jacob-C-Smith/hash-cache/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/hash-cache/actions/workflows/cmake.yml) [![CMake](https://github.com/Jacob-C-Smith/dict/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/dict/actions/workflows/cmake.yml) [![http](https://github.com/Jacob-C-Smith/http/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/http/actions/workflows/cmake.yml) [![json](https://github.com/Jacob-C-Smith/json/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/json/actions/workflows/cmake.yml) [![log](https://github.com/Jacob-C-Smith/log/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/log/actions/workflows/cmake.yml) [![queue](https://github.com/Jacob-C-Smith/queue/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/queue/actions/workflows/cmake.yml) ![socket](https://github.com/Jacob-C-Smith/socket/actions/workflows/cmake.yml/badge.svg) [![stack](https://github.com/Jacob-C-Smith/stack/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/stack/actions/workflows/cmake.yml) [![sync](https://github.com/Jacob-C-Smith/sync/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/sync/actions/workflows/cmake.yml) [![tuple](https://github.com/Jacob-C-Smith/tuple/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/tuple/actions/workflows/cmake.yml) [![parallel](https://github.com/Jacob-C-Smith/parallel/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/parallel/actions/workflows/cmake.yml) [![web](https://github.com/Jacob-C-Smith/web/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/web/actions/workflows/cmake.yml)
+[![array](https://github.com/Jacob-C-Smith/array/actions/workflows/cmake.yml/badge.svg?branch=main)](https://github.com/Jacob-C-Smith/array/actions/workflows/cmake.yml) [![hash-cache](https://github.com/Jacob-C-Smith/hash-cache/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/hash-cache/actions/workflows/cmake.yml) [![CMake](https://github.com/Jacob-C-Smith/circular-buffer/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/circular-buffer/actions/workflows/cmake.yml) [![dict](https://github.com/Jacob-C-Smith/dict/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/dict/actions/workflows/cmake.yml) [![http](https://github.com/Jacob-C-Smith/http/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/http/actions/workflows/cmake.yml) [![json](https://github.com/Jacob-C-Smith/json/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/json/actions/workflows/cmake.yml) [![log](https://github.com/Jacob-C-Smith/log/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/log/actions/workflows/cmake.yml) [![queue](https://github.com/Jacob-C-Smith/queue/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/queue/actions/workflows/cmake.yml) ![socket](https://github.com/Jacob-C-Smith/socket/actions/workflows/cmake.yml/badge.svg) [![stack](https://github.com/Jacob-C-Smith/stack/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/stack/actions/workflows/cmake.yml) [![sync](https://github.com/Jacob-C-Smith/sync/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/sync/actions/workflows/cmake.yml) [![tuple](https://github.com/Jacob-C-Smith/tuple/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/tuple/actions/workflows/cmake.yml) [![parallel](https://github.com/Jacob-C-Smith/parallel/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/parallel/actions/workflows/cmake.yml) [![web](https://github.com/Jacob-C-Smith/web/actions/workflows/cmake.yml/badge.svg)](https://github.com/Jacob-C-Smith/web/actions/workflows/cmake.yml)
 
  A cross platform, multithreaded game engine written in C. 
  
@@ -33,12 +33,13 @@
  ## Download
  To download g10, execute the following command
  ```bash
- $ git clone https://github.com/Jacob-C-Smith/g10 --recurse-submodules
+ $ git clone https://github.com/Jacob-C-Smith/g10
  ```
  ## Build
  To build on UNIX like machines, execute the following commands in the same directory
  ```bash
  $ cd g10
+ $ git submodule update --init
  $ cmake .
  $ make
  ```
@@ -69,7 +70,7 @@
  See [gtypedef](./include/g10/gtypedef.h)
 
  ### Function definitions
- See [g10 manual](https://github.com/Jacob-C-Smith/g10/wiki)
+ See [g10 manual](./manual/manual.md)
 
  ### Macro definitions
  Macros change the features and functionality of G10.
