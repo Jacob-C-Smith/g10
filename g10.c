@@ -17,6 +17,20 @@ extern int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_valu
 extern int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value );
 #endif
 
+// Data
+const char *_p_signal_data[] = 
+{
+    [SIGHUP]  = " hangup",
+    [SIGINT]  = " program interrupt",
+    [SIGQUIT] = " quit signal",
+    [SIGILL]  = "n illegal instruction",
+    [SIGABRT] = "n abort signal",
+    [SIGFPE]  = " floating point exception",
+    [SIGKILL] = " kill signal",
+    [SIGSEGV] = " segmentation violation",
+    [SIGTERM] = " terminate signal"
+};
+
 // Static initialized data
 static g_instance *p_active_instance = 0;
 
@@ -64,8 +78,11 @@ u0 g_init_early ( void )
 u0 g_signal_handler ( int signal_number )
 {
 
+    // Initialized data
+    size_t i = 0;
+
     // Print the signal
-    log_error("\n[g10] %s shit its pants.\nLog says:\n\n", p_active_instance->_name);
+    log_error("\n[%s] A%s was encountered.\n\n", p_active_instance->_name, _p_signal_data[signal_number]);
 
     // Dump the message log
     while ( circular_buffer_empty(p_active_instance->debug) == false )
@@ -78,7 +95,10 @@ u0 g_signal_handler ( int signal_number )
         circular_buffer_pop(p_active_instance->debug, &p_message);
 
         // Print the message
-        log_error("%s\n", p_message);
+        log_error("[%d] %s\n", i, p_message);
+
+        // Increment the counter
+        i++;
     }
 
     // Done
@@ -96,7 +116,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     if ( p_path      == (void *) 0 ) goto no_path;
 
     // Initialized data
-    size_t file_len = g_load_file(p_path, (void *) 0, true);
+    size_t file_len          = g_load_file(p_path, (void *) 0, true),
+           debug_message_max = 64;
     char *const p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
     const json_value *p_value = 0;
     g_instance  _instance = { 0 },
@@ -126,6 +147,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
                          *p_scene           = dict_get(p_dict, "initial scene"),
+                         *p_debug           = dict_get(p_dict, "debug"),
                          *p_window          = dict_get(p_dict, "window");
 
         // Extra check
@@ -203,34 +225,43 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             _instance.context.fixed_tick_rate = p_fixed_tick_rate->integer;
         }
 
-        // Initialize the window
-        if ( p_window )
+        // Set up the debug system
+        if ( p_debug )
         {
+            
+            // Extra checking
+            if ( p_debug->type != JSON_VALUE_INTEGER ) goto debug_wrong_type;
 
+            // Store the 
+            debug_message_max = p_debug->integer;
+        }            
+
+        // Initialize the window
+        #ifdef BUILD_G10_WITH_SDL2
+            
             // SDL2
-            #ifdef BUILD_G10_WITH_SDL2
-                g_sdl2_initialize_window(&_instance, p_window);
+            g_sdl2_initialize_window(&_instance, p_window);
+        #else
 
             // Others? 
-            #endif
-        }
+        #endif
 
         // Initialize the graphics API
-        {
+        #ifdef G10_BUILD_WITH_VULKAN
+    
+            // External functions
+            g_vulkan_initialize(&_instance, p_vulkan);
+        #elif defined G10_BUILD_WITH_OPENGL
 
-            // Vulkan
-            #ifdef G10_BUILD_WITH_VULKAN
-                g_vulkan_initialize(&_instance, p_vulkan);
-            #endif
+            // External functions            
+            extern int g_opengl_initialize ( g_instance *p_instance, json_value *p_value );
 
             // OpenGL
-            #ifdef G10_BUILD_WITH_OPENGL
-                extern int g_opengl_initialize ( g_instance *p_instance, json_value *p_value );
-                g_opengl_initialize(&_instance, (void *) 0);
-            #endif
-
+            g_opengl_initialize(&_instance, (void *) 0);
+        #else
+            
             // Others? 
-        }
+        #endif
 
         // Initialize the scheduler
         if ( p_schedule )
@@ -242,24 +273,23 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Load the initial scene
         if ( p_scene )
-            if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
+            if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;        
     }
 
-    // Set up the debug system
-    {
+    // Construct a circular buffer for messages
+    circular_buffer_construct(&_instance.debug, debug_message_max);
 
-        // Construct a circular buffer for messages
-        circular_buffer_construct(&_instance.debug, 64);
-
-        // Set up signal handlers
-        signal(SIGINT , g_signal_handler);
-        signal(SIGILL , g_signal_handler);
-        signal(SIGABRT, g_signal_handler);
-        signal(SIGFPE , g_signal_handler);
-        signal(SIGSEGV, g_signal_handler);
-        signal(SIGTERM, g_signal_handler);
-    }
-
+    // Set up signal handlers
+    signal(SIGHUP , g_signal_handler);
+    signal(SIGINT , g_signal_handler);
+    signal(SIGQUIT, g_signal_handler);
+    signal(SIGILL , g_signal_handler);
+    signal(SIGABRT, g_signal_handler);
+    signal(SIGFPE , g_signal_handler);
+    signal(SIGKILL, g_signal_handler);
+    signal(SIGSEGV, g_signal_handler);
+    signal(SIGTERM, g_signal_handler);
+    
     // Allocate memory for the instance
     p_instance = G10_REALLOC(0, sizeof(g_instance));
 
@@ -286,6 +316,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     return 1;
 
     failed_to_load_renderer:
+    debug_wrong_type:
         return 0;
 
     // Error handling
