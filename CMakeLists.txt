@@ -210,7 +210,20 @@ if ( NOT "${HAS_TUPLE}")
         set(TUPLE_INCLUDE_DIR ${TUPLE_INCLUDE_DIR} PARENT_SCOPE)
     endif()
 endif()
- 
+
+# Find the circular buffer module
+if ( NOT "${HAS_CIRCULAR_BUFFER}")
+    
+    # Add the circular buffer directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/circular-buffer ${CMAKE_SOURCE_DIR}/build/circular-buffer)
+
+    # Let any parent project know that this project has circular buffer
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set(HAS_CIRCULAR_BUFFER true PARENT_SCOPE)
+        set(CIRCULAR_BUFFER_INCLUDE_DIR ${CIRCULAR_BUFFER_INCLUDE_DIR} PARENT_SCOPE)
+    endif()
+endif()
+
 # Find the stack module
 if ( NOT "${HAS_STACK}")
 
@@ -295,17 +308,17 @@ endif()
 # g10 example
 add_executable (g10_example "main.c") 
 add_dependencies(g10_example g10)
-target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
+target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_example g10)
 
 # g10 example
 add_executable (g10_test "g10_test.c") 
 add_dependencies(g10_test g10)
-target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
+target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_test g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "scene.c" "shader.c" "entity.c" "camera.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_opengl.c" "3rd-party/g_sdl2.c" "3rd-party/glad/glad.c") # "3rd-party/g_vulkan.c"
-add_dependencies(g10 log sync array dict tuple stack queue json http socket hash_cache)
-target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
-target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} log sync array dict tuple stack queue json http parallel socket m GL ) #${Vulkan_LIBRARY}
+add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json http socket hash_cache)
+target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
+target_link_libraries(g10 PUBLIC ${SDL2_LIBRARIES} log sync array circular_buffer dict tuple stack queue json http parallel socket m GL ) #${Vulkan_LIBRARY}
