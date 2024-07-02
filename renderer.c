@@ -253,7 +253,8 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 // Initialized data
                 //attachment *p_attachment       = (void *) 0;
                 json_value *p_attachment_value = dict_get(p_dict, p_scratch[i]);
-                printf("%d : %s\n", i, p_scratch[i]);
+                
+                //printf("%d : %s\n", i, p_scratch[i]);
                 // Construct an attachment
                 //
 

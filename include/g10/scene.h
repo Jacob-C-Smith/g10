@@ -31,6 +31,10 @@
 #include <g10/gtypedef.h>
 #include <g10/linear.h>
 #include <g10/entity.h>
+#include <g10/camera.h>
+
+// Preprocessor definitions
+#define G10_SCENE_CAMERA_MAX 1024
 
 // Structure definitions
 struct scene_s

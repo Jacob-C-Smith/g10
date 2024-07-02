@@ -59,17 +59,26 @@ int main ( int argc, const char *const argv[] )
     mesh_data *_p_mesh_data[G10_BASE_MESH_QUANTITY] = { 0 };
     json_value *p_shader_val = 0;
     camera     *p_camera = 0;
-    
+    const char *_mesh_names[] = 
+    {
+        "Drawing plane",
+        "Drawing cube",
+        "Drawing circle",
+        "Drawing sphere",
+        "Drawing cylinder",
+        "Drawing cone"
+    };
+
     char _shader_text[] = "{\"vertex\":\"resources/shaders/solid_color/vert.glsl\",\"fragment\":\"resources/shaders/solid_color/frag.glsl\"}";
 
     // Initialize g10
     if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
 
-    // Print g10 info
-    g_info(p_instance);
-
     // Set up the example
     game_setup(p_instance);
+
+    // Print g10 info
+    g_info(p_instance);
 
     json_value_parse(_shader_text, 0, &p_shader_val);
 
@@ -81,14 +90,28 @@ int main ( int argc, const char *const argv[] )
     // Start the schedule
     //parallel_schedule_start(p_instance->p_schedule, p_instance);
 
-    int i = 0;
+    int i = 1;
 
     // Block
     while ( p_instance->running )
     {
-        i++;
-        if ( i > 863 ) i = 0;
         
+        if ( i > 863 )
+        {
+            i = 0;
+
+            circular_buffer_push(p_instance->debug, "I'm going to divide by zero like an idiot");
+
+            i /= 0;
+            
+        }
+        if ( i % 144 == 0 )
+        {
+            circular_buffer_push(p_instance->debug, _mesh_names[i / 144]);
+        }
+        
+        i++;
+
         // Input
         g_sdl2_poll_window(p_instance);
 
@@ -154,8 +177,6 @@ int game_setup ( g_instance *p_instance )
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
-
-    //
 
     // Set the running flag
     p_instance->running = true;
