@@ -258,11 +258,13 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         size_t len = strlen(p_name);
 
         // Error check
-        if ( len < 63 ) goto name_too_long;
+        if ( len > 63 ) goto name_too_long;
         if ( len == 0 ) goto name_too_short;
 
         // Copy the name
         strncpy(_camera._name, p_name, len);
+
+        goto done;
     }
 
     parse_fov:
