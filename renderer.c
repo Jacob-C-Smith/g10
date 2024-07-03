@@ -266,6 +266,31 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         // Construct render passes
         {
 
+            // Initialized data
+            dict       *p_dict          = p_passes_value->object;
+            const char *p_scratch[32]   = { 0 };
+            size_t  pass_quantity = dict_keys(p_dict, 0);
+
+            // Error check
+            if ( pass_quantity > 32 ) goto too_many_passes;
+
+            // Get the name of each render pass
+            dict_keys(p_dict, &p_scratch);
+
+            // Iterate through each render pass
+            for (size_t i = 0; i < pass_quantity; i++)
+            {
+                
+                // Initialized data
+                render_pass *p_render_pass       = (void *) 0;
+                json_value  *p_render_pass_value = dict_get(p_dict, p_scratch[i]);
+                
+                // Construct a render pass
+                render_pass_from_json(&p_render_pass, p_scratch[i], p_render_pass_value);
+
+                // Store the render pass
+                // dict_add(p_renderer->render_pass.data, p_render_pass->_name, p_render_pass);
+            }
         }
     }
 
@@ -282,7 +307,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
     return 1;
 
     too_many_attachments:
-    too_many_render_passes:
+    too_many_passes:
 
         // Error
         return 0;
@@ -550,6 +575,218 @@ int attachment_from_json ( attachment **pp_attachment, json_value *p_value )
             failed_to_allocate_attachment:
                 #ifndef NDEBUG
                     log_error("[g10] [renderer] Failed to allocate attachment in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            name_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            description_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            format_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            name_property_is_too_long:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            name_property_is_too_short:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            description_property_is_too_long:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            description_property_is_too_short:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_name_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_description_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_format_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, json_value *p_value )
+{
+
+    // Argument check
+    if ( pp_render_pass == (void *)        0 ) goto no_render_pass;
+    if ( p_value        == (void *)        0 ) goto no_value;
+    if ( p_value->type  != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
+
+    // Initialized data
+    render_pass  _render_pass  = { 0 },
+                *p_render_pass = (void *) 0;
+
+    // Parse the json value into a render pass
+    {
+
+        // Initialized data
+        dict *const p_dict = p_value->object;
+        const json_value *p_description_value = dict_get(p_dict, "description");
+
+        // Extra check
+        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the render pass\n");
+
+        // Error check
+        if ( p_description_value == (void *) 0 ) goto no_name_property;
+        
+        // Type check
+        if ( p_description_value->type != JSON_VALUE_STRING ) goto description_property_is_wrong_type;
+
+        // Store the description
+        {
+
+            // Initialized data
+            size_t len = strlen(p_description_value->string);
+
+            // Error check
+            if ( len == 0   ) goto description_property_is_too_short;
+            if ( len  > 255 ) goto description_property_is_too_long;
+
+            // Copy the attachment description
+            strncpy(_render_pass._description, p_description_value->string, 255);
+
+            // Store a null terminator
+            _render_pass._name[len] = '\0';
+        }
+    }
+
+    // Allocate memory on the heap
+    if ( render_pass_create(&p_render_pass) == 0 ) goto failed_to_allocate_render_pass;
+
+    // Copy the render pass to the heap
+    memcpy(p_render_pass, &_render_pass, sizeof(render_pass));
+    
+    // Store the name
+    {
+
+        // Initialized data
+        size_t len = strlen(p_name);
+
+        // Error check
+        if ( len == 0   ) goto name_property_is_too_short;
+        if ( len  > 255 ) goto name_property_is_too_long;
+
+        // Copy the render pass name
+        strncpy(_render_pass._name, p_name, 255);
+
+        // Store a null terminator
+        _render_pass._name[len] = '\0';
+    }
+
+    // Return a pointer to the caller
+    *pp_render_pass = p_render_pass;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_render_pass:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            value_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // g10 errors
+        {
+            failed_to_allocate_render_pass:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Failed to allocate render pass in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error

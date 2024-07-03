@@ -54,6 +54,9 @@ struct render_pass_s
     // Name
     char _name[255 + 1];
 
+    // Description
+    char _description[255 + 1];
+    
     size_t shader_quantity;
     shader *_p_shaders[];
 };
