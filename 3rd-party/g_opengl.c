@@ -229,6 +229,8 @@ int g_opengl_shader_construct
         printf("%s\n", _log);
     }
 
+    p_shader->functions.pfn_shader_on_draw = mesh_draw;
+
     // Return a pointer to the caller
     *pp_shader = p_shader;
 

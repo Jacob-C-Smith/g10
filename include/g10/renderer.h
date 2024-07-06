@@ -126,6 +126,19 @@ DLLEXPORT int renderer_render ( g_instance *p_instance );
  */
 DLLEXPORT int renderer_present ( g_instance *p_instance );
 
+// Info
+/** !
+ *  Print info about a renderer
+ *
+ * @param p_renderer the renderer
+ *
+ * @sa renderer_load
+ * @sa renderer_load_as_json_value
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int renderer_info ( const renderer *const p_renderer );
+
 // Destructorss
 /** !
  * Destroy and deallocate a renderer

@@ -10,7 +10,7 @@
 #pragma once
 
 // Void
-typedef void u0;
+typedef          void      u0;
 
 // Integers
 typedef unsigned char      u8;
@@ -52,6 +52,7 @@ struct ai_s;
 struct attachment_s;
 struct bv_s;
 struct camera_s;
+struct cull_operation_s;
 struct entity_s;
 struct g_instance_s;
 struct mesh_s;
@@ -69,6 +70,7 @@ typedef struct ai_s               ai;
 typedef struct attachment_s       attachment;
 typedef struct bv_s               bv;
 typedef struct camera_s           camera;
+typedef struct cull_operation_s   cull_operation;
 typedef struct entity_s           entity;
 typedef struct g_instance_s       g_instance;
 typedef struct mesh_s             mesh;
@@ -82,8 +84,8 @@ typedef struct shader_s           shader;
 typedef struct transform_s        transform;
 
 typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
+typedef int (*fn_cull_operation)( void *p_object );
 typedef int (*fn_shader_on_bind)( u0 );
 typedef int (*fn_shader_on_material)( u0 );
-typedef int (*fn_shader_on_draw)( u0 );
+typedef int (*fn_shader_on_draw)( void *p_draw_item );
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
-

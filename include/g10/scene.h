@@ -78,7 +78,15 @@ DLLEXPORT int scene_from_json
 );
 
 // Accessors
-//
+/** !
+ * Find an entity in a scene
+ * 
+ * @param p_scene the scene
+ * @param p_name  the name
+ * 
+ * @return pointer to entity on success, null pointer on error
+ */
+DLLEXPORT entity *scene_entity_get ( const scene *const p_scene, const char *const p_name );
 
 // Mutators
 /** !

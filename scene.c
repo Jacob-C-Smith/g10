@@ -308,6 +308,24 @@ int scene_from_json
     }
 }
 
+entity *scene_entity_get ( const scene *const p_scene, const char *const p_name )
+{
+    
+    // TODO: Argument check
+
+    // Done
+    return dict_get(p_scene->data.entities, p_name);
+
+    // TODO: Error handling
+    {
+
+        // Argument errors
+        {
+
+        }
+    }
+}
+
 int scene_entity_add ( scene *p_scene, entity *p_entity )
 {
 

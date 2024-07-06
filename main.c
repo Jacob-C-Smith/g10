@@ -42,6 +42,7 @@ int user_code_main ( g_instance *const p_instance );
  */
 int game_setup ( g_instance *p_instance );
 
+// TODO: Abstract this into "input_poll" so it's platform agnostic
 // External functions
 extern int g_sdl2_poll_window ( g_instance *p_instance );
 
@@ -55,21 +56,6 @@ int main ( int argc, const char *const argv[] )
 
     // Initialized data
     g_instance *p_instance = 0;
-    shader     *p_shader = 0;
-    mesh_data *_p_mesh_data[G10_BASE_MESH_QUANTITY] = { 0 };
-    json_value *p_shader_val = 0;
-    camera     *p_camera = 0;
-    const char *_mesh_names[] = 
-    {
-        "Drawing plane",
-        "Drawing cube",
-        "Drawing circle",
-        "Drawing sphere",
-        "Drawing cylinder",
-        "Drawing cone"
-    };
-
-    char _shader_text[] = "{\"vertex\":\"resources/shaders/solid_color/vert.glsl\",\"fragment\":\"resources/shaders/solid_color/frag.glsl\"}";
 
     // Initialize g10
     if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
@@ -77,57 +63,22 @@ int main ( int argc, const char *const argv[] )
     // Set up the example
     game_setup(p_instance);
 
-    // Print g10 info
-    g_info(p_instance);
-
-    json_value_parse(_shader_text, 0, &p_shader_val);
-
-    shader_from_json(&p_shader, p_shader_val);
-
-    for (size_t i = 0; i < G10_BASE_MESH_QUANTITY; i++)
-        mesh_shape_construct(&_p_mesh_data[i], i, 0);
-
-    // Start the schedule
-    //parallel_schedule_start(p_instance->p_schedule, p_instance);
-
-    int i = 1;
-
     // Block
     while ( p_instance->running )
     {
-        
-        if ( i > 863 )
-        {
-            i = 0;
-
-            circular_buffer_push(p_instance->debug, "I'm going to divide by zero like an idiot");
-
-            i /= 0;
-            
-        }
-        if ( i % 144 == 0 )
-        {
-            circular_buffer_push(p_instance->debug, _mesh_names[i / 144]);
-        }
-        
-        i++;
 
         // Input
         g_sdl2_poll_window(p_instance);
+        
+        // User code
+        user_code_callback(p_instance);
 
         // Render
         renderer_render(p_instance);
 
-        shader_bind(p_shader);
-
-        mesh_draw(_p_mesh_data[i / 144]);
-
         // Present
         renderer_present(p_instance);
     }
-
-    // Stop the schedule
-    //parallel_schedule_stop(p_instance->p_schedule);
 
     // Clean up g10
     if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;
@@ -163,7 +114,7 @@ int user_code_main ( g_instance *const p_instance )
 {
 
     // Print the name of the instance
-    printf("%s\n", p_instance->_name);
+    // printf("%s\n", p_instance->_name);
 
     // Success
     return 1;
@@ -173,10 +124,24 @@ int game_setup ( g_instance *p_instance )
 {
 
     // Initialized data
-    //entity *p_entity = scene_entity_get(p_instance->context.p_scene->data, "entity");
+    scene  *p_scene = p_instance->context.p_scene;
+    entity *p_entity = scene_entity_get(p_scene, "entity");
+
+    // Print g10 info
+    g_info(p_instance);
+
+    // Print renderer info
+    renderer_info(p_instance->context.p_renderer);
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
+
+    // Add a plane to the entity
+    mesh_shape_construct(&p_entity->p_mesh_data, G10_BASE_MESH_PLANE, 0);
+
+    // TODO: Move this somewhere less stupid
+    p_entity->p_shader->count = 1;
+    p_entity->p_shader->_p_draw_items[0] = p_entity->p_mesh_data;
 
     // Set the running flag
     p_instance->running = true;

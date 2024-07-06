@@ -23,6 +23,8 @@ u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
     return;
 }
 
+
+
 u0 vec2_sub_vec2 ( vec2 *p_result, vec2 a, vec2 b )
 {
     

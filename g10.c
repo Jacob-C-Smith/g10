@@ -28,7 +28,7 @@ const char *_p_signal_data[] =
     [SIGFPE]  = " floating point exception",
     [SIGKILL] = " kill signal",
     [SIGSEGV] = " segmentation violation",
-    [SIGTERM] = " terminate signal"
+    [SIGTERM] = " terminate signal",
 };
 
 // Static initialized data
@@ -120,8 +120,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
            debug_message_max = 64;
     char *const p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
     const json_value *p_value = 0;
-    g_instance  _instance = { 0 },
-               *p_instance = 0;
+    g_instance *p_instance = 0;
 
     // Error check
     if ( file_len == 0 ) goto failed_to_load_file;
@@ -134,6 +133,12 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
     // Error check
     if ( p_value->type != JSON_VALUE_OBJECT ) goto instance_value_is_wrong_type;
+
+    // Allocate memory for the instance
+    p_instance = G10_REALLOC(0, sizeof(g_instance));
+
+    // Error check
+    if ( p_instance == (void *) 0 ) goto no_mem;
 
     // Parse the json value into an instance
     {
@@ -156,6 +161,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Missing properties
         if ( p_name_value == (void *) 0 ) goto missing_name_property;
 
+        // Set the instance singleton
+        p_active_instance = p_instance;
+        
         // Store the name
         if ( p_name_value )
         {
@@ -171,10 +179,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             if ( len  > 255 ) goto name_property_is_too_long;
 
             // Copy the instance name
-            strncpy(_instance._name, p_name_value->string, 255);
+            strncpy(p_instance->_name, p_name_value->string, 255);
 
             // Store a null terminator
-            _instance._name[len] = '\0';
+            p_instance->_name[len] = '\0';
         }
 
         // Store the version
@@ -202,17 +210,17 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 if ( p_patch->type != JSON_VALUE_INTEGER ) goto version_patch_wrong_type;
                 
                 // Store each version number
-                _instance.version.major = p_major->integer,
-                _instance.version.minor = p_minor->integer,
-                _instance.version.patch = p_patch->integer;
+                p_instance->version.major = p_major->integer,
+                p_instance->version.minor = p_minor->integer,
+                p_instance->version.patch = p_patch->integer;
             }
         }
 
         // Default to 1.0.0
         else
-            _instance.version.major = 1,
-            _instance.version.major = 0,
-            _instance.version.patch = 0;
+            p_instance->version.major = 1,
+            p_instance->version.major = 0,
+            p_instance->version.patch = 0;
 
         // Set the fixed tick rate
         if ( p_fixed_tick_rate )
@@ -222,7 +230,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             if ( p_fixed_tick_rate->type != JSON_VALUE_INTEGER ) goto fixed_tick_rate_is_wrong_type;
 
             // Store the fixed tick rate
-            _instance.context.fixed_tick_rate = p_fixed_tick_rate->integer;
+            p_instance->context.fixed_tick_rate = p_fixed_tick_rate->integer;
         }
 
         // Set up the debug system
@@ -240,7 +248,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         #ifdef BUILD_G10_WITH_SDL2
             
             // SDL2
-            g_sdl2_initialize_window(&_instance, p_window);
+            g_sdl2_initialize_window(p_instance, p_window);
         #else
 
             // Others? 
@@ -257,27 +265,31 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             extern int g_opengl_initialize ( g_instance *p_instance, json_value *p_value );
 
             // OpenGL
-            g_opengl_initialize(&_instance, (void *) 0);
+            g_opengl_initialize(p_instance, (void *) 0);
         #else
             
             // Others? 
         #endif
 
+        // TODO: Error check
+        // Set up the cache
+        dict_construct(&p_instance->cache.p_shaders, 32, 0);
+
         // Initialize the scheduler
         if ( p_schedule )
-            if ( parallel_schedule_load_as_json_value(&_instance.p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
+            if ( parallel_schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
         // Load the renderer
         if ( p_renderer )
-            if ( renderer_from_json(&_instance.context.p_renderer, p_renderer) == 0 ) goto failed_to_load_renderer;
+            if ( renderer_from_json(&p_instance->context.p_renderer, p_renderer) == 0 ) goto failed_to_load_renderer;
 
         // Load the initial scene
         if ( p_scene )
-            if ( scene_from_json(&_instance.context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;        
+            if ( scene_from_json(&p_instance->context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
     }
 
     // Construct a circular buffer for messages
-    circular_buffer_construct(&_instance.debug, debug_message_max);
+    circular_buffer_construct(&p_instance->debug, debug_message_max);
 
     // Set up signal handlers
     signal(SIGHUP , g_signal_handler);
@@ -289,18 +301,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     signal(SIGKILL, g_signal_handler);
     signal(SIGSEGV, g_signal_handler);
     signal(SIGTERM, g_signal_handler);
-    
-    // Allocate memory for the instance
-    p_instance = G10_REALLOC(0, sizeof(g_instance));
-
-    // Error check
-    if ( p_instance == (void *) 0 ) goto no_mem;
-
-    // Copy the memory from the stack to the heap
-    memcpy(p_instance, &_instance, sizeof(g_instance));
-
-    // Set the instance singleton
-    p_active_instance = p_instance;
 
     // Store a timestamp
     p_active_instance->time.init = timer_high_precision();

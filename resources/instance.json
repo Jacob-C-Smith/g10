@@ -1,5 +1,4 @@
 {
-    "$schema" : "https://schema.g10.app/instance.json",
     "name"    : "g10 example",
     "version" : 
     {
@@ -79,13 +78,13 @@
                 }
             }
         },
-        "lights"  : [ ]
+        "lights" : [ ]
     },
     "renderer" : 
     {
-        "$schema" : "https://schema.g10.app/renderer.json",
         "name"        : "Solid color geometry",
         "clear color" : [ 0.5, 0.5, 1.0, 1.0 ],
+        "culling"     : [ "visible" ],
         "attachments" :
         {
             "color" :

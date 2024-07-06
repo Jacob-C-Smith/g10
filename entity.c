@@ -67,8 +67,9 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
-    entity   _entity = { 0 },
-           *p_entity = (void *) 0;
+    g_instance *p_instance = g_get_active_instance();
+    entity       _entity   = { 0 },
+               *p_entity   = (void *) 0;
 
     // Parse the json value into an entity
     {
@@ -76,6 +77,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         // Initialized data
         const dict *const p_dict = p_value->object;
         const json_value *p_name_value      = dict_get(p_dict, "name"),
+                         *p_shader_value    = dict_get(p_dict, "shader"),
                          *p_transform_value = dict_get(p_dict, "transform");
 
         // Extra check
@@ -84,8 +86,11 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         // Check for missing properties
         if ( ! ( p_name_value ) ) goto missing_properties;
 
+        // TODO: Check for missing properties
+
         // Error check
-        if ( p_name_value->type != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
+        if ( p_name_value->type   != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
+        if ( p_shader_value->type != JSON_VALUE_STRING ) goto shader_property_is_wrong_type;
 
         // Store the name
         {
@@ -106,6 +111,10 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // Store the transform
         if ( transform_from_json(&_entity.p_transform, p_transform_value) == 0 ) goto failed_to_construct_transform;
+
+        // Store the shader
+        // TODO: Error checking
+        _entity.p_shader = dict_get(p_instance->cache.p_shaders, p_shader_value->string);
     }
 
     // Allocate memory on the heap
@@ -176,6 +185,15 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
             name_property_is_wrong_type:
                 #ifndef NDEBUG
                     log_error("[g10] [entity] \"name\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            shader_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] \"shader\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
                 #endif
 

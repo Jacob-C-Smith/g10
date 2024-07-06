@@ -158,8 +158,10 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
 
     // Initialized data
     size_t    i = 0;
-    renderer  _renderer  = { 0 },
-             *p_renderer = (void *) 0;
+    renderer *p_renderer = (void *) 0;
+
+    // Allocate memory on the heap
+    if ( renderer_create(&p_renderer) == 0 ) goto failed_to_allocate_renderer;
 
     // Parse the json value into a renderer
     {
@@ -183,7 +185,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         if ( p_name_value->type        != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
         if ( p_clear_color_value->type != JSON_VALUE_ARRAY  ) goto clear_color_property_is_wrong_type;
         if ( p_attachments_value->type != JSON_VALUE_OBJECT ) goto attachments_property_is_wrong_type;
-        if ( p_attachments_value->type != JSON_VALUE_OBJECT ) goto passes_property_is_wrong_type;
+        if ( p_passes_value->type      != JSON_VALUE_OBJECT ) goto passes_property_is_wrong_type;
 
         // Store the name
         {
@@ -196,10 +198,10 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
             if ( len  > 255 ) goto name_property_is_too_long;
 
             // Copy the instance name
-            strncpy(_renderer._name, p_name_value->string, 255);
+            strncpy(p_renderer->_name, p_name_value->string, 255);
 
             // Store a null terminator
-            _renderer._name[len] = '\0';
+            p_renderer->_name[len] = '\0';
         }
 
         // Store the clear color
@@ -224,7 +226,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
             }
 
             // Store the vector
-            _renderer.clear_color = (vec3)
+            p_renderer->clear_color = (vec3)
             {
                 .x = (float) p_scratch[0]->number,
                 .y = (float) p_scratch[1]->number,
@@ -277,6 +279,12 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
             // Get the name of each render pass
             dict_keys(p_dict, &p_scratch);
 
+            // Store the quantity of render passes
+            p_renderer->render_pass_quantity = pass_quantity;
+
+            // Grow the allocation
+            p_renderer = G10_REALLOC(p_renderer, sizeof(renderer) + ( pass_quantity * sizeof(render_pass *)) );
+
             // Iterate through each render pass
             for (size_t i = 0; i < pass_quantity; i++)
             {
@@ -289,17 +297,12 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 render_pass_from_json(&p_render_pass, p_scratch[i], p_render_pass_value);
 
                 // Store the render pass
+                p_renderer->_p_render_passes[i] = p_render_pass;
                 // dict_add(p_renderer->render_pass.data, p_render_pass->_name, p_render_pass);
             }
         }
     }
-
-    // Allocate memory on the heap
-    if ( renderer_create(&p_renderer) == 0 ) goto failed_to_allocate_renderer;
-
-    // Copy the struct to the heap
-    memcpy(p_renderer, &_renderer, sizeof(renderer));
-
+    
     // Return a pointer to the caller
     *pp_renderer = p_renderer;
 
@@ -685,15 +688,18 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
     if ( p_value->type  != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
-    render_pass  _render_pass  = { 0 },
-                *p_render_pass = (void *) 0;
+    render_pass *p_render_pass = (void *) 0;
+
+    // Allocate memory on the heap
+    if ( render_pass_create(&p_render_pass) == 0 ) goto failed_to_allocate_render_pass;
 
     // Parse the json value into a render pass
     {
 
         // Initialized data
         dict *const p_dict = p_value->object;
-        const json_value *p_description_value = dict_get(p_dict, "description");
+        const json_value *p_description_value = dict_get(p_dict, "description"),
+                         *p_shaders_value     = dict_get(p_dict, "shaders");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the render pass\n");
@@ -715,19 +721,49 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
             if ( len  > 255 ) goto description_property_is_too_long;
 
             // Copy the attachment description
-            strncpy(_render_pass._description, p_description_value->string, 255);
+            strncpy(p_render_pass->_description, p_description_value->string, 255);
 
             // Store a null terminator
-            _render_pass._name[len] = '\0';
+            p_render_pass->_name[len] = '\0';
+        }
+
+        // Construct shaders
+        {
+
+            // Initialized data
+            dict       *p_dict          = p_shaders_value->object;
+            const char *p_scratch[32]   = { 0 };
+            size_t  shader_quantity = dict_keys(p_dict, 0);
+
+            // Error check
+            if ( shader_quantity > 32 ) goto too_many_shaders;
+
+            // Get the name of each shader
+            dict_keys(p_dict, &p_scratch);
+
+            // Store the quantity of shaders
+            p_render_pass->shader_quantity = shader_quantity;
+
+            // Grow the allocation
+            p_render_pass = G10_REALLOC(p_render_pass, sizeof(render_pass) + ( shader_quantity * sizeof(shader *)) );
+
+            // Iterate through each shader
+            for (size_t i = 0; i < shader_quantity; i++)
+            {
+                
+                // Initialized data
+                shader     *p_shader       = (void *) 0;
+                json_value *p_shader_value = dict_get(p_dict, p_scratch[i]);
+                
+                // Construct a shader
+                shader_from_json(&p_shader, p_scratch[i], p_shader_value);
+
+                // Store the shader
+                p_render_pass->_p_shaders[i] = p_shader;
+            }
         }
     }
 
-    // Allocate memory on the heap
-    if ( render_pass_create(&p_render_pass) == 0 ) goto failed_to_allocate_render_pass;
-
-    // Copy the render pass to the heap
-    memcpy(p_render_pass, &_render_pass, sizeof(render_pass));
-    
     // Store the name
     {
 
@@ -739,10 +775,10 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
         if ( len  > 255 ) goto name_property_is_too_long;
 
         // Copy the render pass name
-        strncpy(_render_pass._name, p_name, 255);
+        strncpy(p_render_pass->_name, p_name, 255);
 
         // Store a null terminator
-        _render_pass._name[len] = '\0';
+        p_render_pass->_name[len] = '\0';
     }
 
     // Return a pointer to the caller
@@ -750,6 +786,11 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
 
     // Success
     return 1;
+
+    too_many_shaders:
+
+        // Error
+        return 0;
 
     // Error handling
     {
@@ -977,6 +1018,61 @@ int renderer_present ( g_instance *p_instance )
     }
 }
 
+int renderer_info ( const renderer *const p_renderer )
+{
+
+    // Argument check
+    if ( p_renderer == (void *) 0 ) goto no_renderer;
+
+    // Print the renderer
+    printf("Renderer:\n");
+    printf(" - name : %s\n", p_renderer->_name);
+    printf(" - passes : \n");
+
+    // Print each render pass
+    for (size_t i = 0; i < p_renderer->render_pass_quantity; i++)
+    {
+
+        // Initialized data
+        render_pass *p_render_pass = p_renderer->_p_render_passes[i];
+        
+        // Print the render pass
+        printf("    [%d]\n", i);
+        printf("     - name    : %s\n", p_render_pass->_name);            
+        printf("     - shaders : \n");            
+
+        // Print each shader
+        for (size_t i = 0; i < p_render_pass->shader_quantity; i++)
+        {
+
+            // Initialized data
+            shader *p_shader = p_render_pass->_p_shaders[i];
+            
+            // Print the shader
+            printf("         [%d]\n", i);            
+            printf("          - name : %s\n", p_shader->_name);            
+        }
+    }
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_renderer:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_renderer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
 {
 
@@ -993,15 +1089,18 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
         
         // Initialized data
         shader *p_shader = p_render_pass->_p_shaders[i];
+        fn_shader_on_draw pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
 
         // Bind the shader
-        //
+        shader_bind(p_shader);
         
         // Bind each material
-        //
+        // for i=0 to N
         
-            // Draw each object
-            //
+        // Draw each object
+        for (size_t i = 0; i < p_shader->count; i++)
+        
+            pfn_shader_on_draw(p_shader->_p_draw_items[i]);
     }
 
     // Success

@@ -28,6 +28,9 @@ struct shader_s
     // Name
     char _name[255+1];
 
+    // Count
+    size_t count, max;
+
     // Functions
     struct
     {
@@ -63,7 +66,7 @@ struct shader_s
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int shader_from_json ( shader **pp_shader, json_value *p_value );
+DLLEXPORT int shader_from_json ( shader **pp_shader, const char *const p_name, json_value *p_value );
 
 // Pipeline operations
 /** !
