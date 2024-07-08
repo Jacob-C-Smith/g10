@@ -78,6 +78,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         const dict *const p_dict = p_value->object;
         const json_value *p_name_value      = dict_get(p_dict, "name"),
                          *p_shader_value    = dict_get(p_dict, "shader"),
+                         *p_mesh_value      = dict_get(p_dict, "mesh"),
                          *p_transform_value = dict_get(p_dict, "transform");
 
         // Extra check
@@ -115,6 +116,9 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         // Store the shader
         // TODO: Error checking
         _entity.p_shader = dict_get(p_instance->cache.p_shaders, p_shader_value->string);
+
+        // Store the mesh(es)
+        if ( mesh_from_json(&_entity.p_mesh, p_mesh_value) == 0 ) goto failed_to_construct_mesh;
     }
 
     // Allocate memory on the heap
@@ -128,7 +132,11 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
     // Success
     return 1;
-
+    
+    failed_to_construct_mesh:
+        // Error
+        return 0;
+        
     // Error handling
     {
 

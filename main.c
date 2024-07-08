@@ -21,6 +21,7 @@
 #include <g10/g10.h>
 #include <g10/entity.h>
 #include <g10/camera.h>
+#include <g10/input.h>
 #include <g10/mesh.h>
 #include <g10/user_code.h>
 
@@ -40,11 +41,7 @@ int user_code_main ( g_instance *const p_instance );
  * 
  * @return 1
  */
-int game_setup ( g_instance *p_instance );
-
-// TODO: Abstract this into "input_poll" so it's platform agnostic
-// External functions
-extern int g_sdl2_poll_window ( g_instance *p_instance );
+int game_setup ( g_instance *const p_instance );
 
 // Entry point
 int main ( int argc, const char *const argv[] )
@@ -68,8 +65,14 @@ int main ( int argc, const char *const argv[] )
     {
 
         // Input
-        g_sdl2_poll_window(p_instance);
+        input_poll(p_instance);
         
+        // State change
+        ai_preupdate(p_instance);
+
+        // State
+        ai_update(p_instance);
+
         // User code
         user_code_callback(p_instance);
 
@@ -120,29 +123,22 @@ int user_code_main ( g_instance *const p_instance )
     return 1;
 }
 
-int game_setup ( g_instance *p_instance )
+int game_setup ( g_instance *const p_instance )
 {
 
-    // Initialized data
-    scene  *p_scene = p_instance->context.p_scene;
-    entity *p_entity = scene_entity_get(p_scene, "entity");
-
     // Print g10 info
-    g_info(p_instance);
+    {
 
-    // Print renderer info
-    renderer_info(p_instance->context.p_renderer);
+        // Print instance info
+        g_info(p_instance);
+
+        // Print renderer info
+        renderer_info(p_instance->context.p_renderer);
+    }
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
-
-    // Add a plane to the entity
-    mesh_shape_construct(&p_entity->p_mesh_data, G10_BASE_MESH_PLANE, 0);
-
-    // TODO: Move this somewhere less stupid
-    p_entity->p_shader->count = 1;
-    p_entity->p_shader->_p_draw_items[0] = p_entity->p_mesh_data;
-
+    
     // Set the running flag
     p_instance->running = true;
 

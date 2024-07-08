@@ -77,6 +77,7 @@
 #include <g10/renderer.h>
 #include <g10/user_code.h>
 #include <g10/ai.h>
+#include <g10/input.h>
 
 // Platform dependent macros
 #ifdef _WIN64
@@ -166,6 +167,7 @@ struct g_instance_s
         renderer              *p_renderer;
         server                *p_server;
         scene                 *p_scene;
+        input                 *p_input;
         u16                    fixed_tick_rate;
     } context;
 

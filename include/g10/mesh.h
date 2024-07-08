@@ -60,12 +60,7 @@ enum mesh_shapes_e
 struct mesh_s
 {
     size_t quantity;
-    struct
-    {
-        union mesh_data_u *p_mesh_data;
-        transform _local;
-        //material *p_material;
-    } _meshes[];
+    mesh_data *_p_meshes[];
 };
 
 struct mesh_create_info_s
@@ -74,9 +69,11 @@ struct mesh_create_info_s
     struct { size_t quantity; const u32 *p_data; } elements;
 };
 
-// Union definitions
-union mesh_data_u
+struct mesh_data_s
 {
+
+    char _name[63 + 1];
+    transform *p_transform;
     #ifdef G10_BUILD_WITH_VULKAN
         struct
         {

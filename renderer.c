@@ -1049,8 +1049,8 @@ int renderer_info ( const renderer *const p_renderer )
             shader *p_shader = p_render_pass->_p_shaders[i];
             
             // Print the shader
-            printf("         [%d]\n", i);            
-            printf("          - name : %s\n", p_shader->_name);            
+            printf("        [%d]\n", i);            
+            printf("         - name : %s\n", p_shader->_name);            
         }
     }
     

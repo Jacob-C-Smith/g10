@@ -110,6 +110,15 @@ DLLEXPORT int transform_get_matrix_world (
     mat4      *p_model_matrix
 );
 
+/** !
+ * Print info about a transform
+ * 
+ * @param p_transform the transform
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int transform_info ( const transform *const p_transform );
+
 // Destructorss
 /** !
  * Destroy and deallocate a transform

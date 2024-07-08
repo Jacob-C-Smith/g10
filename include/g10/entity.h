@@ -28,9 +28,9 @@ struct entity_s
     char _name[255+1];
 
     transform *p_transform;
-    mesh_data *p_mesh_data;
     ai        *p_ai;
     shader    *p_shader;
+    mesh      *p_mesh;
 };
 
 // Constructors

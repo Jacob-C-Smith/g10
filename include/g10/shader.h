@@ -68,6 +68,9 @@ struct shader_s
  */
 DLLEXPORT int shader_from_json ( shader **pp_shader, const char *const p_name, json_value *p_value );
 
+// Mutators
+DLLEXPORT int shader_draw_item_add ( shader *p_shader, void *p_draw_item );
+
 // Pipeline operations
 /** !
  * Bind a shader

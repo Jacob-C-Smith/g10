@@ -100,6 +100,78 @@ int shader_from_json ( shader **pp_shader, const char *const p_name, json_value 
     }
 }
 
+int shader_draw_item_add ( shader *p_shader, void *p_draw_item )
+{
+
+    // Argument check
+    if ( p_shader    == (void *) 0 ) goto no_shader;
+    if ( p_draw_item == (void *) 0 ) goto no_draw_item;
+
+    
+    if ( p_shader->count == p_shader->max ) goto grow_allocation;
+
+    done:
+
+    // Store the draw item
+    p_shader->_p_draw_items[p_shader->count] = p_draw_item;
+
+    // Increment the draw item count
+    p_shader->count++;
+
+    // Success
+    return 1;
+
+    grow_allocation:
+    {
+        
+        // Increase the maximum quantity of draw items
+        p_shader->max += 128;
+
+        // Grow the allocation
+        p_shader = G10_REALLOC(p_shader, sizeof(shader) + ( sizeof(void *) + p_shader->max ));
+
+        // Error check
+        if ( p_shader == (void *) 0 ) goto no_mem;
+
+        // Done
+        goto done;
+    }
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_draw_item:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_draw_item\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int shader_bind ( shader *p_shader )
 {
 

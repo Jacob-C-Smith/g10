@@ -10,7 +10,7 @@
 #include <g10/g10.h>
 
 #ifdef G10_BUILD_WITH_SDL2
-extern int g_sdl2_initialize_window ( g_instance *p_instance, json_value *p_value );
+extern int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value );
 #endif
 
 #ifdef G10_BUILD_WITH_VULKAN
@@ -60,9 +60,12 @@ u0 g_init_early ( void )
     #ifdef BUILD_G10_WITH_SDL2
 
         // External functions
-        extern int g_sdl2_poll_window ( g_instance *p_instance );
-        parallel_register_task("sdl2 poll", (fn_parallel_task *) g_sdl2_poll_window);
+        extern int g_sdl2_window_poll ( g_instance *p_instance );
+        parallel_register_task("sdl2 poll", (fn_parallel_task *) g_sdl2_window_poll);
     #endif
+
+    extern u0 g_init_mesh ( u0 );
+    g_init_mesh();
 
     // Done
     return;
@@ -103,6 +106,44 @@ u0 g_signal_handler ( int signal_number )
 
     // Done
     exit(EXIT_FAILURE);
+}
+
+/** !
+ * This is used by the window system integrator 
+ * 
+ */
+int g_window_resize ( g_instance *p_instance, u32 width, u32 height )
+{
+
+    // Store the new width and height
+    p_instance->window.width  = width,
+    p_instance->window.height = height;
+    
+    // Notify the graphics API
+    
+        // Initialize the graphics API
+        #ifdef G10_BUILD_WITH_VULKAN
+    
+            // External functions
+            g_vulkan_window_resize(&_instance, width, height);
+        #elif defined G10_BUILD_WITH_OPENGL
+
+            // External functions            
+            extern int g_opengl_window_resize ( g_instance *p_instance, u32 width, u32 height );
+
+            // OpenGL
+            g_opengl_window_resize(p_instance, width, height);
+        #else
+            
+            // Others? 
+        #endif
+
+
+    // Log the update
+    //log_info("[g10] [sdl2] Window resized to [ %d, %d ]\n", p_instance->window.width, p_instance->window.height);
+
+    // Success
+    return 1;
 }
 
 int g_init ( g_instance **pp_instance, const char *p_path )
@@ -150,6 +191,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                          *p_schedule        = dict_get(p_dict, "schedule"),
                          *p_renderer        = dict_get(p_dict, "renderer"),
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
+                         *p_input           = dict_get(p_dict, "input"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
                          *p_scene           = dict_get(p_dict, "initial scene"),
                          *p_debug           = dict_get(p_dict, "debug"),
@@ -248,7 +290,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         #ifdef BUILD_G10_WITH_SDL2
             
             // SDL2
-            g_sdl2_initialize_window(p_instance, p_window);
+            g_sdl2_window_from_json(p_instance, p_window);
         #else
 
             // Others? 
@@ -270,6 +312,16 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             
             // Others? 
         #endif
+
+        // Construct inputs
+        if ( p_input )
+        {
+
+            // Error check
+            if ( p_input->type != JSON_VALUE_OBJECT ) goto input_is_wrong_type;
+
+            if ( input_from_json(&p_instance->context.p_input, p_input) == 0 ) goto failed_to_construct_input;
+        }
 
         // TODO: Error check
         // Set up the cache
@@ -317,6 +369,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
     failed_to_load_renderer:
     debug_wrong_type:
+    input_is_wrong_type:
+    failed_to_construct_input:
         return 0;
 
     // Error handling

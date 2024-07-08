@@ -742,16 +742,20 @@ int transform_get_matrix_world (
     if ( p_model_matrix == (void *) 0 ) goto no_return;
 
     // Initialized data
-    mat4 matrix_world = { 0 };
+    mat4 matrix_local = p_transform->model,
+         matrix_world = { 0 };
 
-    // Identity matrix
-    mat4_identity(&matrix_world);
+    // Base case
+    if ( p_transform->p_parent == (void *) 0 ) goto done;
 
     // Recursively build the world matrix
     transform_get_matrix_world_recursive(p_transform, &matrix_world);
 
-    // Copy the local matrix
-    memcpy(p_model_matrix, &p_transform->model, sizeof(mat4));
+    done:
+
+    // Build the world matrix
+    // TODO: Is this the correct order, or is it local * world?
+    mat4_mul_mat4(p_model_matrix, matrix_local, matrix_world);
 
     // Success
     return 1;
@@ -777,6 +781,37 @@ int transform_get_matrix_world (
                 // Error
                 return 0;
 
+        }
+    }
+}
+
+int transform_info ( const transform *const p_transform )
+{
+
+    // Argument check
+    if ( p_transform == (void *) 0 ) goto no_transform;
+
+    // Print the transform
+    printf("Transform:\n");
+    printf(" - location : [ %3.2f %3.2f %3.2f ]\n", p_transform->location.x, p_transform->location.y, p_transform->location.z);
+    printf(" - rotation : [ %3.2f %3.2f %3.2f ]\n", p_transform->rotation.x, p_transform->rotation.y, p_transform->rotation.z);
+    printf(" - scale    : [ %3.2f %3.2f %3.2f ]\n", p_transform->scale.x, p_transform->scale.y, p_transform->scale.z);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
     }
 }

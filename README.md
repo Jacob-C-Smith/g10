@@ -73,12 +73,28 @@
  See [g10 manual](./manual/manual.md)
 
  ### Macro definitions
- Macros change the features and functionality of G10.
- 
+ Macros change G10 at the build step. 
+
+ #### Debug
+ | name                      | description                                          | 
+ |---------------------------|------------------------------------------------------| 
+ | BUILD_G10_WITH_ANSI_COLOR | true for color coded logs, false for no color coding | 
+
+ #### Version
  | name                      | description                                                      | 
  |---------------------------|------------------------------------------------------------------| 
  | G10_VERSION_MAJOR         | Different major versions introduce incompatible API changes      | 
  | G10_VERSION_MINOR         | Different minor versions add backward compatible functionality   | 
  | G10_VERSION_PATCH         | Different patch versions introduce backward compatible bug fixes | 
- | BUILD_G10_WITH_ANSI_COLOR | true for color coded logs, false for no color coding             | 
  
+ #### Window System Integration (mutually exclusive)
+ | name                      | description                            | 
+ |---------------------------|----------------------------------------| 
+ | G10_BUILD_WITH_SDL2       | Use SDL2 for window system integration | 
+ | G10_BUILD_WITH_GLFW       | Use GLFW for window system integration | 
+
+ #### Graphics API (mutually exclusive)
+ | name                      | description                 | 
+ |---------------------------|-----------------------------| 
+ | G10_BUILD_WITH_OPENGL     | Use OpenGL for graphics API | 
+ | G10_BUILD_WITH_VULKAN     | Use Vulkan for graphics API |

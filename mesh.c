@@ -115,10 +115,147 @@ u0 g_init_mesh ( u0 )
     for (size_t i = 0; i < G10_BASE_MESH_QUANTITY; i++)
     
         // ... add it to the base mesh lookup
-        dict_add(p_base_mesh_lookup, &_base_mesh_data[i]._name, &_base_mesh_data);
+        dict_add(p_base_mesh_lookup, &_base_mesh_data[i]._name, i);
 
     // Done
     return;
+}
+
+int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
+{
+    
+    // Argument check
+    if ( p_value       ==        (void *) 0 ) goto no_value;
+    if ( pp_mesh       ==        (void *) 0 ) goto no_mesh;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
+
+    // Initialized data
+    g_instance *p_instance = g_get_active_instance();
+    mesh       *p_mesh     = G10_REALLOC(0, sizeof(mesh));
+
+    memset(p_mesh, 0, sizeof(mesh));
+
+    // Parse the json value into an mesh
+    {
+
+        // Initialized data
+        const dict *const p_dict = p_value->object;
+        size_t mesh_quantity = dict_keys(p_dict, 0);
+        const char * _p_keys[64];
+
+        p_mesh = G10_REALLOC(p_mesh, sizeof(mesh) + ( mesh_quantity * (sizeof(mesh_data *))));
+
+        dict_keys(p_dict, &_p_keys);
+
+        for (size_t i = 0; i < mesh_quantity; i++)
+        {
+            json_value *p_mesh_value = dict_get(p_dict, _p_keys[i]);
+
+            mesh_data_from_json(&p_mesh->_p_meshes[i], _p_keys[i], p_mesh_value);
+        }
+    }
+
+    *pp_mesh = p_mesh;
+
+    // Success
+    return 1;
+
+    no_value:
+    no_mesh:
+    value_is_wrong_type:
+    missing_properties:
+    name_property_is_wrong_type:
+    name_property_is_too_short:
+    name_property_is_too_long:
+
+        // Error
+        return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+
+        }
+    }
+}
+
+int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value )
+{
+
+    mesh_data *p_mesh_data = (void *) 0;
+    g_instance *p_instance = g_get_active_instance();
+    shader *p_shader = (void *) 0;
+    json_value *p_transform = dict_get(p_value->object, "transform");
+    json_value *p_shader_value = dict_get(p_value->object, "shader");
+    json_value *p_primitive = dict_get(p_value->object, "primative");
+
+    p_shader = dict_get(p_instance->cache.p_shaders, p_shader_value->string);
+
+    enum mesh_shapes_e type = (enum mesh_shapes_e) dict_get(p_base_mesh_lookup, p_primitive->string);
+
+    // Platform dependent implementation
+    #ifdef G10_BUILD_WITH_VULKAN
+        // TODO
+        //
+    #elif defined G10_BUILD_WITH_OPENGL
+        
+        // External functions
+        extern int g_opengl_mesh_construct (
+            mesh_data **pp_mesh_data,
+            mesh_create_info _mesh_ci
+        );
+
+        g_opengl_mesh_construct(
+            &p_mesh_data,
+            (mesh_create_info)
+            {
+                .verticies = 
+                {
+                    .quantity = _base_mesh_data[type].verticies.quantity,
+                    .p_data   = _base_mesh_data[type].verticies._data,
+                },
+                .elements = 
+                {
+                    .quantity = _base_mesh_data[type].elements.quantity,
+                    .p_data   = _base_mesh_data[type].elements._data,
+                }
+            }
+        );
+    #endif
+
+    // Store the name
+    {
+        
+        // Initialized data
+        size_t len = strlen(p_name);
+
+        // Error check
+        if ( len == 0  ) goto name_property_is_too_short;
+        if ( len  > 63 ) goto name_property_is_too_long;
+
+        // Copy the instance name
+        strncpy(p_mesh_data->_name, p_name, 63);
+
+        // Store a null terminator
+        p_mesh_data->_name[len] = '\0';
+    }
+
+    transform_from_json(&p_mesh_data->p_transform, p_transform);
+
+    shader_draw_item_add(p_shader, p_mesh_data);
+
+    *pp_mesh_data = p_mesh_data;
+
+    // Success
+    return 1;
+
+    name_property_is_too_short:
+    name_property_is_too_long:
+
+        // Error
+        return 0;
 }
 
 int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, transform *p_transform )

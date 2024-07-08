@@ -57,6 +57,16 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
     }
 }
 
+int g_opengl_window_resize ( g_instance *p_instance, u32 width, u32 height )
+{
+
+    // Update the viewport
+    glViewport(0, 0, width, height);    
+
+    // Success
+    return 1;
+}
+
 /** !
  * Construct an OpenGL mesh from a struct
  * 
@@ -184,6 +194,9 @@ int g_opengl_shader_construct
     // Error check
     if ( p_shader == (void *) 0 ) goto no_mem;
     
+    // Initialize memory
+    memset(p_shader, 0, sizeof(shader));
+
     // Property check
     if ( p_vertex   == (void *) 0 ) goto no_vertex_property;
     if ( p_fragment == (void *) 0 ) goto no_fragment_property;
