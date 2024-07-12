@@ -40,3 +40,6 @@
 [submodule "extern/circular-buffer"]
 	path = extern/circular-buffer
 	url = https://github.com/Jacob-C-Smith/circular-buffer
+[submodule "extern/g10-py"]
+	path = extern/g10-py
+	url = https://github.com/Jacob-C-Smith/g10-py
