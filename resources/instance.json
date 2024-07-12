@@ -6,7 +6,6 @@
         "minor" : 0,
         "patch" : 1
     },
-    "debug" : 4,
     "window" :
     {
         "width"  : 800,
@@ -47,46 +46,66 @@
     },
     "initial scene" :
     {
-        "$schema"  : "https://schema.g10.app/scene.json",
         "name"     : "default scene",
         "entities" :
-        [
+        {
+            "floor" : 
             {
-                "$schema"   : "https://schema.g10.app/entity.json",
-                "name"      : "entity 1",
-                "shader"    : "solid color",
-                "mesh"      :
+                "shader"    : "holdout",
+                "transform" :
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "mesh" :
                 {
                     "plane" : 
                     {
                         "primative" : "plane",
+                        "shader"    : "holdout",
+                        "transform" : 
+                        {
+                            "location" : [ 0.0, 0.0, 0.0 ],
+                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                            "scale"    : [ 5.0, 5.0, 5.0 ]
+                        }
+                    }
+                }
+            },
+            "ball" : 
+            {
+                "shader"    : "solid color",
+                "transform" :
+                {
+                    "location" : [ 0.0, 0.0, 3.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "mesh" :
+                {
+                    "plane" : 
+                    {
+                        "primative" : "sphere",
                         "shader"    : "solid color",
                         "transform" : 
                         {
-                            "$schema"  : "https://schema.g10.app/transform.json",
-                            "location" : [ 0.0, 0.0, 1.0 ],
+                            "location" : [ 0.0, 0.0, 3.0 ],
                             "rotation" : [ 0.0, 0.0, 0.0 ],
                             "scale"    : [ 1.0, 1.0, 1.0 ]
                         }
                     }
-                },
-                "transform" :
-                {
-                    "$schema"  : "https://schema.g10.app/transform.json",
-                    "location" : [ 0.0, 0.0, 0.0 ],
-                    "rotation" : [ 0.0, 0.0, 0.0 ],
-                    "scale"    : [ 1.0, 1.0, 1.0 ]
                 }
             }
-        ],
+        },
         "cameras" :
         {
             "camera" :
             {
                 "$schema" : "https://schema.g10.app/camera.json",
                 "fov" : 60.0,
-                "location" : [ 0.0, 0.0, 0.0 ],
-                "orientation" : [ 0.0, 0.0, 0.0 ],
+                "location" : [ -2.0, 0.0, 3.0 ],
+                "orientation" : [ 0.1, 0.1, 0.2 ],
                 "clip" :
                 {
                     "near" : 0.1,
@@ -99,8 +118,7 @@
     "renderer" : 
     {
         "name"        : "Solid color geometry",
-        "clear color" : [ 0.5, 0.5, 1.0, 1.0 ],
-        "culling"     : [ "visible" ],
+        "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
         "attachments" :
         {
             "color" :
@@ -114,15 +132,28 @@
             "geometry" :
             {
                 "description" : "Render geometry with solid color",
-                "shaders" : 
+                "in"          : { "camera" : [ { "view" : "mat4" }, { "projection" : "mat4" } ] },
+                "shaders"     : 
                 {
                     "solid color" : 
                     {
-                        "vertex"   : "resources/shaders/solid_color/vert.glsl",
-                        "fragment" : "resources/shaders/solid_color/frag.glsl"
+                        "vertex"   : "resources/shaders/solid color/vert.glsl",
+                        "fragment" : "resources/shaders/solid color/frag.glsl",
+                        "culling"  : [ "visible" ],
+                        "layout"   : [ { "xyz" : "vec3" }, { "uv" : "vec2" } ],
+                        "in"       : { "transform" : [ { "model" : "mat4" } ] }
+                    },
+                    "holdout" : 
+                    {
+                        "vertex"   : "resources/shaders/holdout/vert.glsl",
+                        "fragment" : "resources/shaders/holdout/frag.glsl",
+                        "culling"  : [ "visible" ],
+                        "layout"   : [ { "xyz" : "vec3" } ],
+                        "in"       : { "transform" : [ { "model" : "mat4" } ] }
                     }
                 }
             }
         }
-    }
+    },
+    "debug" : 4
 }
