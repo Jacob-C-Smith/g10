@@ -98,6 +98,16 @@ struct callback_parameter_s
  */
 DLLEXPORT int input_from_json ( input **pp_input, const json_value *const p_value );
 
+// Info
+/** !
+ *  Print information about an input
+ *
+ * @param p_input the input
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int input_info ( const input *const p_input );
+
 // Input poll
 /** !
  * Update the binds of an instance
