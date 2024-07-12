@@ -58,7 +58,7 @@ void main ( )
         vec3  light_direction = normalize(lights[i].position - xyz);
         vec3  diffuse         = max(dot(nxyz, light_direction), 0.0) * rgb * lights[i].color;
         vec3  half            = normalize(light_direction + view_direction);  
-        float spec            = pow(max(dot(nxyz, half), 0.0), 16.0);
+        float spec            = pow(max(dot(nxyz, half), 0.0), 256.0);
         vec3  specular        = lights[i].color * spec * s;
         float attenuation     = 1.0 / (1.0 + lights[i].linear * dist + lights[i].quadratic * dist * dist);
 
