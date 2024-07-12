@@ -81,7 +81,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     camera *p_camera = (void *) 0;
     camera _camera = { 0 };
     vec3 location, orientation;
-    float fov, near_clip, far_clip, aspect_ratio;
+    float fov, near_clip, far_clip, aspect_ratio = (16.0 / 9.0);
     mat4 view, projection;
     dict *const p_dict = p_value->object;
     json_value *p_scratch[4] = { 0 };
@@ -229,6 +229,25 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         }
     };
 
+    // Compute the view matrix
+    camera_matrix_view
+    (
+        &_camera.matrix._view,
+        _camera.view.location,
+        _camera.view.target,
+        _camera.view.up
+    );
+    
+    // Compute the projection matrix
+    camera_matrix_projection_perspective
+    (
+        &_camera.matrix._projection,
+        _camera.projection.fov,
+        _camera.projection.aspect_ratio,
+        _camera.projection.near_clip,
+        _camera.projection.far_clip
+    );
+
     // Copy the name
     if ( p_name ) goto copy_name;
 
@@ -279,6 +298,8 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         // Error check
         if ( fov <  1.0 ) goto fov_too_short;
         if ( fov > 90.0 ) goto fov_too_long;
+
+        // 
 
         // Done
         goto lens_parsed;
@@ -588,8 +609,8 @@ u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
         (vec3)
         {
             .x = eye.x - target.x,
-            .x = eye.y - target.y,
-            .x = eye.z - target.z
+            .y = eye.y - target.y,
+            .z = eye.z - target.z
         }
     );
 
@@ -600,7 +621,9 @@ u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
     vec3_normalize(&_left, _scratch);
 
     // (Re)compute the up vector
-    vec3_cross_product(&_up, _forward, _left);
+    vec3_cross_product(&_up, _left, _forward);
+
+    //vec3_mul_scalar(&_up, _up, -1.0f);
 
     // Store the orientation
     *p_view = (mat4)
@@ -615,6 +638,9 @@ u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
     vec3_dot_product(&p_view->m, _left   , eye);
     vec3_dot_product(&p_view->n, _up     , eye);
     vec3_dot_product(&p_view->o, _forward, eye);
+    p_view->m *= -1;
+    p_view->n *= -1;
+    p_view->o *= -1;
 
     // Done
     return;
