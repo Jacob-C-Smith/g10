@@ -58,7 +58,7 @@ int entity_create ( entity **pp_entity )
     }
 }
 
-int entity_from_json ( entity **pp_entity, json_value *p_value )
+int entity_from_json ( entity **pp_entity, const char *const p_name, json_value *p_value )
 {
 
     // Argument check
@@ -76,35 +76,29 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // Initialized data
         const dict *const p_dict = p_value->object;
-        const json_value *p_name_value      = dict_get(p_dict, "name"),
-                         *p_shader_value    = dict_get(p_dict, "shader"),
+        const json_value *p_shader_value    = dict_get(p_dict, "shader"),
                          *p_mesh_value      = dict_get(p_dict, "mesh"),
                          *p_transform_value = dict_get(p_dict, "transform");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [entity] Consider adding a \"$schema\" property to the entity\n");
 
-        // Check for missing properties
-        if ( ! ( p_name_value ) ) goto missing_properties;
-
         // TODO: Check for missing properties
 
-        // Error check
-        if ( p_name_value->type   != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
-        if ( p_shader_value->type != JSON_VALUE_STRING ) goto shader_property_is_wrong_type;
-
+        // TODO: Error check
+        
         // Store the name
         {
 
             // Initialized data
-            size_t len = strlen(p_name_value->string);
+            size_t len = strlen(p_name);
 
             // Error check
             if ( len == 0   ) goto name_property_is_too_short;
             if ( len  > 255 ) goto name_property_is_too_long;
 
             // Copy the instance name
-            strncpy(_entity._name, p_name_value->string, 255);
+            strncpy(_entity._name, p_name, 255);
 
             // Store a null terminator
             _entity._name[len] = '\0';
