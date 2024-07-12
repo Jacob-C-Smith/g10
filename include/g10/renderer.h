@@ -31,6 +31,7 @@
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
 #include <g10/linear.h>
+#include <g10/mesh.h>
 #include <g10/shader.h>
 
 // Structure definitions

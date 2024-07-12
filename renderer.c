@@ -1049,8 +1049,7 @@ int renderer_info ( const renderer *const p_renderer )
             shader *p_shader = p_render_pass->_p_shaders[i];
             
             // Print the shader
-            printf("        [%d]\n", i);            
-            printf("         - name : %s\n", p_shader->_name);            
+            printf("        [%d] : %s\n", i, p_shader->_name);            
         }
     }
     
@@ -1081,6 +1080,7 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
     if ( p_render_pass == (void *) 0 ) goto no_render_pass;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     size_t i = 0;
 
     // Iterate through each shader
@@ -1089,18 +1089,32 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
         
         // Initialized data
         shader *p_shader = p_render_pass->_p_shaders[i];
+        fn_shader_on_bind pfn_shader_on_bind = p_shader->functions.pfn_shader_on_bind;
         fn_shader_on_draw pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
 
         // Bind the shader
         shader_bind(p_shader);
-        
-        // Bind each material
-        // for i=0 to N
-        
+
+        // Bind the camera
+        pfn_shader_on_bind(p_shader, (void *)p_instance->context.p_scene->context.p_camera);
+
         // Draw each object
         for (size_t i = 0; i < p_shader->count; i++)
-        
-            pfn_shader_on_draw(p_shader->_p_draw_items[i]);
+        {
+
+            // Initialized data
+            mat4 _m = { 0 };
+            mesh_data *p_mesh_data = p_shader->_p_draw_items[i];
+            
+            // Store the local matrix
+            transform_get_matrix_local(p_mesh_data->p_transform, &_m);
+            
+            // Bind the model matrix
+            glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, &_m);
+            
+            // Draw the mesh
+            pfn_shader_on_draw(p_mesh_data);
+        }
     }
 
     // Success
