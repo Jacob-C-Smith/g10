@@ -21,6 +21,26 @@
 #include <g10/linear.h>
 #include <g10/transform.h>
 
+// Enumeration definitions
+enum shader_vertex_attribute_type_e
+{
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC2_F32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC3_F32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC4_F32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC2_BOOL,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC3_BOOL,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC4_BOOL,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC2_S32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC3_S32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC4_S32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC2_U32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC3_U32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC4_U32,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC2_F64,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC3_F64,
+    SHADER_VERTEX_ATTRIBUTE_TYPE_VEC4_F64
+};
+
 // Structure definitions
 struct shader_s
 {
@@ -50,7 +70,12 @@ struct shader_s
             unsigned int vertex_shader,
                          fragment_shader,
                          program;
-
+            size_t vertex_attribute_count;
+            struct 
+            {
+                char _name[15 + 1];
+                enum shader_vertex_attribute_type_e _type;
+            } vertex_attributes[16];
         } opengl;
     #endif
 
@@ -81,3 +106,17 @@ DLLEXPORT int shader_draw_item_add ( shader *p_shader, void *p_draw_item );
  */
 DLLEXPORT int shader_bind ( shader *p_shader );
 
+// Info
+/** !
+ *  Print info about a shader
+ *
+ * @param p_shader the shader
+ *
+ * @sa shader_load
+ * @sa shader_from_json
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int shader_info ( const shader *const p_shader );
+
+DLLEXPORT int shader_bind_camera ( shader *p_shader, const camera *const p_camera );

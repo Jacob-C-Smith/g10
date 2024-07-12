@@ -174,7 +174,6 @@ int shader_draw_item_add ( shader *p_shader, void *p_draw_item )
 
 int shader_bind ( shader *p_shader )
 {
-
     // Graphics API specific implementation
     #ifdef G10_BUILD_WITH_VULKAN
     
@@ -189,3 +188,87 @@ int shader_bind ( shader *p_shader )
         return g_opengl_shader_bind(p_shader);
     #endif
 }
+
+int shader_info ( const shader *const p_shader )
+{
+
+    // Argument check
+    if ( p_shader == (void *) 0 ) goto no_shader;
+
+    // Print the shader
+    printf("Shader:\n");
+    printf(" - name : %s\n", p_shader->_name);
+    printf(" - draw items : \n");
+
+    // Print each render pass
+    for (size_t i = 0; i < p_shader->count; i++)
+    {
+
+        // Initialized data
+        void *p_draw_item = p_shader->_p_draw_items[i];
+        
+        // Print the render pass
+        printf("    [%d] : %p\n", i, p_draw_item);
+    }
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
+{
+    
+    if ( p_camera->dirty )
+    {
+        
+        // Compute the view matrix
+        camera_matrix_view
+        (
+            &p_camera->matrix._view,
+            p_camera->view.location,
+            p_camera->view.target,
+            p_camera->view.up
+        );
+        
+        // Compute the projection matrix
+        camera_matrix_projection_perspective
+        (
+            &p_camera->matrix._projection,
+            p_camera->projection.fov,
+            p_camera->projection.aspect_ratio,
+            p_camera->projection.near_clip,
+            p_camera->projection.far_clip
+        );
+    }
+
+    // Initialized data
+    mat4 _p = p_camera->matrix._projection,
+         _v = p_camera->matrix._view;
+
+    // Graphics API specific implementation
+    #ifdef G10_BUILD_WITH_VULKAN
+    
+        // Done
+        return g_vulkan_shader_bind(p_shader);
+    #elif defined G10_BUILD_WITH_OPENGL
+        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "P"), 1, GL_FALSE, &_p);
+        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "V"), 1, GL_FALSE, &_v);
+    #endif
+    
+}
+
