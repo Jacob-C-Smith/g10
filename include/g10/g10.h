@@ -271,8 +271,8 @@ u0 g_init_early ( void ) __attribute__((constructor));
 /** !
  *  Construct a g10 instance
  *
- * @param pp_instance : return
- * @param path        : Path to instance json file
+ * @param pp_instance return
+ * @param path        path to instance json file
  *
  * @sa g_exit
  *

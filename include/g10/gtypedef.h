@@ -89,7 +89,7 @@ typedef struct transform_s        transform;
 
 typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
 typedef int (*fn_cull_operation)( void *p_object );
-typedef int (*fn_shader_on_bind)( u0 );
+typedef int (*fn_shader_on_bind)( shader *p_shader, void *p_on_bind );
 typedef int (*fn_shader_on_material)( u0 );
 typedef int (*fn_shader_on_draw)( void *p_draw_item );
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
