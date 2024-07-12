@@ -286,10 +286,11 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             debug_message_max = p_debug->integer;
         }            
 
-        // Initialize the window
+        // Initialize window system integration
         #ifdef BUILD_G10_WITH_SDL2
-            
+
             // SDL2
+            g_sdl2_init(p_instance);
             g_sdl2_window_from_json(p_instance, p_window);
         #else
 
@@ -320,6 +321,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Error check
             if ( p_input->type != JSON_VALUE_OBJECT ) goto input_is_wrong_type;
 
+            // Construct inputs
             if ( input_from_json(&p_instance->context.p_input, p_input) == 0 ) goto failed_to_construct_input;
         }
 

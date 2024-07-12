@@ -115,16 +115,17 @@ int main ( int argc, const char *const argv[] )
 
 int user_code_main ( g_instance *const p_instance )
 {
-
-    // Print the name of the instance
-    // printf("%s\n", p_instance->_name);
-
+    
     // Success
     return 1;
 }
 
 int game_setup ( g_instance *const p_instance )
 {
+
+    // Initialized data
+    entity *p_floor = dict_get(p_instance->context.p_scene->data.entities, "floor"),
+           *p_ball  = dict_get(p_instance->context.p_scene->data.entities, "ball");
 
     // Print g10 info
     {
@@ -134,6 +135,14 @@ int game_setup ( g_instance *const p_instance )
 
         // Print renderer info
         renderer_info(p_instance->context.p_renderer);
+
+        // Print each shader
+        for (size_t i = 0; i < p_instance->context.p_renderer->_p_render_passes[0]->shader_quantity; i++)
+        
+            shader_info(p_instance->context.p_renderer->_p_render_passes[0]->_p_shaders[i]);
+
+        // Print input info
+        input_info(p_instance->context.p_input);
     }
 
     // Set a user code callback
