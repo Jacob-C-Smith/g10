@@ -189,7 +189,13 @@ int g_opengl_shader_construct
            fragment_source_len = 0;
     dict *const p_dict = p_value->object;
     const json_value *const p_vertex   = dict_get(p_dict, "vertex"),
+                     *const p_layout   = dict_get(p_dict, "layout"),
                      *const p_fragment = dict_get(p_dict, "fragment");
+    int success;
+    char _vs_src[512] = { 0 };
+    char _fs_src[512] = { 0 };
+    char *p_vs_src = &_vs_src;
+    char *p_fs_src = &_fs_src;
 
     // Error check
     if ( p_shader == (void *) 0 ) goto no_mem;
@@ -201,27 +207,30 @@ int g_opengl_shader_construct
     if ( p_vertex   == (void *) 0 ) goto no_vertex_property;
     if ( p_fragment == (void *) 0 ) goto no_fragment_property;
 
-    char _vs_src[512] = { 0 };
-    char _fs_src[512] = { 0 };
-    char *p_vs_src = &_vs_src;
-    char *p_fs_src = &_fs_src;
-
+    // Load the shader source code
     g_load_file(p_vertex->string, &_vs_src, false);
     g_load_file(p_fragment->string, &_fs_src, false);
 
+    // Compute the length of each file
     vertex_source_len = strlen(_vs_src);
     fragment_source_len = strlen(_fs_src);
 
+    // Create a vertex shader and a fragment shader
     p_shader->opengl.vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     p_shader->opengl.fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
+    // Attach source code to each shader handle
     glShaderSource(p_shader->opengl.vertex_shader, 1, &p_vs_src, &vertex_source_len);
     glShaderSource(p_shader->opengl.fragment_shader, 1, &p_fs_src, &fragment_source_len);
 
+    // Compile the vertex and fragment shaders
     glCompileShader(p_shader->opengl.vertex_shader);
     glCompileShader(p_shader->opengl.fragment_shader);
 
+    // Create a shader program
     p_shader->opengl.program = glCreateProgram();
+
+    // Attach the shaders to the program
     glAttachShader(
         p_shader->opengl.program,
         p_shader->opengl.vertex_shader
@@ -230,18 +239,18 @@ int g_opengl_shader_construct
         p_shader->opengl.program,
         p_shader->opengl.fragment_shader
     );
+
+    // Link the shader
     glLinkProgram(p_shader->opengl.program);
 
-    int success;
-
-
+    // Get the build status
     glGetProgramiv(p_shader->opengl.program, GL_LINK_STATUS, &success);
-    if (!success) {
-        char _log[512] = { 0 };
-        glGetProgramInfoLog(p_shader->opengl.program, 512, NULL, &_log);
-        printf("%s\n", _log);
-    }
 
+    // Error handling
+    if ( success == false ) goto failed_to_compile_shader;
+    
+    // 
+    p_shader->functions.pfn_shader_on_bind = shader_bind_camera;
     p_shader->functions.pfn_shader_on_draw = mesh_draw;
 
     // Return a pointer to the caller
@@ -301,6 +310,23 @@ int g_opengl_shader_construct
                 return 0;
         }
 
+        // OpenGL errors
+        {
+            failed_to_compile_shader:
+            
+                // Initialized data
+                char _log[512] = { 0 };
+
+                // Get the output
+                glGetProgramInfoLog(p_shader->opengl.program, 512, NULL, &_log);
+
+                // Print the output to standard out
+                printf("%s\n", _log);
+
+                // Error
+                return 0;
+        }
+
         // Standard library errors
         {
             no_mem:
@@ -345,3 +371,19 @@ int g_opengl_shader_bind ( shader *p_shader )
         }
     }
 }
+
+int g_opengl_shader_bind_mat4 ( shader *p_shader, const char *p_name, void *p_value )
+{
+    glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, p_name), 1, GL_FALSE, p_value);
+}
+
+int g_opengl_shader_bind_camera ( shader *p_shader, const camera *const p_camera, ... )
+{
+    mat4 _p = p_camera->matrix._projection,
+         _v = p_camera->matrix._view;
+        
+    g_opengl_shader_bind_mat4(p_shader, "P", &_p);
+    g_opengl_shader_bind_mat4(p_shader, "V", &_v);
+    
+}
+
