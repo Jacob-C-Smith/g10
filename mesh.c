@@ -133,6 +133,10 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
     g_instance *p_instance = g_get_active_instance();
     mesh       *p_mesh     = G10_REALLOC(0, sizeof(mesh));
 
+    // Error check
+    if ( p_mesh == (void *) 0 ) goto no_mem;
+
+    // Initialize the memory
     memset(p_mesh, 0, sizeof(mesh));
 
     // Parse the json value into an mesh
@@ -141,20 +145,30 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
         // Initialized data
         const dict *const p_dict = p_value->object;
         size_t mesh_quantity = dict_keys(p_dict, 0);
-        const char * _p_keys[64];
+        const char * _p_keys[64] = { 0 };
 
-        p_mesh = G10_REALLOC(p_mesh, sizeof(mesh) + ( mesh_quantity * (sizeof(mesh_data *))));
+        // Error check
+        if ( mesh_quantity > 63 ) goto too_many_meshes;
 
+        // Dump the keys
         dict_keys(p_dict, &_p_keys);
 
+        // Grow the allocation
+        p_mesh = G10_REALLOC(p_mesh, sizeof(mesh) + ( mesh_quantity * (sizeof(mesh_data *))));
+
+        // Load each mesh
         for (size_t i = 0; i < mesh_quantity; i++)
         {
+
+            // Initialized data
             json_value *p_mesh_value = dict_get(p_dict, _p_keys[i]);
 
+            // Construct the mesh
             mesh_data_from_json(&p_mesh->_p_meshes[i], _p_keys[i], p_mesh_value);
         }
     }
 
+    // Return a pointer to the caller
     *pp_mesh = p_mesh;
 
     // Success
@@ -163,6 +177,8 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
     no_value:
     no_mesh:
     value_is_wrong_type:
+    too_many_meshes:
+    no_mem:
     missing_properties:
     name_property_is_wrong_type:
     name_property_is_too_short:
@@ -187,9 +203,9 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
     mesh_data *p_mesh_data = (void *) 0;
     g_instance *p_instance = g_get_active_instance();
     shader *p_shader = (void *) 0;
-    json_value *p_transform = dict_get(p_value->object, "transform");
-    json_value *p_shader_value = dict_get(p_value->object, "shader");
-    json_value *p_primitive = dict_get(p_value->object, "primative");
+    json_value *p_transform    = dict_get(p_value->object, "transform"),
+               *p_shader_value = dict_get(p_value->object, "shader"),
+               *p_primitive    = dict_get(p_value->object, "primative");
 
     p_shader = dict_get(p_instance->cache.p_shaders, p_shader_value->string);
 

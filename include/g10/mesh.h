@@ -43,6 +43,10 @@
 // g10
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
+#ifdef G10_BUILD_WITH_VULKAN
+#elif defined G10_BUILD_WITH_OPENGL
+    #include <glad/glad.h>
+#endif
 
 // Enumeration definitions
 enum mesh_shapes_e
@@ -80,9 +84,6 @@ struct mesh_data_s
             
         } vulkan;
     #elif defined G10_BUILD_WITH_OPENGL
-        
-        #include <glad/glad.h>
-
         struct
         {
             GLuint vertex_buffers[32];
