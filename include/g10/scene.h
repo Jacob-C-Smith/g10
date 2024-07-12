@@ -52,12 +52,10 @@ struct scene_s
     } data;
 
     // State
-    /*
     struct 
     {
         camera *p_camera;
-    } state;
-    */
+    } context;
 };
 
 // Function definitions

@@ -79,6 +79,7 @@ int scene_from_json
     size_t entity_quantity = 0,
            camera_quantity = 0,
            light_quantity  = 0;
+    char **p_entity_names = (void *) 0;
     char *_camera_names[G10_SCENE_CAMERA_MAX] = { 0 };
 
     // Parse the json value into a scene
@@ -95,7 +96,7 @@ int scene_from_json
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [scene] Consider adding a \"$schema\" property to the scene\n");
 
         // Count the quantity of entities
-        entity_quantity = array_size(p_entities->list);
+        entity_quantity = dict_keys(p_entities->object, 0);
 
         // Count the quantity of cameras
         camera_quantity = dict_keys(p_cameras->object, 0);
@@ -103,6 +104,18 @@ int scene_from_json
         // Construct lookups
         if ( dict_construct(&_scene.data.entities, entity_quantity, 0) == 0 ) goto failed_to_construct_dictionary;
         if ( dict_construct(&_scene.data.cameras , camera_quantity, 0) == 0 ) goto failed_to_construct_dictionary;
+
+        // Allocate some memory for entity names
+        p_entity_names = G10_REALLOC(0, sizeof(void *) * entity_quantity);
+
+        // Error check
+        if ( p_entity_names == (void *) 0 ) goto no_mem;
+
+        // Store entity names
+        dict_keys(p_entities->object, p_entity_names);
+
+        // Store camera names
+        dict_keys(p_cameras->object, &_camera_names);
 
         // Set the name
         {
@@ -129,29 +142,23 @@ int scene_from_json
         {
 
             // Initialized data
-            json_value *p_value  = (void *) 0;
+            json_value *p_value  = dict_get(p_entities->object, p_entity_names[i]);
             entity     *p_entity = (void *) 0;
 
-            // Store the entity json
-            if ( array_index(p_entities->list, i, &p_value) == 0 ) goto failed_to_index_array;
-
             // Construct the entity
-            if ( entity_from_json(&p_entity, p_value) == 0 ) goto failed_to_construct_entity;
+            if ( entity_from_json(&p_entity, p_entity_names[i], p_value) == 0 ) goto failed_to_construct_entity;
 
             // Add the entity to the scene
             dict_add(_scene.data.entities, p_entity->_name, p_entity);
         }
     
-        // Store camera names
-        dict_keys(p_cameras->object, &_camera_names);
-
         // Construct cameras
         for (size_t i = 0; i < camera_quantity; i++)
         {
 
             // Initialized data
             camera     *p_camera = (void *) 0;
-            json_value *p_value  = dict_get(p_cameras->object, _camera_names[i]);;
+            json_value *p_value  = dict_get(p_cameras->object, _camera_names[i]);
 
             // Error check
             if ( p_value == (void *)0 ) goto failed_to_get_dictionary;
@@ -161,6 +168,9 @@ int scene_from_json
 
             // Add the camera to the scene
             dict_add(_scene.data.entities, p_camera->_name, p_camera);
+
+            // Store the active camera
+            _scene.context.p_camera = p_camera;
         }
     }
 
