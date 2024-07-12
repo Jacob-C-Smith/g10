@@ -2,6 +2,7 @@
 #include <log/log.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 struct 
 {
@@ -134,6 +135,19 @@ struct
     [SDL_SCANCODE_RALT]   = { ._name = "RIGTH ALT"    , ._active = false, ._scancode = SDL_SCANCODE_RALT }
 };
 
+int g_sdl2_init ( g_instance *p_instance )
+{
+
+    // Initialize SDL2
+    SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
+
+    // Initialize SDL2 image
+    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+
+    // Success
+    return 1;
+}
+
 int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
 {
 
@@ -144,6 +158,7 @@ int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
 
     // Initialized data
     u32 sdl2_window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    SDL_Surface *p_icon_surface = (void *) 0;
 
     // Graphics API
     #ifdef G10_BUILD_WITH_VULKAN
@@ -288,6 +303,26 @@ int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
 
                 // Error
                 return 0;
+
+            wrong_icon_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl2] Property \"icon\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // SDL2 errors
+        {
+            failed_to_load_icon:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl2] Failed to load icon in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
         }
 
         // Standard library errors
@@ -334,31 +369,44 @@ int g_sdl2_window_poll ( g_instance *p_instance )
 
             case SDL_WINDOWEVENT:
 
-                    if ( p_instance->window.sdl2.event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED )
-                    {
+                if ( p_instance->window.sdl2.event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED )
+                {
 
-                        // External functions
-                        extern int g_window_resize ( g_instance *p_instance, u32 width, u32 height );
-                        
-                        // Resize the window
-                        g_window_resize
-                        (
-                            p_instance,
-                            p_instance->window.sdl2.event.window.data1,
-                            p_instance->window.sdl2.event.window.data2                         
-                        );
-                    }
+                    // External functions
+                    extern int g_window_resize ( g_instance *p_instance, u32 width, u32 height );
+                    
+                    // Resize the window
+                    g_window_resize
+                    (
+                        p_instance,
+                        p_instance->window.sdl2.event.window.data1,
+                        p_instance->window.sdl2.event.window.data2
+                    );
+                }
 
-                    // Done
-                    break;
+                // Done
+                break;
 
             // Mouse moves
-            case SDL_MOUSEMOTION:
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
             {
-                //pprintf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
-                
+                camera *p_camera = p_instance->context.p_scene->context.p_camera;
+
+                p_camera->view.location.z -= 0.25;
+                break;
+            }
+            case SDL_MOUSEMOTION:
+            {
+
+                // Initialized data
+                camera *p_camera = p_instance->context.p_scene->context.p_camera;
+                // printf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
+                SDL_SetRelativeMouseMode(true);
+                p_camera->view.location.y += 0.01 * p_instance->window.sdl2.event.motion.xrel;
+                p_camera->view.location.x += 0.01 * p_instance->window.sdl2.event.motion.yrel;
+                p_camera->dirty = true;
+
                 // Done
                 break;
             }
