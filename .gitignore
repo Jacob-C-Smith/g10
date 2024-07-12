@@ -14,7 +14,9 @@ CMakeFiles/
 cmake_install.cmake
 *.dylib
 CMakeCache.txt
-build/
+build/*
+!build/.gitkeep
+!build/resources
 Makefile
 .vscode/
 .gituhb/
@@ -371,3 +373,4 @@ FodyWeavers.xsd
 *.ico
 Icon?
 
+python/__pycache__/
