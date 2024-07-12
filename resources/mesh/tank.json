@@ -1,0 +1,362 @@
+{
+    "transform" :
+    {
+        "location" : [ 0.0, 0.0, 0.0 ],
+        "rotation" : [ 0.0, 0.0, 0.0 ],
+        "scale"    : [ 1.0, 1.0, 1.0 ]
+    },
+    "mesh" :
+    {
+        "tank body" : 
+        {
+            "shader"    : "holdout",
+            "transform" : 
+            {
+                "location" : [ 0.0, 0.0, 0.0 ],
+                "rotation" : [ 0.0, 0.0, 0.0 ],
+                "scale"    : [ 1.0, 1.0, 1.0 ]
+            },
+            "mesh" : 
+            {
+                "detail 1" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 2" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 3" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 4" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 5" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 6" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 7" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 8" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 9" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    },
+                    "mesh" : 
+                    {
+                        "detail 9 1" : 
+                        {
+                            "shader"    : "holdout",
+                            "transform" : 
+                            {
+                                "location" : [ 0.0, 0.0, 0.0 ],
+                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                            }
+                        }
+                    }
+                },
+                "detail 10" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 11" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 12" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "detail 13" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "linking chain base" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    },
+                    "mesh" :
+                    {
+                        "linking chain" :
+                        {
+                            "shader"    : "holdout",
+                            "transform" : 
+                            {
+                                "location" : [ 0.0, 0.0, 0.0 ],
+                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                            }
+                        }
+                    }
+                },
+                "machine gun" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "midsection" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    }
+                },
+                "track" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    },
+                    "mesh" : 
+                    {
+                        "drive wheels" : 
+                        {
+                            "shader"    : "holdout",
+                            "transform" : 
+                            {
+                                "location" : [ 0.0, 0.0, 0.0 ],
+                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                            }
+                        },
+                        "road wheels" : 
+                        {
+                            "shader"    : "holdout",
+                            "transform" : 
+                            {
+                                "location" : [ 0.0, 0.0, 0.0 ],
+                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                            }
+                        }
+                    }
+                },
+                "turret ring" : 
+                {
+                    "shader"    : "holdout",
+                    "transform" : 
+                    {
+                        "location" : [ 0.0, 0.0, 0.0 ],
+                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                    },
+                    "mesh" : 
+                    {
+                        "turret" : 
+                        {
+                            "shader"    : "holdout",
+                            "transform" : 
+                            {
+                                "location" : [ 0.0, 0.0, 0.0 ],
+                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                            },
+                            "mesh" : 
+                            {
+                                "antenna 1" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    }
+                                },
+                                "antenna 2" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    }
+                                },
+                                "hatch" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    },
+                                    "mesh" :
+                                    {
+                                        "hatch detail 1" : 
+                                        {
+                                            "shader"    : "holdout",
+                                            "transform" : 
+                                            {
+                                                "location" : [ 0.0, 0.0, 0.0 ],
+                                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                                            }
+                                        },
+                                        "hatch detail 2" : 
+                                        {
+                                            "shader"    : "holdout",
+                                            "transform" : 
+                                            {
+                                                "location" : [ 0.0, 0.0, 0.0 ],
+                                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                                            }
+                                        },
+                                        "hatch detail 3" : 
+                                        {
+                                            "shader"    : "holdout",
+                                            "transform" : 
+                                            {
+                                                "location" : [ 0.0, 0.0, 0.0 ],
+                                                "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                "scale"    : [ 0.3, 0.3, 0.3 ]
+                                            }
+                                        }
+                                    } 
+                                },
+                                "main gun" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    }
+                                },
+                                "rockets" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    }
+                                },
+                                "vents" : 
+                                {
+                                    "shader"    : "holdout",
+                                    "transform" : 
+                                    {
+                                        "location" : [ 0.0, 0.0, 0.0 ],
+                                        "rotation" : [ 0.0, 0.0, 0.0 ],
+                                        "scale"    : [ 0.3, 0.3, 0.3 ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
