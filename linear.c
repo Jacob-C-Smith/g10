@@ -23,8 +23,6 @@ u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
     return;
 }
 
-
-
 u0 vec2_sub_vec2 ( vec2 *p_result, vec2 a, vec2 b )
 {
     
@@ -723,7 +721,7 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     mat4 _location,
          _rotation,
          _scale,
-         _location_scale;
+         _rotation_scale;
 
     // Compute the translation matrix
     mat4_translation(&_location, location);
@@ -735,10 +733,10 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     mat4_scale(&_scale, scale);
 
     // Compute the location-scale matrix
-    mat4_mul_mat4(&_location_scale, _scale, _location);
+    mat4_mul_mat4(&_rotation_scale, _rotation, _scale);
 
     // Compute the model matrix
-    mat4_mul_mat4(p_result, _location_scale, _rotation);
+    mat4_mul_mat4(p_result, _rotation_scale, _location);
 
     // Done
     return;
