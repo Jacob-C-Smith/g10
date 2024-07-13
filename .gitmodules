@@ -43,3 +43,6 @@
 [submodule "extern/g10-py"]
 	path = extern/g10-py
 	url = https://github.com/Jacob-C-Smith/g10-py
+[submodule "extern/gschema"]
+	path = extern/gschema
+	url = https://github.com/Jacob-C-Smith/gschema
