@@ -3,6 +3,8 @@
 
 // Function declarations
 int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass );
+int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, json_value *p_value );
+int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, json_value *p_value );
 
 int renderer_create ( renderer **pp_renderer ) 
 {
@@ -157,8 +159,10 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
     if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
-    size_t    i = 0;
+    size_t    i = 0,
+              render_pass_quantity = 0;
     renderer *p_renderer = (void *) 0;
+    node_graph *p_node_graph = (void *) 0;
 
     // Allocate memory on the heap
     if ( renderer_create(&p_renderer) == 0 ) goto failed_to_allocate_renderer;
@@ -170,8 +174,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         dict *const p_dict = p_value->object;
         const json_value *p_name_value        = dict_get(p_dict, "name"),
                          *p_clear_color_value = dict_get(p_dict, "clear color"),
-                         *p_attachments_value = dict_get(p_dict, "attachments"),
-                         *p_passes_value      = dict_get(p_dict, "passes");
+                         *p_attachments_value = dict_get(p_dict, "attachments");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the renderer\n");
@@ -179,13 +182,11 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         // Error check
         if ( p_name_value        == (void *) 0 ) goto no_name_property;
         if ( p_attachments_value == (void *) 0 ) goto no_attachments_property;
-        if ( p_passes_value      == (void *) 0 ) goto no_passes_property;
 
         // Type check
         if ( p_name_value->type        != JSON_VALUE_STRING ) goto name_property_is_wrong_type;
         if ( p_clear_color_value->type != JSON_VALUE_ARRAY  ) goto clear_color_property_is_wrong_type;
         if ( p_attachments_value->type != JSON_VALUE_OBJECT ) goto attachments_property_is_wrong_type;
-        if ( p_passes_value->type      != JSON_VALUE_OBJECT ) goto passes_property_is_wrong_type;
 
         // Store the name
         {
@@ -264,42 +265,65 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 // dict_add(p_renderer->attachments.data, p_attachment->_name, p_attachment);
             }
         }
+    
+        // Construct a node graph
+        if ( node_graph_construct(&p_node_graph, p_value) == 0 ) goto failed_to_construct_node_graph;
+    
+        // Print the node graph
+        node_graph_print(p_node_graph);
 
-        // Construct render passes
+        // Grow the allocation
+        p_renderer = G10_REALLOC(p_renderer, sizeof(renderer) + 16 * sizeof(render_pass *));
+
+        // Error check
+        if ( p_renderer == (void *) 0 ) goto no_mem;
+
+        // Construct a renderer from the node graph
         {
-
+            
             // Initialized data
-            dict       *p_dict          = p_passes_value->object;
-            const char *p_scratch[32]   = { 0 };
-            size_t  pass_quantity = dict_keys(p_dict, 0);
+            node *_p_nodes[8] = { 0 };
+            size_t j = 0;
 
-            // Error check
-            if ( pass_quantity > 32 ) goto too_many_passes;
-
-            // Get the name of each render pass
-            dict_keys(p_dict, &p_scratch);
-
-            // Store the quantity of render passes
-            p_renderer->render_pass_quantity = pass_quantity;
-
-            // Grow the allocation
-            p_renderer = G10_REALLOC(p_renderer, sizeof(renderer) + ( pass_quantity * sizeof(render_pass *)) );
-
-            // Iterate through each render pass
-            for (size_t i = 0; i < pass_quantity; i++)
+            // Construct the elements of the render graph
+            for (size_t i = 0; i < p_node_graph->node_quantity; i++)
             {
-                
-                // Initialized data
-                render_pass *p_render_pass       = (void *) 0;
-                json_value  *p_render_pass_value = dict_get(p_dict, p_scratch[i]);
-                
-                // Construct a render pass
-                render_pass_from_json(&p_render_pass, p_scratch[i], p_render_pass_value);
 
-                // Store the render pass
-                p_renderer->_p_render_passes[i] = p_render_pass;
-                // dict_add(p_renderer->render_pass.data, p_render_pass->_name, p_render_pass);
+                // Initialized data
+                node *p_node = p_node_graph->_p_nodes[i];
+                json_value *p_value = p_node->value;
+                dict *p_dict = (void *) 0;
+                const char *type = (void *) 0;
+
+                // Store source nodes
+                if ( p_node->in_quantity == 0 ) _p_nodes[j++] = p_node_graph->_p_nodes[i];
+
+                // Error check
+                if ( p_value == (void *) 0 ) continue;
+
+                // Type check
+                if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_node_type;
+
+                // Store the dictionary
+                p_dict = p_value->object;
+
+                // Store the type
+                type = ((json_value *) dict_get(p_dict, "type"))->string;
+
+                // Error check
+                //
+                if ( strcmp(type, "render pass") == 0 ) 
+                {
+                    printf("%s is a %s\n", p_node->_name, type);
+
+                    render_pass_from_json_2(&p_renderer->_p_render_passes[render_pass_quantity], p_node->_name, p_value);
+
+                    render_pass_quantity++;
+                }
             }
+            
+            // Store the quantity of render passes
+            p_renderer->render_pass_quantity = render_pass_quantity;
         }
     }
     
@@ -311,6 +335,9 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
 
     too_many_attachments:
     too_many_passes:
+    failed_to_construct_node_graph:
+    wrong_node_type:
+    no_node_value:
 
         // Error
         return 0;
@@ -453,6 +480,17 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 #ifndef NDEBUG
                     log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"passes\" in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // Error
@@ -756,7 +794,7 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
                 json_value *p_shader_value = dict_get(p_dict, p_scratch[i]);
                 
                 // Construct a shader
-                shader_from_json(&p_shader, p_scratch[i], p_shader_value);
+                shader_from_json_2(&p_shader, p_scratch[i], p_shader_value);
 
                 // Store the shader
                 p_render_pass->_p_shaders[i] = p_shader;
@@ -788,6 +826,280 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
     return 1;
 
     too_many_shaders:
+
+        // Error
+        return 0;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_render_pass:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"pp_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            value_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // g10 errors
+        {
+            failed_to_allocate_render_pass:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Failed to allocate render pass in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // json errors
+        {
+            name_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            description_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            format_property_is_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+            
+            name_property_is_too_long:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            name_property_is_too_short:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"name\" property of renderer object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            description_property_is_too_long:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be less than 255 characters in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            description_property_is_too_short:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] \"description\" property of renderer object must be at least 1 character long in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_name_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"name\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_description_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+
+            no_format_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, json_value *p_value )
+{
+
+    // Argument check
+    if ( pp_render_pass == (void *)        0 ) goto no_render_pass;
+    if ( p_value        == (void *)        0 ) goto no_value;
+    if ( p_value->type  != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
+
+    // Initialized data
+    render_pass *p_render_pass = (void *) 0;
+    node_graph  *p_node_graph  = (void *) 0;
+    size_t shader_quantity = 0;
+
+    // Allocate memory on the heap
+    if ( render_pass_create(&p_render_pass) == 0 ) goto failed_to_allocate_render_pass;
+
+    // Construct a node graph
+    if ( node_graph_construct(&p_node_graph, p_value) == 0 ) goto failed_to_construct_node_graph;
+    
+    // Parse the json value into a render pass
+    {
+
+        // Initialized data
+        dict *const p_dict = p_value->object;
+        const json_value *p_description_value = dict_get(p_dict, "description"),
+                         *p_shaders_value     = dict_get(p_dict, "shaders");
+
+        // Extra check
+        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the render pass\n");
+
+        // Error check
+        if ( p_description_value == (void *) 0 ) goto no_name_property;
+        
+        // Type check
+        if ( p_description_value->type != JSON_VALUE_STRING ) goto description_property_is_wrong_type;
+
+        // Store the description
+        {
+
+            // Initialized data
+            size_t len = strlen(p_description_value->string);
+
+            // Error check
+            if ( len == 0   ) goto description_property_is_too_short;
+            if ( len  > 255 ) goto description_property_is_too_long;
+
+            // Copy the attachment description
+            strncpy(p_render_pass->_description, p_description_value->string, 255);
+
+            // Store a null terminator
+            p_render_pass->_name[len] = '\0';
+        }
+    }
+
+    p_render_pass = G10_REALLOC(p_render_pass, sizeof(render_pass) + 8 * sizeof(shader *));
+
+    // Construct a render pass from the node graph
+    {
+        
+        // Initialized data
+        node *_p_nodes[8] = { 0 };
+        size_t j = 0;
+
+        // Construct the elements of the render graph
+        for (size_t i = 0; i < p_node_graph->node_quantity; i++)
+        {
+
+            // Initialized data
+            node *p_node = p_node_graph->_p_nodes[i];
+            json_value *p_value = p_node->value;
+            dict *p_dict = (void *) 0;
+            const char *type = (void *) 0;
+
+            // Store source nodes
+            if ( p_node->in_quantity == 0 ) _p_nodes[j++] = p_node_graph->_p_nodes[i];
+
+            // Error check
+            if ( p_value == (void *) 0 ) continue;
+
+            // Type check
+            //if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_node_type;
+
+            // Store the dictionary
+            p_dict = p_value->object;
+
+            // Store the type
+            type = ((json_value *) dict_get(p_dict, "type"))->string;
+
+            // Error check
+            //
+
+            if ( strcmp(type, "shader") == 0 )
+            {
+                printf("%s is a shader\n", p_node->_name);
+
+                json_value_print(p_value);
+                fflush(stdout);
+
+                shader_from_json_2(&p_render_pass->_p_shaders[shader_quantity], p_node->_name, p_value);
+
+                shader_quantity++;
+            }
+        }
+
+        // Store the quantity of shaders
+        p_render_pass->shader_quantity = shader_quantity;
+    }
+
+    // Store the name
+    {
+
+        // Initialized data
+        size_t len = strlen(p_name);
+
+        // Error check
+        if ( len == 0   ) goto name_property_is_too_short;
+        if ( len  > 255 ) goto name_property_is_too_long;
+
+        // Copy the render pass name
+        strncpy(p_render_pass->_name, p_name, 255);
+
+        // Store a null terminator
+        p_render_pass->_name[len] = '\0';
+    }
+
+    // Return a pointer to the caller
+    *pp_render_pass = p_render_pass;
+
+    // Success
+    return 1;
+
+    too_many_shaders:
+    failed_to_construct_node_graph:
 
         // Error
         return 0;

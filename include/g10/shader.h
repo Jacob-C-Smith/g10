@@ -15,6 +15,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+// node
+#include <node/node.h>
+
 // g10
 #include <g10/gtypedef.h>
 #include <g10/g10.h>
@@ -92,6 +95,8 @@ struct shader_s
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int shader_from_json ( shader **pp_shader, const char *const p_name, json_value *p_value );
+
+DLLEXPORT int shader_from_json_2 ( shader **pp_shader, const char *const p_name, json_value *p_value );
 
 // Mutators
 DLLEXPORT int shader_draw_item_add ( shader *p_shader, void *p_draw_item );
