@@ -141,9 +141,6 @@ int g_sdl2_init ( g_instance *p_instance )
     // Initialize SDL2
     SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
 
-    // Initialize SDL2 image
-    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-
     // Success
     return 1;
 }
