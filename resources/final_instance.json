@@ -8,9 +8,10 @@
     },
     "window" : 
     {
-        "width"  : 800,
-        "height" : 600,
-        "title"  : "G10 Example"
+        "width"      : 1920,
+        "height"     : 1080,
+        "title"      : "G10 Example",
+        "fullscreen" : true
     },
     "input" :
     {
@@ -189,7 +190,360 @@
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
                 },
-                "parts"      : { },
+                "mesh" :
+                {
+                    "tank body" : 
+                    {
+                        "shader"    : "deferred pbr",
+                        "transform" : 
+                        {
+                            "location" : [ 0.0, 0.0, 0.0 ],
+                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                            "scale"    : [ 1.0, 1.0, 1.0 ]
+                        },
+                        "mesh" : 
+                        {
+                            "detail 1" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 2" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 3" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 4" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 5" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 6" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 7" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 8" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 9" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                },
+                                "mesh" : 
+                                {
+                                    "detail 9 1" : 
+                                    {
+                                        "shader"    : "deferred pbr",
+                                        "transform" : 
+                                        {
+                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                        }
+                                    }
+                                }
+                            },
+                            "detail 10" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 11" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 12" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "detail 13" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "linking chain base" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                },
+                                "mesh" :
+                                {
+                                    "linking chain" :
+                                    {
+                                        "shader"    : "deferred pbr",
+                                        "transform" : 
+                                        {
+                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                        }
+                                    }
+                                }
+                            },
+                            "machine gun" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "midsection" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                }
+                            },
+                            "track" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                },
+                                "mesh" : 
+                                {
+                                    "drive wheels" : 
+                                    {
+                                        "shader"    : "deferred pbr",
+                                        "transform" : 
+                                        {
+                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                        }
+                                    },
+                                    "road wheels" : 
+                                    {
+                                        "shader"    : "deferred pbr",
+                                        "transform" : 
+                                        {
+                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                        }
+                                    }
+                                }
+                            },
+                            "turret ring" : 
+                            {
+                                "shader"    : "deferred pbr",
+                                "transform" : 
+                                {
+                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                },
+                                "mesh" : 
+                                {
+                                    "turret" : 
+                                    {
+                                        "shader"    : "deferred pbr",
+                                        "transform" : 
+                                        {
+                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                        },
+                                        "mesh" : 
+                                        {
+                                            "antenna 1" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                }
+                                            },
+                                            "antenna 2" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                }
+                                            },
+                                            "hatch" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                },
+                                                "mesh" :
+                                                {
+                                                    "hatch detail 1" : 
+                                                    {
+                                                        "shader"    : "deferred pbr",
+                                                        "transform" : 
+                                                        {
+                                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                        }
+                                                    },
+                                                    "hatch detail 2" : 
+                                                    {
+                                                        "shader"    : "deferred pbr",
+                                                        "transform" : 
+                                                        {
+                                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                        }
+                                                    },
+                                                    "hatch detail 3" : 
+                                                    {
+                                                        "shader"    : "deferred pbr",
+                                                        "transform" : 
+                                                        {
+                                                            "location" : [ 0.0, 0.0, 0.0 ],
+                                                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                            "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                        }
+                                                    }
+                                                } 
+                                            },
+                                            "main gun" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                }
+                                            },
+                                            "rockets" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                }
+                                            },
+                                            "vents" : 
+                                            {
+                                                "shader"    : "deferred pbr",
+                                                "transform" : 
+                                                {
+                                                    "location" : [ 0.0, 0.0, 0.0 ],
+                                                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                                                    "scale"    : [ 0.3, 0.3, 0.3 ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "materials"  : { },
                 "ai"         : { },
                 "rigid body" : { }
@@ -199,7 +553,7 @@
         {
             "camera" :
             {
-                "fov" : 60.0,
+                "fov" : 60.5,
                 "location" : [ 0.0, 0.0, 0.0 ],
                 "rotation" : [ 0.0, 0.0, 0.0 ],
                 "clip" :
@@ -221,53 +575,95 @@
     },
     "renderer" : 
     {
-        "name"        : "default deferred",
+        "name"        : "Deferred physically based rendering",
         "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
         "attachments" :
         {
-            "position" :
+            "color" :
             {
-                "description" : "< X, Y, Z >",
-                "format"      : "r16g16b16a16"
-            },
-            "normal" :
-            {
-                "description" : "< nX, nY, nZ >",
-                "format"      : "r16g16b16a16"
-            },
-            "color + specular" :
-            {
-                "description" : "< R, G, B, E >",
+                "description" : "< R, G, B >",
                 "format"      : "r8g8b8a8"
             }
         },
-        "passes" :
+        "nodes" :
         {
             "geometry" :
             {
-                "description" : "Render position, normal, color, specular",
-                "shader"      : 
+                "out" : [ "color" ],
+                "data" :
                 {
-                    "source" : 
+                    "type" : "render pass",
+                    "description" : "Render holdout and color",
+                    "in" : { "camera" : [ { "view" : "mat4" }, { "projection" : "mat4" } ] },
+                    "nodes" : 
                     {
-                        "vertex"   : "resources/shaders/gbuffer/vert.glsl",
-                        "fragment" : "resources/shaders/gbuffer/frag.glsl"
-                    }
+                        "holdout" : 
+                        {
+                            "data" :
+                            {
+                                "type"     : "shader",  
+                                "vertex"   : "resources/shaders/holdout/vert.glsl",
+                                "fragment" : "resources/shaders/holdout/frag.glsl",
+                                "nodes" :
+                                {
+                                    "input assembler" : { "out" : [ "xyz" ] },
+                                    "camera" : { "out" : [ "view", "projection" ] },
+                                    "transform" : { "out" : [ "model" ] },
+                                    "geometry" :
+                                    {
+                                        "in"  : [ "xyz", "view", "projection", "model" ],
+                                        "out" : [ "color" ]
+                                    },
+                                    "color" : { "in"  : [ "color" ] }
+                                },
+                                "connections" : 
+                                [
+                                    [ "input assembler:xyz"     , "geometry:xyz" ],
+                                    [ "camera:view"             , "geometry:view" ],
+                                    [ "camera:projection"       , "geometry:projection" ],
+                                    [ "transform:model"         , "geometry:model" ],
+                                    [ "geometry:color"          , "color:color" ]
+                                ]
+                            }
+                        },
+                        "normals" : 
+                        {
+                            "data" :
+                            {
+                                "type"     : "shader",  
+                                "vertex"   : "resources/shaders/normals/vert.glsl",
+                                "fragment" : "resources/shaders/normals/frag.glsl",
+                                "nodes" :
+                                {
+                                    "input assembler" : { "out" : [ "xyz" ] },
+                                    "camera" : { "out" : [ "view", "projection" ] },
+                                    "transform" : { "out" : [ "model" ] },
+                                    "geometry" :
+                                    {
+                                        "in"  : [ "xyz", "view", "projection", "model" ],
+                                        "out" : [ "color" ]
+                                    },
+                                    "color" : { "in"  : [ "color" ] }
+                                },
+                                "connections" : 
+                                [
+                                    [ "input assembler:xyz"     , "geometry:xyz" ],
+                                    [ "camera:view"             , "geometry:view" ],
+                                    [ "camera:projection"       , "geometry:projection" ],
+                                    [ "transform:model"         , "geometry:model" ],
+                                    [ "geometry:color"          , "color:color" ]
+                                ]
+                            }
+                        }
+                    },
+                    "connections" : [ ]
                 }
             },
-            "lighting" :
-            {
-                "description"  : "Calculate lighting",
-                "dependencies" : "geometry",
-                "shader"       : 
-                {
-                    "source" :
-                    {
-                        "vertex"   : "resources/shaders/lighting/vert.glsl",
-                        "fragment" : "resources/shaders/lighting/frag.glsl"
-                    }
-                }
-            }
-        }
-    }
+            "framebuffer" : { "in" : [ "color" ] }
+        },
+        "connections" :
+        [
+            [ "geometry:color", "framebuffer:color" ]
+        ]
+    },
 }

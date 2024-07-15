@@ -1,0 +1,28 @@
+{
+    "nodes" :
+    {
+        "input assembler" : { "out" : [ "xyz" ] },
+        "camera" : { "out" : [ "view", "projection" ] },
+        "transform" : { "out" : [ "model" ] },
+        "geometry" :
+        {
+            "in"  : [ "xyz", "view", "projection", "model" ],
+            "out" : [ "color" ],
+            "data" : 
+            {
+                "vertex"   : "resources/shaders/holdout/vert.glsl",
+                "fragment" : "resources/shaders/holdout/frag.glsl",
+                "layout"   : [ { "xyz" : "vec3" } ]
+            }
+        },
+        "color" : { "in"  : [ "color" ] }
+    },
+    "connections" : 
+    [
+        [ "input assembler:xyz"     , "geometry:xyz" ],
+        [ "camera:view"             , "geometry:view" ],
+        [ "camera:projection"       , "geometry:projection" ],
+        [ "transform:model"         , "geometry:model" ],
+        [ "geometry:color"          , "color:color" ]
+    ]
+}
