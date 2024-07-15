@@ -43,7 +43,12 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
         // Check the glad loader
         if ( gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress) == false ) goto failed_to_load_glad;
     #endif
-    
+
+    // Enable backface culling
+    glEnable(GL_CULL_FACE); 
+    glCullFace(GL_FRONT);  
+    glFrontFace(GL_CCW);  
+
     // Success
     return 1;
 
