@@ -255,8 +255,8 @@ int g_opengl_shader_construct
     if ( success == false ) goto failed_to_compile_shader;
     
     // 
-    p_shader->functions.pfn_shader_on_bind = shader_bind_camera;
-    p_shader->functions.pfn_shader_on_draw = mesh_draw;
+    p_shader->functions.pfn_shader_on_bind = (fn_shader_on_bind) shader_bind_camera;
+    p_shader->functions.pfn_shader_on_draw = (fn_shader_on_draw) mesh_draw;
 
     // Return a pointer to the caller
     *pp_shader = p_shader;
