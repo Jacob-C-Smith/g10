@@ -289,6 +289,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Initialize window system integration
         #ifdef BUILD_G10_WITH_SDL2
 
+            // External functions
+            extern int g_sdl2_init ( g_instance *p_instance );
+
             // SDL2
             g_sdl2_init(p_instance);
             g_sdl2_window_from_json(p_instance, p_window);
