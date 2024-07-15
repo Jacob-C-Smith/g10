@@ -115,7 +115,7 @@ u0 g_init_mesh ( u0 )
     for (size_t i = 0; i < G10_BASE_MESH_QUANTITY; i++)
     
         // ... add it to the base mesh lookup
-        dict_add(p_base_mesh_lookup, &_base_mesh_data[i]._name, i);
+        dict_add(p_base_mesh_lookup, &_base_mesh_data[i]._name, (void *) i);
 
     // Done
     return;
@@ -159,6 +159,9 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
         // Load each mesh
         for (size_t i = 0; i < mesh_quantity; i++)
         {
+
+            // External functions
+            extern int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value );
 
             // Initialized data
             json_value *p_mesh_value = dict_get(p_dict, _p_keys[i]);

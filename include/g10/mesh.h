@@ -101,4 +101,6 @@ DLLEXPORT int mesh_shape_construct
     transform           *p_transform
 );
 
+DLLEXPORT int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value );
+
 DLLEXPORT int mesh_draw ( mesh_data *p_mesh_data );
