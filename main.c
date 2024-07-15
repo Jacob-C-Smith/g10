@@ -55,7 +55,7 @@ int main ( int argc, const char *const argv[] )
     g_instance *p_instance = 0;
 
     // Initialize g10
-    if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
+    if ( g_init(&p_instance, "resources/instance2.json") == 0 ) goto failed_to_initialize_g10;
 
     // Set up the example
     game_setup(p_instance);
@@ -134,12 +134,12 @@ int game_setup ( g_instance *const p_instance )
         g_info(p_instance);
 
         // Print renderer info
-        renderer_info(p_instance->context.p_renderer);
+        //renderer_info(p_instance->context.p_renderer);
 
         // Print each shader
-        for (size_t i = 0; i < p_instance->context.p_renderer->_p_render_passes[0]->shader_quantity; i++)
+        //for (size_t i = 0; i < p_instance->context.p_renderer->_p_render_passes[0]->shader_quantity; i++)
         
-            shader_info(p_instance->context.p_renderer->_p_render_passes[0]->_p_shaders[i]);
+            //shader_info(p_instance->context.p_renderer->_p_render_passes[0]->_p_shaders[i]);
 
         // Print input info
         input_info(p_instance->context.p_input);
