@@ -46,3 +46,6 @@
 [submodule "extern/gschema"]
 	path = extern/gschema
 	url = https://github.com/Jacob-C-Smith/gschema
+[submodule "extern/node"]
+	path = extern/node
+	url = https://github.com/Jacob-C-Smith/node
