@@ -115,7 +115,19 @@ int main ( int argc, const char *const argv[] )
 
 int user_code_main ( g_instance *const p_instance )
 {
-    
+
+    // Initialized data
+    camera *p_camera = p_instance->context.p_scene->context.p_camera;
+
+    // Exit the game?
+    if ( input_bind_value("QUIT") ) g_stop();
+
+    // Toggle mouse locking
+    if ( input_bind_value("MOUSE LOCK") ) input_mouse_lock_toggle();
+
+    // Update the camera controller
+    p_camera->pfn_camera_controller(p_camera);
+
     // Success
     return 1;
 }
@@ -132,14 +144,6 @@ int game_setup ( g_instance *const p_instance )
 
         // Print instance info
         g_info(p_instance);
-
-        // Print renderer info
-        //renderer_info(p_instance->context.p_renderer);
-
-        // Print each shader
-        //for (size_t i = 0; i < p_instance->context.p_renderer->_p_render_passes[0]->shader_quantity; i++)
-        
-            //shader_info(p_instance->context.p_renderer->_p_render_passes[0]->_p_shaders[i]);
 
         // Print input info
         input_info(p_instance->context.p_input);
