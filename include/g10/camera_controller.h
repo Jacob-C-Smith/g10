@@ -10,6 +10,7 @@
 #pragma once
 
 // Standard library
+#include <math.h>
 #include <float.h>
 
 // g10
@@ -25,4 +26,4 @@
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int camera_controller_first_person_update ( camera *p_camera );
+DLLEXPORT int camera_controller_orbit_update ( camera *p_camera );

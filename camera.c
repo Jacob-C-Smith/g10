@@ -209,7 +209,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     _camera = (camera)
     {
         ._name = { 0 },
-        .pfn_camera_controller = camera_controller_first_person_update,
+        .pfn_camera_controller = camera_controller_orbit_update,
         .dirty = true,
         .view  = 
         {
