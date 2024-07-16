@@ -142,6 +142,15 @@ int g_window_resize ( g_instance *p_instance, u32 width, u32 height )
     // Log the update
     //log_info("[g10] [sdl2] Window resized to [ %d, %d ]\n", p_instance->window.width, p_instance->window.height);
 
+    // State check
+    if ( p_instance->context.p_scene == (void *) 0 ) goto no_active_camera;
+    if ( p_instance->context.p_scene->context.p_camera == (void *) 0 ) goto no_active_camera;
+
+    // Set the dirty flag
+    p_instance->context.p_scene->context.p_camera->dirty = true;
+
+    no_active_camera:
+
     // Success
     return 1;
 }
@@ -598,6 +607,23 @@ g_instance *g_get_active_instance ( void )
     // Get
     return p_active_instance;
 }
+
+void g_stop ( void )
+{
+
+    // Initialized data
+    g_instance *p_active_instance = g_get_active_instance();
+
+    // Error check
+    //
+
+    // Clear the running flag
+    p_active_instance->running = false;
+
+    // Done
+    return;
+}
+
 
 size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode )
 {

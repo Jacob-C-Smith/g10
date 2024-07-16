@@ -77,11 +77,12 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     size_t i = 0;
     camera *p_camera = (void *) 0;
     camera _camera = { 0 };
     vec3 location, orientation;
-    float fov, near_clip, far_clip, aspect_ratio = (16.0 / 9.0);
+    float fov, near_clip, far_clip, aspect_ratio = ((double)p_instance->window.width / (double)p_instance->window.height);
     mat4 view, projection;
     dict *const p_dict = p_value->object;
     json_value *p_scratch[4] = { 0 };
