@@ -331,7 +331,7 @@ target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIR
 target_link_libraries(g10_test g10)
 
 # g10 library
-add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "input.c" "shader.c" "entity.c" "camera.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_opengl.c" "3rd-party/g_sdl2.c" "3rd-party/glad/glad.c") # "3rd-party/g_vulkan.c"
+add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_opengl.c" "3rd-party/g_sdl2.c" "3rd-party/glad/glad.c") # "3rd-party/g_vulkan.c"
 add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json http socket parallel node hash_cache)
 target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
 target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack queue json http parallel node socket m GL ${SDL2_LIBRARIES}) #${Vulkan_LIBRARY}

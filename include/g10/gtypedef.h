@@ -93,3 +93,4 @@ typedef int (*fn_shader_on_bind)( shader *p_shader, void *p_on_bind );
 typedef int (*fn_shader_on_material)( u0 );
 typedef int (*fn_shader_on_draw)( void *p_draw_item );
 typedef int (*fn_user_code_callback)( g_instance *p_instance );
+typedef int (*fn_camera_controller)( camera *p_camera );

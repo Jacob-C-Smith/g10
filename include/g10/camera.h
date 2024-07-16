@@ -9,11 +9,6 @@
 // Include guard
 #pragma once
 
-// g10
-#include <g10/gtypedef.h>
-#include <g10/g10.h>
-#include <g10/linear.h>
-
 // array submodule
 #include <array/array.h>
 
@@ -23,11 +18,18 @@
 // json submodule
 #include <json/json.h>
 
+// g10
+#include <g10/gtypedef.h>
+#include <g10/g10.h>
+#include <g10/linear.h>
+#include <g10/camera_controller.h>
+
 // Structure definitions
 struct camera_s
 {
     char _name[63 + 1];
     bool dirty;
+    fn_camera_controller pfn_camera_controller;
     struct
     {
         vec3 location, target, up;
