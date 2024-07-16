@@ -1,4 +1,5 @@
 {
+    "$schema": "https://schema.g10.app/instance.json",
     "name"    : "g10 example",
     "version" : 
     {
@@ -8,12 +9,13 @@
     },
     "window" :
     {
-        "width"  : 800,
-        "height" : 600,
+        "width"  : 1280,
+        "height" : 720,
         "title"  : "G10 Example"
     },
     "input" :
     {
+        "$schema": "https://schema.g10.app/input.json",
         "name"              : "default input",
         "mouse sensitivity" : 1.0,
         "binds"             :
@@ -22,8 +24,13 @@
             "BACKWARD"     : [ "S" ],
             "STRAFE LEFT"  : [ "A" ],
             "STRAFE RIGHT" : [ "D" ],
+            "CAMERA UP"    : [ "UP" ],
+            "CAMERA DOWN"  : [ "DOWN" ],
+            "CAMERA LEFT"  : [ "LEFT" ],
+            "CAMERA RIGHT" : [ "RIGHT" ],
             "CROUCH"       : [ "C" ],
-            "PRONE"        : [ "LEFT CONTROL" ],
+            "PRONE"        : [ "LEFT SHIFT" ],
+            "MOUSE LOCK"   : [ "M" ],
             "JUMP"         : [ "SPACE" ],
             "QUIT"         : [ "ESCAPE" ]
         }
@@ -46,14 +53,17 @@
     },
     "initial scene" :
     {
+        "$schema": "https://schema.g10.app/scene.json",
         "name"     : "default scene",
         "entities" :
         {
             "floor" : 
             {
-                "shader"    : "holdout",
+                "$schema": "https://schema.g10.app/entity.json",
+                "shader"    : "position",
                 "transform" :
                 {
+                    "$schema": "https://schema.g10.app/transform.json",
                     "location" : [ 0.0, 0.0, 0.0 ],
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
@@ -63,21 +73,24 @@
                     "plane" : 
                     {
                         "primative" : "plane",
-                        "shader"    : "holdout",
+                        "shader"    : "position",
                         "transform" : 
                         {
+                            "$schema": "https://schema.g10.app/transform.json",
                             "location" : [ 0.0, 0.0, 0.0 ],
                             "rotation" : [ 0.0, 0.0, 0.0 ],
-                            "scale"    : [ 5.0, 5.0, 5.0 ]
+                            "scale"    : [ 7.5, 7.5, 7.5 ]
                         }
                     }
                 }
             },
             "ball" : 
             {
-                "shader"    : "solid color",
+                "$schema": "https://schema.g10.app/entity.json",
+                "shader"    : "position",
                 "transform" :
                 {
+                    "$schema": "https://schema.g10.app/transform.json",
                     "location" : [ 0.0, 0.0, 3.0 ],
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
@@ -87,12 +100,13 @@
                     "plane" : 
                     {
                         "primative" : "sphere",
-                        "shader"    : "solid color",
+                        "shader"    : "position",
                         "transform" : 
                         {
-                            "location" : [ 0.0, 0.0, 3.0 ],
+                            "$schema": "https://schema.g10.app/transform.json",
+                            "location" : [ 0.0, 0.0, 5.0 ],
                             "rotation" : [ 0.0, 0.0, 0.0 ],
-                            "scale"    : [ 1.0, 1.0, 1.0 ]
+                            "scale"    : [ 2.5, 2.5, 2.5 ]
                         }
                     }
                 }
@@ -103,9 +117,9 @@
             "camera" :
             {
                 "$schema" : "https://schema.g10.app/camera.json",
-                "fov" : 60.0,
-                "location" : [ -2.0, 0.0, 3.0 ],
-                "orientation" : [ 0.1, 0.1, 0.2 ],
+                "fov" : 30.5,
+                "location" : [ 10.0, 10.0, 7.5 ],
+                "orientation" : [ 0.0, 0.0, 1.0 ],
                 "clip" :
                 {
                     "near" : 0.1,
@@ -117,6 +131,7 @@
     },
     "renderer" : 
     {
+        "$schema": "https://schema.g10.app/renderer.json",
         "name"        : "Solid color geometry",
         "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
         "attachments" :
@@ -127,33 +142,84 @@
                 "format"      : "r8g8b8a8"
             }
         },
-        "passes" :
+        "nodes" :
         {
             "geometry" :
             {
-                "description" : "Render geometry with solid color",
-                "in"          : { "camera" : [ { "view" : "mat4" }, { "projection" : "mat4" } ] },
-                "shaders"     : 
+                "out" : [ "color" ],
+                "data" :
                 {
-                    "solid color" : 
+                    "$schema": "https://schema.g10.app/renderer_pass.json",
+                    "type" : "render pass",
+                    "description" : "Render holdout and color",
+                    "in" : { "camera" : [ { "view" : "mat4" }, { "projection" : "mat4" } ] },
+                    "nodes" : 
                     {
-                        "vertex"   : "resources/shaders/solid color/vert.glsl",
-                        "fragment" : "resources/shaders/solid color/frag.glsl",
-                        "culling"  : [ "visible" ],
-                        "layout"   : [ { "xyz" : "vec3" }, { "uv" : "vec2" } ],
-                        "in"       : { "transform" : [ { "model" : "mat4" } ] }
+                        "holdout" : 
+                        {
+                            "data" :
+                            {
+                                "type"     : "shader",  
+                                "vertex"   : "resources/shaders/holdout/vert.glsl",
+                                "fragment" : "resources/shaders/holdout/frag.glsl",
+                                "nodes" :
+                                {
+                                    "input assembler" : { "out" : [ "xyz" ] },
+                                    "camera" : { "out" : [ "view", "projection" ] },
+                                    "transform" : { "out" : [ "model" ] },
+                                    "geometry" :
+                                    {
+                                        "in"  : [ "xyz", "view", "projection", "model" ],
+                                        "out" : [ "color" ]
+                                    },
+                                    "color" : { "in"  : [ "color" ] }
+                                },
+                                "connections" : 
+                                [
+                                    [ "input assembler:xyz"     , "geometry:xyz" ],
+                                    [ "camera:view"             , "geometry:view" ],
+                                    [ "camera:projection"       , "geometry:projection" ],
+                                    [ "transform:model"         , "geometry:model" ],
+                                    [ "geometry:color"          , "color:color" ]
+                                ]
+                            }
+                        },
+                        "position" : 
+                        {
+                            "data" :
+                            {
+                                "type"     : "shader",  
+                                "vertex"   : "resources/shaders/position/vert.glsl",
+                                "fragment" : "resources/shaders/position/frag.glsl",
+                                "nodes" :
+                                {
+                                    "input assembler" : { "out" : [ "xyz" ] },
+                                    "camera" : { "out" : [ "view", "projection" ] },
+                                    "transform" : { "out" : [ "model" ] },
+                                    "geometry" :
+                                    {
+                                        "in"  : [ "xyz", "view", "projection", "model" ],
+                                        "out" : [ "color" ]
+                                    },
+                                    "color" : { "in"  : [ "color" ] }
+                                },
+                                "connections" : 
+                                [
+                                    [ "input assembler:xyz"     , "geometry:xyz" ],
+                                    [ "camera:view"             , "geometry:view" ],
+                                    [ "camera:projection"       , "geometry:projection" ],
+                                    [ "transform:model"         , "geometry:model" ],
+                                    [ "geometry:color"          , "color:color" ]
+                                ]
+                            }
+                        }
                     },
-                    "holdout" : 
-                    {
-                        "vertex"   : "resources/shaders/holdout/vert.glsl",
-                        "fragment" : "resources/shaders/holdout/frag.glsl",
-                        "culling"  : [ "visible" ],
-                        "layout"   : [ { "xyz" : "vec3" } ],
-                        "in"       : { "transform" : [ { "model" : "mat4" } ] }
-                    }
+                    "connections" : [ ]
                 }
-            }
-        }
+            },
+            "framebuffer" : { "in" : [ "color" ] }
+        },
+        "connections" : [ [ "geometry:color", "framebuffer:color" ] ]
     },
     "debug" : 4
 }
