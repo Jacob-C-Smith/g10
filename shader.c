@@ -331,6 +331,9 @@ int shader_info ( const shader *const p_shader )
 int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
 {
     
+    // Initialized data
+    g_instance *p_instance = g_get_active_instance();
+
     if ( p_camera->dirty )
     {
         
@@ -348,7 +351,7 @@ int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
         (
             &p_camera->matrix._projection,
             p_camera->projection.fov,
-            p_camera->projection.aspect_ratio,
+            ((double)p_instance->window.width / (double)p_instance->window.height),
             p_camera->projection.near_clip,
             p_camera->projection.far_clip
         );
