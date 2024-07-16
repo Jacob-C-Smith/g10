@@ -132,17 +132,61 @@ struct
     [SDL_SCANCODE_LALT]   = { ._name = "LEFT ALT"     , ._active = false, ._scancode = SDL_SCANCODE_LALT },
     [SDL_SCANCODE_RCTRL]  = { ._name = "RIGHT CONTROL", ._active = false, ._scancode = SDL_SCANCODE_RCTRL },
     [SDL_SCANCODE_RSHIFT] = { ._name = "RIGHT SHIFT"  , ._active = false, ._scancode = SDL_SCANCODE_RSHIFT },
-    [SDL_SCANCODE_RALT]   = { ._name = "RIGTH ALT"    , ._active = false, ._scancode = SDL_SCANCODE_RALT }
+    [SDL_SCANCODE_RALT]   = { ._name = "RIGHT ALT"    , ._active = false, ._scancode = SDL_SCANCODE_RALT }
 };
 
+// Static data
+dict *p_sdl2_key_lookup = (void *) 0;
+dict *p_sdl2_key_scancode = (void *) 0;
+
+// Function definitions
 int g_sdl2_init ( g_instance *p_instance )
 {
 
     // Initialize SDL2
     SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
 
+    // Construct the key lookups
+    if ( dict_construct(&p_sdl2_key_lookup  , SDL_NUM_SCANCODES, 0) == 0 ) goto failed_to_construct_dict;
+    if ( dict_construct(&p_sdl2_key_scancode, SDL_NUM_SCANCODES, 0) == 0 ) goto failed_to_construct_dict;
+
+    // Populate the key lookup
+    for (size_t i = 0; i < SDL_NUM_SCANCODES; i++)
+    {
+
+        // Add the key
+        dict_add(p_sdl2_key_lookup  , _key_lookup[i]._name, &_key_lookup[i]._active);
+        dict_add(p_sdl2_key_scancode, _key_lookup[i]._name, (void *)_key_lookup[i]._scancode);
+    }
+
     // Success
     return 1;
+    
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[sdl2] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+
+        // dict errors
+        {
+            failed_to_construct_dict:
+                #ifndef NDEBUG
+                    log_error("[sdl2] Failed to construct key lookup in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
@@ -357,8 +401,8 @@ int g_sdl2_window_poll ( g_instance *p_instance )
             case SDL_QUIT:
             {
 
-                // Clear the running flag
-                p_instance->running = false;
+                // Quit
+                g_stop( );
 
                 // Done
                 break;
@@ -385,12 +429,11 @@ int g_sdl2_window_poll ( g_instance *p_instance )
                 break;
 
             // Mouse moves
-            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONDOWN:break;
             case SDL_MOUSEBUTTONUP:
             {
-                camera *p_camera = p_instance->context.p_scene->context.p_camera;
-
-                p_camera->view.location.z -= 0.25;
+                
+                // Done
                 break;
             }
             case SDL_MOUSEMOTION:
@@ -398,10 +441,11 @@ int g_sdl2_window_poll ( g_instance *p_instance )
 
                 // Initialized data
                 camera *p_camera = p_instance->context.p_scene->context.p_camera;
+                int xrel = p_instance->window.sdl2.event.motion.xrel,
+                    yrel = p_instance->window.sdl2.event.motion.yrel;
+                
                 // printf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
-                SDL_SetRelativeMouseMode(true);
-                p_camera->view.location.y += 0.01 * p_instance->window.sdl2.event.motion.xrel;
-                p_camera->view.location.x += 0.01 * p_instance->window.sdl2.event.motion.yrel;
+                
                 p_camera->dirty = true;
 
                 // Done
@@ -411,17 +455,36 @@ int g_sdl2_window_poll ( g_instance *p_instance )
     }
     
     // Update the keyboard state
-    //for (size_t i = 0; i < 110; i++) _key_lookup[i]._active = keyboard_state[i];
+    for (size_t i = 0; i < SDL_NUM_SCANCODES; i++) _key_lookup[i]._active = keyboard_state[i];
 
     // Update the binds
-    //for (size_t i = 0; i < p_input->bind_quantity; i++)
+    for (size_t i = 0; i < p_input->bind_quantity; i++)
     {
         
         // Initialize data
-        //input_bind *p_bind = p_input->_p_binds[i];
+        input_bind *p_bind = p_input->_p_binds[i];
 
-        
+        // Clear the input
+        p_bind->value = 0.0;
 
+        // Iterate through each scancode
+        for (size_t j = 0; j < p_bind->scancode_quantity; j++)
+        {
+
+            // Initialized data
+            size_t p_scancode = (size_t) p_bind->_scancodes[j];
+
+            // Update the scancode 
+            if ( _key_lookup[p_scancode]._active )
+            {
+
+                // Set the input
+                p_bind->value = 1.0;
+
+                // Done with this bind
+                break;
+            }
+        }
     }
 
     // Success
@@ -441,6 +504,22 @@ int g_sdl2_window_poll ( g_instance *p_instance )
                 return 0;
         }
     }
+}
+
+void g_sdl2_mouse_lock_toggle ( void )
+{
+
+    // Static data
+    static bool relative_mouse = false;
+
+    // Invert the relative mouse flag
+    relative_mouse = !relative_mouse;
+
+    // Update the relative mouse mode
+    SDL_SetRelativeMouseMode(relative_mouse);
+
+    // Done
+    return;
 }
 
 int g_sdl2_window_destroy ( g_instance *p_instance )

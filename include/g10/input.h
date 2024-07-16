@@ -51,7 +51,7 @@ struct input_bind_s
     char   _name[63 + 1];
     float   value;
     size_t  scancode_quantity;
-    char   _scancode[][16];
+    void   *_scancodes[];
 };
 
 struct input_s
@@ -59,6 +59,7 @@ struct input_s
     char _name[63 + 1];
     float mouse_sensitivity;
     size_t bind_quantity;
+    dict *p_binds;
     input_bind *_p_binds[];
 };
 
@@ -117,3 +118,16 @@ DLLEXPORT int input_info ( const input *const p_input );
  * @return 1 on success, 0 on error
 */
 DLLEXPORT int input_poll ( g_instance *p_instance );
+
+// Accessors
+/** !
+ * Get the value of a bind
+ * 
+ * @param p_bind_name the name of the bind
+ * 
+ * @return [1.0, 0.0) if active else 0.0
+*/
+DLLEXPORT float input_bind_value ( const char *const p_bind_name );
+
+// Global state
+DLLEXPORT void input_mouse_lock_toggle ( void );
