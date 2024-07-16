@@ -269,9 +269,6 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         // Construct a node graph
         if ( node_graph_construct(&p_node_graph, p_value) == 0 ) goto failed_to_construct_node_graph;
     
-        // Print the node graph
-        node_graph_print(p_node_graph);
-
         // Grow the allocation
         p_renderer = G10_REALLOC(p_renderer, sizeof(renderer) + 16 * sizeof(render_pass *));
 
@@ -314,8 +311,6 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 //
                 if ( strcmp(type, "render pass") == 0 ) 
                 {
-                    printf("%s is a %s\n", p_node->_name, type);
-
                     render_pass_from_json_2(&p_renderer->_p_render_passes[render_pass_quantity], p_node->_name, p_value);
 
                     render_pass_quantity++;
@@ -1060,10 +1055,6 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
 
             if ( strcmp(type, "shader") == 0 )
             {
-                printf("%s is a shader\n", p_node->_name);
-
-                json_value_print(p_value);
-                fflush(stdout);
 
                 shader_from_json_2(&p_render_pass->_p_shaders[shader_quantity], p_node->_name, p_value);
 

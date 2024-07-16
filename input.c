@@ -299,10 +299,6 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
                 input_bind *p_input_bind = (void *) 0;
                 json_value *p_bind_value = dict_get(p_binds_value->object, bind_keys[i]);
 
-                printf("%s : ", bind_keys[i]);
-                json_value_print(p_bind_value);
-                putchar('\n');
-
                 // Construct the input bind
                 if ( input_bind_from_json(&p_input_bind, bind_keys[i], p_bind_value) == 0 ) goto failed_to_construct_bind;
 

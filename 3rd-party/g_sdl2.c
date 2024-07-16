@@ -446,8 +446,6 @@ int g_sdl2_window_poll ( g_instance *p_instance )
                 
                 // printf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
                 
-                p_camera->dirty = true;
-
                 // Done
                 break;
             }

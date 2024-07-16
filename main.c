@@ -55,7 +55,7 @@ int main ( int argc, const char *const argv[] )
     g_instance *p_instance = 0;
 
     // Initialize g10
-    if ( g_init(&p_instance, "resources/instance2.json") == 0 ) goto failed_to_initialize_g10;
+    if ( g_init(&p_instance, "resources/instance.json") == 0 ) goto failed_to_initialize_g10;
 
     // Set up the example
     game_setup(p_instance);
@@ -85,6 +85,9 @@ int main ( int argc, const char *const argv[] )
 
     // Clean up g10
     if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;
+
+    // Log the clean exit
+    log_info("Game over!\n");
 
     // Success
     return EXIT_SUCCESS;
@@ -117,7 +120,10 @@ int user_code_main ( g_instance *const p_instance )
 {
 
     // Initialized data
+    static int c = 0;
     camera *p_camera = p_instance->context.p_scene->context.p_camera;
+    entity *p_ball   = dict_get(p_instance->context.p_scene->data.entities, "ball");
+    mesh_data *p_ball_data = p_ball->p_mesh->_p_meshes[0];
 
     // Exit the game?
     if ( input_bind_value("QUIT") ) g_stop();
@@ -128,26 +134,21 @@ int user_code_main ( g_instance *const p_instance )
     // Update the camera controller
     p_camera->pfn_camera_controller(p_camera);
 
+    // Animate the ball
+    p_ball_data->p_transform->location.z = 6.0 + 3.0 * sinf((float) c / (float)144);
+
+    // Calculate the model matrix
+    mat4_model_from_vec3(&p_ball_data->p_transform->model, p_ball_data->p_transform->location, (vec3){ 0, 0, 0 }, p_ball_data->p_transform->scale);
+
+    // Increment the counter
+    c++;
+
     // Success
     return 1;
 }
 
 int game_setup ( g_instance *const p_instance )
 {
-
-    // Initialized data
-    entity *p_floor = dict_get(p_instance->context.p_scene->data.entities, "floor"),
-           *p_ball  = dict_get(p_instance->context.p_scene->data.entities, "ball");
-
-    // Print g10 info
-    {
-
-        // Print instance info
-        g_info(p_instance);
-
-        // Print input info
-        input_info(p_instance->context.p_input);
-    }
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
