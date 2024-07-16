@@ -290,6 +290,18 @@ DLLEXPORT int g_init ( g_instance **pp_instance, const char *p_path );
  */
 DLLEXPORT g_instance *g_get_active_instance ( void );
 
+// Global state
+/** !
+ *  Halt a running g10 instance
+ *
+ * @param void
+ *
+ * @sa g_init
+ *
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT void g_stop ( void );
+
 /** ! 
  * Print info about a g10 instance
  * 
@@ -311,7 +323,7 @@ DLLEXPORT int g_info ( g_instance *p_instance );
  */
 DLLEXPORT size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary_mode );
 
-// 
+// Cleanup
 /** !
  *  Destroy a g10 instance
  *
