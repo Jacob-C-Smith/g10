@@ -235,6 +235,7 @@ int transform_from_json
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     size_t i = 0;
     transform *p_transform = (void *) 0;
     transform _transform = { 0 };
@@ -248,7 +249,7 @@ int transform_from_json
                      *const p_scale      = dict_get(p_dict, "scale");
     
     // Extra check
-    if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [transform] Consider adding a \"$schema\" property to the transform\n");
+    if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [transform] Consider adding a \"$schema\" property to the transform");
 
     // Property check
     if ( p_location   == (void *) 0 )       goto no_location_property;

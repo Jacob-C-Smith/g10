@@ -159,6 +159,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
     if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     size_t    i = 0,
               render_pass_quantity = 0;
     renderer *p_renderer = (void *) 0;
@@ -177,7 +178,7 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                          *p_attachments_value = dict_get(p_dict, "attachments");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the renderer\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [renderer] Consider adding a \"$schema\" property to the renderer");
 
         // Error check
         if ( p_name_value        == (void *) 0 ) goto no_name_property;
@@ -503,6 +504,7 @@ int attachment_from_json ( attachment **pp_attachment, json_value *p_value )
     if ( p_value->type != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     attachment  _attachment = { 0 },
               *p_attachment = (void *) 0;
 
@@ -516,7 +518,7 @@ int attachment_from_json ( attachment **pp_attachment, json_value *p_value )
                          *p_format_value      = dict_get(p_dict, "format");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the attachment\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [renderer] Consider adding a \"$schema\" property to the attachment");
 
         // Error check
         if ( p_name_value        == (void *) 0 ) goto no_name_property;
@@ -721,6 +723,7 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
     if ( p_value->type  != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     render_pass *p_render_pass = (void *) 0;
 
     // Allocate memory on the heap
@@ -735,7 +738,7 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
                          *p_shaders_value     = dict_get(p_dict, "shaders");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the render pass\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [renderer] Consider adding a \"$schema\" property to the render pass");
 
         // Error check
         if ( p_description_value == (void *) 0 ) goto no_name_property;
@@ -971,6 +974,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
     if ( p_value->type  != JSON_VALUE_OBJECT ) goto value_is_wrong_type;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     render_pass *p_render_pass = (void *) 0;
     node_graph  *p_node_graph  = (void *) 0;
     size_t shader_quantity = 0;
@@ -990,7 +994,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
                          *p_shaders_value     = dict_get(p_dict, "shaders");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [renderer] Consider adding a \"$schema\" property to the render pass\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [renderer] Consider adding a \"$schema\" property to the render pass");
 
         // Error check
         if ( p_description_value == (void *) 0 ) goto no_name_property;

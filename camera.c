@@ -93,7 +93,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
                      *const p_clip        = dict_get(p_dict, "clip");
     
     // Extra check
-    if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [camera] Consider adding a \"$schema\" property to the camera\n");
+    if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [camera] Consider adding a \"$schema\" property to the camera");
 
     // Property check
     if ( p_location    == (void *) 0 ) goto no_location_property;

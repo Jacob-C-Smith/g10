@@ -223,6 +223,7 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
     if ( p_value  == (void *) 0 ) goto no_value;
 
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     input *p_input = (void *) 0;
 
     // Allocate memory on the heap
@@ -238,7 +239,7 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
                          *p_binds_value             = dict_get(p_dict, "binds");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [input] Consider adding a \"$schema\" property to the input\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [input] Consider adding a \"$schema\" property to the input");
 
         // Error check
         if ( p_name_value  == (void *) 0 ) goto no_name_property;

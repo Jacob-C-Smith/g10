@@ -81,7 +81,7 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
                          *p_transform_value = dict_get(p_dict, "transform");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [entity] Consider adding a \"$schema\" property to the entity\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [entity] Consider adding a \"$schema\" property to the entity");
 
         // TODO: Check for missing properties
 

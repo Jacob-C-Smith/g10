@@ -85,7 +85,7 @@ u0 g_signal_handler ( int signal_number )
     size_t i = 0;
 
     // Print the signal
-    log_error("\n[%s] A%s was encountered.\n\n", p_active_instance->_name, _p_signal_data[signal_number]);
+    log_error("\n[%s] Fatal: A%s was encountered.\n\n", p_active_instance->_name, _p_signal_data[signal_number]);
 
     // Dump the message log
     while ( circular_buffer_empty(p_active_instance->debug) == false )
@@ -103,7 +103,9 @@ u0 g_signal_handler ( int signal_number )
         // Increment the counter
         i++;
     }
-
+    
+    parallel_thread_cancel(p_active_instance->p_shell->p_thread);
+    
     // Done
     exit(EXIT_FAILURE);
 }
@@ -207,7 +209,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                          *p_window          = dict_get(p_dict, "window");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] Consider adding a \"$schema\" property to the instance\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] Consider adding a \"$schema\" property to the instance");
 
         // Missing properties
         if ( p_name_value == (void *) 0 ) goto missing_name_property;
@@ -273,6 +275,20 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             p_instance->version.major = 0,
             p_instance->version.patch = 0;
 
+        // Set up the debug system
+        if ( p_debug )
+        {
+            
+            // Extra checking
+            if ( p_debug->type != JSON_VALUE_INTEGER ) goto debug_wrong_type;
+
+            // Store the 
+            debug_message_max = p_debug->integer;
+
+            // Construct a circular buffer for messages
+            circular_buffer_construct(&p_instance->debug, debug_message_max);
+        } 
+
         // Set the fixed tick rate
         if ( p_fixed_tick_rate )
         {
@@ -283,17 +299,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             // Store the fixed tick rate
             p_instance->context.fixed_tick_rate = p_fixed_tick_rate->integer;
         }
-
-        // Set up the debug system
-        if ( p_debug )
-        {
-            
-            // Extra checking
-            if ( p_debug->type != JSON_VALUE_INTEGER ) goto debug_wrong_type;
-
-            // Store the 
-            debug_message_max = p_debug->integer;
-        }            
 
         // Initialize window system integration
         #ifdef BUILD_G10_WITH_SDL2
@@ -353,9 +358,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         if ( p_scene )
             if ( scene_from_json(&p_instance->context.p_scene, p_scene) == 0 ) goto failed_to_load_initial_scene;
     }
-
-    // Construct a circular buffer for messages
-    circular_buffer_construct(&p_instance->debug, debug_message_max);
 
     // Set up signal handlers
     signal(SIGHUP , g_signal_handler);
@@ -613,12 +615,13 @@ void g_stop ( void )
 
     // Initialized data
     g_instance *p_active_instance = g_get_active_instance();
-
-    // Error check
-    //
-
+    
     // Clear the running flag
     p_active_instance->running = false;
+
+    // Kill the shell
+    parallel_thread_cancel(&p_active_instance->p_shell->p_thread);
+    parallel_thread_destory(&p_active_instance->p_shell->p_thread);
 
     // Done
     return;

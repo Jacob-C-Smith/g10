@@ -93,7 +93,7 @@ int scene_from_json
                          *p_lights   = dict_get(p_dict, "lights");
 
         // Extra check
-        if ( dict_get(p_dict, "$schema") == 0 ) log_info("[g10] [scene] Consider adding a \"$schema\" property to the scene\n");
+        if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [scene] Consider adding a \"$schema\" property to the scene");
 
         // Count the quantity of entities
         entity_quantity = dict_keys(p_entities->object, 0);
