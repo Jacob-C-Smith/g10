@@ -13,7 +13,7 @@ int shell_construct ( shell **pp_shell )
     if ( p_shell == (void *) 0 ) goto no_mem;
 
     // Construct a thread for the shell loop
-    parallel_thread_start(&p_shell->p_thread, shell_loop, p_shell);
+    parallel_thread_start(&p_shell->p_thread, (fn_parallel_task *) shell_loop, p_shell);
 
     // Return a pointer to the caller
     *pp_shell = p_shell;
@@ -53,7 +53,6 @@ int shell_loop ( shell *p_shell )
 
     // Argument check
     if ( p_shell == (void *) 0 ) goto no_shell;
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
     // Initialized data
     g_instance *p_instance = g_get_active_instance();
