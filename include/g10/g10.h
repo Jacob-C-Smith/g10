@@ -77,6 +77,7 @@
 #include <g10/renderer.h>
 #include <g10/user_code.h>
 #include <g10/ai.h>
+#include <g10/shell.h>
 #include <g10/input.h>
 
 // Platform dependent macros
@@ -255,6 +256,7 @@ struct g_instance_s
     } time;  
 
     // Debug
+    shell *p_shell;
     circular_buffer *debug;
 };
 
