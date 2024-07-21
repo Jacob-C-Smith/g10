@@ -1,5 +1,4 @@
 {
-    "$schema": "https://schema.g10.app/instance.json",
     "name"    : "g10 example",
     "version" : 
     {
@@ -11,11 +10,10 @@
     {
         "width"  : 1280,
         "height" : 720,
-        "title"  : "G10 Example"
+        "title"  : "g10 example"
     },
     "input" :
     {
-        "$schema": "https://schema.g10.app/input.json",
         "name"              : "default input",
         "mouse sensitivity" : 1.0,
         "binds"             :
@@ -53,17 +51,14 @@
     },
     "initial scene" :
     {
-        "$schema": "https://schema.g10.app/scene.json",
         "name"     : "default scene",
         "entities" :
         {
             "floor" : 
             {
-                "$schema": "https://schema.g10.app/entity.json",
-                "shader"    : "position",
+                "shader"    : "holdout",
                 "transform" :
                 {
-                    "$schema": "https://schema.g10.app/transform.json",
                     "location" : [ 0.0, 0.0, 0.0 ],
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
@@ -73,40 +68,84 @@
                     "plane" : 
                     {
                         "primative" : "plane",
-                        "shader"    : "position",
+                        "shader"    : "holdout",
                         "transform" : 
                         {
-                            "$schema": "https://schema.g10.app/transform.json",
                             "location" : [ 0.0, 0.0, 0.0 ],
                             "rotation" : [ 0.0, 0.0, 0.0 ],
-                            "scale"    : [ 7.5, 7.5, 7.5 ]
+                            "scale"    : [ 7.5, 7.5, 0.01 ]
                         }
                     }
                 }
             },
-            "ball" : 
+            "ball 1" : 
             {
-                "$schema": "https://schema.g10.app/entity.json",
                 "shader"    : "position",
                 "transform" :
                 {
-                    "$schema": "https://schema.g10.app/transform.json",
                     "location" : [ 0.0, 0.0, 3.0 ],
                     "rotation" : [ 0.0, 0.0, 0.0 ],
                     "scale"    : [ 1.0, 1.0, 1.0 ]
                 },
                 "mesh" :
                 {
-                    "plane" : 
+                    "ball" : 
                     {
                         "primative" : "sphere",
                         "shader"    : "position",
                         "transform" : 
                         {
-                            "$schema": "https://schema.g10.app/transform.json",
-                            "location" : [ 0.0, 0.0, 5.0 ],
+                            "location" : [ -2.5, 0.0, 5.0 ],
                             "rotation" : [ 0.0, 0.0, 0.0 ],
                             "scale"    : [ 2.5, 2.5, 2.5 ]
+                        }
+                    }
+                }
+            },
+            "ball 2" : 
+            {
+                "shader"    : "position",
+                "transform" :
+                {
+                    "location" : [ 0.0, 0.0, 3.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "mesh" :
+                {
+                    "ball" : 
+                    {
+                        "primative" : "sphere",
+                        "shader"    : "position",
+                        "transform" : 
+                        {
+                            "location" : [ 2.5, 0.0, 5.0 ],
+                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                            "scale"    : [ 2.5, 2.5, 2.5 ]
+                        }
+                    }
+                }
+            },
+            "cone" : 
+            {
+                "shader"    : "color",
+                "transform" :
+                {
+                    "location" : [ 0.0, 0.0, 3.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "mesh" :
+                {
+                    "ball" : 
+                    {
+                        "primative" : "cone",
+                        "shader"    : "color",
+                        "transform" : 
+                        {
+                            "location" : [ 0.0, 0.0, 7.5 ],
+                            "rotation" : [ 0.0, 0.0, 0.0 ],
+                            "scale"    : [ 1.0, 1.0, 1.0 ]
                         }
                     }
                 }
@@ -116,9 +155,8 @@
         {
             "camera" :
             {
-                "$schema" : "https://schema.g10.app/camera.json",
                 "fov" : 30.5,
-                "location" : [ 10.0, 10.0, 7.5 ],
+                "location" : [ 0.0, 22.0, 8.0 ],
                 "orientation" : [ 0.0, 0.0, 1.0 ],
                 "clip" :
                 {
@@ -131,7 +169,6 @@
     },
     "renderer" : 
     {
-        "$schema": "https://schema.g10.app/renderer.json",
         "name"        : "Solid color geometry",
         "clear color" : [ 1.0, 1.0, 1.0, 1.0 ],
         "attachments" :
@@ -149,7 +186,6 @@
                 "out" : [ "color" ],
                 "data" :
                 {
-                    "$schema": "https://schema.g10.app/renderer_pass.json",
                     "type" : "render pass",
                     "description" : "Render holdout and color",
                     "in" : { "camera" : [ { "view" : "mat4" }, { "projection" : "mat4" } ] },
@@ -212,6 +248,35 @@
                                     [ "geometry:color"          , "color:color" ]
                                 ]
                             }
+                        },
+                        "color" : 
+                        {
+                            "data" :
+                            {
+                                "type"     : "shader",  
+                                "vertex"   : "resources/shaders/color/vert.glsl",
+                                "fragment" : "resources/shaders/color/frag.glsl",
+                                "nodes" :
+                                {
+                                    "input assembler" : { "out" : [ "xyz" ] },
+                                    "camera" : { "out" : [ "view", "projection" ] },
+                                    "transform" : { "out" : [ "model" ] },
+                                    "geometry" :
+                                    {
+                                        "in"  : [ "xyz", "view", "projection", "model" ],
+                                        "out" : [ "color" ]
+                                    },
+                                    "color" : { "in"  : [ "color" ] }
+                                },
+                                "connections" : 
+                                [
+                                    [ "input assembler:xyz", "geometry:xyz" ],
+                                    [ "camera:view"        , "geometry:view" ],
+                                    [ "camera:projection"  , "geometry:projection" ],
+                                    [ "transform:model"    , "geometry:model" ],
+                                    [ "geometry:color"     , "color:color" ]
+                                ]
+                            }
                         }
                     },
                     "connections" : [ ]
@@ -221,5 +286,10 @@
         },
         "connections" : [ [ "geometry:color", "framebuffer:color" ] ]
     },
-    "debug" : 4
+    "debug" : 4,
+    "debug " :
+    {
+        "log limit"   : 4,
+        "shell limit" : 3
+    }
 }
