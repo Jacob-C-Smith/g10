@@ -1414,8 +1414,14 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
             mesh_data *p_mesh_data = p_shader->_p_draw_items[i];
             
             // Store the local matrix
+            mat4_model_from_vec3(
+                &p_mesh_data->p_transform->model,
+                p_mesh_data->p_transform->location,
+                (vec3){ 0, 0, 0 },
+                p_mesh_data->p_transform->scale
+            );
             transform_get_matrix_local(p_mesh_data->p_transform, &_m);
-            
+
             // Bind the model matrix
             glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, &_m);
             
