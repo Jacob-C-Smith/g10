@@ -28,10 +28,10 @@
 struct shell_s
 {
     parallel_thread *p_thread;
-
 };
 
 // Function declarations
+// Constructors
 /** !
  * Construct a g10 shell
  * 
@@ -40,5 +40,23 @@ struct shell_s
  * @return 1 on success, 0 on error
 */
 DLLEXPORT int shell_construct ( shell **pp_shell );
-DLLEXPORT int shell_loop ( shell *p_shell );
 
+// Listener
+/** !
+ * Listen for TCP connections
+ * 
+ * @param p_instance the active instance
+ * 
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int shell_network_listener ( g_instance *p_instance );
+
+// Detach
+/** !
+ * Detach a g10 shell
+ * 
+ * @param p_shell the shell
+ * 
+ * @return 1 on success, 0 on error
+*/
+DLLEXPORT int shell_detach ( shell *p_shell );
