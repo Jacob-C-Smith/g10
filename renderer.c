@@ -1303,8 +1303,21 @@ int renderer_present ( g_instance *p_instance )
     // Argument check
     if ( p_instance == (void *) 0 ) goto no_instance;
     
-    // Present the window
-    SDL_GL_SwapWindow(p_instance->window.sdl2.window);
+    // WSI dependant implementation
+    #ifdef G10_BUILD_WITH_SDL2
+    
+        // Graphics API dependant implementation
+        #ifdef G10_BUILD_WITH_OPENGL
+
+            // Present the window
+            SDL_GL_SwapWindow(p_instance->window.sdl2.window);
+
+        #elif defined G10_BUILD_WITH_VULKAN
+
+            // TODO:
+        #endif
+
+    #endif
 
     // Success
     return 1;
