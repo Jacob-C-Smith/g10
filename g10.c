@@ -620,15 +620,8 @@ void g_stop ( void )
     p_active_instance->running = false;
 
     // Kill the shell
-    if ( p_active_instance->p_shell )
-    {
-
-        // Cancel the thread
-        parallel_thread_cancel(&p_active_instance->p_shell->p_thread);
-
-        // Join
-        parallel_thread_destory(&p_active_instance->p_shell->p_thread);
-    }
+    if ( p_active_instance->p_shell ) shell_detach(p_active_instance->p_shell);
+    
 
     // Done
     return;
