@@ -153,6 +153,7 @@ int game_setup ( g_instance *const p_instance )
 
     // Initialized data
     shell *p_shell = (void *) 0; 
+    parallel_thread *p_nwt = (void *) 0;
 
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
@@ -165,6 +166,9 @@ int game_setup ( g_instance *const p_instance )
 
     // Construct a shell
     shell_construct(&p_instance->p_shell);
+
+    // Construct a thread to accept new connections
+    parallel_thread_start(&p_nwt, (fn_parallel_task *) shell_network_listener, p_instance);
 
     // Success
     return 1;
