@@ -49,6 +49,13 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
     glCullFace(GL_FRONT);  
     glFrontFace(GL_CCW);  
 
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);  
+    glDepthFunc(GL_LESS);  
+
+    // Enable multisampling
+    glEnable(GL_MULTISAMPLE);  
+
     // Success
     return 1;
 
@@ -66,7 +73,7 @@ int g_opengl_window_resize ( g_instance *p_instance, u32 width, u32 height )
 {
 
     // Update the viewport
-    glViewport(0, 0, width, height);    
+    glViewport(0, 0, width, height);
 
     // Success
     return 1;
