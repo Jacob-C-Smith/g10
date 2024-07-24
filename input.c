@@ -429,6 +429,41 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
     }
 }
 
+int input_scancode_to_name ( const char **pp_result, void *scancode )
+{
+
+    // Argument check
+    if ( pp_result == (void *) 0 ) goto no_result;
+
+    // WSI dependant implementation
+    #ifdef G10_BUILD_WITH_SDL2
+
+        // External functions
+        extern int g_sdl2_scancode_to_name ( void **pp_result, void *scancode );
+
+        // Get the scancode
+        g_sdl2_scancode_to_name(pp_result, scancode);
+    #endif
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_result:
+                #ifndef NDEBUG
+                    log_error("[g10] [input] Null pointer provided for paramter \"pp_result\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int input_info ( const input *const p_input )
 {
 
@@ -448,14 +483,22 @@ int input_info ( const input *const p_input )
         input_bind *p_input_bind = p_input->_p_binds[i];
 
         // Print the bind
-        printf("     \"%s\" : ", p_input_bind->_name);
+        printf("     \"%s\" : [ ", p_input_bind->_name);
 
         for (size_t j = 0; j < p_input_bind->scancode_quantity; j++)
         {
-            printf("0x%x, ", p_input_bind->_scancodes[j]);
+
+            // Initialized data
+            char *p_name = (void *) 0 ;
+
+            // Get the scancode
+            input_scancode_to_name(&p_name, p_input_bind->_scancodes[j]);
+
+            // Print the scancode
+            printf("\"%s\"%c ", p_name, (j == p_input_bind->scancode_quantity - 1) ? '\0' : ',');
         }
-        
-        putchar('\n');
+
+        printf("]\n");
     }
     
     

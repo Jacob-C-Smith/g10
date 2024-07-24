@@ -520,6 +520,34 @@ void g_sdl2_mouse_lock_toggle ( void )
     return;
 }
 
+int g_sdl2_scancode_to_name ( const char **pp_result, void *scancode )
+{
+
+    // Argument check
+    if ( pp_result == (void *) 0 ) goto no_result;
+
+    // Return a scancode name to the caller
+    *pp_result = _key_lookup[(size_t)scancode]._name;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_result:
+                #ifndef NDEBUG
+                    log_error("[g10] [input] Null pointer provided for paramter \"pp_result\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 int g_sdl2_window_destroy ( g_instance *p_instance )
 {
 
