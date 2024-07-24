@@ -113,6 +113,9 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
 
         // Store the mesh(es)
         if ( mesh_from_json(&_entity.p_mesh, p_mesh_value) == 0 ) goto failed_to_construct_mesh;
+
+        // Increment the quantity of meshes
+        _entity.p_mesh->quantity++;
     }
 
     // Allocate memory on the heap
@@ -231,6 +234,49 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
         }
     }
 }
+
+int entity_info ( const entity *const p_entity )
+{
+
+    // Argument check
+    if ( p_entity == (void *) 0 ) goto no_entity;
+
+    // Print the shader
+    printf("Entity:\n");
+    printf(" - name : %s\n", p_entity->_name);
+    transform_info(p_entity->p_transform);
+    printf(" - mesh : \n");
+
+    // Print each mesh data
+    for (size_t i = 0; i < p_entity->p_mesh->quantity; i++)
+    {
+
+        // Initialized data
+        mesh_data *p_mesh_data = p_entity->p_mesh->_p_meshes[i];
+        
+        // Print the mesh data
+        printf("    [%d] : %s --> %s\n", i, p_mesh_data->_name, p_entity->p_shader->_name);
+    }
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_entity:
+                #ifndef NDEBUG
+                    log_error("[g10] [entity] Null pointer provided for parameter \"p_entity\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 
 int entity_bounding_box ( entity *p_entity, vec3 *p_min, vec3 *p_max )
 {
