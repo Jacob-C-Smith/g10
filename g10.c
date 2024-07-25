@@ -51,12 +51,14 @@ u0 g_init_early ( void )
     parallel_init();
 
     // Add core scheduler tasks
-    parallel_register_task("input"    , (fn_parallel_task *) input_poll);
-    parallel_register_task("pre ai"   , (fn_parallel_task *) ai_preupdate);
-    parallel_register_task("ai"       , (fn_parallel_task *) ai_update);
-    parallel_register_task("user code", (fn_parallel_task *) user_code_callback);
-    parallel_register_task("render"   , (fn_parallel_task *) renderer_render);
-    parallel_register_task("present"  , (fn_parallel_task *) renderer_present);
+    parallel_register_task("input"        , (fn_parallel_task *) input_poll);
+    parallel_register_task("pre ai"       , (fn_parallel_task *) ai_preupdate);
+    parallel_register_task("ai"           , (fn_parallel_task *) ai_update);
+    parallel_register_task("user code"    , (fn_parallel_task *) user_code_callback);
+    parallel_register_task("render"       , (fn_parallel_task *) renderer_render);
+    parallel_register_task("present"      , (fn_parallel_task *) renderer_present);
+    parallel_register_task("shell"        , (fn_parallel_task *) shell_loop);
+    parallel_register_task("network shell", (fn_parallel_task *) shell_network_listener);
 
     // Add 3rd party scheduler tasks
     #ifdef BUILD_G10_WITH_SDL2
@@ -634,9 +636,9 @@ void g_stop ( void )
     // Initialized data
     g_instance *p_active_instance = g_get_active_instance();
 
-    // Wait for the schedule to idle
-    parallel_schedule_wait_idle(p_active_instance->p_schedule);
-
+    // Print a carriage return
+    putchar('\r');
+    
     // Stop the schedule
     parallel_schedule_stop(p_active_instance->p_schedule);
 
