@@ -60,28 +60,11 @@ int main ( int argc, const char *const argv[] )
     // Set up the example
     game_setup(p_instance);
 
-    // Block
-    while ( p_instance->running )
-    {
+    // Start the game
+    g_start();
 
-        // Input
-        input_poll(p_instance);
-        
-        // State change
-        ai_preupdate(p_instance);
-
-        // State
-        ai_update(p_instance);
-
-        // User code
-        user_code_callback(p_instance);
-
-        // Render
-        renderer_render(p_instance);
-
-        // Present
-        renderer_present(p_instance);
-    }
+    // Stop the game
+    g_stop();
 
     // Clean up g10
     if ( g_exit(&p_instance) == 0 ) goto failed_to_teardown_g10;
@@ -151,10 +134,6 @@ int user_code_main ( g_instance *const p_instance )
 int game_setup ( g_instance *const p_instance )
 {
 
-    // Initialized data
-    shell *p_shell = (void *) 0; 
-    parallel_thread *p_nwt = (void *) 0;
-
     // Set a user code callback
     user_code_callback_set(p_instance, user_code_main);
     
@@ -163,12 +142,6 @@ int game_setup ( g_instance *const p_instance )
     
     // Log
     log_info("Game setup is complete!\n");
-
-    // Construct a shell
-    shell_construct(&p_instance->p_shell);
-
-    // Construct a thread to accept new connections
-    parallel_thread_start(&p_nwt, (fn_parallel_task *) shell_network_listener, p_instance);
 
     // Success
     return 1;
