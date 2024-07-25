@@ -35,17 +35,19 @@
     },
     "schedule" :
     {
-        "name"    : "default schedule",
-        "repeat"  : true,
-        "threads" :
+        "name"        : "default schedule",
+        "repeat"      : true,
+        "main thread" : "main",
+        "threads"     :
         {
             "main" : 
             [
-                { "task" : "sdl2 poll" },
+                { "task" : "input" },
                 { "task" : "pre ai" },
                 { "task" : "ai" },
                 { "task" : "user code" },
-                { "task" : "render" }
+                { "task" : "render" },
+                { "task" : "present" }
             ]
         }
     },
