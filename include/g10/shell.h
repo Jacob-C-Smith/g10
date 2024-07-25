@@ -41,6 +41,16 @@ struct shell_s
 */
 DLLEXPORT int shell_construct ( shell **pp_shell );
 
+// REPL
+/** !
+ * Run a g10 shell
+ * 
+ * @param p_shell the shell
+ * 
+ * @return 1 on success, 0 on error
+*/
+int shell_loop ( g_instance *p_instance );
+
 // Listener
 /** !
  * Listen for TCP connections

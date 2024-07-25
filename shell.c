@@ -1,14 +1,7 @@
 #include <g10/shell.h>
 
 // Function declarations
-/** !
- * Run a g10 shell
- * 
- * @param p_shell the shell
- * 
- * @return 1 on success, 0 on error
-*/
-int shell_loop ( shell *p_shell );
+int shell_evaluate ( char *p_input, char *p_output );
 
 // Function definitions
 int shell_construct ( shell **pp_shell )
@@ -65,32 +58,74 @@ int shell_construct ( shell **pp_shell )
 int shell_accept_connection ( socket_tcp _socket_tcp, unsigned long ip_address, unsigned short port )
 {
 
-    // Uninitialized data
-    char buffer[4096];
-
     // Initialized data
+    g_instance *p_instance = g_get_active_instance();
     unsigned char a = (ip_address & 0xff000000) >> 24,
                   b = (ip_address & 0x00ff0000) >> 16,
                   c = (ip_address & 0x0000ff00) >> 8,
                   d = (ip_address & 0x000000ff) >> 0;
+    char _buf[1024] = { 0 };
+    char _out[4096] = { 0 };
+    int r = 1;
     
     // Log the IP
-    printf("\r\033[44m\033[[[[[CONNECTED]]]\033[0m\n");
+    printf("\r\033[44m\033[[[[[%d.%d.%d.%d:%d CONNECTED]]]\033[0m\n", a, b, c, d, port);
     
     // Reprint the prompt
     printf("\033[42m\033>>>>\033[0m "); fflush(stdout);
-
-    // Print the prompt
-    socket_tcp_send(_socket_tcp, "\033[42m\033>>>>\033[0m ", 16);
-
-    // Receive data from the socket
-    if ( socket_tcp_receive(_socket_tcp, buffer, 4096) == 0 )
+    
+    // REPL 
+    while ( p_instance->running )
     {
-        printf("\r\033[44m\033[[[[[DISCONNECTED]]]\033[0m\n");
-        printf("\033[42m\033>>>>\033[0m "); fflush(stdout);
-    }
 
-    if ( strncmp(buffer, "name", 4) == 0 ) socket_tcp_send(_socket_tcp, (g_get_active_instance())->_name, strlen((g_get_active_instance())->_name));
+        // Clear the input buffer
+        memset(&_buf, 0, sizeof(_buf));
+
+        // Prompt
+        if ( r == 1 ) socket_tcp_send(_socket_tcp, "\033[42m\033>>>>\033[0m ", 16);
+        else          socket_tcp_send(_socket_tcp, "\033[41m\033>>>>\033[0m ", 16);
+        
+        int z = socket_tcp_receive(_socket_tcp, _buf, sizeof(_buf));
+        
+        // Receive data from the socket
+        if ( z == 0 )
+        {
+
+            // Print the disconnect
+            printf("\r\033[44m\033[[[[[%d.%d.%d.%d:%d DISCONNECTED]]]\033[0m\n", a, b, c, d, port);
+
+            // Reprint the prompt
+            printf("\033[42m\033>>>>\033[0m "); fflush(stdout);
+
+            // Done
+            break;
+        }
+
+        // Evaluate
+        r = shell_evaluate(&_buf, &_out);
+
+        // Error check
+        if ( r == -1 )
+        {
+            
+            // Close the connection
+            socket_tcp_send(_socket_tcp, "", 0);
+            socket_tcp_send(_socket_tcp, "Bye bye!", 8);
+            socket_tcp_destroy(&_socket_tcp);
+
+            // Log the disconnect
+            printf("\r\033[44m\033[[[[[%d.%d.%d.%d:%d DISCONNECTED]]]\033[0m\n", a, b, c, d, port);
+
+            // Reprint the prompt
+            printf("\033[42m\033>>>>\033[0m "); fflush(stdout);
+            
+            // Done
+            break;
+        }
+
+        // Print
+        socket_tcp_send(_socket_tcp, &_out, strlen(_out));
+    } 
 
     // Success
     return 1;
@@ -130,15 +165,21 @@ int shell_network_listener ( g_instance *p_instance )
     }
 }
 
-int shell_loop ( shell *p_shell )
+int shell_loop ( g_instance *p_instance )
 {
 
     // Argument check
-    if ( p_shell == (void *) 0 ) goto no_shell;
+    if ( p_instance == (void *) 0 ) goto no_instance;
+
+    // State check
+    if ( feof(stdin) )
+
+        // Sleep forever
+        sleep((unsigned int) -1);
 
     // Initialized data
-    g_instance *p_instance = g_get_active_instance();
     char _buf[1024] = { 0 };
+    char _out[4096] = { 0 };
     int r = 1;
 
     // REPL 
@@ -146,83 +187,17 @@ int shell_loop ( shell *p_shell )
     {
 
         // Prompt
-        if ( r == 1 )
-            printf("\033[42m\033>>>>\033[0m ");
-        else 
-            printf("\033[41m\033>>>>\033[0m ");
+        if ( r == 1 ) printf("\033[42m\033>>>>\033[0m ");
+        else          printf("\033[41m\033>>>>\033[0m ");
 
         // Read
-        if ( fgets(_buf, 1024, stdin) == 0 ) break;
+        if ( fgets(_buf, sizeof(_buf), stdin) == 0 ) break; 
 
         // Evaluate
-        if ( strlen(_buf) == 1 ) continue;
+        r = shell_evaluate(&_buf, &_out);
 
-        // Info
-        if ( strncmp(_buf, "info", 4) == 0 )
-        {
-
-            // Dump the message log
-            while ( circular_buffer_empty(p_instance->debug) == false )
-            {
-
-                // Initialized data
-                const char *p_message = (void *) 0;
-
-                // Get the message
-                circular_buffer_pop(p_instance->debug, &p_message);
-
-                // Print the message
-                log_info("%s\n", p_message);
-            }
-
-            r = 1;
-        }
-
-        // Camera info
-        else if ( strncmp(_buf, "camera", 6) == 0 ) r = camera_info(p_instance->context.p_scene->context.p_camera);
-        
-        // Input info
-        else if ( strncmp(_buf, "input", 5) == 0 ) r = input_info(p_instance->context.p_input);
-        
-        // Instance info
-        else if ( strncmp(_buf, "instance", 8) == 0 ) r = g_info(p_instance);
-        
-        // Renderer info
-        else if ( strncmp(_buf, "renderer", 8) == 0 ) r = renderer_info(p_instance->context.p_renderer);
-        
-        // Clear
-        else if ( strncmp(_buf, "clear", 5) == 0 ) {
-            printf("\033[2J\033[H");
-            r = 1;
-        }
-
-        // Shader
-        else if ( strncmp(_buf, "shader", 6) == 0 ) {
-            char *t = strtok(_buf, " \n");
-            t = strtok(0, " \n");
-            const shader *p_shader = dict_get(p_instance->cache.p_shaders, t);
-
-            shader_info(p_shader);
-        }
-
-        // Exit
-        else if ( strncmp(_buf, "exit", 4) == 0 )
-        {
-            
-            // Clear the run flag
-            p_instance->running = false;
-
-            // Done
-            break;
-        }
-        
-        // Default
-        else 
-        {
-            r = 0;
-
-            printf("%.*s: command not found\n", (int) strlen(_buf) - 1, _buf);
-        }
+        // Print
+        printf("%s", &_out);
     } 
 
     // Log the detach
@@ -233,14 +208,58 @@ int shell_loop ( shell *p_shell )
 
     // Error handling
     {
-        no_shell:
+        no_instance:
             #ifndef NDEBUG
-                log_error("[g10] [shell] Null pointer provided for parameter \"p_shell\" in call to function \"%s\"\n", __FUNCTION__);
+                log_error("[g10] [shell] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
             #endif
 
             // Error
             return 0;
     }
+}
+
+int shell_evaluate ( char *p_input, char *p_output )
+{
+
+    // Initialized data
+    g_instance *p_instance = g_get_active_instance();
+    int r = 1;
+
+    // Blank line
+    if ( strlen(p_input) == 1 ) return 1;
+
+    // Quit
+    if ( strncmp(p_input, "quit", 4) == 0 )
+    {
+        
+        // Clear the run flag
+        p_instance->running = false;
+
+        // Clear the repeat flag
+        parallel_schedule_pause(p_instance->p_schedule);
+
+        // Exit
+        r = -1;
+    }
+
+    // Exit
+    else if ( strncmp(p_input, "disconnect", 10) == 0 )
+    {
+
+        // Update the result
+        r = -1;
+    }
+    
+    // Default
+    else 
+    {
+        r = 0;
+
+        sprintf(p_output, "%.*s: command not found\n", (int) strlen(p_input) - 1, p_input);
+    }
+
+    // Done
+    return r;
 }
 
 int shell_detach ( shell *p_shell )
