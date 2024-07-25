@@ -19,7 +19,11 @@ if (${IS_DEBUG_BUILD})
 endif()
 add_compile_options(-gdwarf-4 -Wall -Wextra -Wpointer-arith -Wstrict-prototypes -Wformat-security -Wfloat-equal -Wshadow -Wconversion -Wlogical-not-parentheses -Wnull-dereference)
 
-add_compile_definitions(BUILD_G10_WITH_SDL2)
+option(G10_ANSI_COLOR "Build g10 with ANSI color" TRUE)
+option(G10_SDL2 "Build g10 with SDL2" TRUE)
+option(G10_GLFW "Build g10 with GLFW")
+option(G10_OPENGL "Build g10 with OpenGL" TRUE)
+option(G10_VULKAN "Build g10 with Vulkan")
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
@@ -331,7 +335,30 @@ target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIR
 target_link_libraries(g10_test g10)
 
 # g10 library
-add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c" "3rd-party/g_opengl.c" "3rd-party/g_sdl2.c" "3rd-party/glad/glad.c") # "3rd-party/g_vulkan.c"
+add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c") # "3rd-party/g_vulkan.c"
 add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json http socket parallel node hash_cache)
 target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
 target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack queue json http parallel node socket m GL ${SDL2_LIBRARIES}) #${Vulkan_LIBRARY}
+
+if(${G10_ANSI_COLOR})
+    message("[g10] Building g10 with ANSI color")
+    add_compile_definitions(G10_BUILD_WITH_ANSI_COLOR)
+endif()
+if (${G10_SDL2})
+    message("[g10] Building g10 with SDL2")
+    target_sources(g10 PUBLIC "3rd-party/g_sdl2.c")
+    add_compile_definitions(G10_BUILD_WITH_SDL2)
+endif()
+if (${G10_GLFW})
+    message("[g10] Building g10 with GLFW")
+    add_compile_definitions(G10_BUILD_WITH_GLFW)
+endif()
+if (${G10_OPENGL})
+    message("[g10] Building g10 with OpenGL")
+    target_sources(g10 PUBLIC "3rd-party/g_opengl.c" "3rd-party/glad/glad.c")
+    add_compile_definitions(G10_BUILD_WITH_OPENGL)
+endif()
+if (${G10_VULKAN})
+    message("[g10] Building g10 with Vulkan")
+    add_compile_definitions(G10_BUILD_WITH_VULKAN)
+endif()
