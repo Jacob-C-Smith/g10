@@ -294,13 +294,24 @@ DLLEXPORT g_instance *g_get_active_instance ( void );
 
 // Global state
 /** !
- *  Halt a running g10 instance
+ *  Start the active g10 instance
+ * 
+ * @param void
+ * 
+ * @sa g_stop
+ * 
+ * @return void
+ */
+DLLEXPORT void g_start ( void );
+
+/** !
+ *  Stop the active g10 instance
  *
  * @param void
  *
- * @sa g_init
+ * @sa g_start
  *
- * @return 1 on success, 0 on error
+ * @return void
  */
 DLLEXPORT void g_stop ( void );
 
