@@ -37,18 +37,26 @@
     {
         "name"        : "default schedule",
         "repeat"      : true,
-        "main thread" : "main",
+        "main thread" : "render",
         "threads"     :
         {
             "main" : 
             [
-                { "task" : "input" },
-                { "task" : "pre ai" },
+                {
+                    "task" : "pre ai",
+                    "wait" : "render:present"
+                },
                 { "task" : "ai" },
-                { "task" : "user code" },
+                { "task" : "user code" }
+            ],
+            "render" : 
+            [
+                { "task" : "input" },
                 { "task" : "render" },
                 { "task" : "present" }
-            ]
+            ],
+            "shell" : [ { "task" : "shell" } ],
+            "network shell" : [ { "task" : "network shell" } ]
         }
     },
     "initial scene" :
