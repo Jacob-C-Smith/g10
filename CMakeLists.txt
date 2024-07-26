@@ -316,10 +316,10 @@ target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_
 target_link_libraries(g10_example g10)
 
 # g10 example
-add_executable (g10_test "g10_test.c") 
-add_dependencies(g10_test g10)
-target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
-target_link_libraries(g10_test g10)
+add_executable (g10_test "g10_test.c" "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c") 
+add_dependencies(g10_test log sync array circular_buffer dict tuple stack queue json socket parallel node hash_cache)
+target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
+target_link_libraries(g10_test PUBLIC log sync array circular_buffer dict tuple stack queue json parallel node socket m)
 
 # g10 library
 add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c") # "3rd-party/g_vulkan.c"
@@ -329,23 +329,23 @@ target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack
 
 if(${G10_ANSI_COLOR})
     message("[g10] Building g10 with ANSI color")
-    add_compile_definitions(G10_BUILD_WITH_ANSI_COLOR)
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_ANSI_COLOR)
 endif()
 if (${G10_SDL2})
     message("[g10] Building g10 with SDL2")
     target_sources(g10 PUBLIC "3rd-party/g_sdl2.c")
-    add_compile_definitions(G10_BUILD_WITH_SDL2)
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_SDL2)
 endif()
 if (${G10_GLFW})
     message("[g10] Building g10 with GLFW")
-    add_compile_definitions(G10_BUILD_WITH_GLFW)
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_GLFW)
 endif()
 if (${G10_OPENGL})
     message("[g10] Building g10 with OpenGL")
     target_sources(g10 PUBLIC "3rd-party/g_opengl.c" "3rd-party/glad/glad.c")
-    add_compile_definitions(G10_BUILD_WITH_OPENGL)
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_OPENGL)
 endif()
 if (${G10_VULKAN})
     message("[g10] Building g10 with Vulkan")
-    add_compile_definitions(G10_BUILD_WITH_VULKAN)
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_VULKAN)
 endif()
