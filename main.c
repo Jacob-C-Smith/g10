@@ -62,7 +62,7 @@ int main ( int argc, const char *const argv[] )
 
     // Start the game
     g_start();
-
+    
     // Stop the game
     g_stop();
 
@@ -104,13 +104,9 @@ int user_code_main ( g_instance *const p_instance )
 
     // Initialized data
     camera *p_camera = p_instance->context.p_scene->context.p_camera;
-    // entity *p_ball_1   = dict_get(p_instance->context.p_scene->data.entities, "ball 1"),
-    //        *p_ball_2   = dict_get(p_instance->context.p_scene->data.entities, "ball 2");
-    // mesh_data *p_ball_data_1 = p_ball_1->p_mesh->_p_meshes[0],
-    //           *p_ball_data_2 = p_ball_2->p_mesh->_p_meshes[0];
 
     // Exit the game?
-    if ( (bool) input_bind_value("QUIT") ) g_stop();
+    if ( (bool) input_bind_value("QUIT") ) p_instance->running = false;
 
     // Toggle mouse locking
     if ( (bool) input_bind_value("MOUSE LOCK") ) input_mouse_lock_toggle();

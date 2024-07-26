@@ -103,9 +103,7 @@ u0 g_signal_handler ( int signal_number )
         // Increment the counter
         i++;
     }
-    
-    parallel_thread_cancel(p_active_instance->p_shell->p_thread);
-    
+        
     // Done
     exit(EXIT_FAILURE);
 }
@@ -613,7 +611,7 @@ void g_start ( void )
 
     // Start the schedule
     parallel_schedule_start(p_active_instance->p_schedule, p_active_instance);
-
+    
     // Done
     return;
 }

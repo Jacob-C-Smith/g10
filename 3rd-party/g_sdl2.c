@@ -388,9 +388,6 @@ int g_sdl2_window_poll ( g_instance *p_instance )
 
                 // Clear the running flag
                 p_instance->running = false;
-                
-                // Clear the repeat flag
-                parallel_schedule_pause(p_instance->p_schedule);
 
                 // Done
                 break;
