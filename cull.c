@@ -24,6 +24,10 @@ int cull_chain_construct
     // Argument check
     //
 
+    // Unused
+    (void) pp_cull_operation;
+    (void) count;
+
     // Success
     return 1;
 
@@ -71,23 +75,27 @@ int cull_objects
     // Argument check
     //
 
+    // Unused
+    (void) p_cull_chain;
+    (void) pp_result;
+    (void) p_objects;
+    (void) limit;
+
     // Initialized data
     //
-
-    done:
 
     // Success
     return 1;
 
-    no_cull:
-    {
+    // no_cull:
+    // {
 
-        // Copy "limit" objects to result
-        memcpy(pp_result, p_objects, sizeof(void *) * limit);
+    //     // Copy "limit" objects to result
+    //     memcpy(pp_result, p_objects, sizeof(void *) * limit);
 
-        // Done
-        goto done;
-    }
+    //     // Done
+    //     goto done;
+    // }
 
     // Error handling
     {
@@ -101,6 +109,9 @@ int cull_objects
 
 int cull_chain_destroy ( cull_operation *pp_cull_operation )
 {
+
+    // Unused
+    (void)pp_cull_operation;
 
     // Success
     return 1;

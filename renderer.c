@@ -150,7 +150,7 @@ int attachment_create ( attachment **pp_attachment )
     }
 }
 
-int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
+int renderer_from_json ( renderer **pp_renderer, const json_value *p_value )
 {
 
     // Argument check
@@ -240,23 +240,23 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
         {
 
             // Initialized data
-            dict       *p_dict          = p_attachments_value->object;
-            const char *p_scratch[32]   = { 0 };
-            size_t  attachment_quantity = dict_keys(p_dict, 0);
+            dict       *p_attachments_dict = p_attachments_value->object;
+            const char *p_scratch[32]      = { 0 };
+            size_t  attachment_quantity    = dict_keys(p_attachments_dict, 0);
 
             // Error check
             if ( attachment_quantity > 32 ) goto too_many_attachments;
 
             // Get the name of each attachment
-            dict_keys(p_dict, &p_scratch);
+            dict_keys(p_attachments_dict, (const char **const) &p_scratch);
 
             // Iterate through each attachment
-            for (size_t i = 0; i < attachment_quantity; i++)
+            for (i = 0; i < attachment_quantity; i++)
             {
                 
                 // Initialized data
                 //attachment *p_attachment       = (void *) 0;
-                json_value *p_attachment_value = dict_get(p_dict, p_scratch[i]);
+                //const json_value *p_attachment_value = dict_get(p_attachments_dict, p_scratch[i]);
                 
                 //printf("%d : %s\n", i, p_scratch[i]);
                 // Construct an attachment
@@ -284,35 +284,35 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
             size_t j = 0;
 
             // Construct the elements of the render graph
-            for (size_t i = 0; i < p_node_graph->node_quantity; i++)
+            for (i = 0; i < p_node_graph->node_quantity; i++)
             {
 
                 // Initialized data
                 node *p_node = p_node_graph->_p_nodes[i];
-                json_value *p_value = p_node->value;
-                dict *p_dict = (void *) 0;
+                json_value *p_node_value = p_node->value;
+                dict *p_node_dict = (void *) 0;
                 const char *type = (void *) 0;
 
                 // Store source nodes
                 if ( p_node->in_quantity == 0 ) _p_nodes[j++] = p_node_graph->_p_nodes[i];
 
                 // Error check
-                if ( p_value == (void *) 0 ) continue;
+                if ( p_node_value == (void *) 0 ) continue;
 
                 // Type check
-                if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_node_type;
+                if ( p_node_value->type != JSON_VALUE_OBJECT ) goto wrong_node_type;
 
                 // Store the dictionary
-                p_dict = p_value->object;
+                p_node_dict = p_node_value->object;
 
                 // Store the type
-                type = ((json_value *) dict_get(p_dict, "type"))->string;
+                type = ((json_value *) dict_get(p_node_dict, "type"))->string;
 
                 // Error check
                 //
                 if ( strcmp(type, "render pass") == 0 ) 
                 {
-                    render_pass_from_json_2(&p_renderer->_p_render_passes[render_pass_quantity], p_node->_name, p_value);
+                    render_pass_from_json_2(&p_renderer->_p_render_passes[render_pass_quantity], p_node->_name, p_node_value);
 
                     render_pass_quantity++;
                 }
@@ -330,10 +330,10 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
     return 1;
 
     too_many_attachments:
-    too_many_passes:
+    //too_many_passes:
     failed_to_construct_node_graph:
     wrong_node_type:
-    no_node_value:
+    //no_node_value:
 
         // Error
         return 0;
@@ -409,14 +409,14 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 // Error
                 return 0;
                         
-            passes_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] \"passes\" property of renderer object must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // passes_property_is_wrong_type:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] \"passes\" property of renderer object must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
             
             name_property_is_too_long:
                 #ifndef NDEBUG
@@ -472,14 +472,14 @@ int renderer_from_json ( renderer **pp_renderer, json_value *p_value )
                 // Error
                 return 0;
 
-            no_passes_property:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"passes\" in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // no_passes_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"passes\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
 
         // Standard library errors
@@ -767,15 +767,15 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
         {
 
             // Initialized data
-            dict       *p_dict          = p_shaders_value->object;
+            dict       *p_shader_dict          = p_shaders_value->object;
             const char *p_scratch[32]   = { 0 };
-            size_t  shader_quantity = dict_keys(p_dict, 0);
+            size_t  shader_quantity = dict_keys(p_shader_dict, 0);
 
             // Error check
             if ( shader_quantity > 32 ) goto too_many_shaders;
 
             // Get the name of each shader
-            dict_keys(p_dict, &p_scratch);
+            dict_keys(p_shader_dict, (const char **const) &p_scratch);
 
             // Store the quantity of shaders
             p_render_pass->shader_quantity = shader_quantity;
@@ -788,8 +788,8 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
             {
                 
                 // Initialized data
-                shader     *p_shader       = (void *) 0;
-                json_value *p_shader_value = dict_get(p_dict, p_scratch[i]);
+                shader           *p_shader       = (void *) 0;
+                const json_value *p_shader_value = dict_get(p_shader_dict, p_scratch[i]);
                 
                 // Construct a shader
                 shader_from_json_2(&p_shader, p_scratch[i], p_shader_value);
@@ -871,16 +871,7 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
         }
 
         // json errors
-        {
-            name_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] \"name\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
-
-                // Error
-                return 0;
-            
+        {            
             description_property_is_wrong_type:
                 #ifndef NDEBUG
                     log_error("[g10] [renderer] \"description\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
@@ -890,14 +881,14 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
                 // Error
                 return 0;
             
-            format_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // format_property_is_wrong_type:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
             
             name_property_is_too_long:
                 #ifndef NDEBUG
@@ -944,23 +935,23 @@ int render_pass_from_json ( render_pass **pp_render_pass, const char *p_name, js
                 // Error
                 return 0;
 
-            no_description_property:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // no_description_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
 
-            no_format_property:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // no_format_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
     }
 }
@@ -992,6 +983,9 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
         dict *const p_dict = p_value->object;
         const json_value *p_description_value = dict_get(p_dict, "description"),
                          *p_shaders_value     = dict_get(p_dict, "shaders");
+
+        // Unnused
+        (void) p_shaders_value;
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [renderer] Consider adding a \"$schema\" property to the render pass");
@@ -1035,7 +1029,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
 
             // Initialized data
             node *p_node = p_node_graph->_p_nodes[i];
-            json_value *p_value = p_node->value;
+            json_value *p_render_graph_value = p_node->value;
             dict *p_dict = (void *) 0;
             const char *type = (void *) 0;
 
@@ -1043,13 +1037,13 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
             if ( p_node->in_quantity == 0 ) _p_nodes[j++] = p_node_graph->_p_nodes[i];
 
             // Error check
-            if ( p_value == (void *) 0 ) continue;
+            if ( p_render_graph_value == (void *) 0 ) continue;
 
             // Type check
             //if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_node_type;
 
             // Store the dictionary
-            p_dict = p_value->object;
+            p_dict = p_render_graph_value->object;
 
             // Store the type
             type = ((json_value *) dict_get(p_dict, "type"))->string;
@@ -1060,7 +1054,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
             if ( strcmp(type, "shader") == 0 )
             {
 
-                shader_from_json_2(&p_render_pass->_p_shaders[shader_quantity], p_node->_name, p_value);
+                shader_from_json_2(&p_render_pass->_p_shaders[shader_quantity], p_node->_name, p_render_graph_value);
 
                 shader_quantity++;
             }
@@ -1093,7 +1087,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
     // Success
     return 1;
 
-    too_many_shaders:
+    //too_many_shaders:
     failed_to_construct_node_graph:
 
         // Error
@@ -1142,16 +1136,7 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
         }
 
         // json errors
-        {
-            name_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] \"name\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
-
-                // Error
-                return 0;
-            
+        {            
             description_property_is_wrong_type:
                 #ifndef NDEBUG
                     log_error("[g10] [renderer] \"description\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
@@ -1161,14 +1146,14 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
                 // Error
                 return 0;
             
-            format_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // format_property_is_wrong_type:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] \"format\" property of renderer object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
             
             name_property_is_too_long:
                 #ifndef NDEBUG
@@ -1215,23 +1200,23 @@ int render_pass_from_json_2 ( render_pass **pp_render_pass, const char *p_name, 
                 // Error
                 return 0;
 
-            no_description_property:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // no_description_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"description\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
 
-            no_format_property:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
-                #endif
+            // no_format_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [renderer] Parameter \"p_value\" is missing required property \"format\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/renderer.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
     }
 }
@@ -1357,19 +1342,19 @@ int renderer_info ( const renderer *const p_renderer )
         render_pass *p_render_pass = p_renderer->_p_render_passes[i];
         
         // Print the render pass
-        printf("    [%d]\n", i);
+        printf("    [%zu]\n", i);
         printf("     - name    : %s\n", p_render_pass->_name);            
         printf("     - shaders : \n");            
 
         // Print each shader
-        for (size_t i = 0; i < p_render_pass->shader_quantity; i++)
+        for (size_t j = 0; j < p_render_pass->shader_quantity; j++)
         {
 
             // Initialized data
-            shader *p_shader = p_render_pass->_p_shaders[i];
+            shader *p_shader = p_render_pass->_p_shaders[j];
             
             // Print the shader
-            printf("        [%d] : %s\n", i, p_shader->_name);            
+            printf("        [%zu] : %s\n", j, p_shader->_name);            
         }
     }
     
@@ -1419,12 +1404,12 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
         pfn_shader_on_bind(p_shader, (void *)p_instance->context.p_scene->context.p_camera);
 
         // Draw each object
-        for (size_t i = 0; i < p_shader->count; i++)
+        for (size_t j = 0; j < p_shader->count; j++)
         {
 
             // Initialized data
             mat4 _m = { 0 };
-            mesh_data *p_mesh_data = p_shader->_p_draw_items[i];
+            mesh_data *p_mesh_data = p_shader->_p_draw_items[j];
             
             // Store the local matrix
             mat4_model_from_vec3(
@@ -1436,7 +1421,7 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
             transform_get_matrix_local(p_mesh_data->p_transform, &_m);
 
             // Bind the model matrix
-            glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, &_m);
+            glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, (const GLfloat *) &_m);
             
             // Draw the mesh
             pfn_shader_on_draw(p_mesh_data);
@@ -1462,17 +1447,6 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
             no_render_pass:
                 #ifndef NDEBUG
                     log_error("[g10] [renderer] Null pointer provided for parameter \"p_render_pass\" in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
-        }
-
-        // Rendering errors
-        {
-            failed_to_render_pass:
-                #ifndef NDEBUG
-                    log_error("[g10] [renderer] Failed to render render pass \"%s\" in call to function \"%s\"\n", &p_renderer->_p_render_passes[i]->_name, __FUNCTION__);
                 #endif
 
                 // Error

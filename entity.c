@@ -58,7 +58,7 @@ int entity_create ( entity **pp_entity )
     }
 }
 
-int entity_from_json ( entity **pp_entity, const char *const p_name, json_value *p_value )
+int entity_from_json ( entity **pp_entity, const char *const p_name, const json_value *const p_value )
 {
 
     // Argument check
@@ -75,10 +75,10 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
     {
 
         // Initialized data
-        const dict *const p_dict = p_value->object;
-        const json_value *p_shader_value    = dict_get(p_dict, "shader"),
-                         *p_mesh_value      = dict_get(p_dict, "mesh"),
-                         *p_transform_value = dict_get(p_dict, "transform");
+        dict *p_dict = p_value->object;
+        const json_value *const p_shader_value    = dict_get(p_dict, "shader"),
+                         *const p_mesh_value      = dict_get(p_dict, "mesh"),
+                         *const p_transform_value = dict_get(p_dict, "transform");
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [entity] Consider adding a \"$schema\" property to the entity");
@@ -109,7 +109,7 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
 
         // Store the shader
         // TODO: Error checking
-        _entity.p_shader = dict_get(p_instance->cache.p_shaders, p_shader_value->string);
+        _entity.p_shader = (shader *) dict_get(p_instance->cache.p_shaders, p_shader_value->string);
 
         // Store the mesh(es)
         if ( mesh_from_json(&_entity.p_mesh, p_mesh_value) == 0 ) goto failed_to_construct_mesh;
@@ -119,7 +119,7 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
     }
 
     // Allocate memory on the heap
-    if ( entity_create(&p_entity) == (void *) 0 ) goto failed_to_allocate_entity;
+    if ( entity_create(&p_entity) == 0 ) goto failed_to_allocate_entity;
 
     // Copy the struct to the heap
     memcpy(p_entity, &_entity, sizeof(entity));
@@ -186,24 +186,15 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
         }
 
         // json errors
-        {
-            name_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [entity] \"name\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
-                #endif
+        {           
+            // shader_property_is_wrong_type:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [entity] \"shader\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+            //     #endif
 
-                // Error
-                return 0;
-            
-            shader_property_is_wrong_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [entity] \"shader\" property of entity object must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
-                #endif
-
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
             
             name_property_is_too_long:
                 #ifndef NDEBUG
@@ -223,14 +214,14 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, json_value 
                 // Error
                 return 0;
 
-            missing_properties:
-                #ifndef NDEBUG
-                    log_error("[g10] [entity] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
-                #endif
+            // missing_properties:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [entity] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/entity.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
     }
 }
@@ -255,7 +246,7 @@ int entity_info ( const entity *const p_entity )
         mesh_data *p_mesh_data = p_entity->p_mesh->_p_meshes[i];
         
         // Print the mesh data
-        printf("    [%d] : %s --> %s\n", i, p_mesh_data->_name, p_entity->p_shader->_name);
+        printf("    [%zu] : %s --> %s\n", i, p_mesh_data->_name, p_entity->p_shader->_name);
     }
 
     // Success

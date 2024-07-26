@@ -78,8 +78,8 @@ DLLEXPORT int transform_construct (
 */
 DLLEXPORT int transform_from_json
 (
-    transform  **pp_transform,
-    json_value  *p_value
+    transform        **pp_transform,
+    const json_value  *p_value
 );
 
 // Accessors

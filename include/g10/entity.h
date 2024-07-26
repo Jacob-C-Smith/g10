@@ -43,7 +43,7 @@ struct entity_s
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int entity_from_json ( entity **pp_entity, const char *const p_name, json_value *p_value );
+DLLEXPORT int entity_from_json ( entity **pp_entity, const char *const p_name, const json_value *const p_value );
 
 /** !
  * Get the bounds of an entity

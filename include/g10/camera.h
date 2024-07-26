@@ -123,11 +123,11 @@ DLLEXPORT u0 camera_matrix_view
  */
 DLLEXPORT u0 camera_matrix_projection_perspective
 (
-    mat4  *const p_projection,
-    float        fov,
-    float        aspect,
-    float        near_clip,
-    float        far_clip
+    mat4  *p_projection,
+    float  fov,
+    float  aspect,
+    float  near_clip,
+    float  far_clip
 );
 
 // Info

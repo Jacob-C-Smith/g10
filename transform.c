@@ -72,6 +72,9 @@ int transform_construct (
     transform  _transform  = { 0 },
               *p_transform = (void *) 0;
 
+    // Unused
+    (void) p_parent;
+
     // Populate the transform 
     _transform = (transform)
     {
@@ -79,7 +82,7 @@ int transform_construct (
         .rotation   = rotation,
         .scale      = scale,
         .model      = { 0 },
-        .p_childern = 0,
+        .p_childern = { 0 },
         .p_parent   = 0
     };
 
@@ -221,8 +224,8 @@ int transform_from_path
 
 int transform_from_json
 (
-    transform  **pp_transform,
-    json_value  *p_value
+    transform        **pp_transform,
+    const json_value  *p_value
 )
 {
 
@@ -231,7 +234,6 @@ int transform_from_json
     if ( p_value       ==        (void *) 0 ) goto no_value;
 
     // Accept check
-    if ( p_value->type == JSON_VALUE_STRING ) goto parse_as_path;
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // Initialized data
@@ -354,28 +356,11 @@ int transform_from_json
     // Copy the transform 
     memcpy(p_transform, &_transform, sizeof(transform));
 
-    // Done
-    done:
-
     // Return a pointer to the caller
     *pp_transform = p_transform;
 
     // Success
     return 1;
-
-    // Parse the transform as a path
-    parse_as_path:
-    {
-
-        // Initialized data
-        const char *const p_path = p_value->string;
-
-        // Construct a transform
-        //if ( transform_from_path(&p_transform, ) == 0 ) goto failed_to_construct_transform;
-
-        // Done
-        goto done;
-    } 
 
     parse_rotation:
     {

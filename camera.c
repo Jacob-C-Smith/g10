@@ -82,8 +82,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     camera *p_camera = (void *) 0;
     camera _camera = { 0 };
     vec3 location, orientation;
-    float fov, near_clip, far_clip, aspect_ratio;
-    mat4 view, projection;
+    float fov, near_clip, far_clip;
     dict *const p_dict = p_value->object;
     json_value *p_scratch[4] = { 0 };
     const json_value *const p_location    = dict_get(p_dict, "location"),
@@ -169,9 +168,9 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     {
 
         // Initialized data
-        dict *const p_dict = p_clip->object;
-        const json_value *const p_near = dict_get(p_dict, "near"),
-                         *const p_far  = dict_get(p_dict, "far");
+        dict *const p_clip_dict = p_clip->object;
+        const json_value *const p_near = dict_get(p_clip_dict, "near"),
+                         *const p_far  = dict_get(p_clip_dict, "far");
 
         // Property check
         if ( p_near == (void *) 0 ) goto no_clip_near_property;
@@ -182,10 +181,10 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         if ( p_far->type  != JSON_VALUE_NUMBER ) goto wrong_clip_far_type;
 
         // Store the distance to the near clipping plane
-        near_clip = p_near->number;
+        near_clip = (float) p_near->number;
 
         // Store the distance to the far clipping plane
-        far_clip = p_far->number;
+        far_clip = (float) p_far->number;
 
         // Error check
         if ( near_clip > far_clip ) goto clip_bounds_error;
@@ -222,7 +221,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
             .fov          = fov,
             .near_clip    = near_clip,
             .far_clip     = far_clip,
-            .aspect_ratio = (p_instance) ? ((double)p_instance->window.width / (double)p_instance->window.height) : (16.0 / 9.0)
+            .aspect_ratio = (p_instance) ? (float) ((double)p_instance->window.width / (double)p_instance->window.height) : (float) (16.0 / 9.0)
         },
         .matrix = 
         {
@@ -295,7 +294,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         if ( p_fov->type != JSON_VALUE_NUMBER ) goto wrong_fov_type;
 
         // Store the fov
-        fov = p_fov->number;
+        fov = (float) p_fov->number;
         
         // Error check
         if ( fov <  1.0 ) goto fov_too_short;
@@ -314,7 +313,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
         if ( p_scale->type != JSON_VALUE_NUMBER ) goto wrong_scale_type;
 
         // Store the fov
-        fov = p_scale->number;
+        fov = (float) p_scale->number;
         
         // Error check
         if ( fov < 0.0010 ) goto fov_too_short;
@@ -561,23 +560,23 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
                 // Error
                 return 0;
 
-            scale_too_short:
-                #ifndef NDEBUG
-                    log_error("[g10] [camera] Property \"scale\" of parameter \"p_value\" must be greater than 0.001 in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/camera.json\n");
-                #endif
+            // scale_too_short:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [camera] Property \"scale\" of parameter \"p_value\" must be greater than 0.001 in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/camera.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
 
-            scale_too_long:
-                #ifndef NDEBUG
-                    log_error("[g10] [camera] Property \"scale\" of parameter \"p_value\" must be less than 1000.0 in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/camera.json\n");
-                #endif
+            // scale_too_long:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [camera] Property \"scale\" of parameter \"p_value\" must be less than 1000.0 in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/camera.json\n");
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
 
         // Standard library errors
@@ -593,7 +592,7 @@ int camera_from_json ( camera **const pp_camera, const char *const p_name, const
     }
 }
 
-u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
+u0 camera_matrix_view ( mat4 *p_view, vec3 eye, vec3 target, vec3 up )
 {
     
     // Argument check
@@ -663,22 +662,22 @@ u0 camera_matrix_view ( mat4 *const p_view, vec3 eye, vec3 target, vec3 up )
     }
 }
 
-u0 camera_matrix_projection_perspective ( mat4 *const p_projection, float fov, float aspect, float near_clip, float far_clip )
+u0 camera_matrix_projection_perspective ( mat4 *p_projection, float fov, float aspect, float near_clip, float far_clip )
 {
     
     // Argument check
     if ( p_projection == (void *) 0 ) goto no_projection;
     
     // Initialized data
-    const float tan_fov_2 = tanf(fov / 2.0);
+    const float tan_fov_2 = (float) tanf(fov / 2.0f);
 
     // Store the orientation
     *p_projection = (mat4)
     {
-        .a = 1.0 / (aspect * tan_fov_2), .b = 0              , .c = 0                                                , .d =  0,
-        .e = 0                         , .f = 1.0 / tan_fov_2, .g = 0                                                , .h =  0,
-        .i = 0                         , .j = 0              , .k = -(far_clip + near_clip) / (far_clip - near_clip) , .l = -1,
-        .m = 0                         , .n = 0              , .o = 2 * far_clip * near_clip / (near_clip - far_clip), .p =  0,        
+        .a = 1.0f / (aspect * tan_fov_2), .b = 0              , .c = 0                                                , .d =  0,
+        .e = 0                          , .f = 1.0f / tan_fov_2, .g = 0                                               , .h =  0,
+        .i = 0                          , .j = 0              , .k = -(far_clip + near_clip) / (far_clip - near_clip) , .l = -1,
+        .m = 0                          , .n = 0              , .o = 2 * far_clip * near_clip / (near_clip - far_clip), .p =  0,        
     };
 
     // Done

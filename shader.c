@@ -24,7 +24,7 @@ int shader_from_json ( shader **pp_shader, const char *const p_name, json_value 
     #elif defined G10_BUILD_WITH_OPENGL
 
         // External functions
-        extern int g_opengl_shader_construct ( shader **pp_shader, json_value *p_value );
+        extern int g_opengl_shader_construct ( shader **pp_shader, const json_value *p_value );
 
         // Construct the shader
         if ( g_opengl_shader_construct(&p_shader, p_value) == 0 ) goto failed_to_create_shader_opengl;
@@ -100,13 +100,16 @@ int shader_from_json ( shader **pp_shader, const char *const p_name, json_value 
     }
 }
 
-int shader_from_json_2 ( shader **pp_shader, const char *const p_name, json_value *p_value )
+int shader_from_json_2 ( shader **pp_shader, const char *const p_name, const json_value *p_value )
 {
-
+ 
     // Initialized data
     g_instance *p_instance   = g_get_active_instance();
     shader     *p_shader     = (void *) 0;
     node_graph *p_node_graph = (void *) 0;
+
+    // Unused
+    (void) p_node_graph;
 
     // Graphics API specific implementation
     #ifdef G10_BUILD_WITH_VULKAN
@@ -116,10 +119,12 @@ int shader_from_json_2 ( shader **pp_shader, const char *const p_name, json_valu
     #elif defined G10_BUILD_WITH_OPENGL
 
         // External functions
-        extern int g_opengl_shader_construct ( shader **pp_shader, json_value *p_value );
-
+        extern int g_opengl_shader_construct ( shader **pp_shader, const json_value *p_value );
+ 
         // Construct the shader
         if ( g_opengl_shader_construct(&p_shader, p_value) == 0 ) goto failed_to_create_shader_opengl;
+    #else
+        return 0;
     #endif
 
     // Store the maximum quantity of draw items
@@ -154,11 +159,6 @@ int shader_from_json_2 ( shader **pp_shader, const char *const p_name, json_valu
 
     // Success
     return 1;
-
-    failed_to_construct_node_graph:
-
-        // Error
-        return 0;
 
     // Error handling
     {
@@ -306,7 +306,7 @@ int shader_info ( const shader *const p_shader )
         void *p_draw_item = p_shader->_p_draw_items[i];
         
         // Print the render pass
-        printf("    [%d] : %p\n", i, p_draw_item);
+        printf("    [%zu] : %p\n", i, p_draw_item);
     }
 
     // Success
@@ -328,7 +328,7 @@ int shader_info ( const shader *const p_shader )
     }
 }
 
-int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
+int shader_bind_camera ( shader *p_shader, camera *p_camera )
 {
     
     // Initialized data
@@ -351,7 +351,7 @@ int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
         (
             &p_camera->matrix._projection,
             p_camera->projection.fov,
-            ((double)p_instance->window.width / (double)p_instance->window.height),
+            (float)((double)p_instance->window.width / (double)p_instance->window.height),
             p_camera->projection.near_clip,
             p_camera->projection.far_clip
         );
@@ -367,9 +367,11 @@ int shader_bind_camera ( shader *p_shader, const camera *const p_camera )
         // Done
         return g_vulkan_shader_bind(p_shader);
     #elif defined G10_BUILD_WITH_OPENGL
-        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "P"), 1, GL_FALSE, &_p);
-        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "V"), 1, GL_FALSE, &_v);
+        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "P"), 1, GL_FALSE, (GLfloat *)&_p);
+        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "V"), 1, GL_FALSE, (GLfloat *)&_v);
     #endif
     
+    // Success
+    return 1;
 }
 

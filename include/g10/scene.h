@@ -71,8 +71,8 @@ struct scene_s
 */
 DLLEXPORT int scene_from_json
 (
-    scene      **pp_scene,
-    json_value  *p_value
+    scene            **pp_scene,
+    const json_value  *p_value
 );
 
 // Accessors

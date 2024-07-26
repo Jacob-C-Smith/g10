@@ -14,18 +14,6 @@
 #define G10_VERSION_MINOR 0
 #define G10_VERSION_PATCH 0
 
-// Build options
-#define G10_BUILD_WITH_ANSI_COLOR
-#define G10_BUILD_WITH_SDL2 
-//#define G10_BUILD_WITH_GLFW
-//#define G10_BUILD_WITH_VULKAN 
-#define G10_BUILD_WITH_OPENGL 
-#define G10_BUILD_WITH_NETWORKING 
-#define G10_BUILD_WITH_AVX2 
-//#define G10_BUILD_WITH_AVX512 
-//#define BUILD_G10_WITH_DISCORD
-//#define BUILD_G10_WITH_FMOD
-
 // Preprocessor error checking
 #if defined G10_BUILD_WITH_VULKAN && defined G10_BUILD_WITH_OPENGL
     #error "[g10] [preprocessor] g10 builds can only use one graphics API at a time!"

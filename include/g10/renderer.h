@@ -100,8 +100,8 @@ struct attachment_s
 */
 DLLEXPORT int renderer_from_json
 (
-    renderer   **pp_renderer,
-    json_value  *p_value
+    renderer         **pp_renderer,
+    const json_value  *p_value
 );
 
 // Accessors

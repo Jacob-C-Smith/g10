@@ -1,7 +1,13 @@
 #include <g10/g10.h>
 #include <log/log.h>
 
-#include <SDL2/SDL.h>
+#ifdef G10_BUILD_WITH_SDL2
+
+// Static data
+dict *p_sdl2_key_lookup = (void *) 0;
+dict *p_sdl2_key_scancode = (void *) 0;
+
+#include <SDL2/SDL.h> 
 #include <SDL2/SDL_image.h>
 
 struct 
@@ -135,13 +141,13 @@ struct
     [SDL_SCANCODE_RALT]   = { ._name = "RIGHT ALT"    , ._active = false, ._scancode = SDL_SCANCODE_RALT }
 };
 
-// Static data
-dict *p_sdl2_key_lookup = (void *) 0;
-dict *p_sdl2_key_scancode = (void *) 0;
 
 // Function definitions
 int g_sdl2_init ( g_instance *p_instance )
 {
+
+    // Argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
 
     // Initialize SDL2
     SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
@@ -189,7 +195,7 @@ int g_sdl2_init ( g_instance *p_instance )
     }
 }
 
-int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
+int g_sdl2_window_from_json ( g_instance *p_instance, const json_value *p_value )
 {
 
     // Argument check
@@ -199,7 +205,6 @@ int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
 
     // Initialized data
     u32 sdl2_window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-    SDL_Surface *p_icon_surface = (void *) 0;
 
     // Graphics API
     #ifdef G10_BUILD_WITH_VULKAN
@@ -344,26 +349,6 @@ int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value )
 
                 // Error
                 return 0;
-
-            wrong_icon_type:
-                #ifndef NDEBUG
-                    log_error("[g10] [sdl2] Property \"icon\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
-                #endif
-
-                // Error
-                return 0;
-        }
-
-        // SDL2 errors
-        {
-            failed_to_load_icon:
-                #ifndef NDEBUG
-                    log_error("[g10] [sdl2] Failed to load icon in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
-                // Error
-                return 0;
         }
 
         // Standard library errors
@@ -423,8 +408,8 @@ int g_sdl2_window_poll ( g_instance *p_instance )
                     g_window_resize
                     (
                         p_instance,
-                        p_instance->window.sdl2.event.window.data1,
-                        p_instance->window.sdl2.event.window.data2
+                        (u32) p_instance->window.sdl2.event.window.data1,
+                        (u32) p_instance->window.sdl2.event.window.data2
                     );
                 }
 
@@ -443,9 +428,9 @@ int g_sdl2_window_poll ( g_instance *p_instance )
             {
 
                 // Initialized data
-                camera *p_camera = p_instance->context.p_scene->context.p_camera;
-                int xrel = p_instance->window.sdl2.event.motion.xrel,
-                    yrel = p_instance->window.sdl2.event.motion.yrel;
+                //camera *p_camera = p_instance->context.p_scene->context.p_camera;
+                //int xrel = p_instance->window.sdl2.event.motion.xrel,
+                //    yrel = p_instance->window.sdl2.event.motion.yrel;
                 
                 // printf("[ %d, %d ]\n", p_instance->window.sdl2.event.motion.x, p_instance->window.sdl2.event.motion.y);
                 
@@ -578,3 +563,4 @@ int g_sdl2_window_destroy ( g_instance *p_instance )
         }
     }
 }
+#endif

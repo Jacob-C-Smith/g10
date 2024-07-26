@@ -73,7 +73,7 @@ int load_ai ( ai **pp_ai, char *path )
     if ( path  == (void *) 0 ) goto no_path;
 
     // Initialized data
-    size_t len          = g_load_file(path, 0, true);
+    //size_t len          = g_load_file(path, 0, true);
     char   _text[16384] = { 0 }; 
 
     // TODO: Check if len > sizeof(_text)
@@ -120,13 +120,13 @@ int load_ai ( ai **pp_ai, char *path )
                 // Error
                 return 0;
 
-            failed_to_construct_ai_from_file_json:
-                #ifndef NDEBUG
-                    log_error("[g10] [ai] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
-                #endif
+            // failed_to_construct_ai_from_file_json:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [ai] Failed to construct AI from file \"%s\" in call to function \"%s\"\n", path, __FUNCTION__);
+            //     #endif
 
-                // Error
-                return 0;
+            //     // Error
+            //     return 0;
         }
     }
 }
@@ -779,7 +779,7 @@ int destroy_ai ( ai **pp_ai )
     if ( p_ai == 0 ) return 1;
 
     // Cleanup
-    G10_REALLOC(p_ai, 0);
+    p_ai = G10_REALLOC(p_ai, 0);
 
     // Success
     return 1;

@@ -9,10 +9,6 @@
 // Headers
 #include <g10/g10.h>
 
-#ifdef G10_BUILD_WITH_SDL2
-extern int g_sdl2_window_from_json ( g_instance *p_instance, json_value *p_value );
-#endif
-
 #ifdef G10_BUILD_WITH_VULKAN
 extern int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value );
 #endif
@@ -61,7 +57,7 @@ u0 g_init_early ( void )
     parallel_register_task("network shell", (fn_parallel_task *) shell_network_listener);
 
     // Add 3rd party scheduler tasks
-    #ifdef BUILD_G10_WITH_SDL2
+    #ifdef G10_BUILD_WITH_SDL2
 
         // External functions
         extern int g_sdl2_window_poll ( g_instance *p_instance );
@@ -99,7 +95,7 @@ u0 g_signal_handler ( int signal_number )
         const char *p_message = (void *) 0;
 
         // Get the message
-        circular_buffer_pop(p_active_instance->debug, &p_message);
+        circular_buffer_pop(p_active_instance->debug, (void **) &p_message);
 
         // Print the message
         log_error("[%d] %s\n", i, p_message);
@@ -174,8 +170,8 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     // Initialized data
     size_t file_len          = g_load_file(p_path, (void *) 0, true),
            debug_message_max = 64;
-    char *const p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
-    const json_value *p_value = 0;
+    char *p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
+    json_value *p_value = 0;
     g_instance *p_instance = 0;
 
     // Error check
@@ -185,7 +181,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     if ( g_load_file(p_path, p_file_contents, true) == 0 ) goto failed_to_load_file;
 
     // Parse the file into a json value
-    if ( json_value_parse(p_file_contents, 0, &p_value) == 0 ) goto failed_to_json_parse_value;
+    if ( json_value_parse(p_file_contents, 0, (json_value **const)&p_value) == 0 ) goto failed_to_json_parse_value;
 
     // Error check
     if ( p_value->type != JSON_VALUE_OBJECT ) goto instance_value_is_wrong_type;
@@ -211,6 +207,9 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                          *p_scene           = dict_get(p_dict, "initial scene"),
                          *p_debug           = dict_get(p_dict, "debug"),
                          *p_window          = dict_get(p_dict, "window");
+
+        // Unused
+        (void) p_vulkan;
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] Consider adding a \"$schema\" property to the instance");
@@ -253,10 +252,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             {
 
                 // Initialized data
-                dict *p_dict = p_version->object;
-                json_value *p_major = dict_get(p_dict, "major"),
-                           *p_minor = dict_get(p_dict, "minor"),
-                           *p_patch = dict_get(p_dict, "patch");
+                dict *p_version_dict = p_version->object;
+                const json_value *const p_major = dict_get(p_version_dict, "major"),
+                                 *const p_minor = dict_get(p_version_dict, "minor"),
+                                 *const p_patch = dict_get(p_version_dict, "patch");
                 
                 // Error check
                 if ( ! ( p_major && p_minor && p_patch ) ) goto missing_version_properties;
@@ -267,17 +266,17 @@ int g_init ( g_instance **pp_instance, const char *p_path )
                 if ( p_patch->type != JSON_VALUE_INTEGER ) goto version_patch_wrong_type;
                 
                 // Store each version number
-                p_instance->version.major = p_major->integer,
-                p_instance->version.minor = p_minor->integer,
-                p_instance->version.patch = p_patch->integer;
+                p_instance->version.major = (u16) p_major->integer,
+                p_instance->version.minor = (u16) p_minor->integer,
+                p_instance->version.patch = (u16) p_patch->integer;
             }
         }
 
         // Default to 1.0.0
         else
-            p_instance->version.major = 1,
-            p_instance->version.major = 0,
-            p_instance->version.patch = 0;
+            p_instance->version.major = (u16)1,
+            p_instance->version.major = (u16)0,
+            p_instance->version.patch = (u16)0;
 
         // Set up the debug system
         if ( p_debug )
@@ -287,7 +286,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             if ( p_debug->type != JSON_VALUE_INTEGER ) goto debug_wrong_type;
 
             // Store the 
-            debug_message_max = p_debug->integer;
+            debug_message_max = (size_t) p_debug->integer;
 
             // Construct a circular buffer for messages
             circular_buffer_construct(&p_instance->debug, debug_message_max);
@@ -301,14 +300,15 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             if ( p_fixed_tick_rate->type != JSON_VALUE_INTEGER ) goto fixed_tick_rate_is_wrong_type;
 
             // Store the fixed tick rate
-            p_instance->context.fixed_tick_rate = p_fixed_tick_rate->integer;
+            p_instance->context.fixed_tick_rate = (u16) p_fixed_tick_rate->integer;
         }
 
         // Initialize window system integration
-        #ifdef BUILD_G10_WITH_SDL2
+        #ifdef G10_BUILD_WITH_SDL2
 
             // External functions
             extern int g_sdl2_init ( g_instance *p_instance );
+            extern int g_sdl2_window_from_json ( g_instance *p_instance, const json_value *p_value );
 
             // SDL2
             g_sdl2_init(p_instance);
@@ -382,7 +382,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
     // Clean up
     json_value_free(p_value);
-    G10_REALLOC(p_file_contents, 0);
+    p_file_contents = G10_REALLOC(p_file_contents, 0);
 
     // Success
     return 1;
@@ -456,15 +456,6 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             fixed_tick_rate_is_wrong_type:
                 #ifndef NDEBUG
                     log_error("[g10] Value must be of type [ integer ] in call to function \"%s\"\n", __FUNCTION__);
-                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
-                #endif
-
-                // Error
-                goto error_after_json_parsed;
-
-            missing_properties:
-                #ifndef NDEBUG
-                    log_error("[g10] Missing required properties in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
@@ -578,7 +569,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         error_after_json_parsed:
             json_value_free(p_value);
         error_after_file_allocated:
-            G10_REALLOC(p_file_contents, 0);
+            p_file_contents = G10_REALLOC(p_file_contents, 0);
 
         // Error
         return 0;
@@ -617,9 +608,6 @@ g_instance *g_get_active_instance ( void )
 void g_start ( void )
 {
 
-    // Initialized data
-    g_instance *p_active_instance = g_get_active_instance();
-    
     // Set the running flag
     p_active_instance->running = true;
 
@@ -632,9 +620,6 @@ void g_start ( void )
 
 void g_stop ( void )
 {
-
-    // Initialized data
-    g_instance *p_active_instance = g_get_active_instance();
 
     // Print a carriage return
     putchar('\r');
@@ -661,7 +646,7 @@ size_t g_load_file ( const char *const p_path, void *const p_buffer, bool binary
 
     // Find file size and prep for read
     fseek(f, 0, SEEK_END);
-    ret = ftell(f);
+    ret = (size_t) ftell(f);
     fseek(f, 0, SEEK_SET);
     
     // Read to data
@@ -719,7 +704,7 @@ int g_exit ( g_instance **pp_instance )
     //p_instance->time.exit = timer_high_precision();
 
     // Clean up
-    G10_REALLOC(p_instance, 0);
+    p_instance = G10_REALLOC(p_instance, 0);
 
     // Success
     return 1;

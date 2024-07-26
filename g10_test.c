@@ -336,10 +336,7 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
 {
     
     // Initialized data
-    size_t file_len = 0;
-    result_t result = 0,
-             value_eq = 0;
-    char *file_buf = 0;
+    result_t result = 0;
     g_instance *p_expected_instance = 0,
                *p_return_instance = 0;
 
@@ -348,7 +345,7 @@ bool test_g_init ( char *test_file, int(*expected_g_instance_constructor) (g_ins
         expected_g_instance_constructor(&p_expected_instance);
 
     // Parse the instance json
-    result = g_init( &p_return_instance, test_file );
+    result = (result_t) g_init( &p_return_instance, test_file );
     
     // Null pointer match
     if ( p_expected_instance == p_return_instance )
@@ -424,14 +421,13 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
 {
 
     // Initialized data
-    result_t result = 0,
-             value_eq = 0;
+    result_t result = 0;
     g_instance *p_return_instance = 0;
 
     // Parse the instance json
     g_init( &p_return_instance, test_file );
 
-    result = (result_t) g_get_active_instance();
+    result = (result_t) (size_t) g_get_active_instance();
 
     // Free the instance value
     g_exit(&p_return_instance);
@@ -446,11 +442,11 @@ bool vec2_equals_vec2 ( vec2 a, vec2 b )
 {
 
     // -0 == 0 
-    a.x = (a.x == -0.f) ? 0.f : a.x;
-    a.y = (a.y == -0.f) ? 0.f : a.y;
+    // a.x = (a.x == -0.f) ? 0.f : a.x;
+    // a.y = (a.y == -0.f) ? 0.f : a.y;
 
-    b.x = (b.x == -0.f) ? 0.f : b.x;
-    b.y = (b.y == -0.f) ? 0.f : b.y;
+    // b.x = (b.x == -0.f) ? 0.f : b.x;
+    // b.y = (b.y == -0.f) ? 0.f : b.y;
 
     return 
     (
@@ -463,13 +459,13 @@ bool vec3_equals_vec3 ( vec3 a, vec3 b )
 {
 
     // -0 == 0 
-    a.x = (a.x == -0.f) ? 0.f : a.x;
-    a.y = (a.y == -0.f) ? 0.f : a.y;
-    a.z = (a.z == -0.f) ? 0.f : a.z;
+    // a.x = (a.x == -0.f) ? 0.f : a.x;
+    // a.y = (a.y == -0.f) ? 0.f : a.y;
+    // a.z = (a.z == -0.f) ? 0.f : a.z;
 
-    b.x = (b.x == -0.f) ? 0.f : b.x;
-    b.y = (b.y == -0.f) ? 0.f : b.y;
-    b.z = (b.z == -0.f) ? 0.f : b.z;
+    // b.x = (b.x == -0.f) ? 0.f : b.x;
+    // b.y = (b.y == -0.f) ? 0.f : b.y;
+    // b.z = (b.z == -0.f) ? 0.f : b.z;
     
     return 
     (
@@ -483,15 +479,15 @@ bool vec4_equals_vec4 ( vec4 a, vec4 b )
 {
 
     // -0 == 0 
-    a.x = (a.x == -0.f) ? 0.f : a.x;
-    a.y = (a.y == -0.f) ? 0.f : a.y;
-    a.z = (a.z == -0.f) ? 0.f : a.z;
-    a.w = (a.w == -0.f) ? 0.f : a.w;
+    // a.x = (a.x == -0.f) ? 0.f : a.x;
+    // a.y = (a.y == -0.f) ? 0.f : a.y;
+    // a.z = (a.z == -0.f) ? 0.f : a.z;
+    // a.w = (a.w == -0.f) ? 0.f : a.w;
 
-    b.x = (b.x == -0.f) ? 0.f : b.x;
-    b.y = (b.y == -0.f) ? 0.f : b.y;
-    b.z = (b.z == -0.f) ? 0.f : b.z;
-    b.w = (b.w == -0.f) ? 0.f : b.w;
+    // b.x = (b.x == -0.f) ? 0.f : b.x;
+    // b.y = (b.y == -0.f) ? 0.f : b.y;
+    // b.z = (b.z == -0.f) ? 0.f : b.z;
+    // b.w = (b.w == -0.f) ? 0.f : b.w;
 
     return 
     (
@@ -506,15 +502,15 @@ bool mat2_equals_mat2 ( mat2 m, mat2 n )
 {
 
     // -0 == 0 
-    m.a = (m.a == -0.f) ? 0.f : m.a;
-    m.b = (m.b == -0.f) ? 0.f : m.b;
-    m.c = (m.c == -0.f) ? 0.f : m.c;
-    m.d = (m.d == -0.f) ? 0.f : m.d;
+    // m.a = (m.a == -0.f) ? 0.f : m.a;
+    // m.b = (m.b == -0.f) ? 0.f : m.b;
+    // m.c = (m.c == -0.f) ? 0.f : m.c;
+    // m.d = (m.d == -0.f) ? 0.f : m.d;
 
-    n.a = (n.a == -0.f) ? 0.f : n.a;
-    n.b = (n.b == -0.f) ? 0.f : n.b;
-    n.c = (n.c == -0.f) ? 0.f : n.c;
-    n.d = (n.d == -0.f) ? 0.f : n.d;
+    // n.a = (n.a == -0.f) ? 0.f : n.a;
+    // n.b = (n.b == -0.f) ? 0.f : n.b;
+    // n.c = (n.c == -0.f) ? 0.f : n.c;
+    // n.d = (n.d == -0.f) ? 0.f : n.d;
 
     return 
     (
@@ -529,25 +525,25 @@ bool mat3_equals_mat3 ( mat3 m, mat3 n )
 {
 
     // -0 == 0 
-    m.a = (m.a == -0.f) ? 0.f : m.a;
-    m.b = (m.b == -0.f) ? 0.f : m.b;
-    m.c = (m.c == -0.f) ? 0.f : m.c;
-    m.d = (m.d == -0.f) ? 0.f : m.d;
-    m.e = (m.e == -0.f) ? 0.f : m.e;
-    m.f = (m.f == -0.f) ? 0.f : m.f;
-    m.g = (m.g == -0.f) ? 0.f : m.g;
-    m.h = (m.h == -0.f) ? 0.f : m.h;
-    m.i = (m.i == -0.f) ? 0.f : m.i;
+    // m.a = (m.a == -0.f) ? 0.f : m.a;
+    // m.b = (m.b == -0.f) ? 0.f : m.b;
+    // m.c = (m.c == -0.f) ? 0.f : m.c;
+    // m.d = (m.d == -0.f) ? 0.f : m.d;
+    // m.e = (m.e == -0.f) ? 0.f : m.e;
+    // m.f = (m.f == -0.f) ? 0.f : m.f;
+    // m.g = (m.g == -0.f) ? 0.f : m.g;
+    // m.h = (m.h == -0.f) ? 0.f : m.h;
+    // m.i = (m.i == -0.f) ? 0.f : m.i;
 
-    n.a = (n.a == -0.f) ? 0.f : n.a;
-    n.b = (n.b == -0.f) ? 0.f : n.b;
-    n.c = (n.c == -0.f) ? 0.f : n.c;
-    n.d = (n.d == -0.f) ? 0.f : n.d;
-    n.e = (n.e == -0.f) ? 0.f : n.e;
-    n.f = (n.f == -0.f) ? 0.f : n.f;
-    n.g = (n.g == -0.f) ? 0.f : n.g;
-    n.h = (n.h == -0.f) ? 0.f : n.h;
-    n.i = (n.i == -0.f) ? 0.f : n.i;
+    // n.a = (n.a == -0.f) ? 0.f : n.a;
+    // n.b = (n.b == -0.f) ? 0.f : n.b;
+    // n.c = (n.c == -0.f) ? 0.f : n.c;
+    // n.d = (n.d == -0.f) ? 0.f : n.d;
+    // n.e = (n.e == -0.f) ? 0.f : n.e;
+    // n.f = (n.f == -0.f) ? 0.f : n.f;
+    // n.g = (n.g == -0.f) ? 0.f : n.g;
+    // n.h = (n.h == -0.f) ? 0.f : n.h;
+    // n.i = (n.i == -0.f) ? 0.f : n.i;
 
     return 
     (
@@ -567,39 +563,39 @@ bool mat4_equals_mat4 ( mat4 m, mat4 n )
 {
 
     // -0 == 0 
-    m.a = (m.a == -0.f) ? 0.f : m.a;
-    m.b = (m.b == -0.f) ? 0.f : m.b;
-    m.c = (m.c == -0.f) ? 0.f : m.c;
-    m.d = (m.d == -0.f) ? 0.f : m.d;
-    m.e = (m.e == -0.f) ? 0.f : m.e;
-    m.f = (m.f == -0.f) ? 0.f : m.f;
-    m.g = (m.g == -0.f) ? 0.f : m.g;
-    m.h = (m.h == -0.f) ? 0.f : m.h;
-    m.i = (m.i == -0.f) ? 0.f : m.i;
-    m.j = (m.j == -0.f) ? 0.f : m.j;
-    m.k = (m.k == -0.f) ? 0.f : m.k;
-    m.l = (m.l == -0.f) ? 0.f : m.l;
-    m.m = (m.m == -0.f) ? 0.f : m.m;
-    m.n = (m.n == -0.f) ? 0.f : m.n;
-    m.o = (m.o == -0.f) ? 0.f : m.o;
-    m.p = (m.p == -0.f) ? 0.f : m.p;
+    // m.a = (m.a == -0.f) ? 0.f : m.a;
+    // m.b = (m.b == -0.f) ? 0.f : m.b;
+    // m.c = (m.c == -0.f) ? 0.f : m.c;
+    // m.d = (m.d == -0.f) ? 0.f : m.d;
+    // m.e = (m.e == -0.f) ? 0.f : m.e;
+    // m.f = (m.f == -0.f) ? 0.f : m.f;
+    // m.g = (m.g == -0.f) ? 0.f : m.g;
+    // m.h = (m.h == -0.f) ? 0.f : m.h;
+    // m.i = (m.i == -0.f) ? 0.f : m.i;
+    // m.j = (m.j == -0.f) ? 0.f : m.j;
+    // m.k = (m.k == -0.f) ? 0.f : m.k;
+    // m.l = (m.l == -0.f) ? 0.f : m.l;
+    // m.m = (m.m == -0.f) ? 0.f : m.m;
+    // m.n = (m.n == -0.f) ? 0.f : m.n;
+    // m.o = (m.o == -0.f) ? 0.f : m.o;
+    // m.p = (m.p == -0.f) ? 0.f : m.p;
 
-    n.a = (n.a == -0.f) ? 0.f : n.a;
-    n.b = (n.b == -0.f) ? 0.f : n.b;
-    n.c = (n.c == -0.f) ? 0.f : n.c;
-    n.d = (n.d == -0.f) ? 0.f : n.d;
-    n.e = (n.e == -0.f) ? 0.f : n.e;
-    n.f = (n.f == -0.f) ? 0.f : n.f;
-    n.g = (n.g == -0.f) ? 0.f : n.g;
-    n.h = (n.h == -0.f) ? 0.f : n.h;
-    n.i = (n.i == -0.f) ? 0.f : n.i;
-    n.j = (n.j == -0.f) ? 0.f : n.j;
-    n.k = (n.k == -0.f) ? 0.f : n.k;
-    n.l = (n.l == -0.f) ? 0.f : n.l;
-    n.m = (n.m == -0.f) ? 0.f : n.m;
-    n.n = (n.n == -0.f) ? 0.f : n.n;
-    n.o = (n.o == -0.f) ? 0.f : n.o;
-    n.p = (n.p == -0.f) ? 0.f : n.p;
+    // n.a = (n.a == -0.f) ? 0.f : n.a;
+    // n.b = (n.b == -0.f) ? 0.f : n.b;
+    // n.c = (n.c == -0.f) ? 0.f : n.c;
+    // n.d = (n.d == -0.f) ? 0.f : n.d;
+    // n.e = (n.e == -0.f) ? 0.f : n.e;
+    // n.f = (n.f == -0.f) ? 0.f : n.f;
+    // n.g = (n.g == -0.f) ? 0.f : n.g;
+    // n.h = (n.h == -0.f) ? 0.f : n.h;
+    // n.i = (n.i == -0.f) ? 0.f : n.i;
+    // n.j = (n.j == -0.f) ? 0.f : n.j;
+    // n.k = (n.k == -0.f) ? 0.f : n.k;
+    // n.l = (n.l == -0.f) ? 0.f : n.l;
+    // n.m = (n.m == -0.f) ? 0.f : n.m;
+    // n.n = (n.n == -0.f) ? 0.f : n.n;
+    // n.o = (n.o == -0.f) ? 0.f : n.o;
+    // n.p = (n.p == -0.f) ? 0.f : n.p;
 
     return 
     (
@@ -998,15 +994,15 @@ bool quaternion_equals_quaternion ( quaternion a, quaternion b )
 {
 
     // -0 == 0 
-    a.u = (a.u == -0.f) ? 0.f : a.u;
-    a.i = (a.i == -0.f) ? 0.f : a.i;
-    a.j = (a.j == -0.f) ? 0.f : a.j;
-    a.k = (a.k == -0.f) ? 0.f : a.k;
+    // a.u = (a.u == -0.f) ? 0.f : a.u;
+    // a.i = (a.i == -0.f) ? 0.f : a.i;
+    // a.j = (a.j == -0.f) ? 0.f : a.j;
+    // a.k = (a.k == -0.f) ? 0.f : a.k;
 
-    b.u = (b.u == -0.f) ? 0.f : b.u;
-    b.i = (b.i == -0.f) ? 0.f : b.i;
-    b.j = (b.j == -0.f) ? 0.f : b.j;
-    b.k = (b.k == -0.f) ? 0.f : b.k;
+    // b.u = (b.u == -0.f) ? 0.f : b.u;
+    // b.i = (b.i == -0.f) ? 0.f : b.i;
+    // b.j = (b.j == -0.f) ? 0.f : b.j;
+    // b.k = (b.k == -0.f) ? 0.f : b.k;
 
     return 
     (
@@ -1033,10 +1029,10 @@ bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback,
     g_instance *p_return_instance = 0;
 
     // Parse the instance json
-    g_init( &p_return_instance, "test\ cases/core/minimal_instance.json" );
+    g_init( &p_return_instance, "test cases/core/minimal_instance.json" );
 
     // Set the user code callback
-    result = user_code_callback_set(p_return_instance, pfn_user_code_callback);
+    result = (result_t) user_code_callback_set(p_return_instance, pfn_user_code_callback);
 
     // Test for error
     if ( result == zero ) goto done;
@@ -1065,7 +1061,7 @@ bool test_user_code_callback ( const char *const path, fn_user_code_callback pfn
     user_code_callback_set(p_return_instance, pfn_user_code_callback);
 
     // Run the callback
-    result = user_code_callback(p_return_instance);
+    result = (result_t) user_code_callback(p_return_instance);
 
     // Test for error
     if ( result == zero ) goto done;
@@ -1155,7 +1151,7 @@ void test_g10_linear_vec2 ( const char *name )
     print_test(name, "length ||<0.0, 0.0>||"  , test_vec2_length((vec2){ 0.0f, 0.0f }, 0.0f, match));
     print_test(name, "length ||<1.0, 0.0>||"  , test_vec2_length((vec2){ 1.0f, 0.0f }, 1.0f, match));
     print_test(name, "length ||<0.0, 1.0>||"  , test_vec2_length((vec2){ 0.0f, 1.0f }, 1.0f, match));
-    print_test(name, "length ||<1.0, 1.0>||\n", test_vec2_length((vec2){ 1.0f, 1.0f } , (M_SQRT1_2 * 2), match));
+    print_test(name, "length ||<1.0, 1.0>||\n", test_vec2_length((vec2){ 1.0f, 1.0f } , (float) (M_SQRT1_2 * 2.0), match));
     
     // Promote 3D
     print_test(name, "to vec3 < 1.0, 2.0> -> <1.0, 2.0, 0.0>", test_vec2_promote_vec3((vec2){1.0f, 2.0f}, (vec3){1.0f, 2.0f, 0.0f}, match));
@@ -1645,6 +1641,9 @@ void test_g10_user_code ( const char *name )
 void test_g10_linear_vectors ( const char *name )
 {
     
+    // Unused
+    (void) name;
+
     // Initialized data
     timestamp g10_vec2_t0 = 0,
               g10_vec2_t1 = 0,
@@ -1713,6 +1712,9 @@ void test_g10_linear_vectors ( const char *name )
 
 void test_g10_linear_matrices ( const char *name )
 {
+
+    // Unused
+    (void) name;
 
     // Initialized data
     timestamp g10_mat2_t0 = 0,
@@ -1819,18 +1821,42 @@ int construct_minimal_g10_instance ( g_instance **pp_instance )
 int construct_identity_transform ( transform **pp_transform )
 {
 
+    // Argument check
+    if ( pp_transform == (void *) 0 ) goto no_transform;
+
     // Initialized data
     transform *p_transform = 0;
 
     // Construct the identity transform
-    return transform_construct(pp_transform, (vec3) {0, 0, 0}, (vec3) { 0, 0, 0 }, (vec3) { 1, 1, 1 }, 0);
+    if ( transform_construct(&p_transform, (vec3) {0, 0, 0}, (vec3) { 0, 0, 0 }, (vec3) { 1, 1, 1 }, 0) == 0 ) goto no_transform;
+
+    // Success
+    return 1;
+    
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+                
+                // Error
+                return 0;
+        }
+    }
 }
 
 int construct_identity_camera ( camera **pp_camera )
 {
 
     // Initialized data
-    camera *p_camera = 0;
+    //
+
+    // Unused
+    (void) pp_camera;
 
     // TODO
     //

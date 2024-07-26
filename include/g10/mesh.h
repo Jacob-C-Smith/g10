@@ -89,7 +89,7 @@ struct mesh_data_s
             GLuint vertex_buffers[32];
             GLuint vertex_arrays[32];
             GLuint element_arrays[32];
-            int indices;
+            size_t indices;
         } opengl;
     #endif
 };

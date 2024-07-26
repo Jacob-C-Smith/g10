@@ -96,7 +96,7 @@ struct shader_s
  */
 DLLEXPORT int shader_from_json ( shader **pp_shader, const char *const p_name, json_value *p_value );
 
-DLLEXPORT int shader_from_json_2 ( shader **pp_shader, const char *const p_name, json_value *p_value );
+DLLEXPORT int shader_from_json_2 ( shader **pp_shader, const char *const p_name, const json_value *p_value );
 
 // Mutators
 DLLEXPORT int shader_draw_item_add ( shader *p_shader, void *p_draw_item );
@@ -124,4 +124,4 @@ DLLEXPORT int shader_bind ( shader *p_shader );
  */
 DLLEXPORT int shader_info ( const shader *const p_shader );
 
-DLLEXPORT int shader_bind_camera ( shader *p_shader, const camera *const p_camera );
+DLLEXPORT int shader_bind_camera ( shader *p_shader, camera *p_camera );

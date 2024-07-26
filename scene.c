@@ -62,8 +62,8 @@ int scene_create ( scene **pp_scene )
 
 int scene_from_json
 (
-    scene      **pp_scene,
-    json_value  *p_value
+    scene            **pp_scene,
+    const json_value  *p_value
 )
 {
 
@@ -81,6 +81,9 @@ int scene_from_json
            light_quantity  = 0;
     char **p_entity_names = (void *) 0;
     char *_camera_names[G10_SCENE_CAMERA_MAX] = { 0 };
+    
+    // Unused
+    (void) light_quantity;
 
     // Parse the json value into a scene
     {
@@ -91,6 +94,9 @@ int scene_from_json
                          *p_entities = dict_get(p_dict, "entities"),
                          *p_cameras  = dict_get(p_dict, "cameras"),
                          *p_lights   = dict_get(p_dict, "lights");
+
+        // Unused
+        (void) p_lights;
 
         // Extra check
         if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [scene] Consider adding a \"$schema\" property to the scene");
@@ -112,10 +118,10 @@ int scene_from_json
         if ( p_entity_names == (void *) 0 ) goto no_mem;
 
         // Store entity names
-        dict_keys(p_entities->object, p_entity_names);
+        dict_keys(p_entities->object, (const char **const) p_entity_names);
 
         // Store camera names
-        dict_keys(p_cameras->object, &_camera_names);
+        dict_keys(p_cameras->object, (const char **const) &_camera_names);
 
         // Set the name
         {
@@ -142,11 +148,11 @@ int scene_from_json
         {
 
             // Initialized data
-            json_value *p_value  = dict_get(p_entities->object, p_entity_names[i]);
-            entity     *p_entity = (void *) 0;
+            const json_value *p_entities_value  = dict_get(p_entities->object, p_entity_names[i]);
+            entity           *p_entity = (void *) 0;
 
             // Construct the entity
-            if ( entity_from_json(&p_entity, p_entity_names[i], p_value) == 0 ) goto failed_to_construct_entity;
+            if ( entity_from_json(&p_entity, p_entity_names[i], p_entities_value) == 0 ) goto failed_to_construct_entity;
 
             // Add the entity to the scene
             dict_add(_scene.data.entities, p_entity->_name, p_entity);
@@ -157,14 +163,14 @@ int scene_from_json
         {
 
             // Initialized data
-            camera     *p_camera = (void *) 0;
-            json_value *p_value  = dict_get(p_cameras->object, _camera_names[i]);
+            camera           *p_camera = (void *) 0;
+            const json_value *p_cameras_value  = dict_get(p_cameras->object, _camera_names[i]);
 
             // Error check
-            if ( p_value == (void *)0 ) goto failed_to_get_dictionary;
+            if ( p_cameras_value == (void *)0 ) goto failed_to_get_dictionary;
 
             // Construct the camera
-            if ( camera_from_json(&p_camera, _camera_names[i], p_value) == 0 ) goto failed_to_construct_camera;
+            if ( camera_from_json(&p_camera, _camera_names[i], p_cameras_value) == 0 ) goto failed_to_construct_camera;
 
             // Add the camera to the scene
             dict_add(_scene.data.entities, p_camera->_name, p_camera);
@@ -204,17 +210,6 @@ int scene_from_json
                     log_error("[g10] [scene] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
                 
-                // Error
-                return 0;
-        }
-
-        // array errors
-        {
-            failed_to_index_array:
-                #ifndef NDEBUG
-                    log_error("[g10] [scene] Failed to index array in call to function \"%s\"\n", __FUNCTION__);
-                #endif
-
                 // Error
                 return 0;
         }
@@ -324,7 +319,7 @@ entity *scene_entity_get ( const scene *const p_scene, const char *const p_name 
     // TODO: Argument check
 
     // Done
-    return dict_get(p_scene->data.entities, p_name);
+    return (entity *) dict_get(p_scene->data.entities, p_name);
 
     // TODO: Error handling
     {
@@ -338,13 +333,20 @@ entity *scene_entity_get ( const scene *const p_scene, const char *const p_name 
 
 int scene_entity_add ( scene *p_scene, entity *p_entity )
 {
-
+    
+    // Unused
+    (void)p_scene;
+    (void)p_entity;
+    
     // Success
     return 1;
 }
 
 int scene_destroy ( scene **pp_scene )
 {
+
+    // Unused
+    (void)pp_scene;
 
     // Success
     return 1;

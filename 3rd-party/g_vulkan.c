@@ -338,7 +338,7 @@ int g_vulkan_initialize ( g_instance *p_instance, json_value *p_value )
     json_value *p_validation = (void *) 0,
                *p_device     = (void *) 0;
 
-    #ifdef BUILD_G10_WITH_SDL2
+    #ifdef G10_BUILD_WITH_SDL2
         
         // Get the quantity of required instance extensions
         if ( SDL_Vulkan_GetInstanceExtensions(p_instance->window.sdl2.window, &extension_count, (void *) 0) == SDL_FALSE ) goto failed_to_get_instance_extensions;

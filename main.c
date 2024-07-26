@@ -103,28 +103,20 @@ int user_code_main ( g_instance *const p_instance )
 {
 
     // Initialized data
-    static int c = 0;
     camera *p_camera = p_instance->context.p_scene->context.p_camera;
-    entity *p_ball_1   = dict_get(p_instance->context.p_scene->data.entities, "ball 1"),
-           *p_ball_2   = dict_get(p_instance->context.p_scene->data.entities, "ball 2");
-    mesh_data *p_ball_data_1 = p_ball_1->p_mesh->_p_meshes[0],
-              *p_ball_data_2 = p_ball_2->p_mesh->_p_meshes[0];
+    // entity *p_ball_1   = dict_get(p_instance->context.p_scene->data.entities, "ball 1"),
+    //        *p_ball_2   = dict_get(p_instance->context.p_scene->data.entities, "ball 2");
+    // mesh_data *p_ball_data_1 = p_ball_1->p_mesh->_p_meshes[0],
+    //           *p_ball_data_2 = p_ball_2->p_mesh->_p_meshes[0];
 
     // Exit the game?
-    if ( input_bind_value("QUIT") ) g_stop();
+    if ( (bool) input_bind_value("QUIT") ) g_stop();
 
     // Toggle mouse locking
-    if ( input_bind_value("MOUSE LOCK") ) input_mouse_lock_toggle();
+    if ( (bool) input_bind_value("MOUSE LOCK") ) input_mouse_lock_toggle();
 
     // Update the camera controller
     p_camera->pfn_camera_controller(p_camera);
-
-    // Animate the ball
-    p_ball_data_1->p_transform->location.z = 6.0 + 3.0 * sinf((float) c / (float)60);
-    p_ball_data_2->p_transform->location.z = 6.0 + 3.0 * cosf((float) c / (float)60);
-
-    // Increment the counter
-    c++;
 
     // Success
     return 1;

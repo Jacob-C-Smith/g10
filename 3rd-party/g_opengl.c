@@ -12,8 +12,12 @@
 #include <g10/mesh.h>
 #include <g10/shader.h>
 
-// SDL2
-#include <SDL2/SDL.h>
+#ifdef G10_BUILD_WITH_OPENGL
+
+#ifdef G10_BUILD_WITH_SDL2
+    // SDL2
+    #include <SDL2/SDL.h>
+#endif
 
 // OpenGL
 #include <glad/glad.h>
@@ -48,7 +52,7 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
     glEnable(GL_CULL_FACE); 
     glCullFace(GL_FRONT);  
     glFrontFace(GL_CCW);  
-
+ 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);  
     glDepthFunc(GL_LESS);  
@@ -72,8 +76,11 @@ int g_opengl_initialize ( g_instance *p_instance, json_value *p_value )
 int g_opengl_window_resize ( g_instance *p_instance, u32 width, u32 height )
 {
 
+    // Unused
+    (void) p_instance;
+
     // Update the viewport
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
     // Success
     return 1;
@@ -115,11 +122,11 @@ int g_opengl_mesh_construct
 
     // Buffer the verticies
     glBindBuffer(GL_ARRAY_BUFFER, p_mesh_data->opengl.vertex_buffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, _mesh_create_info.verticies.quantity * sizeof(f32), _mesh_create_info.verticies.p_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) (_mesh_create_info.verticies.quantity * sizeof(f32)), _mesh_create_info.verticies.p_data, GL_STATIC_DRAW);
 
-    // Buffer the indicies
+    // Buffer the indicies 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_mesh_data->opengl.element_arrays[0]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _mesh_create_info.elements.quantity * sizeof(u32), _mesh_create_info.elements.p_data, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(_mesh_create_info.elements.quantity * sizeof(u32)), _mesh_create_info.elements.p_data, GL_STATIC_DRAW);
 
     // Add vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), 0);
@@ -129,7 +136,7 @@ int g_opengl_mesh_construct
 
     // Bind the array buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0); 
+    glBindVertexArray(0);  
 
     // Set the quantity of indices
     p_mesh_data->opengl.indices = _mesh_create_info.elements.quantity;
@@ -185,8 +192,8 @@ int g_opengl_mesh_construct
 
 int g_opengl_shader_construct
 (
-    shader     **pp_shader,
-    json_value  *p_value
+    shader           **pp_shader,
+    const json_value  *p_value
 )
 {
 
@@ -206,8 +213,11 @@ int g_opengl_shader_construct
     int success;
     char _vs_src[512] = { 0 };
     char _fs_src[512] = { 0 };
-    char *p_vs_src = &_vs_src;
-    char *p_fs_src = &_fs_src;
+    char *p_vs_src = (char *)&_vs_src;
+    char *p_fs_src = (char *)&_fs_src;
+
+    // Unused 
+    (void) p_layout;
 
     // Error check
     if ( p_shader == (void *) 0 ) goto no_mem;
@@ -232,8 +242,8 @@ int g_opengl_shader_construct
     p_shader->opengl.fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
     // Attach source code to each shader handle
-    glShaderSource(p_shader->opengl.vertex_shader, 1, &p_vs_src, &vertex_source_len);
-    glShaderSource(p_shader->opengl.fragment_shader, 1, &p_fs_src, &fragment_source_len);
+    glShaderSource(p_shader->opengl.vertex_shader, 1, (const GLchar **)&p_vs_src, (const GLint *)&vertex_source_len);
+    glShaderSource(p_shader->opengl.fragment_shader, 1, (const GLchar **)&p_fs_src, (const GLint *)&fragment_source_len);
 
     // Compile the vertex and fragment shaders
     glCompileShader(p_shader->opengl.vertex_shader);
@@ -323,20 +333,20 @@ int g_opengl_shader_construct
         }
 
         // OpenGL errors
+        failed_to_compile_shader:
         {
-            failed_to_compile_shader:
             
-                // Initialized data
-                char _log[512] = { 0 };
+            // Initialized data
+            char _log[512] = { 0 };
 
-                // Get the output
-                glGetProgramInfoLog(p_shader->opengl.program, 512, NULL, &_log);
+            // Get the output
+            glGetProgramInfoLog(p_shader->opengl.program, 512, NULL, (GLchar *)&_log);
 
-                // Print the output to standard out
-                printf("%s\n", _log);
+            // Print the output to standard out
+            printf("%s\n", _log);
 
-                // Error
-                return 0;
+            // Error
+            return 0;
         }
 
         // Standard library errors
@@ -386,16 +396,27 @@ int g_opengl_shader_bind ( shader *p_shader )
 
 int g_opengl_shader_bind_mat4 ( shader *p_shader, const char *p_name, void *p_value )
 {
-    glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, p_name), 1, GL_FALSE, p_value);
+
+    // Bind the 4x4 matrix
+    glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, p_name), 1, GL_FALSE, p_value); 
+
+    // Success
+    return 1;
 }
 
 int g_opengl_shader_bind_camera ( shader *p_shader, const camera *const p_camera, ... )
 {
+
+    // Initialized data
     mat4 _p = p_camera->matrix._projection,
          _v = p_camera->matrix._view;
-        
+    
+    // Bind projection and view matricies
     g_opengl_shader_bind_mat4(p_shader, "P", &_p);
     g_opengl_shader_bind_mat4(p_shader, "V", &_v);
-    
+
+    // Success
+    return 1;
 }
 
+#endif

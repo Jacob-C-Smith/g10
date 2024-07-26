@@ -95,7 +95,7 @@ int input_bind_from_json ( input_bind **pp_input_bind, const char *const p_name,
         json_value *p_key_value = (void *) 0;
 
         // Store the i'th element
-        array_index(p_value->list, i, &p_key_value);
+        array_index(p_value->list, (signed int)i, (void **const)&p_key_value);
 
         // Type check
         if ( p_key_value->type != JSON_VALUE_STRING ) goto wrong_key_type;
@@ -111,14 +111,14 @@ int input_bind_from_json ( input_bind **pp_input_bind, const char *const p_name,
             extern dict *p_sdl2_key_scancode;
 
             // Lookup the key
-            void *p_key_scancode = dict_get(p_sdl2_key_scancode, p_key);
+            const void *p_key_scancode = dict_get(p_sdl2_key_scancode, p_key);
 
             // Error check
             if ( p_key_scancode == (void *) 0 ) goto bind_not_found;
 
             // Store the scancode
-            p_input_bind->_scancodes[i] = p_key_scancode;
-        #elif
+            p_input_bind->_scancodes[i] = (void *) p_key_scancode;
+        #else
         #endif
     }
 
@@ -268,7 +268,7 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
         }
 
         // Store the mouse sensitivity
-        p_input->mouse_sensitivity = p_mouse_sensitivity_value->number;
+        p_input->mouse_sensitivity = (float) p_mouse_sensitivity_value->number;
 
         // Store the binds
         {
@@ -281,7 +281,7 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
             if ( bind_keys == (void *) 0 ) goto no_mem;
 
             // Get the keys
-            dict_keys(p_binds_value->object, bind_keys);
+            dict_keys(p_binds_value->object, (const char **const) bind_keys);
 
             // Grow the allocation
             p_input = G10_REALLOC(p_input, sizeof(input) + bind_quantity * sizeof(input_bind *));
@@ -297,8 +297,8 @@ int input_from_json ( input **pp_input, const json_value *const p_value )
             {
                 
                 // Initialized data
-                input_bind *p_input_bind = (void *) 0;
-                json_value *p_bind_value = dict_get(p_binds_value->object, bind_keys[i]);
+                input_bind       *p_input_bind = (void *) 0;
+                const json_value *p_bind_value = dict_get(p_binds_value->object, bind_keys[i]);
 
                 // Construct the input bind
                 if ( input_bind_from_json(&p_input_bind, bind_keys[i], p_bind_value) == 0 ) goto failed_to_construct_bind;
@@ -442,7 +442,7 @@ int input_scancode_to_name ( const char **pp_result, void *scancode )
         extern int g_sdl2_scancode_to_name ( void **pp_result, void *scancode );
 
         // Get the scancode
-        g_sdl2_scancode_to_name(pp_result, scancode);
+        g_sdl2_scancode_to_name((void **) pp_result, scancode);
     #endif
 
     // Success
@@ -489,7 +489,7 @@ int input_info ( const input *const p_input )
         {
 
             // Initialized data
-            char *p_name = (void *) 0 ;
+            const char *p_name = (void *) 0 ;
 
             // Get the scancode
             input_scancode_to_name(&p_name, p_input_bind->_scancodes[j]);
@@ -528,7 +528,7 @@ int input_poll ( g_instance *p_instance )
     if ( p_instance == (void *) 0 ) goto no_instance;
 
     // Window system integration depenant implementation
-    #ifdef BUILD_G10_WITH_SDL2
+    #ifdef G10_BUILD_WITH_SDL2
         
         // External functions
         extern int g_sdl2_window_poll ( g_instance *p_instance );
@@ -567,7 +567,7 @@ float input_bind_value ( const char *const p_bind_name )
 
     // Initialized data
     g_instance *p_instance = g_get_active_instance();
-    input_bind *p_input_bind = dict_get(p_instance->context.p_input->p_binds, p_bind_name);
+    const input_bind *p_input_bind = dict_get(p_instance->context.p_input->p_binds, p_bind_name);
 
     // Success
     return p_input_bind->value;
@@ -592,14 +592,14 @@ void input_mouse_lock_toggle ( void )
 {
 
     // WSI dependant implementation
-    #ifdef BUILD_G10_WITH_SDL2
+    #ifdef G10_BUILD_WITH_SDL2
 
         // External functions
         extern void g_sdl2_mouse_lock_toggle ( void );
 
         // Toggle mouse locking
         g_sdl2_mouse_lock_toggle();
-    #elif
+    #else
 
     #endif
 

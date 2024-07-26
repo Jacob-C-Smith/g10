@@ -102,7 +102,7 @@ int shell_accept_connection ( socket_tcp _socket_tcp, unsigned long ip_address, 
         }
 
         // Evaluate
-        r = shell_evaluate(&_buf, &_out);
+        r = shell_evaluate((char *)&_buf, (char *)&_out);
 
         // Error check
         if ( r == -1 )
@@ -194,10 +194,13 @@ int shell_loop ( g_instance *p_instance )
         if ( fgets(_buf, sizeof(_buf), stdin) == 0 ) break; 
 
         // Evaluate
-        r = shell_evaluate(&_buf, &_out);
+        r = shell_evaluate((char *)&_buf, (char *)&_out);
+
+        // Error check
+        if ( r == -1 ) break;
 
         // Print
-        printf("%s", &_out);
+        printf("%s", (char *)&_out);
     } 
 
     // Log the detach
@@ -229,7 +232,7 @@ int shell_evaluate ( char *p_input, char *p_output )
     if ( strlen(p_input) == 1 ) return 1;
 
     // Quit
-    if ( strncmp(p_input, "quit", 4) == 0 )
+    if ( strncmp(p_input, "exit", 4) == 0 )
     {
         
         // Clear the run flag
