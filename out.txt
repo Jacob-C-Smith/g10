@@ -1,0 +1,638 @@
+[  1%] Building C object log/CMakeFiles/log.dir/log.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[  2%] Linking C shared library /home/j/Desktop/c/g10/lib/liblog.so
+[  2%] Built target log
+[  3%] Building C object sync/CMakeFiles/sync.dir/sync.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[  3%] Linking C shared library /home/j/Desktop/c/g10/lib/libsync.so
+[  3%] Built target sync
+[  4%] Building C object hash-cache/CMakeFiles/hash_cache.dir/hash_cache.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[  4%] Building C object hash-cache/CMakeFiles/hash_cache.dir/hash.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[  5%] Building C object hash-cache/CMakeFiles/hash_cache.dir/cache.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+/home/j/Desktop/c/g10/extern/hash-cache/cache.c:88:40: warning: pointer type mismatch ('fn_hash_cache_key_getter *' (aka 'void *(*)(const void *const)') and 'int (*)(const void *const, const void *)') [-Wpointer-type-mismatch]
+   88 |     p_cache->pfn_key_get = pfn_key_get ? pfn_key_get : hash_cache_equals;
+      |                                        ^ ~~~~~~~~~~~   ~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/cache.c:223:60: warning: assigning to 'void *' from 'const void *const' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  223 |     p_cache->properties.pp_data[p_cache->properties.count] = p_value;
+      |                                                            ^ ~~~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/cache.c:263:80: warning: unused parameter 'pp_result' [-Wunused-parameter]
+  263 | int cache_remove ( cache *const p_cache, const void *const p_key, void **const pp_result )
+      |                                                                                ^
+3 warnings generated.
+[  6%] Building C object hash-cache/CMakeFiles/hash_cache.dir/hash_table.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:127:13: warning: unused label 'no_mem' [-Wunused-label]
+  127 |             no_mem:
+      |             ^~~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:83:69: warning: unused parameter 'size' [-Wunused-parameter]
+   83 | int hash_table_construct ( hash_table **const pp_hash_table, size_t size )
+      |                                                                     ^
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:325:70: warning: unused parameter 'pfn_free' [-Wunused-parameter]
+  325 | int hash_table_clear ( hash_table *p_hash_table, fn_hash_cache_free *pfn_free )
+      |                                                                      ^
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:350:80: warning: unused parameter 'pfn_free' [-Wunused-parameter]
+  350 | int hash_table_destroy ( hash_table **const pp_hash_table, fn_hash_cache_free *pfn_free )
+      |                                                                                ^
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:382:14: warning: implicit conversion changes signedness: 'int' to 'size_t' (aka 'unsigned long') [-Wsign-conversion]
+  382 |         if ( n % i == 0 )
+      |              ^ ~
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:379:26: warning: comparison of integers of different signs: 'size_t' (aka 'unsigned long') and 'int' [-Wsign-compare]
+  379 |     for (size_t i = 2; i < n; i++)
+      |                        ~ ^ ~
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:395:12: warning: unused variable 'j' [-Wunused-variable]
+  395 |     size_t j = 0;
+      |            ^
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:402:61: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  402 |         if ( hash_table_is_prime(i) && hash_table_is_prime(i+2) )
+      |                                        ~~~~~~~~~~~~~~~~~~~ ~^~
+/home/j/Desktop/c/g10/extern/hash-cache/hash_table.c:402:34: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  402 |         if ( hash_table_is_prime(i) && hash_table_is_prime(i+2) )
+      |              ~~~~~~~~~~~~~~~~~~~ ^
+9 warnings generated.
+[  7%] Linking C shared library /home/j/Desktop/c/g10/lib/libhash_cache.so
+[  7%] Built target hash_cache
+[  8%] Building C object dict/CMakeFiles/dict.dir/dict.c.o
+[  9%] Linking C shared library /home/j/Desktop/c/g10/lib/libdict.so
+[  9%] Built target dict
+[  9%] Building C object array/CMakeFiles/array.dir/array.c.o
+[ 10%] Linking C shared library /home/j/Desktop/c/g10/lib/libarray.so
+[ 10%] Built target array
+[ 11%] Building C object json/CMakeFiles/json.dir/json.c.o
+[ 12%] Linking C shared library /home/j/Desktop/c/g10/lib/libjson.so
+[ 12%] Built target json
+[ 13%] Building C object queue/CMakeFiles/queue.dir/queue.c.o
+/home/j/Desktop/c/g10/extern/queue/queue.c:457:13: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  457 |         mutex_lock(&p_queue->_lock);
+      |                    ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:142:35: note: passing argument to parameter 'p_mutex' here
+  142 | DLLEXPORT int mutex_lock ( mutex *p_mutex );
+      |                                   ^
+/home/j/Desktop/c/g10/extern/queue/queue.c:463:15: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  463 |         mutex_unlock(&p_queue->_lock);
+      |                      ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:181:37: note: passing argument to parameter 'p_mutex' here
+  181 | DLLEXPORT int mutex_unlock ( mutex *p_mutex );
+      |                                     ^
+2 warnings generated.
+[ 14%] Linking C shared library /home/j/Desktop/c/g10/lib/libqueue.so
+[ 14%] Built target queue
+[ 15%] Building C object parallel/CMakeFiles/parallel.dir/parallel.c.o
+[ 16%] Building C object parallel/CMakeFiles/parallel.dir/thread.c.o
+/home/j/Desktop/c/g10/extern/parallel/thread.c:172:13: warning: unused label 'no_function_pointer' [-Wunused-label]
+  172 |             no_function_pointer:
+      |             ^~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/thread.c:201:22: warning: unused variable 'p_parallel_thread' [-Wunused-variable]
+  201 |     parallel_thread *p_parallel_thread = *pp_parallel_thread;
+      |                      ^~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/thread.c:222:13: warning: unused label 'no_function_pointer' [-Wunused-label]
+  222 |             no_function_pointer:
+      |             ^~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/thread.c:233:13: warning: unused label 'failed_to_join_pthread' [-Wunused-label]
+  233 |             failed_to_join_pthread:
+      |             ^~~~~~~~~~~~~~~~~~~~~~~
+4 warnings generated.
+[ 16%] Building C object parallel/CMakeFiles/parallel.dir/thread_pool.c.o
+/home/j/Desktop/c/g10/extern/parallel/thread_pool.c:193:13: warning: unused label 'failed_to_construct_queue' [-Wunused-label]
+  193 |             failed_to_construct_queue:
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/thread_pool.c:204:13: warning: unused label 'no_mem' [-Wunused-label]
+  204 |             no_mem:
+      |             ^~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/thread_pool.c:230:19: warning: incompatible pointer types passing 'thread_pool *' (aka 'struct thread_pool_s *') to parameter of type 'queue *' (aka 'struct queue_s *') [-Wincompatible-pointer-types]
+  230 |     queue_dequeue(p_thread_pool, &p_job);
+      |                   ^~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:44: note: passing argument to parameter 'p_queue' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                            ^
+/home/j/Desktop/c/g10/extern/parallel/thread_pool.c:230:34: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  230 |     queue_dequeue(p_thread_pool, &p_job);
+      |                                  ^~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/parallel/thread_pool.c:303:5: warning: ignoring return value of function declared with 'warn_unused_result' attribute [-Wunused-result]
+  303 |     PARALLEL_REALLOC(p_thread_pool, 0);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/include/parallel/parallel.h:63:37: note: expanded from macro 'PARALLEL_REALLOC'
+   63 |     #define PARALLEL_REALLOC(p, sz) realloc(p,sz)
+      |                                     ^~~~~~~ ~~~~
+5 warnings generated.
+[ 17%] Building C object parallel/CMakeFiles/parallel.dir/schedule.c.o
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:276:5: warning: ignoring return value of function declared with 'warn_unused_result' attribute [-Wunused-result]
+  276 |     PARALLEL_REALLOC(p_file_contents, 0);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/include/parallel/parallel.h:63:37: note: expanded from macro 'PARALLEL_REALLOC'
+   63 |     #define PARALLEL_REALLOC(p, sz) realloc(p,sz)
+      |                                     ^~~~~~~ ~~~~
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:419:21: warning: declaration shadows a local variable [-Wshadow]
+  419 |         dict       *p_dict           = p_threads->object;
+      |                     ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:358:11: note: previous declaration is here
+  358 |     dict *p_dict = p_value->object;
+      |           ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:432:29: warning: incompatible pointer types passing 'json_value *[64]' (aka 'struct json_value_s *[64]') to parameter of type 'void **' [-Wincompatible-pointer-types]
+  432 |         dict_values(p_dict, _p_values);
+      |                             ^~~~~~~~~
+/home/j/Desktop/c/g10/extern/dict/include/dict/dict.h:125:65: note: passing argument to parameter 'values' here
+  125 | DLLEXPORT size_t dict_values ( dict *const p_dict, void **const values );
+      |                                                                 ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:479:42: warning: incompatible pointer types passing 'parallel_schedule_thread *[64]' (aka 'struct parallel_schedule_thread_s *[64]') to parameter of type 'void **' [-Wincompatible-pointer-types]
+  479 |         dict_values(_schedule.p_threads, _p_threads);
+      |                                          ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/dict/include/dict/dict.h:125:65: note: passing argument to parameter 'values' here
+  125 | DLLEXPORT size_t dict_values ( dict *const p_dict, void **const values );
+      |                                                                 ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:500:47: warning: initializing 'parallel_schedule_thread *' (aka 'struct parallel_schedule_thread_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  500 |                     parallel_schedule_thread *p_dependency_thread = dict_get(_schedule.p_threads, p_task->_wait_thread);
+      |                                               ^                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:503:61: warning: if statement has empty body [-Wempty-body]
+  503 |                     if ( p_dependency_thread == (void *) 0 );
+      |                                                             ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:503:61: note: put the semicolon on a separate line to silence this warning
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:601:13: warning: unused label 'wrong_name_type' [-Wunused-label]
+  601 |             wrong_name_type:
+      |             ^~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:734:40: warning: incompatible pointer types passing 'const json_value **' (aka 'const struct json_value_s **') to parameter of type 'void **' [-Wincompatible-pointer-types]
+  734 |         (void) array_index(p_array, i, &p_ith_value);
+      |                                        ^~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/array/include/array/array.h:123:78: note: passing argument to parameter 'pp_value' here
+  123 | DLLEXPORT int array_index ( array *const p_array, signed index, void **const pp_value );
+      |                                                                              ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:806:46: warning: implicit conversion changes signedness: 'long' to 'size_t' (aka 'unsigned long') [-Wsign-conversion]
+  806 |                 wait_thread_len = (wait_task - wait_thread);
+      |                                 ~  ~~~~~~~~~~^~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:734:37: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  734 |         (void) array_index(p_array, i, &p_ith_value);
+      |                ~~~~~~~~~~~          ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:936:40: warning: incompatible pointer types passing 'parallel_schedule_thread *[64]' (aka 'struct parallel_schedule_thread_s *[64]') to parameter of type 'void **' [-Wincompatible-pointer-types]
+  936 |     dict_values(p_schedule->p_threads, _p_threads);
+      |                                        ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/dict/include/dict/dict.h:125:65: note: passing argument to parameter 'values' here
+  125 | DLLEXPORT size_t dict_values ( dict *const p_dict, void **const values );
+      |                                                                 ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:930:10: warning: unused variable 'ready' [-Wunused-variable]
+  930 |     bool ready = false;
+      |          ^~~~~
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1058:40: warning: incompatible pointer types passing 'parallel_schedule_thread *[64]' (aka 'struct parallel_schedule_thread_s *[64]') to parameter of type 'void **' [-Wincompatible-pointer-types]
+ 1058 |     dict_values(p_schedule->p_threads, _p_threads);
+      |                                        ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/dict/include/dict/dict.h:125:65: note: passing argument to parameter 'values' here
+  125 | DLLEXPORT size_t dict_values ( dict *const p_dict, void **const values );
+      |                                                                 ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1110:59: warning: unused parameter 'pp_schedule' [-Wunused-parameter]
+ 1110 | int parallel_schedule_destroy ( parallel_schedule **const pp_schedule )
+      |                                                           ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1191:47: warning: declaration shadows a local variable [-Wshadow]
+ 1191 |         const parallel_schedule_thread *const p_schedule_thread = dict_get(p_schedule->p_threads, thread_name);
+      |                                               ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1128:31: note: previous declaration is here
+ 1128 |     parallel_schedule_thread *p_schedule_thread = p_parameter->p_thread;
+      |                               ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1202:30: warning: passing 'const monitor *' to parameter of type 'monitor *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+ 1202 |                 monitor_wait(&p_schedule_thread->tasks[i]._monitor);
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:168:39: note: passing argument to parameter 'p_monitor' here
+  168 | DLLEXPORT int monitor_wait ( monitor *p_monitor );
+      |                                       ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1311:47: warning: declaration shadows a local variable [-Wshadow]
+ 1311 |         const parallel_schedule_thread *const p_schedule_thread = dict_get(p_schedule->p_threads, thread_name);
+      |                                               ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1248:31: note: previous declaration is here
+ 1248 |     parallel_schedule_thread *p_schedule_thread = p_parameter->p_thread;
+      |                               ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1322:30: warning: passing 'const monitor *' to parameter of type 'monitor *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+ 1322 |                 monitor_wait(&p_schedule_thread->tasks[i]._monitor);
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:168:39: note: passing argument to parameter 'p_monitor' here
+  168 | DLLEXPORT int monitor_wait ( monitor *p_monitor );
+      |                                       ^
+/home/j/Desktop/c/g10/extern/parallel/schedule.c:1377:11: warning: implicit conversion changes signedness: 'long' to 'size_t' (aka 'unsigned long') [-Wsign-conversion]
+ 1377 |     ret = ftell(f);
+      |         ~ ^~~~~~~~
+19 warnings generated.
+[ 18%] Linking C shared library /home/j/Desktop/c/g10/lib/libparallel.so
+[ 18%] Built target parallel
+[ 19%] Building C object socket/CMakeFiles/socket.dir/socket.c.o
+[ 20%] Linking C shared library /home/j/Desktop/c/g10/lib/libsocket.so
+[ 20%] Built target socket
+[ 21%] Building C object tuple/CMakeFiles/tuple.dir/tuple.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+/home/j/Desktop/c/g10/extern/tuple/tuple.c:293:33: warning: comparison of integers of different signs: 'const size_t' (aka 'const unsigned long') and 'long long' [-Wsign-compare]
+  293 |     if ( p_tuple->element_count == llabs(index) ) goto bounds_error;
+      |          ~~~~~~~~~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~
+1 warning generated.
+[ 22%] Linking C shared library /home/j/Desktop/c/g10/lib/libtuple.so
+[ 22%] Built target tuple
+[ 23%] Building C object circular-buffer/CMakeFiles/circular_buffer.dir/circular_buffer.c.o
+[ 24%] Linking C shared library /home/j/Desktop/c/g10/lib/libcircular_buffer.so
+[ 24%] Built target circular_buffer
+[ 25%] Building C object stack/CMakeFiles/stack.dir/stack.c.o
+[ 26%] Linking C shared library /home/j/Desktop/c/g10/lib/libstack.so
+[ 26%] Built target stack
+[ 27%] Building C object node/CMakeFiles/node.dir/node.c.o
+/home/j/Desktop/c/g10/extern/node/node.c:159:21: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  159 |         json_value *p_nodes       = dict_get(p_dict, "nodes"),
+      |                     ^               ~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:160:21: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  160 |                    *p_connections = dict_get(p_dict, "connections");
+      |                     ^               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:172:19: warning: declaration shadows a local variable [-Wshadow]
+  172 |             dict *p_dict = p_nodes->object;
+      |                   ^
+/home/j/Desktop/c/g10/extern/node/node.c:158:15: note: previous declaration is here
+  158 |         dict *p_dict = p_value->object;
+      |               ^
+/home/j/Desktop/c/g10/extern/node/node.c:177:32: warning: comparison between pointer and integer ('size_t' (aka 'unsigned long') and 'void *') [-Wpointer-integer-compare]
+  177 |             if ( node_quantity == (void *) 0 ) goto no_nodes;
+      |                  ~~~~~~~~~~~~~ ^  ~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:201:29: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  201 |                 json_value *p_node_value = dict_get(p_dict, p_key);
+      |                             ^              ~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:241:28: warning: declaration shadows a local variable [-Wshadow]
+  241 |                     array *p_array = p_connection->list;
+      |                            ^
+/home/j/Desktop/c/g10/extern/node/node.c:221:20: note: previous declaration is here
+  221 |             array *p_array = p_connections->list;
+      |                    ^
+/home/j/Desktop/c/g10/extern/node/node.c:290:36: warning: assigning to 'node *' (aka 'struct node_s *') from 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  290 |                         p_node_in  = dict_get(p_node_graph->p_nodes, in_node_text);
+      |                                    ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:291:36: warning: assigning to 'node *' (aka 'struct node_s *') from 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  291 |                         p_node_out = dict_get(p_node_graph->p_nodes, out_node_text);
+      |                                    ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:354:5: warning: unused label 'no_connections' [-Wunused-label]
+  354 |     no_connections:
+      |     ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:232:38: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  232 |                 array_index(p_array, i, (void **)&p_connection);
+      |                 ~~~~~~~~~~~          ^
+/home/j/Desktop/c/g10/extern/node/node.c:431:21: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  431 |         json_value *p_out  = dict_get(p_dict, "out"),
+      |                     ^        ~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:432:21: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  432 |                    *p_in   = dict_get(p_dict, "in"),
+      |                     ^        ~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:433:21: warning: initializing 'json_value *' (aka 'struct json_value_s *') with an expression of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  433 |                    *p_data = dict_get(p_dict, "data");
+      |                     ^        ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/node/node.c:411:123: warning: unused parameter 'pfn_node_data_constructor' [-Wunused-parameter]
+  411 | int node_construct ( node **pp_node, const char *const p_name, const json_value *const p_value, fn_node_data_constructor *pfn_node_data_constructor )
+      |                                                                                                                           ^
+/home/j/Desktop/c/g10/extern/node/node.c:459:38: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  459 |                 array_index(p_array, i, (void **)&i_value);
+      |                 ~~~~~~~~~~~          ^
+/home/j/Desktop/c/g10/extern/node/node.c:481:38: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'int' [-Wshorten-64-to-32]
+  481 |                 array_index(p_array, i, (void **)&i_value);
+      |                 ~~~~~~~~~~~          ^
+16 warnings generated.
+[ 28%] Linking C shared library /home/j/Desktop/c/g10/lib/libnode.so
+[ 28%] Built target node
+[ 29%] Building C object CMakeFiles/g10.dir/g10.c.o
+[ 30%] Building C object CMakeFiles/g10.dir/ai.c.o
+[ 31%] Building C object CMakeFiles/g10.dir/linear.c.o
+[ 32%] Building C object CMakeFiles/g10.dir/renderer.c.o
+[ 33%] Building C object CMakeFiles/g10.dir/cull.c.o
+[ 34%] Building C object CMakeFiles/g10.dir/scene.c.o
+[ 34%] Building C object CMakeFiles/g10.dir/shell.c.o
+[ 35%] Building C object CMakeFiles/g10.dir/input.c.o
+[ 36%] Building C object CMakeFiles/g10.dir/shader.c.o
+[ 37%] Building C object CMakeFiles/g10.dir/entity.c.o
+[ 38%] Building C object CMakeFiles/g10.dir/camera.c.o
+[ 39%] Building C object CMakeFiles/g10.dir/camera_controller.c.o
+[ 40%] Building C object CMakeFiles/g10.dir/mesh.c.o
+[ 41%] Building C object CMakeFiles/g10.dir/transform.c.o
+[ 41%] Building C object CMakeFiles/g10.dir/quaternion.c.o
+[ 42%] Building C object CMakeFiles/g10.dir/user_code.c.o
+[ 43%] Building C object CMakeFiles/g10.dir/3rd-party/g_sdl2.c.o
+[ 44%] Building C object CMakeFiles/g10.dir/3rd-party/g_opengl.c.o
+[ 45%] Building C object CMakeFiles/g10.dir/3rd-party/glad/glad.c.o
+/home/j/Desktop/c/g10/3rd-party/glad/glad.c:227:79: warning: implicit conversion changes signedness: 'int' to 'GLuint' (aka 'unsigned int') [-Wsign-conversion]
+  227 |             const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
+      |                                                   ~~~~~~~~~~~~                ^~~~~
+1 warning generated.
+[ 46%] Linking C shared library /home/j/Desktop/c/g10/lib/libg10.so
+[ 46%] Built target g10
+[ 47%] Building C object CMakeFiles/g10_example.dir/main.c.o
+[ 48%] Building C object CMakeFiles/g10_example.dir/3rd-party/g_sdl2.c.o
+[ 48%] Building C object CMakeFiles/g10_example.dir/3rd-party/g_opengl.c.o
+[ 49%] Building C object CMakeFiles/g10_example.dir/3rd-party/glad/glad.c.o
+/home/j/Desktop/c/g10/3rd-party/glad/glad.c:227:79: warning: implicit conversion changes signedness: 'int' to 'GLuint' (aka 'unsigned int') [-Wsign-conversion]
+  227 |             const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
+      |                                                   ~~~~~~~~~~~~                ^~~~~
+1 warning generated.
+[ 50%] Linking C executable g10_example
+[ 50%] Built target g10_example
+[ 51%] Building C object CMakeFiles/g10_test.dir/g10_test.c.o
+[ 52%] Building C object CMakeFiles/g10_test.dir/3rd-party/g_sdl2.c.o
+[ 53%] Building C object CMakeFiles/g10_test.dir/3rd-party/g_opengl.c.o
+[ 54%] Building C object CMakeFiles/g10_test.dir/3rd-party/glad/glad.c.o
+/home/j/Desktop/c/g10/3rd-party/glad/glad.c:227:79: warning: implicit conversion changes signedness: 'int' to 'GLuint' (aka 'unsigned int') [-Wsign-conversion]
+  227 |             const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
+      |                                                   ~~~~~~~~~~~~                ^~~~~
+1 warning generated.
+[ 55%] Linking C executable g10_test
+[ 55%] Built target g10_test
+[ 55%] Building C object log/CMakeFiles/log_example.dir/main.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[ 56%] Linking C executable ../log_example
+[ 56%] Built target log_example
+[ 57%] Building C object socket/CMakeFiles/socket_example.dir/main.c.o
+[ 57%] Linking C executable ../socket_example
+[ 57%] Built target socket_example
+[ 58%] Building C object hash-cache/CMakeFiles/hash_cache_example.dir/main.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+/home/j/Desktop/c/g10/extern/hash-cache/main.c:348:31: warning: format specifies type 'char *' but the argument has type 'char (*)[16]' [-Wformat]
+  348 |         fscanf(p_file, "%s ", &_word);
+      |                         ~~    ^~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/main.c:351:35: warning: incompatible pointer types passing 'word_frequency **' (aka 'struct word_frequency_s **') to parameter of type 'void **' [-Wincompatible-pointer-types]
+  351 |         cache_get(p_cache, _word, &p_word_frequency);
+      |                                   ^~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/include/hash_cache/cache.h:96:93: note: passing argument to parameter 'pp_result' here
+   96 | DLLEXPORT int cache_get ( const cache *const p_cache, const void *const p_key, void **const pp_result );
+      |                                                                                             ^
+/home/j/Desktop/c/g10/extern/hash-cache/main.c:433:17: warning: unused variable 'p_hash_table' [-Wunused-variable]
+  433 |     hash_table *p_hash_table = (void *) 0;
+      |                 ^~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/hash-cache/main.c:461:94: warning: unused parameter 'i' [-Wunused-parameter]
+  461 | int hash_cache_word_frequency_print_i ( const word_frequency *const p_word_frequency, size_t i )
+      |                                                                                              ^
+4 warnings generated.
+[ 59%] Linking C executable ../hash_cache_example
+[ 59%] Built target hash_cache_example
+[ 60%] Building C object sync/CMakeFiles/sync_example.dir/main.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[ 61%] Linking C executable ../sync_example
+[ 61%] Built target sync_example
+[ 62%] Building C object array/CMakeFiles/array_example.dir/main.c.o
+[ 63%] Linking C executable ../array_example
+[ 63%] Built target array_example
+[ 64%] Building C object array/CMakeFiles/array_test.dir/array_test.c.o
+[ 65%] Linking C executable ../array_test
+[ 65%] Built target array_test
+[ 66%] Building C object base64/CMakeFiles/base64.dir/base64.c.o
+[ 67%] Linking C shared library /home/j/Desktop/c/g10/lib/libbase64.so
+[ 67%] Built target base64
+[ 67%] Building C object base64/CMakeFiles/base64_example.dir/main.c.o
+[ 68%] Linking C executable ../base64_example
+[ 68%] Built target base64_example
+[ 69%] Building C object base64/CMakeFiles/base64_test.dir/base64_test.c.o
+[ 70%] Linking C executable ../base64_test
+[ 70%] Built target base64_test
+[ 71%] Building C object dict/CMakeFiles/dict_example.dir/main.c.o
+[ 72%] Building C object dict/CMakeFiles/dict_example.dir/dict.c.o
+[ 73%] Linking C executable ../dict_example
+[ 73%] Built target dict_example
+[ 74%] Building C object dict/CMakeFiles/dict_test.dir/dict_test.c.o
+/home/j/Desktop/c/g10/extern/dict/dict_test.c:194:14: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+  194 | int run_tests()
+      |              ^
+      |               void
+/home/j/Desktop/c/g10/extern/dict/dict_test.c:578:25: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+  578 | int print_final_summary ()
+      |                         ^
+      |                          void
+/home/j/Desktop/c/g10/extern/dict/dict_test.c:607:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  607 |     result = dict_add(p_dict, key, value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3 warnings generated.
+[ 74%] Building C object dict/CMakeFiles/dict_test.dir/dict.c.o
+[ 75%] Linking C executable ../dict_test
+[ 75%] Built target dict_test
+[ 76%] Building C object tuple/CMakeFiles/tuple_example.dir/main.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+[ 77%] Linking C executable ../tuple_example
+[ 77%] Built target tuple_example
+[ 78%] Building C object tuple/CMakeFiles/tuple_test.dir/tuple_test.c.o
+clang: warning: -lpthread: 'linker' input unused [-Wunused-command-line-argument]
+/home/j/Desktop/c/g10/extern/tuple/tuple_test.c:208:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  208 |     result = tuple_index(p_tuple, idx, &result_value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/tuple/tuple_test.c:234:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  234 |     result = tuple_slice(p_tuple, (const void **const)(&result_values), lower, upper);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2 warnings generated.
+[ 79%] Linking C executable ../tuple_test
+[ 79%] Built target tuple_test
+[ 80%] Building C object circular-buffer/CMakeFiles/circular_buffer_example.dir/main.c.o
+/home/j/Desktop/c/g10/extern/circular-buffer/main.c:52:2: warning: no newline at end of file [-Wnewline-eof]
+   52 | }
+      |  ^
+1 warning generated.
+[ 81%] Linking C executable ../circular_buffer_example
+[ 81%] Built target circular_buffer_example
+[ 81%] Building C object circular-buffer/CMakeFiles/circular_buffer_test.dir/circular_buffer_test.c.o
+/home/j/Desktop/c/g10/extern/circular-buffer/circular_buffer_test.c:693:3: warning: no newline at end of file [-Wnewline-eof]
+  693 | */
+      |   ^
+/home/j/Desktop/c/g10/extern/circular-buffer/circular_buffer_test.c:89:16: warning: unused parameter 'argc' [-Wunused-parameter]
+   89 | int main ( int argc, const char* argv[] )
+      |                ^
+/home/j/Desktop/c/g10/extern/circular-buffer/circular_buffer_test.c:89:34: warning: unused parameter 'argv' [-Wunused-parameter]
+   89 | int main ( int argc, const char* argv[] )
+      |                                  ^
+3 warnings generated.
+[ 82%] Linking C executable ../circular_buffer_test
+[ 82%] Built target circular_buffer_test
+[ 83%] Building C object stack/CMakeFiles/stack_example.dir/main.c.o
+[ 84%] Linking C executable ../stack_example
+[ 84%] Built target stack_example
+[ 85%] Building C object stack/CMakeFiles/stack_test.dir/stack_test.c.o
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:55:25: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+   55 | int run_tests           ();
+      |                         ^
+      |                          void
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:56:25: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+   56 | int print_final_summary ();
+      |                         ^
+      |                          void
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:395:25: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+  395 | int print_final_summary ()
+      |                         ^
+      |                          void
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:425:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  425 |     result = stack_push(p_stack, value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:449:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  449 |     result = stack_peek(p_stack, &result_value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/stack/stack_test.c:481:18: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  481 |         result = stack_pop(p_stack, &result_value);
+      |                ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+6 warnings generated.
+[ 86%] Linking C executable ../stack_test
+[ 86%] Built target stack_test
+[ 87%] Building C object queue/CMakeFiles/queue_example.dir/main.c.o
+/home/j/Desktop/c/g10/extern/queue/main.c:44:26: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+   44 |                 queue_dequeue(p_queue, &v);
+      |                                        ^~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/main.c:66:25: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+   66 |                 queue_dequeue(p_queue,&v);
+      |                                       ^~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/main.c:73:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+   73 |         if ( queue_dequeue(p_queue, &value) == 0 )
+      |                                     ^~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+3 warnings generated.
+[ 87%] Building C object queue/CMakeFiles/queue_example.dir/queue.c.o
+/home/j/Desktop/c/g10/extern/queue/queue.c:457:13: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  457 |         mutex_lock(&p_queue->_lock);
+      |                    ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:142:35: note: passing argument to parameter 'p_mutex' here
+  142 | DLLEXPORT int mutex_lock ( mutex *p_mutex );
+      |                                   ^
+/home/j/Desktop/c/g10/extern/queue/queue.c:463:15: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  463 |         mutex_unlock(&p_queue->_lock);
+      |                      ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:181:37: note: passing argument to parameter 'p_mutex' here
+  181 | DLLEXPORT int mutex_unlock ( mutex *p_mutex );
+      |                                     ^
+2 warnings generated.
+[ 88%] Linking C executable ../queue_example
+[ 88%] Built target queue_example
+[ 89%] Building C object queue/CMakeFiles/queue_test.dir/queue_test.c.o
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:190:14: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+  190 | int run_tests()
+      |              ^
+      |               void
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:281:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  281 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:294:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  294 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:333:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  333 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:346:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  346 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:385:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  385 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:398:30: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  398 |     queue_dequeue(*pp_queue, (void **)0);
+      |                              ^~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:425:12: warning: unused variable 'p_queue' [-Wunused-variable]
+  425 |     queue *p_queue = 0;
+      |            ^~~~~~~
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:482:50: warning: format specifies type 'long long' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+  482 |         sprintf(test_name, "queue_dequeue_%lld", i);
+      |                                           ~~~~   ^
+      |                                           %zu
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:526:25: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+  526 | int print_final_summary ()
+      |                         ^
+      |                          void
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:558:35: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  558 |     result = queue_front(p_queue, &result_value);
+      |                                   ^~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:103:70: note: passing argument to parameter 'pp_value' here
+  103 | DLLEXPORT int queue_front ( queue *const p_queue, const void **const pp_value );
+      |                                                                      ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:558:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  558 |     result = queue_front(p_queue, &result_value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:595:34: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  595 |     result = queue_rear(p_queue, &result_value);
+      |                                  ^~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:114:69: note: passing argument to parameter 'pp_value' here
+  114 | DLLEXPORT int queue_rear ( queue *const p_queue, const void **const pp_value );
+      |                                                                     ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:595:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  595 |     result = queue_rear(p_queue, &result_value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:630:14: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  630 |     result = queue_enqueue(p_queue, value);
+      |            ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:652:41: warning: passing 'void **' to parameter of type 'const void **' discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+  652 |         result = queue_dequeue(p_queue, &result_value);
+      |                                         ^~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/include/queue/queue.h:138:72: note: passing argument to parameter 'pp_value' here
+  138 | DLLEXPORT int queue_dequeue ( queue *const p_queue, const void **const pp_value );
+      |                                                                        ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:652:18: warning: implicit conversion changes signedness: 'int' to 'result_t' (aka 'enum result_e') [-Wsign-conversion]
+  652 |         result = queue_dequeue(p_queue, &result_value);
+      |                ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:689:2: warning: no newline at end of file [-Wnewline-eof]
+  689 | }
+      |  ^
+/home/j/Desktop/c/g10/extern/queue/queue_test.c:672:62: warning: unused parameter 'expected_values' [-Wunused-parameter]
+  672 | bool test_empty ( int (*queue_constructor)(queue **), void **expected_values, result_t  expected )
+      |                                                              ^
+19 warnings generated.
+[ 90%] Building C object queue/CMakeFiles/queue_test.dir/queue.c.o
+/home/j/Desktop/c/g10/extern/queue/queue.c:457:13: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  457 |         mutex_lock(&p_queue->_lock);
+      |                    ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:142:35: note: passing argument to parameter 'p_mutex' here
+  142 | DLLEXPORT int mutex_lock ( mutex *p_mutex );
+      |                                   ^
+/home/j/Desktop/c/g10/extern/queue/queue.c:463:15: warning: passing 'const mutex *' (aka 'const pthread_mutex_t *') to parameter of type 'mutex *' (aka 'pthread_mutex_t *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  463 |         mutex_unlock(&p_queue->_lock);
+      |                      ^~~~~~~~~~~~~~~
+/home/j/Desktop/c/g10/extern/sync/include/sync/sync.h:181:37: note: passing argument to parameter 'p_mutex' here
+  181 | DLLEXPORT int mutex_unlock ( mutex *p_mutex );
+      |                                     ^
+2 warnings generated.
+[ 91%] Linking C executable ../queue_test
+[ 91%] Built target queue_test
+[ 91%] Building C object json/CMakeFiles/json_example.dir/main.c.o
+[ 92%] Linking C executable ../json_example
+[ 92%] Built target json_example
+[ 93%] Building C object json/CMakeFiles/json_test.dir/json_test.c.o
+[ 94%] Linking C executable ../json_test
+[ 94%] Built target json_test
+[ 95%] Building C object json/CMakeFiles/json_test_lib.dir/json_test.c.o
+[ 96%] Linking C shared library /home/j/Desktop/c/g10/lib/libjson_test_lib.so
+[ 96%] Built target json_test_lib
+[ 97%] Building C object node/CMakeFiles/node_example.dir/main.c.o
+/home/j/Desktop/c/g10/extern/node/main.c:31:16: warning: unused parameter 'argc' [-Wunused-parameter]
+   31 | int main ( int argc, const char *argv[] )
+      |                ^
+/home/j/Desktop/c/g10/extern/node/main.c:31:34: warning: unused parameter 'argv' [-Wunused-parameter]
+   31 | int main ( int argc, const char *argv[] )
+      |                                  ^
+2 warnings generated.
+[ 98%] Linking C executable ../node_example
+[ 98%] Built target node_example
+[ 99%] Building C object parallel/CMakeFiles/parallel_example.dir/main.c.o
+[100%] Linking C executable ../parallel_example
+[100%] Built target parallel_example

@@ -267,19 +267,6 @@ if ( NOT "${HAS_JSON}")
     endif()
 endif()
 
-# Find the http module
-if ( NOT "${HAS_HTTP}")
-
-    # Add the http directory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/http ${CMAKE_SOURCE_DIR}/build/http)
-
-    # Let any parent project know that this project has http
-    if(NOT PROJECT_IS_TOP_LEVEL)
-        set(HAS_HTTP true PARENT_SCOPE)
-        set(HTTP_INCLUDE_DIR ${HTTP_INCLUDE_DIR} PARENT_SCOPE)
-    endif()
-endif()
-
 # Find the node module
 if ( NOT "${HAS_NODE}")
     
@@ -325,20 +312,20 @@ endif()
 # g10 example
 add_executable (g10_example "main.c") 
 add_dependencies(g10_example g10)
-target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
+target_include_directories(g10_example PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_example g10)
 
 # g10 example
 add_executable (g10_test "g10_test.c") 
 add_dependencies(g10_test g10)
-target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
+target_include_directories(g10_test PUBLIC ${G10_INCLUDE_DIR} ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR}) 
 target_link_libraries(g10_test g10)
 
 # g10 library
 add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c") # "3rd-party/g_vulkan.c"
-add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json http socket parallel node hash_cache)
-target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${HTTP_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
-target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack queue json http parallel node socket m GL ${SDL2_LIBRARIES}) #${Vulkan_LIBRARY}
+add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json socket parallel node hash_cache)
+target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
+target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack queue json parallel node socket m GL ${SDL2_LIBRARIES}) #${Vulkan_LIBRARY}
 
 if(${G10_ANSI_COLOR})
     message("[g10] Building g10 with ANSI color")
