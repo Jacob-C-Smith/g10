@@ -1237,14 +1237,17 @@ int renderer_render ( g_instance *p_instance )
     // Sort objects
     // [ ??? ]
 
-    // Clear the framebuffer
-    glClearColor(
-        p_instance->context.p_renderer->clear_color.x,
-        p_instance->context.p_renderer->clear_color.y,
-        p_instance->context.p_renderer->clear_color.z,
-        1.f
-    );
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    #ifdef G10_BUILD_WITH_OPENGL
+
+        // Clear the framebuffer
+        glClearColor(
+            p_instance->context.p_renderer->clear_color.x,
+            p_instance->context.p_renderer->clear_color.y,
+            p_instance->context.p_renderer->clear_color.z,
+            1.f
+        );
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    #endif
 
     // Iterate through each render pass
     for ( i = 0; i < p_renderer->render_pass_quantity; i++ )
@@ -1420,8 +1423,10 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
             );
             transform_get_matrix_local(p_mesh_data->p_transform, &_m);
 
-            // Bind the model matrix
-            glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, (const GLfloat *) &_m);
+            #ifdef G10_BUILD_WITH_OPENGL
+                // Bind the model matrix
+                glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, (const GLfloat *) &_m);
+            #endif
             
             // Draw the mesh
             pfn_shader_on_draw(p_mesh_data);
