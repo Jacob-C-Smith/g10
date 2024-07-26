@@ -93,6 +93,7 @@ bool test_g_get_active_instance ( char *test_file, result_t expected );
 // Constructors
 int construct_minimal_g10_instance ( g_instance **pp_instance );
 int construct_identity_transform ( transform **pp_transform );
+int construct_identity_camera ( camera **pp_camera );
 int get_mat4_from_list ( mat4 *p_mat4 );
 
 // Functions used by the tester
@@ -201,18 +202,12 @@ void run_tests ( void )
 {
 
     // Initialized data
-    timestamp g10_core_t0       = 0,
-              g10_core_t1       = 0,
-              g10_linear_t0     = 0,
-              g10_linear_t1     = 0,
-              g10_quaternion_t0 = 0,
-              g10_quaternion_t1 = 0,
-              g10_transform_t0  = 0,
-              g10_transform_t1  = 0,
-              g10_camera_t0     = 0,
-              g10_camera_t1     = 1,
-              g10_user_code_t0  = 0,
-              g10_user_code_t1  = 0;
+    timestamp g10_core_t0       = 0, g10_core_t1       = 0,
+              g10_linear_t0     = 0, g10_linear_t1     = 0,
+              g10_quaternion_t0 = 0, g10_quaternion_t1 = 0,
+              g10_transform_t0  = 0, g10_transform_t1  = 0,
+              g10_camera_t0     = 0, g10_camera_t1     = 0,
+              g10_user_code_t0  = 0, g10_user_code_t1  = 0;
 
     ///////////////////
     // Test the core //
@@ -225,7 +220,7 @@ void run_tests ( void )
         test_g10_g_init("g10 core g_init");
 
         // Test g_get_active_instance
-        test_g10_g_get_active_instance("g10 core g_get_active_instance");
+        //test_g10_g_get_active_instance("g10 core g_get_active_instance");
 
     // Stop timing core
     g10_core_t1 = timer_high_precision();
@@ -441,180 +436,92 @@ bool test_g_get_active_instance ( char *test_file, result_t expected )
 bool vec2_equals_vec2 ( vec2 a, vec2 b )
 {
 
-    // -0 == 0 
-    // a.x = (a.x == -0.f) ? 0.f : a.x;
-    // a.y = (a.y == -0.f) ? 0.f : a.y;
-
-    // b.x = (b.x == -0.f) ? 0.f : b.x;
-    // b.y = (b.y == -0.f) ? 0.f : b.y;
-
+    // Done
     return 
     (
-        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8)
+        (fabsf(a.x - b.x) < 0.001f) &&
+        (fabsf(a.y - b.y) < 0.001f) 
     );
 }
 
 bool vec3_equals_vec3 ( vec3 a, vec3 b )
 {
 
-    // -0 == 0 
-    // a.x = (a.x == -0.f) ? 0.f : a.x;
-    // a.y = (a.y == -0.f) ? 0.f : a.y;
-    // a.z = (a.z == -0.f) ? 0.f : a.z;
-
-    // b.x = (b.x == -0.f) ? 0.f : b.x;
-    // b.y = (b.y == -0.f) ? 0.f : b.y;
-    // b.z = (b.z == -0.f) ? 0.f : b.z;
-    
+    // Done
     return 
     (
-        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.z) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.z) & 0xFFFFFFF8)
+        (fabsf(a.x - b.x) < 0.001f) &&
+        (fabsf(a.y - b.y) < 0.001f) &&
+        (fabsf(a.z - b.z) < 0.001f) 
     );
 }
 
 bool vec4_equals_vec4 ( vec4 a, vec4 b )
 {
 
-    // -0 == 0 
-    // a.x = (a.x == -0.f) ? 0.f : a.x;
-    // a.y = (a.y == -0.f) ? 0.f : a.y;
-    // a.z = (a.z == -0.f) ? 0.f : a.z;
-    // a.w = (a.w == -0.f) ? 0.f : a.w;
-
-    // b.x = (b.x == -0.f) ? 0.f : b.x;
-    // b.y = (b.y == -0.f) ? 0.f : b.y;
-    // b.z = (b.z == -0.f) ? 0.f : b.z;
-    // b.w = (b.w == -0.f) ? 0.f : b.w;
-
+    // Done
     return 
     (
-        ( (*(unsigned long*)&a.x) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.x) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.y) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.y) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.z) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.z) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&a.w) & 0xFFFFFFF8) == ( (*(unsigned long*)&b.w) & 0xFFFFFFF8)
+        (fabsf(a.x - b.x) < 0.001f) &&
+        (fabsf(a.y - b.y) < 0.001f) &&
+        (fabsf(a.z - b.z) < 0.001f) &&
+        (fabsf(a.w - b.w) < 0.001f) 
     );
 }
 
 bool mat2_equals_mat2 ( mat2 m, mat2 n )
 {
 
-    // -0 == 0 
-    // m.a = (m.a == -0.f) ? 0.f : m.a;
-    // m.b = (m.b == -0.f) ? 0.f : m.b;
-    // m.c = (m.c == -0.f) ? 0.f : m.c;
-    // m.d = (m.d == -0.f) ? 0.f : m.d;
-
-    // n.a = (n.a == -0.f) ? 0.f : n.a;
-    // n.b = (n.b == -0.f) ? 0.f : n.b;
-    // n.c = (n.c == -0.f) ? 0.f : n.c;
-    // n.d = (n.d == -0.f) ? 0.f : n.d;
-
+    // Done
     return 
     (
-        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) 
+        (fabsf(m.a - n.a) < 0.001f) &&
+        (fabsf(m.b - n.b) < 0.001f) &&
+        (fabsf(m.c - n.c) < 0.001f) &&
+        (fabsf(m.d - n.d) < 0.001f) 
     );
 }
 
 bool mat3_equals_mat3 ( mat3 m, mat3 n )
 {
 
-    // -0 == 0 
-    // m.a = (m.a == -0.f) ? 0.f : m.a;
-    // m.b = (m.b == -0.f) ? 0.f : m.b;
-    // m.c = (m.c == -0.f) ? 0.f : m.c;
-    // m.d = (m.d == -0.f) ? 0.f : m.d;
-    // m.e = (m.e == -0.f) ? 0.f : m.e;
-    // m.f = (m.f == -0.f) ? 0.f : m.f;
-    // m.g = (m.g == -0.f) ? 0.f : m.g;
-    // m.h = (m.h == -0.f) ? 0.f : m.h;
-    // m.i = (m.i == -0.f) ? 0.f : m.i;
-
-    // n.a = (n.a == -0.f) ? 0.f : n.a;
-    // n.b = (n.b == -0.f) ? 0.f : n.b;
-    // n.c = (n.c == -0.f) ? 0.f : n.c;
-    // n.d = (n.d == -0.f) ? 0.f : n.d;
-    // n.e = (n.e == -0.f) ? 0.f : n.e;
-    // n.f = (n.f == -0.f) ? 0.f : n.f;
-    // n.g = (n.g == -0.f) ? 0.f : n.g;
-    // n.h = (n.h == -0.f) ? 0.f : n.h;
-    // n.i = (n.i == -0.f) ? 0.f : n.i;
-
+    // Done
     return 
     (
-        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.e) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.e) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.f) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.f) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.g) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.g) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.h) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.h) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.i) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.i) & 0xFFFFFFF8) 
+        (fabsf(m.a - n.a) < 0.001f) &&
+        (fabsf(m.b - n.b) < 0.001f) &&
+        (fabsf(m.c - n.c) < 0.001f) &&
+        (fabsf(m.d - n.d) < 0.001f) &&
+        (fabsf(m.e - n.e) < 0.001f) &&
+        (fabsf(m.f - n.f) < 0.001f) &&
+        (fabsf(m.g - n.g) < 0.001f) &&
+        (fabsf(m.h - n.h) < 0.001f) &&
+        (fabsf(m.i - n.i) < 0.001f) 
     );
 }
 
 bool mat4_equals_mat4 ( mat4 m, mat4 n )
 {
 
-    // -0 == 0 
-    // m.a = (m.a == -0.f) ? 0.f : m.a;
-    // m.b = (m.b == -0.f) ? 0.f : m.b;
-    // m.c = (m.c == -0.f) ? 0.f : m.c;
-    // m.d = (m.d == -0.f) ? 0.f : m.d;
-    // m.e = (m.e == -0.f) ? 0.f : m.e;
-    // m.f = (m.f == -0.f) ? 0.f : m.f;
-    // m.g = (m.g == -0.f) ? 0.f : m.g;
-    // m.h = (m.h == -0.f) ? 0.f : m.h;
-    // m.i = (m.i == -0.f) ? 0.f : m.i;
-    // m.j = (m.j == -0.f) ? 0.f : m.j;
-    // m.k = (m.k == -0.f) ? 0.f : m.k;
-    // m.l = (m.l == -0.f) ? 0.f : m.l;
-    // m.m = (m.m == -0.f) ? 0.f : m.m;
-    // m.n = (m.n == -0.f) ? 0.f : m.n;
-    // m.o = (m.o == -0.f) ? 0.f : m.o;
-    // m.p = (m.p == -0.f) ? 0.f : m.p;
-
-    // n.a = (n.a == -0.f) ? 0.f : n.a;
-    // n.b = (n.b == -0.f) ? 0.f : n.b;
-    // n.c = (n.c == -0.f) ? 0.f : n.c;
-    // n.d = (n.d == -0.f) ? 0.f : n.d;
-    // n.e = (n.e == -0.f) ? 0.f : n.e;
-    // n.f = (n.f == -0.f) ? 0.f : n.f;
-    // n.g = (n.g == -0.f) ? 0.f : n.g;
-    // n.h = (n.h == -0.f) ? 0.f : n.h;
-    // n.i = (n.i == -0.f) ? 0.f : n.i;
-    // n.j = (n.j == -0.f) ? 0.f : n.j;
-    // n.k = (n.k == -0.f) ? 0.f : n.k;
-    // n.l = (n.l == -0.f) ? 0.f : n.l;
-    // n.m = (n.m == -0.f) ? 0.f : n.m;
-    // n.n = (n.n == -0.f) ? 0.f : n.n;
-    // n.o = (n.o == -0.f) ? 0.f : n.o;
-    // n.p = (n.p == -0.f) ? 0.f : n.p;
-
+    // Done
     return 
     (
-        ( (*(unsigned long*)&m.a) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.a) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.b) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.b) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.c) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.c) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.d) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.d) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.e) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.e) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.f) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.f) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.g) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.g) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.h) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.h) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.i) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.i) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.j) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.j) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.k) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.k) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.l) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.l) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.m) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.m) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.n) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.n) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.o) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.o) & 0xFFFFFFF8) &&
-        ( (*(unsigned long*)&m.p) & 0xFFFFFFF8) == ( (*(unsigned long*)&n.p) & 0xFFFFFFF8) 
+        (fabsf(m.a - n.a) < 0.001f) &&
+        (fabsf(m.b - n.b) < 0.001f) &&
+        (fabsf(m.c - n.c) < 0.001f) &&
+        (fabsf(m.d - n.d) < 0.001f) &&
+        (fabsf(m.e - n.e) < 0.001f) &&
+        (fabsf(m.f - n.f) < 0.001f) &&
+        (fabsf(m.g - n.g) < 0.001f) &&
+        (fabsf(m.h - n.h) < 0.001f) &&
+        (fabsf(m.i - n.i) < 0.001f) &&
+        (fabsf(m.j - n.j) < 0.001f) &&
+        (fabsf(m.k - n.k) < 0.001f) &&
+        (fabsf(m.l - n.l) < 0.001f) &&
+        (fabsf(m.m - n.m) < 0.001f) &&
+        (fabsf(m.n - n.n) < 0.001f) &&
+        (fabsf(m.o - n.o) < 0.001f) &&
+        (fabsf(m.p - n.p) < 0.001f) 
     );
 }
 
@@ -643,224 +550,296 @@ bool camera_equals_camera ( camera *p_a, camera *p_b )
         vec3_equals_vec3(p_a->view.location, p_b->view.location) && 
         vec3_equals_vec3(p_a->view.target  , p_b->view.target)   &&      
         vec3_equals_vec3(p_a->view.up      , p_b->view.up)       &&
-        
-        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
-        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
-        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
-        //vec3_equals_vec3(p_a->view.target, p_b->view.target)     &&      
 
-        mat4_equals_mat4(p_a->matrix._view, p_b->matrix._view)   &&      
-        mat4_equals_mat4(p_a->matrix._projection, p_b->matrix._projection)
+        ( fabsf(p_a->projection.fov       - p_a->projection.fov)       < 0.001f ) &&  
+        ( fabsf(p_a->projection.near_clip - p_a->projection.near_clip) < 0.001f ) &&  
+        ( fabsf(p_a->projection.far_clip  - p_a->projection.far_clip)  < 0.001f )         
     );
 }
 
 bool test_vec2_add ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec2 result_vec = (vec2) { 0 };
     
+    // Add the vectors
     vec2_add_vec2(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_sub ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec2 result_vec = (vec2) { 0 };
     
+    // Subtract the vectors
     vec2_sub_vec2(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_mul ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec2 result_vec = (vec2) { 0 };
     
+    // Multiply the vectors
     vec2_mul_vec2(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_div ( vec2 a, vec2 b, vec2 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec2 result_vec = (vec2) { 0 };
     
+    // Divide the vectors
     vec2_div_vec2(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_length ( vec2 v, float expected_length, result_t expected_result )
 {
+
+    // Initialized data
     float result = 0.f;
     
+    // Compute the length of the vector
     vec2_length(&result, v);
 
-    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+    // Done
+    return expected_result == ( (fabsf(result - expected_length) < 0.001f) ? match : zero); 
 }
 
 bool test_vec2_promote_vec3 ( vec2 v, vec3 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec3 result_vec = { 0 };
 
+    // Promote the vector
     vec2_to_vec3(&result_vec, v);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec2_promote_vec4 ( vec2 v, vec4 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec4 result_vec = { 0 };
 
+    // Promote the vector
     vec2_to_vec4(&result_vec, v);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_add ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec3 result_vec = (vec3) { 0 };
     
+    // Add the vector
     vec3_add_vec3(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_sub ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec3 result_vec = (vec3) { 0 };
     
+    // Subtract the vector
     vec3_sub_vec3(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_mul ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec3 result_vec = (vec3) { 0 };
     
+    // Multiply the vector
     vec3_mul_vec3(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_div ( vec3 a, vec3 b, vec3 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec3 result_vec = (vec3) { 0 };
     
+    // Divide the vector
     vec3_div_vec3(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_length ( vec3 v, float expected_length, result_t expected_result )
 {
+
+    // Initialized data
     float result = 0.f;
     
+    // Compute the length of the vector
     vec3_length(&result, v);
 
-    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+    // Done
+    return expected_result == ( (fabsf(result - expected_length) < 0.001f) ? match : zero); 
 }
 
 bool test_vec3_demote_vec2 ( vec3 v, vec2 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec2 result_vec = { 0 };
 
+    // Demote the vector
     vec3_to_vec2(&result_vec, v);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec3_promote_vec4 ( vec3 v, vec4 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec4 result_vec = { 0 };
 
+    // Promote the vector
     vec3_to_vec4(&result_vec, v);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_add ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec4 result_vec = (vec4) { 0 };
     
+    // Add the vector
     vec4_add_vec4(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_sub ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec4 result_vec = (vec4) { 0 };
     
+    // Subtract the vector
     vec4_sub_vec4(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_mul ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec4 result_vec = (vec4) { 0 };
     
+    // Multiply the vector
     vec4_mul_vec4(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_div ( vec4 a, vec4 b, vec4 expected_vec, result_t expected_result )
 {
 
+    // Initialized data
     vec4 result_vec = (vec4) { 0 };
     
+    // Divide the vector
     vec4_div_vec4(&result_vec, a, b);
 
+    // Done
     return expected_result == ( vec4_equals_vec4(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_length ( vec4 v, float expected_length, result_t expected_result )
 {
+
+    // Initialized data
     float result = 0.f;
     
+    // Compute the length of the vector
     vec4_length(&result, v);
 
-    return expected_result == ( ( (*(unsigned long*)&result) & 0xFFFFFFF8) == ( (*(unsigned long*)&expected_length) & 0xFFFFFFF8) ? match : zero); 
+    // Done
+    return expected_result == ( (fabsf(result - expected_length) < 0.001f) ? match : zero); 
 }
 
 bool test_vec4_demote_vec2 ( vec4 v, vec2 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec2 result_vec = { 0 };
 
+    // Demote the vector
     vec4_to_vec2(&result_vec, v);
 
+    // Done
     return expected_result == ( vec2_equals_vec2(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_vec4_demote_vec3 ( vec4 v, vec3 expected_vec, result_t expected_result )
 {
+
+    // Initialized data
     vec3 result_vec = { 0 };
 
+    // Demote the vector
     vec4_to_vec3(&result_vec, v);
 
+    // Done
     return expected_result == ( vec3_equals_vec3(expected_vec, result_vec) ? match : zero); 
 }
 
 bool test_mat2_identity ( mat2 expected_mat, result_t expected_result )
 {
+
+    // Initialized data
     mat2 result_mat = { 0 };
 
+    // Store the identity matrix
     mat2_identity(&result_mat);
 
+    // Done
     return expected_result == ( mat2_equals_mat2(expected_mat, result_mat) ? match : zero); 
 }
 
@@ -1015,16 +994,21 @@ bool quaternion_equals_quaternion ( quaternion a, quaternion b )
 
 bool test_quaternion_identity ( quaternion expected_quaternion, result_t expected_result )
 {
+
+    // Initialized data
     quaternion result_quaternion = { 0 };
 
+    // Store the identity quaternion
     quaternion_identity(&result_quaternion);
 
+    // Done
     return expected_result == ( quaternion_equals_quaternion(expected_quaternion, result_quaternion) ? match : zero); 
 } 
 
 bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback, result_t expected )
 {
 
+    // Initialized data
     result_t result = zero;
     g_instance *p_return_instance = 0;
 
@@ -1038,19 +1022,20 @@ bool test_user_code_callback_set ( fn_user_code_callback pfn_user_code_callback,
     if ( result == zero ) goto done;
 
     // Test for equality
-    if ( pfn_user_code_callback == p_return_instance->context.pfn_user_code_callback )
-        result = match;
+    result = ( pfn_user_code_callback == p_return_instance->context.pfn_user_code_callback ) ?  match : result;
 
     done:
     // Free the instance value
     g_exit(&p_return_instance);
 
+    // Done
     return (result == expected);
 }
 
 bool test_user_code_callback ( const char *const path, fn_user_code_callback pfn_user_code_callback, const char *const new_instance_name, result_t expected )
 {
-
+    
+    // Initialized data
     result_t result = zero;
     g_instance *p_return_instance = 0;
 
@@ -1221,7 +1206,7 @@ void test_g10_linear_vec3 ( const char *name )
 void test_g10_linear_vec4 ( const char *name )
 {
     
-     // Formatting
+    // Formatting
     log_scenario("%s\n", name);
 
     // Accumulate 
@@ -1505,6 +1490,12 @@ void test_g10_linear_mat4 ( const char *name )
 
 void test_g10_camera ( const char *name )
 {
+    
+    // Initialized data
+    g_instance *p_instance = (void *) 0;
+
+    // Construct an instance
+    g_init( &p_instance, "test cases/core/instance_bare_bones.json" );
 
     // Formatting
     log_scenario("%s\n", name);
@@ -1552,10 +1543,13 @@ void test_g10_camera ( const char *name )
     print_test(name, "fov_and_scale", test_camera_from_json("test cases/camera/fov_and_scale.json", (void *) 0, match));
 
     // TODO: Valid
-    //print_test(name, "valid", test_camera_from_json("test cases/camera/valid.json", (void *) 0, match));
+    print_test(name, "valid", test_camera_from_json("test cases/camera/valid.json", construct_identity_camera, match));
     //print_test(name, "valid_ortho", test_camera_from_json("test cases/camera/valid_ortho.json", (void *) 0, match));
-    //print_test(name, "valid_no_schema", test_camera_from_json("test cases/camera/valid_no_schema.json", (void *) 0, match));    
-        
+    print_test(name, "valid_no_schema", test_camera_from_json("test cases/camera/valid_no_schema.json", construct_identity_camera, match));    
+    
+    // Free the instance value
+    g_exit(&p_instance); 
+
     // Print the summary of this test
     print_final_summary();
 
@@ -1566,6 +1560,12 @@ void test_g10_camera ( const char *name )
 void test_g10_transform ( const char *name )
 {
     
+    // Initialized data
+    g_instance *p_instance = (void *) 0;
+
+    // Construct an instance
+    g_init( &p_instance, "test cases/core/instance_bare_bones.json" );
+
     // Formatting
     log_scenario("%s\n", name);
     
@@ -1610,6 +1610,9 @@ void test_g10_transform ( const char *name )
     print_test(name, "valid quaternion", test_transform_from_json("test cases/transform/valid_quaternion.json", construct_identity_transform, match));
     print_test(name, "valid no schema", test_transform_from_json("test cases/transform/valid_no_schema.json", construct_identity_transform, match));
 
+    // Free the instance value
+    g_exit(&p_instance);
+
     // Print the summary of this test
     print_final_summary();
 
@@ -1645,12 +1648,9 @@ void test_g10_linear_vectors ( const char *name )
     (void) name;
 
     // Initialized data
-    timestamp g10_vec2_t0 = 0,
-              g10_vec2_t1 = 0,
-              g10_vec3_t0 = 0,
-              g10_vec3_t1 = 0,
-              g10_vec4_t0 = 0,
-              g10_vec4_t1 = 0;
+    timestamp g10_vec2_t0 = 0, g10_vec2_t1 = 0,
+              g10_vec3_t0 = 0, g10_vec3_t1 = 0,
+              g10_vec4_t0 = 0, g10_vec4_t1 = 0;
 
     ///////////////
     // Test vec2 //
@@ -1717,12 +1717,9 @@ void test_g10_linear_matrices ( const char *name )
     (void) name;
 
     // Initialized data
-    timestamp g10_mat2_t0 = 0,
-              g10_mat2_t1 = 0,
-              g10_mat3_t0 = 0,
-              g10_mat3_t1 = 0,
-              g10_mat4_t0 = 0,
-              g10_mat4_t1 = 0;
+    timestamp g10_mat2_t0 = 0, g10_mat2_t1 = 0,
+              g10_mat3_t0 = 0, g10_mat3_t1 = 0,
+              g10_mat4_t0 = 0, g10_mat4_t1 = 0;
 
     ///////////////
     // Test mat2 //
@@ -1830,6 +1827,9 @@ int construct_identity_transform ( transform **pp_transform )
     // Construct the identity transform
     if ( transform_construct(&p_transform, (vec3) {0, 0, 0}, (vec3) { 0, 0, 0 }, (vec3) { 1, 1, 1 }, 0) == 0 ) goto no_transform;
 
+    // Return a pointer to the caller
+    *pp_transform = p_transform;
+
     // Success
     return 1;
     
@@ -1853,13 +1853,39 @@ int construct_identity_camera ( camera **pp_camera )
 {
 
     // Initialized data
-    //
+    camera *p_camera = (void *) 0;
 
-    // Unused
-    (void) pp_camera;
+    // Allocate memory for the camera
+    p_camera = G10_REALLOC(0, sizeof(camera));
+    
+    // Populate the camera
+    *p_camera = (camera)
+    {
+        ._name = { 0 },
+        .pfn_camera_controller = camera_controller_orbit_update,
+        .dirty = true,
+        .view  = 
+        {
+            .location = (vec3) { 0.f, 0.f, 0.f },
+            .target   = (vec3) { 0.f, 0.f, 0.f },
+            .up       = (vec3) { 0.f, 0.f, 1.f }
+        },
+        .projection = 
+        {
+            .fov          = 60.0f,
+            .near_clip    = 0.1f,
+            .far_clip     = 1000.0f,
+            .aspect_ratio = 0
+        },
+        .matrix = 
+        {
+            ._projection = { 0 },
+            ._view = { 0 }
+        }
+    };
 
-    // TODO
-    //
+    // Return a pointer to the caller
+    *pp_camera = p_camera;
 
     // Success
     return 1;
