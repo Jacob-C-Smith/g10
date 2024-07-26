@@ -1,5 +1,4 @@
 {
     "$schema": "http://schema.g10.app/instance.json",
-    "name": "G10 instance",
-    "fixed tick rate": 32
+    "name": "g10 instance"
 }
