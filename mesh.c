@@ -121,7 +121,7 @@ u0 g_init_mesh ( u0 )
     return;
 }
 
-int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
+int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value, transform *p_parent_transform )
 {
     
     // Argument check
@@ -152,21 +152,36 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
         // Dump the keys
         dict_keys(p_dict, (const char **const)&_p_keys);
 
+        // Store the quantity of meshes
+        p_mesh->quantity = mesh_quantity;
+
+        // Grow the parent transform's child list
+        p_parent_transform = G10_REALLOC(p_parent_transform, sizeof(transform) + (mesh_quantity * sizeof(transform *)));
+
+        // Error check
+        if ( p_parent_transform == (void *) 0 ) goto no_mem;
+
         // Grow the allocation
         p_mesh = G10_REALLOC(p_mesh, sizeof(mesh) + ( mesh_quantity * (sizeof(mesh_data *))));
+
+        // Error check
+        if ( p_mesh == (void *) 0 ) goto no_mem;
 
         // Load each mesh
         for (size_t i = 0; i < mesh_quantity; i++)
         {
 
             // External functions
-            extern int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value );
+            extern int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value, transform *p_parent_transform );
 
             // Initialized data
             const json_value *p_mesh_value = dict_get(p_dict, _p_keys[i]);
 
             // Construct the mesh
-            mesh_data_from_json(&p_mesh->_p_meshes[i], _p_keys[i], p_mesh_value);
+            mesh_data_from_json(&p_mesh->_p_meshes[i], _p_keys[i], p_mesh_value, p_parent_transform);
+
+            // Store the mesh's transform in the parent transform's child list
+            p_parent_transform->p_childern[i] = p_mesh->_p_meshes[i]->p_transform;
         }
     }
 
@@ -180,7 +195,6 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
     no_mesh:
     value_is_wrong_type:
     too_many_meshes:
-    no_mem:
     // missing_properties:
     // name_property_is_wrong_type:
     // name_property_is_too_short:
@@ -196,14 +210,31 @@ int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value )
         {
 
         }
+
+        // Standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
     }
 }
 
-int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value )
+int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const json_value *const p_value, transform *p_parent_transform )
 {
 
-    mesh_data *p_mesh_data = (void *) 0;
+    // Argument check
+    if ( pp_mesh_data == (void *) 0 ) goto no_mesh_data;
+    if ( p_name       == (void *) 0 ) goto no_name;
+    if ( p_value      == (void *) 0 ) goto no_value;
+
+    // Initialized data
     g_instance *p_instance = g_get_active_instance();
+    mesh_data *p_mesh_data = (void *) 0;
     const json_value *const p_transform    = dict_get(p_value->object, "transform"),
                      *const p_shader_value = dict_get(p_value->object, "shader"),
                      *const p_primitive    = dict_get(p_value->object, "primative");
@@ -223,6 +254,7 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
             mesh_create_info _mesh_ci
         );
 
+        // Construct an OpenGL mesh
         g_opengl_mesh_construct(
             &p_mesh_data,
             (mesh_create_info)
@@ -260,10 +292,16 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
         p_mesh_data->_name[len] = '\0';
     }
 
-    transform_from_json(&p_mesh_data->p_transform, p_transform);
+    // Construct a transform
+    if ( transform_from_json(&p_mesh_data->p_transform, p_transform) == 0 ) goto failed_to_construct_transform;
 
+    // Store the parent transform
+    p_mesh_data->p_transform->p_parent = p_parent_transform;
+
+    // Add the mesh to the shader's draw list
     shader_draw_item_add(p_shader, p_mesh_data);
 
+    // Return a pointer to the caller
     *pp_mesh_data = p_mesh_data;
 
     // Success
@@ -271,6 +309,10 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
 
     name_property_is_too_short:
     name_property_is_too_long:
+    failed_to_construct_transform:
+    no_mesh_data:
+    no_name:
+    no_value:
 
         // Error
         return 0;
@@ -357,9 +399,17 @@ int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, tr
     }
 }
 
-int mesh_draw ( mesh_data *p_mesh_data )
+int mesh_draw ( shader *p_shader, mesh_data *p_mesh_data )
 {
 
+    // Argument check
+    if ( p_shader    == (void *) 0 ) goto no_shader;
+    if ( p_mesh_data == (void *) 0 ) goto no_mesh_data;
+
+    // Bind the transform 
+    shader_bind_transform(p_shader, p_mesh_data->p_transform);
+
+    // Graphics API dependant implementation
     #ifdef G10_BUILD_WITH_OPENGL
 
         // Bind the vertex array
@@ -371,6 +421,26 @@ int mesh_draw ( mesh_data *p_mesh_data )
 
     // Success
     return 1;
+
+    // Error handling
+    {
+
+        no_shader:
+            #ifndef NDEBUG
+                log_error("[g10] [mesh] Null pointer provided for paramter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+
+        no_mesh_data:
+            #ifndef NDEBUG
+                log_error("[g10] [mesh] Null pointer provided for paramter \"p_mesh_data\" in call to function \"%s\"\n", __FUNCTION__);
+            #endif
+
+            // Error
+            return 0;
+    }
 }
 
 u0 g_exit_mesh ( u0 )
