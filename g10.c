@@ -39,6 +39,9 @@ static g_instance *p_active_instance = 0;
  */
 u0 g_init_early ( void )
 {
+    
+    // External functions
+    extern u0 g_init_mesh ( u0 );
 
     // Initialize log library
     log_init();
@@ -56,15 +59,7 @@ u0 g_init_early ( void )
     parallel_register_task("shell"        , (fn_parallel_task *) shell_loop);
     parallel_register_task("network shell", (fn_parallel_task *) shell_network_listener);
 
-    // Add 3rd party scheduler tasks
-    #ifdef G10_BUILD_WITH_SDL2
-
-        // External functions
-        extern int g_sdl2_window_poll ( g_instance *p_instance );
-        parallel_register_task("sdl2 poll", (fn_parallel_task *) g_sdl2_window_poll);
-    #endif
-
-    extern u0 g_init_mesh ( u0 );
+    // Initialize the mesh system
     g_init_mesh();
 
     // Done
@@ -166,11 +161,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
     if ( p_path      == (void *) 0 ) goto no_path;
 
     // Initialized data
-    size_t file_len          = g_load_file(p_path, (void *) 0, true),
-           debug_message_max = 64;
-    char *p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
+    size_t file_len = g_load_file(p_path, (void *) 0, true), debug_message_max = 64;
     json_value *p_value = 0;
     g_instance *p_instance = 0;
+    char *p_file_contents = G10_REALLOC(0, (file_len + 1) * sizeof(char));
 
     // Error check
     if ( file_len == 0 ) goto failed_to_load_file;
@@ -308,8 +302,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
             extern int g_sdl2_init ( g_instance *p_instance );
             extern int g_sdl2_window_from_json ( g_instance *p_instance, const json_value *p_value );
 
-            // SDL2
+            // Initialize SDL2
             g_sdl2_init(p_instance);
+
+            // Create an SDL2 window
             g_sdl2_window_from_json(p_instance, p_window);
         #else
 
@@ -578,9 +574,6 @@ int g_info ( g_instance *p_instance )
 {
 
     // Argument check
-    //
-
-    // Initialized data
     //
 
     // Print the instance
