@@ -1397,40 +1397,16 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
         
         // Initialized data
         shader *p_shader = p_render_pass->_p_shaders[i];
-        fn_shader_on_bind pfn_shader_on_bind = p_shader->functions.pfn_shader_on_bind;
         fn_shader_on_draw pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
 
         // Bind the shader
         shader_bind(p_shader);
 
-        // Bind the camera
-        pfn_shader_on_bind(p_shader, (void *)p_instance->context.p_scene->context.p_camera);
-
         // Draw each object
         for (size_t j = 0; j < p_shader->count; j++)
-        {
-
-            // Initialized data
-            mat4 _m = { 0 };
-            mesh_data *p_mesh_data = p_shader->_p_draw_items[j];
-            
-            // Store the local matrix
-            mat4_model_from_vec3(
-                &p_mesh_data->p_transform->model,
-                p_mesh_data->p_transform->location,
-                (vec3){ 0, 0, 0 },
-                p_mesh_data->p_transform->scale
-            );
-            transform_get_matrix_local(p_mesh_data->p_transform, &_m);
-
-            #ifdef G10_BUILD_WITH_OPENGL
-                // Bind the model matrix
-                glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "M"), 1, GL_FALSE, (const GLfloat *) &_m);
-            #endif
-            
-            // Draw the mesh
-            pfn_shader_on_draw(p_mesh_data);
-        }
+        
+            // Draw the draw object
+            pfn_shader_on_draw(p_shader, p_shader->_p_draw_items[j]);
     }
 
     // Success

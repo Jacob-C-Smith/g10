@@ -72,10 +72,10 @@ struct attachment_s
     char _description[255 + 1];
 
     #ifdef G10_BUILD_WITH_VULKAN
-    struct
-    {
-        
-    } vulkan;
+        struct
+        {
+            
+        } vulkan;
     #elif defined G10_BUILD_WITH_OPENGL
         struct
         {
@@ -140,7 +140,7 @@ DLLEXPORT int renderer_present ( g_instance *p_instance );
  */
 DLLEXPORT int renderer_info ( const renderer *const p_renderer );
 
-// Destructorss
+// Destructors
 /** !
  * Destroy and deallocate a renderer
  * 
