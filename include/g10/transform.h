@@ -32,11 +32,11 @@
 #include <g10/linear.h>
 #include <g10/quaternion.h>
 
-#define G10_TRANSFORM_CHILD_MAX 64
-
 // Structure definitions
 struct transform_s
 {
+    bool dirty;
+
     vec3 location;
     vec3 rotation;
     vec3 scale;
@@ -44,7 +44,8 @@ struct transform_s
     mat4 model;
 
     transform *p_parent;
-    transform *p_childern[G10_TRANSFORM_CHILD_MAX];
+
+    transform *p_childern[];
 };
 
 // Function definitions

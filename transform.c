@@ -82,7 +82,6 @@ int transform_construct (
         .rotation   = rotation,
         .scale      = scale,
         .model      = { 0 },
-        .p_childern = { 0 },
         .p_parent   = 0
     };
 
