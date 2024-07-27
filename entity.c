@@ -104,18 +104,11 @@ int entity_from_json ( entity **pp_entity, const char *const p_name, const json_
             _entity._name[len] = '\0';
         }
 
-        // Store the transform
+        // Construct the transform
         if ( transform_from_json(&_entity.p_transform, p_transform_value) == 0 ) goto failed_to_construct_transform;
 
-        // Store the shader
-        // TODO: Error checking
-        _entity.p_shader = (shader *) dict_get(p_instance->cache.p_shaders, p_shader_value->string);
-
-        // Store the mesh(es)
-        if ( mesh_from_json(&_entity.p_mesh, p_mesh_value) == 0 ) goto failed_to_construct_mesh;
-
-        // Increment the quantity of meshes
-        _entity.p_mesh->quantity++;
+        // Construct the mesh(es)
+        if ( mesh_from_json(&_entity.p_mesh, p_mesh_value, _entity.p_transform) == 0 ) goto failed_to_construct_mesh;
     }
 
     // Allocate memory on the heap
