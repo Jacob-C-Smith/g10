@@ -124,4 +124,23 @@ DLLEXPORT int shader_bind ( shader *p_shader );
  */
 DLLEXPORT int shader_info ( const shader *const p_shader );
 
+// Bind data
+/** !
+ * Bind the view and projection matricies of a camera 
+ * 
+ * @param p_shader the shader
+ * @param p_camera the camera
+ * 
+ * @return 1 on success, 0 on error
+ */
 DLLEXPORT int shader_bind_camera ( shader *p_shader, camera *p_camera );
+
+/** !
+ * Bind the model matrix of a transform 
+ * 
+ * @param p_shader the shader
+ * @param p_camera the camera
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int shader_bind_transform ( shader *p_shader, transform *p_transform );

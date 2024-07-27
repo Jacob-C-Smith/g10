@@ -54,11 +54,11 @@ int shader_from_json ( shader **pp_shader, const char *const p_name, json_value 
         p_shader->_name[len] = '\0';
     }
 
-    // Return a pointer to the caller
-    *pp_shader = p_shader;
-
     // Add the shader to the shader cache
     dict_add(p_instance->cache.p_shaders, p_name, p_shader);
+
+    // Return a pointer to the caller
+    *pp_shader = p_shader;
 
     // Success
     return 1;
@@ -272,6 +272,11 @@ int shader_draw_item_add ( shader *p_shader, void *p_draw_item )
 
 int shader_bind ( shader *p_shader )
 {
+
+    // Initialized data
+    g_instance *p_instance = g_get_active_instance();
+    fn_shader_on_bind pfn_shader_on_bind = p_shader->functions.pfn_shader_on_bind;
+
     // Graphics API specific implementation
     #ifdef G10_BUILD_WITH_VULKAN
     
@@ -281,10 +286,16 @@ int shader_bind ( shader *p_shader )
 
         // External functions
         extern int g_opengl_shader_bind ( shader *p_shader );
-
-        // Done
-        return g_opengl_shader_bind(p_shader);
+        
+        // Bind the shader
+        g_opengl_shader_bind(p_shader);
+        
+        // Bind the camera
+        pfn_shader_on_bind(p_shader, (void *)p_instance->context.p_scene->context.p_camera);
     #endif
+
+    // Success
+    return 1;
 }
 
 int shader_info ( const shader *const p_shader )
@@ -331,35 +342,9 @@ int shader_info ( const shader *const p_shader )
 int shader_bind_camera ( shader *p_shader, camera *p_camera )
 {
     
-    // Initialized data
-    g_instance *p_instance = g_get_active_instance();
-
-    if ( p_camera->dirty )
-    {
-        
-        // Compute the view matrix
-        camera_matrix_view
-        (
-            &p_camera->matrix._view,
-            p_camera->view.location,
-            p_camera->view.target,
-            p_camera->view.up
-        );
-        
-        // Compute the projection matrix
-        camera_matrix_projection_perspective
-        (
-            &p_camera->matrix._projection,
-            p_camera->projection.fov,
-            (float)((double)p_instance->window.width / (double)p_instance->window.height),
-            p_camera->projection.near_clip,
-            p_camera->projection.far_clip
-        );
-    }
-
-    // Initialized data
-    mat4 _p = p_camera->matrix._projection,
-         _v = p_camera->matrix._view;
+    // Argument check
+    if ( p_shader == (void *) 0 ) goto no_shader;
+    if ( p_camera == (void *) 0 ) goto no_camera;
 
     // Graphics API specific implementation
     #ifdef G10_BUILD_WITH_VULKAN
@@ -367,11 +352,85 @@ int shader_bind_camera ( shader *p_shader, camera *p_camera )
         // Done
         return g_vulkan_shader_bind(p_shader);
     #elif defined G10_BUILD_WITH_OPENGL
-        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "P"), 1, GL_FALSE, (GLfloat *)&_p);
-        glUniformMatrix4fv(glGetUniformLocation(p_shader->opengl.program, "V"), 1, GL_FALSE, (GLfloat *)&_v);
+        
+        // External functions
+        extern int g_opengl_shader_bind_camera ( shader *p_shader, const camera *const p_camera, ... );
+
+        g_opengl_shader_bind_camera(p_shader, p_camera);
+
     #endif
     
     // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_camera:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
+int shader_bind_transform ( shader *p_shader, transform *p_transform )
+{
+    
+    // Argument check
+    if ( p_shader    == (void *) 0 ) goto no_shader;
+    if ( p_transform == (void *) 0 ) goto no_transform;
+
+    // Graphics API specific implementation
+    #ifdef G10_BUILD_WITH_VULKAN
+    
+        // Done
+        return g_vulkan_shader_bind(p_shader);
+    #elif defined G10_BUILD_WITH_OPENGL
+        
+        // External functions
+        extern int g_opengl_shader_bind_transform ( shader *p_shader, const transform *const p_transform, ... );
+
+        // Bind the transform
+        g_opengl_shader_bind_transform(p_shader, p_transform);
+    #endif
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
