@@ -14,9 +14,14 @@
 
 #ifdef G10_BUILD_WITH_OPENGL
 
+// WSI dependant
 #ifdef G10_BUILD_WITH_SDL2
+    
     // SDL2
     #include <SDL2/SDL.h>
+#elif defined G10_BUILD_WITH_GLFW
+
+    //
 #endif
 
 // OpenGL
@@ -204,8 +209,7 @@ int g_opengl_shader_construct
 
     // Initialized data
     shader *p_shader = G10_REALLOC(0, sizeof(shader));
-    size_t vertex_source_len   = 0,
-           fragment_source_len = 0;
+    size_t vertex_source_len = 0, fragment_source_len = 0;
     dict *const p_dict = p_value->object;
     const json_value *const p_vertex   = dict_get(p_dict, "vertex"),
                      *const p_layout   = dict_get(p_dict, "layout"),
@@ -271,8 +275,10 @@ int g_opengl_shader_construct
     // Error handling
     if ( success == false ) goto failed_to_compile_shader;
     
-    // 
+    // Store the on bind function
     p_shader->functions.pfn_shader_on_bind = (fn_shader_on_bind) shader_bind_camera;
+
+    // Store the draw function
     p_shader->functions.pfn_shader_on_draw = (fn_shader_on_draw) mesh_draw;
 
     // Return a pointer to the caller
@@ -394,6 +400,16 @@ int g_opengl_shader_bind ( shader *p_shader )
     }
 }
 
+int g_opengl_shader_bind_vec3 ( shader *p_shader, const char *p_name, void *p_value )
+{
+
+    // Bind the vec3 
+    glUniform3fv(glGetUniformLocation(p_shader->opengl.program, p_name), 1, p_value); 
+
+    // Success
+    return 1;
+}
+
 int g_opengl_shader_bind_mat4 ( shader *p_shader, const char *p_name, void *p_value )
 {
 
@@ -407,6 +423,15 @@ int g_opengl_shader_bind_mat4 ( shader *p_shader, const char *p_name, void *p_va
 int g_opengl_shader_bind_camera ( shader *p_shader, const camera *const p_camera, ... )
 {
 
+    // Argument check
+    if ( p_shader == (void *) 0 ) goto no_shader;
+    if ( p_camera == (void *) 0 ) goto no_camera;
+
+    // State check
+    if ( p_camera->dirty ) goto camera_dirty;
+    
+    camera_ready:
+    
     // Initialized data
     mat4 _p = p_camera->matrix._projection,
          _v = p_camera->matrix._view;
@@ -417,6 +442,120 @@ int g_opengl_shader_bind_camera ( shader *p_shader, const camera *const p_camera
 
     // Success
     return 1;
+
+    // This branch recomputes the projection and view matricies
+    camera_dirty:
+    {
+
+        // Initialized data
+        g_instance *p_instance = g_get_active_instance();
+        
+        // Compute the view matrix
+        camera_matrix_view
+        (
+            &p_camera->matrix._view,
+            p_camera->view.location,
+            p_camera->view.target,
+            p_camera->view.up
+        );
+        
+        // Compute the projection matrix
+        camera_matrix_projection_perspective
+        (
+            &p_camera->matrix._projection,
+            p_camera->projection.fov,
+            (float)((double)p_instance->window.width / (double)p_instance->window.height),
+            p_camera->projection.near_clip,
+            p_camera->projection.far_clip
+        );
+
+        // Done
+        goto camera_ready;
+    }
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_camera:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int g_opengl_shader_bind_transform ( shader *p_shader, const transform *const p_transform, ... )
+{
+
+    // Argument check
+    if ( p_shader    == (void *) 0 ) goto no_shader;
+    if ( p_transform == (void *) 0 ) goto no_transform;
+
+    // State check
+    if ( p_transform->dirty ) goto transform_dirty;
+    
+    transform_ready:
+    
+    // Initialized data
+    mat4 _m = p_transform->model;
+    
+    // Bind model matrix
+    g_opengl_shader_bind_mat4(p_shader, "M", &_m);
+
+    // Success
+    return 1;
+
+    // This branch recomputes the model matricies
+    transform_dirty:
+    {
+
+        // Compute the model matrix
+        mat4_model_from_vec3(
+            &p_transform->model,
+            p_transform->location,
+            (vec3){ 0, 0, 0 },
+            p_transform->scale
+        );
+
+        // Done
+        goto transform_ready;
+    }
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 #endif
