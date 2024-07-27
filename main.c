@@ -103,7 +103,10 @@ int user_code_main ( g_instance *const p_instance )
 {
 
     // Initialized data
-    camera *p_camera = p_instance->context.p_scene->context.p_camera;
+    scene     *p_scene     = p_instance->context.p_scene;
+    camera    *p_camera    = p_scene->context.p_camera;
+    entity    *p_entity    = dict_get(p_scene->data.entities, "ball and cone");
+    transform *p_transform = p_entity->p_transform;
 
     // Exit the game?
     if ( (bool) input_bind_value("QUIT") ) p_instance->running = false;
