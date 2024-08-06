@@ -91,9 +91,9 @@ struct
     [SDL_SCANCODE_F7]   = { ._name = "F7", ._active = false, ._scancode = SDL_SCANCODE_F7},
     [SDL_SCANCODE_F8]   = { ._name = "F8", ._active = false, ._scancode = SDL_SCANCODE_F8},
     [SDL_SCANCODE_F9]   = { ._name = "F9", ._active = false, ._scancode = SDL_SCANCODE_F9},
-    [SDL_SCANCODE_F10]  = { ._name = "10", ._active = false, ._scancode = SDL_SCANCODE_F10},
-    [SDL_SCANCODE_F11]  = { ._name = "11", ._active = false, ._scancode = SDL_SCANCODE_F11},
-    [SDL_SCANCODE_F12]  = { ._name = "12", ._active = false, ._scancode = SDL_SCANCODE_F12},
+    [SDL_SCANCODE_F10]  = { ._name = "F10", ._active = false, ._scancode = SDL_SCANCODE_F10},
+    [SDL_SCANCODE_F11]  = { ._name = "F11", ._active = false, ._scancode = SDL_SCANCODE_F11},
+    [SDL_SCANCODE_F12]  = { ._name = "F12", ._active = false, ._scancode = SDL_SCANCODE_F12},
 
     // Special
     [SDL_SCANCODE_CAPSLOCK]    = { ._name = "CAPS LOCK"   , ._active = false, ._scancode = SDL_SCANCODE_SLASH },
