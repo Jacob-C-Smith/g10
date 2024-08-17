@@ -144,7 +144,7 @@ int shell_network_listener ( g_instance *p_instance )
     socket_tcp_create(&_tcp_socket, socket_address_family_ipv4, 6710);
 
     // Listen for connections
-    while ( p_instance->running ) socket_tcp_listen(_tcp_socket, (socket_tcp_accept_callback_function_t) shell_accept_connection, 0);
+    while ( p_instance->running ) socket_tcp_listen(_tcp_socket, (fn_socket_tcp_accept) shell_accept_connection, 0);
 
     // Success
     return 1;
