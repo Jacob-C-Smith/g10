@@ -239,7 +239,7 @@ int shell_evaluate ( char *p_input, char *p_output )
         p_instance->running = false;
 
         // Clear the repeat flag
-        parallel_schedule_pause(p_instance->p_schedule);
+        schedule_wait_idle(p_instance->p_schedule);
 
         // Exit
         r = -1;

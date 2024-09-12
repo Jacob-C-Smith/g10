@@ -374,3 +374,5 @@ FodyWeavers.xsd
 Icon?
 
 python/__pycache__/
+/extern/SDL3
+/lib

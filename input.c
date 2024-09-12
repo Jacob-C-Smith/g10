@@ -541,7 +541,7 @@ int input_poll ( g_instance *p_instance )
     #endif
     
     // Halt
-    if ( p_instance->running == false ) parallel_schedule_pause(p_instance->p_schedule);
+    if ( p_instance->running == false ) schedule_stop(p_instance->p_schedule);
 
     // Success
     return 1;

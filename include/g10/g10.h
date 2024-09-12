@@ -147,7 +147,7 @@ struct g_instance_s
     bool running; 
 
     // Schedule
-    parallel_schedule *p_schedule;
+    schedule *p_schedule;
 
     // Context
     struct

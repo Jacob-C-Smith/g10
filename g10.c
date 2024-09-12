@@ -346,7 +346,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Initialize the scheduler
         if ( p_schedule )
-            if ( parallel_schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
+            if ( schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
         // Load the renderer
         if ( p_renderer )
@@ -603,7 +603,7 @@ void g_start ( void )
     p_active_instance->running = true;
 
     // Start the schedule
-    parallel_schedule_start(p_active_instance->p_schedule, p_active_instance);
+    schedule_start(p_active_instance->p_schedule, p_active_instance);
     
     // Done
     return;
@@ -616,7 +616,7 @@ void g_stop ( void )
     putchar('\r');
     
     // Stop the schedule
-    parallel_schedule_stop(p_active_instance->p_schedule);
+    schedule_stop(p_active_instance->p_schedule);
 
     // Done
     return;
