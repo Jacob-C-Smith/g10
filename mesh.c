@@ -239,14 +239,13 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
                      *const p_shader_value = dict_get(p_value->object, "shader"),
                      *const p_primitive    = dict_get(p_value->object, "primative");
     shader *p_shader = (shader *)dict_get(p_instance->cache.p_shaders, p_shader_value->string);
-
     enum mesh_shapes_e type = (enum mesh_shapes_e) (size_t) dict_get(p_base_mesh_lookup, p_primitive->string);
 
     // Platform dependent implementation
     #ifdef G10_BUILD_WITH_VULKAN
         // TODO
         //
-    #elif defined G10_BUILD_WITH_OPENGL
+    #elif defined (G10_BUILD_WITH_OPENGL)
         
         // External functions
         extern int g_opengl_mesh_construct (
@@ -256,6 +255,31 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
 
         // Construct an OpenGL mesh
         g_opengl_mesh_construct(
+            &p_mesh_data,
+            (mesh_create_info)
+            {
+                .verticies = 
+                {
+                    .quantity = _base_mesh_data[type].verticies.quantity,
+                    .p_data   = _base_mesh_data[type].verticies._data,
+                },
+                .elements = 
+                {
+                    .quantity = _base_mesh_data[type].elements.quantity,
+                    .p_data   = _base_mesh_data[type].elements._data,
+                }
+            }
+        );
+    #elif defined (G10_BUILD_WITH_SDL3)
+        
+        // External functions
+        extern int g_sdl3_mesh_construct (
+            mesh_data **pp_mesh_data,
+            mesh_create_info _mesh_ci
+        );
+
+        // Construct an OpenGL mesh
+        g_sdl3_mesh_construct(
             &p_mesh_data,
             (mesh_create_info)
             {
@@ -361,6 +385,30 @@ int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, tr
                 }
             }
         );
+    #elif defined G10_BUILD_WITH_SDL3
+        
+        // External functions
+        extern int g_sdl3_mesh_construct (
+            mesh_data **pp_mesh_data,
+            mesh_create_info _mesh_ci
+        );
+
+        g_sdl3_mesh_construct(
+            &p_mesh_data,
+            (mesh_create_info)
+            {
+                .verticies = 
+                {
+                    .quantity = _base_mesh_data[type].verticies.quantity,
+                    .p_data   = _base_mesh_data[type].verticies._data,
+                },
+                .elements = 
+                {
+                    .quantity = _base_mesh_data[type].elements.quantity,
+                    .p_data   = _base_mesh_data[type].elements._data,
+                }
+            }
+        );
     #endif
 
     // Error check
@@ -399,7 +447,7 @@ int mesh_shape_construct ( mesh_data **pp_mesh_data, enum mesh_shapes_e type, tr
     }
 }
 
-int mesh_draw ( shader *p_shader, mesh_data *p_mesh_data )
+int mesh_draw ( render_pass *p_render_pass, shader *p_shader, mesh_data *p_mesh_data )
 {
 
     // Argument check
@@ -417,6 +465,22 @@ int mesh_draw ( shader *p_shader, mesh_data *p_mesh_data )
 
         // Draw the mesh
         glDrawElements(GL_TRIANGLES, (GLsizei)p_mesh_data->opengl.indices, GL_UNSIGNED_INT, 0);
+    #elif defined G10_BUILD_WITH_SDL3
+        SDL_BindGPUVertexBuffers(p_render_pass->sdl3.p_render_pass, 0,
+            (SDL_GPUBufferBinding[]) {
+                (SDL_GPUBufferBinding) {
+                    .buffer = p_mesh_data->sdl3.p_vertex_buffer,
+                    .offset = 0,
+                },
+            },
+            1);
+        SDL_BindGPUIndexBuffer(p_render_pass->sdl3.p_render_pass,
+            &(SDL_GPUBufferBinding) {
+                .buffer = p_mesh_data->sdl3.p_index_buffer,
+                .offset = 0,
+            },
+            SDL_GPU_INDEXELEMENTSIZE_32BIT);
+        SDL_DrawGPUIndexedPrimitives(p_render_pass->sdl3.p_render_pass, p_mesh_data->sdl3.indices, 1, 0, 0, 0);
     #endif
 
     // Success

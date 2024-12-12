@@ -49,3 +49,6 @@
 [submodule "extern/node"]
 	path = extern/node
 	url = https://github.com/Jacob-C-Smith/node
+[submodule "extern/SDL3"]
+	path = extern/SDL3
+	url = https://github.com/libsdl-org/SDL

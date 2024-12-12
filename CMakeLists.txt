@@ -1,5 +1,5 @@
 # Need CMake 3.0
-cmake_minimum_required (VERSION 3.28.0)
+cmake_minimum_required (VERSION 3.16.0)
 
 # This is the name of the repository
 project ("g10")
@@ -20,18 +20,16 @@ endif()
 add_compile_options(-gdwarf-4 -Wall -Wextra -Wpointer-arith -Wstrict-prototypes -Wformat-security -Wfloat-equal -Wshadow -Wconversion -Wlogical-not-parentheses -Wnull-dereference)
 
 option(G10_ANSI_COLOR "Build g10 with ANSI color" TRUE)
-option(G10_SDL2 "Build g10 with SDL2" TRUE)
+option(G10_SDL2 "Build g10 with SDL2")
+option(G10_SDL3 "Build g10 with SDL3" TRUE)
 option(G10_GLFW "Build g10 with GLFW")
-option(G10_OPENGL "Build g10 with OpenGL" TRUE)
+option(G10_OPENGL "Build g10 with OpenGL")
 option(G10_VULKAN "Build g10 with Vulkan")
 
-find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 
 # IF(UNIX AND NOT APPLE)
 # 	set(LINUX TRUE)
 # ENDIF()
-
 # IF(WIN32)
 # 	IF (NOT Vulkan_FOUND)
 # 		find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
@@ -324,7 +322,7 @@ target_link_libraries(g10_test PUBLIC log sync array circular_buffer dict tuple 
 # g10 library
 add_library (g10 SHARED "g10.c" "ai.c" "linear.c" "renderer.c" "cull.c" "scene.c" "shell.c" "input.c" "shader.c" "entity.c" "camera.c" "camera_controller.c" "mesh.c" "transform.c" "quaternion.c" "user_code.c") # "3rd-party/g_vulkan.c"
 add_dependencies(g10 log sync array circular_buffer dict tuple stack queue json socket parallel node hash_cache)
-target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${SDL2_INCLUDE_DIRS} ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
+target_include_directories(g10 PUBLIC ${G10_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/3rd-party/glad/include ${ARRAY_INCLUDE_DIR} ${CIRCULAR_BUFFER_INCLUDE_DIR} ${BASE64_INCLUDE_DIR} ${DICT_INCLUDE_DIR} ${JSON_INCLUDE_DIR} ${LOG_INCLUDE_DIR} ${PARALLEL_INCLUDE_DIR} ${QUEUE_INCLUDE_DIR} ${SOCKET_INCLUDE_DIR} ${STACK_INCLUDE_DIR} ${NODE_INCLUDE_DIR} ${SYNC_INCLUDE_DIR} ${TUPLE_INCLUDE_DIR} ${HASH_CACHE_INCLUDE_DIR}) 
 target_link_libraries(g10 PUBLIC log sync array circular_buffer dict tuple stack queue json parallel node socket m GL ${SDL2_LIBRARIES}) #${Vulkan_LIBRARY}
 
 if(${G10_ANSI_COLOR})
@@ -332,9 +330,32 @@ if(${G10_ANSI_COLOR})
     target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_ANSI_COLOR)
 endif()
 if (${G10_SDL2})
+    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
     message("[g10] Building g10 with SDL2")
     target_sources(g10 PUBLIC "3rd-party/g_sdl2.c")
     target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_SDL2)
+endif()
+if (${G10_SDL3})
+
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+
+    message("[g10] Building g10 with SDL3")
+    
+    # Add the sdl3 directory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/extern/SDL3 ${CMAKE_SOURCE_DIR}/extern/SDL3)
+
+    # Let any parent project know that this project has sdl3
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set(HAS_SDL3 true PARENT_SCOPE)
+        set(SDL3_INCLUDE_DIR ${SDL3_INCLUDE_DIR} PARENT_SCOPE)
+    endif()
+
+    target_sources(g10 PUBLIC "3rd-party/g_sdl3.c")
+    target_compile_definitions(g10 PUBLIC G10_BUILD_WITH_SDL3)
+
+    target_include_directories(g10 PUBLIC ${SDL3_INCLUDE_DIRS})
+    target_link_libraries(g10 PUBLIC ${SDL3_LIBRARIES}) 
 endif()
 if (${G10_GLFW})
     message("[g10] Building g10 with GLFW")

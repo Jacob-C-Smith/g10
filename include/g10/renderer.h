@@ -44,6 +44,24 @@ struct renderer_s
     // Clear color
     vec3 clear_color;
 
+    #ifdef G10_BUILD_WITH_VULKAN
+        struct
+        {
+            
+        } vulkan;
+    #elif defined G10_BUILD_WITH_OPENGL
+        struct
+        {
+
+        } opengl;
+    #elif defined G10_BUILD_WITH_SDL3
+        struct
+        {
+            void *p_command_buffer;
+            void *p_depth_texture;
+        } sdl3;
+    #endif
+
     // Render passes
     size_t       render_pass_quantity;
     render_pass *_p_render_passes[];
@@ -59,6 +77,24 @@ struct render_pass_s
     char _description[255 + 1];
     
     size_t shader_quantity;
+
+    #ifdef G10_BUILD_WITH_VULKAN
+        struct
+        {
+            
+        } vulkan;
+    #elif defined G10_BUILD_WITH_OPENGL
+        struct
+        {
+
+        } opengl;
+    #elif defined G10_BUILD_WITH_SDL3
+        struct
+        {
+            void *p_render_pass;
+        } sdl3;
+    #endif
+
     shader *_p_shaders[];
 };
 

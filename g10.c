@@ -307,8 +307,18 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
             // Create an SDL2 window
             g_sdl2_window_from_json(p_instance, p_window);
-        #else
+        #elif G10_BUILD_WITH_SDL3
 
+            // External functions
+            extern int g_sdl3_init ( g_instance *p_instance );
+            extern int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value );
+
+            // Initialize SDL3
+            g_sdl3_init(p_instance);
+
+            // Create an SDL# window
+            g_sdl3_window_from_json(p_instance, p_window);
+        #else
             // Others? 
         #endif
 
@@ -346,7 +356,7 @@ int g_init ( g_instance **pp_instance, const char *p_path )
 
         // Initialize the scheduler
         if ( p_schedule )
-            if ( parallel_schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
+            if ( schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;
         
         // Load the renderer
         if ( p_renderer )
@@ -603,7 +613,7 @@ void g_start ( void )
     p_active_instance->running = true;
 
     // Start the schedule
-    parallel_schedule_start(p_active_instance->p_schedule, p_active_instance);
+    schedule_start(p_active_instance->p_schedule, p_active_instance);
     
     // Done
     return;
@@ -616,7 +626,7 @@ void g_stop ( void )
     putchar('\r');
     
     // Stop the schedule
-    parallel_schedule_stop(p_active_instance->p_schedule);
+    schedule_stop(p_active_instance->p_schedule);
 
     // Done
     return;

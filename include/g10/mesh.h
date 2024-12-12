@@ -46,6 +46,9 @@
 #ifdef G10_BUILD_WITH_VULKAN
 #elif defined G10_BUILD_WITH_OPENGL
     #include <glad/glad.h>
+#elif defined G10_BUILD_WITH_SDL3
+    #include <SDL3/SDL.h>
+    #include <SDL3/SDL_gpu.h>
 #endif
 
 // Enumeration definitions
@@ -91,6 +94,13 @@ struct mesh_data_s
             GLuint element_arrays[32];
             size_t indices;
         } opengl;
+    #elif defined G10_BUILD_WITH_SDL3
+        struct
+        {
+            SDL_GPUBuffer *p_vertex_buffer;
+            SDL_GPUBuffer *p_index_buffer;
+            size_t indices;
+        } sdl3;
     #endif
 };
 
@@ -103,4 +113,4 @@ DLLEXPORT int mesh_shape_construct
 
 DLLEXPORT int mesh_from_json ( mesh **pp_mesh, const json_value *const p_value, transform *p_parent_transform );
 
-DLLEXPORT int mesh_draw ( shader *p_shader, mesh_data *p_mesh_data );
+DLLEXPORT int mesh_draw ( render_pass *p_render_pass, shader *p_shader, mesh_data *p_mesh_data );

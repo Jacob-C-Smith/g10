@@ -80,6 +80,13 @@ struct shader_s
                 enum shader_vertex_attribute_type_e _type;
             } vertex_attributes[16];
         } opengl;
+    #elif defined G10_BUILD_WITH_SDL3
+        struct
+        {
+            void *p_vertex_shader,
+                 *p_fragment_shader,
+                 *p_pipeline;
+        } sdl3;
     #endif
 
     void *_p_draw_items[];
@@ -105,11 +112,12 @@ DLLEXPORT int shader_draw_item_add ( shader *p_shader, void *p_draw_item );
 /** !
  * Bind a shader
  * 
+ * @param p_render_pass
  * @param p_shader
  * 
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int shader_bind ( shader *p_shader );
+DLLEXPORT int shader_bind ( render_pass *p_render_pass, shader *p_shader );
 
 // Info
 /** !

@@ -15,11 +15,11 @@
 #define G10_VERSION_PATCH 0
 
 // Preprocessor error checking
-#if defined G10_BUILD_WITH_VULKAN && defined G10_BUILD_WITH_OPENGL
+#if defined (G10_BUILD_WITH_VULKAN) && defined (G10_BUILD_WITH_OPENGL) 
     #error "[g10] [preprocessor] g10 builds can only use one graphics API at a time!"
 #endif
 
-#if defined G10_BUILD_WITH_SDL2 && defined G10_BUILD_WITH_GLFW
+#if defined (G10_BUILD_WITH_SDL2) && defined (G10_BUILD_WITH_GLFW)
     #error "[g10] [preprocessor] g10 builds can only use one WSI at a time!"
 #endif
 
@@ -127,6 +127,11 @@
     #include <SDL2/SDL.h>
 #endif
 
+// SDL3
+#ifdef G10_BUILD_WITH_SDL3
+    #include <SDL3/SDL.h>
+#endif
+
 // Vulkan
 #ifdef G10_BUILD_WITH_VULKAN
     #include <vulkan/vulkan.h>
@@ -147,7 +152,7 @@ struct g_instance_s
     bool running; 
 
     // Schedule
-    parallel_schedule *p_schedule;
+    schedule *p_schedule;
 
     // Context
     struct
@@ -185,11 +190,17 @@ struct g_instance_s
                             transfer;
                 } queue;
             } vulkan;
-        #elif defined G10_BUILD_WITH_OPENGL
+        #elif defined (G10_BUILD_WITH_OPENGL)
             struct
             {
                 int openGL;
             } opengl;
+
+        #elif defined (G10_BUILD_WITH_SDL3)
+            struct
+            {
+                SDL_GPUDevice *p_device;
+            } sdl3;
         #endif
     } graphics;
 
@@ -219,6 +230,12 @@ struct g_instance_s
                         SDL_GLContext gl_context;
                     #endif
                 } sdl2;
+            #elif defined(G10_BUILD_WITH_SDL3)
+                struct
+                {
+                    SDL_Window *window;
+                    SDL_Event event;
+                } sdl3;
             #endif
         };
     } window;

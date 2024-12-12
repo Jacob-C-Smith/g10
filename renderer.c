@@ -322,6 +322,24 @@ int renderer_from_json ( renderer **pp_renderer, const json_value *p_value )
             p_renderer->render_pass_quantity = render_pass_quantity;
         }
     }
+
+    #ifdef G10_BUILD_WITH_SDL3
+        SDL_GPUTextureCreateInfo _depth_texture_create_info =
+        {
+            .type = SDL_GPU_TEXTURETYPE_2D,
+            .format = SDL_GPU_TEXTUREFORMAT_D16_UNORM,
+            .width = 1280,
+            .height = 720,
+            .layer_count_or_depth = 1,
+            .num_levels = 1,
+            .sample_count = SDL_GPU_SAMPLECOUNT_1,
+            .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
+            .props = 0,
+        };
+
+        p_renderer->sdl3.p_depth_texture = SDL_CreateGPUTexture(p_instance->graphics.sdl3.p_device, &_depth_texture_create_info);
+    #endif
+
     
     // Return a pointer to the caller
     *pp_renderer = p_renderer;
@@ -1247,6 +1265,10 @@ int renderer_render ( g_instance *p_instance )
             1.f
         );
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    #elif defined(G10_BUILD_WITH_SDL3)
+        p_renderer->sdl3.p_command_buffer = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.p_device);
+    #else
+        // Others?
     #endif
 
     // Iterate through each render pass
@@ -1254,6 +1276,14 @@ int renderer_render ( g_instance *p_instance )
         
         // Render the render pass
         if ( renderer_pass_render(p_renderer, p_renderer->_p_render_passes[i]) == 0 ) goto failed_to_render_pass;
+
+    #ifdef G10_BUILD_WITH_OPENGL
+    #elif defined(G10_BUILD_WITH_SDL3)
+        SDL_SubmitGPUCommandBuffer(p_renderer->sdl3.p_command_buffer);
+    #else
+        // Others?
+    #endif
+
 
     // Success
     return 1;
@@ -1391,6 +1421,57 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
     g_instance *p_instance = g_get_active_instance();
     size_t i = 0;
 
+    #ifdef G10_BUILD_WITH_VULKAN
+    #elif defined G10_BUILD_WITH_OPENGL
+    #elif defined G10_BUILD_WITH_SDL3
+        SDL_GPUColorTargetInfo _color_target = { 0 };
+        SDL_GPUDepthStencilTargetInfo _depth_stencil_target = { 0 };
+        SDL_GPUTexture *p_swapchain = (void *) 0;
+
+        if ( SDL_AcquireGPUSwapchainTexture(
+            p_renderer->sdl3.p_command_buffer,
+            p_instance->window.sdl3.window,
+            &p_swapchain,
+            NULL,
+            NULL
+        ) == false ) log_error("ERROR!\n");
+
+        _color_target = (SDL_GPUColorTargetInfo)
+        {
+            .clear_color =
+            {
+                .r = 1.f,
+                .g = 1.f,
+                .b = 1.f,
+                .a = 1.f
+            },
+            .load_op = SDL_GPU_LOADOP_CLEAR,
+            .store_op = SDL_GPU_STOREOP_STORE,
+            .texture = p_swapchain,
+            .resolve_texture = NULL,
+            .cycle = true,
+            .cycle_resolve_texture = true
+        };
+
+        _depth_stencil_target = (SDL_GPUDepthStencilTargetInfo)
+        {
+            .clear_depth      = 1.0f,
+            .load_op          = SDL_GPU_LOADOP_CLEAR,
+            .store_op         = SDL_GPU_STOREOP_DONT_CARE,
+            .stencil_load_op  = SDL_GPU_LOADOP_DONT_CARE,
+            .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
+            .texture          = p_renderer->sdl3.p_depth_texture,
+            .cycle            = true
+        };
+
+        p_render_pass->sdl3.p_render_pass = SDL_BeginGPURenderPass(
+            p_renderer->sdl3.p_command_buffer,
+            &_color_target,
+            1,
+            &_depth_stencil_target
+        ); 
+    #endif
+
     // Iterate through each shader
     for ( i = 0; i < p_render_pass->shader_quantity; i++ )
     {
@@ -1400,14 +1481,20 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
         fn_shader_on_draw pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
 
         // Bind the shader
-        shader_bind(p_shader);
+        shader_bind(p_render_pass, p_shader);
 
         // Draw each object
         for (size_t j = 0; j < p_shader->count; j++)
         
             // Draw the draw object
-            pfn_shader_on_draw(p_shader, p_shader->_p_draw_items[j]);
+            pfn_shader_on_draw(p_render_pass, p_shader, p_shader->_p_draw_items[j]);
     }
+
+    #ifdef G10_BUILD_WITH_VULKAN
+    #elif defined G10_BUILD_WITH_OPENGL
+    #elif defined G10_BUILD_WITH_SDL3
+        SDL_EndGPURenderPass(p_render_pass->sdl3.p_render_pass);
+    #endif
 
     // Success
     return 1;

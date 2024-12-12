@@ -123,7 +123,16 @@ int shader_from_json_2 ( shader **pp_shader, const char *const p_name, const jso
  
         // Construct the shader
         if ( g_opengl_shader_construct(&p_shader, p_value) == 0 ) goto failed_to_create_shader_opengl;
+    #elif defined G10_BUILD_WITH_SDL3
+
+        // External functions
+        extern int g_sdl3_shader_construct ( shader **pp_shader, const json_value *p_value );
+ 
+        // Construct the shader
+        if ( g_sdl3_shader_construct(&p_shader, p_value) == 0 ) goto failed_to_create_shader_opengl;
     #else
+
+        // Error
         return 0;
     #endif
 
@@ -270,7 +279,7 @@ int shader_draw_item_add ( shader *p_shader, void *p_draw_item )
     }
 }
 
-int shader_bind ( shader *p_shader )
+int shader_bind ( render_pass *p_render_pass, shader *p_shader )
 {
 
     // Initialized data
@@ -281,17 +290,19 @@ int shader_bind ( shader *p_shader )
     #ifdef G10_BUILD_WITH_VULKAN
     
         // Done
-        return g_vulkan_shader_bind(p_shader);
+        return g_vulkan_shader_bind(p_render_pass, p_shader);
     #elif defined G10_BUILD_WITH_OPENGL
 
         // External functions
-        extern int g_opengl_shader_bind ( shader *p_shader );
+        extern int g_opengl_shader_bind ( render_pass *p_render_pass, shader *p_shader );
         
         // Bind the shader
-        g_opengl_shader_bind(p_shader);
+        g_opengl_shader_bind(p_render_pass, p_shader);
         
         // Bind the camera
         pfn_shader_on_bind(p_shader, (void *)p_instance->context.p_scene->context.p_camera);
+    #elif defined G10_BUILD_WITH_SDL3
+        SDL_BindGPUGraphicsPipeline(p_render_pass->sdl3.p_render_pass, p_shader->sdl3.p_pipeline);
     #endif
 
     // Success
