@@ -151,11 +151,18 @@ int shader_from_json_2 ( shader **pp_shader, const char *const p_name, const jso
         p_shader->_name[len] = '\0';
     }
 
-    // Return a pointer to the caller
-    *pp_shader = p_shader;
+    if ( strcmp(p_shader->_name, "bv") == 0 ) 
+    {
+
+        // Store the draw function
+        p_shader->functions.pfn_shader_on_draw = (fn_shader_on_draw *) bv_draw;
+    }
 
     // Add the shader to the shader cache
     dict_add(p_instance->cache.p_shaders, p_name, p_shader);
+
+    // Return a pointer to the caller
+    *pp_shader = p_shader;
 
     // Success
     return 1;
@@ -275,7 +282,7 @@ int shader_bind ( shader *p_shader )
 
     // Initialized data
     g_instance *p_instance = g_get_active_instance();
-    fn_shader_on_bind pfn_shader_on_bind = p_shader->functions.pfn_shader_on_bind;
+    fn_shader_on_bind *pfn_shader_on_bind = p_shader->functions.pfn_shader_on_bind;
 
     // Graphics API specific implementation
     #ifdef G10_BUILD_WITH_VULKAN
@@ -406,6 +413,54 @@ int shader_bind_transform ( shader *p_shader, transform *p_transform )
 
         // Bind the transform
         g_opengl_shader_bind_transform(p_shader, p_transform);
+    #endif
+    
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [shader] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int shader_bind_bv ( shader *p_shader, bv *p_bv )
+{
+    
+    // Argument check
+    if ( p_shader    == (void *) 0 ) goto no_shader;
+    //if ( p_transform == (void *) 0 ) goto no_transform;
+
+    // Graphics API specific implementation
+    #ifdef G10_BUILD_WITH_VULKAN
+    
+        // Done
+        return g_vulkan_shader_bind(p_shader);
+    #elif defined G10_BUILD_WITH_OPENGL
+        
+        // External functions
+        extern int g_opengl_shader_bind_bv ( shader *p_shader, const bv *const p_bv, ... );
+
+        // Bind the bv
+        g_opengl_shader_bind_bv(p_shader, p_bv);
     #endif
     
     // Success

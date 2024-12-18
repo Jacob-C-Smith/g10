@@ -173,12 +173,15 @@ int scene_from_json
             if ( camera_from_json(&p_camera, _camera_names[i], p_cameras_value) == 0 ) goto failed_to_construct_camera;
 
             // Add the camera to the scene
-            dict_add(_scene.data.entities, p_camera->_name, p_camera);
+            dict_add(_scene.data.cameras, p_camera->_name, p_camera);
 
             // Store the active camera
             _scene.context.p_camera = p_camera;
         }
     }
+
+    // Construct a bounding volume hierarchy from the scene
+    bvh_from_scene(&_scene);
 
     // Allocate memory for the scene
     if ( scene_create(&p_scene) == 0 ) goto failed_to_allocate_scene;

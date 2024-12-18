@@ -1,5 +1,5 @@
 /** !
- * @file resources/shaders/solid_color/frag.glsl
+ * @file resources/shaders/holdout/frag.glsl
  *
  * @author Jacob Smith
  */
@@ -7,16 +7,13 @@
 // 4.6
 #version 460 core
 
-// Input
-in vec3 xyz;
-
 // Output
-out vec4 FragColor;
+out vec4 color;
 
 // Entry point
 void main()
 {
 
    // Store the color in the framebuffer
-   FragColor = vec4(vec3(xyz.x, xyz.y, xyz.z), 1.0f);
+   color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }

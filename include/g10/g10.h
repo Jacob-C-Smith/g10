@@ -152,7 +152,7 @@ struct g_instance_s
     // Context
     struct
     {
-        fn_user_code_callback  pfn_user_code_callback;
+        fn_user_code_callback *pfn_user_code_callback;
         renderer              *p_renderer;
         server                *p_server;
         scene                 *p_scene;

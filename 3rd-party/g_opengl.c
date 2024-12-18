@@ -117,6 +117,9 @@ int g_opengl_mesh_construct
     // Error check
     if ( p_mesh_data == (void *) 0 ) goto no_mem;
 
+    // Initialize
+    memset(p_mesh_data, 0, sizeof(mesh_data));
+
     // Allocate a buffers
     glGenVertexArrays(1, p_mesh_data->opengl.vertex_arrays);
     glGenBuffers(1, p_mesh_data->opengl.vertex_buffers);
@@ -215,8 +218,8 @@ int g_opengl_shader_construct
                      *const p_layout   = dict_get(p_dict, "layout"),
                      *const p_fragment = dict_get(p_dict, "fragment");
     int success;
-    char _vs_src[512] = { 0 };
-    char _fs_src[512] = { 0 };
+    char _vs_src[2048] = { 0 };
+    char _fs_src[2048] = { 0 };
     char *p_vs_src = (char *)&_vs_src;
     char *p_fs_src = (char *)&_fs_src;
 
@@ -276,10 +279,10 @@ int g_opengl_shader_construct
     if ( success == false ) goto failed_to_compile_shader;
     
     // Store the on bind function
-    p_shader->functions.pfn_shader_on_bind = (fn_shader_on_bind) shader_bind_camera;
+    p_shader->functions.pfn_shader_on_bind = (fn_shader_on_bind *) shader_bind_camera;
 
     // Store the draw function
-    p_shader->functions.pfn_shader_on_draw = (fn_shader_on_draw) mesh_draw;
+    p_shader->functions.pfn_shader_on_draw = (fn_shader_on_draw *) mesh_draw;
 
     // Return a pointer to the caller
     *pp_shader = p_shader;
@@ -556,6 +559,87 @@ int g_opengl_shader_bind_transform ( shader *p_shader, const transform *const p_
                 return 0;
         }
     }
+}
+
+int g_opengl_shader_bind_bv ( shader *p_shader, const bv *const p_bv, ... )
+{
+
+    // Argument check
+    if ( p_shader == (void *) 0 ) goto no_shader;
+    if ( p_bv     == (void *) 0 ) goto no_bv;
+
+    // Initialized data
+    vec3 _min         = p_bv->bounds.min,
+         _max         = p_bv->bounds.max,
+         _center      = { 0 },
+         _dimension   = { 0 };
+    mat4 _translation = { 0 },
+         _scale       = { 0 },
+         _model       = { 0 };
+
+    // Compute center
+    vec3_add_vec3(&_center, _min, _max);
+    float scale_factor = 0.5;
+    // Compute dimensions
+    vec3_sub_vec3(&_dimension, _max, _min);
+    vec3_mul_scalar(&_dimension, _dimension, scale_factor);
+    vec3_mul_scalar(&_center, _center, scale_factor);
+
+    _translation = (mat4)
+    {
+        .a = 1         , .b = 0         , .c = 0         , .d = 0,
+        .e = 0         , .f = 1         , .g = 0         , .h = 0,
+        .i = 0         , .j = 0         , .k = 1         , .l = 0,
+        .m = _center.x, .n = _center.y, .o = _center.z, .p = 1
+    };
+
+    _scale = (mat4)
+    {
+        .a = _dimension.x, .b = 0           , .c = 0           , .d = 0,
+        .e = 0           , .f = _dimension.y, .g = 0           , .h = 0,
+        .i = 0           , .j = 0           , .k = _dimension.z, .l = 0,
+        .m = 0           , .n = 0           , .o = 0           , .p = 1
+    };
+
+    // Compute the model matrix
+    mat4_mul_mat4(&_model, _scale, _translation);
+    
+    // Bind the model matrix
+    g_opengl_shader_bind_mat4(p_shader, "M", &_model);
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_shader:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_shader\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_bv:
+                #ifndef NDEBUG
+                    log_error("[g10] [renderer] Null pointer provided for parameter \"p_bv\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
+int g_opengl_set_wireframe ( bool set )
+{
+    
+    glPolygonMode(GL_FRONT_AND_BACK, set ? GL_LINE : GL_FILL);
+
+    return 1;
 }
 
 #endif

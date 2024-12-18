@@ -29,7 +29,7 @@ struct camera_s
 {
     char _name[63 + 1];
     bool dirty;
-    fn_camera_controller pfn_camera_controller;
+    fn_camera_controller *pfn_camera_controller;
     struct
     {
         vec3 location, target, up;

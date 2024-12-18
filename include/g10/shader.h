@@ -57,9 +57,9 @@ struct shader_s
     // Functions
     struct
     {
-        fn_shader_on_bind     pfn_shader_on_bind;
-        fn_shader_on_material pfn_shader_on_material;
-        fn_shader_on_draw     pfn_shader_on_draw;
+        fn_shader_on_bind     *pfn_shader_on_bind;
+        fn_shader_on_material *pfn_shader_on_material;
+        fn_shader_on_draw     *pfn_shader_on_draw;
     } functions;
 
     #ifdef G10_BUILD_WITH_VULKAN
@@ -144,3 +144,13 @@ DLLEXPORT int shader_bind_camera ( shader *p_shader, camera *p_camera );
  * @return 1 on success, 0 on error
  */
 DLLEXPORT int shader_bind_transform ( shader *p_shader, transform *p_transform );
+
+/** !
+ * Bind the model matrix of a bounding volume 
+ * 
+ * @param p_bv     the bv
+ * @param p_camera the camera
+ * 
+ * @return 1 on success, 0 on error
+ */
+DLLEXPORT int shader_bind_bv ( shader *p_shader, bv *p_bv );

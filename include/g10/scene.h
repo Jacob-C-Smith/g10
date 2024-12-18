@@ -30,6 +30,7 @@
 // g10
 #include <g10/gtypedef.h>
 #include <g10/linear.h>
+#include <g10/bv.h>
 #include <g10/entity.h>
 #include <g10/camera.h>
 
@@ -49,6 +50,7 @@ struct scene_s
         dict *entities,
              *cameras,
              *lights;
+        bvh  *p_bvh;
     } data;
 
     // State

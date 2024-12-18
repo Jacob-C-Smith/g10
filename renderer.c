@@ -1395,12 +1395,22 @@ int renderer_pass_render ( renderer *p_renderer, render_pass *p_render_pass )
     for ( i = 0; i < p_render_pass->shader_quantity; i++ )
     {
         
+        extern int g_opengl_set_wireframe ( bool set );
+        
         // Initialized data
         shader *p_shader = p_render_pass->_p_shaders[i];
-        fn_shader_on_draw pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
+        fn_shader_on_draw *pfn_shader_on_draw = p_shader->functions.pfn_shader_on_draw;
 
         // Bind the shader
         shader_bind(p_shader);
+        #ifdef G10_BUILD_WITH_OPENGL
+
+            //if ( strcmp(p_shader->_name, "bv") == 0 )
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            //else
+            //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        #endif
+
 
         // Draw each object
         for (size_t j = 0; j < p_shader->count; j++)

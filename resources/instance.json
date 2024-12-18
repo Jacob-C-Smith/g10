@@ -131,8 +131,8 @@
                 "orientation" : [ 0.0, 0.0, 1.0 ],
                 "clip" :
                 {
-                    "near" : 0.1,
-                    "far"  : 1000.0
+                    "near" : 5.0,
+                    "far"  : 100.0
                 }
             }
         },
@@ -220,13 +220,13 @@
                                 ]
                             }
                         },
-                        "color" : 
+                        "bv" : 
                         {
                             "data" :
                             {
                                 "type"     : "shader",  
-                                "vertex"   : "resources/shaders/color/vert.glsl",
-                                "fragment" : "resources/shaders/color/frag.glsl",
+                                "vertex"   : "resources/shaders/bv/vert.glsl",
+                                "fragment" : "resources/shaders/bv/frag.glsl",
                                 "nodes" :
                                 {
                                     "input assembler" : { "out" : [ "xyz" ] },
@@ -241,11 +241,11 @@
                                 },
                                 "connections" : 
                                 [
-                                    [ "input assembler:xyz", "geometry:xyz" ],
-                                    [ "camera:view"        , "geometry:view" ],
-                                    [ "camera:projection"  , "geometry:projection" ],
-                                    [ "transform:model"    , "geometry:model" ],
-                                    [ "geometry:color"     , "color:color" ]
+                                    [ "input assembler:xyz"     , "geometry:xyz" ],
+                                    [ "camera:view"             , "geometry:view" ],
+                                    [ "camera:projection"       , "geometry:projection" ],
+                                    [ "transform:model"         , "geometry:model" ],
+                                    [ "geometry:color"          , "color:color" ]
                                 ]
                             }
                         }
@@ -257,7 +257,7 @@
         },
         "connections" : [ [ "geometry:color", "framebuffer:color" ] ]
     },
-    "debug" : 4,
+    "debug" : 64,
     "debug " :
     {
         "log limit"   : 4,

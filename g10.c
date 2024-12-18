@@ -344,6 +344,10 @@ int g_init ( g_instance **pp_instance, const char *p_path )
         // Set up the cache
         dict_construct(&p_instance->cache.p_shaders, 32, 0);
 
+        // Initialize the bv system
+        extern u0 g_init_bv ( u0 );
+        g_init_bv();
+
         // Initialize the scheduler
         if ( p_schedule )
             if ( schedule_load_as_json_value(&p_instance->p_schedule, p_schedule) == 0 ) goto failed_to_load_schedule_from_json_value;

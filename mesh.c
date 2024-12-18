@@ -105,6 +105,91 @@ const struct
 
 dict *p_base_mesh_lookup = (void *) 0;
 
+// Function declarations
+int mesh_data_local_bounds_compute ( mesh_create_info *p_mesh_create_info, size_t offset, size_t stride, vec3 *p_min, vec3 *p_max )
+{
+
+    // Argument check
+    if ( p_mesh_create_info == (void *) 0 ) goto no_mesh_create_info;
+    if ( p_max              == (void *) 0 ) goto no_max;
+    if ( p_min              == (void *) 0 ) goto no_min;
+
+    // Initialized data
+    f32 *p_vertex_data = p_mesh_create_info->verticies.p_data;
+    vec3 _min = (vec3)
+    {
+        .x = INFINITY,
+        .y = INFINITY,
+        .z = INFINITY
+    };
+    vec3 _max = (vec3)
+    {
+        .x = -INFINITY,
+        .y = -INFINITY,
+        .z = -INFINITY
+    };
+
+    // Iterate through the verticies
+    for (size_t i = 0; i < p_mesh_create_info->verticies.quantity / 3; i++)
+    {
+
+        // Initialized data
+        f32 x = p_vertex_data[i * stride + offset + 0];
+        f32 y = p_vertex_data[i * stride + offset + 1];
+        f32 z = p_vertex_data[i * stride + offset + 2];
+        
+        // Update min
+        _min.x = (_min.x > x) ? x : _min.x;
+        _min.y = (_min.y > y) ? y : _min.y;
+        _min.z = (_min.z > z) ? z : _min.z;
+
+        // Update max
+        _max.x = (_max.x < x) ? x : _max.x;
+        _max.y = (_max.y < y) ? y : _max.y;
+        _max.z = (_max.z < z) ? z : _max.z;
+    }
+    
+    // Store min
+    *p_min = _min;
+
+    // Store max
+    *p_max = _max;
+
+    // Success
+    return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_mesh_create_info:
+                #ifndef NDEBUG
+                    log_error("[g10] [mesh] Null pointer provided for parameter \"p_mesh_create_info\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_max:
+                #ifndef NDEBUG
+                    log_error("[g10] [mesh] Null pointer provided for parameter \"p_max\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+
+            no_min:
+                #ifndef NDEBUG
+                    log_error("[g10] [mesh] Null pointer provided for parameter \"p_min\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
+}
+
 u0 g_init_mesh ( u0 )
 {
 
@@ -239,8 +324,20 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
                      *const p_shader_value = dict_get(p_value->object, "shader"),
                      *const p_primitive    = dict_get(p_value->object, "primative");
     shader *p_shader = (shader *)dict_get(p_instance->cache.p_shaders, p_shader_value->string);
-
     enum mesh_shapes_e type = (enum mesh_shapes_e) (size_t) dict_get(p_base_mesh_lookup, p_primitive->string);
+    mesh_create_info _mesh_create_info = (mesh_create_info)
+    {
+        .verticies = 
+        {
+            .quantity = _base_mesh_data[type].verticies.quantity,
+            .p_data   = _base_mesh_data[type].verticies._data,
+        },
+        .elements = 
+        {
+            .quantity = _base_mesh_data[type].elements.quantity,
+            .p_data   = _base_mesh_data[type].elements._data,
+        }
+    };
 
     // Platform dependent implementation
     #ifdef G10_BUILD_WITH_VULKAN
@@ -257,19 +354,7 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
         // Construct an OpenGL mesh
         g_opengl_mesh_construct(
             &p_mesh_data,
-            (mesh_create_info)
-            {
-                .verticies = 
-                {
-                    .quantity = _base_mesh_data[type].verticies.quantity,
-                    .p_data   = _base_mesh_data[type].verticies._data,
-                },
-                .elements = 
-                {
-                    .quantity = _base_mesh_data[type].elements.quantity,
-                    .p_data   = _base_mesh_data[type].elements._data,
-                }
-            }
+            _mesh_create_info
         );
     #else
         return 0;
@@ -297,6 +382,9 @@ int mesh_data_from_json ( mesh_data **pp_mesh_data, const char *p_name, const js
 
     // Store the parent transform
     p_mesh_data->p_transform->p_parent = p_parent_transform;
+
+    // Compute and store the local bounds
+    mesh_data_local_bounds_compute(&_mesh_create_info, 0, 3, &p_mesh_data->local_bounds.min, &p_mesh_data->local_bounds.max);
 
     // Add the mesh to the shader's draw list
     shader_draw_item_add(p_shader, p_mesh_data);

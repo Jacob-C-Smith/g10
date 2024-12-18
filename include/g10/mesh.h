@@ -78,6 +78,8 @@ struct mesh_data_s
 
     char _name[63 + 1];
     transform *p_transform;
+    struct { vec3 min, max; } local_bounds;
+    
     #ifdef G10_BUILD_WITH_VULKAN
         struct
         {
