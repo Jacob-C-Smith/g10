@@ -19,6 +19,7 @@
 #include <gtypedef.h>
 #include <attachment.h>
 #include <pipeline.h>
+#include <scene.h>
 
 #define G10_BUILD_WITH_SDL3
 
@@ -45,7 +46,7 @@ struct g_instance_s
         // fn_user_code_callback  pfn_user_code_callback;
         renderer *p_renderer;
         // server                *p_server;
-        // scene                 *p_scene;
+        scene *p_scene;
         // input                 *p_input;
         u16 fixed_tick_rate;
     } context;
@@ -119,7 +120,7 @@ struct g_instance_s
     // cache
     struct 
     {
-        cache *p_pipeline,
+        dict *p_pipeline,
               *p_attachment,
               *p_texture,
               *p_geometry;

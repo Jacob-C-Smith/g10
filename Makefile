@@ -61,6 +61,14 @@ assets:
 	xcrun metal -c assets/pipeline/quad/frag.metal -o assets/pipeline/quad/frag.air
 	xcrun metallib assets/pipeline/quad/vert.air assets/pipeline/quad/frag.air -o assets/pipeline/quad/quad.metallib
 
+	xcrun metal -c assets/pipeline/geom/vert.metal -o assets/pipeline/geom/vert.air
+	xcrun metal -c assets/pipeline/geom/frag.metal -o assets/pipeline/geom/frag.air
+	xcrun metallib assets/pipeline/geom/vert.air assets/pipeline/geom/frag.air -o assets/pipeline/geom/geom.metallib
+
+	xcrun metal -c assets/pipeline/color/vert.metal -o assets/pipeline/color/vert.air
+	xcrun metal -c assets/pipeline/color/frag.metal -o assets/pipeline/color/frag.air
+	xcrun metallib assets/pipeline/color/vert.air assets/pipeline/color/frag.air -o assets/pipeline/color/color.metallib
+
 # Info
 info:
 	@echo "g10 sources : $(G10_SRC)"

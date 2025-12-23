@@ -50,10 +50,11 @@ typedef struct { float u, i, j, k; } quaternion;
 // forward declarations
 // struct ai_s;
 struct attachment_s;
+struct aabb_s;
 // struct bv_s;
 // struct camera_s;
 // struct cull_operation_s;
-// struct entity_s;
+struct entity_s;
 struct g_instance_s;
 struct framebuffer_s;
 // struct input_s;
@@ -64,19 +65,21 @@ struct geometry_s;
 // struct mesh_create_info_s;
 struct renderer_s;
 struct render_pass_s;
-// struct scene_s;
+struct scene_s;
 // struct server_s;
 struct pipeline_s;
 // struct shell_s;
-// struct transform_s;
+struct transform_s;
+struct uniform_s;
 
 // Type definitions
 // typedef struct ai_s               ai;
+typedef struct aabb_s aabb;
 typedef struct attachment_s       attachment;
 // typedef struct bv_s               bv;
 // typedef struct camera_s           camera;
 // typedef struct cull_operation_s   cull_operation;
-// typedef struct entity_s           entity;
+typedef struct entity_s           entity;
 typedef struct framebuffer_s       framebuffer;
 typedef struct g_instance_s       g_instance;
 // typedef struct input_s            input;
@@ -87,11 +90,12 @@ typedef struct geometry_s            geometry;
 // typedef struct mesh_create_info_s mesh_create_info;
 typedef struct renderer_s         renderer;
 typedef struct render_pass_s      render_pass;
-// typedef struct scene_s            scene;
+typedef struct scene_s            scene;
 // typedef struct server_s           server;
 typedef struct pipeline_s           pipeline;
 // typedef struct shell_s            shell;
-// typedef struct transform_s        transform;
+typedef struct transform_s        transform;
+typedef struct uniform_s        uniform;
 
 // function pointers
 typedef int (fn_render_early)( g_instance *p_instance );
@@ -99,6 +103,9 @@ typedef int (fn_render_late)( g_instance *p_instance );
 typedef int (fn_render_draw)( g_instance *p_instance );
 typedef int (fn_render_pass_bind)( renderer *p_renderer );
 typedef int (fn_render_pass_draw)( renderer *p_renderer );
+typedef int (fn_pipeline_bind_once)( render_pass *p_render_pass, pipeline *p_pipeline );
+typedef int (fn_pipeline_bind_each)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
+
 // typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
 // typedef int (*fn_camera_controller)( camera *p_camera );
 // typedef int (*fn_cull_operation)( void *p_object );

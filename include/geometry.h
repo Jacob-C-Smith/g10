@@ -15,11 +15,13 @@
 // g10
 #include <gtypedef.h>
 #include <g10.h>
+#include <aabb.h>
 
 // structure definitions
 struct geometry_s
 {
     char _name[63+1];
+    aabb _bounds;
     void *p_handle;
 };
 

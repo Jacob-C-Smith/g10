@@ -20,29 +20,46 @@
 #include <framebuffer.h>
 #include <render_pass.h>
 #include <pipeline.h>
+#include <aabb.h>
 #include <geometry.h>
 
 // sdl3
 #include <SDL3/SDL.h>
 
+// todo: get rid of
 pipeline *p_current_pl = NULL;
 geometry *p_current_g = NULL;
 
 // forward declarations
+/// sdl3
+int g_sdl3_init ( g_instance *p_instance );
+int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value );
+
+/// renderer
+int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_value );
 int g_sdl3_render_early ( g_instance *p_instance );
 int g_sdl3_render_draw ( g_instance *p_instance );
 int g_sdl3_render_late ( g_instance *p_instance );
-int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass );
-int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *p_value );
-int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_value );
+
+/// render pass
 int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_value *p_value );
+int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass );
+
+/// attachment
+int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *p_value );
+
+/// pipeline
+int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_value );
+int g_sdl3_pipeline_bind ( render_pass *p_render_pass, pipeline *p_pipeline );
+int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline );
+
+/// framebuffer
 int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_value *p_value );
 
-// function definitions
-void F(void *p_value, int i) {
-    log_info("%d : %p\n", i, p_value);
-};
+/// geometry
+int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_value );
 
+// function definitions
 int g_sdl3_init ( g_instance *p_instance )
 {
 
@@ -88,24 +105,33 @@ int g_sdl3_init ( g_instance *p_instance )
 
 int g_sdl3_render_early ( g_instance *p_instance )
 {
+
+    // argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+    
+    // initialized data
+    u32 width  = 0,
+        height = 0;
+        
     // acquire the command buffer
     p_instance->graphics.sdl3.command_buffer = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
 
     // get the swapchain texture
-    Uint32 width, height;
-    SDL_WaitAndAcquireGPUSwapchainTexture(
+    SDL_WaitAndAcquireGPUSwapchainTexture
+    (
         p_instance->graphics.sdl3.command_buffer, 
         p_instance->window.sdl3.window, 
+
         &p_instance->graphics.sdl3.swapchain_texture, 
         &width, 
         &height
     );
 
-    // end the frame early if a swapchain texture is not available
-    if (p_instance->graphics.sdl3.swapchain_texture == NULL)
+    // swapchain texture unavailable
+    if ( p_instance->graphics.sdl3.swapchain_texture == NULL )
     {
         
-        // you must always submit the command buffer
+        // submit the empty command buffer
         SDL_SubmitGPUCommandBuffer(p_instance->graphics.sdl3.command_buffer);
         
         // unavailable
@@ -114,21 +140,29 @@ int g_sdl3_render_early ( g_instance *p_instance )
 
     // success 
     return 1;
-}
 
-int g_sdl3_render_late ( g_instance *p_instance )
-{
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
 
-    // submit the command buffer
-    SDL_SubmitGPUCommandBuffer(p_instance->graphics.sdl3.command_buffer);
-
-    // success
-    return 1;
+                // error
+                return 0;
+        }
+    }
 }
 
 int g_sdl3_render_draw ( g_instance *p_instance ) 
 {
 
+    // argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+    
     // initialized data
     renderer *p_renderer = p_instance->context.p_renderer;
     array *p_passes = p_renderer->p_passes;
@@ -150,13 +184,58 @@ int g_sdl3_render_draw ( g_instance *p_instance )
 
     // success
     return 1;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+int g_sdl3_render_late ( g_instance *p_instance )
+{
+
+    // argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+    
+    // submit the command buffer
+    SDL_SubmitGPUCommandBuffer(p_instance->graphics.sdl3.command_buffer);
+
+    // success
+    return 1;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
 }
 
 int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass )
 {
 
+    // argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+    
     // initialized data
-    SDL_GPURenderPass* renderPass = NULL;
     SDL_GPUColorTargetInfo colorTargetInfo = 
     {
         .clear_color = (SDL_FColor)
@@ -170,21 +249,62 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
         .store_op = SDL_GPU_STOREOP_STORE,
         .texture = p_instance->graphics.sdl3.swapchain_texture
     };
-    SDL_GPUBufferBinding vertexBinding = { .buffer = p_current_g->p_handle, .offset = 0 };
-    // begin a render pass
-    renderPass = SDL_BeginGPURenderPass(p_instance->graphics.sdl3.command_buffer, &colorTargetInfo, 1, NULL);
+    SDL_GPUBufferBinding vertexBinding = 
+    { 
+        .buffer = p_current_g->p_handle, 
+        .offset = 0
+    };
+    size_t len = array_size(p_render_pass->p_pipelines);
 
-    SDL_BindGPUGraphicsPipeline(renderPass, p_current_pl->pipeline);
-    SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBinding, 1);
+    // begin the render pass
+    p_render_pass->p_handle = SDL_BeginGPURenderPass(p_instance->graphics.sdl3.command_buffer, &colorTargetInfo, 1, NULL);
 
-    // draw something
-    SDL_DrawGPUPrimitives(renderPass, 6, 1, 0, 0);
+    // iterate through each pipeline
+    for (size_t i = 0; i < len; i++)
+    {
+        
+        // initialized data
+        pipeline *p_pipeline = NULL;
+        array_index(p_render_pass->p_pipelines, i, &p_pipeline);
+
+        // bind the pipeline
+        g_sdl3_pipeline_bind(p_render_pass, p_pipeline);
+        
+        // bind once
+        if ( p_pipeline->pfn_bind_once )
+            p_pipeline->pfn_bind_once(p_render_pass, p_pipeline);
+
+        // pipeline draw
+        g_sdl3_pipeline_draw(p_render_pass, p_pipeline);
+        
+        // bind the drawable
+        SDL_BindGPUVertexBuffers(p_render_pass->p_handle, 0, &vertexBinding, 1);
+        p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_current_g);
+
+        // draw something
+        SDL_DrawGPUPrimitives(p_render_pass->p_handle, 6, 1, 0, 0);
+    } 
 
     // end the render pass
-    SDL_EndGPURenderPass(renderPass);
+    SDL_EndGPURenderPass(p_render_pass->p_handle);
 
     // success
     return 1;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
 }
 
 int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value )
@@ -196,7 +316,7 @@ int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value 
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // initialized data
-    SDL_GPUDevice* device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB, true, NULL);
+    SDL_GPUDevice* device = NULL;
     u32 sdl3_window_flags = SDL_WINDOW_RESIZABLE;
 
     // parse the window object
@@ -254,6 +374,14 @@ int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value 
 
     // show the window
     SDL_ShowWindow(p_instance->window.sdl3.window);
+
+    // create a gpu device
+    device = SDL_CreateGPUDevice
+    (
+        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB,
+        true, 
+        NULL
+    );
 
     // use the window for the game
     SDL_ClaimWindowForGPUDevice(device, p_instance->window.sdl3.window);
@@ -383,22 +511,22 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name  = (json_value *)dict_get(p_dict, "name"),
-                   *p_pipelines  = (json_value *)dict_get(p_dict, "pipelines"),
+        json_value *p_name        = (json_value *)dict_get(p_dict, "name"),
+                   *p_pipelines   = (json_value *)dict_get(p_dict, "pipelines"),
                    *p_attachments = (json_value *)dict_get(p_dict, "attachments"),
-                   *p_passes  = (json_value *)dict_get(p_dict, "passes");
+                   *p_passes      = (json_value *)dict_get(p_dict, "passes");
 
         // error check
-        if ( p_name  == (void *) 0 ) goto no_name_property;
-        if ( p_pipelines  == (void *) 0 ) goto no_pipelines_property;
+        if ( p_name        == (void *) 0 ) goto no_name_property;
+        if ( p_pipelines   == (void *) 0 ) goto no_pipelines_property;
         if ( p_attachments == (void *) 0 ) goto no_attachments_property;
-        if ( p_passes  == (void *) 0 ) goto no_passes_property;
+        if ( p_passes      == (void *) 0 ) goto no_passes_property;
 
         // type check
-        if ( p_name->type  != JSON_VALUE_STRING ) goto wrong_name_type;
-        if ( p_pipelines->type  != JSON_VALUE_ARRAY ) goto wrong_pipelines_type;
-        if ( p_attachments->type != JSON_VALUE_ARRAY ) goto wrong_attachments_type;
-        if ( p_passes->type  != JSON_VALUE_ARRAY  ) goto wrong_passes_type;
+        if ( p_name->type        != JSON_VALUE_STRING ) goto wrong_name_type;
+        if ( p_pipelines->type   !=  JSON_VALUE_ARRAY ) goto wrong_pipelines_type;
+        if ( p_attachments->type !=  JSON_VALUE_ARRAY ) goto wrong_attachments_type;
+        if ( p_passes->type      !=  JSON_VALUE_ARRAY ) goto wrong_passes_type;
 
         // store the name
         strncpy(p_renderer->_name, p_name->string, sizeof(p_renderer->_name) - 1);
@@ -406,47 +534,39 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
         // construct lookups
         dict_construct(&p_renderer->p_attachments, 64, NULL);
 
-        // construct pipelines
+        // iterate through each pipeline json
+        for (size_t i = 0; i < array_size(p_pipelines->list); i++)
         {
 
-            // iterate through each pipeline json
-            for (size_t i = 0; i < array_size(p_pipelines->list); i++)
-            {
+            // initialized data
+            pipeline *p_pipeline = NULL;
+            json_value *p_value = NULL;
+            
+            // store the i'th pipeline json
+            array_index(p_pipelines->list, i, &p_value);
 
-                // initialized data
-                pipeline *p_pipeline = NULL;
-                json_value *p_value = NULL;
-                
-                // store the i'th pipeline json
-                array_index(p_pipelines->list, i, &p_value);
-
-                // construct the i'th pipeline
-                g_sdl3_pipeline_from_json(&p_pipeline, p_value);
-            }
+            // construct the i'th pipeline
+            g_sdl3_pipeline_from_json(&p_pipeline, p_value);
         }
-
-        // construct attachments
+    
+        // iterate through each attachment json
+        for (size_t i = 0; i < array_size(p_attachments->list); i++)
         {
 
-            // iterate through each attachment json
-            for (size_t i = 0; i < array_size(p_attachments->list); i++)
-            {
+            // initialized data
+            attachment *p_attachment = NULL;
+            json_value *p_value = NULL;
+            
+            // store the i'th attachment json
+            array_index(p_attachments->list, i, &p_value);
 
-                // initialized data
-                attachment *p_attachment = NULL;
-                json_value *p_value = NULL;
-                
-                // store the i'th attachment json
-                array_index(p_attachments->list, i, &p_value);
+            // construct the i'th attachment
+            g_sdl3_attachment_from_json(&p_attachment, p_value);
 
-                // construct the i'th attachment
-                g_sdl3_attachment_from_json(&p_attachment, p_value);
-
-                // store the i'th attachment
-                dict_add(p_renderer->p_attachments, p_attachment->_name, p_attachment);
-            }
+            // store the i'th attachment
+            dict_add(p_renderer->p_attachments, p_attachment->_name, p_attachment);
         }
-
+    
         // construct render passes
         {
 
@@ -478,8 +598,8 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
 
     // function pointers
     p_renderer->pfn_early = g_sdl3_render_early;
-    p_renderer->pfn_draw = g_sdl3_render_draw;
-    p_renderer->pfn_late = g_sdl3_render_late;
+    p_renderer->pfn_draw  = g_sdl3_render_draw;
+    p_renderer->pfn_late  = g_sdl3_render_late;
     
     // return a pointer to the caller
     *pp_renderer = p_renderer;
@@ -626,6 +746,7 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // initialized data
+    g_instance *p_instance = g_active_instance();
     attachment *p_attachment = default_allocator(0, sizeof(attachment));
 
     // error check
@@ -657,6 +778,8 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
             
         }
     }
+
+    dict_add(p_instance->cache.p_attachment, p_attachment->_name, p_attachment);
 
     // return a pointer to the caller
     *pp_attachment = p_attachment;
@@ -850,15 +973,30 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             // compile the fragment shader
             fs = SDL_CreateGPUShader(p_instance->graphics.sdl3.device, &fs_ci);
 
+            // define vertex input state
+            SDL_GPUVertexBufferDescription vertex_buffer_descriptions[] = {{
+                .slot = 0,
+                .pitch = sizeof(float) * 3,
+                .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+                .instance_step_rate = 0
+            }};
+
+            SDL_GPUVertexAttribute vertex_attributes[] = {{
+                .location = 0,
+                .buffer_slot = 0,
+                .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+                .offset = 0
+            }};
+
             p_ci = (SDL_GPUGraphicsPipelineCreateInfo)
             {
                 .vertex_shader = vs,
                 .fragment_shader = fs,
                 .vertex_input_state = {
-                    .vertex_buffer_descriptions = NULL,
-                    .num_vertex_buffers = 0,
-                    .vertex_attributes = NULL,
-                    .num_vertex_attributes = 0
+                    .vertex_buffer_descriptions = vertex_buffer_descriptions,
+                    .num_vertex_buffers = 1,
+                    .vertex_attributes = vertex_attributes,
+                    .num_vertex_attributes = 1
                 },
                 .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
                 .rasterizer_state = {
@@ -904,8 +1042,11 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
         }
     }
 
+    // construct a static draw list
+    array_construct(&p_pipeline->p_static_draw_list, 512);
+
     // add the pipeline to the cache
-    cache_insert(p_instance->cache.p_pipeline, p_pipeline->_name, p_pipeline);
+    dict_add(p_instance->cache.p_pipeline, p_pipeline->_name, p_pipeline);
     p_current_pl = p_pipeline;
     
     // return a pointer to the caller
@@ -1014,6 +1155,47 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
     }
 }
 
+int g_sdl3_pipeline_bind ( render_pass *p_render_pass, pipeline *p_pipeline )
+{
+    
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+
+    // bind the pipeline
+    SDL_BindGPUGraphicsPipeline(p_render_pass->p_handle, p_pipeline->pipeline);
+
+    // success
+    return 1;
+}
+
+int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
+{
+    
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    size_t len = array_size(p_pipeline->p_static_draw_list);
+
+    // iterate through each drawable
+    for (size_t i = 0; i < len; i++)
+    {
+        
+        // initialized data
+        void *p_drawable = NULL;
+
+        // retrieve the i'th drawable
+        array_index(p_pipeline->p_static_draw_list, i, &p_drawable);
+
+        // bind the i'th drawable
+        p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
+
+        // draw the i'th drawable
+        log_info("Drawing drawable %i\n", i);
+    }
+    
+    // success
+    return 1;
+}
+
 int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_value *p_value )
 {
     
@@ -1023,6 +1205,7 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // initialized data
+    g_instance *p_instance = g_active_instance();
     render_pass *p_render_pass = default_allocator(0, sizeof(render_pass));
 
     // error check
@@ -1034,15 +1217,18 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
         // initialized data
         dict *p_dict = p_value->object;
         json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                   *p_framebuffer = (json_value *)dict_get(p_dict, "framebuffer");
+                   *p_framebuffer = (json_value *)dict_get(p_dict, "framebuffer"),
+                   *p_pipelines = (json_value *)dict_get(p_dict, "pipelines");
 
         // error check
         if ( p_name  == (void *) 0 ) goto no_name_property;
         if ( p_framebuffer == (void *) 0 ) goto no_framebuffer_property;
+        if ( p_pipelines == (void *) 0 ) goto no_pipelines_property;
 
         // type check
         if ( p_name->type != JSON_VALUE_STRING ) goto wrong_name_type;
         if ( p_framebuffer->type != JSON_VALUE_OBJECT ) goto wrong_framebuffer_type;
+        if ( p_pipelines->type != JSON_VALUE_ARRAY ) goto wrong_pipelines_type;
 
         // store the name
         strncpy(p_render_pass->_name, p_name->string, sizeof(p_render_pass->_name) - 1);
@@ -1050,6 +1236,37 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
         // construct the framebuffer
         g_sdl3_framebuffer_from_json(&p_render_pass->p_framebuffer, p_framebuffer);
 
+        // iterate through each pipeline json
+        {
+            
+            // initialized data
+            size_t len = array_size(p_pipelines->list);
+            
+            // construct an array
+            array_construct(&p_render_pass->p_pipelines, len);
+
+            // iterate through each pipeline 
+            for (size_t i = 0; i < array_size(p_pipelines->list); i++)
+            {
+                
+                // initialized data
+                pipeline *p_pipeline = NULL;
+                json_value *p_value = NULL;
+                char *p_name = NULL;
+                
+                // store the i'th pipeline json
+                array_index(p_pipelines->list, i, &p_value);
+
+                // store the name of the pipeline
+                p_name = p_value->string;
+
+                // retrieve the pipeline from the cache
+                p_pipeline = dict_get(p_instance->cache.p_pipeline, p_name);
+
+                // store the i'th pipeline
+                array_add(p_render_pass->p_pipelines, p_pipeline);
+            }
+        }
     }
 
     // return a pointer to the caller
@@ -1108,6 +1325,15 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
                 // error
                 return 0;
 
+            no_pipelines_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Parameter \"p_value\" is missing required property \"pipelines\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/render_pass.json\n");
+                #endif
+
+                // error
+                return 0;
+
             wrong_name_type:
                 #ifndef NDEBUG
                     log_error("[g10] [sdl3] Property \"name\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
@@ -1122,6 +1348,15 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
                     log_error("[g10] [sdl3] Property \"framebuffer\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
+
+                // error
+                return 0;
+            
+            wrong_pipelines_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Property \"pipelines\" of parameter \"p_value\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif 
 
                 // error
                 return 0;
@@ -1325,6 +1560,18 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     // initialized data
     g_instance *p_instance = g_active_instance();
     geometry *p_geometry = default_allocator(0, sizeof(geometry));
+    vec3 min = 
+    { 
+        .x = INFINITY,
+        .y = INFINITY,
+        .z = INFINITY
+    }, 
+    max = 
+    { 
+        .x = -INFINITY,
+        .y = -INFINITY,
+        .z = -INFINITY        
+    };
 
     // error check
     if ( NULL == p_geometry ) goto no_mem;
@@ -1334,7 +1581,8 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
+        json_value *p_name = (json_value *)dict_get(p_dict, "name"),
+                   *p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
                    *p_uv   = (json_value *)dict_get(p_dict, "uv"),
                    *p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
                    *p_txyz = (json_value *)dict_get(p_dict, "txyz"),
@@ -1343,6 +1591,9 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // todo: error check
         // todo: type check
+
+        // store the name
+        strncpy(p_geometry->_name, p_name->string, sizeof(p_geometry->_name) - 1);
 
         // xyz
         if ( p_xyz )
@@ -1368,6 +1619,26 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
                 xyz[i] = p_value->number;
             }
+
+            // compute the bounds of the geometry
+            for (size_t i = 0; i < len; i++)
+            {
+                if ( i%3==0 )
+                    min.x = (min.x > xyz[i]) ? xyz[i] : min.x,
+                    max.x = (max.x < xyz[i]) ? xyz[i] : max.x;
+                
+                if ( i%3==1 )
+                    min.y = (min.y > xyz[i]) ? xyz[i] : min.y,
+                    max.y = (max.y < xyz[i]) ? xyz[i] : max.y;
+                
+                if ( i%3==2 )
+                    min.z = (min.z > xyz[i]) ? xyz[i] : min.z,
+                    max.z = (max.z < xyz[i]) ? xyz[i] : max.z;
+            }
+
+            // construct an aabb 
+            aabb_from_bounds(&p_geometry->_bounds, min, max);
+            aabb_info(&p_geometry->_bounds);
             
             SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(p_instance->graphics.sdl3.device, &_transfer_buffer_ci);
             p_geometry->p_handle = SDL_CreateGPUBuffer(
@@ -1403,6 +1674,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     // return a pointer to the caller
     *pp_geometry = p_geometry;
     p_current_g = p_geometry;
+    dict_add(p_instance->cache.p_geometry, p_geometry->_name, p_geometry);
 
     // success
     return 1;
@@ -1499,6 +1771,31 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             no_mem:
                 #ifndef NDEBUG
                     log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+int g_sdl3_geometry_bind ( geometry *p_geometry )
+{
+
+    // argument check
+    if ( p_geometry == (void *) 0 ) goto no_geometry;
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_geometry:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"p_geometry\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // error

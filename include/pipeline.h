@@ -11,6 +11,7 @@
 
 /// data
 #include <data/dict.h>
+#include <data/queue.h>
 
 // g10
 #include <gtypedef.h>
@@ -21,9 +22,15 @@ struct pipeline_s
 {
     char _name[63+1];
     void *pipeline;
+    array *p_static_draw_list;
+    fn_pipeline_bind_once *pfn_bind_once;
+    fn_pipeline_bind_each *pfn_bind_each;
 };
 
 // function declarations
+int pipeline_set_bind_once (pipeline *p_pipeline, fn_pipeline_bind_once *pfn_bind_once);
+int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bind_each);
+
 /// print
 /** 
  *  Print a textual representation of an pipeline to standard output

@@ -1,0 +1,24 @@
+{
+    "name" : "entity",
+    "source" : 
+    {
+        "program" : "assets/pipeline/entity/entity.metallib"
+    },
+    "uniform" : 
+    [
+        {
+            "camera" :
+            [
+                { "V" : "mat4" },
+                { "P" : "mat4" }                
+            ]
+        },
+        {
+            "entity" :
+            [
+                { "M" : "mat4"},
+                { "color" : "vec3" }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+{
+    "name" : "geom",
+    "source" : 
+    {
+        "program" : "assets/pipeline/geom/geom.metallib"
+    }
+}

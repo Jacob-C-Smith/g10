@@ -21,6 +21,8 @@ struct render_pass_s
 {
     char _name[63+1];
     framebuffer *p_framebuffer;
+    array *p_pipelines;
+    void *p_handle;
 };
 
 // function declarations

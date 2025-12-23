@@ -12,18 +12,72 @@
         "width" : 800,
         "height" : 600
     },
+    "scene" : 
+    {
+        "name" : "scene",
+        "entities" : 
+        [
+            {
+                "name" : "entity",
+                "pipeline" : "geom",
+                "transform" :
+                {
+                    "location" : [0.0,0.0,0.0],
+                    "rotation" : [0.0,0.0,0.0],
+                    "scale" : [1.0,1.0,1.0]
+                },
+                "geometry" : 
+                {
+                    "xyz" :
+                    [
+                        -0.5, -0.5, 1.0,
+                        0.5, -0.5, 1.0,
+                        0.0,  0.5, 1.0 
+                    ], 
+                    "uv" : 
+                    [
+                        0.875, 0.5,
+                        0.625, 0.75,
+                        0.625, 0.5
+                    ],
+                    "nxyz" :
+                    [
+                        -0.5773503184318542, 0.5773503184318542, 0.5773503184318542, 
+                        0.5773503184318542, -0.5773503184318542, 0.5773503184318542, 
+                        0.5773503184318542, 0.5773503184318542, 0.5773503184318542
+                    ],
+                    "bxyz" : 
+                    [
+                        0.0, -1.0, 0.0, 
+                        0.0, -1.0, 0.0, 
+                        0.0, -1.0, 0.0
+                    ],
+                    "txyz": [
+                        -1.0, -0.0, 0.0, 
+                        -1.0, -0.0, 0.0, 
+                        -1.0, -0.0, 0.0
+                    ], 
+                    "idx" : [ 0, 1, 2 ]
+                }
+            }
+        ]
+    },
     "renderer" : 
     {
         "name"      : "renderer",
         "pipelines" :
         [
             {
-                "name" : "quad",
+                "name" : "geom",
                 "source" : 
                 {
-                    "vert" : "assets/pipeline/quad/quad.metallib",
-                    "frag" : "assets/pipeline/quad/quad.metallib"
-                }
+                    "vert" : "assets/pipeline/geom/geom.metallib",
+                    "frag" : "assets/pipeline/geom/geom.metallib"
+                },
+                "uniform" :
+                [
+                    { "color" : "vec3" }
+                ]
             }
         ],
         "attachments" : 
@@ -53,7 +107,7 @@
                 { 
                     "clear" : [ 0.5, 0.5, 1.0, 0.0 ]
                 },
-                "pipelines" : [ "quad" ]
+                "pipelines" : [ "geom" ]
             }
         ]
     }

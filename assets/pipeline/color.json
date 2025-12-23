@@ -1,0 +1,16 @@
+{
+    "name" : "color",
+    "source" : 
+    {
+        "program" : "assets/pipeline/color/color.metallib"
+    },
+    "uniform" : 
+    [
+        {
+            "color" :
+            [
+                { "color" : "vec3" }
+            ]
+        }
+    ]
+}

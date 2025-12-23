@@ -6,7 +6,9 @@ int render_pass_info ( render_pass *p_render_pass )
 
     log_info("Render Pass @%p\n", p_render_pass);
     log_info(" - name : \"%s\"\n", p_render_pass->_name);
-
+    log_info(" - pipelines : \n");
+    array_foreach( p_render_pass->p_pipelines, (fn_foreach *) pipeline_info );
+    
     return 1;
 }
 

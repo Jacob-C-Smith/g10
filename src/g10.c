@@ -44,20 +44,10 @@ int g_init
     p_active_instance = p_instance;
 
     // construct caches
-    cache_construct(
-        &p_instance->cache.p_attachment, 
-        64, 
-        
-        (fn_equality *)attachment_equality, 
-        (fn_key_accessor *)attachment_key_accessor
-    );
-    cache_construct(&p_instance->cache.p_pipeline, 64, 
-        
-        (fn_equality *)pipeline_equality, 
-        (fn_key_accessor *)pipeline_key_accessor
-    );
-    cache_construct(&p_instance->cache.p_texture, 64, NULL, NULL);
-    cache_construct(&p_instance->cache.p_geometry, 64, NULL, NULL);
+    dict_construct(&p_instance->cache.p_attachment, 64, NULL);
+    dict_construct(&p_instance->cache.p_pipeline, 64, NULL);
+    dict_construct(&p_instance->cache.p_texture, 64, NULL);
+    dict_construct(&p_instance->cache.p_geometry, 64, NULL);
 
     // parse the json value into an instance
     {
@@ -71,7 +61,7 @@ int g_init
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
                          *p_input           = dict_get(p_dict, "input"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
-                         *p_scene           = dict_get(p_dict, "initial scene"),
+                         *p_scene           = dict_get(p_dict, "scene"),
                          *p_debug           = dict_get(p_dict, "debug"),
                          *p_window          = dict_get(p_dict, "window");
     
@@ -163,6 +153,9 @@ int g_init
 
             // others? 
         #endif
+
+        // load a scene
+        scene_from_json(&p_instance->context.p_scene, p_scene);
     }
 
     // return a pointer to the caller
