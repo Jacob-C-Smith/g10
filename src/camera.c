@@ -801,3 +801,33 @@ int camera_pack ( void *p_buffer, camera *p_camera )
         }
     }
 }
+
+int camera_bind_active ( render_pass *p_render_pass, pipeline *p_pipeline )
+{
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    scene *p_scene = p_instance->context.p_scene;
+    camera *p_camera = p_scene->p_active_camera;
+    
+    // log
+    #ifdef LOG_VERBOSE
+        log_info("[pipeline] Binding %s\n", p_pipeline->_name);
+    #endif
+
+    // camera
+    {
+
+        // initialized data
+        uniform *p_vp = NULL;
+
+        // get the transform uniform
+        array_index(p_pipeline->p_uniforms, 2, (void **)&p_vp);
+
+        // bind model matrix
+        uniform_set_pack_push(p_vp, p_camera, (fn_pack *)camera_pack);
+    }
+
+    // success
+    return 1;
+}

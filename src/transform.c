@@ -614,6 +614,27 @@ int transform_get_matrix_world (
     }
 }
 
+int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform *p_transform )
+{
+     
+    // initialized data
+    uniform *p_m = NULL;
+
+    // get the transform uniform
+    array_index(p_pipeline->p_uniforms, 1, (void **)&p_m);
+
+    // compute the model matrix
+    mat4_model_from_vec3(
+        &p_transform->model,
+        p_transform->location,
+        p_transform->rotation,
+        p_transform->scale
+    );
+    
+    // bind model matrix
+    uniform_set_pack_push(p_m, &p_transform->model, (fn_pack *)mat4_pack);
+}
+
 int transform_destroy ( transform **pp_transform )
 {
 

@@ -81,6 +81,9 @@ int transform_get_matrix_local (
     mat4      *p_model_matrix
 );
 
+/// bind
+int transform_bind( render_pass *p_render_pass, pipeline *p_pipeline, transform *p_transform );
+
 /// destructors
 /** !
  * Destroy and deallocate a transform

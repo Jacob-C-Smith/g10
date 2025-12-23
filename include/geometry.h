@@ -14,8 +14,8 @@
 
 // g10
 #include <gtypedef.h>
-#include <g10.h>
 #include <aabb.h>
+#include <g10.h>
 
 // structure definitions
 struct geometry_s

@@ -20,6 +20,7 @@
 #include <gtypedef.h>
 #include <g10.h>
 #include <linear.h>
+#include <uniform.h>
 
 // structure definitions
 struct camera_s
@@ -119,3 +120,5 @@ int camera_info ( camera *p_camera );
 
 /// pack
 int camera_pack(void *p_buffer, camera *p_camera);
+
+int camera_bind_active ( render_pass *p_render_pass, pipeline *p_pipeline );

@@ -354,6 +354,34 @@ g_instance *g_active_instance( void )
     return p_active_instance;
 }
 
+int poll_input ( g_instance *p_instance ) 
+{
+
+    // poll events
+    while ( SDL_PollEvent(&p_instance->window.sdl3.event) )
+    {
+        if ( p_instance->window.sdl3.event.type == SDL_EVENT_QUIT )
+            p_instance->running = false;
+    }
+
+    // success
+    return 1;
+}
+
+int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_bind_each *pfn_each )
+{
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, _name);
+
+    pipeline_set_bind_once(p_pipeline, (fn_pipeline_bind_once *)pfn_once),
+    pipeline_set_bind_each(p_pipeline, (fn_pipeline_bind_each *)pfn_each);
+
+    // success
+    return 1;
+}
+
 size_t load_file ( const char *path, void *buffer, bool binary_mode )
 {
 
