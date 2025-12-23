@@ -19,7 +19,7 @@
         [
             {
                 "name" : "entity",
-                "pipeline" : "geom",
+                "pipeline" : "color",
                 "transform" :
                 {
                     "location" : [0.0,0.0,0.0],
@@ -28,11 +28,56 @@
                 },
                 "geometry" : 
                 {
+                    "name" : "t1",
                     "xyz" :
                     [
-                        -0.5, -0.5, 1.0,
-                        0.5, -0.5, 1.0,
-                        0.0,  0.5, 1.0 
+                        -0.75, -0.25, 1.0,
+                        0.75, 0.0, 1.0,
+                        0.0,  0.25, 1.0 
+                    ], 
+                    "uv" : 
+                    [
+                        0.875, 0.5,
+                        0.625, 0.75,
+                        0.625, 0.5
+                    ],
+                    "nxyz" :
+                    [
+                        -0.5773503184318542, 0.5773503184318542, 0.5773503184318542, 
+                        0.5773503184318542, -0.5773503184318542, 0.5773503184318542, 
+                        0.5773503184318542, 0.5773503184318542, 0.5773503184318542
+                    ],
+                    "bxyz" : 
+                    [
+                        0.0, -1.0, 0.0, 
+                        0.0, -1.0, 0.0, 
+                        0.0, -1.0, 0.0
+                    ],
+                    "txyz": [
+                        -1.0, -0.0, 0.0, 
+                        -1.0, -0.0, 0.0, 
+                        -1.0, -0.0, 0.0
+                    ], 
+                    "idx" : [ 0, 1, 2 ]
+                }
+            },
+            {
+                "name" : "entity 2",
+                "pipeline" : "color",
+                "transform" :
+                {
+                    "location" : [0.0,0.0,0.0],
+                    "rotation" : [0.0,0.0,0.0],
+                    "scale" : [1.0,1.0,1.0]
+                },
+                "geometry" : 
+                {
+                    "name" : "t2",
+                    "xyz" :
+                    [
+                        -0.25, -1.0, 1.0,
+                        0.25, -1.0, 1.0,
+                        0.0,  -0.5, 1.0 
                     ], 
                     "uv" : 
                     [
@@ -60,6 +105,20 @@
                     "idx" : [ 0, 1, 2 ]
                 }
             }
+        ],
+        "cameras" :
+        [
+            {
+                "name" : "camera",
+                "fov" : 30.5,
+                "location" : [ 0.0, 22.0, 8.0 ],
+                "orientation" : [ 0.0, 0.0, 1.0 ],
+                "clip" :
+                {
+                    "near" : 0.1,
+                    "far"  : 1000.0
+                }
+            }
         ]
     },
     "renderer" : 
@@ -68,15 +127,21 @@
         "pipelines" :
         [
             {
-                "name" : "geom",
+                "name" : "color",
                 "source" : 
                 {
-                    "vert" : "assets/pipeline/geom/geom.metallib",
-                    "frag" : "assets/pipeline/geom/geom.metallib"
+                    "vert" : "assets/pipeline/color/color.metallib",
+                    "frag" : "assets/pipeline/color/color.metallib"
                 },
-                "uniform" :
+                "uniforms" :
                 [
-                    { "color" : "vec3" }
+                    {
+                        "name" : "color",
+                        "data" :
+                        [
+                            { "color" : "vec3" }
+                        ]
+                    }
                 ]
             }
         ],
@@ -107,7 +172,7 @@
                 { 
                     "clear" : [ 0.5, 0.5, 1.0, 0.0 ]
                 },
-                "pipelines" : [ "geom" ]
+                "pipelines" : [ "color" ]
             }
         ]
     }

@@ -1,6 +1,6 @@
 #include "shared.metal"
 
-vertex VSOut vs_quad(uint vid [[vertex_id]])
+vertex VSOut vs_main(uint vid [[vertex_id]])
 {
     float2 positions[6] = {
         float2(-0.5, -0.5),

@@ -285,6 +285,21 @@ u0 vec3_normalize ( vec3 *p_result, vec3 v )
     return;
 }
 
+int vec3_pack ( void *p_buffer, vec3 *p_v )
+{
+
+    // done
+    return pack_pack
+    (
+        p_buffer, 
+        "%3f32", 
+        
+        p_v->x, 
+        p_v->y, 
+        p_v->z
+    );
+}
+
 u0 vec4_add_vec4 ( vec4 *p_result, vec4 a, vec4 b )
 {
     // store the sum

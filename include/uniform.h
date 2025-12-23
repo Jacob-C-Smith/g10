@@ -20,9 +20,14 @@
 struct uniform_s
 {
     char _name[63+1];
+    void *p_data;
+    fn_pack *pfn_pack;
+    char _buffer[256];
 };
 
 // function declarations
+int uniform_pack ( uniform *p_uniform );
+
 /// print
 /** 
  *  Print a textual representation of an uniform to standard output

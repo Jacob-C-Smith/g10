@@ -16,12 +16,15 @@
 #include <gtypedef.h>
 #include <g10.h>
 #include <entity.h>
+#include <camera.h>
 
 // structure definitions
 struct scene_s
 {
     char _name[63+1];
     dict *entities;
+    dict *cameras;
+    camera *p_active_camera;
 };
 
 // function declarations

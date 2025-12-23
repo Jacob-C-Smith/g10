@@ -19,9 +19,13 @@
 #include <pipeline.h>
 #include <geometry.h>
 #include <render_pass.h>
+#include <uniform.h>
 
 // sdl3
 #include <SDL3/SDL.h>
+
+// data
+vec3 c = { 0.3f, 0.3f, 0.3f };
 
 // forward declarations
 int poll_input( g_instance *p_instance ); 
@@ -52,7 +56,7 @@ int main( int argc, const char *argv[] )
     {
 
         // initialized data
-        pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "geom");
+        pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "color");
         geometry *p_geometry = NULL;
         json_value *p_value = NULL;
 
@@ -72,7 +76,7 @@ int main( int argc, const char *argv[] )
         }
 
         // add geometry to pipeline
-        array_add(p_pipeline->p_static_draw_list, (void *)p_geometry);
+        // array_add(p_pipeline->p_static_draw_list, (void *)p_geometry);
 
         geometry_info(p_geometry);
     }
@@ -129,13 +133,22 @@ int bind_once ( render_pass *p_render_pass, pipeline *p_pipeline )
 
     // initialized data
     g_instance *p_instance = g_active_instance();
-    p_instance->context.p_scene;
-
+    scene *p_scene = p_instance->context.p_scene;
+    camera *p_camera = p_scene->p_active_camera;
+    uniform *p_color = NULL;
+    
+    array_index(p_pipeline->p_uniforms, 0, (void **)&p_color);
+    
+    p_color->p_data = &c;
+    
+    uniform_pack(p_color);
+    
+    SDL_PushGPUFragmentUniformData(p_instance->graphics.sdl3.command_buffer, 0, p_color->_buffer, sizeof(vec3));
+    
     // log
-    printf("[bind once] %s\n", p_pipeline->_name);
-
-
-
+    log_info("[pipeline] Binding %s\n", p_pipeline->_name);
+    camera_info(p_camera);
+    
     // success
     return 1;
 }
@@ -144,13 +157,16 @@ int bind_each ( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawab
 {
 
     // initialized data
-    geometry *p_geometry = (geometry *)p_drawable;
+    g_instance *p_instance = g_active_instance();
+    entity *p_entity = (geometry *)p_drawable;
 
     // log
-    printf("[bind each] %s : geometry %s\n", p_pipeline->_name, p_geometry->_name);
-    aabb_info(&p_geometry->_bounds);
+    log_info("[pipeline] [%s] [each] Binding \"%s\"\n", p_pipeline->_name, p_entity->_name);
+    aabb_info(&p_entity->p_geometry->_bounds);
 
-    vec3 c = { 0.1f, 0.2f, 0.3f };
+    // bind the geometry
+    extern int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
+    g_sdl3_geometry_bind(p_render_pass, p_entity->p_geometry);
 
     // success
     return 1;
@@ -160,11 +176,12 @@ int program_pipelines ( g_instance *p_instance )
 {
 
     // initialized data
-    pipeline *p_geom = dict_get(p_instance->cache.p_pipeline, "geom");
-
-    // set bind once and bind each
-    pipeline_set_bind_once(p_geom, bind_once),
-    pipeline_set_bind_each(p_geom, bind_each);
+    pipeline *p_pipeline = NULL;
+    
+    // program color pipeline
+    p_pipeline = dict_get(p_instance->cache.p_pipeline, "color"),
+    pipeline_set_bind_once(p_pipeline, bind_once),
+    pipeline_set_bind_each(p_pipeline, bind_each);
 
     // success
     return 1;
@@ -179,7 +196,6 @@ int program_renderer ( g_instance *p_instance )
 
     // store the first pass
     array_index(p_renderer->p_passes, 0, &p_pass);
-    render_pass_info(p_pass);
 
     // set early
     //

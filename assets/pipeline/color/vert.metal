@@ -4,7 +4,7 @@ struct VertexInput {
     float3 position [[attribute(0)]];
 };
 
-vertex VSOut vs_quad(VertexInput in [[stage_in]])
+vertex VSOut vs_main(VertexInput in [[stage_in]])
 {
     VSOut out;
     // Expand float3 to float4 (w = 1)

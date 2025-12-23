@@ -11,7 +11,7 @@
 #include <gtypedef.h>
 #include <g10.h>
 
-// 2D vectors
+// 2 component vectors
 /** !
  * Add vector a to vector b; Store result
  *
@@ -117,7 +117,7 @@ u0 vec2_to_vec4 ( vec4 *p_result, vec2 v );
  */
 u0 vec2_length ( float *p_result, vec2 v );
 
-// 3D vectors
+// 3 component vectors
 /** !
  * Add vector a to vector b; Store result
  *
@@ -249,7 +249,17 @@ u0 vec3_length ( float *p_result, vec3 v );
  */
 u0 vec3_normalize ( vec3 *p_result, vec3 v );
 
-// 4D vector
+/** !
+ * Serialize a vector to a buffer
+ * 
+ * @param p_buffer the buffer
+ * @param p_v      pointer to the vector
+ * 
+ * @return bytes written
+ */
+int vec3_pack ( void *p_buffer, vec3 *p_v );
+
+// 4 component vectors
 /** !
  * Add vector a to vector b; Store result
  *
