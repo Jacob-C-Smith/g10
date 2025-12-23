@@ -1,0 +1,60 @@
+{
+    "name" : "g10 example",
+    "version" : 
+    {
+        "major" : 1,
+        "minor" : 0,
+        "patch" : 0
+    },
+    "window" : 
+    {
+        "title" : "g10 example",
+        "width" : 800,
+        "height" : 600
+    },
+    "renderer" : 
+    {
+        "name"      : "renderer",
+        "pipelines" :
+        [
+            {
+                "name" : "quad",
+                "source" : 
+                {
+                    "vert" : "assets/pipeline/quad/quad.metallib",
+                    "frag" : "assets/pipeline/quad/quad.metallib"
+                }
+            }
+        ],
+        "attachments" : 
+        [
+            { 
+                "name" : "position",
+                "type" : "texture"
+            },
+            { 
+                "name" : "normal",
+                "type" : "texture"
+            },
+            { 
+                "name" : "color+specular",
+                "type" : "texture"
+            },
+            {
+                "name" : "depth",
+                "type" : "depth"
+            }
+        ],
+        "passes" : 
+        [
+            {
+                "name" : "lighting",
+                "framebuffer" : 
+                { 
+                    "clear" : [ 0.5, 0.5, 1.0, 0.0 ]
+                },
+                "pipelines" : [ "quad" ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "name" : "quad",
+    "source" : 
+    {
+        "program" : "assets/pipeline/quad/quad.metallib"
+    }
+}

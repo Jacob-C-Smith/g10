@@ -1,0 +1,5 @@
+gport.zip
+build/
+.vscode/
+*.air
+*.metallib
