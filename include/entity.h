@@ -23,6 +23,7 @@ struct entity_s
     char _name[63+1];
     transform *p_transform;
     geometry *p_geometry;
+    vec3 color;
     char *pipeline;
 };
 

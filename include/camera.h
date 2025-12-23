@@ -116,3 +116,6 @@ u0 camera_matrix_projection_perspective ( mat4 *p_projection, float fov, float a
  * @return 1 on success, 0 on error
  */
 int camera_info ( camera *p_camera );
+
+/// pack
+int camera_pack(void *p_buffer, camera *p_camera);

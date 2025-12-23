@@ -749,3 +749,44 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     // done
     return;
 }
+
+u0 mat4_model_from_bounds ( mat4 *p_result, vec3 min, vec3 max )
+{
+
+    // initialized data
+    vec3 scale = 
+    {
+        .x = max.x - min.x,
+        .y = max.y - min.y,
+        .z = max.z - min.z
+    };
+    vec3 location = 
+    {
+        .x = (max.x + min.x) / 2.0f,
+        .y = (max.y + min.y) / 2.0f,
+        .z = (max.z + min.z) / 2.0f
+    };
+    vec3 rotation = { 0.0f, 0.0f, 0.0f };
+
+    // compute the model matrix
+    mat4_model_from_vec3(p_result, location, rotation, scale);
+
+    // done
+    return;
+}
+
+int mat4_pack ( void *p_buffer, mat4 *p_m )
+{
+
+    // done
+    return pack_pack
+    (
+        p_buffer, 
+        "%16f32", 
+        
+        p_m->a, p_m->b, p_m->c, p_m->d,
+        p_m->e, p_m->f, p_m->g, p_m->h,
+        p_m->i, p_m->j, p_m->k, p_m->l,
+        p_m->m, p_m->n, p_m->o, p_m->p
+    );
+}

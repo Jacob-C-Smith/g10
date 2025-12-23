@@ -1,6 +1,13 @@
 #include <geometry.h>
 
 // function definitions
+int geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
+{
+    extern int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
+
+    return g_sdl3_geometry_bind(p_render_pass, p_geometry);
+}
+
 int geometry_info ( geometry *p_geometry )
 {
 

@@ -22,10 +22,13 @@ struct geometry_s
 {
     char _name[63+1];
     aabb _bounds;
+    u32 vertex_count;
     void *p_handle;
 };
 
 // function declarations
+int geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
+
 /// print
 /** 
  *  Print a textual representation of an geometry to standard output

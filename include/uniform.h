@@ -22,10 +22,13 @@ struct uniform_s
     char _name[63+1];
     void *p_data;
     fn_pack *pfn_pack;
+    size_t len;
+    size_t idx;
     char _buffer[256];
 };
 
 // function declarations
+int uniform_set_pack_push ( uniform *p_uniform, void *p_data, fn_pack *pfn_pack );
 int uniform_pack ( uniform *p_uniform );
 
 /// print

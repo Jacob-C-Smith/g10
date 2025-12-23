@@ -950,6 +950,9 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 // construct the i'th uniform
                 g_sdl3_uniform_from_json(&p_uniform, p_value);
 
+                // store the index
+                p_uniform->idx = i;
+
                 // store the i'th uniform
                 array_add(p_pipeline->p_uniforms, p_uniform);
             }
@@ -968,6 +971,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             {
                 .format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM
             };
+
+            size_t uniform_count = array_size(p_pipeline->p_uniforms);
             
             // vertex shader
             {
@@ -992,7 +997,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                     .num_samplers         = 0,
                     .num_storage_textures = 0,
                     .num_storage_buffers  = 0,
-                    .num_uniform_buffers  = 0
+                    .num_uniform_buffers  = uniform_count
                 };
 
                 // compile the vertex shader
@@ -1009,8 +1014,6 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
                 // load the file
                 load_file(p_frag->string, p_fs_contents, true);
-
-                size_t uniform_count = array_size(p_pipeline->p_uniforms);
 
                 fs_ci = (SDL_GPUShaderCreateInfo)
                 {
@@ -1061,7 +1064,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 .rasterizer_state = 
                 {
                     .fill_mode = SDL_GPU_FILLMODE_FILL,
-                    .cull_mode = SDL_GPU_CULLMODE_BACK,
+                    .cull_mode = SDL_GPU_CULLMODE_NONE,
                     .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
                     .depth_bias_constant_factor = 0,
                     .depth_bias_clamp = 0,
@@ -1249,7 +1252,7 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
             p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
 
         // draw something
-        SDL_DrawGPUPrimitives(p_render_pass->p_handle, 3, 1, 0, 0);
+        SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->vertex_count, 1, 0, 0);
     }
     
     // success
@@ -1696,6 +1699,9 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                     max.z = (max.z < xyz[i]) ? xyz[i] : max.z;
             }
 
+            // store the vertex count
+            p_geometry->vertex_count = len / 3;
+
             // construct an aabb 
             aabb_from_bounds(&p_geometry->_bounds, min, max);
             aabb_info(&p_geometry->_bounds);
@@ -1904,8 +1910,6 @@ int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value )
         // store the name
         strncpy(p_uniform->_name, p_name->string, sizeof(p_uniform->_name) - 1);
     }
-
-    p_uniform->pfn_pack = (fn_pack*)vec3_pack;
 
     // return a pointer to the caller
     *pp_uniform = p_uniform;

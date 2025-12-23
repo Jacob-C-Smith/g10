@@ -14,6 +14,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
     dict *p_dict = p_value->object;
     json_value *p_name          = dict_get(p_dict, "name"),
+               *p_color         = dict_get(p_dict, "color"),
                *p_transform     = dict_get(p_dict, "transform"),
                *p_geometry      = dict_get(p_dict, "geometry"),
                *p_pipeline_name = dict_get(p_dict, "pipeline");
@@ -51,6 +52,33 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         p_entity->p_geometry = p_geom;
     }
 
+    p_entity->color = (vec3)
+    {
+        .x = 1.0f,
+        .y = 1.0f,
+        .z = 1.0f
+    };
+
+    if ( p_color )
+    {
+        array *p_array = p_color->list;
+        json_value *p_r = NULL,
+                   *p_g = NULL,
+                   *p_b = NULL;
+        
+        array_index(p_array, 0, &p_r);
+        array_index(p_array, 1, &p_g);
+        array_index(p_array, 2, &p_b);
+
+        p_entity->color = (vec3)
+        {
+            .x = (float) p_r->number,
+            .y = (float) p_g->number,
+            .z = (float) p_b->number
+        };
+    }
+
+    
     // return a pointer to the caller
     *pp_entity = p_entity;
 

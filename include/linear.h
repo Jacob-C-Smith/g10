@@ -626,3 +626,15 @@ u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation );
  * @return void
  */
 u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 scale );
+
+u0 mat4_model_from_bounds ( mat4 *p_result, vec3 min, vec3 max );
+
+/** !
+ * Serialize a matrix to a buffer
+ * 
+ * @param p_buffer the buffer
+ * @param p_m      pointer to the matrix
+ * 
+ * @return bytes written
+ */
+int mat4_pack ( void *p_buffer, mat4 *p_m );

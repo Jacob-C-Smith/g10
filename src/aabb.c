@@ -6,12 +6,18 @@ int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
     // error check
     if ( NULL == p_aabb ) goto no_aabb;
 
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "aabb");
+
     // populate the struct
     *p_aabb = (aabb)
     {
         ._min = min,
         ._max = max
     };
+
+    array_add(p_pipeline->p_static_draw_list, p_aabb);
 
     // done
     return 1;

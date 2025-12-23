@@ -84,9 +84,6 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
                      *const p_scale       = dict_get(p_dict, "scale"),
                      *const p_clip        = dict_get(p_dict, "clip");
     
-    // extra check
-    if ( dict_get(p_dict, "$schema") == 0 ) circular_buffer_push(p_instance->debug, "[g10] [camera] Consider adding a \"$schema\" property to the camera");
-
     // property check
     if ( p_location    == (void *) 0 ) goto no_location_property;
     if ( p_orientation == (void *) 0 ) goto no_orientation_property;
@@ -205,7 +202,7 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
         {
             .location = location,
             .target   = orientation,
-            .up       = (vec3) { 0.f, 0.f, 1.f }
+            .up       = (vec3) { 0.f, 1.f, 0.f }
         },
         .projection = 
         {
@@ -716,6 +713,84 @@ int camera_info ( camera *p_camera )
 
         // argument errors
         {
+            no_camera:
+                #ifndef NDEBUG
+                    log_error("[g10] [camera] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+int camera_pack ( void *p_buffer, camera *p_camera )
+{
+
+    // argument check
+    if ( p_buffer  == (void *) 0 ) goto no_buffer;
+    if ( p_camera  == (void *) 0 ) goto no_camera;
+
+    // initialized data
+    char *p = p_buffer;
+    mat4 V = { 0 };
+    mat4 P = { 0 };
+
+    camera_matrix_projection_perspective
+    (
+        &P,
+        p_camera->projection.fov,
+        p_camera->projection.aspect_ratio,
+        p_camera->projection.near_clip,
+        p_camera->projection.far_clip
+    );
+
+    camera_matrix_view
+    (
+        &V,
+        p_camera->view.location,
+        p_camera->view.target,
+        p_camera->view.up
+    );
+
+    // pack the view matrix
+    p += pack_pack(
+        p, 
+        "%16f32", 
+
+        V.a, V.b, V.c, V.d,
+        V.e, V.f, V.g, V.h,
+        V.i, V.j, V.k, V.l,
+        V.m, V.n, V.o, V.p
+    );
+
+    // pack the projection matrix
+    p += pack_pack(
+        p, 
+        "%16f32", 
+        
+        P.a, P.b, P.c, P.d,
+        P.e, P.f, P.g, P.h,
+        P.i, P.j, P.k, P.l,
+        P.m, P.n, P.o, P.p
+    );
+
+    // success
+    return p - (char *)p_buffer;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_buffer:
+                #ifndef NDEBUG
+                    log_error("[g10] [camera] Null pointer provided for parameter \"p_buffer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
             no_camera:
                 #ifndef NDEBUG
                     log_error("[g10] [camera] Null pointer provided for parameter \"p_camera\" in call to function \"%s\"\n", __FUNCTION__);

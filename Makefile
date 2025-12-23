@@ -69,6 +69,10 @@ assets:
 	xcrun metal -c assets/pipeline/color/frag.metal -o assets/pipeline/color/frag.air
 	xcrun metallib assets/pipeline/color/vert.air assets/pipeline/color/frag.air -o assets/pipeline/color/color.metallib
 
+	xcrun metal -c assets/pipeline/aabb/vert.metal -o assets/pipeline/aabb/vert.air
+	xcrun metal -c assets/pipeline/aabb/frag.metal -o assets/pipeline/aabb/frag.air
+	xcrun metallib assets/pipeline/aabb/vert.air assets/pipeline/aabb/frag.air -o assets/pipeline/aabb/aabb.metallib
+
 # Info
 info:
 	@echo "g10 sources : $(G10_SRC)"
