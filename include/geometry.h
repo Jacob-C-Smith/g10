@@ -17,6 +17,17 @@
 #include <aabb.h>
 #include <g10.h>
 
+// enumeration definitions
+enum geometry_vertex_attribute_e
+{ 
+    GEOMETRY_XYZ, 
+    GEOMETRY_UV, 
+    GEOMETRY_NXYZ, 
+    GEOMETRY_TXYZ, 
+    GEOMETRY_BXYZ, 
+    GEOMETRY_QTY
+};
+
 // structure definitions
 struct geometry_s
 {
@@ -24,6 +35,7 @@ struct geometry_s
     aabb _bounds;
     u32 vertex_count;
     void *p_handle;
+    void *_p_handles[GEOMETRY_QTY];
 };
 
 // function declarations

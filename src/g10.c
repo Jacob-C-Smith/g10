@@ -379,11 +379,30 @@ int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_p
     g_instance *p_instance = g_active_instance();
     pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, _name);
 
+    // error check
+    if ( NULL == p_pipeline ) goto failed_to_find_pipeline;
+
+    // program the pipelines
     pipeline_set_bind_once(p_pipeline, (fn_pipeline_bind_once *)pfn_once),
     pipeline_set_bind_each(p_pipeline, (fn_pipeline_bind_each *)pfn_each);
 
     // success
     return 1;
+
+    // error check
+    {
+
+        // g10 errors
+        {
+            failed_to_find_pipeline:
+                #ifndef NDEBUG
+                    log_error("[g10] Failed to find pipeline \"%s\" in call to function \"%s\"\n", _name, __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
 }
 
 size_t load_file ( const char *path, void *buffer, bool binary_mode )

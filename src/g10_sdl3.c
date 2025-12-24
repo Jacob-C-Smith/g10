@@ -978,7 +978,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                    *p_source = (json_value *)dict_get(p_dict, "source"),
                    *p_vert = (json_value *)dict_get(p_source->object, "vert"),
                    *p_frag = (json_value *)dict_get(p_source->object, "frag"),
-                   *p_uniforms = (json_value *)dict_get(p_dict, "uniforms");
+                   *p_uniforms = (json_value *)dict_get(p_dict, "uniforms"),
+                   *p_input = (json_value *)dict_get(p_dict, "input");
 
         // error check
         if ( p_name  == (void *) 0 ) goto no_name_property;
@@ -990,12 +991,6 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
         // store the name
         strncpy(p_pipeline->_name, p_name->string, sizeof(p_pipeline->_name) - 1);
-
-        // store the vertex shader path
-        p_vert = dict_get(p_source->object, "vert");
-
-        // store the fragment shader path
-        p_frag = dict_get(p_source->object, "frag");
 
         // construct uniforms
         {
@@ -1033,14 +1028,11 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             SDL_GPUShader *fs = NULL;
             SDL_GPUGraphicsPipelineCreateInfo p_ci = { 0 };
             SDL_GPUGraphicsPipeline *pipeline = NULL;
-            
-            SDL_GPUColorTargetDescription ctd = 
-            {
-                .format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM
-            };
-
+            SDL_GPUVertexBufferDescription _vertex_buffer_descriptions[GEOMETRY_QTY] = { 0 };
+            SDL_GPUVertexAttribute _vertex_attributes[GEOMETRY_QTY] = { 0 };
             size_t uniform_count = array_size(p_pipeline->p_uniforms);
-            
+            size_t vertex_buffer_quantity = 0;
+
             // vertex shader
             {
 
@@ -1100,32 +1092,84 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 // compile the fragment shader
                 fs = SDL_CreateGPUShader(p_instance->graphics.sdl3.device, &fs_ci);
             }
+           
+            // parse vertex buffers
+            {
 
-            // define vertex input state
-            SDL_GPUVertexBufferDescription vertex_buffer_descriptions[] = {{
-                .slot = 0,
-                .pitch = sizeof(float) * 3,
-                .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
-                .instance_step_rate = 0
-            }};
+                // initialized data
+                array *p_array = p_input->list;
+                
+                // store the number of vertex attributes
+                vertex_buffer_quantity = array_size(p_array);
 
-            SDL_GPUVertexAttribute vertex_attributes[] = {{
-                .location = 0,
-                .buffer_slot = 0,
-                .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
-                .offset = 0
-            }};
+                // iterate through each vertex buffer
+                for (size_t i = 0; i < vertex_buffer_quantity; i++)
+                {
 
+                    // initialized data
+                    json_value *p_value = NULL;
+                    
+                    // store the i'th vertex buffer
+                    array_index(p_array, i, &p_value);
+
+                    // xyz
+                    if ( 0 == strcmp(p_value->string, "xyz") )
+                        _vertex_buffer_descriptions[i] = (SDL_GPUVertexBufferDescription)
+                        {
+                            .slot = i,
+                            .pitch = sizeof(f32) * 3,
+                            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+                            .instance_step_rate = 0
+                        },
+                        _vertex_attributes[i] = (SDL_GPUVertexAttribute)
+                        {
+                            .location = 0,
+                            .buffer_slot = 0,
+                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+                            .offset = 0
+                        };
+                    
+                    // uv
+                    else if ( 0 == strcmp(p_value->string, "uv") )
+                        _vertex_buffer_descriptions[i] = (SDL_GPUVertexBufferDescription)
+                        {
+                            .slot = i,
+                            .pitch = sizeof(f32) * 2,
+                            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+                            .instance_step_rate = 0
+                        },
+                        _vertex_attributes[i] = (SDL_GPUVertexAttribute)
+                        {
+                            .location = i,
+                            .buffer_slot = i,
+                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+                            .offset = 0
+                        };
+                    
+                }
+            }
+            
+            // todo: parse framebuffer
+            //
+
+
+
+
+            SDL_GPUColorTargetDescription ctd = 
+            {
+                .format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM
+            };
+            
             p_ci = (SDL_GPUGraphicsPipelineCreateInfo)
             {
                 .vertex_shader = vs,
                 .fragment_shader = fs,
                 .vertex_input_state = 
                 {
-                    .vertex_buffer_descriptions = vertex_buffer_descriptions,
-                    .num_vertex_buffers = 1,
-                    .vertex_attributes = vertex_attributes,
-                    .num_vertex_attributes = 1
+                    .vertex_buffer_descriptions = _vertex_buffer_descriptions,
+                    .num_vertex_buffers = vertex_buffer_quantity,
+                    .vertex_attributes = _vertex_attributes,
+                    .num_vertex_attributes = vertex_buffer_quantity
                 },
                 .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
                 .rasterizer_state = 
@@ -1147,7 +1191,6 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 .depth_stencil_state = 
                 {
                     .compare_op = SDL_GPU_COMPAREOP_LESS,
-                    .back_stencil_state = SDL_GPU_STENCILOP_KEEP,
                     .back_stencil_state = SDL_GPU_STENCILOP_KEEP,
                     .compare_mask = 0,
                     .write_mask = 0,
@@ -1716,6 +1759,26 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     // initialized data
     g_instance *p_instance = g_active_instance();
     geometry *p_geometry = default_allocator(0, sizeof(geometry));
+    dict *p_dict = p_value->object;
+    json_value *p_name = (json_value *)dict_get(p_dict, "name"),
+                *p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
+                *p_uv   = (json_value *)dict_get(p_dict, "uv"),
+                *p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
+                *p_txyz = (json_value *)dict_get(p_dict, "txyz"),
+                *p_bxyz = (json_value *)dict_get(p_dict, "bxyz"),
+                *p_idx  = (json_value *)dict_get(p_dict, "idx");
+    f32 *xyz  = NULL,
+        *uv   = NULL,
+        *nxyz = NULL,
+        *txyz = NULL,
+        *bxyz = NULL;
+    i16 *idx  = NULL;
+    size_t xyz_len  = 0,
+           uv_len   = 0,
+           nxyz_len = 0,
+           txyz_len = 0,
+           bxyz_len = 0,
+           idx_len  = 0;
     vec3 min = 
     { 
         .x = INFINITY,
@@ -1735,16 +1798,6 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     // parse the geometry object
     {
 
-        // initialized data
-        dict *p_dict = p_value->object;
-        json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                   *p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
-                   *p_uv   = (json_value *)dict_get(p_dict, "uv"),
-                   *p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
-                   *p_txyz = (json_value *)dict_get(p_dict, "txyz"),
-                   *p_bxyz = (json_value *)dict_get(p_dict, "bxyz"),
-                   *p_idx  = (json_value *)dict_get(p_dict, "idx");
-
         // todo: error check
         // todo: type check
 
@@ -1752,90 +1805,273 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         strncpy(p_geometry->_name, p_name->string, sizeof(p_geometry->_name) - 1);
 
         // xyz
-        if ( p_xyz )
+        if ( p_xyz ) goto parse_xyz;
+        xyz_done:
+
+        // uv
+        if ( p_uv ) goto parse_uv;
+        uv_done:
+
+        // normal
+        if ( p_nxyz ) goto parse_nxyz;
+        nxyz_done:
+    }
+
+    // construct the geometry
+    {
+
+        // initialized data
+        SDL_GPUTransferBuffer* _transfer_buffers[GEOMETRY_QTY] = { 0 };
+        struct
         {
-            array *p_array = p_xyz->list;
-            size_t len = array_size(p_array);
-            f32 *xyz = default_allocator(NULL, sizeof(f32) * len);
-            SDL_GPUBufferCreateInfo _ci = 
-            { 
-                .size = sizeof(f32) * len,
-                .usage = SDL_GPU_BUFFERUSAGE_VERTEX
-            };
-            SDL_GPUTransferBufferCreateInfo _transfer_buffer_ci = {
-                .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-                .size = sizeof(f32) * len
-            };
-
-            for (size_t i = 0; i < len; i++)
+            f32 *p_data;
+            size_t len;
+            size_t size;
+        } 
+        _p_attribute[GEOMETRY_QTY] = 
+        {
+            [GEOMETRY_XYZ] = 
             {
-                json_value *p_value = NULL;
-
-                array_index(p_array, i, &p_value);
-
-                xyz[i] = p_value->number;
-            }
-
-            // compute the bounds of the geometry
-            for (size_t i = 0; i < len; i++)
+                .p_data = xyz,
+                .len = xyz_len,
+                .size = xyz_len * sizeof(f32)
+            },
+            [GEOMETRY_UV] = 
             {
-                if ( i%3==0 )
-                    min.x = (min.x > xyz[i]) ? xyz[i] : min.x,
-                    max.x = (max.x < xyz[i]) ? xyz[i] : max.x;
-                
-                if ( i%3==1 )
-                    min.y = (min.y > xyz[i]) ? xyz[i] : min.y,
-                    max.y = (max.y < xyz[i]) ? xyz[i] : max.y;
-                
-                if ( i%3==2 )
-                    min.z = (min.z > xyz[i]) ? xyz[i] : min.z,
-                    max.z = (max.z < xyz[i]) ? xyz[i] : max.z;
+                .p_data = uv,
+                .len = uv_len,
+                .size = uv_len * sizeof(f32)
+            },
+            [GEOMETRY_NXYZ] = 
+            {
+                .p_data = nxyz,
+                .len = nxyz_len,
+                .size = nxyz_len * sizeof(f32)
+            },
+            [GEOMETRY_TXYZ] = 
+            {
+                .p_data = txyz,
+                .len = txyz_len,
+                .size = txyz_len * sizeof(f32)
+            },
+            [GEOMETRY_BXYZ] = 
+            {
+                .p_data = bxyz,
+                .len = bxyz_len,
+                .size = bxyz_len * sizeof(f32)
             }
+        };
+        
+        // iterate through each vertex attribute
+        for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
+        {
 
-            // store the vertex count
-            p_geometry->vertex_count = len / 3;
+            // initialized data
+            enum geometry_vertex_attribute_e _type = i;
+            void* p_mmap = NULL;
 
-            // construct an aabb 
-            aabb_from_bounds(&p_geometry->_bounds, min, max);
-            aabb_info(&p_geometry->_bounds);
-            
-            SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(p_instance->graphics.sdl3.device, &_transfer_buffer_ci);
-            p_geometry->p_handle = SDL_CreateGPUBuffer(
-                p_instance->graphics.sdl3.device,
-                &_ci
+            // fast fail
+            if ( NULL == _p_attribute[_type].p_data ) continue;
+
+            // construct a transfer buffer
+            _transfer_buffers[_type] = SDL_CreateGPUTransferBuffer
+            (
+                p_instance->graphics.sdl3.device, 
+
+                &(SDL_GPUTransferBufferCreateInfo)
+                {
+                    .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+                    .size = _p_attribute[_type].size
+                }
             );
-            void* mapPtr = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, transferBuffer, false);
 
-            // Copy your vertex data into that pointer
-            SDL_memcpy(mapPtr, xyz, sizeof(f32) * len);
+            // construct a gpu buffer
+            p_geometry->_p_handles[_type] = SDL_CreateGPUBuffer
+            (
+                p_instance->graphics.sdl3.device,
 
-            // Unmap it once finished
-            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, transferBuffer);
+                &(SDL_GPUBufferCreateInfo)
+                { 
+                    .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+                    .size = sizeof(f32) * xyz_len
+                }
+            );
 
-            // Begin a command buffer
+            // map the transfer buffer into address space
+            p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type], false);
+
+            // copy the vertex data to the transfer buffer
+            SDL_memcpy(p_mmap, xyz, sizeof(f32) * xyz_len);
+
+            // unmap the transfer buffer from address space
+            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type]);
+        }
+
+        // copy the data from the transfer buffer to the gpu
+        {
+
+            // initialized data
             SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
+            SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd);
 
-            // Begin the copy pass
-            SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(cmd);
+            // iterate through each vertex attribute
+            for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
+            {
 
-            // Upload from Transfer Buffer -> GPU Vertex Buffer
-            SDL_GPUTransferBufferLocation source = { .transfer_buffer = transferBuffer, .offset = 0 };
-            SDL_GPUBufferRegion destination = { .buffer = p_geometry->p_handle, .offset = 0, .size = sizeof(f32) * len };
+                // initialized data
+                enum geometry_vertex_attribute_e _type = i;
 
-            SDL_UploadToGPUBuffer(copyPass, &source, &destination, false);
+                // fast fail
+                if ( NULL == _p_attribute[_type].p_data ) continue;
 
-            // End the pass and submit
-            SDL_EndGPUCopyPass(copyPass);
+                // upload from the transfer buffer to the gpu
+                SDL_UploadToGPUBuffer
+                (
+                    copy_pass,
+
+                    &(SDL_GPUTransferBufferLocation)
+                    {
+                        .transfer_buffer = _transfer_buffers[_type],
+                        .offset = 0
+                    },
+
+                    &(SDL_GPUBufferRegion)
+                    {
+                        .buffer = p_geometry->_p_handles[_type],
+                        .offset = 0, 
+                        .size = _p_attribute->size
+                    },
+
+                    false
+                );
+            }
+
+            // end the copy pass
+            SDL_EndGPUCopyPass(copy_pass),
             SDL_SubmitGPUCommandBuffer(cmd);
         }
     }
 
+    p_geometry->p_handle = p_geometry->_p_handles[GEOMETRY_XYZ];
+
     // return a pointer to the caller
     *pp_geometry = p_geometry;
+
+    // cache the geometry
     dict_add(p_instance->cache.p_geometry, p_geometry->_name, p_geometry);
 
     // success
     return 1;
+
+    // this branch parses xyz
+    parse_xyz:
+    {
+
+        // initialized data
+        array *p_array = p_xyz->list;
+        xyz_len = array_size(p_array);
+        
+        // allocate memory for vertices
+        xyz = default_allocator(NULL, sizeof(f32) * xyz_len);
+
+        // store the vertex count
+        p_geometry->vertex_count = xyz_len / 3;
+
+        // parse the vertex data
+        for (size_t i = 0; i < xyz_len; i++)
+        {
+
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // store the i'th number
+            xyz[i] = p_value->number;
+        }
+
+        // compute the bounds of the geometry
+        for (size_t i = 0; i < xyz_len; i++)
+        {
+            if ( i%3==0 )
+                min.x = (min.x > xyz[i]) ? xyz[i] : min.x,
+                max.x = (max.x < xyz[i]) ? xyz[i] : max.x;
+            
+            if ( i%3==1 )
+                min.y = (min.y > xyz[i]) ? xyz[i] : min.y,
+                max.y = (max.y < xyz[i]) ? xyz[i] : max.y;
+            
+            if ( i%3==2 )
+                min.z = (min.z > xyz[i]) ? xyz[i] : min.z,
+                max.z = (max.z < xyz[i]) ? xyz[i] : max.z;
+        }
+
+        // construct an aabb 
+        aabb_from_bounds(&p_geometry->_bounds, min, max);
+        aabb_info(&p_geometry->_bounds);
+        
+        // done
+        goto xyz_done;
+    }
+
+    // this branch parses uv
+    parse_uv:
+    {
+
+        // initialized data
+        array *p_array = p_uv->list;
+        uv_len = array_size(p_array);
+        
+        // allocate memory for vertices
+        uv = default_allocator(NULL, sizeof(f32) * uv_len);
+
+        // parse the vertex data
+        for (size_t i = 0; i < uv_len; i++)
+        {
+
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // store the i'th number
+            uv[i] = p_value->number;
+        }
+
+        // done
+        goto uv_done;
+    }
+
+    // this branch parses normals
+    parse_nxyz:
+    {
+
+        // initialized data
+        array *p_array = p_nxyz->list;
+        nxyz_len = array_size(p_array);
+        
+        // allocate memory for vertices
+        nxyz = default_allocator(NULL, sizeof(f32) * nxyz_len);
+
+        // parse the normal data
+        for (size_t i = 0; i < nxyz_len; i++)
+        {
+
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // store the i'th number
+            nxyz[i] = p_value->number;
+        }
+
+        // done
+        goto nxyz_done;
+    }
 
     // error handling
     {
@@ -1944,13 +2180,37 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
     if ( p_geometry == (void *) 0 ) goto no_geometry;
 
     // initialized data
-    SDL_GPUBufferBinding _binding = (SDL_GPUBufferBinding) 
-    { 
-        .buffer = p_geometry->p_handle
-    };
+    SDL_GPUBufferBinding _bindings[GEOMETRY_QTY] = { 0 };
+    size_t len = 0;
+
+    // iterate through each vertex attribute
+    for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
+    {
+
+        // initialized data
+        enum geometry_vertex_attribute_e _type = i;
+
+        // fast fail
+        if ( NULL == p_geometry->_p_handles[_type] ) continue;
+
+        // populate the binding
+        _bindings[len] = (SDL_GPUBufferBinding)
+        {
+            .buffer = p_geometry->_p_handles[_type],
+            .offset = 0,
+        };
+
+        // increment the quantity of bindings
+        len++;
+    }
 
     // bind the drawable geometry
-    SDL_BindGPUVertexBuffers(p_render_pass->p_handle, 0, &_binding, 1);
+    SDL_BindGPUVertexBuffers(
+        p_render_pass->p_handle,
+        0,
+        &_bindings,
+        len
+    );
 
     // success
     return 1;

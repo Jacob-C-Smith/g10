@@ -32,24 +32,29 @@ int main ( int argc, const char *argv[] )
 
     // initialized data
     g_instance *p_instance = NULL;
+    bool ok = true;
 
     // initialize g10
     if ( 0 == g_init(&p_instance, "assets/instance.json") ) goto failed_to_initialize_g10;
 
-    // program color pipeline
-    program_pipeline("color", 
-        (fn_pipeline_bind_once *)camera_bind_active,
-        (fn_pipeline_bind_each *)entity_bind
-    );
+    // program pipelines
+    {
+        
+        // program color pipeline
+        ok |= program_pipeline("color", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
 
-    // program aabb pipeline
-    program_pipeline("floor", 
-        (fn_pipeline_bind_once *)camera_bind_active,
-        (fn_pipeline_bind_each *)entity_bind
-    );
+        // program uv pipeline
+        ok |= program_pipeline("uv", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
+    }
 
     // set running flag
-    p_instance->running = true;
+    p_instance->running = ok;
 
     // main loop
     while ( p_instance->running )

@@ -1,0 +1,17 @@
+{
+    "name" : "texture",
+    "source" : 
+    {
+        "program" : "assets/pipeline/texture/texture.metallib"
+    },
+    "uniform" : 
+    [
+        {
+            "name" : "texture",
+            "data" :
+            [
+                { "texture" : "sampler" }
+            ]
+        }
+    ]
+}

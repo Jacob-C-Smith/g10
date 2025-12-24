@@ -19,7 +19,7 @@
         [
             {
                 "name" : "entity",
-                "pipeline" : "color",
+                "pipeline" : "uv",
                 "color" : [ 0.0, 0.0, 1.0 ],
                 "transform" :
                 {
@@ -64,13 +64,13 @@
             },
             {
                 "name" : "entity 2",
-                "pipeline" : "color",
+                "pipeline" : "uv",
                 "color" : [ 1.0, 0.0, 0.0 ],
                 "transform" :
                 {
-                    "location" : [0.0,0.0,0.0],
-                    "rotation" : [0.0,0.0,0.0],
-                    "scale" : [1.0,1.0,1.0]
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
                 },
                 "geometry" : 
                 {
@@ -83,7 +83,26 @@
                          0.5,  0.5, 1.0,
                          0.5, -0.5, 1.0,
                         -0.5,  0.5, 1.0
-                    ]
+                    ],
+                    "uv" : 
+                    [
+                        0.0, 0.0,
+                        1.0, 0.0,
+                        0.0, 1.0,
+                        1.0, 1.0,
+                        1.0, 0.0,
+                        0.0, 1.0
+                    ],
+                    "nxyz" :
+                    [
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0
+                    ],
+                    "idx" : [ 0, 1, 2, 2, 3, 0 ]
                 }
             }
         ],
@@ -114,6 +133,7 @@
                     "vert" : "assets/pipeline/color/color.metallib",
                     "frag" : "assets/pipeline/color/color.metallib"
                 },
+                "input" : [ "xyz" ],
                 "uniforms" :
                 [
                     {
@@ -141,20 +161,17 @@
                 ]
             },
             {
-                "name" : "floor",
+                "name" : "uv",
                 "source" : 
                 {
-                    "vert" : "assets/pipeline/floor/floor.metallib",
-                    "frag" : "assets/pipeline/floor/floor.metallib"
+                    "vert" : "assets/pipeline/uv/uv.metallib",
+                    "frag" : "assets/pipeline/uv/uv.metallib"
                 },
+                "input" : [ "xyz", "uv" ],
                 "uniforms" :
                 [
                     {
-                        "name" : "color",
-                        "data" :
-                        [
-                            { "color" : "vec3" }
-                        ]
+                        "name" : "unused"
                     },
                     {
                         "name" : "transform",
@@ -199,7 +216,7 @@
                     "color" : [ "OUTPUT", "color" ],
                     "depth" : "depth"
                 },
-                "pipelines" : [ "color", "floor" ]
+                "pipelines" : [ "color", "uv" ]
             }
         ]
     }
