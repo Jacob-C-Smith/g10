@@ -2,6 +2,7 @@
 
 struct VertexInput {
     float3 position [[attribute(0)]];
+    float2 uv [[attribute(1)]];
 };
 
 struct VertexUniforms {
@@ -24,5 +25,6 @@ vertex VSOut vs_main(
     float4 position = float4(in.position, 1.0);
     
     out.position = camera.P * camera.V * transform.M * position;
+    out.uv = in.uv;
     return out;
 }

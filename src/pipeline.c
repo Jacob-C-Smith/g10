@@ -21,7 +21,6 @@ int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bin
     return 1;
 }
 
-
 int pipeline_info ( pipeline *p_pipeline )
 {
 

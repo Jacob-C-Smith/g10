@@ -19,8 +19,8 @@
         [
             {
                 "name" : "entity",
-                "pipeline" : "uv",
-                "color" : [ 0.0, 0.0, 1.0 ],
+                "pipeline" : "color",
+                "color" : [ 0.5, 0.5, 1.0 ],
                 "transform" :
                 {
                     "location" : [-3.0,0.0,0.0],
@@ -29,7 +29,7 @@
                 },
                 "geometry" : 
                 {
-                    "name" : "t1",
+                    "name" : "triangle",
                     "xyz" :
                     [
                         -0.75, -0.25, 1.0,
@@ -63,9 +63,9 @@
                 }
             },
             {
-                "name" : "entity 2",
-                "pipeline" : "uv",
-                "color" : [ 1.0, 0.0, 0.0 ],
+                "name" : "entity 3",
+                "pipeline" : "texture",
+                "texture" : "assets/texture/debug_normal.png",
                 "transform" :
                 {
                     "location" : [ 0.0, 0.0, 0.0 ],
@@ -75,23 +75,25 @@
                 "geometry" : 
                 {
                     "name" : "quad",
-                    "xyz" :
+                    "xyz" : 
                     [
-                        -0.5, -0.5, 1.0,
-                         0.5, -0.5, 1.0,
-                        -0.5,  0.5, 1.0,
-                         0.5,  0.5, 1.0,
-                         0.5, -0.5, 1.0,
-                        -0.5,  0.5, 1.0
+                         1.0,  1.0, 0.0,
+                        -1.0,  1.0, 0.0,
+                        -1.0, -1.0, 0.0,
+
+                        -1.0, -1.0, 0.0,
+                         1.0, -1.0, 0.0,
+                         1.0,  1.0, 0.0
                     ],
-                    "uv" : 
+                    "uv" :
                     [
+                        1.0, 1.0,
+                        0.0, 1.0,
+                        0.0, 0.0,
+
                         0.0, 0.0,
                         1.0, 0.0,
-                        0.0, 1.0,
-                        1.0, 1.0,
-                        1.0, 0.0,
-                        0.0, 1.0
+                        1.0, 1.0
                     ],
                     "nxyz" :
                     [
@@ -101,8 +103,7 @@
                         0.0, 0.0, 1.0,
                         0.0, 0.0, 1.0,
                         0.0, 0.0, 1.0
-                    ],
-                    "idx" : [ 0, 1, 2, 2, 3, 0 ]
+                    ]
                 }
             }
         ],
@@ -189,6 +190,42 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name" : "texture",
+                "source" : 
+                {
+                    "vert" : "assets/pipeline/texture/texture.metallib",
+                    "frag" : "assets/pipeline/texture/texture.metallib"
+                },
+                "input" : [ "xyz", "uv" ],
+                "uniforms" :
+                [
+                    {
+                        "name" : "unused"
+                    },
+                    {
+                        "name" : "transform",
+                        "data" :
+                        [
+                            { "M" : "mat4" }
+                        ]
+                    },
+                    {
+                        "name" : "camera",
+                        "data" : 
+                        [
+                            { "V" : "mat4" },
+                            { "P" : "mat4" }
+                        ]
+                    }
+                ],
+                "samplers" :
+                [
+                    {
+                        "name" : "texture"
+                    }
+                ]
             }
         ],
         "attachments" : 
@@ -213,10 +250,10 @@
                 "framebuffer" : 
                 { 
                     "clear" : [ 1.0, 1.0, 1.0, 0.0 ],
-                    "color" : [ "OUTPUT", "color" ],
+                    "color" : [ "OUTPUT" ],
                     "depth" : "depth"
                 },
-                "pipelines" : [ "color", "uv" ]
+                "pipelines" : [ "color", "uv", "texture" ]
             }
         ]
     }

@@ -47,57 +47,61 @@ typedef struct { float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p; } mat4;
 // quaternions
 typedef struct { float u, i, j, k; } quaternion;
 
-// forward declarations
-// struct ai_s;
-struct attachment_s;
+// structure declarations
 struct aabb_s;
-// struct bv_s;
+struct attachment_s;
 struct camera_s;
-// struct cull_operation_s;
 struct entity_s;
-struct g_instance_s;
 struct framebuffer_s;
-// struct input_s;
-// struct input_bind_s;
+struct g_instance_s;
 struct geometry_s;
-// struct mesh_s;
-// union  mesh_data_u;
-// struct mesh_create_info_s;
+struct pipeline_s;
 struct renderer_s;
 struct render_pass_s;
 struct scene_s;
-// struct server_s;
-struct pipeline_s;
-// struct shell_s;
+struct sampler_s;
 struct transform_s;
 struct texture_s;
 struct uniform_s;
 
-// Type definitions
+// struct ai_s;
+// struct bv_s;
+// struct cull_operation_s;
+// struct input_s;
+// struct input_bind_s;
+// struct mesh_s;
+// union  mesh_data_u;
+// struct mesh_create_info_s;
+// struct server_s;
+// struct shell_s;
+
+// type definitions
+typedef struct aabb_s        aabb;
+typedef struct attachment_s  attachment;
+typedef struct camera_s      camera;
+typedef struct entity_s      entity;
+typedef struct framebuffer_s framebuffer;
+typedef struct g_instance_s  g_instance;
+typedef struct geometry_s    geometry;
+typedef struct pipeline_s    pipeline;
+typedef struct renderer_s    renderer;
+typedef struct render_pass_s render_pass;
+typedef struct scene_s       scene;
+typedef struct sampler_s     sampler;
+typedef struct transform_s   transform;
+typedef struct texture_s     texture;
+typedef struct uniform_s     uniform;
+
 // typedef struct ai_s               ai;
-typedef struct aabb_s aabb;
-typedef struct attachment_s       attachment;
 // typedef struct bv_s               bv;
-typedef struct camera_s           camera;
 // typedef struct cull_operation_s   cull_operation;
-typedef struct entity_s           entity;
-typedef struct framebuffer_s       framebuffer;
-typedef struct g_instance_s       g_instance;
 // typedef struct input_s            input;
 // typedef struct input_bind_s       input_bind;
-typedef struct geometry_s            geometry;
 // typedef struct mesh_s             mesh;
 // typedef struct mesh_data_s        mesh_data;
 // typedef struct mesh_create_info_s mesh_create_info;
-typedef struct renderer_s         renderer;
-typedef struct render_pass_s      render_pass;
-typedef struct scene_s            scene;
 // typedef struct server_s           server;
-typedef struct pipeline_s           pipeline;
 // typedef struct shell_s            shell;
-typedef struct transform_s        transform;
-typedef struct texture_s        texture;
-typedef struct uniform_s        uniform;
 
 // function pointers
 typedef int (fn_render_early)( g_instance *p_instance );
@@ -111,7 +115,4 @@ typedef int (fn_pipeline_bind_each)( render_pass *p_render_pass, pipeline *p_pip
 // typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
 // typedef int (*fn_camera_controller)( camera *p_camera );
 // typedef int (*fn_cull_operation)( void *p_object );
-// typedef int (*fn_shader_on_bind)( shader *p_shader, void *p_on_bind );
-// typedef int (*fn_shader_on_material)( u0 );
-// typedef int (*fn_shader_on_draw)( shader *p_shader, void *p_draw_item );
 // typedef int (*fn_user_code_callback)( g_instance *p_instance );

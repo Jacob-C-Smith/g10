@@ -21,9 +21,17 @@
 struct pipeline_s
 {
     char _name[63+1];
+    
     void *pipeline;
+
     array *p_static_draw_list;
+
     array *p_uniforms;
+    array *p_samplers;
+    
+    dict *uniforms;
+    dict *samplers;
+
     fn_pipeline_bind_once *pfn_bind_once;
     fn_pipeline_bind_each *pfn_bind_each;
 };

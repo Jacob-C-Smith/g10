@@ -15,6 +15,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     dict *p_dict = p_value->object;
     json_value *p_name          = dict_get(p_dict, "name"),
                *p_color         = dict_get(p_dict, "color"),
+               *p_texture       = dict_get(p_dict, "texture"),
                *p_transform     = dict_get(p_dict, "transform"),
                *p_geometry      = dict_get(p_dict, "geometry"),
                *p_pipeline_name = dict_get(p_dict, "pipeline");
@@ -52,6 +53,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         p_entity->p_geometry = p_geom;
     }
 
+    // default to pitch white
     p_entity->color = (vec3)
     {
         .x = 1.0f,
@@ -59,17 +61,25 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         .z = 1.0f
     };
 
+    // parse the color
     if ( p_color )
     {
+
+        // initialized data
         array *p_array = p_color->list;
         json_value *p_r = NULL,
                    *p_g = NULL,
                    *p_b = NULL;
+
+        // TODO: type check
+        //
         
-        array_index(p_array, 0, &p_r);
-        array_index(p_array, 1, &p_g);
+        // store the red, green, and blue components
+        array_index(p_array, 0, &p_r),
+        array_index(p_array, 1, &p_g),
         array_index(p_array, 2, &p_b);
 
+        // store the color
         p_entity->color = (vec3)
         {
             .x = (float) p_r->number,
@@ -77,8 +87,18 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
             .z = (float) p_b->number
         };
     }
-
     
+    // parse the texture
+    if ( p_texture )
+    {
+
+        // initialized data
+        char *p_path = p_texture->string;
+
+        extern int g_sdl3_texture_load ( texture **pp_texture, const char *p_path );
+        g_sdl3_texture_load(&p_entity->p_texture, p_path);
+    }
+
     // return a pointer to the caller
     *pp_entity = p_entity;
 
@@ -95,6 +115,7 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
     g_instance *p_instance = g_active_instance();
 
     // color 
+    if ( 0 == strcmp(p_pipeline->_name, "color") )
     {
     
         // initialized data
@@ -105,6 +126,30 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
 
         // bind color
         uniform_set_pack_push(p_color, &p_entity->color, (fn_pack *)vec3_pack);
+    } 
+    else if ( 0 == strcmp(p_pipeline->_name, "texture") )
+    {
+    
+        // initialized data
+        uniform *p_texture = NULL;
+        sampler *p_sampler = NULL;
+
+        // get the texture uniform
+        array_index(p_pipeline->p_uniforms, 0, (void **)&p_texture);
+        array_index(p_pipeline->p_samplers, 0, (void **)&p_sampler);
+
+        SDL_GPUTextureSamplerBinding _sb = 
+        {
+            .sampler = p_sampler->p_handle,
+            .texture = p_entity->p_texture->p_handle
+        };
+
+        SDL_BindGPUFragmentSamplers(
+            p_render_pass->p_handle,
+            0,
+            &_sb,
+            1
+        );
     }
 
     // transform

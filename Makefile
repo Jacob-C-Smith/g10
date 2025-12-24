@@ -63,6 +63,7 @@ assets:
 	@./scripts/compile-metal-shader.sh aabb 
 	@./scripts/compile-metal-shader.sh floor
 	@./scripts/compile-metal-shader.sh uv
+	@./scripts/compile-metal-shader.sh texture
 
 # Info
 info:

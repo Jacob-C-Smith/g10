@@ -13,8 +13,6 @@
 // g10
 #include <gtypedef.h>
 #include <g10.h>
-
-/// renderer
 #include <renderer.h>
 #include <attachment.h>
 #include <framebuffer.h>
@@ -22,6 +20,7 @@
 #include <pipeline.h>
 #include <aabb.h>
 #include <geometry.h>
+#include <sampler.h>
 #include <uniform.h>
 #include <texture.h>
 
@@ -63,6 +62,9 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
 int g_sdl3_texture_from_data ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
 int g_sdl3_texture_construct ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
 int g_sdl3_texture_load ( texture **pp_texture, const char *p_path );
+
+/// sampler
+int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value );
 
 /// uniform
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value );
@@ -979,6 +981,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                    *p_vert = (json_value *)dict_get(p_source->object, "vert"),
                    *p_frag = (json_value *)dict_get(p_source->object, "frag"),
                    *p_uniforms = (json_value *)dict_get(p_dict, "uniforms"),
+                   *p_samplers = (json_value *)dict_get(p_dict, "samplers"),
                    *p_input = (json_value *)dict_get(p_dict, "input");
 
         // error check
@@ -993,11 +996,13 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
         strncpy(p_pipeline->_name, p_name->string, sizeof(p_pipeline->_name) - 1);
 
         // construct uniforms
+        if ( p_uniforms )
         {
 
             // initialized data
             size_t len = array_size(p_uniforms->list);
             array_construct(&p_pipeline->p_uniforms, len);
+            dict_construct(&p_pipeline->uniforms, len, NULL);
 
             // iterate through each uniform json
             for (size_t i = 0; i < len; i++)
@@ -1020,6 +1025,36 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             }
         }
 
+        // construct samplers
+        if ( p_samplers )
+        {
+
+            // initialized data
+            size_t len = array_size(p_samplers->list);
+            array_construct(&p_pipeline->p_samplers, len);
+            dict_construct(&p_pipeline->samplers, len, NULL);
+
+            // iterate through each sampler json
+            for (size_t i = 0; i < len; i++)
+            {
+                // initialized data
+                sampler *p_sampler = NULL;
+                json_value *p_value = NULL;
+                
+                // store the i'th sampler json
+                array_index(p_samplers->list, i, &p_value);
+
+                // construct the i'th sampler
+                g_sdl3_sampler_from_json(&p_sampler, p_value);
+
+                // store the index
+                p_sampler->idx = i;
+
+                // store the i'th sampler
+                array_add(p_pipeline->p_samplers, p_sampler);
+            }
+        }
+
         // construct pipeline
         {
 
@@ -1030,7 +1065,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             SDL_GPUGraphicsPipeline *pipeline = NULL;
             SDL_GPUVertexBufferDescription _vertex_buffer_descriptions[GEOMETRY_QTY] = { 0 };
             SDL_GPUVertexAttribute _vertex_attributes[GEOMETRY_QTY] = { 0 };
-            size_t uniform_count = array_size(p_pipeline->p_uniforms);
+            size_t uniform_count = ( p_uniforms ) ? array_size(p_pipeline->p_uniforms) : 0;
+            size_t sampler_count = ( p_samplers ) ? array_size(p_pipeline->p_samplers) : 0;
             size_t vertex_buffer_quantity = 0;
 
             // vertex shader
@@ -1083,7 +1119,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                     .format = SDL_GPU_SHADERFORMAT_METALLIB,
                     .stage = SDL_GPU_SHADERSTAGE_FRAGMENT,
 
-                    .num_samplers         = 0,
+                    .num_samplers         = sampler_count,
                     .num_storage_textures = 0,
                     .num_storage_buffers  = 0,
                     .num_uniform_buffers  = uniform_count
@@ -2009,7 +2045,6 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // construct an aabb 
         aabb_from_bounds(&p_geometry->_bounds, min, max);
-        aabb_info(&p_geometry->_bounds);
         
         // done
         goto xyz_done;
@@ -2469,7 +2504,184 @@ int g_sdl3_texture_load ( texture **pp_texture, const char *p_path )
         }
     }
 }
- 
+
+int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value )
+{
+    
+    // argument check
+    if ( pp_sampler   ==        (void *) 0 ) goto no_sampler;
+    if ( p_value       ==        (void *) 0 ) goto no_value;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    sampler *p_sampler = default_allocator(0, sizeof(sampler));
+    SDL_GPUSamplerCreateInfo _ci = { 0 };
+
+    // error check
+    if ( NULL == p_sampler ) goto no_mem;
+
+    // parse the sampler object
+    {
+
+        // initialized data
+        dict *p_dict = p_value->object;
+        json_value *p_name    = (json_value *)dict_get(p_dict, "name"),
+                   *p_filter  = (json_value *)dict_get(p_dict, "filter"),
+                //    *p_min     = (json_value *)dict_get(p_filter->object, "min"),
+                //    *p_mag     = (json_value *)dict_get(p_filter->object, "mag"),
+                   *p_mipmap  = (json_value *)dict_get(p_dict, "mipmap"),
+                   *p_address = (json_value *)dict_get(p_dict, "address"),
+                //    *p_u       = (json_value *)dict_get(p_address->object, "u"),
+                //    *p_v       = (json_value *)dict_get(p_address->object, "v"),
+                   *p_compare = (json_value *)dict_get(p_dict, "compare");
+
+        // defaults
+        _ci = (SDL_GPUSamplerCreateInfo)
+        {
+            .min_filter = SDL_GPU_FILTER_LINEAR,
+            .mag_filter = SDL_GPU_FILTER_LINEAR,
+
+            .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
+
+            .address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
+            .address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
+            
+            .mip_lod_bias = 0.0f,
+            .max_anisotropy = 8.f,
+
+            .compare_op = SDL_GPU_COMPAREOP_ALWAYS,
+
+            .min_lod = 0.0f,
+            .max_lod = 1000.0f,
+
+            .enable_anisotropy = true,
+            .enable_compare = false
+        };
+
+        // filter
+        if ( p_filter ) { }
+        
+        // mipmap
+        if ( p_mipmap ) { }
+        
+        // address
+        if ( p_address ) { }
+        
+        // compare
+        if ( p_compare ) { }
+        
+    }
+
+    // construct the sampler
+    p_sampler->p_handle = SDL_CreateGPUSampler(p_instance->graphics.sdl3.device, &_ci);
+
+    // return a pointer to the caller
+    *pp_sampler = p_sampler;
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_sampler:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"pp_sampler\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            no_value:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"p_value\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Parameter \"p_value\" must be of type [ object ] in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    
+        // json errors
+        {
+            no_clear_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Parameter \"p_value\" is missing required property \"clear\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/framebuffer.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            no_color_property:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Parameter \"p_value\" is missing required property \"color\" in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/framebuffer.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            // no_passes_property:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [sdl3] Parameter \"p_value\" is missing required property \"passes\" in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+            //     #endif
+
+            //     // error
+            //     return 0;
+
+            wrong_clear_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Property \"clear\" of parameter \"p_value\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            wrong_color_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Property \"color\" of parameter \"p_value\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            // wrong_passes_type:
+            //     #ifndef NDEBUG
+            //         log_error("[g10] [sdl3] Property \"passes\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
+            //         log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+            //     #endif
+
+            //     // error
+            //     return 0;
+        }
+
+        // standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value )
 {
 

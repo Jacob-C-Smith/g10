@@ -41,13 +41,19 @@ int main ( int argc, const char *argv[] )
     {
         
         // program color pipeline
-        ok |= program_pipeline("color", 
+        ok &= program_pipeline("color", 
             (fn_pipeline_bind_once *)camera_bind_active,
             (fn_pipeline_bind_each *)entity_bind
         );
 
         // program uv pipeline
-        ok |= program_pipeline("uv", 
+        ok &= program_pipeline("uv", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
+
+        // program texture pipeline
+        ok &= program_pipeline("texture", 
             (fn_pipeline_bind_once *)camera_bind_active,
             (fn_pipeline_bind_each *)entity_bind
         );

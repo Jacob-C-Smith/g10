@@ -17,6 +17,9 @@
 #include <g10.h>
 #include <transform.h>
 #include <geometry.h>
+#include <texture.h>
+#include <render_pass.h>
+#include <sampler.h>
 
 // structure definitions
 struct entity_s
@@ -25,6 +28,7 @@ struct entity_s
     transform *p_transform;
     geometry *p_geometry;
     vec3 color;
+    texture *p_texture;
     char *pipeline;
 };
 

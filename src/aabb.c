@@ -1,5 +1,7 @@
+// header file
 #include <aabb.h>
 
+// function definitions
 int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
 {
 
