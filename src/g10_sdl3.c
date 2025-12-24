@@ -23,13 +23,11 @@
 #include <aabb.h>
 #include <geometry.h>
 #include <uniform.h>
+#include <texture.h>
 
 // sdl3
 #include <SDL3/SDL.h>
-
-// todo: get rid of
-pipeline *p_current_pl = NULL;
-geometry *p_current_g = NULL;
+#include <SDL3_image/SDL_image.h>
 
 // forward declarations
 /// sdl3
@@ -60,6 +58,11 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
 /// geometry
 int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_value );
 int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
+
+/// texture
+int g_sdl3_texture_from_data ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
+int g_sdl3_texture_construct ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
+int g_sdl3_texture_load ( texture **pp_texture, const char *p_path );
 
 /// uniform
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value );
@@ -173,7 +176,7 @@ int g_sdl3_render_draw ( g_instance *p_instance )
     array *p_passes = p_renderer->p_passes;
     size_t len = array_size(p_passes);
 
-    // iterate through each attachment
+    // iterate through each render pass
     for (size_t i = 0; i < 1; i++)
     {
             
@@ -241,28 +244,70 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
     if ( p_instance == (void *) 0 ) goto no_instance;
     
     // initialized data
-    SDL_GPUColorTargetInfo colorTargetInfo = 
-    {
-        .clear_color = (SDL_FColor)
-        {
-            p_render_pass->p_framebuffer->clear[0], 
-            p_render_pass->p_framebuffer->clear[1], 
-            p_render_pass->p_framebuffer->clear[2], 
-            p_render_pass->p_framebuffer->clear[3]
-        },
-        .load_op = SDL_GPU_LOADOP_CLEAR,
-        .store_op = SDL_GPU_STOREOP_STORE,
-        .texture = p_instance->graphics.sdl3.swapchain_texture
-    };
-    SDL_GPUBufferBinding vertexBinding = 
-    { 
-        .buffer = p_current_g->p_handle, 
-        .offset = 0
-    };
+    framebuffer *p_framebuffer = p_render_pass->p_framebuffer;
     size_t len = array_size(p_render_pass->p_pipelines);
+    size_t attachment_len = array_size(p_framebuffer->p_attachments);
+    SDL_GPUColorTargetInfo _color_target_ci[8] = { 0 };
+    
+    // iterate through each attachment
+    for (size_t i = 0; i < attachment_len; i++)
+    {
 
+        // initialized data
+        attachment *p_attachment = NULL;
+
+        // get the i'th attachment
+        array_index(p_framebuffer->p_attachments, i, &p_attachment);
+
+        // setup the color target info
+        _color_target_ci[i] = (SDL_GPUColorTargetInfo)
+        {
+            .clear_color = (SDL_FColor)
+            {
+                p_framebuffer->clear[0], 
+                p_framebuffer->clear[1], 
+                p_framebuffer->clear[2], 
+                p_framebuffer->clear[3]
+            },
+            .load_op = SDL_GPU_LOADOP_CLEAR,
+            .store_op = SDL_GPU_STOREOP_STORE,
+            .texture = p_attachment->p_handle
+        };
+
+        // use the swapchain texture for the output attachment
+        if ( 0 == strncmp(p_attachment->_name, "OUTPUT", 6) )
+            _color_target_ci[i].texture = p_instance->graphics.sdl3.swapchain_texture;
+    }
+    
     // begin the render pass
-    p_render_pass->p_handle = SDL_BeginGPURenderPass(p_instance->graphics.sdl3.command_buffer, &colorTargetInfo, 1, NULL);
+    p_render_pass->p_handle = SDL_BeginGPURenderPass(p_instance->graphics.sdl3.command_buffer, &_color_target_ci, attachment_len, NULL);
+    
+    // viewport and scissor
+    {
+        SDL_SetGPUViewport
+        (
+            p_render_pass->p_handle, 
+            &(SDL_GPUViewport)
+            {
+                0, 
+                0, 
+                (int)p_instance->window.width, 
+                (int)p_instance->window.height
+            }
+        );
+
+        SDL_SetGPUScissor
+        (
+            p_render_pass->p_handle, 
+            &(SDL_Rect)
+            {
+                0, 
+                0, 
+                (int)p_instance->window.width, 
+                (int)p_instance->window.height
+            }
+        );
+    }
 
     // iterate through each pipeline
     for (size_t i = 0; i < len; i++)
@@ -748,6 +793,8 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
     // initialized data
     g_instance *p_instance = g_active_instance();
     attachment *p_attachment = default_allocator(0, sizeof(attachment));
+    SDL_GPUTextureFormat format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_SNORM;
+    SDL_GPUTextureUsageFlags usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
 
     // error check
     if ( NULL == p_attachment ) goto no_mem;
@@ -772,13 +819,33 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
         strncpy(p_attachment->_name, p_name->string, sizeof(p_attachment->_name) - 1);
 
         // TODO: type
-
-        // construct attachment
+        if ( 0 == strncmp(p_type->string, "texture", 8) )
+            format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_SNORM,
+            usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+        else if ( 0 == strncmp(p_type->string, "depth", 6) )
+            format = SDL_GPU_TEXTUREFORMAT_D16_UNORM,
+            usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+        else if ( 0 == strncmp(p_type->string, "framebuffer", 11 ) ) goto done;
+        
+        // create an SDL GPU texture
         {
-            
+            SDL_GPUTextureCreateInfo _ci = 
+            {
+                .type = SDL_GPU_TEXTURETYPE_2D,
+                .format = format,
+                .usage = usage,
+                .width = p_instance->window.width,  
+                .height = p_instance->window.height, 
+                .layer_count_or_depth = 1,  
+                .num_levels = 1,  
+                .sample_count = 0
+            };
+
+            p_attachment->p_handle = SDL_CreateGPUTexture(p_instance->graphics.sdl3.device, &_ci);
         }
     }
 
+done:
     dict_add(p_instance->cache.p_attachment, p_attachment->_name, p_attachment);
 
     // return a pointer to the caller
@@ -1447,6 +1514,7 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // initialized data
+    g_instance *p_instance = g_active_instance();
     framebuffer *p_framebuffer = default_allocator(0, sizeof(framebuffer));
 
     // error check
@@ -1497,6 +1565,31 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
 
             // type check
             if ( p_color->type != JSON_VALUE_ARRAY ) goto wrong_color_type;
+
+            // initialized data
+            size_t len = array_size(p_color->list);
+
+            array_construct(&p_framebuffer->p_attachments, len);
+
+            for (size_t i = 0; i < len; i++)
+            {
+                
+                // initialized data
+                json_value *p_attachment_name = NULL;
+                char *p_name = NULL;
+                attachment *p_attachment = NULL;
+
+                // store the i'th attachment name json
+                array_index(p_color->list, i, &p_attachment_name);
+
+                // store the i'th attachment name
+                p_name = p_attachment_name->string;
+
+                // retrieve the attachment from the cache
+                p_attachment = dict_get(p_instance->cache.p_attachment, p_name);
+
+                array_add(p_framebuffer->p_attachments, p_attachment);
+            }
         }
     }
 
@@ -1739,7 +1832,6 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
     // return a pointer to the caller
     *pp_geometry = p_geometry;
-    p_current_g = p_geometry;
     dict_add(p_instance->cache.p_geometry, p_geometry->_name, p_geometry);
 
     // success
@@ -1879,6 +1971,245 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
     }
 }
 
+int g_sdl3_texture_construct ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data )
+{
+
+    // argument check
+    if ( pp_texture == (void *) 0 ) goto no_texture;
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    texture *p_texture = default_allocator(0, sizeof(texture));
+
+    // error check
+    if ( NULL == p_texture ) goto no_mem;
+
+    // create an SDL GPU texture
+    {
+        SDL_GPUTextureCreateInfo _ci = 
+        {
+            .type = SDL_GPU_TEXTURETYPE_2D,
+            .format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_SNORM,
+            .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
+            .width = width,  
+            .height = height, 
+            .layer_count_or_depth = 0,  
+            .num_levels = 0,  
+            .sample_count = 0
+        };
+
+        p_texture->p_handle = SDL_CreateGPUTexture(p_instance->graphics.sdl3.device, &_ci);
+    }
+
+    // return a pointer to the caller
+    *pp_texture = p_texture;
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+int g_sdl3_texture_load ( texture **pp_texture, const char *p_path )
+{
+
+    // argument check
+    if ( pp_texture == (void *) 0 ) goto no_texture;
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    texture *p_texture = default_allocator(0, sizeof(texture));
+
+    if ( p_texture == (void *) 0 ) goto no_mem;
+
+    // initialized data
+    SDL_Surface *p_surface = NULL;
+    SDL_Surface *p_converted = NULL;
+    SDL_GPUTextureCreateInfo _ci = { 0 };
+    SDL_GPUTransferBufferCreateInfo _tci = { 0 };
+    SDL_GPUTransferBuffer *p_transfer_buffer = NULL;
+    void *p_map = NULL;
+    SDL_GPUCommandBuffer *p_cmd = NULL;
+    SDL_GPUCopyPass *p_copy_pass = NULL;
+    SDL_GPUTextureTransferInfo _src = { 0 };
+    SDL_GPUTextureRegion _dst = { 0 };
+
+    // load the image
+    p_surface = IMG_Load(p_path);
+
+    // error check
+    if ( p_surface == (void *) 0 ) goto failed_to_load_image;
+
+    // convert to ABGR8888
+    p_converted = SDL_ConvertSurface(p_surface, SDL_PIXELFORMAT_ABGR8888);
+
+    // free the original surface
+    SDL_DestroySurface(p_surface);
+
+    // error check
+    if ( p_converted == (void *) 0 ) goto failed_to_convert_surface;
+
+    // setup texture create info
+    _ci = (SDL_GPUTextureCreateInfo)
+    {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+        .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        .width = p_converted->w,  
+        .height = p_converted->h, 
+        .layer_count_or_depth = 1,  
+        .num_levels = 1,  
+        .sample_count = 0
+    };
+
+    // create the texture
+    p_texture->p_handle = SDL_CreateGPUTexture(p_instance->graphics.sdl3.device, &_ci);
+
+    // error check
+    if ( p_texture->p_handle == NULL ) goto failed_to_create_texture;
+
+    // setup transfer buffer create info
+    _tci = (SDL_GPUTransferBufferCreateInfo)
+    {
+        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+        .size = p_converted->w * p_converted->h * 4
+    };
+
+    // create the transfer buffer
+    p_transfer_buffer = SDL_CreateGPUTransferBuffer(p_instance->graphics.sdl3.device, &_tci);
+
+    // map the transfer buffer
+    p_map = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer, false);
+
+    // copy the pixels
+    SDL_memcpy(p_map, p_converted->pixels, p_converted->w * p_converted->h * 4);
+
+    // unmap the transfer buffer
+    SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
+
+    // acquire command buffer
+    p_cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
+
+    // begin copy pass
+    p_copy_pass = SDL_BeginGPUCopyPass(p_cmd);
+
+    // setup source
+    _src = (SDL_GPUTextureTransferInfo)
+    {
+        .transfer_buffer = p_transfer_buffer,
+        .offset = 0,
+        .pixels_per_row = p_converted->w,
+        .rows_per_layer = p_converted->h
+    };
+
+    // setup destination
+    _dst = (SDL_GPUTextureRegion)
+    {
+        .texture = p_texture->p_handle,
+        .w = p_converted->w,
+        .h = p_converted->h,
+        .d = 1
+    };
+
+    // upload
+    SDL_UploadToGPUTexture(p_copy_pass, &_src, &_dst, false);
+
+    // end copy pass
+    SDL_EndGPUCopyPass(p_copy_pass);
+
+    // submit command buffer
+    SDL_SubmitGPUCommandBuffer(p_cmd);
+
+    // release transfer buffer
+    SDL_ReleaseGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
+
+    // destroy the surface
+    SDL_DestroySurface(p_converted);
+
+    // return a pointer to the caller
+    *pp_texture = p_texture;
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // image errors
+        {
+            failed_to_load_image:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Failed to load image from path \"%s\" in call to function \"%s\"\n", p_path, __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            failed_to_convert_surface:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Failed to convert surface in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+            
+            failed_to_create_texture:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Failed to create texture in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+ 
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value )
 {
 

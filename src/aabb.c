@@ -17,7 +17,8 @@ int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
         ._max = max
     };
 
-    array_add(p_pipeline->p_static_draw_list, p_aabb);
+    if ( p_pipeline )
+        array_add(p_pipeline->p_static_draw_list, p_aabb);
 
     // done
     return 1;

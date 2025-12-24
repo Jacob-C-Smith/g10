@@ -70,6 +70,7 @@ struct scene_s;
 struct pipeline_s;
 // struct shell_s;
 struct transform_s;
+struct texture_s;
 struct uniform_s;
 
 // Type definitions
@@ -95,6 +96,7 @@ typedef struct scene_s            scene;
 typedef struct pipeline_s           pipeline;
 // typedef struct shell_s            shell;
 typedef struct transform_s        transform;
+typedef struct texture_s        texture;
 typedef struct uniform_s        uniform;
 
 // function pointers

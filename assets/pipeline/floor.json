@@ -1,0 +1,17 @@
+{
+    "name" : "floor",
+    "source" : 
+    {
+        "program" : "assets/pipeline/floor/floor.metallib"
+    },
+    "uniform" : 
+    [
+        {
+            "name" : "color",
+            "data" :
+            [
+                { "color" : "vec3" }
+            ]
+        }
+    ]
+}

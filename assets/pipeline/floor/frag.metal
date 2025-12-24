@@ -15,7 +15,7 @@ fragment FragmentOutput fs_main(
 ) {
     
     FragmentOutput output;
-    output.color0 = uniforms.color; 
+    output.color0 = float4(0.0, 0.0, 0.0, 1.0); 
     output.color1 = float4(0.0, 0.0, 1.0, 1.0); 
 
     // done

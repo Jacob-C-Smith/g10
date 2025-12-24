@@ -20,10 +20,10 @@
             {
                 "name" : "entity",
                 "pipeline" : "color",
-                "color" : [ 0.0, 0.0, 1.0 ],
+                "color" : [ 1.0, 0.0, 0.0 ],
                 "transform" :
                 {
-                    "location" : [-3.0,0.0,0.0],
+                    "location" : [0.0,0.0,0.0],
                     "rotation" : [0.0,0.0,0.0],
                     "scale" : [1.0,1.0,1.0]
                 },
@@ -65,24 +65,42 @@
             {
                 "name" : "entity 2",
                 "pipeline" : "color",
-                "color" : [ 1.0, 0.0, 0.0 ],
+                "color" : [ 0.0, 0.0, 1.0 ],
                 "transform" :
                 {
                     "location" : [0.0,0.0,0.0],
                     "rotation" : [0.0,0.0,0.0],
-                    "scale" : [1.0,1.0,1.0]
+                    "scale" : [0.25,0.25,0.25]
                 },
                 "geometry" : 
                 {
-                    "name" : "quad",
+                    "name" : "cube",
                     "xyz" :
                     [
-                        -0.5, -0.5, 1.0,
-                         0.5, -0.5, 1.0,
-                        -0.5,  0.5, 1.0,
-                         0.5,  0.5, 1.0,
-                         0.5, -0.5, 1.0,
-                        -0.5,  0.5, 1.0
+                        -1.0, -1.0,  1.0, 
+                        -1.0,  1.0, -1.0, 
+                        -1.0, -1.0, -1.0, 
+                        -1.0,  1.0,  1.0, 
+                        1.0,  1.0, -1.0, 
+                        -1.0,  1.0, -1.0, 
+                        1.0,  1.0,  1.0, 
+                        1.0, -1.0, -1.0, 
+                        1.0,  1.0, -1.0, 
+                        1.0, -1.0,  1.0, 
+                        -1.0, -1.0, -1.0,
+                        1.0, -1.0, -1.0, 
+                        1.0,  1.0, -1.0, 
+                        -1.0, -1.0, -1.0, 
+                        -1.0,  1.0, -1.0, 
+                        -1.0,  1.0,  1.0, 
+                        1.0, -1.0,  1.0, 
+                        1.0,  1.0,  1.0, 
+                        -1.0,  1.0,  1.0, 
+                        1.0,  1.0,  1.0, 
+                        1.0, -1.0,  1.0, 
+                        -1.0, -1.0,  1.0, 
+                        1.0, -1.0, -1.0, 
+                        -1.0, -1.0,  1.0
                     ]
                 }
             }
@@ -91,8 +109,8 @@
         [
             {
                 "name" : "camera",
-                "fov" : 30.0,
-                "location" : [ 0.0, 0.0, -5.0 ],
+                "fov" : 45.0,
+                "location" : [ 0.0, 0.0, -2.0 ],
                 "orientation" : [ 0.0, 0.0, 1.0 ],
                 "clip" :
                 {
@@ -141,11 +159,11 @@
                 ]
             },
             {
-                "name" : "floor",
+                "name" : "aabb",
                 "source" : 
                 {
-                    "vert" : "assets/pipeline/floor/floor.metallib",
-                    "frag" : "assets/pipeline/floor/floor.metallib"
+                    "vert" : "assets/pipeline/aabb/aabb.metallib",
+                    "frag" : "assets/pipeline/aabb/aabb.metallib"
                 },
                 "uniforms" :
                 [
@@ -195,11 +213,11 @@
                 "name" : "gbuf",
                 "framebuffer" : 
                 { 
-                    "clear" : [ 1.0, 1.0, 1.0, 0.0 ],
+                    "clear" : [ 1.0, 0.0, 1.0, 0.0 ],
                     "color" : [ "OUTPUT", "color" ],
                     "depth" : "depth"
                 },
-                "pipelines" : [ "color", "floor" ]
+                "pipelines" : [ "color" ]
             }
         ]
     }

@@ -12,8 +12,8 @@ else
 endif
 
 # SDL3
-SDL_CFLAGS := $(shell pkg-config --cflags sdl3)
-SDL_LIBS := $(shell pkg-config --libs sdl3)
+SDL_CFLAGS := $(shell pkg-config --cflags sdl3 sdl3-image)
+SDL_LIBS := $(shell pkg-config --libs sdl3 sdl3-image)
 
 # Compiler and flags
 CC = clang
@@ -57,21 +57,11 @@ $(CLIENT): main.c $(G10_LIB)
 
 # Assets
 assets: 
-	xcrun metal -c assets/pipeline/quad/vert.metal -o assets/pipeline/quad/vert.air
-	xcrun metal -c assets/pipeline/quad/frag.metal -o assets/pipeline/quad/frag.air
-	xcrun metallib assets/pipeline/quad/vert.air assets/pipeline/quad/frag.air -o assets/pipeline/quad/quad.metallib
-
-	xcrun metal -c assets/pipeline/geom/vert.metal -o assets/pipeline/geom/vert.air
-	xcrun metal -c assets/pipeline/geom/frag.metal -o assets/pipeline/geom/frag.air
-	xcrun metallib assets/pipeline/geom/vert.air assets/pipeline/geom/frag.air -o assets/pipeline/geom/geom.metallib
-
-	xcrun metal -c assets/pipeline/color/vert.metal -o assets/pipeline/color/vert.air
-	xcrun metal -c assets/pipeline/color/frag.metal -o assets/pipeline/color/frag.air
-	xcrun metallib assets/pipeline/color/vert.air assets/pipeline/color/frag.air -o assets/pipeline/color/color.metallib
-
-	xcrun metal -c assets/pipeline/aabb/vert.metal -o assets/pipeline/aabb/vert.air
-	xcrun metal -c assets/pipeline/aabb/frag.metal -o assets/pipeline/aabb/frag.air
-	xcrun metallib assets/pipeline/aabb/vert.air assets/pipeline/aabb/frag.air -o assets/pipeline/aabb/aabb.metallib
+	@./scripts/compile-metal-shader.sh quad 
+	@./scripts/compile-metal-shader.sh geom
+	@./scripts/compile-metal-shader.sh color 
+	@./scripts/compile-metal-shader.sh aabb 
+	@./scripts/compile-metal-shader.sh floor
 
 # Info
 info:
@@ -90,8 +80,4 @@ gport:
 	zip gport.zip gport/*
 	rm -rf /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons/gport
 
-gport_symlink:
-	rm -rf /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons/gport
-	ln -s ./gport/ /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons/gport
-
-.PHONY: all clean info assets gport gport_symlink
+.PHONY: all clean info assets gport 

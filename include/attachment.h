@@ -20,6 +20,7 @@
 struct attachment_s
 {
     char _name[63+1];
+    void *p_handle;
 };
 
 // function declarations

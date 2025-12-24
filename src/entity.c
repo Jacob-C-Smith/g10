@@ -103,17 +103,6 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
         // get the color uniform
         array_index(p_pipeline->p_uniforms, 0, (void **)&p_color);
 
-        // increase brightness
-        {
-            p_entity->color.x += 0.005f;
-            p_entity->color.y += 0.0025f;
-            p_entity->color.z += 0.00125f;
-
-            p_entity->color.x = (p_entity->color.x > 1.0f) ? 0.0f : p_entity->color.x;
-            p_entity->color.y = (p_entity->color.y > 1.0f) ? 0.0f : p_entity->color.y;
-            p_entity->color.z = (p_entity->color.z > 1.0f) ? 0.0f : p_entity->color.z;
-        }
-
         // bind color
         uniform_set_pack_push(p_color, &p_entity->color, (fn_pack *)vec3_pack);
     }

@@ -362,6 +362,10 @@ int poll_input ( g_instance *p_instance )
     {
         if ( p_instance->window.sdl3.event.type == SDL_EVENT_QUIT )
             p_instance->running = false;
+        if ( p_instance->window.sdl3.event.type == SDL_EVENT_KEY_DOWN )
+            if ( p_instance->window.sdl3.event.key.key == SDLK_P );
+                // TODO
+                
     }
 
     // success
