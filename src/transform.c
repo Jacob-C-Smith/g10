@@ -623,6 +623,18 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
     // get the transform uniform
     array_index(p_pipeline->p_uniforms, 1, (void **)&p_m);
 
+    p_transform->rotation.x += 0.02f;
+    p_transform->rotation.y += 0.02f;
+    p_transform->rotation.z += 0.02f;
+
+    if (p_transform->rotation.x > M_PI)
+        p_transform->rotation.x -= 2 * M_PI;
+    if (p_transform->rotation.y > M_PI)
+        p_transform->rotation.y -= 2 * M_PI;
+    if (p_transform->rotation.y > M_PI)
+        p_transform->rotation.y -= 2 * M_PI;
+    
+
     // compute the model matrix
     mat4_model_from_vec3(
         &p_transform->model,

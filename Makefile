@@ -59,21 +59,19 @@ $(CLIENT): main.c $(G10_LIB)
 assets: 
 
 	# shaders
-	@./scripts/compile-metal-shader.sh quad 
-	@./scripts/compile-metal-shader.sh geom
-	@./scripts/compile-metal-shader.sh color 
-	@./scripts/compile-metal-shader.sh aabb 
-	@./scripts/compile-metal-shader.sh floor
-	@./scripts/compile-metal-shader.sh uv
-	@./scripts/compile-metal-shader.sh texture
+	./scripts/compile-metal-shader.sh quad 
+	./scripts/compile-metal-shader.sh geom
+	./scripts/compile-metal-shader.sh color 
+	./scripts/compile-metal-shader.sh aabb 
+	./scripts/compile-metal-shader.sh floor
+	./scripts/compile-metal-shader.sh uv
+	./scripts/compile-metal-shader.sh texture
+	./scripts/compile-metal-shader.sh normal
 
 	# pack geometry
-	@./scripts/pack-geometry.sh circle
-	@./scripts/pack-geometry.sh cube
-	@./scripts/pack-geometry.sh icosphere
-	@./scripts/pack-geometry.sh quad
-	@./scripts/pack-geometry.sh uv_sph
-	
+	./scripts/pack-geometry.sh circle
+	./scripts/pack-geometry.sh cube
+	./scripts/pack-geometry.sh quad
 
 # Info
 info:

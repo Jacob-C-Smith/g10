@@ -34,7 +34,9 @@ struct geometry_s
     char _name[63+1];
     aabb _bounds;
     u32 vertex_count;
+    u32 index_count;
     void *p_handle;
+    void *p_index_handle;
     void *_p_handles[GEOMETRY_QTY];
 };
 

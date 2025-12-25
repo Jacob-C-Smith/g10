@@ -708,14 +708,17 @@ u0 mat4_scale ( mat4 *p_result, vec3 scale )
 
 u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation )
 {
+    float cx = cosf(rotation.x), sx = sinf(rotation.x);
+    float cy = cosf(rotation.y), sy = sinf(rotation.y);
+    float cz = cosf(rotation.z), sz = sinf(rotation.z);
 
-    // store the rotation matrix
-    *p_result = (mat4)
-    {
-        cosf(rotation.x) + powf(rotation.x, 2) * (1 - cosf(rotation.x))                 , rotation.x * rotation.y * (1 - cosf(rotation.y)) - rotation.z * sinf(rotation.y), rotation.x * rotation.z * (1 - cosf(rotation.z)) + rotation.y * sinf(rotation.z), 0,
-        rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x), cosf(rotation.y) + powf(rotation.y, 2) * (1 - cosf(rotation.y))                 , rotation.y * rotation.z * (1 - cosf(rotation.z)) - rotation.x * sinf(rotation.z), 0,
-        rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x), rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x), cosf(rotation.x) + powf(rotation.x, 2) * (1 - cosf(rotation.x))                 , 0,
-        0                                                                               , 0                                                                               , 0                                                                               , 1
+    // Standard Euler XYZ Rotation Matrix (Row-Major Storage, Column-Vector compatible)
+    // Note: If you prefer a different order (like YXZ), you can re-order the multiplications.
+    *p_result = (mat4){
+        .a = cy * cz, .b = -cy * sz, .c = sy, .d = 0.f,
+        .e = cx * sz + sx * sy * cz, .f = cx * cz - sx * sy * sz, .g = -sx * cy, .h = 0.f,
+        .i = sx * sz - cx * sy * cz, .j = sx * cz + cx * sy * sz, .k = cx * cy, .l = 0.f,
+        .m = 0.f, .n = 0.f, .o = 0.f, .p = 1.f
     };
 
     // done
@@ -729,7 +732,7 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     mat4 _location       = { 0 },
          _rotation       = { 0 },
          _scale          = { 0 },
-         _location_scale = { 0 };
+         _rotation_scale = { 0 };
 
     // compute the translation matrix
     mat4_translation(&_location, location);
@@ -740,11 +743,12 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     // compute the scale matrix
     mat4_scale(&_scale, scale);
 
-    // compute the location-scale matrix
-    mat4_mul_mat4(&_location_scale, _scale, _location);
+    // Standard Model Matrix Order: Translation * Rotation * Scale
+    // compute the rotation-scale matrix
+    mat4_mul_mat4(&_rotation_scale, _rotation, _scale);
 
     // compute the model matrix
-    mat4_mul_mat4(p_result, _location_scale, _rotation);
+    mat4_mul_mat4(p_result, _location, _rotation_scale);
 
     // done
     return;
