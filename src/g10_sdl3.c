@@ -1398,7 +1398,10 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
             p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
 
         // draw something
-        SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->vertex_count, 1, 0, 0);
+        if ( p_drawable->p_geometry->p_index_handle )
+            SDL_DrawGPUIndexedPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->index_count * 3, 1, 0, 0, 0);
+        else
+            SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->vertex_count, 1, 0, 0);
     }
     
     // success
@@ -1808,7 +1811,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         *nxyz = NULL,
         *txyz = NULL,
         *bxyz = NULL;
-    i16 *idx  = NULL;
+    i32 *idx  = NULL;
     size_t xyz_len  = 0,
            uv_len   = 0,
            nxyz_len = 0,
@@ -1851,6 +1854,10 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         // normal
         if ( p_nxyz ) goto parse_nxyz;
         nxyz_done:
+
+        // index
+        if ( p_idx ) goto parse_idx;
+        idx_done:
     }
 
     // construct the geometry
@@ -1929,7 +1936,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                 &(SDL_GPUBufferCreateInfo)
                 { 
                     .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-                    .size = sizeof(f32) * xyz_len
+                    .size = _p_attribute[_type].size
                 }
             );
 
@@ -1937,7 +1944,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type], false);
 
             // copy the vertex data to the transfer buffer
-            SDL_memcpy(p_mmap, xyz, sizeof(f32) * xyz_len);
+            SDL_memcpy(p_mmap, _p_attribute[_type].p_data, _p_attribute[_type].size);
 
             // unmap the transfer buffer from address space
             SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type]);
@@ -1982,13 +1989,73 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                 );
             }
 
+            // upload indices
+            if ( p_idx )
+            {
+
+                SDL_GPUTransferBuffer* _transfer_buffer = { 0 };
+                void* p_mmap = NULL;
+
+                // construct a transfer buffer
+                _transfer_buffer = SDL_CreateGPUTransferBuffer
+                (
+                    p_instance->graphics.sdl3.device, 
+
+                    &(SDL_GPUTransferBufferCreateInfo)
+                    {
+                        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+                        .size = idx_len * sizeof(i32)
+                    }
+                );
+
+                // construct a gpu buffer
+                p_geometry->p_index_handle = SDL_CreateGPUBuffer
+                (
+                    p_instance->graphics.sdl3.device,
+
+                    &(SDL_GPUBufferCreateInfo)
+                    { 
+                        .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+                        .size = idx_len * sizeof(i32)
+                    }
+                );
+
+                // map the transfer buffer into address space
+                p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffer, false);
+
+                // copy the vertex data to the transfer buffer
+                SDL_memcpy(p_mmap, idx, idx_len * sizeof(u32));
+
+                // unmap the transfer buffer from address space
+                SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffer);
+
+                // upload from the transfer buffer to the gpu
+                SDL_UploadToGPUBuffer
+                (
+                    copy_pass,
+
+                    &(SDL_GPUTransferBufferLocation)
+                    {
+                        .transfer_buffer = _transfer_buffer,
+                        .offset = 0
+                    },
+
+                    &(SDL_GPUBufferRegion)
+                    {
+                        .buffer = p_geometry->p_index_handle,
+                        .offset = 0, 
+                        .size = _p_attribute->size
+                    },
+
+                    false
+                );
+            }
+
             // end the copy pass
             SDL_EndGPUCopyPass(copy_pass),
             SDL_SubmitGPUCommandBuffer(cmd);
         }
     }
-
-    p_geometry->p_handle = p_geometry->_p_handles[GEOMETRY_XYZ];
 
     // return a pointer to the caller
     *pp_geometry = p_geometry;
@@ -2108,6 +2175,38 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         goto nxyz_done;
     }
 
+    // this branch parses indices
+    parse_idx:
+    {
+
+        // initialized data
+        array *p_array = p_idx->list;
+        idx_len = array_size(p_array);
+        
+        // store the vertex count
+        p_geometry->index_count = idx_len / 3;
+
+        // allocate memory for indices
+        idx = default_allocator(NULL, sizeof(i32) * idx_len);
+
+        // parse the index data
+        for (size_t i = 0; i < idx_len; i++)
+        {
+
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // store the i'th number
+            idx[i] = p_value->integer;
+        }
+
+        // done
+        goto idx_done;
+    }
+
     // error handling
     {
 
@@ -2216,6 +2315,7 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
 
     // initialized data
     SDL_GPUBufferBinding _bindings[GEOMETRY_QTY] = { 0 };
+    SDL_GPUBufferBinding _idx_bind = { 0 };
     size_t len = 0;
 
     // iterate through each vertex attribute
@@ -2239,6 +2339,7 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
         len++;
     }
 
+    
     // bind the drawable geometry
     SDL_BindGPUVertexBuffers(
         p_render_pass->p_handle,
@@ -2246,6 +2347,19 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
         &_bindings,
         len
     );
+
+    // bind the index buffer
+    if ( p_geometry->p_index_handle )
+        _idx_bind = (SDL_GPUBufferBinding)
+        {
+            .buffer = p_geometry->p_index_handle,
+            .offset = 0
+        },
+        SDL_BindGPUIndexBuffer(
+            p_render_pass->p_handle,
+            &_idx_bind,
+            SDL_GPU_INDEXELEMENTSIZE_32BIT
+        );
 
     // success
     return 1;
