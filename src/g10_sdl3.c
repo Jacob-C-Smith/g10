@@ -960,16 +960,33 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 {
 
     // argument check
-    if ( pp_pipeline ==        (void *) 0 ) goto no_pipeline;
-    if ( p_value       ==        (void *) 0 ) goto no_value;
-    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
+    if ( pp_pipeline == (void *) 0 ) goto no_pipeline;
+    if ( p_value     == (void *) 0 ) goto no_value;
 
     // initialized data
     g_instance *p_instance = g_active_instance();
     pipeline *p_pipeline = default_allocator(0, sizeof(pipeline));
 
+    // type check
+    if ( JSON_VALUE_STRING == p_value->type)
+    {
+
+        size_t file_len = load_file(p_value->string, (void *) 0, true);
+        char *p_file_contents = default_allocator(0, (file_len + 1) * sizeof(char));
+        
+        // error check
+        if ( file_len == 0 ) goto failed_to_load_file;
+
+        // load the file
+        if ( load_file(p_value->string, p_file_contents, true) == 0 ) goto failed_to_load_file;
+
+        // parse the json value
+        json_value_parse(p_file_contents, NULL, &p_value);
+    }
+    
     // error check
     if ( NULL == p_pipeline ) goto no_mem;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // parse the pipeline object
     {
@@ -1204,7 +1221,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                         _vertex_buffer_descriptions[i] = (SDL_GPUVertexBufferDescription)
                         {
                             .slot = i,
-                            .pitch = sizeof(f32) * 3,
+                            .pitch = sizeof(f32) * 4,
                             .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
                             .instance_step_rate = 0
                         },
@@ -1212,7 +1229,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                         {
                             .location = i,
                             .buffer_slot = i,
-                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
                             .offset = 0
                         };
                     
@@ -1389,6 +1406,14 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             no_mem:
                 #ifndef NDEBUG
                     log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to load file in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // error
@@ -1825,48 +1850,55 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 {
     
     // argument check
-    if ( pp_geometry   ==        (void *) 0 ) goto no_geometry;
-    if ( p_value       ==        (void *) 0 ) goto no_value;
-    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
+    if ( pp_geometry == (void *) 0 ) goto no_geometry;
+    if ( p_value     == (void *) 0 ) goto no_value;
 
     // initialized data
     g_instance *p_instance = g_active_instance();
     geometry *p_geometry = default_allocator(0, sizeof(geometry));
-    dict *p_dict = p_value->object;
-    json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                *p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
-                *p_uv   = (json_value *)dict_get(p_dict, "uv"),
-                *p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
-                *p_txyz = (json_value *)dict_get(p_dict, "txyz"),
-                *p_bxyz = (json_value *)dict_get(p_dict, "bxyz"),
-                *p_idx  = (json_value *)dict_get(p_dict, "idx");
-    f32 *xyz  = NULL,
-        *uv   = NULL,
-        *nxyz = NULL,
-        *txyz = NULL,
-        *bxyz = NULL;
-    i32 *idx  = NULL;
-    size_t xyz_len  = 0,
-           uv_len   = 0,
-           nxyz_len = 0,
-           txyz_len = 0,
-           bxyz_len = 0,
-           idx_len  = 0;
-    vec3 min = 
-    { 
-        .x = INFINITY,
-        .y = INFINITY,
-        .z = INFINITY
-    }, 
-    max = 
-    { 
-        .x = -INFINITY,
-        .y = -INFINITY,
-        .z = -INFINITY        
-    };
+    dict       *p_dict = NULL;
+    json_value *p_name = NULL,
+               *p_xyz  = NULL,
+               *p_uv   = NULL,
+               *p_nxyz = NULL,
+               *p_txyz = NULL,
+               *p_bxyz = NULL,
+               *p_idx  = NULL;
+    f32 *xyz = NULL, *uv = NULL, *nxyz = NULL, *txyz = NULL, *bxyz = NULL;
+    i32 *idx = NULL;
+    size_t xyz_len = 0, uv_len = 0, nxyz_len = 0, txyz_len = 0, bxyz_len = 0, idx_len = 0;
+    vec3 min = {  .x = INFINITY, .y = INFINITY, .z = INFINITY }, 
+         max = { .x = -INFINITY, .y = -INFINITY, .z = -INFINITY };
 
+    // type check
+    if ( JSON_VALUE_STRING == p_value->type )
+    {
+
+        size_t file_len = load_file(p_value->string, (void *) 0, true);
+        char *p_file_contents = default_allocator(0, (file_len + 1) * sizeof(char));
+        
+        // error check
+        if ( file_len == 0 ) goto failed_to_load_file;
+
+        // load the file
+        if ( load_file(p_value->string, p_file_contents, true) == 0 ) goto failed_to_load_file;
+
+        // parse the json value
+        json_value_parse(p_file_contents, NULL, &p_value);
+    }
+    
     // error check
     if ( NULL == p_geometry ) goto no_mem;
+    if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
+    
+    p_dict = p_value->object;
+    p_name = (json_value *)dict_get(p_dict, "name"),
+    p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
+    p_uv   = (json_value *)dict_get(p_dict, "uv"),
+    p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
+    p_txyz = (json_value *)dict_get(p_dict, "txyz"),
+    p_bxyz = (json_value *)dict_get(p_dict, "bxyz"),
+    p_idx  = (json_value *)dict_get(p_dict, "idx");
 
     // parse the geometry object
     {
@@ -2366,6 +2398,14 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             no_mem:
                 #ifndef NDEBUG
                     log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            failed_to_load_file:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to load file in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // error

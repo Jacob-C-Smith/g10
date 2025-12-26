@@ -126,6 +126,9 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
     // initialized data
     g_instance *p_instance = g_active_instance();
 
+    // transform
+    transform_bind(p_render_pass, p_pipeline, p_entity->p_transform);
+  
     // color 
     if ( 0 == strcmp(p_pipeline->_name, "color") )
     {
@@ -146,12 +149,32 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
     {
     
         // initialized data
-        sampler *p_sampler_1 = NULL;
-        sampler *p_sampler_2 = NULL;
+        sampler *p_sampler_1  = NULL;
+        sampler *p_sampler_2  = NULL;
+        uniform *p_inv_normal = NULL;
+
+        // get the color uniform
+        array_index(p_pipeline->p_uniforms, 0, (void **)&p_inv_normal);
 
         // get the texture uniform
         array_index(p_pipeline->p_samplers, 0, (void **)&p_sampler_1);
         array_index(p_pipeline->p_samplers, 1, (void **)&p_sampler_2);
+
+        {
+
+            // initialized data
+            mat4 _x = p_entity->p_transform->model;
+            mat4 _y = { 0 };
+            mat4 _z = { 0 };
+
+            // inverse transpose
+            mat4_inverse(&_y, _x);
+            mat4_transpose(&_z, _y);
+            mat4_to_mat3(&p_entity->_inv_normal, _z);
+
+            // bind color
+            uniform_set_pack_push(p_inv_normal, &p_entity->_inv_normal, (fn_pack *)mat3_pack);
+        }
 
         SDL_BindGPUFragmentSamplers(
             p_render_pass->p_handle,
@@ -175,9 +198,6 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
         );
     }
 
-    // transform
-    transform_bind(p_render_pass, p_pipeline, p_entity->p_transform);
-  
     // bind the geometry
     geometry_bind(p_render_pass, p_entity->p_geometry);
 

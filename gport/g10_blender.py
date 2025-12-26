@@ -358,7 +358,7 @@ class Geometry:
             except FileExistsError: pass
 
     # PLY exporter 
-    def export_ply ( self, file_path, comment="" ):
+    def export_json ( self, file_path, comment="" ):
 
         use_geometry    : bool  = True 
         use_uv_coords   : bool  = True 
@@ -492,142 +492,76 @@ class Geometry:
 
             faces[i] = face_indicies
 
+        # geometry
         ge = {
             "xyz" : [ ],
             "uv" : [ ],
             "nxyz" : [ ],
-            "bxyz" : [ ],
             "txyz" : [ ],
             "idx" : [ ]
         }
 
-        # Iterate over vertices
+        # construct vertex data
         for v in vertices:
 
-            # Write < x, y, z >
+            # write < x, y, z >
             if use_geometry is True:
                 ge["xyz"].append(v[0])
                 ge["xyz"].append(v[1])
                 ge["xyz"].append(v[2])
 
-            # Write < s, t >
+            # write < s, t >
             if use_uv_coords is True:
                 ge["uv"].append(v[3])
                 ge["uv"].append(v[4])
 
-            # Write < nx, ny, nz >
+            # write < nx, ny, nz, nw >
             if use_normals is True:
                 ge["nxyz"].append(v[5])
                 ge["nxyz"].append(v[6])
                 ge["nxyz"].append(v[7])
 
-            # Write < tx, ty, tz >
+            # write < tx, ty, tz >
             if use_tangents is True:
                 ge["txyz"].append(v[8])
                 ge["txyz"].append(v[9])
                 ge["txyz"].append(v[10])
 
-            # Write < bx, by, bz >
-            if use_bitangents is True:
-                ge["bxyz"].append(v[11])
-                ge["bxyz"].append(v[12])
-                ge["bxyz"].append(v[13])
+                T = v[8:11]
+                B = v[11:14]
+                N = v[5:8]
 
+                # compute chirality
+                cx = N[1] * T[2] - N[2] * T[1]
+                cy = N[2] * T[0] - N[0] * T[2]
+                cz = N[0] * T[1] - N[1] * T[0]
+
+                # compute sign
+                sign = 1.0 if (cx * B[0] + cy * B[1] + cz * B[2]) > 0.0 else -1.0
+
+                # store the tangent and the sign of the bitangent
+                ge["txyz"].extend([T[0], T[1], T[2], sign])
+
+        # round floats
         for key in ge:
             ge[key] = [float(f"{v:.6f}") for v in ge[key]]
 
-        # Iterate over faces
+        # construct index data
         for i, f in enumerate(faces):
             lf = faces[f] 
             ge["idx"].append(lf[0])
             ge["idx"].append(lf[1])
             ge["idx"].append(lf[2])
 
-        print(ge)
+        # store the name
+        ge["name"] = self.json_data["name"]
 
-        with open(file_path+".json", "w") as f:
+        # write the geometry
+        with open(file_path, "w") as f:
             try: json.dump(ge, f, indent=4)
             except FileExistsError: pass
 
         return
-          
-        # with open(file_path, "wb") as file:
-        #     fw = file.write
-
-        #     fw(b"ply\n")
-        #     fw(b"format binary_little_endian 1.0\n")
-
-        #     if comment is not None:
-        #         fw(b"comment " + bytes(comment, 'ascii') + b"\n")
-
-        #     fw(b"element vertex %d\n" % vertex_counter)
-
-        #     if use_geometry is True:
-        #         fw(
-        #             b"property float x\n"
-        #             b"property float y\n"
-        #             b"property float z\n"
-        #         )
-                
-        #     if use_uv_coords is True:
-        #         fw(
-        #             b"property float s\n"
-        #             b"property float t\n"
-        #         )
-        #     if use_normals is True:
-        #         fw(
-        #             b"property float nx\n"
-        #             b"property float ny\n"
-        #             b"property float nz\n"
-        #         )
-        #     if use_tangents is True:
-        #         fw(
-        #             b"property float tx\n"
-        #             b"property float ty\n"
-        #             b"property float tz\n"
-        #         )
-        #     if use_bitangents is True:
-        #         fw(
-        #             b"property float bx\n"
-        #             b"property float by\n"
-        #             b"property float bz\n"
-        #         )
-                
-        #     fw(b"element face %d\n" % len(faces))
-        #     fw(b"property list uchar uint vertex_indices\n")
-        #     fw(b"end_header\n")
-
-        #     # Iterate over vertices
-        #     for v in vertices:
-
-        #         # Write < x, y, z >
-        #         if use_geometry is True:
-        #             fw(pack("<3f", v[0] , v[1], v[2] ))
-
-        #         # Write < s, t >
-        #         if use_uv_coords is True:
-        #             fw(pack("<2f", v[3] , v[4] ))
-
-        #         # Write < nx, ny, nz >
-        #         if use_normals is True:
-        #             fw(pack("<3f", v[5] , v[6] , v[7] ))
-
-        #         # Write < tx, ty, tz >
-        #         if use_tangents is True:
-        #             fw(pack("<3f", v[8] , v[9] , v[10]))
-
-        #         # Write < bx, by, bz >
-        #         if use_bitangents is True:
-        #             fw(pack("<3f", v[11], v[12], v[13]))
-
-        #     # Iterate over faces
-        #     for i, f in enumerate(faces):
-        #         w = "<3I"
-        #         fw(pack("<b", 3))
-        #         lf = faces[f] 
-        #         fw(pack(w, lf[0], lf[1], lf[2]))
-
-        # return
 
     # This function gives me anxiety 
     def get_bone_groups_and_weights(self, object):
@@ -718,7 +652,7 @@ class Geometry:
         self.path       = (parts_directory + self.name + ".json")
 
         temp_mat = self.mesh.matrix_world.copy()
-        self.export_ply(self.ply_path, "")
+        self.export_json(self.ply_path, "")
         self.mesh.matrix_world = temp_mat
 
         self.write_to_file(self.path)

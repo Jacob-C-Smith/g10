@@ -274,6 +274,35 @@ int transform_from_json
             .z = (float) p_scratch[2]->number                
         };
     }
+
+    // parse the rotation
+    {
+
+        // initialized data
+        array *p_array = p_rotation->list;
+        size_t len     = array_size(p_array);
+
+        // error check
+        if ( len != 3 ) goto wrong_location_len;
+
+        // dump the location values
+        array_slice(p_array, (void **) &p_scratch, 0, 2);
+
+        // error check
+        for ( i = 0; i < len; i++ ) 
+        {
+            if ( p_scratch[i]       ==        (void *) 0 ) goto rotation_element_was_wrong_type;
+            if ( p_scratch[i]->type != JSON_VALUE_NUMBER ) goto rotation_element_was_wrong_type;  
+        }
+
+        // store the vector
+        rotation = (vec3)
+        {
+            .x = (float) p_scratch[0]->number,
+            .y = (float) p_scratch[1]->number,
+            .z = (float) p_scratch[2]->number                
+        };
+    }
     
     // parse the scale
     {
@@ -305,12 +334,13 @@ int transform_from_json
     }       
         
     // calculate the model matrix
-    mat4_model_from_vec3(&model, location, (vec3){ 0, 0, 0 }, scale);
+    mat4_model_from_vec3(&model, location, rotation, scale);
 
     // construct a transform
     _transform = (transform)
     {
         .location = location,
+        .rotation = rotation,
         .scale    = scale,
         .model    = model
     };
@@ -428,6 +458,33 @@ int transform_from_json
             location_element_was_wrong_type:
                 #ifndef NDEBUG
                     log_error("[g10] [transform] Element %d of \"location\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            wrong_rotation_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] \"rotation\" property of transform object must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            wrong_rotation_len:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Property \"rotation\" of parameter \"p_value\" must be of length 3 in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
+                #endif
+
+                // error
+                return 0;
+
+            rotation_element_was_wrong_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Element %d of \"rotation\" property of \"p_value\" parameter must be of type [ number ] in call to function \"%s\"\n", i, __FUNCTION__);
                     log_info("\tRefer to gschema: https://schema.g10.app/transform.json\n");
                 #endif
 
@@ -623,18 +680,17 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
     // get the transform uniform
     array_index(p_pipeline->p_uniforms, 1, (void **)&p_m);
 
-    p_transform->rotation.x += 0.02f;
-    p_transform->rotation.y += 0.02f;
-    p_transform->rotation.z += 0.02f;
+    // p_transform->rotation.x += 0.02f;
+    // p_transform->rotation.y += 0.02f;
+    // p_transform->rotation.z += 0.02f;
 
-    if (p_transform->rotation.x > M_PI)
-        p_transform->rotation.x -= 2 * M_PI;
-    if (p_transform->rotation.y > M_PI)
-        p_transform->rotation.y -= 2 * M_PI;
-    if (p_transform->rotation.y > M_PI)
-        p_transform->rotation.y -= 2 * M_PI;
+    // if (p_transform->rotation.x > M_PI)
+    //     p_transform->rotation.x -= 2 * M_PI;
+    // if (p_transform->rotation.y > M_PI)
+    //     p_transform->rotation.y -= 2 * M_PI;
+    // if (p_transform->rotation.y > M_PI)
+    //     p_transform->rotation.y -= 2 * M_PI;
     
-
     // compute the model matrix
     mat4_model_from_vec3(
         &p_transform->model,

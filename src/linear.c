@@ -1,6 +1,8 @@
 // header
 #include <linear.h>
 
+#define DEG_TO_RAD ((double)M_PI/(double)180.0)
+
 // function definitions
 u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
 {
@@ -581,6 +583,21 @@ u0 mat3_to_mat4 ( mat4 *p_result, mat3 m )
     return;
 }
 
+int mat3_pack ( void *p_buffer, mat3 *p_m )
+{
+    
+    // done
+    return pack_pack
+    (
+        p_buffer, 
+        "%9f32", 
+        
+        p_m->a, p_m->b, p_m->c,
+        p_m->d, p_m->e, p_m->f,
+        p_m->g, p_m->h, p_m->i
+    );
+}
+
 u0 mat4_mul_vec4 ( vec4 *p_result, mat4 m, vec4 v )
 {
 
@@ -623,6 +640,60 @@ u0 mat4_transpose ( mat4 *p_result, mat4 m )
         .e = m.b, .f = m.f, .g = m.j, .h = m.n,
         .i = m.c, .j = m.g, .k = m.k, .l = m.o,
         .m = m.d, .n = m.h, .o = m.l, .p = m.p
+    };
+
+    // done
+    return;
+}
+
+u0 mat4_inverse ( mat4 *p_result, mat4 m )
+{
+    float m00 = m.a, m01 = m.b, m02 = m.c, m03 = m.d;
+    float m10 = m.e, m11 = m.f, m12 = m.g, m13 = m.h;
+    float m20 = m.i, m21 = m.j, m22 = m.k, m23 = m.l;
+    float m30 = m.m, m31 = m.n, m32 = m.o, m33 = m.p;
+
+    float a00 = m00 * m11 - m01 * m10;
+    float a01 = m00 * m12 - m02 * m10;
+    float a02 = m00 * m13 - m03 * m10;
+    float a03 = m01 * m12 - m02 * m11;
+    float a04 = m01 * m13 - m03 * m11;
+    float a05 = m02 * m13 - m03 * m12;
+    float a06 = m20 * m31 - m21 * m30;
+    float a07 = m20 * m32 - m22 * m30;
+    float a08 = m20 * m33 - m23 * m30;
+    float a09 = m21 * m32 - m22 * m31;
+    float a10 = m21 * m33 - m23 * m31;
+    float a11 = m22 * m33 - m23 * m32;
+
+    float det = a00 * a11 - a01 * a10 + a02 * a09 + a03 * a08 - a04 * a07 + a05 * a06;
+
+    if (det == 0.0f)
+    {
+        mat4_identity(p_result);
+        return;
+    }
+
+    float invDet = 1.0f / det;
+
+    *p_result = (mat4)
+    {
+        .a = ( m11 * a11 - m12 * a10 + m13 * a09) * invDet,
+        .b = (-m01 * a11 + m02 * a10 - m03 * a09) * invDet,
+        .c = ( m31 * a05 - m32 * a04 + m33 * a03) * invDet,
+        .d = (-m21 * a05 + m22 * a04 - m23 * a03) * invDet,
+        .e = (-m10 * a11 + m12 * a08 - m13 * a07) * invDet,
+        .f = ( m00 * a11 - m02 * a08 + m03 * a07) * invDet,
+        .g = (-m30 * a05 + m32 * a02 - m33 * a01) * invDet,
+        .h = ( m20 * a05 - m22 * a02 + m23 * a01) * invDet,
+        .i = ( m10 * a10 - m11 * a08 + m13 * a06) * invDet,
+        .j = (-m00 * a10 + m01 * a08 - m03 * a06) * invDet,
+        .k = ( m30 * a04 - m31 * a02 + m33 * a00) * invDet,
+        .l = (-m20 * a04 + m21 * a02 - m23 * a00) * invDet,
+        .m = (-m10 * a09 + m11 * a07 - m12 * a06) * invDet,
+        .n = ( m00 * a09 - m01 * a07 + m02 * a06) * invDet,
+        .o = (-m30 * a03 + m31 * a01 - m32 * a00) * invDet,
+        .p = ( m20 * a03 - m21 * a01 + m22 * a00) * invDet
     };
 
     // done
@@ -708,9 +779,9 @@ u0 mat4_scale ( mat4 *p_result, vec3 scale )
 
 u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation )
 {
-    float cx = cosf(rotation.x), sx = sinf(rotation.x);
-    float cy = cosf(rotation.y), sy = sinf(rotation.y);
-    float cz = cosf(rotation.z), sz = sinf(rotation.z);
+    float cx = cosf(rotation.x * DEG_TO_RAD), sx = sinf(rotation.x * DEG_TO_RAD);
+    float cy = cosf(rotation.y * DEG_TO_RAD), sy = sinf(rotation.y * DEG_TO_RAD);
+    float cz = cosf(rotation.z * DEG_TO_RAD), sz = sinf(rotation.z * DEG_TO_RAD);
 
     // Standard Euler XYZ Rotation Matrix (Row-Major Storage, Column-Vector compatible)
     // Note: If you prefer a different order (like YXZ), you can re-order the multiplications.

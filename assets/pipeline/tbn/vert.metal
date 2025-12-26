@@ -4,7 +4,11 @@ struct VertexInput {
     float3 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
     float3 normal [[attribute(2)]];
-    float3 tangent [[attribute(3)]];
+    float4 tangent [[attribute(3)]];
+};
+
+struct InvMat {
+    float3x3 N;
 };
 
 struct VertexUniforms {
@@ -18,6 +22,7 @@ struct CameraUniforms {
 
 vertex VSOut vs_main(
     VertexInput in [[stage_in]],
+    constant InvMat &inv_mat [[buffer(0)]],
     constant VertexUniforms &transform [[buffer(1)]],
     constant CameraUniforms &camera [[buffer(2)]]
 )
@@ -28,14 +33,17 @@ vertex VSOut vs_main(
     out.position = camera.P * camera.V * worldPosition;
     out.uv = in.uv;
 
-    float3 T = normalize((transform.M * float4(in.tangent, 0.0)).xyz);
-    float3 N = normalize((transform.M * float4(in.normal, 0.0)).xyz);
-    T = normalize(T - dot(T, N) * N);
-    float3 B = cross(N, T);
+    // Create the TBN vectors
+    float3 T = normalize(inv_mat.N * in.tangent.xyz);
+    float3 N = normalize(inv_mat.N * in.normal.xyz);
+    float3 B = cross(N, T) * in.tangent.w;
+    
+    out.worldTangent = in.tangent.xyz;
+    out.worldNormal = in.normal.xyz;
 
-    out.worldTangent = T;
+    //out.worldTangent = T;
+    //out.worldNormal = N;
     out.worldBitangent = B;
-    out.worldNormal = N;
     
     return out;
 }

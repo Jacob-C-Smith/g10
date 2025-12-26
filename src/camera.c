@@ -202,7 +202,7 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
         {
             .location = location,
             .target   = orientation,
-            .up       = (vec3) { 0.f, 1.f, 0.f }
+            .up       = (vec3) { 0.f, -1.f, 0.f }
         },
         .projection = 
         {

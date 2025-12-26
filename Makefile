@@ -32,12 +32,13 @@ G10_OBJ = $(patsubst $(G10_SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(G10_SRC))
 G10_LIB_BASENAME = g10
 G10_LIB = $(BUILD_DIR)/lib$(G10_LIB_BASENAME).$(SHARED_EXT)
 CLIENT = $(BUILD_DIR)/g10_client
+LIGHTSPEED = $(BUILD_DIR)/lightspeed
 
 # Locate gsdk shared libraries (full paths)
 GSDK_LIBS = $(wildcard $(GSDK_LIB_DIR)/*.$(SHARED_EXT))
 
 # Default target
-all: $(G10_LIB) $(SERVER) $(CLIENT)
+all: $(G10_LIB) $(CLIENT) $(LIGHTSPEED)
 
 # Ensure build directory exists
 $(BUILD_DIR):
@@ -55,8 +56,14 @@ $(G10_LIB): $(G10_OBJ)
 $(CLIENT): main.c $(G10_LIB)
 	$(CC) $(CFLAGS) -o $@ $< $(G10_LIB) $(GSDK_LIBS) $(SDL_LIBS) $(RPATH_FLAGS)
 
+$(LIGHTSPEED): lightspeed/main.c $(G10_LIB)
+	$(CC) $(CFLAGS) -o $@ $< $(G10_LIB) $(GSDK_LIBS) $(SDL_LIBS) $(RPATH_FLAGS)
+
 # Assets
 assets: 
+
+	# blender
+	./scripts/gport-geometry.sh g10_base_geometry | grep 'gport'
 
 	# shaders
 	./scripts/compile-metal-shader.sh quad 
@@ -68,20 +75,33 @@ assets:
 	./scripts/compile-metal-shader.sh texture
 	./scripts/compile-metal-shader.sh normal
 	./scripts/compile-metal-shader.sh tbn
-	./scripts/compile-metal-shader.sh lgt
 
 	# pack geometry
+	./scripts/pack-geometry.sh bar
+	./scripts/pack-geometry.sh capsule
 	./scripts/pack-geometry.sh circle
+	./scripts/pack-geometry.sh cone
 	./scripts/pack-geometry.sh cube
-	./scripts/pack-geometry.sh quad
+	./scripts/pack-geometry.sh cylinder
+	./scripts/pack-geometry.sh grid
+	./scripts/pack-geometry.sh icosphere
+	./scripts/pack-geometry.sh octahedron
+	./scripts/pack-geometry.sh plane
+	./scripts/pack-geometry.sh quadsphere
+	./scripts/pack-geometry.sh sphere
+	./scripts/pack-geometry.sh torus
+
+	rm ./assets/input/** || exit 0
+	touch ./assets/input/ignore
 
 # Info
 info:
-	@echo "g10 sources : $(G10_SRC)"
-	@echo "g10 objects : $(G10_OBJ)"
-	@echo "g10 library : $(G10_LIB)"
-	@echo "gsdk libraries       : $(GSDK_LIBS)"
-	@echo "exec                 : $(CLIENT)"
+	@echo "g10 sources    : $(G10_SRC)"
+	@echo "g10 objects    : $(G10_OBJ)"
+	@echo "g10 library    : $(G10_LIB)"
+	@echo "gsdk libraries : $(GSDK_LIBS)"
+	@echo "exec           : $(CLIENT)"
+	@echo "exec           : $(LIGHTSPEED)"
 
 # Clean
 clean:

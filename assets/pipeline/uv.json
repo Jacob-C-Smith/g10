@@ -1,19 +1,15 @@
 {
-    "name" : "color",
+    "name" : "uv",
     "source" : 
     {
-        "vert" : "assets/pipeline/color/color.metallib",
-        "frag" : "assets/pipeline/color/color.metallib"
+        "vert" : "assets/pipeline/uv/uv.metallib",
+        "frag" : "assets/pipeline/uv/uv.metallib"
     },
-    "input" : [ "xyz" ],
+    "input" : [ "xyz", "uv" ],
     "uniforms" :
     [
         {
-            "name" : "color",
-            "data" :
-            [
-                { "color" : "vec3" }
-            ]
+            "name" : "unused"
         },
         {
             "name" : "transform",

@@ -28,6 +28,7 @@ struct entity_s
     transform *p_transform;
     geometry *p_geometry;
     vec3 color;
+    mat3 _inv_normal;
     texture *p_texture;
     texture *p_normal;
     char *pipeline;

@@ -1,18 +1,18 @@
 {
-    "name" : "color",
+    "name" : "tbn",
     "source" : 
     {
-        "vert" : "assets/pipeline/color/color.metallib",
-        "frag" : "assets/pipeline/color/color.metallib"
+        "vert" : "assets/pipeline/tbn/tbn.metallib",
+        "frag" : "assets/pipeline/tbn/tbn.metallib"
     },
-    "input" : [ "xyz" ],
+    "input" : [ "xyz", "uv", "nxyz", "txyz" ],
     "uniforms" :
     [
         {
-            "name" : "color",
+            "name" : "inv_normal",
             "data" :
             [
-                { "color" : "vec3" }
+                { "inv_normal" : "mat4" }
             ]
         },
         {
@@ -29,6 +29,15 @@
                 { "V" : "mat4" },
                 { "P" : "mat4" }
             ]
+        }
+    ],
+    "samplers" :
+    [
+        {
+            "name" : "texture"
+        },
+        {
+            "name" : "normal"
         }
     ]
 }

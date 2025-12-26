@@ -35,7 +35,7 @@ int main ( int argc, const char *argv[] )
     bool ok = true;
 
     // initialize g10
-    if ( 0 == g_init(&p_instance, "assets/instance.json") ) goto failed_to_initialize_g10;
+    if ( 0 == g_init(&p_instance, "assets/lightspeed.json") ) goto failed_to_initialize_g10;
 
     // program pipelines
     {

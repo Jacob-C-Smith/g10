@@ -509,6 +509,16 @@ u0 mat3_to_mat2 ( mat2 *p_result, mat3 m );
  */
 u0 mat3_to_mat4 ( mat4 *p_result, mat3 m );
 
+/** !
+ * Serialize a matrix to a buffer
+ * 
+ * @param p_buffer the buffer
+ * @param p_m      pointer to the matrix
+ * 
+ * @return bytes written
+ */
+int mat3_pack ( void *p_buffer, mat3 *p_m );
+
 // 4x4 matrix
 /** !
  * Multiply a matrix by a vector; Store result
@@ -575,6 +585,16 @@ u0 mat4_to_mat3 ( mat3 *p_result, mat4 m );
  * @return void
  */
 u0 mat4_transpose ( mat4 *p_result, mat4 m );
+
+/** !
+ * Compute the inverse of a 4x4 matrix; Store result
+ *
+ * @param p_result return
+ * @param m        the matrix
+ *
+ * @return void
+ */
+u0 mat4_inverse ( mat4 *p_result, mat4 m );
 
 /**
  * Compute a translation matrix from a location vector; Store result

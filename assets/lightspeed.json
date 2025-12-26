@@ -1,5 +1,5 @@
 {
-    "name" : "g10 example",
+    "name" : "lightspeed",
     "version" : 
     {
         "major" : 1,
@@ -8,8 +8,8 @@
     },
     "window" : 
     {
-        "title" : "g10 example",
-        "width" : 720,
+        "title" : "lightspeed",
+        "width" : 1280,
         "height" : 720
     },
     "scene" : 
@@ -22,12 +22,12 @@
                 "pipeline" : "tbn",
                 "color" : [ 1.0, 0.5, 0.5 ],
                 "normal" : "assets/texture/pitch_normal.png",
-                "texture" : "assets/texture/debug.png",
+                "texture" : "assets/texture/debug_big.png",
                 "transform" :
                 {
                     "location" : [ 0.0, 0.0, 0.0 ],
-                    "rotation" : [ 0.0, 0.0, 0.0 ],
-                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                    "rotation" : [ 90.0, 180.0, 0.0 ],
+                    "scale"    : [ 10.0, 10.0, 10.0 ]
                 },
                 "geometry" : "assets/geometry/plane.json"
             }
@@ -37,8 +37,8 @@
             {
                 "name" : "camera",
                 "fov" : 45.0,
-                "location" : [ 0.0, 0.0, 7.50 ],
-                "orientation" : [ 0.0, 0.0, -1.0 ],
+                "location" : [ 0.0, 1.0, 7.50 ],
+                "orientation" : [ 0.0, 0.0, 1.0 ],
                 "clip" :
                 {
                     "near" : 0.1,
