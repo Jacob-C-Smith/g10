@@ -16,8 +16,7 @@ fragment FragmentOutput fs_main(
     float4 sampledColor = tex.sample(smp, in.uv);
 
     // Combine sampled color with your uniform or UV visualization
-    //output.color0 = sampledColor;
-    output.color0 = float4(in.uv, 0.0, 1.0);
+    output.color0 = sampledColor;
 
     return output;
 }

@@ -67,6 +67,8 @@ assets:
 	./scripts/compile-metal-shader.sh uv
 	./scripts/compile-metal-shader.sh texture
 	./scripts/compile-metal-shader.sh normal
+	./scripts/compile-metal-shader.sh tbn
+	./scripts/compile-metal-shader.sh lgt
 
 	# pack geometry
 	./scripts/pack-geometry.sh circle

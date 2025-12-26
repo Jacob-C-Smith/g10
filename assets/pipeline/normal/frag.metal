@@ -2,6 +2,7 @@
 
 struct FragmentOutput {
     float4 color0 [[color(0)]];
+    float4 color1 [[color(1)]];
 };
 
 struct FragmentUniforms {
@@ -14,10 +15,8 @@ fragment FragmentOutput fs_main(
 ) {
     
     FragmentOutput output;
-    //float3 normal = normalize(in.normal);
-    float3 normal = in.normal;
-    //output.color0 = float4(normal * 0.5 + 0.5, 1.0);
-    output.color0 = float4(normal.xyz, 1.0);
+    output.color0 = float4(in.normal, 1.0);
+    output.color1 = float4(0.0, 0.0, 1.0, 1.0); 
 
     // done
     return output;

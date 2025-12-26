@@ -2,6 +2,7 @@
 
 struct VertexInput {
     float3 position [[attribute(0)]];
+    float2 uv [[attribute(1)]];
     float3 normal [[attribute(2)]];
 };
 
@@ -22,10 +23,13 @@ vertex VSOut vs_main(
 {
     VSOut out;
 
-    float4 position = transform.M * float4(in.position, 1.0);
-    
-    out.position = camera.P * camera.V * position;
+    float4 position = float4(in.position, 1.0);
+    out.position = camera.P * camera.V * transform.M * position;
+    out.uv = in.uv;
 
-    out.normal = position.xyz;
+    float3 worldNormal = normalize((transform.M * float4(in.normal, 0.0)).xyz);
+    
+    // Assign to output (assuming your VSOut.normal is a float3)
+    out.normal = worldNormal;
     return out;
 }

@@ -52,8 +52,20 @@ int main ( int argc, const char *argv[] )
             (fn_pipeline_bind_each *)entity_bind
         );
 
+        // program normal pipeline
+        ok &= program_pipeline("normal", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
+
         // program texture pipeline
         ok &= program_pipeline("texture", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
+        
+        // program tbn pipeline
+        ok &= program_pipeline("tbn", 
             (fn_pipeline_bind_once *)camera_bind_active,
             (fn_pipeline_bind_each *)entity_bind
         );

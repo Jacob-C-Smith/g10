@@ -1181,6 +1181,40 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                             .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
                             .offset = 0
                         };
+
+                    // normal
+                    else if ( 0 == strcmp(p_value->string, "nxyz") )
+                        _vertex_buffer_descriptions[i] = (SDL_GPUVertexBufferDescription)
+                        {
+                            .slot = i,
+                            .pitch = sizeof(f32) * 3,
+                            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+                            .instance_step_rate = 0
+                        },
+                        _vertex_attributes[i] = (SDL_GPUVertexAttribute)
+                        {
+                            .location = i,
+                            .buffer_slot = i,
+                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+                            .offset = 0
+                        };
+                    
+                    // tangent
+                    else if ( 0 == strcmp(p_value->string, "txyz") )
+                        _vertex_buffer_descriptions[i] = (SDL_GPUVertexBufferDescription)
+                        {
+                            .slot = i,
+                            .pitch = sizeof(f32) * 3,
+                            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+                            .instance_step_rate = 0
+                        },
+                        _vertex_attributes[i] = (SDL_GPUVertexAttribute)
+                        {
+                            .location = i,
+                            .buffer_slot = i,
+                            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+                            .offset = 0
+                        };
                     
                 }
             }
@@ -1211,8 +1245,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 .rasterizer_state = 
                 {
                     .fill_mode = SDL_GPU_FILLMODE_FILL,
-                    .cull_mode = SDL_GPU_CULLMODE_NONE,
-                    .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
+                    .cull_mode = SDL_GPU_CULLMODE_BACK,
+                    .front_face = SDL_GPU_FRONTFACE_CLOCKWISE,
                     .depth_bias_constant_factor = 0,
                     .depth_bias_clamp = 0,
                     .enable_depth_bias = false,
@@ -1855,6 +1889,10 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         if ( p_nxyz ) goto parse_nxyz;
         nxyz_done:
 
+        // tangent
+        if ( p_txyz ) goto parse_txyz;
+        txyz_done:
+
         // index
         if ( p_idx ) goto parse_idx;
         idx_done:
@@ -2173,6 +2211,35 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // done
         goto nxyz_done;
+    }
+
+    // this branch parses tangents
+    parse_txyz:
+    {
+
+        // initialized data
+        array *p_array = p_txyz->list;
+        txyz_len = array_size(p_array);
+        
+        // allocate memory for vertices
+        txyz = default_allocator(NULL, sizeof(f32) * txyz_len);
+
+        // parse the normal data
+        for (size_t i = 0; i < txyz_len; i++)
+        {
+
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // store the i'th number
+            txyz[i] = p_value->number;
+        }
+
+        // done
+        goto txyz_done;
     }
 
     // this branch parses indices

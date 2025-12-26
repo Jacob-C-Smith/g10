@@ -29,6 +29,7 @@ struct entity_s
     geometry *p_geometry;
     vec3 color;
     texture *p_texture;
+    texture *p_normal;
     char *pipeline;
 };
 

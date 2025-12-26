@@ -16,6 +16,7 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     json_value *p_name          = dict_get(p_dict, "name"),
                *p_color         = dict_get(p_dict, "color"),
                *p_texture       = dict_get(p_dict, "texture"),
+               *p_normal        = dict_get(p_dict, "normal"),
                *p_transform     = dict_get(p_dict, "transform"),
                *p_geometry      = dict_get(p_dict, "geometry"),
                *p_pipeline_name = dict_get(p_dict, "pipeline");
@@ -99,6 +100,17 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         g_sdl3_texture_load(&p_entity->p_texture, p_path);
     }
 
+    // parse the normal
+    if ( p_normal )
+    {
+
+        // initialized data
+        char *p_path = p_normal->string;
+
+        extern int g_sdl3_texture_load ( texture **pp_normal, const char *p_path );
+        g_sdl3_texture_load(&p_entity->p_normal, p_path);
+    }
+
     // return a pointer to the caller
     *pp_entity = p_entity;
 
@@ -127,27 +139,38 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
         // bind color
         uniform_set_pack_push(p_color, &p_entity->color, (fn_pack *)vec3_pack);
     } 
-    else if ( 0 == strcmp(p_pipeline->_name, "texture") )
+    else if ( 
+        0 == strcmp(p_pipeline->_name, "texture") ||
+        0 == strcmp(p_pipeline->_name, "tbn")
+    )
     {
     
         // initialized data
-        uniform *p_texture = NULL;
-        sampler *p_sampler = NULL;
+        sampler *p_sampler_1 = NULL;
+        sampler *p_sampler_2 = NULL;
 
         // get the texture uniform
-        array_index(p_pipeline->p_uniforms, 0, (void **)&p_texture);
-        array_index(p_pipeline->p_samplers, 0, (void **)&p_sampler);
-
-        SDL_GPUTextureSamplerBinding _sb = 
-        {
-            .sampler = p_sampler->p_handle,
-            .texture = p_entity->p_texture->p_handle
-        };
+        array_index(p_pipeline->p_samplers, 0, (void **)&p_sampler_1);
+        array_index(p_pipeline->p_samplers, 1, (void **)&p_sampler_2);
 
         SDL_BindGPUFragmentSamplers(
             p_render_pass->p_handle,
             0,
-            &_sb,
+            &(SDL_GPUTextureSamplerBinding)
+            {
+                .sampler = p_sampler_1->p_handle,
+                .texture = p_entity->p_texture->p_handle
+            },
+            1
+        );
+        SDL_BindGPUFragmentSamplers(
+            p_render_pass->p_handle,
+            1,
+            &(SDL_GPUTextureSamplerBinding)
+            {
+                .sampler = p_sampler_2->p_handle,
+                .texture = p_entity->p_normal->p_handle
+            },
             1
         );
     }
