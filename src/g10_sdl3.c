@@ -69,6 +69,141 @@ int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value )
 /// uniform
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value );
 
+// Static data
+dict *p_sdl2_key_lookup = (void *) 0;
+dict *p_sdl2_key_scancode = (void *) 0;
+
+struct 
+{
+    char _name[64];
+    SDL_Scancode _scancode;
+    bool _active;
+} _key_lookup[SDL_SCANCODE_COUNT] = 
+{
+
+    // Invalid
+    [SDL_SCANCODE_UNKNOWN] = { ._name = "INVALID", ._active = false, ._scancode = SDL_SCANCODE_UNKNOWN },
+
+    // Letters
+    [SDL_SCANCODE_A] = { ._name = "A", ._active = false, ._scancode = SDL_SCANCODE_A },
+    [SDL_SCANCODE_B] = { ._name = "B", ._active = false, ._scancode = SDL_SCANCODE_B },
+    [SDL_SCANCODE_C] = { ._name = "C", ._active = false, ._scancode = SDL_SCANCODE_C },
+    [SDL_SCANCODE_D] = { ._name = "D", ._active = false, ._scancode = SDL_SCANCODE_D },
+    [SDL_SCANCODE_E] = { ._name = "E", ._active = false, ._scancode = SDL_SCANCODE_E },
+    [SDL_SCANCODE_F] = { ._name = "F", ._active = false, ._scancode = SDL_SCANCODE_F },
+    [SDL_SCANCODE_G] = { ._name = "G", ._active = false, ._scancode = SDL_SCANCODE_G },
+    [SDL_SCANCODE_H] = { ._name = "H", ._active = false, ._scancode = SDL_SCANCODE_H },
+    [SDL_SCANCODE_I] = { ._name = "I", ._active = false, ._scancode = SDL_SCANCODE_I },
+    [SDL_SCANCODE_J] = { ._name = "J", ._active = false, ._scancode = SDL_SCANCODE_J },
+    [SDL_SCANCODE_K] = { ._name = "K", ._active = false, ._scancode = SDL_SCANCODE_K },
+    [SDL_SCANCODE_L] = { ._name = "L", ._active = false, ._scancode = SDL_SCANCODE_L },
+    [SDL_SCANCODE_M] = { ._name = "M", ._active = false, ._scancode = SDL_SCANCODE_M },
+    [SDL_SCANCODE_N] = { ._name = "N", ._active = false, ._scancode = SDL_SCANCODE_N },
+    [SDL_SCANCODE_O] = { ._name = "O", ._active = false, ._scancode = SDL_SCANCODE_O },
+    [SDL_SCANCODE_P] = { ._name = "P", ._active = false, ._scancode = SDL_SCANCODE_P },
+    [SDL_SCANCODE_Q] = { ._name = "Q", ._active = false, ._scancode = SDL_SCANCODE_Q },
+    [SDL_SCANCODE_R] = { ._name = "R", ._active = false, ._scancode = SDL_SCANCODE_R },
+    [SDL_SCANCODE_S] = { ._name = "S", ._active = false, ._scancode = SDL_SCANCODE_S },
+    [SDL_SCANCODE_T] = { ._name = "T", ._active = false, ._scancode = SDL_SCANCODE_T },
+    [SDL_SCANCODE_U] = { ._name = "U", ._active = false, ._scancode = SDL_SCANCODE_U },
+    [SDL_SCANCODE_V] = { ._name = "V", ._active = false, ._scancode = SDL_SCANCODE_V },
+    [SDL_SCANCODE_W] = { ._name = "W", ._active = false, ._scancode = SDL_SCANCODE_W },
+    [SDL_SCANCODE_X] = { ._name = "X", ._active = false, ._scancode = SDL_SCANCODE_X },
+    [SDL_SCANCODE_Y] = { ._name = "Y", ._active = false, ._scancode = SDL_SCANCODE_Y },
+    [SDL_SCANCODE_Z] = { ._name = "Z", ._active = false, ._scancode = SDL_SCANCODE_Z },
+
+    [SDL_SCANCODE_1] = { ._name = "1", ._active = false, ._scancode = SDL_SCANCODE_1 },
+    [SDL_SCANCODE_2] = { ._name = "2", ._active = false, ._scancode = SDL_SCANCODE_2 },
+    [SDL_SCANCODE_3] = { ._name = "3", ._active = false, ._scancode = SDL_SCANCODE_3 },
+    [SDL_SCANCODE_4] = { ._name = "4", ._active = false, ._scancode = SDL_SCANCODE_4 },
+    [SDL_SCANCODE_5] = { ._name = "5", ._active = false, ._scancode = SDL_SCANCODE_5 },
+    [SDL_SCANCODE_6] = { ._name = "6", ._active = false, ._scancode = SDL_SCANCODE_6 },
+    [SDL_SCANCODE_7] = { ._name = "7", ._active = false, ._scancode = SDL_SCANCODE_7 },
+    [SDL_SCANCODE_8] = { ._name = "8", ._active = false, ._scancode = SDL_SCANCODE_8 },
+    [SDL_SCANCODE_9] = { ._name = "9", ._active = false, ._scancode = SDL_SCANCODE_9 },
+    [SDL_SCANCODE_0] = { ._name = "0", ._active = false, ._scancode = SDL_SCANCODE_0 },
+
+    // White space
+    [SDL_SCANCODE_RETURN]    = { ._name = "RETURN"   , ._active = false, ._scancode = SDL_SCANCODE_RETURN },
+    [SDL_SCANCODE_ESCAPE]    = { ._name = "ESCAPE"   , ._active = false, ._scancode = SDL_SCANCODE_ESCAPE },
+    [SDL_SCANCODE_BACKSPACE] = { ._name = "BACKSPACE", ._active = false, ._scancode = SDL_SCANCODE_BACKSPACE },
+    [SDL_SCANCODE_TAB]       = { ._name = "TAB"      , ._active = false, ._scancode = SDL_SCANCODE_TAB },
+    [SDL_SCANCODE_SPACE]     = { ._name = "SPACE"    , ._active = false, ._scancode = SDL_SCANCODE_SPACE },
+
+    // Symbols
+    [SDL_SCANCODE_MINUS]        = { ._name = "MINUS"        , ._active = false, ._scancode = SDL_SCANCODE_MINUS },
+    [SDL_SCANCODE_EQUALS]       = { ._name = "EQUALS"       , ._active = false, ._scancode = SDL_SCANCODE_EQUALS },
+    [SDL_SCANCODE_LEFTBRACKET]  = { ._name = "LEFT BRACKET" , ._active = false, ._scancode = SDL_SCANCODE_LEFTBRACKET },
+    [SDL_SCANCODE_RIGHTBRACKET] = { ._name = "RIGHT BRACKET", ._active = false, ._scancode = SDL_SCANCODE_RIGHTBRACKET },
+    [SDL_SCANCODE_BACKSLASH]    = { ._name = "BACKSLASH"    , ._active = false, ._scancode = SDL_SCANCODE_BACKSLASH }, 
+    [SDL_SCANCODE_NONUSHASH]    = { ._name = "NONUSHASH"    , ._active = false, ._scancode = SDL_SCANCODE_NONUSHASH }, 
+    [SDL_SCANCODE_SEMICOLON]    = { ._name = "SEMICOLON"    , ._active = false, ._scancode = SDL_SCANCODE_SEMICOLON },
+    [SDL_SCANCODE_APOSTROPHE]   = { ._name = "APOSTROPHE"   , ._active = false, ._scancode = SDL_SCANCODE_APOSTROPHE },
+    [SDL_SCANCODE_GRAVE]        = { ._name = "GRAVE"        , ._active = false, ._scancode = SDL_SCANCODE_GRAVE }, 
+    [SDL_SCANCODE_COMMA]        = { ._name = "COMMA"        , ._active = false, ._scancode = SDL_SCANCODE_COMMA },
+    [SDL_SCANCODE_PERIOD]       = { ._name = "PERIOD"       , ._active = false, ._scancode = SDL_SCANCODE_PERIOD },
+    [SDL_SCANCODE_SLASH]        = { ._name = "SLASH"        , ._active = false, ._scancode = SDL_SCANCODE_SLASH },
+
+    // F keys
+    [SDL_SCANCODE_F1]   = { ._name = "F1", ._active = false, ._scancode = SDL_SCANCODE_F1},
+    [SDL_SCANCODE_F2]   = { ._name = "F2", ._active = false, ._scancode = SDL_SCANCODE_F2},
+    [SDL_SCANCODE_F3]   = { ._name = "F3", ._active = false, ._scancode = SDL_SCANCODE_F3},
+    [SDL_SCANCODE_F4]   = { ._name = "F4", ._active = false, ._scancode = SDL_SCANCODE_F4},
+    [SDL_SCANCODE_F5]   = { ._name = "F5", ._active = false, ._scancode = SDL_SCANCODE_F5},
+    [SDL_SCANCODE_F6]   = { ._name = "F6", ._active = false, ._scancode = SDL_SCANCODE_F6},
+    [SDL_SCANCODE_F7]   = { ._name = "F7", ._active = false, ._scancode = SDL_SCANCODE_F7},
+    [SDL_SCANCODE_F8]   = { ._name = "F8", ._active = false, ._scancode = SDL_SCANCODE_F8},
+    [SDL_SCANCODE_F9]   = { ._name = "F9", ._active = false, ._scancode = SDL_SCANCODE_F9},
+    [SDL_SCANCODE_F10]  = { ._name = "F10", ._active = false, ._scancode = SDL_SCANCODE_F10},
+    [SDL_SCANCODE_F11]  = { ._name = "F11", ._active = false, ._scancode = SDL_SCANCODE_F11},
+    [SDL_SCANCODE_F12]  = { ._name = "F12", ._active = false, ._scancode = SDL_SCANCODE_F12},
+
+    // Special
+    [SDL_SCANCODE_CAPSLOCK]    = { ._name = "CAPS LOCK"   , ._active = false, ._scancode = SDL_SCANCODE_SLASH },
+    [SDL_SCANCODE_PRINTSCREEN] = { ._name = "PRINT SCREEN", ._active = false, ._scancode = SDL_SCANCODE_PRINTSCREEN },
+    [SDL_SCANCODE_SCROLLLOCK]  = { ._name = "SCROLL LOCK" , ._active = false, ._scancode = SDL_SCANCODE_SCROLLLOCK },
+    [SDL_SCANCODE_PAUSE]       = { ._name = "PAUSE"       , ._active = false, ._scancode = SDL_SCANCODE_PAUSE },
+    [SDL_SCANCODE_INSERT]      = { ._name = "INSERT"      , ._active = false, ._scancode = SDL_SCANCODE_INSERT },
+    
+    // Navigation
+    [SDL_SCANCODE_HOME]         = { ._name = "HOME"     , ._active = false, ._scancode = SDL_SCANCODE_HOME },
+    [SDL_SCANCODE_PAGEUP]       = { ._name = "PAGE UP"  , ._active = false, ._scancode = SDL_SCANCODE_PAGEUP },
+    [SDL_SCANCODE_DELETE]       = { ._name = "DELETE"   , ._active = false, ._scancode = SDL_SCANCODE_DELETE },
+    [SDL_SCANCODE_END]          = { ._name = "END"      , ._active = false, ._scancode = SDL_SCANCODE_END },
+    [SDL_SCANCODE_PAGEDOWN]     = { ._name = "PAGE DOWN", ._active = false, ._scancode = SDL_SCANCODE_PAGEDOWN },
+    [SDL_SCANCODE_RIGHT]        = { ._name = "RIGHT"    , ._active = false, ._scancode = SDL_SCANCODE_RIGHT },
+    [SDL_SCANCODE_LEFT]         = { ._name = "LEFT"     , ._active = false, ._scancode = SDL_SCANCODE_LEFT },
+    [SDL_SCANCODE_DOWN]         = { ._name = "DOWN"     , ._active = false, ._scancode = SDL_SCANCODE_DOWN },
+    [SDL_SCANCODE_UP]           = { ._name = "UP"       , ._active = false, ._scancode = SDL_SCANCODE_UP },
+    [SDL_SCANCODE_NUMLOCKCLEAR] = { ._name = "NUM LOCK" , ._active = false, ._scancode = SDL_SCANCODE_NUMLOCKCLEAR },
+    
+    // Keypad
+    [SDL_SCANCODE_KP_DIVIDE]   = { ._name = "KEYPAD DIVIDE"  , ._active = false, ._scancode = SDL_SCANCODE_KP_DIVIDE },
+    [SDL_SCANCODE_KP_MULTIPLY] = { ._name = "KEYPAD MULTIPLY", ._active = false, ._scancode = SDL_SCANCODE_KP_MULTIPLY },
+    [SDL_SCANCODE_KP_MINUS]    = { ._name = "KEYPAD MINUS"   , ._active = false, ._scancode = SDL_SCANCODE_KP_MINUS },
+    [SDL_SCANCODE_KP_PLUS]     = { ._name = "KEYPAD PLUS"    , ._active = false, ._scancode = SDL_SCANCODE_KP_PLUS },
+    [SDL_SCANCODE_KP_ENTER]    = { ._name = "KEYPAD ENTER"   , ._active = false, ._scancode = SDL_SCANCODE_KP_ENTER },
+    [SDL_SCANCODE_KP_1]        = { ._name = "KEYPAD 1"       , ._active = false, ._scancode = SDL_SCANCODE_KP_1 },
+    [SDL_SCANCODE_KP_2]        = { ._name = "KEYPAD 2"       , ._active = false, ._scancode = SDL_SCANCODE_KP_2 },
+    [SDL_SCANCODE_KP_3]        = { ._name = "KEYPAD 3"       , ._active = false, ._scancode = SDL_SCANCODE_KP_3 },
+    [SDL_SCANCODE_KP_4]        = { ._name = "KEYPAD 4"       , ._active = false, ._scancode = SDL_SCANCODE_KP_4 },
+    [SDL_SCANCODE_KP_5]        = { ._name = "KEYPAD 5"       , ._active = false, ._scancode = SDL_SCANCODE_KP_5 },
+    [SDL_SCANCODE_KP_6]        = { ._name = "KEYPAD 6"       , ._active = false, ._scancode = SDL_SCANCODE_KP_6 },
+    [SDL_SCANCODE_KP_7]        = { ._name = "KEYPAD 7"       , ._active = false, ._scancode = SDL_SCANCODE_KP_7 },
+    [SDL_SCANCODE_KP_8]        = { ._name = "KEYPAD 8"       , ._active = false, ._scancode = SDL_SCANCODE_KP_8 },
+    [SDL_SCANCODE_KP_9]        = { ._name = "KEYPAD 9"       , ._active = false, ._scancode = SDL_SCANCODE_KP_9 },
+    [SDL_SCANCODE_KP_0]        = { ._name = "KEYPAD 0"       , ._active = false, ._scancode = SDL_SCANCODE_KP_0 },
+    [SDL_SCANCODE_KP_PERIOD]   = { ._name = "KEYPAD PERIOD"  , ._active = false, ._scancode = SDL_SCANCODE_KP_PERIOD },
+
+    // Modifier
+    [SDL_SCANCODE_LCTRL]  = { ._name = "LEFT CONTROL" , ._active = false, ._scancode = SDL_SCANCODE_LCTRL },
+    [SDL_SCANCODE_LSHIFT] = { ._name = "LEFT SHIFT"   , ._active = false, ._scancode = SDL_SCANCODE_LSHIFT },
+    [SDL_SCANCODE_LALT]   = { ._name = "LEFT ALT"     , ._active = false, ._scancode = SDL_SCANCODE_LALT },
+    [SDL_SCANCODE_RCTRL]  = { ._name = "RIGHT CONTROL", ._active = false, ._scancode = SDL_SCANCODE_RCTRL },
+    [SDL_SCANCODE_RSHIFT] = { ._name = "RIGHT SHIFT"  , ._active = false, ._scancode = SDL_SCANCODE_RSHIFT },
+    [SDL_SCANCODE_RALT]   = { ._name = "RIGHT ALT"    , ._active = false, ._scancode = SDL_SCANCODE_RALT }
+};
+
 // function definitions
 int g_sdl3_init ( g_instance *p_instance )
 {
@@ -83,6 +218,19 @@ int g_sdl3_init ( g_instance *p_instance )
     ok = SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
     if ( !ok ) goto failed_to_initialize_sdl3;
 
+    // Construct the key lookups
+    if ( dict_construct(&p_sdl2_key_lookup  , SDL_SCANCODE_COUNT, 0) == 0 ) goto failed_to_construct_dict;
+    if ( dict_construct(&p_sdl2_key_scancode, SDL_SCANCODE_COUNT, 0) == 0 ) goto failed_to_construct_dict;
+
+    // Populate the key lookup
+    for (size_t i = 0; i < SDL_SCANCODE_COUNT; i++)
+    {
+
+        // Add the key
+        dict_add(p_sdl2_key_lookup  , _key_lookup[i]._name, &_key_lookup[i]._active);
+        dict_add(p_sdl2_key_scancode, _key_lookup[i]._name, (void *)_key_lookup[i]._scancode);
+    }
+
     // success
     return 1;
     
@@ -94,6 +242,17 @@ int g_sdl3_init ( g_instance *p_instance )
             no_instance:
                 #ifndef NDEBUG
                     log_error("[sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // dict errors
+        {
+            failed_to_construct_dict:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Failed to construct key lookup in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
                 // error
@@ -250,7 +409,8 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
     size_t len = array_size(p_render_pass->p_pipelines);
     size_t attachment_len = array_size(p_framebuffer->p_attachments);
     SDL_GPUColorTargetInfo _color_target_ci[8] = { 0 };
-    
+    SDL_GPUDepthStencilTargetInfo _depth_target_ci = { 0 };
+
     // iterate through each attachment
     for (size_t i = 0; i < attachment_len; i++)
     {
@@ -281,8 +441,27 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
             _color_target_ci[i].texture = p_instance->graphics.sdl3.swapchain_texture;
     }
     
+    // populate depth target
+    _depth_target_ci = (SDL_GPUDepthStencilTargetInfo)
+    {
+        .texture = p_framebuffer->p_depth->p_handle,
+        .clear_depth = 1.0f,
+        .load_op = SDL_GPU_LOADOP_CLEAR,
+        .store_op = SDL_GPU_STOREOP_STORE,
+        .stencil_load_op = SDL_GPU_LOADOP_DONT_CARE,
+        .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
+        .cycle = true,
+        .clear_stencil = 0
+    };
+
     // begin the render pass
-    p_render_pass->p_handle = SDL_BeginGPURenderPass(p_instance->graphics.sdl3.command_buffer, &_color_target_ci, attachment_len, NULL);
+    p_render_pass->p_handle = SDL_BeginGPURenderPass(
+        p_instance->graphics.sdl3.command_buffer, 
+        
+        &_color_target_ci, 
+        attachment_len, 
+        &_depth_target_ci
+    );
     
     // viewport and scissor
     {
@@ -825,7 +1004,7 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
             format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_SNORM,
             usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
         else if ( 0 == strncmp(p_type->string, "depth", 6) )
-            format = SDL_GPU_TEXTUREFORMAT_D16_UNORM,
+            format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
             usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
         else if ( 0 == strncmp(p_type->string, "framebuffer", 11 ) ) goto done;
         
@@ -1262,8 +1441,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 .rasterizer_state = 
                 {
                     .fill_mode = SDL_GPU_FILLMODE_FILL,
-                    .cull_mode = SDL_GPU_CULLMODE_BACK,
-                    .front_face = SDL_GPU_FRONTFACE_CLOCKWISE,
+                    .cull_mode = SDL_GPU_CULLMODE_NONE,
+                    .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
                     .depth_bias_constant_factor = 0,
                     .depth_bias_clamp = 0,
                     .enable_depth_bias = false,
@@ -1283,14 +1462,14 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                     .write_mask = 0,
                     .enable_depth_test = true,
                     .enable_depth_write = true,
-                    .enable_stencil_test = false                    
+                    .enable_stencil_test = false                
                 },
                 .target_info = 
                 {
                     .color_target_descriptions = &ctd,
                     .num_color_targets = 1,
-                    .depth_stencil_format = 0,
-                    .has_depth_stencil_target = false
+                    .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+                    .has_depth_stencil_target = true,
                 }
             };
 
@@ -1457,7 +1636,33 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
             p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
 
         // draw something
-        if ( p_drawable->p_geometry->p_index_handle )
+        if ( p_drawable->p_geometry )
+        if ( p_drawable->p_geometry->_parts[0].p_handle )
+        {
+            for (size_t i = 0; i < 4; i++)
+            {
+                if (p_drawable->p_geometry->_parts[i].p_handle == NULL) continue;
+                SDL_BindGPUIndexBuffer(
+                    p_render_pass->p_handle,
+                    &(SDL_GPUBufferBinding)
+                    {
+                        .buffer = p_drawable->p_geometry->_parts[i].p_handle,
+                        .offset = 0
+                    },
+                    SDL_GPU_INDEXELEMENTSIZE_32BIT
+                );
+
+                SDL_DrawGPUIndexedPrimitives(
+                    p_render_pass->p_handle, 
+                    p_drawable->p_geometry->_parts[i].index_count * 3, 
+                    1,
+                    0, 
+                    0, 
+                    0
+                );
+            }
+        }
+        else if ( p_drawable->p_geometry->p_index_handle )
             SDL_DrawGPUIndexedPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->index_count * 3, 1, 0, 0, 0);
         else
             SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->vertex_count, 1, 0, 0);
@@ -1667,7 +1872,8 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
         // initialized data
         dict *p_dict = p_value->object;
         json_value *p_clear = (json_value *)dict_get(p_dict, "clear"),
-                   *p_color = (json_value *)dict_get(p_dict, "color");
+                   *p_color = (json_value *)dict_get(p_dict, "color"),
+                   *p_depth = (json_value *)dict_get(p_dict, "depth");
 
         // error check
         if ( p_clear  == (void *) 0 ) goto no_clear_property;
@@ -1731,6 +1937,26 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
 
                 array_add(p_framebuffer->p_attachments, p_attachment);
             }
+        }
+    
+        if ( p_depth )
+        {
+
+            // initialized data
+            char *p_name = NULL;
+            attachment *p_attachment = NULL;
+
+            // type check
+            if ( p_depth->type != JSON_VALUE_STRING ) goto wrong_depth_type;
+        
+
+            // store the i'th attachment name
+            p_name = p_depth->string;
+
+            // retrieve the attachment from the cache
+            p_attachment = dict_get(p_instance->cache.p_attachment, p_name);
+
+            p_framebuffer->p_depth = p_attachment;
         }
     }
 
@@ -1823,6 +2049,15 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
                 // error
                 return 0;
 
+            wrong_depth_type:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Property \"depth\" of parameter \"p_value\" must be of type [ array ] in call to function \"%s\"\n", __FUNCTION__);
+                    log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
+                #endif
+
+                // error
+                return 0;
+
             // wrong_passes_type:
             //     #ifndef NDEBUG
             //         log_error("[g10] [sdl3] Property \"passes\" of parameter \"p_value\" must be of type [ string ] in call to function \"%s\"\n", __FUNCTION__);
@@ -1856,17 +2091,18 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     // initialized data
     g_instance *p_instance = g_active_instance();
     geometry *p_geometry = default_allocator(0, sizeof(geometry));
-    dict       *p_dict = NULL;
-    json_value *p_name = NULL,
-               *p_xyz  = NULL,
-               *p_uv   = NULL,
-               *p_nxyz = NULL,
-               *p_txyz = NULL,
-               *p_bxyz = NULL,
-               *p_idx  = NULL;
+    dict       *p_dict  = NULL;
+    json_value *p_name  = NULL,
+               *p_xyz   = NULL,
+               *p_uv    = NULL,
+               *p_nxyz  = NULL,
+               *p_txyz  = NULL,
+               *p_bxyz  = NULL,
+               *p_parts = NULL,
+               *p_idx   = NULL;
     f32 *xyz = NULL, *uv = NULL, *nxyz = NULL, *txyz = NULL, *bxyz = NULL;
     i32 *idx = NULL;
-    size_t xyz_len = 0, uv_len = 0, nxyz_len = 0, txyz_len = 0, bxyz_len = 0, idx_len = 0;
+    size_t xyz_len = 0, uv_len = 0, nxyz_len = 0, txyz_len = 0, bxyz_len = 0, idx_len = 0, parts_len = 0;
     vec3 min = {  .x = INFINITY, .y = INFINITY, .z = INFINITY }, 
          max = { .x = -INFINITY, .y = -INFINITY, .z = -INFINITY };
 
@@ -1891,14 +2127,15 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     if ( NULL == p_geometry ) goto no_mem;
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
     
-    p_dict = p_value->object;
-    p_name = (json_value *)dict_get(p_dict, "name"),
-    p_xyz  = (json_value *)dict_get(p_dict, "xyz"),
-    p_uv   = (json_value *)dict_get(p_dict, "uv"),
-    p_nxyz = (json_value *)dict_get(p_dict, "nxyz"),
-    p_txyz = (json_value *)dict_get(p_dict, "txyz"),
-    p_bxyz = (json_value *)dict_get(p_dict, "bxyz"),
-    p_idx  = (json_value *)dict_get(p_dict, "idx");
+    p_dict  = p_value->object;
+    p_name  = (json_value *)dict_get(p_dict, "name"),
+    p_xyz   = (json_value *)dict_get(p_dict, "xyz"),
+    p_uv    = (json_value *)dict_get(p_dict, "uv"),
+    p_nxyz  = (json_value *)dict_get(p_dict, "nxyz"),
+    p_txyz  = (json_value *)dict_get(p_dict, "txyz"),
+    p_bxyz  = (json_value *)dict_get(p_dict, "bxyz"),
+    p_idx   = (json_value *)dict_get(p_dict, "idx"),
+    p_parts = (json_value *)dict_get(p_dict, "parts");
 
     // parse the geometry object
     {
@@ -1928,13 +2165,19 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
         // index
         if ( p_idx ) goto parse_idx;
         idx_done:
+
+        // parts
+        if ( p_parts ) goto parse_parts;
+        parts_done:
     }
 
-    // construct the geometry
+    // upload vertex data
     {
 
         // initialized data
-        SDL_GPUTransferBuffer* _transfer_buffers[GEOMETRY_QTY] = { 0 };
+        SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
+        SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd);
+        SDL_GPUTransferBuffer* _vertex_transfer_buffers[GEOMETRY_QTY] = { 0 };
         struct
         {
             f32 *p_data;
@@ -1975,7 +2218,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             }
         };
         
-        // iterate through each vertex attribute
+        // construct vertex buffers
         for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
         {
 
@@ -1987,7 +2230,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             if ( NULL == _p_attribute[_type].p_data ) continue;
 
             // construct a transfer buffer
-            _transfer_buffers[_type] = SDL_CreateGPUTransferBuffer
+            _vertex_transfer_buffers[_type] = SDL_CreateGPUTransferBuffer
             (
                 p_instance->graphics.sdl3.device, 
 
@@ -2011,120 +2254,188 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             );
 
             // map the transfer buffer into address space
-            p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type], false);
+            p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _vertex_transfer_buffers[_type], false);
 
             // copy the vertex data to the transfer buffer
             SDL_memcpy(p_mmap, _p_attribute[_type].p_data, _p_attribute[_type].size);
 
             // unmap the transfer buffer from address space
-            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffers[_type]);
+            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _vertex_transfer_buffers[_type]);
         }
 
-        // copy the data from the transfer buffer to the gpu
+        // upload vertices
+        for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
         {
 
             // initialized data
-            SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
-            SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd);
+            enum geometry_vertex_attribute_e _type = i;
 
-            // iterate through each vertex attribute
-            for ( size_t i = 0; i < GEOMETRY_QTY; i++ )
-            {
+            // fast fail
+            if ( NULL == _p_attribute[_type].p_data ) continue;
 
-                // initialized data
-                enum geometry_vertex_attribute_e _type = i;
+            // upload from the transfer buffer to the gpu
+            SDL_UploadToGPUBuffer
+            (
+                copy_pass,
 
-                // fast fail
-                if ( NULL == _p_attribute[_type].p_data ) continue;
+                &(SDL_GPUTransferBufferLocation)
+                {
+                    .transfer_buffer = _vertex_transfer_buffers[_type],
+                    .offset = 0
+                },
 
-                // upload from the transfer buffer to the gpu
-                SDL_UploadToGPUBuffer
-                (
-                    copy_pass,
+                &(SDL_GPUBufferRegion)
+                {
+                    .buffer = p_geometry->_p_handles[_type],
+                    .offset = 0, 
+                    .size = _p_attribute->size
+                },
 
-                    &(SDL_GPUTransferBufferLocation)
-                    {
-                        .transfer_buffer = _transfer_buffers[_type],
-                        .offset = 0
-                    },
-
-                    &(SDL_GPUBufferRegion)
-                    {
-                        .buffer = p_geometry->_p_handles[_type],
-                        .offset = 0, 
-                        .size = _p_attribute->size
-                    },
-
-                    false
-                );
-            }
-
-            // upload indices
-            if ( p_idx )
-            {
-
-                SDL_GPUTransferBuffer* _transfer_buffer = { 0 };
-                void* p_mmap = NULL;
-
-                // construct a transfer buffer
-                _transfer_buffer = SDL_CreateGPUTransferBuffer
-                (
-                    p_instance->graphics.sdl3.device, 
-
-                    &(SDL_GPUTransferBufferCreateInfo)
-                    {
-                        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-                        .size = idx_len * sizeof(i32)
-                    }
-                );
-
-                // construct a gpu buffer
-                p_geometry->p_index_handle = SDL_CreateGPUBuffer
-                (
-                    p_instance->graphics.sdl3.device,
-
-                    &(SDL_GPUBufferCreateInfo)
-                    { 
-                        .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-                        .size = idx_len * sizeof(i32)
-                    }
-                );
-
-                // map the transfer buffer into address space
-                p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffer, false);
-
-                // copy the vertex data to the transfer buffer
-                SDL_memcpy(p_mmap, idx, idx_len * sizeof(u32));
-
-                // unmap the transfer buffer from address space
-                SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _transfer_buffer);
-
-                // upload from the transfer buffer to the gpu
-                SDL_UploadToGPUBuffer
-                (
-                    copy_pass,
-
-                    &(SDL_GPUTransferBufferLocation)
-                    {
-                        .transfer_buffer = _transfer_buffer,
-                        .offset = 0
-                    },
-
-                    &(SDL_GPUBufferRegion)
-                    {
-                        .buffer = p_geometry->p_index_handle,
-                        .offset = 0, 
-                        .size = _p_attribute->size
-                    },
-
-                    false
-                );
-            }
-
-            // end the copy pass
-            SDL_EndGPUCopyPass(copy_pass),
-            SDL_SubmitGPUCommandBuffer(cmd);
+                false
+            );
         }
+
+        // end the copy pass
+        SDL_EndGPUCopyPass(copy_pass),
+        SDL_SubmitGPUCommandBuffer(cmd);
+    }
+
+    // upload index data
+    {
+
+        // initialized data
+        SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
+        SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd);
+        SDL_GPUTransferBuffer* _index_transfer_buffer = { 0 };
+        
+        // upload indices
+        if ( p_idx )
+        {
+
+            // initialized data 
+            void* p_mmap = NULL;
+
+            // construct a transfer buffer
+            _index_transfer_buffer = SDL_CreateGPUTransferBuffer
+            (
+                p_instance->graphics.sdl3.device, 
+
+                &(SDL_GPUTransferBufferCreateInfo)
+                {
+                    .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+                    .size = idx_len * sizeof(i32)
+                }
+            );
+
+            // construct a gpu buffer
+            p_geometry->p_index_handle = SDL_CreateGPUBuffer
+            (
+                p_instance->graphics.sdl3.device,
+
+                &(SDL_GPUBufferCreateInfo)
+                { 
+                    .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+                    .size = idx_len * sizeof(i32)
+                }
+            );
+
+            // map the transfer buffer into address space
+            p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _index_transfer_buffer, false);
+
+            // copy the vertex data to the transfer buffer
+            SDL_memcpy(p_mmap, idx, idx_len * sizeof(u32));
+
+            // unmap the transfer buffer from address space
+            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _index_transfer_buffer);
+
+            // upload from the transfer buffer to the gpu
+            SDL_UploadToGPUBuffer
+            (
+                copy_pass,
+
+                &(SDL_GPUTransferBufferLocation)
+                {
+                    .transfer_buffer = _index_transfer_buffer,
+                    .offset = 0
+                },
+
+                &(SDL_GPUBufferRegion)
+                {
+                    .buffer = p_geometry->p_index_handle,
+                    .offset = 0, 
+                    .size = sizeof(u32) * idx_len
+                },
+
+                false
+            );
+        }
+
+        // upload parts
+        if ( p_parts )
+        for (size_t i = 0; i < parts_len; i++)
+        {
+
+            // initialized data 
+            void* p_mmap = NULL;
+
+            // construct a transfer buffer
+            _index_transfer_buffer = SDL_CreateGPUTransferBuffer
+            (
+                p_instance->graphics.sdl3.device, 
+
+                &(SDL_GPUTransferBufferCreateInfo)
+                {
+                    .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+                    .size = p_geometry->_parts[i].index_count * sizeof(i32)
+                }
+            );
+
+            // construct a gpu buffer
+            p_geometry->_parts[i].p_handle = SDL_CreateGPUBuffer
+            (
+                p_instance->graphics.sdl3.device,
+
+                &(SDL_GPUBufferCreateInfo)
+                { 
+                    .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+                    .size = p_geometry->_parts[i].index_count * sizeof(i32)
+                }
+            );
+
+            // map the transfer buffer into address space
+            p_mmap = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, _index_transfer_buffer, false);
+
+            // copy the vertex data to the transfer buffer
+            SDL_memcpy(p_mmap, p_geometry->_parts[i].p_data, p_geometry->_parts[i].index_count * sizeof(u32));
+
+            // unmap the transfer buffer from address space
+            SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, _index_transfer_buffer);
+
+            // upload from the transfer buffer to the gpu
+            SDL_UploadToGPUBuffer
+            (
+                copy_pass,
+
+                &(SDL_GPUTransferBufferLocation)
+                {
+                    .transfer_buffer = _index_transfer_buffer,
+                    .offset = 0
+                },
+
+                &(SDL_GPUBufferRegion)
+                {
+                    .buffer = p_geometry->_parts[i].p_handle,
+                    .offset = 0, 
+                    .size = sizeof(u32) * p_geometry->_parts[i].index_count
+                },
+
+                false
+            );
+        }
+
+        // end the copy pass
+        SDL_EndGPUCopyPass(copy_pass),
+        SDL_SubmitGPUCommandBuffer(cmd);
     }
 
     // return a pointer to the caller
@@ -2304,6 +2615,68 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // done
         goto idx_done;
+    }
+
+    // this branch parses parts
+    parse_parts:
+    {
+
+        // initialized data
+        array *p_array = p_parts->list;
+
+        // store the quantity of parts
+        parts_len = array_size(p_array);
+        
+        // iterate through each part
+        for (size_t i = 0; i < parts_len; i++)
+        {
+            
+            // initialized data
+            json_value *p_value = NULL;
+
+            // store the i'th json value
+            array_index(p_array, i, &p_value);
+
+            // parse the part
+            {
+
+                // initialized data
+                dict *p_dict = p_value->object;
+
+                json_value *p_material = dict_get(p_dict, "material"),
+                           *p_idx      = dict_get(p_dict, "idx"); 
+                
+                // store the name 
+                strncpy(
+                    p_geometry->_parts[i]._material_name,
+                    p_material->string, 
+                    sizeof(p_geometry->_parts[i]._material_name)
+                );
+
+                // store the index quantity
+                p_geometry->_parts[i].index_count = array_size(p_idx->list);
+
+                // allocate memory
+                p_geometry->_parts[i].p_data = default_allocator(0, sizeof(i32) * p_geometry->_parts[i].index_count);
+
+                for (size_t j = 0; j < p_geometry->_parts[i].index_count; j++)
+                {
+                    
+                    // initialized data
+                    array *p_array = p_idx->list;
+                    json_value *p_value = NULL;
+
+                    // store the i'th json value
+                    array_index(p_array, j, &p_value);
+
+                    // store the i'th number
+                    p_geometry->_parts[i].p_data[j] = p_value->integer;
+                }
+            }
+        }
+
+        // done
+        goto parts_done;
     }
 
     // error handling

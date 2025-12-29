@@ -1,0 +1,22 @@
+{
+    "name": "white lighting element",
+    "transform": {
+        "location": [
+            -18.0,
+            13.5,
+            6.0
+        ],
+        "rotation": [
+            -180.02333923010465,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting element.json",
+    "pipeline": "color"
+}

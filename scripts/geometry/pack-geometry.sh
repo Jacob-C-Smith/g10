@@ -2,7 +2,7 @@
 GEOMETRY_NAME=$1
 
 # pack geometry information
-cat assets/input/$GEOMETRY_NAME.json |
+cat assets/input/geometry/$GEOMETRY_NAME.json |
 grep -v '\-\-\-' | 
 tr '\n' ' ' |
 tr -d '[:space:]' |

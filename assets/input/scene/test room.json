@@ -1,0 +1,336 @@
+{
+    "name": "test room",
+    "entities": [
+        {
+            "name": "floor",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "-x wall",
+            "transform": {
+                "location": [
+                    -20.0,
+                    0.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/-x wall.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "+y wall",
+            "transform": {
+                "location": [
+                    0.0,
+                    20.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/+y wall.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "+x wall",
+            "transform": {
+                "location": [
+                    20.0,
+                    0.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/+x wall.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "-y wall",
+            "transform": {
+                "location": [
+                    0.0,
+                    -20.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/-y wall.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ramp shallow",
+            "transform": {
+                "location": [
+                    17.0,
+                    18.667,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp shallow.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ramp 45",
+            "transform": {
+                "location": [
+                    13.0,
+                    18.667,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ramp steep",
+            "transform": {
+                "location": [
+                    9.0,
+                    18.667,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ramp sign",
+            "transform": {
+                "location": [
+                    13.0,
+                    5.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "white lighting base",
+            "transform": {
+                "location": [
+                    -18.0,
+                    13.5,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting base.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "white lighting element",
+            "transform": {
+                "location": [
+                    -18.0,
+                    13.5,
+                    6.0
+                ],
+                "rotation": [
+                    -180.02333923010465,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting element.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "octahedron",
+            "transform": {
+                "location": [
+                    -18.0,
+                    13.5,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/octahedron.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "white lighting noise",
+            "transform": {
+                "location": [
+                    -19.9,
+                    10.5,
+                    1.75
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    90.01166961505233
+                ],
+                "scale": [
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting noise.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ceiling",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    6.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ceiling.json",
+            "pipeline": "color"
+        }
+    ],
+    "cameras": [
+        {
+            "name": "Camera",
+            "fov": 50.0,
+            "near": 0.1,
+            "far": 1000.0,
+            "front": [
+                -0.94,
+                0.342,
+                0.0
+            ],
+            "up": [
+                0.0,
+                -0.0,
+                1.0
+            ],
+            "location": [
+                -5.0,
+                8.25,
+                1.6
+            ]
+        }
+    ]
+}

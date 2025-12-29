@@ -1,8 +1,18 @@
 // header
 #include <g10.h>
+#include <input.h>
 
 // data
+static int logger_depth = 0;
 static g_instance *p_active_instance;
+
+// key lookup
+typedef struct key_lookup_s
+{
+    bool _active;
+} key_lookup;
+
+static key_lookup _key_lookup[SDL_SCANCODE_COUNT];
 
 int g_init 
 (
@@ -153,6 +163,14 @@ int g_init
 
             // others? 
         #endif
+
+        // input
+        if ( p_input )
+        {
+            
+            // create an sdl3 renderer
+            input_from_json(&p_instance->context.p_input, p_input);
+        }
 
         // load a scene
         scene_from_json(&p_instance->context.p_scene, p_scene);
@@ -360,19 +378,150 @@ g_instance *g_active_instance( void )
 int poll_input ( g_instance *p_instance ) 
 {
 
-    // poll events
-    while ( SDL_PollEvent(&p_instance->window.sdl3.event) )
+    // Argument check
+    if ( p_instance == (void *) 0 ) goto no_instance;
+    
+    // Initialized data
+    input *p_input = p_instance->context.p_input;
+    int num_keys = 0;
+    const bool* keyboard_state = SDL_GetKeyboardState(&num_keys);
+
+    for (size_t i = 0; i < p_input->bind_quantity; i++)
     {
-        if ( p_instance->window.sdl3.event.type == SDL_EVENT_QUIT )
-            p_instance->running = false;
-        if ( p_instance->window.sdl3.event.type == SDL_EVENT_KEY_DOWN )
-            if ( p_instance->window.sdl3.event.key.key == SDLK_P );
-                // TODO
+        
+        // Initialize data
+        input_bind *p_bind = p_input->_p_binds[i];
+
+        // Clear the input
+        p_bind->value = 0.0;
+    }
+    
+    // Process each event
+    while (SDL_PollEvent(&p_instance->window.sdl3.event))
+    {
+        
+        // Switch on the event type
+        switch (p_instance->window.sdl3.event.type)
+        {
+
+            // Process should exit
+            case SDL_EVENT_QUIT:
+            {
+
+                // Clear the running flag
+                p_instance->running = false;
+
+                // Done
+                break;
+            }
+
+            case SDL_EVENT_WINDOW_RESIZED:
+            {
+
+                // // External functions
+                // extern int g_window_resize ( g_instance *p_instance, u32 width, u32 height );
                 
+                // // Resize the window
+                // g_window_resize
+                // (
+                //     p_instance,
+                //     (u32) p_instance->window.sdl3.event.window.data1,
+                //     (u32) p_instance->window.sdl3.event.window.data2
+                // );
+
+                // Done
+                break;
+            }
+
+            // Mouse moves
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:break;
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            {
+                
+                // Done
+                break;
+            }
+            case SDL_EVENT_MOUSE_MOTION:
+            {
+
+                // Initialized data
+                int xrel = p_instance->window.sdl3.event.motion.xrel,
+                    yrel = p_instance->window.sdl3.event.motion.yrel;
+                camera *p_camera = p_instance->context.p_scene->p_active_camera;
+                
+                // vec3 vel = p_camera->view.target;
+                // vec3 svel = { 0 };
+                
+                // float forward_backward = 0.02f * ( yrel );
+                // float left_right = 0.02f * ( xrel );
+                
+                // vec3_cross_product(&svel, vel, p_camera->view.up);
+                
+                // vec3_mul_scalar(&vel, vel, forward_backward);
+                // vec3_mul_scalar(&svel, svel, left_right);
+
+                // vec3_add_vec3(&p_camera->view.location, p_camera->view.location, vel);
+                // vec3_add_vec3(&p_camera->view.location, p_camera->view.location, svel);
+
+                // printf("[ %4.2f, %4.2f ]\n", p_instance->window.sdl3.event.motion.x, p_instance->window.sdl3.event.motion.y);
+                
+                // Done
+                break;
+            }
+        }
+    }
+    
+    // Update the keyboard state
+    for (size_t i = 0; i < num_keys; i++) 
+        _key_lookup[i]._active = keyboard_state[i];
+
+    // Update the binds
+    if ( p_input )
+    {
+        for (size_t i = 0; i < p_input->bind_quantity; i++)
+        {
+            
+            // Initialize data
+            input_bind *p_bind = p_input->_p_binds[i];
+
+            // Iterate through each scancode
+            for (size_t j = 0; j < p_bind->scancode_quantity; j++)
+            {
+
+                // Initialized data
+                size_t p_scancode = (size_t) p_bind->_scancodes[j];
+
+                // Update the scancode 
+                if ( _key_lookup[p_scancode]._active )
+                {
+
+                    // Set the input
+                    p_bind->value = 1.0;
+
+                    // Done with this bind
+                    break;
+                }
+            }
+        }
     }
 
-    // success
+    // Success
     return 1;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return 0;
+        }
+    }
 }
 
 int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_bind_each *pfn_each )
@@ -456,5 +605,84 @@ size_t load_file ( const char *path, void *buffer, bool binary_mode )
                 // error
                 return 0;
         }
+    }
+}
+
+int instance_info ( g_instance *p_instance )
+{
+
+    // argument check
+    if ( NULL == p_instance ) goto no_instance;
+
+    // logs
+    logger_pad(), log_info("Instance @%p\n", p_instance),
+    
+    logger_push(),
+    logger_pad(), printf("name    - %s\n", p_instance->_name),
+    logger_pad(), printf("running - %s\n", p_instance->running ? "true" : "false"),
+    logger_pad(), printf("version - %u.%u.%u\n", 
+        p_instance->version.major,
+        p_instance->version.minor, 
+        p_instance->version.patch),
+    logger_pad(), printf("window  - <%u, %u> \"%s\"\n", 
+        p_instance->window.width, 
+        p_instance->window.height, 
+        p_instance->window.title
+    ),
+    
+    logger_pad(), printf("input: \n"),
+    logger_push(),
+    input_info(p_instance->context.p_input),
+    logger_pop(),
+
+    logger_pad(), printf("renderer: \n"),
+    logger_push(),
+    renderer_info(p_instance->context.p_renderer),
+    logger_pop(),
+
+    logger_pad(), printf("scene: \n"),
+    logger_push(),
+    scene_info(p_instance->context.p_scene),
+    logger_pop(),
+
+    logger_pop();
+    
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_instance:
+                #ifndef NDEBUG
+                    log_error("[g10] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 1;
+        }
+    }
+}
+
+void logger_push(){
+
+    logger_depth++;
+
+    return;
+}
+
+void logger_pop(){
+
+    logger_depth--;
+
+    return;
+}
+
+void logger_pad(){
+    for (size_t i = 0; i < logger_depth; i++)
+    {
+        printf("  ");
     }
 }

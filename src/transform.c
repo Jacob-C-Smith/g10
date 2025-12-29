@@ -703,6 +703,20 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
     uniform_set_pack_push(p_m, &p_transform->model, (fn_pack *)mat4_pack);
 }
 
+int transform_info ( transform *p_transform )
+{
+
+    logger_pad(), log_info("Transform @%p\n", p_transform);
+
+    logger_push(),
+    logger_pad(), printf("location - [ %.2f, %.2f, %.2f ]\n", p_transform->location.x, p_transform->location.y, p_transform->location.z);
+    logger_pad(), printf("rotation - [ %.2f, %.2f, %.2f ]\n", p_transform->rotation.x, p_transform->rotation.y, p_transform->rotation.z);
+    logger_pad(), printf("scale    - [ %.2f, %.2f, %.2f ]\n", p_transform->scale.x, p_transform->scale.y, p_transform->scale.z);
+    logger_pop();
+
+    return 1;
+}
+
 int transform_destroy ( transform **pp_transform )
 {
 

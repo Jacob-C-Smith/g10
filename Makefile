@@ -62,36 +62,46 @@ $(LIGHTSPEED): lightspeed/main.c $(G10_LIB)
 # Assets
 assets: 
 
-	# blender
-	./scripts/gport-geometry.sh g10_base_geometry | grep 'gport'
+	# ensure geometry directory exists
+	mkdir -p ./assets/input/geometry
+	mkdir -p ./assets/input/texture
+	mkdir -p ./assets/input/entity
+	mkdir -p ./assets/input/scene
+
+	# geometry
+	@./scripts/geometry/gport-geometry.sh g10_base_geometry | grep 'gport'
+	@./scripts/geometry/gport-geometry.sh g10_test_room | grep 'gport'
+
+	# texture
+	@./scripts/texture/gport-texture.sh g10_base_geometry | grep 'gport'
+	@./scripts/texture/gport-texture.sh g10_test_room | grep 'gport'
+
+	# entities
+	@./scripts/entity/gport-entity.sh g10_base_geometry | grep 'gport'
+	@./scripts/entity/gport-entity.sh g10_test_room | grep 'gport'
+
+	# scene
+	@./scripts/scene/gport-scene.sh g10_test_room #| grep 'gport'
 
 	# shaders
-	./scripts/compile-metal-shader.sh quad 
-	./scripts/compile-metal-shader.sh geom
-	./scripts/compile-metal-shader.sh color 
-	./scripts/compile-metal-shader.sh aabb 
-	./scripts/compile-metal-shader.sh floor
-	./scripts/compile-metal-shader.sh uv
-	./scripts/compile-metal-shader.sh texture
-	./scripts/compile-metal-shader.sh normal
-	./scripts/compile-metal-shader.sh tbn
+	@./scripts/pipeline/compile-metal-shader.sh quad 
+	@./scripts/pipeline/compile-metal-shader.sh geom
+	@./scripts/pipeline/compile-metal-shader.sh color 
+	@./scripts/pipeline/compile-metal-shader.sh aabb 
+	@./scripts/pipeline/compile-metal-shader.sh floor
+	@./scripts/pipeline/compile-metal-shader.sh uv
+	@./scripts/pipeline/compile-metal-shader.sh texture
+	@./scripts/pipeline/compile-metal-shader.sh normal
+	@./scripts/pipeline/compile-metal-shader.sh tbn
 
-	# pack geometry
-	./scripts/pack-geometry.sh bar
-	./scripts/pack-geometry.sh capsule
-	./scripts/pack-geometry.sh circle
-	./scripts/pack-geometry.sh cone
-	./scripts/pack-geometry.sh cube
-	./scripts/pack-geometry.sh cylinder
-	./scripts/pack-geometry.sh grid
-	./scripts/pack-geometry.sh icosphere
-	./scripts/pack-geometry.sh octahedron
-	./scripts/pack-geometry.sh plane
-	./scripts/pack-geometry.sh quadsphere
-	./scripts/pack-geometry.sh sphere
-	./scripts/pack-geometry.sh torus
+	cp ./assets/input/texture/* ./assets/texture/
+	cp ./assets/input/geometry/* ./assets/geometry/
+	cp ./assets/input/entity/* ./assets/entity/
+	cp ./assets/input/scene/* ./assets/scene/
 
-	rm ./assets/input/** || exit 0
+	rm -rf ./assets/input/geometry || exit 0
+	rm -rf ./assets/input/texture || exit 0
+	rm -rf ./assets/input/entity || exit 0
 	touch ./assets/input/ignore
 
 # Info
@@ -106,10 +116,12 @@ info:
 # Clean
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf assets/gport_cache.json
 
 gport:
 	rm gport.zip
 	zip gport.zip gport/*
 	rm -rf /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons/gport
+	unzip gport.zip -d /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons
 
 .PHONY: all clean info assets gport 

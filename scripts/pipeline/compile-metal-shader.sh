@@ -9,3 +9,5 @@ xcrun metal -c assets/pipeline/$PIPELINE_NAME/frag.metal -o assets/pipeline/$PIP
 
 # link the pipeline
 xcrun metallib assets/pipeline/$PIPELINE_NAME/vert.air assets/pipeline/$PIPELINE_NAME/frag.air -o assets/pipeline/$PIPELINE_NAME/$PIPELINE_NAME.metallib
+
+printf "[gport] [pipeline] %s\n" $PIPELINE_NAME

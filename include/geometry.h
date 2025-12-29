@@ -34,9 +34,17 @@ struct geometry_s
     char _name[63+1];
     aabb _bounds;
     u32 vertex_count;
+    void *_p_handles[GEOMETRY_QTY];
     u32 index_count;
     void *p_index_handle;
-    void *_p_handles[GEOMETRY_QTY];
+
+    struct 
+    {
+        void *p_handle;
+        u32 *p_data;
+        size_t index_count;
+        const char _material_name[63+1];
+    } _parts[4];
 };
 
 // function declarations

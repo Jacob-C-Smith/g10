@@ -10,6 +10,23 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
 
     scene *p_scene = default_allocator(0, sizeof(scene));
 
+    // type check
+    if ( JSON_VALUE_STRING == p_value->type )
+    {
+
+        size_t file_len = load_file(p_value->string, (void *) 0, true);
+        char *p_file_contents = default_allocator(0, (file_len + 1) * sizeof(char));
+        
+        // error check
+        if ( file_len == 0 ) return 0;
+
+        // load the file
+        if ( load_file(p_value->string, p_file_contents, true) == 0 ) return 0;
+
+        // parse the json value
+        json_value_parse(p_file_contents, NULL, &p_value);
+    }
+
     dict *p_dict = p_value->object;
     json_value *p_name = dict_get(p_dict, "name"),
                *p_entities = dict_get(p_dict, "entities"),
@@ -83,6 +100,44 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
     return 1;
     
     no_scene: return 0;
+}
+
+int scene_info ( scene *p_scene )
+{
+
+    // error check
+    if ( NULL == p_scene ) goto no_scene;
+
+    // print the scene
+    logger_pad(), log_info("Scene @%p\n", p_scene),
+
+    logger_push(),
+    logger_pad(), printf("name - %s\n", p_scene->_name),
+
+    logger_pad(), printf("entities: \n"),
+    logger_push(),
+    dict_foreach(p_scene->entities, (void (*)(const void *const, size_t i))entity_info);
+    logger_pop(),
+    
+    logger_pop();
+
+    // success
+    return 1;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_scene:
+                #ifndef NDEBUG
+                    log_error("[g10] [scene] Null pointer provided for parameter \"p_scene\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
 }
 
 int scene_gather_drawable 

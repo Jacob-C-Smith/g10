@@ -12,6 +12,27 @@
         "width" : 720,
         "height" : 720
     },
+    "input" :
+    {
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CAMERA UP"    : [ "UP" ],
+            "CAMERA DOWN"  : [ "DOWN" ],
+            "CAMERA LEFT"  : [ "LEFT" ],
+            "CAMERA RIGHT" : [ "RIGHT" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT SHIFT" ],
+            "MOUSE LOCK"   : [ "M" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
+    },
     "scene" : 
     {
         "name" : "scene",
@@ -30,6 +51,20 @@
                     "scale"    : [ 1.0, 1.0, 1.0 ]
                 },
                 "geometry" : "assets/geometry/plane.json"
+            },
+            {
+                "name" : "entity2",
+                "pipeline" : "tbn",
+                "color" : [ 1.0, 0.5, 0.5 ],
+                "normal" : "assets/texture/pitch_normal.png",
+                "texture" : "assets/texture/debug.png",
+                "transform" :
+                {
+                    "location" : [ 0.0, 0.0, 0.0 ],
+                    "rotation" : [ 0.0, 0.0, 0.0 ],
+                    "scale"    : [ 1.0, 1.0, 1.0 ]
+                },
+                "geometry" : "assets/geometry/plane2.json"
             }
         ],
         "cameras" :

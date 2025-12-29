@@ -1,7 +1,67 @@
 // header
 #include <entity.h>
 
+static float frand(void)
+{
+    return (float)rand() / (float)RAND_MAX;
+}
+
+void hsv_to_rgb(float h, float s, float v, float *r, float *g, float *b)
+{
+    float c = v * s;
+    float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
+    float m = v - c;
+
+    float rp, gp, bp;
+
+    if (h < 1.0f/6.0f)      { rp = c; gp = x; bp = 0; }
+    else if (h < 2.0f/6.0f) { rp = x; gp = c; bp = 0; }
+    else if (h < 3.0f/6.0f) { rp = 0; gp = c; bp = x; }
+    else if (h < 4.0f/6.0f) { rp = 0; gp = x; bp = c; }
+    else if (h < 5.0f/6.0f) { rp = x; gp = 0; bp = c; }
+    else                    { rp = c; gp = 0; bp = x; }
+
+    *r = rp + m;
+    *g = gp + m;
+    *b = bp + m;
+}
+
+void random_vibrant_color(float *r, float *g, float *b)
+{
+    float h = frand();          // random hue
+    float s = 0.9f + 0.1f * frand(); // high saturation
+    float v = 0.9f + 0.1f * frand(); // high brightness
+
+    hsv_to_rgb(h, s, v, r, g, b);
+}
+
 // function definitions
+int entity_info ( entity *p_entity )
+{
+
+    // print the entity
+    logger_pad(), log_info("Entity @%p\n", p_entity),
+
+    logger_push(),
+    logger_pad(), printf("name     - %s\n", p_entity->_name),
+    logger_pad(), printf("pipeline - %s\n", p_entity->pipeline),    
+    
+    logger_pad(), printf("geometry:\n"),
+    logger_push();
+
+    if(p_entity->p_geometry) geometry_info(p_entity->p_geometry);
+    logger_pop(),
+
+    logger_pad(), printf("transform:\n"),
+    logger_push(),
+    transform_info(p_entity->p_transform),
+    logger_pop(),
+
+    logger_pop();
+    
+    return 1;
+}
+
 int entity_from_json ( entity **pp_entity, json_value *p_value )
 {
 
@@ -87,6 +147,14 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
             .y = (float) p_g->number,
             .z = (float) p_b->number
         };
+    }
+    else
+    {   
+        random_vibrant_color(
+            &p_entity->color.x,
+            &p_entity->color.y,
+            &p_entity->color.z
+        );
     }
     
     // parse the texture

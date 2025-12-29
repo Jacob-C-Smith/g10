@@ -6,12 +6,20 @@
 int renderer_info ( renderer *p_renderer )
 {
 
-    log_info("Renderer @%p:\n",p_renderer);
-    log_info("name : %s\n", p_renderer->_name);
-    log_info("attachments : \n");
-    dict_foreach(p_renderer->p_attachments, (void (*)(const void *const, size_t))attachment_info);
-    log_info("render passes : \n");
+    logger_pad(), log_info("Renderer @%p\n",p_renderer),
+    logger_push(),
+    logger_pad(),printf("name - %s\n", p_renderer->_name),
+    logger_pad(), printf("attachments:\n"),
+    
+    logger_push(),
+    dict_foreach(p_renderer->p_attachments, (void (*)(const void *const, size_t))attachment_info),
+    logger_pop(),
+
+    logger_pad(), printf("render passes: \n"),
+    
+    logger_push(),
     array_foreach(p_renderer->p_passes, (fn_foreach *)render_pass_info);
+    logger_pop();
 
     // success
     return 1;

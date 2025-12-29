@@ -1,0 +1,22 @@
+{
+    "name": "quadsphere",
+    "transform": {
+        "location": [
+            27.0,
+            0.0,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/quadsphere.json",
+    "pipeline": "color"
+}

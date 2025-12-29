@@ -29,3 +29,5 @@ struct scene_s
 
 // function declarations
 int scene_from_json ( scene **pp_scene, json_value *p_value );
+
+int scene_info ( scene *p_scene );

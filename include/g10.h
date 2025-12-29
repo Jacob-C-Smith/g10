@@ -19,6 +19,8 @@
 #include <gtypedef.h>
 #include <attachment.h>
 #include <pipeline.h>
+#include <renderer.h>
+#include <camera.h>
 #include <scene.h>
 
 #define G10_BUILD_WITH_SDL3
@@ -43,11 +45,10 @@ struct g_instance_s
     // Context
     struct
     {
-        // fn_user_code_callback  pfn_user_code_callback;
+        fn_user_code *pfn_user_code;
         renderer *p_renderer;
-        // server                *p_server;
         scene *p_scene;
-        // input                 *p_input;
+        input *p_input;
         u16 fixed_tick_rate;
     } context;
 
@@ -169,3 +170,9 @@ int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_p
  * @return 1 on success, 0 on error
  */
 size_t load_file ( const char *path, void *buffer, bool binary_mode );
+
+int instance_info ( g_instance *p_instance );
+
+void logger_push();
+void logger_pop();
+void logger_pad();

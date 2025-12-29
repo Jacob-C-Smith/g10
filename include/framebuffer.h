@@ -21,6 +21,7 @@ struct framebuffer_s
 {
     char _name[63+1];
     array *p_attachments;
+    attachment *p_depth;
     f32 clear[4];
 };
 

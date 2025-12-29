@@ -4,11 +4,23 @@
 int render_pass_info ( render_pass *p_render_pass )
 {
 
-    log_info("Render Pass @%p\n", p_render_pass);
-    log_info(" - name : \"%s\"\n", p_render_pass->_name);
-    log_info(" - pipelines : \n");
-    array_foreach( p_render_pass->p_pipelines, (fn_foreach *) pipeline_info );
+    // logs
+    logger_pad(), log_info("Render Pass @%p\n", p_render_pass),
+
+    logger_push(),
+    logger_pad(), printf("name - %s\n", p_render_pass->_name),
     
+    logger_pad(), printf("framebuffer: \n"),
+    logger_push(),
+    framebuffer_info(p_render_pass->p_framebuffer),
+    logger_pop(),
+
+    logger_pad(), printf("pipelines: \n"),
+    logger_push(),
+    array_foreach( p_render_pass->p_pipelines, (fn_foreach *) pipeline_info ),
+    logger_pop();
+    
+    // success
     return 1;
 }
 

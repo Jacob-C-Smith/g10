@@ -68,9 +68,11 @@ int aabb_bind ( render_pass *p_render_pass, pipeline *p_pipeline, aabb *p_aabb )
 int aabb_info ( aabb *p_aabb )
 {
 
-    printf("AABB @%p\n", p_aabb);
-    printf(" - min : < %.2f, %.2f, %.2f >\n", p_aabb->_min.x, p_aabb->_min.y, p_aabb->_min.z);
-    printf(" - max : < %.2f, %.2f, %.2f >\n", p_aabb->_max.x, p_aabb->_max.y, p_aabb->_max.z);
+    logger_pad(), log_info("AABB @%p\n", p_aabb);
+    logger_push(),
+    logger_pad(), printf("min - < %.2f, %.2f, %.2f >\n", p_aabb->_min.x, p_aabb->_min.y, p_aabb->_min.z);
+    logger_pad(), printf("max - < %.2f, %.2f, %.2f >\n", p_aabb->_max.x, p_aabb->_max.y, p_aabb->_max.z);
+    logger_pop();
     
     return 1;
 }

@@ -39,7 +39,7 @@ int uniform_pack ( uniform *p_uniform );
  * 
  * @return 1 on success, 0 on failure
  */
-int uniform_info ( uniform *p_uniform );
+int uniform_info ( uniform *p_uniform, size_t i );
 
 /// key accessor
 /** 

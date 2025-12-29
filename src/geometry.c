@@ -11,7 +11,18 @@ int geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
 int geometry_info ( geometry *p_geometry )
 {
 
-    log_info(" - %s\n", p_geometry->_name);
+    logger_pad(), log_info("Geometry @%p\n", p_geometry);
+    
+    logger_push(),
+    logger_pad(), printf("name - %s\n", p_geometry->_name),
+
+    logger_pad(), printf("bounds:\n"),
+    logger_push(),
+    aabb_info(&p_geometry->_bounds),
+    logger_pop(),
+
+    logger_pop();
+    
     return 1;
 }
 

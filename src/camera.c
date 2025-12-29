@@ -198,6 +198,7 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
     _camera = (camera)
     {
         ._name = { 0 },
+        .pfn_camera_controller = camera_controller_first_person_update,
         .view  = 
         {
             .location = location,

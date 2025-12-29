@@ -1,24 +1,132 @@
-// header guard
+/** !
+ * Input 
+ * 
+ * @file g10/input.h
+ * 
+ * @author Jacob Smith
+ */
+
+// include guard
 #pragma once
 
 // standard library
 #include <stdio.h>
-
-// gsdk
-/// core
-#include <core/log.h>
-#include <core/interfaces.h>
-
-/// data
-#include <data/dict.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 // g10
+#include <g10.h>
 #include <gtypedef.h>
 
+// enumeration definitions
+enum gamepad_input_e
+{
+    INPUT_GAMEPAD_A            = 0,
+    INPUT_GAMEPAD_B            = 1,
+    INPUT_GAMEPAD_X            = 2,
+    INPUT_GAMEPAD_Y            = 3,
+    INPUT_GAMEPAD_D_UP         = 4,
+    INPUT_GAMEPAD_D_RIGHT      = 5,
+    INPUT_GAMEPAD_D_DOWN       = 6,
+    INPUT_GAMEPAD_D_LEFT       = 7,
+    INPUT_GAMEPAD_BUMPER_LEFT  = 8,
+    INPUT_GAMEPAD_BUMPER_RIGHT = 9,
+    INPUT_GAMEPAD_START        = 10,
+    INPUT_GAMEPAD_SELECT       = 11,
+    INPUT_GAMEPAD_QUANTITY     = 12,
+};
+
+enum input_state_e
+{
+    INPUT_STATE_INVALID  = 0,
+	INPUT_STATE_KEYBOARD = 1,
+	INPUT_STATE_MOUSE    = 2,
+	INPUT_STATE_GAMEPAD  = 3
+};
+
 // structure definitions
+struct input_bind_s
+{
+    char   _name[63 + 1];
+    float   value;
+    size_t  scancode_quantity;
+    void   *_scancodes[];
+};
+
 struct input_s
 {
+    char _name[63 + 1];
+    float mouse_sensitivity;
+    size_t bind_quantity;
     dict *p_binds;
+    input_bind *_p_binds[];
+};
+
+struct callback_parameter_s
+{
+	enum input_state_e input_state;
+
+	union
+    {
+		struct { bool depressed; } key;
+
+		struct 
+        {
+			s32 xrel, yrel;
+			u8  button;
+		} mouse;
+
+		struct
+        {
+            struct { vec2  left, right; } stick;
+            struct { float left, right; } trigger;
+            bool buttons[INPUT_GAMEPAD_QUANTITY];
+		} gamepad;
+	} inputs;
 };
 
 // function declarations
+// constructors
+/** !
+ * Construct an input from a json value 
+ * 
+ * @param pp_input return
+ * @param p_value  the json value
+ * 
+ * @return 1 on success, 0 on error
+ */
+int input_from_json ( input **pp_input, const json_value *const p_value );
+
+// Info
+/** !
+ *  Print information about an input
+ *
+ * @param p_input the input
+ *
+ * @return 1 on success, 0 on error
+ */
+int input_info ( const input *const p_input );
+
+// Input poll
+/** !
+ * Update the binds of an instance
+ * 
+ * @param p_instance the active instance
+ * 
+ * @return 1 on success, 0 on error
+*/
+int input_poll ( g_instance *p_instance );
+
+// Accessors
+/** !
+ * Get the value of a bind
+ * 
+ * @param p_bind_name the name of the bind
+ * 
+ * @return [1.0, 0.0) if active else 0.0
+*/
+float input_bind_value ( const char *const p_bind_name );
+
+// Global state
+void input_mouse_lock_toggle ( void );

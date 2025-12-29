@@ -17,8 +17,8 @@ int sampler_info ( sampler *p_sampler )
 {
 
     // logs
-    printf("Sampler @%p\n", p_sampler);
-    
+    logger_pad(), log_info("Sampler @%p\n", p_sampler);
+
     // success
     return 1;
 }

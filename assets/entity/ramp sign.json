@@ -1,0 +1,22 @@
+{
+    "name": "ramp sign",
+    "transform": {
+        "location": [
+            13.0,
+            5.0,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            0.5,
+            0.5,
+            0.5
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
+    "pipeline": "color"
+}

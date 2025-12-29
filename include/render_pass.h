@@ -15,6 +15,7 @@
 // g10
 #include <gtypedef.h>
 #include <g10.h>
+#include <framebuffer.h>
 
 // structure definitions
 struct render_pass_s

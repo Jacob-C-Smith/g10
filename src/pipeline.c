@@ -20,11 +20,40 @@ int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bin
     // success
     return 1;
 }
+void any_print(void *p_element, int i)
+{
+    logger_pad(), printf("[%d] : %p\n", i, p_element);
+
+    return;
+}
 
 int pipeline_info ( pipeline *p_pipeline )
 {
 
-    log_info(" - %s\n", p_pipeline->_name);
+    // logs
+    logger_pad(), log_info("Pipeline @%p\n", p_pipeline),
+    logger_push(),
+    logger_pad(), printf("name - %s\n", p_pipeline->_name);
+    logger_pad(), printf("uniforms[%d]: \n", array_size(p_pipeline->p_uniforms));
+    
+    logger_push(), 
+    array_fori(p_pipeline->p_uniforms, (fn_fori *)uniform_info);
+    logger_pop(),
+
+    logger_pad(), printf("samplers[%d]: \n", array_size(p_pipeline->p_samplers)),
+    logger_push(),
+    array_foreach(p_pipeline->p_samplers, (fn_foreach *)sampler_info),
+    logger_pop(),
+
+    
+    logger_pad(), printf("draw list[%d]: \n", array_size(p_pipeline->p_static_draw_list)),
+    logger_push(),
+    array_fori(p_pipeline->p_static_draw_list, (fn_fori *)any_print),
+    logger_pop(),
+    
+    logger_pop();
+
+    // success
     return 1;
 }
 

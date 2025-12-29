@@ -1,0 +1,22 @@
+{
+    "name": "icosphere",
+    "transform": {
+        "location": [
+            9.0,
+            0.0,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/icosphere.json",
+    "pipeline": "color"
+}

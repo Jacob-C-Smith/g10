@@ -82,7 +82,10 @@ int transform_get_matrix_local (
 );
 
 /// bind
-int transform_bind( render_pass *p_render_pass, pipeline *p_pipeline, transform *p_transform );
+int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform *p_transform );
+
+/// info
+int transform_info ( transform *p_transform );
 
 /// destructors
 /** !

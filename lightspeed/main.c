@@ -22,6 +22,10 @@
 #include <render_pass.h>
 #include <uniform.h>
 #include <aabb.h>
+#include <user_code.h>
+
+// function declarations
+int game_logic ( g_instance *p_instance );
 
 // entry point
 int main ( int argc, const char *argv[] ) 
@@ -65,6 +69,12 @@ int main ( int argc, const char *argv[] )
         );
     }
 
+    // user code 
+    user_code_set_callback((fn_user_code *)game_logic);
+
+    // logs
+    instance_info(p_instance);
+
     // set running flag
     p_instance->running = ok;
 
@@ -74,6 +84,9 @@ int main ( int argc, const char *argv[] )
 
         // poll input
         poll_input(p_instance);
+        
+        // user code
+        user_code(p_instance);
 
         // render the frame
         renderer_render(p_instance);
@@ -96,4 +109,14 @@ int main ( int argc, const char *argv[] )
             log_warning("Error: Failed to teardown g10!\n");
             return EXIT_FAILURE;
     }
+}
+
+int game_logic ( g_instance *p_instance )
+{
+
+    // update the camera
+    camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
+
+    // success
+    return 1;
 }

@@ -44,12 +44,14 @@ int uniform_pack ( uniform *p_uniform )
     return p_uniform->pfn_pack(&p_uniform->_buffer, p_uniform->p_data);
 }
 
-int uniform_info ( uniform *p_uniform )
+int uniform_info ( uniform *p_uniform, size_t i )
 {
     
     // logs
-    log_info("Uniform @%p\n", p_uniform),
-    log_info("name - %s\n", p_uniform->_name);
+    logger_pad(), log_info("Uniform #%d @%p\n", i, p_uniform), 
+    logger_push(),
+    logger_pad(), printf("name - %s\n", p_uniform->_name),
+    logger_pop();
 
     // success
     return 1;

@@ -22,10 +22,13 @@
 #include <linear.h>
 #include <uniform.h>
 
+#include <camera_controller.h>
+
 // structure definitions
 struct camera_s
 {
     char _name[63 + 1];
+    fn_camera_controller *pfn_camera_controller;
     struct
     {
         vec3 location, target, up;
