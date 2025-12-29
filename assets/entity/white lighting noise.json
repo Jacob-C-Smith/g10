@@ -9,12 +9,12 @@
         "rotation": [
             0.0,
             -0.0,
-            90.01166961505233
+            0.0
         ],
         "scale": [
-            0.5,
-            0.5,
-            0.5
+            1.0,
+            1.0,
+            1.0
         ]
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting noise.json",

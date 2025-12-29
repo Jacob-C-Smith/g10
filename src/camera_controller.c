@@ -54,7 +54,9 @@ int camera_controller_first_person_update ( camera *p_camera )
         p_camera->view.location.z += _displacement.z;
 
         // up / down
-        p_camera->view.location.z += 0.2f * ( input_bind_value("JUMP") - input_bind_value("PRONE") );
+        vec3 _up_prime = { 0 };
+        vec3_mul_scalar(&_up_prime, p_camera->view.up, 0.2f * ( input_bind_value("JUMP") - input_bind_value("PRONE") ) );
+        vec3_add_vec3(&p_camera->view.location, p_camera->view.location, _up_prime);
     }
 
     // orientation

@@ -12,41 +12,28 @@
         "width" : 1280,
         "height" : 720
     },
-    "scene" : 
+    "input" :
     {
-        "name" : "scene",
-        "entities" : 
-        [
-            {
-                "name" : "entity",
-                "pipeline" : "tbn",
-                "color" : [ 1.0, 0.5, 0.5 ],
-                "normal" : "assets/texture/pitch_normal.png",
-                "texture" : "assets/texture/debug_big.png",
-                "transform" :
-                {
-                    "location" : [ 0.0, 0.0, 0.0 ],
-                    "rotation" : [ 90.0, 180.0, 0.0 ],
-                    "scale"    : [ 10.0, 10.0, 10.0 ]
-                },
-                "geometry" : "assets/geometry/plane.json"
-            }
-        ],
-        "cameras" :
-        [
-            {
-                "name" : "camera",
-                "fov" : 45.0,
-                "location" : [ 0.0, 1.0, 7.50 ],
-                "orientation" : [ 0.0, 0.0, 1.0 ],
-                "clip" :
-                {
-                    "near" : 0.1,
-                    "far"  : 1000.0
-                }
-            }
-        ]
+        "name"              : "default input",
+        "mouse sensitivity" : 1.0,
+        "binds"             :
+        {
+            "FORWARD"      : [ "W" ],
+            "BACKWARD"     : [ "S" ],
+            "STRAFE LEFT"  : [ "A" ],
+            "STRAFE RIGHT" : [ "D" ],
+            "CAMERA UP"    : [ "UP" ],
+            "CAMERA DOWN"  : [ "DOWN" ],
+            "CAMERA LEFT"  : [ "LEFT" ],
+            "CAMERA RIGHT" : [ "RIGHT" ],
+            "CROUCH"       : [ "C" ],
+            "PRONE"        : [ "LEFT SHIFT" ],
+            "MOUSE LOCK"   : [ "M" ],
+            "JUMP"         : [ "SPACE" ],
+            "QUIT"         : [ "ESCAPE" ]
+        }
     },
+    "scene" : "assets/scene/test room.json",
     "renderer" : 
     {
         "name"      : "renderer",
@@ -62,10 +49,6 @@
             {
                 "name" : "OUTPUT",
                 "type" : "framebuffer"
-            },
-            { 
-                "name" : "color",
-                "type" : "texture"
             },
             {
                 "name" : "depth",

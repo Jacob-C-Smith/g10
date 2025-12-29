@@ -11,6 +11,10 @@ for e in D.objects:
     # print the name
     print(f'[gport] [entity] {e.name}')
 
+    # type check
+    if isinstance(e.data, bpy.types.Mesh) == False:
+        continue
+
     # construct entity
     ent = g10.Entity(e)
 

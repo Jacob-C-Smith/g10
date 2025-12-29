@@ -24,7 +24,7 @@
             "pipeline": "color"
         },
         {
-            "name": "-x wall",
+            "name": "back x wall",
             "transform": {
                 "location": [
                     -20.0,
@@ -42,33 +42,11 @@
                     1.0
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/-x wall.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/back x wall.json",
             "pipeline": "color"
         },
         {
-            "name": "+y wall",
-            "transform": {
-                "location": [
-                    0.0,
-                    20.0,
-                    3.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/+y wall.json",
-            "pipeline": "color"
-        },
-        {
-            "name": "+x wall",
+            "name": "front x wall",
             "transform": {
                 "location": [
                     20.0,
@@ -86,11 +64,11 @@
                     1.0
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/+x wall.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/front x wall.json",
             "pipeline": "color"
         },
         {
-            "name": "-y wall",
+            "name": "back y wall",
             "transform": {
                 "location": [
                     0.0,
@@ -108,7 +86,7 @@
                     1.0
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/-y wall.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
             "pipeline": "color"
         },
         {
@@ -191,9 +169,9 @@
                     0.0
                 ],
                 "scale": [
-                    0.5,
-                    0.5,
-                    0.5
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
@@ -230,7 +208,7 @@
                     6.0
                 ],
                 "rotation": [
-                    -180.02333923010465,
+                    0.0,
                     -0.0,
                     0.0
                 ],
@@ -276,12 +254,12 @@
                 "rotation": [
                     0.0,
                     -0.0,
-                    90.01166961505233
+                    0.0
                 ],
                 "scale": [
-                    0.5,
-                    0.5,
-                    0.5
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting noise.json",
@@ -308,18 +286,52 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ceiling.json",
             "pipeline": "color"
+        },
+        {
+            "name": "front y wall",
+            "transform": {
+                "location": [
+                    0.0,
+                    20.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
+            "pipeline": "color"
         }
     ],
     "cameras": [
         {
-            "name" : "camera",
-            "fov" : 45.0,
-            "location" : [ 0.0, 1.0, 7.50 ],
-            "orientation" : [ 0.0, 0.0, 1.0 ],
-            "clip" :
-            {
-                "near" : 0.1,
-                "far"  : 1000.0
+            "name": "Camera",
+            "fov": 39.598,
+            "location": [
+                -5.0,
+                8.25,
+                1.6
+            ],
+            "up": [
+                0.025,
+                -0.009,
+                1.0
+            ],
+            "orientation": [
+                -5.939,
+                8.594,
+                1.626
+            ],
+            "clip": {
+                "near": 0.1,
+                "far": 1000.0
             }
         }
     ]

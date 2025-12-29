@@ -69,10 +69,9 @@ int g_init
                          *p_schedule        = dict_get(p_dict, "schedule"),
                          *p_renderer        = dict_get(p_dict, "renderer"),
                          *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
-                         *p_input           = dict_get(p_dict, "input"),
                          *p_vulkan          = dict_get(p_dict, "vulkan"),
                          *p_scene           = dict_get(p_dict, "scene"),
-                         *p_debug           = dict_get(p_dict, "debug"),
+                         *p_input           = dict_get(p_dict, "input"),
                          *p_window          = dict_get(p_dict, "window");
     
                 

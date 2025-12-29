@@ -73,12 +73,12 @@ assets:
 	@./scripts/geometry/gport-geometry.sh g10_test_room | grep 'gport'
 
 	# texture
-	@./scripts/texture/gport-texture.sh g10_base_geometry | grep 'gport'
-	@./scripts/texture/gport-texture.sh g10_test_room | grep 'gport'
+	@./scripts/texture/gport-texture.sh g10_base_geometry #| grep 'gport'
+	@./scripts/texture/gport-texture.sh g10_test_room #| grep 'gport'
 
 	# entities
-	@./scripts/entity/gport-entity.sh g10_base_geometry | grep 'gport'
-	@./scripts/entity/gport-entity.sh g10_test_room | grep 'gport'
+	@./scripts/entity/gport-entity.sh g10_base_geometry #| grep 'gport'
+	@./scripts/entity/gport-entity.sh g10_test_room #| grep 'gport'
 
 	# scene
 	@./scripts/scene/gport-scene.sh g10_test_room #| grep 'gport'

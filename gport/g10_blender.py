@@ -155,7 +155,7 @@ class Geometry:
 
         mat_count = max(1, len(self.mesh.material_slots))
 
-        geome = {"name":self.mesh.name,"xyz":[],"uv":[],"nxyz":[],"txyzw":[],"parts":[]} 
+        geome = {"name":self.mesh.name,"xyz":[],"uv":[],"nxyz":[],"txyz":[],"parts":[]} 
 
         for i in range(mat_count):
             geome["parts"].append({"material":self.mesh.material_slots[i].name,"idx":[]})
@@ -167,8 +167,8 @@ class Geometry:
             for i in range(1, len(loop_indices) - 1):
                 tri_loops = (
                     loop_indices[0],
-                    loop_indices[i],
                     loop_indices[i + 1],
+                    loop_indices[i],
                 )
 
                 for li in tri_loops:
@@ -188,21 +188,21 @@ class Geometry:
                     sign = loop.bitangent_sign
                     t = [round(t.x, 3), round(t.y, 3), round(t.z,3), sign]
 
-                    geome["xyz"].append(co[0])
-                    geome["xyz"].append(co[1])
-                    geome["xyz"].append(co[2])
+                    geome["xyz"].append(round(co[0], 3))
+                    geome["xyz"].append(round(co[1], 3))
+                    geome["xyz"].append(round(co[2], 3))
                     
-                    geome["uv"].append(uv[0])
-                    geome["uv"].append(uv[1])
+                    geome["uv"].append(round(uv[0], 3))
+                    geome["uv"].append(round(uv[1], 3))
 
-                    geome["nxyz"].append(n[0])
-                    geome["nxyz"].append(n[1])
-                    geome["nxyz"].append(n[2])
+                    geome["nxyz"].append(round(n[0], 3))
+                    geome["nxyz"].append(round(n[1], 3))
+                    geome["nxyz"].append(round(n[2], 3))
                     
-                    geome["txyzw"].append(t[0])
-                    geome["txyzw"].append(t[1])
-                    geome["txyzw"].append(t[2])
-                    geome["txyzw"].append(t[2])
+                    geome["txyz"].append(round(t[0], 3))
+                    geome["txyz"].append(round(t[1], 3))
+                    geome["txyz"].append(round(t[2], 3))
+                    geome["txyz"].append(round(t[3], 3))
                     
                     geome["parts"][mat_index]["idx"].append(li)
 
@@ -238,7 +238,7 @@ class Entity:
             # empty -> name + transform
             if object.type == 'EMPTY':
 
-                # set the name
+                # set the `name
                 self.name = object.name
 
                 # construct the transform
@@ -545,7 +545,6 @@ class Camera:
     near     : float = None
     far      : float = None
     target   : list  = None
-    up       : list  = None
     where    : list  = None
     
     json_data: dict  = None
@@ -568,7 +567,7 @@ class Camera:
         object.data.lens_unit = 'FOV'
 
         ## store the fov
-        self.fov = round(object.data.lens,3)
+        self.fov = round(math.degrees(object.data.angle), 3)
 
         ## pop the unit type
         object.data.lens_unit = tmp
@@ -583,7 +582,7 @@ class Camera:
         self.target[1] = round(object.matrix_world[1][2] * -1, 3)
         self.target[2] = round(object.matrix_world[2][2] * -1, 3)
 
-        # set the up 
+        # set the up vector
         self.up = [ None, None, None ]
         self.up[0] = round(object.matrix_world[0][1], 3)
         self.up[1] = round(object.matrix_world[1][1], 3)
@@ -599,11 +598,17 @@ class Camera:
         self.json_data             = { }
         self.json_data["name"]     = self.name
         self.json_data["fov"]      = self.fov
-        self.json_data["near"]     = self.near
-        self.json_data["far"]      = self.far
-        self.json_data["front"]    = (self.target.copy())
-        self.json_data["up"]       = (self.up.copy())
         self.json_data["location"] = (self.where.copy())
+        self.json_data["up"]       = (self.up.copy())
+        self.json_data["orientation"] = [
+            round(self.where[0] + self.target[0], 3),
+            round(self.where[1] + self.target[1], 3),
+            round(self.where[2] + self.target[2], 3)
+        ]
+        self.json_data["clip"]     = {
+            "near": self.near,
+            "far" : self.far
+        }
 
         # done
         return

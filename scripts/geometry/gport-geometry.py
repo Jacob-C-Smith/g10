@@ -11,6 +11,10 @@ for e in D.objects:
     # print the name
     print(f'[gport] [geometry] {e.name}')
 
+    # type check
+    if isinstance(e.data, bpy.types.Mesh) == False:
+        continue
+
     # construct geometry
     geom = g10.Geometry(e)
 

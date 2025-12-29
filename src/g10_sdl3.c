@@ -442,17 +442,20 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
     }
     
     // populate depth target
-    _depth_target_ci = (SDL_GPUDepthStencilTargetInfo)
+    if ( p_framebuffer->p_depth )
     {
-        .texture = p_framebuffer->p_depth->p_handle,
-        .clear_depth = 1.0f,
-        .load_op = SDL_GPU_LOADOP_CLEAR,
-        .store_op = SDL_GPU_STOREOP_STORE,
-        .stencil_load_op = SDL_GPU_LOADOP_DONT_CARE,
-        .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
-        .cycle = true,
-        .clear_stencil = 0
-    };
+        _depth_target_ci = (SDL_GPUDepthStencilTargetInfo)
+        {
+            .texture = p_framebuffer->p_depth->p_handle,
+            .clear_depth = 1.0f,
+            .load_op = SDL_GPU_LOADOP_CLEAR,
+            .store_op = SDL_GPU_STOREOP_DONT_CARE,
+            .stencil_load_op = SDL_GPU_LOADOP_DONT_CARE,
+            .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
+            .cycle = false,
+            .clear_stencil = 0
+        };
+    }
 
     // begin the render pass
     p_render_pass->p_handle = SDL_BeginGPURenderPass(
@@ -460,7 +463,7 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
         
         &_color_target_ci, 
         attachment_len, 
-        &_depth_target_ci
+        ( p_framebuffer->p_depth ) ? &_depth_target_ci : (void *) 0
     );
     
     // viewport and scissor
@@ -470,10 +473,12 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
             p_render_pass->p_handle, 
             &(SDL_GPUViewport)
             {
-                0, 
-                0, 
-                (int)p_instance->window.width, 
-                (int)p_instance->window.height
+                .x = 0, 
+                .y = 0, 
+                .w = (float)p_instance->window.width, 
+                .h = (float)p_instance->window.height,
+                .min_depth = 0.0f,
+                .max_depth = 1.0f
             }
         );
 
@@ -1441,7 +1446,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 .rasterizer_state = 
                 {
                     .fill_mode = SDL_GPU_FILLMODE_FILL,
-                    .cull_mode = SDL_GPU_CULLMODE_NONE,
+                    .cull_mode = SDL_GPU_CULLMODE_BACK,
                     .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
                     .depth_bias_constant_factor = 0,
                     .depth_bias_clamp = 0,
