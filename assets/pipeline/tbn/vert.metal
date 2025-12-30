@@ -34,16 +34,15 @@ vertex VSOut vs_main(
     out.uv = in.uv;
 
     // Create the TBN vectors
-    float3 T = normalize(inv_mat.N * in.tangent.xyz);
-    float3 N = normalize(inv_mat.N * in.normal.xyz);
-    float3 B = cross(N, T) * in.tangent.w;
-    
-    out.worldTangent = in.tangent.xyz;
-    out.worldNormal = in.normal.xyz;
+    float3 worldNormal = normalize(inv_mat.N * in.normal.xyz);
+    float3 worldTangent = normalize(inv_mat.N * in.tangent.xyz);
+    float3 worldBitangent = cross(worldNormal, worldTangent) * in.tangent.w;
 
-    //out.worldTangent = T;
-    //out.worldNormal = N;
-    out.worldBitangent = B;
+    out.normal = worldNormal;
+    out.worldNormal = worldNormal;
+    out.worldTangent = worldTangent;
+    out.worldBitangent = worldBitangent;
+    out.viewNormal = (camera.V * float4(worldNormal, 0.0)).xyz;
     
     return out;
 }

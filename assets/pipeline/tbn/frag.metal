@@ -17,5 +17,5 @@ fragment float4 fs_main(
     sampler          normalSmp [[sampler(1)]],
     constant FragmentUniforms &uniforms [[buffer(0)]]
 ) {
-    return colorMap.sample(colorSmp, in.uv);
+    return float4(normalize(in.viewNormal) * 0.5 + 0.5, 1.0);
 }

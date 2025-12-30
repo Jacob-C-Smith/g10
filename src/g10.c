@@ -175,6 +175,8 @@ int g_init
         scene_from_json(&p_instance->context.p_scene, p_scene);
     }
 
+    srand(time(NULL));
+
     // return a pointer to the caller
     *pp_instance = p_instance;
 

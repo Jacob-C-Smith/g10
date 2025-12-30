@@ -233,12 +233,10 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
             // initialized data
             mat4 _x = p_entity->p_transform->model;
             mat4 _y = { 0 };
-            mat4 _z = { 0 };
 
             // inverse transpose
             mat4_inverse(&_y, _x);
-            mat4_transpose(&_z, _y);
-            mat4_to_mat3(&p_entity->_inv_normal, _z);
+            mat4_to_mat3(&p_entity->_inv_normal, _y);
 
             // bind color
             uniform_set_pack_push(p_inv_normal, &p_entity->_inv_normal, (fn_pack *)mat3_pack);

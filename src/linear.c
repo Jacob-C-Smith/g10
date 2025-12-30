@@ -803,7 +803,7 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     mat4 _location       = { 0 },
          _rotation       = { 0 },
          _scale          = { 0 },
-         _rotation_scale = { 0 };
+         _scale_rotation = { 0 };
 
     // compute the translation matrix
     mat4_translation(&_location, location);
@@ -814,12 +814,12 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     // compute the scale matrix
     mat4_scale(&_scale, scale);
 
-    // Standard Model Matrix Order: Translation * Rotation * Scale
-    // compute the rotation-scale matrix
-    mat4_mul_mat4(&_rotation_scale, _rotation, _scale);
+    // Standard Model Matrix Order: Scale * Rotation * Translation
+    // compute the scale-rotation matrix
+    mat4_mul_mat4(&_scale_rotation, _scale, _rotation);
 
     // compute the model matrix
-    mat4_mul_mat4(p_result, _location, _rotation_scale);
+    mat4_mul_mat4(p_result, _scale_rotation, _location);
 
     // done
     return;

@@ -21,7 +21,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "back x wall",
@@ -43,7 +45,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back x wall.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "front x wall",
@@ -65,7 +69,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front x wall.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "back y wall",
@@ -87,7 +93,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "ramp shallow",
@@ -109,7 +117,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp shallow.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "ramp 45",
@@ -131,7 +141,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "ramp steep",
@@ -153,7 +165,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "ramp sign",
@@ -175,7 +189,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "white lighting base",
@@ -197,7 +213,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting base.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "white lighting element",
@@ -219,7 +237,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting element.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "octahedron",
@@ -241,7 +261,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/octahedron.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "white lighting noise",
@@ -263,7 +285,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting noise.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "ceiling",
@@ -285,7 +309,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ceiling.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         },
         {
             "name": "front y wall",
@@ -307,7 +333,9 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
-            "pipeline": "color"
+            "pipeline": "tbn",
+            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
+            "normal" : "/Users/j/Desktop/g10/assets/texture/debug.png"
         }
     ],
     "cameras": [
