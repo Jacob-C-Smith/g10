@@ -2951,6 +2951,40 @@ int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a
     SDL_GPUTextureTransferInfo _src = { 0 };
     SDL_GPUTextureRegion _dst = { 0 };
     u8 _color[4] = { (u8)(r*255), (u8)(g*255), (u8)(b*255), (u8)(a*255) };
+    void *p_maybe = NULL;
+
+    // name the texture
+    snprintf(
+        &p_texture->_name, 
+        sizeof(p_texture->_name),
+
+        "#%02hhx%02hhx%02hhx%02hhx",
+
+        _color[0], 
+        _color[1], 
+        _color[2], 
+        _color[3]
+    );
+
+    // cache query
+    p_maybe = dict_get(p_instance->cache.p_texture, p_texture->_name);
+
+    // cache hit
+    if ( p_maybe ) 
+    {
+        
+        // log the cache hit
+        printf("[g10] [texture] cache hit for: %s\n", p_texture->_name);
+
+        // release the texture
+        p_texture = default_allocator(p_texture, 0);
+
+        // return a pointer to the caller
+        *pp_texture = p_maybe;
+
+        // success
+        return 1;
+    }
 
     // setup texture create info
     _ci = (SDL_GPUTextureCreateInfo)
@@ -3025,6 +3059,11 @@ int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a
 
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
+
+    // cache the color
+    dict_add(p_instance->cache.p_texture, p_texture->_name, p_texture),
+    printf("[g10] [texture] cached: %s\n", p_texture->_name);
+
 
     // return a pointer to the caller
     *pp_texture = p_texture;

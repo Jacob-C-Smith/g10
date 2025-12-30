@@ -63,11 +63,17 @@ $(LIGHTSPEED): lightspeed/main.c $(G10_LIB)
 assets: 
 
 	# ensure geometry directory exists
-	mkdir -p ./assets/input/geometry
-	mkdir -p ./assets/input/texture
 	mkdir -p ./assets/input/entity
-	mkdir -p ./assets/input/scene
+	mkdir -p ./assets/input/geometry
 	mkdir -p ./assets/input/material
+	mkdir -p ./assets/input/scene
+	mkdir -p ./assets/input/texture
+
+	rm -rf ./assets/entity/*
+	rm -rf ./assets/geometry/*
+	rm -rf ./assets/material/*
+	rm -rf ./assets/scene/*
+	rm -rf ./assets/texture/*
 
 	# geometry
 	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
@@ -98,17 +104,23 @@ assets:
 	@./scripts/pipeline/compile-metal-shader.sh normal
 	@./scripts/pipeline/compile-metal-shader.sh tbn
 
-	cp ./assets/input/texture/* ./assets/texture/
-	cp ./assets/input/geometry/* ./assets/geometry/
-	cp ./assets/input/entity/* ./assets/entity/
-	cp ./assets/input/scene/* ./assets/scene/
-	cp ./assets/input/material/* ./assets/material/
+	cp -f ./assets/input/entity/* ./assets/entity/
+	cp -f ./assets/input/geometry/* ./assets/geometry/
+	cp -f ./assets/input/material/* ./assets/material/
+	cp -f ./assets/input/scene/* ./assets/scene/
+	cp -f ./assets/input/texture/* ./assets/texture/
 
-	rm -rf ./assets/input/geometry || exit 0
-	rm -rf ./assets/input/texture || exit 0
 	rm -rf ./assets/input/entity || exit 0
+	rm -rf ./assets/input/geometry || exit 0
 	rm -rf ./assets/input/material || exit 0
+	rm -rf ./assets/input/scene || exit 0
+	rm -rf ./assets/input/texture || exit 0
+	
 	touch ./assets/input/ignore
+
+# Assets 2
+assets2:
+	@./scripts/assets/gport-assets.sh assets/
 
 # Info
 info:
@@ -130,4 +142,4 @@ gport:
 	rm -rf /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons/gport
 	unzip gport.zip -d /Users/j/Library/Application\ Support/Blender/3.6/scripts/addons
 
-.PHONY: all clean info assets gport 
+.PHONY: all clean info assets assets2 gport 
