@@ -239,7 +239,7 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
             mat4_to_mat3(&p_entity->_inv_normal, _y);
 
             // bind color
-            uniform_set_pack_push(p_inv_normal, &p_entity->_inv_normal, (fn_pack *)mat3_pack);
+            uniform_set_pack_push(p_inv_normal, &_y, (fn_pack *)mat4_pack);
         }
 
         SDL_BindGPUFragmentSamplers(

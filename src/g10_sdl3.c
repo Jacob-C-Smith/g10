@@ -2293,7 +2293,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                 {
                     .buffer = p_geometry->_p_handles[_type],
                     .offset = 0, 
-                    .size = _p_attribute->size
+                    .size = _p_attribute[_type].size
                 },
 
                 false

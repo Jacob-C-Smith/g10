@@ -2,28 +2,6 @@
     "name": "test room",
     "entities": [
         {
-            "name": "floor",
-            "transform": {
-                "location": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
-            "pipeline": "color"
-        },
-        {
             "name": "back x wall",
             "transform": {
                 "location": [
@@ -131,28 +109,6 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
-            "pipeline": "color"
-        },
-        {
-            "name": "ramp steep",
-            "transform": {
-                "location": [
-                    9.0,
-                    18.667,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
             "pipeline": "color"
         },
         {
@@ -307,6 +263,50 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "ramp steep",
+            "transform": {
+                "location": [
+                    9.0,
+                    18.667,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
+            "pipeline": "color"
+        },
+        {
+            "name": "floor",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    180.02333923010465,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
             "pipeline": "color"
         }
     ],
