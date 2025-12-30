@@ -1,0 +1,10 @@
+{
+    "name": "Dots Stroke",
+    "albedo": [
+        0.8,
+        0.8,
+        0.8
+    ],
+    "roughness": 0.5,
+    "metallic": 0.0
+}

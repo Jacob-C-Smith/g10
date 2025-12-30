@@ -217,14 +217,101 @@ class Geometry:
         # done
         return 
 
+## material
+class Material:
+    '''
+        - Material
+    '''
+
+    name      : str = None
+    json_data : dict = None
+    textures  : list = None # List of Texture objects
+
+    def __init__(self, material: bpy.types.Material):
+        self.name = material.name
+        self.json_data = { }
+        self.textures = []
+
+        self.json_data["name"] = self.name
+        
+        # Default PBR values
+        self.json_data["albedo"]    = [1.0, 1.0, 1.0]
+        self.json_data["roughness"] = 0.5
+        self.json_data["metallic"]  = 0.0
+
+        if not material.use_nodes:
+            # Fallback for simple materials
+            c = material.diffuse_color
+            self.json_data["albedo"] = [round(c[0], 3), round(c[1], 3), round(c[2], 3)].copy()
+            return
+
+        # Find Principled BSDF
+        bsdf = None
+        for node in material.node_tree.nodes:
+            if node.type == "BSDF_PRINCIPLED":
+                bsdf = node
+                break
+        
+        if not bsdf:
+            print(f"[gport] [material] No Principled BSDF found for {self.name}")
+            return
+
+        # Parse Inputs
+        self.parse_socket(bsdf.inputs["Base Color"], "albedo", 3)
+        self.parse_socket(bsdf.inputs["Roughness"], "roughness", 1)
+        self.parse_socket(bsdf.inputs["Metallic"], "metallic", 1)
+        self.parse_socket(bsdf.inputs["Normal"], "normal", 3)
+        self.parse_socket(bsdf.inputs["Emission"], "emission", 3)
+
+        return
+
+    def parse_socket(self, socket, json_key, dims):
+        
+        # Check for links (Textures)
+        if socket.is_linked:
+            link = socket.links[0]
+            node = link.from_node
+            
+            if node.type == "TEX_IMAGE":
+                # Create and store Texture object
+                tex = Texture(node)
+                self.textures.append(tex)
+                
+                # Assume standard asset path structure
+                tex_filename = f"{tex.name}.png"
+                self.json_data[json_key] = f"assets/texture/{tex_filename}"
+                return
+
+        # No texture, use default value
+        val = socket.default_value
+        if dims == 1:
+            self.json_data[json_key] = round(val, 3)
+            self.json_data[json_key] = self.json_data[json_key]
+        elif dims == 3:
+            # Handles RGB and Vector types
+            self.json_data[json_key] = [round(val[0], 3), round(val[1], 3), round(val[2], 3)]
+            self.json_data[json_key] = self.json_data[json_key].copy()
+        elif dims == 4:
+            self.json_data[json_key] = [round(val[0], 3), round(val[1], 3), round(val[2], 3), round(val[3], 3)]
+            self.json_data[json_key] = self.json_data[json_key].copy()
+
+        return
+
+    def write_to_file(self, path: str):
+        with open(path, "w+") as f:
+            try: json.dump(self.json_data, f, indent=4)
+            except FileExistsError: pass
+        return
+
 ## entity
 class Entity:
     '''
         - Entity
     '''
 
-    name     : str       = None
+    name      : str       = None
     transform : Transform = None
+    material  : Material  = None
 
     json_data : dict = { }
 
@@ -260,6 +347,8 @@ class Entity:
                 # done
                 return
         
+        path : str = os.getenv('GPORT_PATH')
+
         # set the name
         self.name = object.name
         
@@ -272,10 +361,11 @@ class Entity:
         # store the transform
         if bool(self.transform.json_data):
             self.json_data['transform'] = self.transform.json_data
-
+        
         # if bool(self.geometry.json_data):
         self.json_data['geometry'] = f'/Users/j/Desktop/g10/assets/geometry/{self.name}.json'
-        self.json_data['pipeline'] = 'color'
+        self.json_data['material'] = f'/Users/j/Desktop/g10/assets/material/{object.material_slots[0].material.name}.json'
+        self.json_data['pipeline'] = 'tbn'
 
         # if bool(self.rigidbody.json_data):
         #     self.json_data['rigidbody'] = json.loads(self.rigidbody.json())
@@ -400,6 +490,7 @@ class Scene:
                 # add the entity to the scene
                 self.json_data["entities"].append(e.json_data.copy())
 
+
             # Construct a light probe 
             elif object.type == 'LIGHT_PROBE':
                 continue
@@ -412,6 +503,7 @@ class Scene:
         return
 
     def json(self):
+        print(f'{self.name}: {self.json_data}\n')
 
         # done
         return json.dumps(self.json_data,indent=4)
@@ -427,7 +519,6 @@ class Scene:
         return
     
     def write_to_directory(self, path: str):
-
         return
 
 ## light

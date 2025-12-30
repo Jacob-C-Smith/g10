@@ -120,13 +120,25 @@ int game_logic ( g_instance *p_instance )
     // update the camera
     camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
 
-    p_entity->p_transform->rotation.x += 0.7f;
-    p_entity->p_transform->rotation.y += 0.7f;
-    p_entity->p_transform->rotation.z += 0.7f;
+    // p_entity->p_transform->rotation.x += 0.7f;
+    // p_entity->p_transform->rotation.y += 0.7f;
+    // p_entity->p_transform->rotation.z += 0.7f;
 
     if ( p_entity->p_transform->rotation.x > 360) p_entity->p_transform->rotation.x -= 360;
     if ( p_entity->p_transform->rotation.y > 360) p_entity->p_transform->rotation.y -= 360;
     if ( p_entity->p_transform->rotation.z > 360) p_entity->p_transform->rotation.z -= 360;
+
+    // p_entity = dict_get(p_instance->context.p_scene->entities, "Cylinder");
+
+    // p_entity->p_transform->rotation.x += 0.7f;
+    // p_entity->p_transform->rotation.y += 0.7f;
+    // p_entity->p_transform->rotation.z += 0.7f;
+
+    if ( p_entity->p_transform->rotation.x > 360) p_entity->p_transform->rotation.x -= 360;
+    if ( p_entity->p_transform->rotation.y > 360) p_entity->p_transform->rotation.y -= 360;
+    if ( p_entity->p_transform->rotation.z > 360) p_entity->p_transform->rotation.z -= 360;
+
+    // success
 
     // success
     return 1;

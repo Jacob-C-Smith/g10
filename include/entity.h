@@ -21,6 +21,7 @@
 #include <texture.h>
 #include <render_pass.h>
 #include <sampler.h>
+#include <material.h>
 
 // structure definitions
 struct entity_s
@@ -28,10 +29,8 @@ struct entity_s
     char _name[63+1];
     transform *p_transform;
     geometry *p_geometry;
-    vec3 color;
+    material *p_material;
     mat3 _inv_normal;
-    texture *p_texture;
-    texture *p_normal;
     char *pipeline;
 };
 

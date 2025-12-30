@@ -67,15 +67,19 @@ assets:
 	mkdir -p ./assets/input/texture
 	mkdir -p ./assets/input/entity
 	mkdir -p ./assets/input/scene
+	mkdir -p ./assets/input/material
 
 	# geometry
-	@./scripts/geometry/gport-geometry.sh g10_base_geometry | grep 'gport'
-	@./scripts/geometry/gport-geometry.sh g10_test_room | grep 'gport'
+	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
+	@./scripts/geometry/gport-geometry.sh g10_test_room #| grep 'gport'
 
 	# texture
 	@./scripts/texture/gport-texture.sh g10_base_geometry #| grep 'gport'
 	@./scripts/texture/gport-texture.sh g10_test_room #| grep 'gport'
 
+	# material
+	@./scripts/material/gport-material.sh g10_test_room #| grep 'gport'
+	
 	# entities
 	@./scripts/entity/gport-entity.sh g10_base_geometry #| grep 'gport'
 	@./scripts/entity/gport-entity.sh g10_test_room #| grep 'gport'
@@ -98,10 +102,12 @@ assets:
 	cp ./assets/input/geometry/* ./assets/geometry/
 	cp ./assets/input/entity/* ./assets/entity/
 	cp ./assets/input/scene/* ./assets/scene/
+	cp ./assets/input/material/* ./assets/material/
 
 	rm -rf ./assets/input/geometry || exit 0
 	rm -rf ./assets/input/texture || exit 0
 	rm -rf ./assets/input/entity || exit 0
+	rm -rf ./assets/input/material || exit 0
 	touch ./assets/input/ignore
 
 # Info

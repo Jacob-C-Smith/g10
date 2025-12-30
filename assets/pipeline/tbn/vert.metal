@@ -32,7 +32,7 @@ vertex VSOut vs_main(
     float4 worldPosition = transform.M * float4(in.position, 1.0);
     out.position = camera.P * camera.V * worldPosition;
     out.worldPos = worldPosition.xyz;
-    out.uv = in.uv;
+    out.uv = float2(in.uv.x, 1.0 - in.uv.y);
 
     // Create the TBN vectors
     float3x3 normalMatrix = float3x3(inv_mat.N[0].xyz, inv_mat.N[1].xyz, inv_mat.N[2].xyz);

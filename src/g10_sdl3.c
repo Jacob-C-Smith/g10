@@ -61,6 +61,7 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry );
 /// texture
 int g_sdl3_texture_from_data ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
 int g_sdl3_texture_construct ( texture **pp_texture, u32 width, u32 height, u32 channels, const void *p_data );
+int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a );
 int g_sdl3_texture_load ( texture **pp_texture, const char *p_path );
 
 /// sampler
@@ -2928,6 +2929,147 @@ int g_sdl3_texture_construct ( texture **pp_texture, u32 width, u32 height, u32 
     }
 }
 
+int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a )
+{
+
+    // argument check
+    if ( pp_texture == (void *) 0 ) goto no_texture;
+
+    // initialized data
+    g_instance *p_instance = g_active_instance();
+    texture *p_texture = default_allocator(0, sizeof(texture));
+
+    if ( p_texture == (void *) 0 ) goto no_mem;
+
+    // initialized data
+    SDL_GPUTextureCreateInfo _ci = { 0 };
+    SDL_GPUTransferBufferCreateInfo _tci = { 0 };
+    SDL_GPUTransferBuffer *p_transfer_buffer = NULL;
+    void *p_map = NULL;
+    SDL_GPUCommandBuffer *p_cmd = NULL;
+    SDL_GPUCopyPass *p_copy_pass = NULL;
+    SDL_GPUTextureTransferInfo _src = { 0 };
+    SDL_GPUTextureRegion _dst = { 0 };
+    u8 _color[4] = { (u8)(r*255), (u8)(g*255), (u8)(b*255), (u8)(a*255) };
+
+    // setup texture create info
+    _ci = (SDL_GPUTextureCreateInfo)
+    {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+        .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        .width = 1,  
+        .height = 1, 
+        .layer_count_or_depth = 1,  
+        .num_levels = 1,  
+        .sample_count = 0
+    };
+
+    // create the texture
+    p_texture->p_handle = SDL_CreateGPUTexture(p_instance->graphics.sdl3.device, &_ci);
+
+    // error check
+    if ( p_texture->p_handle == NULL ) goto failed_to_create_texture;
+
+    // setup transfer buffer create info
+    _tci = (SDL_GPUTransferBufferCreateInfo)
+    {
+        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+        .size = 4
+    };
+
+    // create the transfer buffer
+    p_transfer_buffer = SDL_CreateGPUTransferBuffer(p_instance->graphics.sdl3.device, &_tci);
+
+    // map the transfer buffer
+    p_map = SDL_MapGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer, false);
+
+    // copy the pixels
+    SDL_memcpy(p_map, &_color, 4);
+
+    // unmap the transfer buffer
+    SDL_UnmapGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
+
+    // acquire command buffer
+    p_cmd = SDL_AcquireGPUCommandBuffer(p_instance->graphics.sdl3.device);
+
+    // begin copy pass
+    p_copy_pass = SDL_BeginGPUCopyPass(p_cmd);
+
+    // setup source
+    _src = (SDL_GPUTextureTransferInfo)
+    {
+        .transfer_buffer = p_transfer_buffer,
+        .offset = 0,
+        .pixels_per_row = 1,
+        .rows_per_layer = 1
+    };
+
+    // setup destination
+    _dst = (SDL_GPUTextureRegion)
+    {
+        .texture = p_texture->p_handle,
+        .w = 1,
+        .h = 1,
+        .d = 1
+    };
+
+    // upload
+    SDL_UploadToGPUTexture(p_copy_pass, &_src, &_dst, false);
+
+    // end copy pass
+    SDL_EndGPUCopyPass(p_copy_pass);
+
+    // submit command buffer
+    SDL_SubmitGPUCommandBuffer(p_cmd);
+
+    // release transfer buffer
+    SDL_ReleaseGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
+
+    // return a pointer to the caller
+    *pp_texture = p_texture;
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_texture:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Null pointer provided for parameter \"pp_texture\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // image errors
+        {
+            failed_to_create_texture:
+                #ifndef NDEBUG
+                    log_error("[g10] [sdl3] Failed to create texture in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+
+        // standard library errors
+        {
+            no_mem:
+                #ifndef NDEBUG
+                    log_error("[Standard Library] Failed to allocate memory in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
 int g_sdl3_texture_load ( texture **pp_texture, const char *p_path )
 {
 
@@ -3139,7 +3281,7 @@ int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value )
         _ci = (SDL_GPUSamplerCreateInfo)
         {
             .min_filter = SDL_GPU_FILTER_LINEAR,
-            .mag_filter = SDL_GPU_FILTER_LINEAR,
+            .mag_filter = SDL_GPU_FILTER_NEAREST,
 
             .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
 

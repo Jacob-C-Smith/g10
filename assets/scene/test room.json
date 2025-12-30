@@ -21,9 +21,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back x wall.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "tbn"
         },
         {
             "name": "front x wall",
@@ -45,9 +44,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front x wall.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "tbn"
         },
         {
             "name": "back y wall",
@@ -69,16 +67,15 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "tbn"
         },
         {
             "name": "ramp shallow",
             "transform": {
                 "location": [
-                    17.0,
-                    18.667,
+                    20.0,
+                    -16.333,
                     0.0
                 ],
                 "rotation": [
@@ -93,16 +90,15 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp shallow.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "ramp 45",
             "transform": {
                 "location": [
-                    13.0,
-                    18.667,
+                    20.0,
+                    -5.333,
                     0.0
                 ],
                 "rotation": [
@@ -117,9 +113,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "ramp sign",
@@ -141,9 +136,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/sign2.json",
+            "pipeline": "tbn"
         },
         {
             "name": "white lighting base",
@@ -165,9 +159,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting base.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "white lighting element",
@@ -189,9 +182,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting element.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "octahedron",
@@ -213,33 +205,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/octahedron.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
-        },
-        {
-            "name": "white lighting noise",
-            "transform": {
-                "location": [
-                    -19.9,
-                    10.5,
-                    1.75
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting noise.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "tbn"
         },
         {
             "name": "ceiling",
@@ -261,9 +228,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ceiling.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "front y wall",
@@ -285,16 +251,15 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "tbn"
         },
         {
             "name": "ramp steep",
             "transform": {
                 "location": [
-                    9.0,
-                    18.667,
+                    20.0,
+                    5.667,
                     0.0
                 ],
                 "rotation": [
@@ -309,9 +274,8 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         },
         {
             "name": "floor",
@@ -333,9 +297,54 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
-            "pipeline": "tbn",
-            "texture" : "/Users/j/Desktop/g10/assets/texture/debug.png",
-            "normal" : "/Users/j/Desktop/g10/assets/texture/pitch_normal.png"
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "white lighting sign",
+            "transform": {
+                "location": [
+                    -19.9,
+                    10.5,
+                    1.75
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting sign.json",
+            "material": "/Users/j/Desktop/g10/assets/material/sign.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "wheel ramp",
+            "transform": {
+                "location": [
+                    19.0,
+                    16.667,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/wheel ramp.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "tbn"
         }
     ],
     "cameras": [
@@ -348,14 +357,14 @@
                 1.6
             ],
             "up": [
-                0.025,
-                -0.009,
+                0.0,
+                -0.0,
                 1.0
             ],
             "orientation": [
-                -5.939,
-                8.594,
-                1.626
+                -5.94,
+                8.592,
+                1.6
             ],
             "clip": {
                 "near": 0.1,

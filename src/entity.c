@@ -1,5 +1,6 @@
 // header
 #include <entity.h>
+#include <material.h>
 
 static float frand(void)
 {
@@ -55,7 +56,12 @@ int entity_info ( entity *p_entity )
     logger_pad(), printf("transform:\n"),
     logger_push(),
     transform_info(p_entity->p_transform),
-    logger_pop(),
+    logger_pop();
+
+    logger_pad(), printf("material:\n");
+    logger_push();
+
+    if ( p_entity->p_material ) material_info(p_entity->p_material);
 
     logger_pop();
     
@@ -74,11 +80,9 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
     dict *p_dict = p_value->object;
     json_value *p_name          = dict_get(p_dict, "name"),
-               *p_color         = dict_get(p_dict, "color"),
-               *p_texture       = dict_get(p_dict, "texture"),
-               *p_normal        = dict_get(p_dict, "normal"),
                *p_transform     = dict_get(p_dict, "transform"),
                *p_geometry      = dict_get(p_dict, "geometry"),
+               *p_material      = dict_get(p_dict, "material"),
                *p_pipeline_name = dict_get(p_dict, "pipeline");
 
     // store the name
@@ -114,69 +118,34 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         p_entity->p_geometry = p_geom;
     }
 
-    // default to pitch white
-    p_entity->color = (vec3)
+    // Parse Material
+    if ( p_material && p_material->type == JSON_VALUE_STRING )
     {
-        .x = 1.0f,
-        .y = 1.0f,
-        .z = 1.0f
-    };
-
-    // parse the color
-    if ( p_color )
-    {
-
-        // initialized data
-        array *p_array = p_color->list;
-        json_value *p_r = NULL,
-                   *p_g = NULL,
-                   *p_b = NULL;
-
-        // TODO: type check
-        //
+        // Load material from file
+        const char *path = p_material->string;
+        size_t len = load_file(path, 0, false);
         
-        // store the red, green, and blue components
-        array_index(p_array, 0, &p_r),
-        array_index(p_array, 1, &p_g),
-        array_index(p_array, 2, &p_b);
-
-        // store the color
-        p_entity->color = (vec3)
+        if ( len > 0 )
         {
-            .x = (float) p_r->number,
-            .y = (float) p_g->number,
-            .z = (float) p_b->number
-        };
-    }
-    else
-    {   
-        random_vibrant_color(
-            &p_entity->color.x,
-            &p_entity->color.y,
-            &p_entity->color.z
-        );
-    }
-    
-    // parse the texture
-    if ( p_texture )
-    {
+            // Allocate buffer
+            char *buf = default_allocator(0, len + 1);
+            if ( buf )
+            {
+                load_file(path, buf, false);
+                buf[len] = '\0'; // Null terminate
 
-        // initialized data
-        char *p_path = p_texture->string;
-
-        extern int g_sdl3_texture_load ( texture **pp_texture, const char *p_path );
-        g_sdl3_texture_load(&p_entity->p_texture, p_path);
-    }
-
-    // parse the normal
-    if ( p_normal )
-    {
-
-        // initialized data
-        char *p_path = p_normal->string;
-
-        extern int g_sdl3_texture_load ( texture **pp_normal, const char *p_path );
-        g_sdl3_texture_load(&p_entity->p_normal, p_path);
+                json_value *mat_json = 0;
+                if ( json_value_parse(buf, 0, &mat_json) )
+                {
+                    material_from_json(&p_entity->p_material, mat_json);
+                    
+                    // Ideally free mat_json here if logic existed
+                }
+                
+                // Free buffer
+                // default_allocator(buf, 0); 
+            }
+        }
     }
 
     // return a pointer to the caller
@@ -191,77 +160,13 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )
 {
 
-    // initialized data
-    g_instance *p_instance = g_active_instance();
-
     // transform
     transform_bind(p_render_pass, p_pipeline, p_entity->p_transform);
   
-    // color 
-    if ( 0 == strcmp(p_pipeline->_name, "color") )
+    // material
+    if ( p_entity->p_material )
     {
-    
-        // initialized data
-        uniform *p_color = NULL;
-
-        // get the color uniform
-        array_index(p_pipeline->p_uniforms, 0, (void **)&p_color);
-
-        // bind color
-        uniform_set_pack_push(p_color, &p_entity->color, (fn_pack *)vec3_pack);
-    } 
-    else if ( 
-        0 == strcmp(p_pipeline->_name, "texture") ||
-        0 == strcmp(p_pipeline->_name, "tbn")
-    )
-    {
-    
-        // initialized data
-        sampler *p_sampler_1  = NULL;
-        sampler *p_sampler_2  = NULL;
-        uniform *p_inv_normal = NULL;
-
-        // get the color uniform
-        array_index(p_pipeline->p_uniforms, 0, (void **)&p_inv_normal);
-
-        // get the texture uniform
-        array_index(p_pipeline->p_samplers, 0, (void **)&p_sampler_1);
-        array_index(p_pipeline->p_samplers, 1, (void **)&p_sampler_2);
-
-        {
-
-            // initialized data
-            mat4 _x = p_entity->p_transform->model;
-            mat4 _y = { 0 };
-
-            // inverse transpose
-            mat4_inverse(&_y, _x);
-            mat4_to_mat3(&p_entity->_inv_normal, _y);
-
-            // bind color
-            uniform_set_pack_push(p_inv_normal, &_y, (fn_pack *)mat4_pack);
-        }
-
-        SDL_BindGPUFragmentSamplers(
-            p_render_pass->p_handle,
-            0,
-            &(SDL_GPUTextureSamplerBinding)
-            {
-                .sampler = p_sampler_1->p_handle,
-                .texture = p_entity->p_texture->p_handle
-            },
-            1
-        );
-        SDL_BindGPUFragmentSamplers(
-            p_render_pass->p_handle,
-            1,
-            &(SDL_GPUTextureSamplerBinding)
-            {
-                .sampler = p_sampler_2->p_handle,
-                .texture = p_entity->p_normal->p_handle
-            },
-            1
-        );
+        material_bind(p_render_pass, p_pipeline, p_entity->p_material);
     }
 
     // bind the geometry
