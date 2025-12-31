@@ -30,6 +30,8 @@ struct transform_s
     vec3 scale;
 
     mat4 model;
+
+    transform *p_parent;
 };
 
 // function definitions
@@ -86,6 +88,16 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
 
 /// info
 int transform_info ( transform *p_transform );
+
+/** !
+ * Construct a transform from an AABB
+ * 
+ * @param p_transform the transform
+ * @param p_aabb      the AABB
+ * 
+ * @return 1 on success, 0 on error
+ */
+int transform_from_aabb ( transform *p_transform, aabb *p_aabb );
 
 /// destructors
 /** !

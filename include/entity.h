@@ -40,3 +40,5 @@ int entity_info ( entity *p_entity );
 int entity_from_json ( entity **pp_entity, json_value *p_value );
 
 int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity );
+
+int entity_draw ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity );

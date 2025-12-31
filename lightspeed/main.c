@@ -15,6 +15,7 @@
 
 // g10
 #include <g10.h>
+#include <transform.h>
 #include <renderer.h>
 #include <entity.h>
 #include <pipeline.h>
@@ -43,35 +44,19 @@ int main ( int argc, const char *argv[] )
 
     // program pipelines
     {
-        
-        // program color pipeline
-        ok &= program_pipeline("color", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
-        );
-
-        // program uv pipeline
-        ok &= program_pipeline("uv", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
-        );
-
-        // program normal pipeline
-        ok &= program_pipeline("normal", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
-        );
-        
-        // program tbn pipeline
-        ok &= program_pipeline("tbn", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
-        );
 
         // program default pipeline
         ok &= program_pipeline("default", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
+        );
+
+        // program aabb pipeline
+        ok &= program_pipeline("aabb", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)aabb_bind,
+            (fn_pipeline_draw *)aabb_draw
         );
     }
 
@@ -120,32 +105,15 @@ int main ( int argc, const char *argv[] )
 int game_logic ( g_instance *p_instance )
 {
 
-    // initialized data
-    entity *p_entity = dict_get(p_instance->context.p_scene->entities, "octahedron");
-
     // update the camera
     camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
 
-    // // p_entity->p_transform->rotation.x += 0.7f;
-    // // p_entity->p_transform->rotation.y += 0.7f;
-    // // p_entity->p_transform->rotation.z += 0.7f;
 
-    // if ( p_entity->p_transform->rotation.x > 360) p_entity->p_transform->rotation.x -= 360;
-    // if ( p_entity->p_transform->rotation.y > 360) p_entity->p_transform->rotation.y -= 360;
-    // if ( p_entity->p_transform->rotation.z > 360) p_entity->p_transform->rotation.z -= 360;
+    {
+        entity *p_entity = dict_get(p_instance->context.p_scene->entities, "back x wall");
 
-    // // p_entity = dict_get(p_instance->context.p_scene->entities, "Cylinder");
-
-    // // p_entity->p_transform->rotation.x += 0.7f;
-    // // p_entity->p_transform->rotation.y += 0.7f;
-    // // p_entity->p_transform->rotation.z += 0.7f;
-
-    // if ( p_entity->p_transform->rotation.x > 360) p_entity->p_transform->rotation.x -= 360;
-    // if ( p_entity->p_transform->rotation.y > 360) p_entity->p_transform->rotation.y -= 360;
-    // if ( p_entity->p_transform->rotation.z > 360) p_entity->p_transform->rotation.z -= 360;
-
-    // // success
-
+    }
+    
     // success
     return 1;
 }

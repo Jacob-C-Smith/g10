@@ -1182,6 +1182,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                    *p_source = (json_value *)dict_get(p_dict, "source"),
                    *p_vert = (json_value *)dict_get(p_source->object, "vert"),
                    *p_frag = (json_value *)dict_get(p_source->object, "frag"),
+                   *p_primitive = (json_value *)dict_get(p_dict, "primitive"),
                    *p_uniforms = (json_value *)dict_get(p_dict, "uniforms"),
                    *p_samplers = (json_value *)dict_get(p_dict, "samplers"),
                    *p_input = (json_value *)dict_get(p_dict, "input");
@@ -1203,6 +1204,9 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
             // initialized data
             size_t len = array_size(p_uniforms->list);
+
+            if ( 0 == len ) goto no_uniforms;
+
             array_construct(&p_pipeline->p_uniforms, len);
             dict_construct(&p_pipeline->uniforms, len, NULL);
 
@@ -1226,6 +1230,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 array_add(p_pipeline->p_uniforms, p_uniform);
             }
         }
+        no_uniforms:;
 
         // construct samplers
         if ( p_samplers )
@@ -1233,6 +1238,9 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
             // initialized data
             size_t len = array_size(p_samplers->list);
+
+            if ( 0 == len ) goto no_samplers;
+
             array_construct(&p_pipeline->p_samplers, len);
             dict_construct(&p_pipeline->samplers, len, NULL);
 
@@ -1256,6 +1264,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 array_add(p_pipeline->p_samplers, p_sampler);
             }
         }
+        no_samplers:;
 
         // construct pipeline
         {
@@ -1267,8 +1276,8 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             SDL_GPUGraphicsPipeline *pipeline = NULL;
             SDL_GPUVertexBufferDescription _vertex_buffer_descriptions[GEOMETRY_QTY] = { 0 };
             SDL_GPUVertexAttribute _vertex_attributes[GEOMETRY_QTY] = { 0 };
-            size_t uniform_count = ( p_uniforms ) ? array_size(p_pipeline->p_uniforms) : 0;
-            size_t sampler_count = ( p_samplers ) ? array_size(p_pipeline->p_samplers) : 0;
+            size_t uniform_count = ( p_pipeline->p_uniforms ) ? array_size(p_pipeline->p_uniforms) : 0;
+            size_t sampler_count = ( p_pipeline->p_samplers ) ? array_size(p_pipeline->p_samplers) : 0;
             size_t vertex_buffer_quantity = 0;
 
             // vertex shader
@@ -1299,6 +1308,12 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
                 // compile the vertex shader
                 vs = SDL_CreateGPUShader(p_instance->graphics.sdl3.device, &vs_ci);
+
+                // error check
+                if ( NULL == vs ) 
+                {
+                    log_error("[g10] [pipeline] Failed to compile vertex shader in call to function \"%s\"\n[sdl3] %s\n", __FUNCTION__, SDL_GetError());
+                }
             }
 
             // fragment shader
@@ -1329,6 +1344,13 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
                 // compile the fragment shader
                 fs = SDL_CreateGPUShader(p_instance->graphics.sdl3.device, &fs_ci);
+
+
+                // error check
+                if ( NULL == fs ) 
+                {
+                    log_error("[g10] [pipeline] Failed to compile fragment shader in call to function \"%s\"\n[sdl3] %s\n", __FUNCTION__, SDL_GetError());
+                }
             }
            
             // parse vertex buffers
@@ -1424,14 +1446,22 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             // todo: parse framebuffer
             //
 
-
-
-
+            SDL_GPUPrimitiveType primitive = -1;
             SDL_GPUColorTargetDescription ctd = 
             {
                 .format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM
             };
+
             
+                 if ( 0 == strcmp(p_primitive->string, "triangle") ) primitive = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+            else if ( 0 == strcmp(p_primitive->string, "point") ) primitive = SDL_GPU_PRIMITIVETYPE_POINTLIST;
+            else if ( 0 == strcmp(p_primitive->string, "line") ) primitive = SDL_GPU_PRIMITIVETYPE_LINELIST;
+            else {
+
+                log_error("[g10] [pipeline] Invalid primitive type \"%s\" in call to function \"%s\"\n", p_primitive->string, __FUNCTION__);
+                return 0;
+            }
+
             p_ci = (SDL_GPUGraphicsPipelineCreateInfo)
             {
                 .vertex_shader = vs,
@@ -1443,7 +1473,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                     .vertex_attributes = _vertex_attributes,
                     .num_vertex_attributes = vertex_buffer_quantity
                 },
-                .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
+                .primitive_type = primitive,
                 .rasterizer_state = 
                 {
                     .fill_mode = SDL_GPU_FILLMODE_FILL,
@@ -1481,6 +1511,12 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
             // link the graphics pipeline
             pipeline = SDL_CreateGPUGraphicsPipeline(p_instance->graphics.sdl3.device, &p_ci);
+
+            // error check
+            if ( NULL == pipeline ) 
+            {
+                log_error("[g10] [pipeline] Failed to construct pipeline in call to function \"%s\"\n[sdl3] %s\n", __FUNCTION__, SDL_GetError());
+            }
 
             // store the pipeline handle
             p_pipeline->pipeline = pipeline;
@@ -1641,37 +1677,9 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
         if ( p_pipeline->pfn_bind_each )
             p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
 
-        // draw something
-        if ( p_drawable->p_geometry )
-        if ( p_drawable->p_geometry->_parts[0].p_handle )
-        {
-            for (size_t i = 0; i < 4; i++)
-            {
-                if (p_drawable->p_geometry->_parts[i].p_handle == NULL) continue;
-                SDL_BindGPUIndexBuffer(
-                    p_render_pass->p_handle,
-                    &(SDL_GPUBufferBinding)
-                    {
-                        .buffer = p_drawable->p_geometry->_parts[i].p_handle,
-                        .offset = 0
-                    },
-                    SDL_GPU_INDEXELEMENTSIZE_32BIT
-                );
-
-                SDL_DrawGPUIndexedPrimitives(
-                    p_render_pass->p_handle, 
-                    p_drawable->p_geometry->_parts[i].index_count * 3, 
-                    1,
-                    0, 
-                    0, 
-                    0
-                );
-            }
-        }
-        else if ( p_drawable->p_geometry->p_index_handle )
-            SDL_DrawGPUIndexedPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->index_count * 3, 1, 0, 0, 0);
-        else
-            SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_drawable->p_geometry->vertex_count, 1, 0, 0);
+        // draw the drawable
+        if ( p_pipeline->pfn_draw )
+            p_pipeline->pfn_draw(p_render_pass, p_pipeline, p_drawable);
     }
     
     // success
@@ -2499,6 +2507,8 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
 
         // construct an aabb 
         aabb_from_bounds(&p_geometry->_bounds, min, max);
+
+        transform_construct(&p_geometry->p_local_transform, (vec3){0.0,0.0,0.0}, (vec3){0.0,0.0,0.0}, (vec3){1.0,1.0,1.0}, NULL);
         
         // done
         goto xyz_done;
@@ -2824,7 +2834,6 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
         // increment the quantity of bindings
         len++;
     }
-
     
     // bind the drawable geometry
     SDL_BindGPUVertexBuffers(

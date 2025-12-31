@@ -20,6 +20,17 @@ int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bin
     // success
     return 1;
 }
+
+int pipeline_set_draw (pipeline *p_pipeline, fn_pipeline_draw *pfn_draw)
+{
+
+    // store the draw function
+    p_pipeline->pfn_draw = pfn_draw;
+
+    // success
+    return 1;
+}
+
 void any_print(void *p_element, int i)
 {
     logger_pad(), printf("[%d] : %p\n", i, p_element);

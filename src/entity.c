@@ -2,40 +2,6 @@
 #include <entity.h>
 #include <material.h>
 
-static float frand(void)
-{
-    return (float)rand() / (float)RAND_MAX;
-}
-
-void hsv_to_rgb(float h, float s, float v, float *r, float *g, float *b)
-{
-    float c = v * s;
-    float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
-    float m = v - c;
-
-    float rp, gp, bp;
-
-    if (h < 1.0f/6.0f)      { rp = c; gp = x; bp = 0; }
-    else if (h < 2.0f/6.0f) { rp = x; gp = c; bp = 0; }
-    else if (h < 3.0f/6.0f) { rp = 0; gp = c; bp = x; }
-    else if (h < 4.0f/6.0f) { rp = 0; gp = x; bp = c; }
-    else if (h < 5.0f/6.0f) { rp = x; gp = 0; bp = c; }
-    else                    { rp = c; gp = 0; bp = x; }
-
-    *r = rp + m;
-    *g = gp + m;
-    *b = bp + m;
-}
-
-void random_vibrant_color(float *r, float *g, float *b)
-{
-    float h = frand();          // random hue
-    float s = 0.9f + 0.1f * frand(); // high saturation
-    float v = 0.9f + 0.1f * frand(); // high brightness
-
-    hsv_to_rgb(h, s, v, r, g, b);
-}
-
 // function definitions
 int entity_info ( entity *p_entity )
 {
@@ -116,6 +82,9 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // store the geometry in the entity's transform
         p_entity->p_geometry = p_geom;
+
+        // TODO: clean this up later so no dangling pointers
+        p_entity->p_geometry->p_local_transform->p_parent = p_entity->p_transform;
     }
 
     // Parse Material
@@ -161,13 +130,57 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
 {
 
     // transform
-    transform_bind(p_render_pass, p_pipeline, p_entity->p_transform);
+    transform_bind(p_render_pass, p_pipeline, p_entity->p_geometry->p_local_transform);
   
     // material
     if ( p_entity->p_material ) material_bind(p_render_pass, p_pipeline, p_entity->p_material);
     
     // bind the geometry
     geometry_bind(p_render_pass, p_entity->p_geometry);
+
+    // success
+    return 1;
+}
+
+int entity_draw ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )
+{
+
+    // draw geometry
+    if ( p_entity->p_geometry )
+
+    // no parts -> skip
+    if ( p_entity->p_geometry->_parts[0].p_handle )
+    {
+        for (size_t i = 0; i < 4; i++)
+        {
+
+            // no part -> skip
+            if (p_entity->p_geometry->_parts[i].p_handle == NULL) continue;
+            
+            SDL_BindGPUIndexBuffer(
+                p_render_pass->p_handle,
+                &(SDL_GPUBufferBinding)
+                {
+                    .buffer = p_entity->p_geometry->_parts[i].p_handle,
+                    .offset = 0
+                },
+                SDL_GPU_INDEXELEMENTSIZE_32BIT
+            );
+
+            SDL_DrawGPUIndexedPrimitives(
+                p_render_pass->p_handle, 
+                p_entity->p_geometry->_parts[i].index_count * 3, 
+                1,
+                0, 
+                0, 
+                0
+            );
+        }
+    }
+    else if ( p_entity->p_geometry->p_index_handle )
+        SDL_DrawGPUIndexedPrimitives(p_render_pass->p_handle, p_entity->p_geometry->index_count * 3, 1, 0, 0, 0);
+    else
+        SDL_DrawGPUPrimitives(p_render_pass->p_handle, p_entity->p_geometry->vertex_count, 1, 0, 0);
 
     // success
     return 1;

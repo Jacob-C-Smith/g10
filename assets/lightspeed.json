@@ -39,11 +39,8 @@
         "name"      : "renderer",
         "pipelines" :
         [
-            "assets/pipeline/color.json",
-            "assets/pipeline/uv.json",
-            "assets/pipeline/normal.json",
-            "assets/pipeline/tbn.json",
-            "assets/pipeline/default.json"
+            "assets/pipeline/default.json",
+            "assets/pipeline/aabb.json"
         ],
         "attachments" : 
         [
@@ -66,7 +63,7 @@
                     "color" : [ "OUTPUT" ],
                     "depth" : "depth"
                 },
-                "pipelines" : [ "color", "uv", "normal", "tbn", "default" ]
+                "pipelines" : [ "default", "aabb" ]
             }
         ]
     }

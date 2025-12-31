@@ -17,6 +17,7 @@
 
 // g10
 #include <gtypedef.h>
+#include <transform.h>
 #include <attachment.h>
 #include <pipeline.h>
 #include <renderer.h>
@@ -158,7 +159,7 @@ int g_init
 g_instance *g_active_instance ( void );
 
 int poll_input ( g_instance *p_instance );
-int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_bind_each *pfn_each );
+int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_bind_each *pfn_each, fn_pipeline_draw *pfn_draw );
 
 /** !
  * Return the size of a file IF buffer == 0 ELSE read a file into buffer

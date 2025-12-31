@@ -14,6 +14,7 @@
 
 // g10
 #include <gtypedef.h>
+#include <transform.h>
 #include <aabb.h>
 #include <g10.h>
 
@@ -37,7 +38,7 @@ struct geometry_s
     void *_p_handles[GEOMETRY_QTY];
     u32 index_count;
     void *p_index_handle;
-
+    transform *p_local_transform;
     struct 
     {
         void *p_handle;

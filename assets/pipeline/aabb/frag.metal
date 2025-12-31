@@ -1,14 +1,9 @@
 #include "shared.metal"
 
-struct FragmentUniforms {
-    float4 color;
+struct FragmentOutput {
+    float4 color0 [[color(0)]];
 };
 
-fragment float4 fs_main(
-    VSOut in [[stage_in]],
-    constant FragmentUniforms &uniforms [[buffer(0)]]
-) {
-
-    // done
-    return uniforms.color;
+fragment float4 fs_main() {
+    return float4(0.0,0.0,0.0,1.0);
 }

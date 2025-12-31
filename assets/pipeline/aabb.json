@@ -1,19 +1,19 @@
 {
-    "name" : "default",
+    "name" : "aabb",
     "source" : 
     {
-        "vert" : "assets/pipeline/default/default.metallib",
-        "frag" : "assets/pipeline/default/default.metallib"
+        "vert" : "assets/pipeline/aabb/aabb.metallib",
+        "frag" : "assets/pipeline/aabb/aabb.metallib"
     },
-    "input" : [ "xyz", "uv", "nxyz", "txyz" ],
-    "primitive" : "triangle",
+    "input" : [ ],
+    "primitive" : "point",
     "uniforms" :
     [
         {
-            "name" : "inv_normal",
+            "name" : "unused",
             "data" :
             [
-                { "inv_normal" : "mat4" }
+                { "unused" : "unused" }
             ]
         },
         {
@@ -32,13 +32,5 @@
             ]
         }
     ],
-    "samplers" :
-    [
-        {
-            "name" : "texture"
-        },
-        {
-            "name" : "normal"
-        }
-    ]
+    "samplers" : [ ]
 }

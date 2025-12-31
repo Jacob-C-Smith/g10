@@ -43,31 +43,36 @@ int main ( int argc, const char *argv[] )
         // program color pipeline
         ok &= program_pipeline("color", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
         );
 
         // program uv pipeline
         ok &= program_pipeline("uv", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
         );
 
         // program normal pipeline
         ok &= program_pipeline("normal", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
         );
         
         // program tbn pipeline
         ok &= program_pipeline("tbn", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
         );
         
         // program default pipeline
         ok &= program_pipeline("default", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind
+            (fn_pipeline_bind_each *)entity_bind,
+            (fn_pipeline_draw *)entity_draw
         );
     }
 

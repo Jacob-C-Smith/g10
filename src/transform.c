@@ -676,31 +676,31 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
      
     // initialized data
     uniform *p_m = NULL;
+    transform *p_iter = p_transform;
+    mat4 _accumulator = { 0 };
+
+    // initialize 
+    mat4_identity(&_accumulator);
 
     // get the transform uniform
     array_index(p_pipeline->p_uniforms, 1, (void **)&p_m);
-
-    // p_transform->rotation.x += 0.02f;
-    // p_transform->rotation.y += 0.02f;
-    // p_transform->rotation.z += 0.02f;
-
-    // if (p_transform->rotation.x > M_PI)
-    //     p_transform->rotation.x -= 2 * M_PI;
-    // if (p_transform->rotation.y > M_PI)
-    //     p_transform->rotation.y -= 2 * M_PI;
-    // if (p_transform->rotation.y > M_PI)
-    //     p_transform->rotation.y -= 2 * M_PI;
     
-    // compute the model matrix
-    mat4_model_from_vec3(
-        &p_transform->model,
-        p_transform->location,
-        p_transform->rotation,
-        p_transform->scale
-    );
+    while ( p_iter )
+    {
+        mat4 _temp = { 0 };
+
+        // accumulator = parent * accumulator
+        mat4_mul_mat4(&_temp, p_iter->model, _accumulator);
+        _accumulator = _temp;
+
+        p_iter = p_iter->p_parent;
+    }
+
     
     // bind model matrix
-    uniform_set_pack_push(p_m, &p_transform->model, (fn_pack *)mat4_pack);
+    uniform_set_pack_push(p_m, &_accumulator, (fn_pack *)mat4_pack);
+    
+    return 1;
 }
 
 int transform_info ( transform *p_transform )
@@ -715,6 +715,59 @@ int transform_info ( transform *p_transform )
     logger_pop();
 
     return 1;
+}
+
+int transform_from_aabb ( transform *p_transform, aabb *p_aabb )
+{
+
+    // argument check
+    if ( p_transform == (void *) 0 ) goto no_transform;
+    if ( p_aabb      == (void *) 0 ) goto no_aabb;
+
+    // rotation is zero
+    p_transform->rotation = (vec3) { 0, 0, 0 };
+
+    // location = (max + min) / 2
+    vec3_add_vec3(&p_transform->location, p_aabb->_max, p_aabb->_min);
+    vec3_mul_scalar(&p_transform->location, p_transform->location, 0.5f);
+
+    // scale = (max - min) / 2
+    vec3_sub_vec3(&p_transform->scale, p_aabb->_max, p_aabb->_min);
+    vec3_mul_scalar(&p_transform->scale, p_transform->scale, 0.5f);
+
+    // compute the model matrix
+    mat4_model_from_vec3(
+        &p_transform->model,
+        p_transform->location,
+        p_transform->rotation,
+        p_transform->scale
+    );
+
+    // success
+    return 1;
+
+    // error handling
+    {
+
+        // argument errors
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            no_aabb:
+                #ifndef NDEBUG
+                    log_error("[g10] [transform] Null pointer provided for parameter \"p_aabb\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
 }
 
 int transform_destroy ( transform **pp_transform )

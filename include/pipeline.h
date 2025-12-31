@@ -34,11 +34,13 @@ struct pipeline_s
 
     fn_pipeline_bind_once *pfn_bind_once;
     fn_pipeline_bind_each *pfn_bind_each;
+    fn_pipeline_draw      *pfn_draw;
 };
 
 // function declarations
 int pipeline_set_bind_once (pipeline *p_pipeline, fn_pipeline_bind_once *pfn_bind_once);
 int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bind_each);
+int pipeline_set_draw (pipeline *p_pipeline, fn_pipeline_draw *pfn_draw);
 
 /// print
 /** 
