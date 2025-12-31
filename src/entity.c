@@ -60,8 +60,8 @@ int entity_info ( entity *p_entity )
 
     logger_pad(), printf("material:\n");
     logger_push();
-
     if ( p_entity->p_material ) material_info(p_entity->p_material);
+    logger_pop();
 
     logger_pop();
     
@@ -164,11 +164,8 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
     transform_bind(p_render_pass, p_pipeline, p_entity->p_transform);
   
     // material
-    if ( p_entity->p_material )
-    {
-        material_bind(p_render_pass, p_pipeline, p_entity->p_material);
-    }
-
+    if ( p_entity->p_material ) material_bind(p_render_pass, p_pipeline, p_entity->p_material);
+    
     // bind the geometry
     geometry_bind(p_render_pass, p_entity->p_geometry);
 

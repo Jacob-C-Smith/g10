@@ -2,9 +2,9 @@
     "name": "octahedron",
     "transform": {
         "location": [
-            -18.0,
-            13.5,
-            2.0
+            24.0,
+            0.0,
+            0.0
         ],
         "rotation": [
             0.0,
@@ -18,6 +18,6 @@
         ]
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/octahedron.json",
-    "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+    "material": "/Users/j/Desktop/g10/assets/material/2x2.json",
     "pipeline": "tbn"
 }

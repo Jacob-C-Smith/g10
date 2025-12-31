@@ -19,6 +19,8 @@ int renderer_info ( renderer *p_renderer )
     
     logger_push(),
     array_foreach(p_renderer->p_passes, (fn_foreach *)render_pass_info);
+    logger_pop(),
+
     logger_pop();
 
     // success

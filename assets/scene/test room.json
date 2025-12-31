@@ -120,8 +120,8 @@
             "name": "ramp sign",
             "transform": {
                 "location": [
-                    13.0,
-                    5.0,
+                    0.0,
+                    -5.0,
                     0.0
                 ],
                 "rotation": [
@@ -136,11 +136,11 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
-            "material": "/Users/j/Desktop/g10/assets/material/sign2.json",
+            "material": "/Users/j/Desktop/g10/assets/material/sign 2.json",
             "pipeline": "tbn"
         },
         {
-            "name": "white lighting base",
+            "name": "pitch white base",
             "transform": {
                 "location": [
                     -18.0,
@@ -158,12 +158,12 @@
                     1.0
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting base.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white base.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
             "pipeline": "tbn"
         },
         {
-            "name": "white lighting element",
+            "name": "pitch white lighing",
             "transform": {
                 "location": [
                     -18.0,
@@ -181,54 +181,8 @@
                     1.0
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting element.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
-        },
-        {
-            "name": "octahedron",
-            "transform": {
-                "location": [
-                    -18.0,
-                    13.5,
-                    2.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/octahedron.json",
-            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-            "pipeline": "tbn"
-        },
-        {
-            "name": "ceiling",
-            "transform": {
-                "location": [
-                    0.0,
-                    0.0,
-                    6.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/ceiling.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white lighing.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
             "pipeline": "tbn"
         },
         {
@@ -304,7 +258,7 @@
             "name": "white lighting sign",
             "transform": {
                 "location": [
-                    -19.9,
+                    -19.8,
                     10.5,
                     1.75
                 ],
@@ -320,7 +274,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting sign.json",
-            "material": "/Users/j/Desktop/g10/assets/material/sign.json",
+            "material": "/Users/j/Desktop/g10/assets/material/pitch white sign.json",
             "pipeline": "tbn"
         },
         {
@@ -345,16 +299,269 @@
             "geometry": "/Users/j/Desktop/g10/assets/geometry/wheel ramp.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
             "pipeline": "tbn"
+        },
+        {
+            "name": "teapot",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/teapot.json",
+            "material": "/Users/j/Desktop/g10/assets/material/teapot.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal base",
+            "transform": {
+                "location": [
+                    -18.0,
+                    4.5,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal base.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal lighting",
+            "transform": {
+                "location": [
+                    -18.0,
+                    4.5,
+                    6.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal lighting.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal lighting sign",
+            "transform": {
+                "location": [
+                    -19.8,
+                    1.5,
+                    1.75
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal lighting sign.json",
+            "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "pitch white object",
+            "transform": {
+                "location": [
+                    -18.0,
+                    13.5,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "back y wall.001",
+            "transform": {
+                "location": [
+                    0.0,
+                    -20.0,
+                    3.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.001.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.001.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal object",
+            "transform": {
+                "location": [
+                    -18.0,
+                    4.5,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal object.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal2 base",
+            "transform": {
+                "location": [
+                    -18.0,
+                    -4.5,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 base.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal2 lighting",
+            "transform": {
+                "location": [
+                    -18.0,
+                    -4.5,
+                    6.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting.json",
+            "material": "/Users/j/Desktop/g10/assets/material/display.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal2 lighting sign",
+            "transform": {
+                "location": [
+                    -19.8,
+                    -7.5,
+                    1.75
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting sign.json",
+            "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
+            "pipeline": "tbn"
+        },
+        {
+            "name": "normal2 object",
+            "transform": {
+                "location": [
+                    -18.0,
+                    -4.5,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
+            "pipeline": "tbn"
         }
     ],
     "cameras": [
         {
-            "name": "Camera",
+            "name": "camera",
             "fov": 39.598,
             "location": [
-                -5.0,
-                8.25,
-                1.6
+                0.0,
+                -11.0,
+                2.0
             ],
             "up": [
                 0.0,
@@ -362,9 +569,9 @@
                 1.0
             ],
             "orientation": [
-                -5.94,
-                8.592,
-                1.6
+                0.0,
+                -10.0,
+                2.0
             ],
             "clip": {
                 "near": 0.1,

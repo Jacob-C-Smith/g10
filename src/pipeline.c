@@ -40,17 +40,19 @@ int pipeline_info ( pipeline *p_pipeline )
     array_fori(p_pipeline->p_uniforms, (fn_fori *)uniform_info);
     logger_pop(),
 
-    logger_pad(), printf("samplers[%d]: \n", array_size(p_pipeline->p_samplers)),
-    logger_push(),
-    array_foreach(p_pipeline->p_samplers, (fn_foreach *)sampler_info),
-    logger_pop(),
+    logger_pad(), printf("samplers[%d]: \n", (p_pipeline->p_samplers) ? array_size(p_pipeline->p_samplers) : 0);
+    if ( p_pipeline->p_samplers )
+        logger_push(),
+        array_foreach(p_pipeline->p_samplers, (fn_foreach *)sampler_info),
+        logger_pop();
 
-    
-    logger_pad(), printf("draw list[%d]: \n", array_size(p_pipeline->p_static_draw_list)),
-    logger_push(),
-    array_fori(p_pipeline->p_static_draw_list, (fn_fori *)any_print),
-    logger_pop(),
-    
+
+    logger_pad(), printf("draw list[%d]: \n", array_size(p_pipeline->p_static_draw_list));
+    if ( array_size(p_pipeline->p_static_draw_list) )
+        logger_push(),
+        array_fori(p_pipeline->p_static_draw_list, (fn_fori *)any_print),
+        logger_pop();
+        
     logger_pop();
 
     // success

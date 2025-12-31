@@ -18,6 +18,8 @@ int render_pass_info ( render_pass *p_render_pass )
     logger_pad(), printf("pipelines: \n"),
     logger_push(),
     array_foreach( p_render_pass->p_pipelines, (fn_foreach *) pipeline_info ),
+    logger_pop(),
+    
     logger_pop();
     
     // success

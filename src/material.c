@@ -79,7 +79,7 @@ int material_from_json ( material **pp_material, json_value *p_value )
     if ( p_metallic )
     {
         if ( p_metallic->type == JSON_VALUE_STRING )
-             g_sdl3_texture_load(&p_material->p_metallic_map, p_metallic->string);
+             g_sdl3_texture_load(&p_material->p_metal_map, p_metallic->string);
         else if ( p_metallic->type == JSON_VALUE_NUMBER )
             p_material->metallic_value = (float)p_metallic->number;
     }
@@ -90,14 +90,20 @@ int material_from_json ( material **pp_material, json_value *p_value )
 
 int material_bind ( render_pass *p_render_pass, pipeline *p_pipeline, material *p_material )
 {
-    if ( !p_material ) return 0;
 
+    // argument check
+    if ( NULL == p_material ) return 0;
 
+    // initialized data
     sampler *p_texture_sampler = NULL;
     sampler *p_normal_sampler = NULL;
-
+    sampler *p_roughness_sampler = NULL;
+    sampler *p_metal_sampler = NULL;
+    
     array_index(p_pipeline->p_samplers, 0, &p_texture_sampler);
     array_index(p_pipeline->p_samplers, 1, &p_normal_sampler);
+    //array_index(p_pipeline->p_samplers, 2, &p_roughness_sampler);
+    //array_index(p_pipeline->p_samplers, 3, &p_metal_sampler);
 
     if ( p_material->p_albedo_map )
     {
@@ -124,7 +130,33 @@ int material_bind ( render_pass *p_render_pass, pipeline *p_pipeline, material *
             1
         );
     }
+/*
+    if ( p_material->p_roughness_map )
+    {
+        SDL_BindGPUFragmentSamplers(
+            p_render_pass->p_handle,
+            p_roughness_sampler->idx, 
+            &(SDL_GPUTextureSamplerBinding){
+                .sampler = p_roughness_sampler->p_handle,
+                .texture = p_material->p_roughness_map->p_handle
+            },
+            1
+        );
+    }    
 
+    if ( p_material->p_metal_map )
+    {
+        SDL_BindGPUFragmentSamplers(
+            p_render_pass->p_handle,
+            p_metal_sampler->idx, 
+            &(SDL_GPUTextureSamplerBinding){
+                .sampler = p_metal_sampler->p_handle,
+                .texture = p_material->p_metal_map->p_handle
+            },
+            1
+        );
+    }
+*/
     return 1;
 }
 

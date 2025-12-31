@@ -1,0 +1,23 @@
+{
+    "name": "normal2 object",
+    "transform": {
+        "location": [
+            -18.0,
+            -4.5,
+            2.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
+    "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
+    "pipeline": "tbn"
+}

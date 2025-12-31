@@ -1,0 +1,23 @@
+{
+    "name": "back y wall.001",
+    "transform": {
+        "location": [
+            0.0,
+            -20.0,
+            3.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.001.json",
+    "material": "/Users/j/Desktop/g10/assets/material/wall.001.json",
+    "pipeline": "tbn"
+}

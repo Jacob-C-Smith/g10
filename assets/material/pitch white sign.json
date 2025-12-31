@@ -1,0 +1,16 @@
+{
+    "name": "pitch white sign",
+    "albedo": "assets/texture/pitch white sign.png",
+    "roughness": 0.5,
+    "metallic": 0.0,
+    "normal": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "emission": [
+        0.0,
+        0.0,
+        0.0
+    ]
+}

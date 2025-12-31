@@ -73,7 +73,6 @@ assets:
 	rm -rf ./assets/geometry/*
 	rm -rf ./assets/material/*
 	rm -rf ./assets/scene/*
-	rm -rf ./assets/texture/*
 
 	# geometry
 	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
@@ -103,12 +102,13 @@ assets:
 	@./scripts/pipeline/compile-metal-shader.sh texture
 	@./scripts/pipeline/compile-metal-shader.sh normal
 	@./scripts/pipeline/compile-metal-shader.sh tbn
+	@./scripts/pipeline/compile-metal-shader.sh default
 
-	cp -f ./assets/input/entity/* ./assets/entity/
-	cp -f ./assets/input/geometry/* ./assets/geometry/
-	cp -f ./assets/input/material/* ./assets/material/
-	cp -f ./assets/input/scene/* ./assets/scene/
-	cp -f ./assets/input/texture/* ./assets/texture/
+	mv ./assets/input/entity/* ./assets/entity/
+	mv ./assets/input/geometry/* ./assets/geometry/
+	mv ./assets/input/material/* ./assets/material/
+	mv ./assets/input/scene/* ./assets/scene/
+	mv ./assets/input/texture/* ./assets/texture/
 
 	rm -rf ./assets/input/entity || exit 0
 	rm -rf ./assets/input/geometry || exit 0

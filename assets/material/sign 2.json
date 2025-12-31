@@ -1,0 +1,16 @@
+{
+    "name": "sign 2",
+    "albedo": "assets/texture/sign 2.png",
+    "roughness": 0.0,
+    "metallic": 0.0,
+    "normal": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "emission": [
+        0.0,
+        0.0,
+        0.0
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "name": "pitch white base",
+    "transform": {
+        "location": [
+            -18.0,
+            13.5,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white base.json",
+    "material": "/Users/j/Desktop/g10/assets/material/display.json",
+    "pipeline": "tbn"
+}

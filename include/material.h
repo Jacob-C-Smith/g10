@@ -27,7 +27,7 @@ struct material_s
     // Texture Maps
     texture *p_albedo_map;
     texture *p_roughness_map;
-    texture *p_metallic_map;
+    texture *p_metal_map;
     texture *p_normal_map;
     texture *p_emission_map;
 };

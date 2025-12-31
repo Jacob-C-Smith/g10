@@ -1,0 +1,43 @@
+{
+    "name" : "default",
+    "source" : 
+    {
+        "vert" : "assets/pipeline/default/default.metallib",
+        "frag" : "assets/pipeline/default/default.metallib"
+    },
+    "input" : [ "xyz", "uv", "nxyz", "txyz" ],
+    "uniforms" :
+    [
+        {
+            "name" : "inv_normal",
+            "data" :
+            [
+                { "inv_normal" : "mat4" }
+            ]
+        },
+        {
+            "name" : "transform",
+            "data" :
+            [
+                { "M" : "mat4" }
+            ]
+        },
+        {
+            "name" : "camera",
+            "data" : 
+            [
+                { "V" : "mat4" },
+                { "P" : "mat4" }
+            ]
+        }
+    ],
+    "samplers" :
+    [
+        {
+            "name" : "texture"
+        },
+        {
+            "name" : "normal"
+        }
+    ]
+}
