@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
     "material": "/Users/j/Desktop/g10/assets/material/sign 2.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }

@@ -22,7 +22,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back x wall.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "front x wall",
@@ -45,7 +45,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front x wall.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "back y wall",
@@ -68,7 +68,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "ramp shallow",
@@ -91,7 +91,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp shallow.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "ramp 45",
@@ -114,7 +114,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "ramp sign",
@@ -137,7 +137,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp sign.json",
             "material": "/Users/j/Desktop/g10/assets/material/sign 2.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "pitch white base",
@@ -160,7 +160,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white base.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "pitch white lighing",
@@ -183,7 +183,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white lighing.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "front y wall",
@@ -206,7 +206,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "ramp steep",
@@ -229,7 +229,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "floor",
@@ -252,7 +252,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "white lighting sign",
@@ -275,7 +275,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting sign.json",
             "material": "/Users/j/Desktop/g10/assets/material/pitch white sign.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "wheel ramp",
@@ -298,7 +298,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/wheel ramp.json",
             "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "teapot",
@@ -321,7 +321,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/teapot.json",
             "material": "/Users/j/Desktop/g10/assets/material/teapot.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal base",
@@ -344,7 +344,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal base.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal lighting",
@@ -367,7 +367,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal lighting.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal lighting sign",
@@ -390,7 +390,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal lighting sign.json",
             "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "pitch white object",
@@ -413,7 +413,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.json",
             "material": "/Users/j/Desktop/g10/assets/material/r.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "back y wall.001",
@@ -436,7 +436,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.001.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.001.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal object",
@@ -459,7 +459,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal object.json",
             "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal2 base",
@@ -482,7 +482,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 base.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal2 lighting",
@@ -505,7 +505,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting.json",
             "material": "/Users/j/Desktop/g10/assets/material/display.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal2 lighting sign",
@@ -528,7 +528,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting sign.json",
             "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         },
         {
             "name": "normal2 object",
@@ -551,7 +551,7 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
             "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
-            "pipeline": "tbn"
+            "pipeline": "default"
         }
     ],
     "cameras": [

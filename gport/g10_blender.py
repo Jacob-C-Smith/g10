@@ -365,7 +365,7 @@ class Entity:
         # if bool(self.geometry.json_data):
         self.json_data['geometry'] = f'/Users/j/Desktop/g10/assets/geometry/{self.name}.json'
         self.json_data['material'] = f'/Users/j/Desktop/g10/assets/material/{object.material_slots[0].material.name}.json'
-        self.json_data['pipeline'] = 'tbn'
+        self.json_data['pipeline'] = 'default'
 
         # if bool(self.rigidbody.json_data):
         #     self.json_data['rigidbody'] = json.loads(self.rigidbody.json())

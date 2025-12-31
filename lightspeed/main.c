@@ -67,6 +67,12 @@ int main ( int argc, const char *argv[] )
             (fn_pipeline_bind_once *)camera_bind_active,
             (fn_pipeline_bind_each *)entity_bind
         );
+
+        // program default pipeline
+        ok &= program_pipeline("default", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)entity_bind
+        );
     }
 
     // user code 

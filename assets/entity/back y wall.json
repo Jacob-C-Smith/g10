@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
     "material": "/Users/j/Desktop/g10/assets/material/wall.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }

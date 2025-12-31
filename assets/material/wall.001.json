@@ -1,6 +1,6 @@
 {
     "name": "wall.001",
-    "albedo": "assets/texture/debug.001.png",
+    "albedo": "assets/texture/debug.png",
     "roughness": 0.0,
     "metallic": 0.0,
     "normal": [

@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
     "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }

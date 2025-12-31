@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting sign.json",
     "material": "/Users/j/Desktop/g10/assets/material/pitch white sign.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }

@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/wheel ramp.json",
     "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }

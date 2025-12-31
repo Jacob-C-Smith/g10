@@ -19,5 +19,5 @@
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting sign.json",
     "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
-    "pipeline": "tbn"
+    "pipeline": "default"
 }
