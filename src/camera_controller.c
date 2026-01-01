@@ -51,7 +51,9 @@ int camera_controller_first_person_update ( camera *p_camera )
         // accumulate 
         p_camera->view.location.x += _displacement.x,
         p_camera->view.location.y += _displacement.y;
-        p_camera->view.location.z += _displacement.z;
+        // p_camera->view.location.z += _displacement.z;
+
+        
 
         // up / down
         vec3 _up_prime = { 0 };

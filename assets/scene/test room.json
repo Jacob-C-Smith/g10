@@ -90,7 +90,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp shallow.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "material": "/Users/j/Desktop/g10/assets/material/ramp.json",
             "pipeline": "default"
         },
         {
@@ -113,7 +113,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp 45.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "material": "/Users/j/Desktop/g10/assets/material/ramp.json",
             "pipeline": "default"
         },
         {
@@ -228,7 +228,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "material": "/Users/j/Desktop/g10/assets/material/ramp.json",
             "pipeline": "default"
         },
         {
@@ -297,30 +297,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/wheel ramp.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "default"
-        },
-        {
-            "name": "teapot",
-            "transform": {
-                "location": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/teapot.json",
-            "material": "/Users/j/Desktop/g10/assets/material/teapot.json",
+            "material": "/Users/j/Desktop/g10/assets/material/ramp.json",
             "pipeline": "default"
         },
         {
@@ -551,6 +528,29 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
             "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Cube",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.5,
+                    0.5,
+                    0.5
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Cube.json",
+            "material": "/Users/j/Desktop/g10/assets/material/calibration.json",
             "pipeline": "default"
         }
     ],

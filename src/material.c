@@ -51,16 +51,7 @@ int material_from_json ( material **pp_material, json_value *p_value )
             g_sdl3_texture_load(&p_material->p_normal_map, p_normal->string);
         else if ( p_normal->type == JSON_VALUE_ARRAY )
         {
-            array *list = p_normal->list;
-            json_value *r=0, *g=0, *b=0;
-            array_index(list, 0, &r);
-            array_index(list, 1, &g);
-            array_index(list, 2, &b);
-            if(r) p_material->albedo_color.x = (float)r->number;
-            if(g) p_material->albedo_color.y = (float)g->number;
-            if(b) p_material->albedo_color.z = (float)b->number;
-
-            g_sdl3_texture_from_color(&p_material->p_normal_map, r->number, g->number, b->number, 1.0);
+            g_sdl3_texture_from_color(&p_material->p_normal_map, 0.5, 0.5, 1.0, 1.0);
         }
     }
 

@@ -21,7 +21,6 @@
 #include <geometry.h>
 #include <render_pass.h>
 #include <uniform.h>
-#include <aabb.h>
 
 // entry point
 int main ( int argc, const char *argv[] ) 

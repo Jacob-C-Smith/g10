@@ -75,7 +75,7 @@ assets:
 	rm -rf ./assets/scene/*
 
 	# geometry
-	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
+# 	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
 	@./scripts/geometry/gport-geometry.sh g10_test_room #| grep 'gport'
 
 	# texture
@@ -120,7 +120,7 @@ assets:
 
 # Assets 2
 assets2:
-	@./scripts/assets/gport-assets.sh assets/
+	@./scripts/assets/gport-assets.sh assets
 
 # Info
 info:

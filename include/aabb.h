@@ -21,14 +21,12 @@ struct aabb_s
 {
     vec3 _min;
     vec3 _max;
-    vec3 _color;
 };
 
 #include <g10.h>
 
 // function declarations
 int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max );
-int aabb_from_transform ( aabb *p_aabb, transform *p_transform );
 int aabb_bind ( render_pass *p_render_pass, pipeline *p_pipeline, aabb *p_aabb );
 int aabb_draw ( render_pass *p_render_pass, pipeline *p_pipeline, aabb *p_aabb );
 

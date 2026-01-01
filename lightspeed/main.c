@@ -107,12 +107,6 @@ int game_logic ( g_instance *p_instance )
 
     // update the camera
     camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
-
-
-    {
-        entity *p_entity = dict_get(p_instance->context.p_scene->entities, "back x wall");
-
-    }
     
     // success
     return 1;

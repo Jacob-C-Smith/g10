@@ -85,6 +85,15 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // TODO: clean this up later so no dangling pointers
         p_entity->p_geometry->p_local_transform->p_parent = p_entity->p_transform;
+
+        aabb_from_entity(&p_entity->p_geometry->_bounds, p_entity);
+
+        {
+            pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "aabb");
+            if ( p_pipeline )
+                array_add(p_pipeline->p_static_draw_list, &p_entity->p_geometry->_bounds);
+        }
+
     }
 
     // Parse Material
@@ -124,6 +133,67 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     return 1;
     
     no_entity: return 0;
+}
+
+int aabb_from_entity ( aabb *p_aabb, entity *p_entity )
+{
+
+    // error check
+    if ( NULL == p_aabb ) goto no_aabb;
+    if ( NULL == p_entity ) goto no_entity;
+    if ( NULL == p_entity->p_geometry ) goto no_geometry;
+    if ( NULL == p_entity->p_transform ) goto no_transform;
+
+    // initialized data
+    vec3 min = p_entity->p_geometry->_bounds._min;
+    vec3 max = p_entity->p_geometry->_bounds._max;
+    mat4 model = p_entity->p_transform->model;
+
+    // corners of the aabb
+    vec3 corners[8] = 
+    {
+        { min.x, min.y, min.z },
+        { max.x, min.y, min.z },
+        { min.x, max.y, min.z },
+        { max.x, max.y, min.z },
+        { min.x, min.y, max.z },
+        { max.x, min.y, max.z },
+        { min.x, max.y, max.z },
+        { max.x, max.y, max.z }
+    };
+
+    // transform the corners
+    vec3 new_min = {  3.402823e+38F,  3.402823e+38F,  3.402823e+38F };
+    vec3 new_max = { -3.402823e+38F, -3.402823e+38F, -3.402823e+38F };
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        vec4 v_in = { corners[i].x, corners[i].y, corners[i].z, 1.0f };
+        vec4 v_out;
+        
+        mat4_mul_vec4(&v_out, model, v_in);
+
+        if ( v_out.x < new_min.x ) new_min.x = v_out.x;
+        if ( v_out.y < new_min.y ) new_min.y = v_out.y;
+        if ( v_out.z < new_min.z ) new_min.z = v_out.z;
+
+        if ( v_out.x > new_max.x ) new_max.x = v_out.x;
+        if ( v_out.y > new_max.y ) new_max.y = v_out.y;
+        if ( v_out.z > new_max.z ) new_max.z = v_out.z;
+    }
+
+    // store the result
+    p_aabb->_min = new_min;
+    p_aabb->_max = new_max;
+
+    // success
+    return 1;
+
+    no_aabb:
+    no_entity:
+    no_geometry:
+    no_transform:
+        return 0;
 }
 
 int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )

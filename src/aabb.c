@@ -2,7 +2,7 @@
 #include <aabb.h>
 
 // function definitions
-
+/*
 static float frand(void)
 {
     return (float)rand() / (float)RAND_MAX;
@@ -35,6 +35,7 @@ void random_vibrant_color(float *r, float *g, float *b)
 
     hsv_to_rgb(h, s, v, r, g, b);
 }
+*/
 
 int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
 {
@@ -50,11 +51,8 @@ int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
     *p_aabb = (aabb)
     {
         ._min = min,
-        ._max = max,
-        ._color = { 0 }
+        ._max = max
     };
-
-    random_vibrant_color(&p_aabb->_color.x, &p_aabb->_color.y, &p_aabb->_color.z);
 
     if ( p_pipeline )
         array_add(p_pipeline->p_static_draw_list, p_aabb);
@@ -142,9 +140,6 @@ int aabb_from_transform ( aabb *p_aabb, transform *p_transform )
     // populate the struct
     p_aabb->_min = min_bounds;
     p_aabb->_max = max_bounds;
-
-    // random color
-    random_vibrant_color(&p_aabb->_color.x, &p_aabb->_color.y, &p_aabb->_color.z);
 
     // done
     return 1;

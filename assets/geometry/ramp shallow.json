@@ -298,7 +298,7 @@
     ],
     "parts": [
         {
-            "material": "floor",
+            "material": "ramp",
             "idx": [
                 0,
                 2,

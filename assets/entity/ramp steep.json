@@ -18,6 +18,6 @@
         ]
     },
     "geometry": "/Users/j/Desktop/g10/assets/geometry/ramp steep.json",
-    "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+    "material": "/Users/j/Desktop/g10/assets/material/ramp.json",
     "pipeline": "default"
 }

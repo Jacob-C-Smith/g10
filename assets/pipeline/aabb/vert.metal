@@ -33,7 +33,7 @@ vertex VSOut vs_main(
 
     float4 worldPosition = transform.M * float4(position[vid], 1.0);
     out.position = camera.P * camera.V * worldPosition;
-    out.pointSize = 10.0;
+    out.pointSize = clamp(10.0 / out.position.z, 4.0, 16.0);
 
     return out;
 }

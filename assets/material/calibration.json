@@ -1,7 +1,7 @@
 {
-    "name": "teapot",
+    "name": "calibration",
     "albedo": [
-        0.443,
+        0.8,
         0.8,
         0.8
     ],

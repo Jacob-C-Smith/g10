@@ -675,7 +675,8 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
 {
      
     // initialized data
-    uniform *p_m = NULL;
+    uniform *p_m   = (void *) 0;
+    uniform *p_inv = (void *) 0;
     transform *p_iter = p_transform;
     mat4 _accumulator = { 0 };
 
@@ -698,7 +699,16 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
 
     
     // bind model matrix
-    uniform_set_pack_push(p_m, &_accumulator, (fn_pack *)mat4_pack);
+    if ( p_m ) uniform_set_pack_push(p_m, &_accumulator, (fn_pack *)mat4_pack);
+
+    // bind inv normal matrix
+    if ( array_index(p_pipeline->p_uniforms, 0, (void **)&p_inv) )
+    {
+        mat4 inv = { 0 }, inv_trans = { 0 };
+        mat4_inverse(&inv, _accumulator);
+        mat4_transpose(&inv_trans, inv);
+        uniform_set_pack_push(p_inv, &inv_trans, (fn_pack *)mat4_pack);
+    }
     
     return 1;
 }

@@ -33,7 +33,7 @@ int pipeline_set_draw (pipeline *p_pipeline, fn_pipeline_draw *pfn_draw)
 
 void any_print(void *p_element, int i)
 {
-    logger_pad(), printf("[%d] : %p\n", i, p_element);
+    logger_pad(), printf("[%d] : %p\n", i, (size_t)p_element & 0xfffff);
 
     return;
 }
