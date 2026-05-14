@@ -1,0 +1,812 @@
+{
+    "name": "level 1",
+    "entities": [
+        {
+            "name": "Plane",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.001",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.001.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.003",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.003.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.004",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.004.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.005",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.005.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Elbow Joint.001",
+            "transform": {
+                "location": [
+                    39.94,
+                    14.348,
+                    1.854
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Elbow Joint.001.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.006",
+            "transform": {
+                "location": [
+                    40.0,
+                    28.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.006.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.007",
+            "transform": {
+                "location": [
+                    40.0,
+                    28.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.007.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.009",
+            "transform": {
+                "location": [
+                    40.0,
+                    28.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.009.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.010",
+            "transform": {
+                "location": [
+                    40.0,
+                    28.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.010.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.011",
+            "transform": {
+                "location": [
+                    40.0,
+                    28.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.011.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.002",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.002.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.008",
+            "transform": {
+                "location": [
+                    40.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.008.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.012",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.012.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.013",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.013.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.014",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.014.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.015",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.015.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.016",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.016.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Elbow Joint.002",
+            "transform": {
+                "location": [
+                    -40.06,
+                    -15.652,
+                    1.854
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Elbow Joint.002.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.017",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -2.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.017.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.018",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -2.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.018.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.019",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -2.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.019.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.020",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -2.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.020.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.021",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -2.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.021.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.022",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.022.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.023",
+            "transform": {
+                "location": [
+                    -40.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.023.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.024",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    -0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.024.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.025",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    -0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.025.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.026",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    -0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.026.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.027",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    -0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.027.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.028",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    10.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.028.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Plane.029",
+            "transform": {
+                "location": [
+                    0.0,
+                    0.0,
+                    -0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Plane.029.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Elbow Joint.004",
+            "transform": {
+                "location": [
+                    25.0,
+                    -0.023,
+                    1.84
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Elbow Joint.004.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "Elbow Joint.003",
+            "transform": {
+                "location": [
+                    -25.0,
+                    -0.023,
+                    1.841
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/Elbow Joint.003.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
+            "pipeline": "default"
+        }
+    ],
+    "cameras": [
+        {
+            "name": "Camera.001",
+            "fov": 39.598,
+            "location": [
+                -40.0,
+                -35.0,
+                1.6
+            ],
+            "up": [
+                0.0,
+                -0.0,
+                1.0
+            ],
+            "orientation": [
+                -40.0,
+                -34.0,
+                1.6
+            ],
+            "clip": {
+                "near": 0.1,
+                "far": 1000.0
+            }
+        }
+    ]
+}

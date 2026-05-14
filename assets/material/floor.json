@@ -1,7 +1,7 @@
 {
     "name": "floor",
-    "albedo": "assets/texture/g10 big padded.png",
-    "roughness": 0.0,
+    "albedo": "assets/texture/floor2.png",
+    "roughness": 0.5,
     "metallic": 0.0,
     "normal": [
         0.0,

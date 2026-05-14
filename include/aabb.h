@@ -26,9 +26,20 @@ struct aabb_s
 #include <g10.h>
 
 // function declarations
-int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max );
 int aabb_bind ( render_pass *p_render_pass, pipeline *p_pipeline, aabb *p_aabb );
 int aabb_draw ( render_pass *p_render_pass, pipeline *p_pipeline, aabb *p_aabb );
+
+/// constructors
+/** 
+ * Construct an axis aligned bounding box from bounds
+ * 
+ * @param p_aabb pointer to AABB
+ * @param min    the minimum bound
+ * @param max    the maximum bound
+ * 
+ * @return 1 on success, 0 on error
+ */
+int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max );
 
 /// print
 /** 

@@ -15,12 +15,18 @@
 
 // g10
 #include <g10.h>
+#include <transform.h>
 #include <renderer.h>
 #include <entity.h>
 #include <pipeline.h>
 #include <geometry.h>
 #include <render_pass.h>
 #include <uniform.h>
+#include <aabb.h>
+#include <user_code.h>
+
+// function declarations
+int game_logic ( g_instance *p_instance );
 
 // entry point
 int main ( int argc, const char *argv[] ) 
@@ -38,42 +44,27 @@ int main ( int argc, const char *argv[] )
 
     // program pipelines
     {
-        
-        // program color pipeline
-        ok &= program_pipeline("color", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind,
-            (fn_pipeline_draw *)entity_draw
-        );
 
-        // program uv pipeline
-        ok &= program_pipeline("uv", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind,
-            (fn_pipeline_draw *)entity_draw
-        );
-
-        // program normal pipeline
-        ok &= program_pipeline("normal", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind,
-            (fn_pipeline_draw *)entity_draw
-        );
-        
-        // program tbn pipeline
-        ok &= program_pipeline("tbn", 
-            (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)entity_bind,
-            (fn_pipeline_draw *)entity_draw
-        );
-        
         // program default pipeline
         ok &= program_pipeline("default", 
             (fn_pipeline_bind_once *)camera_bind_active,
             (fn_pipeline_bind_each *)entity_bind,
             (fn_pipeline_draw *)entity_draw
         );
+
+        // program aabb pipeline
+        ok &= program_pipeline("aabb", 
+            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_each *)aabb_bind,
+            (fn_pipeline_draw *)aabb_draw
+        );
     }
+
+    // user code 
+    user_code_set_callback((fn_user_code *)game_logic);
+
+    // logs
+    instance_info(p_instance);
 
     // set running flag
     p_instance->running = ok;
@@ -84,6 +75,9 @@ int main ( int argc, const char *argv[] )
 
         // poll input
         poll_input(p_instance);
+        
+        // user code
+        user_code(p_instance);
 
         // render the frame
         renderer_render(p_instance);
@@ -106,4 +100,14 @@ int main ( int argc, const char *argv[] )
             log_warning("Error: Failed to teardown g10!\n");
             return EXIT_FAILURE;
     }
+}
+
+int game_logic ( g_instance *p_instance )
+{
+
+    // update the camera
+    camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
+    
+    // success
+    return 1;
 }

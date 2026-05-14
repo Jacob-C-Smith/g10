@@ -9,8 +9,8 @@
     "window" : 
     {
         "title" : "lightspeed",
-        "width" : 1280,
-        "height" : 720
+        "width" : 1600,
+        "height" : 900
     },
     "input" :
     {
@@ -33,7 +33,7 @@
             "QUIT"         : [ "ESCAPE" ]
         }
     },
-    "scene" : "assets/scene/test room.json",
+    "scene" : "assets/scene/level 1.json",
     "renderer" : 
     {
         "name"      : "renderer",

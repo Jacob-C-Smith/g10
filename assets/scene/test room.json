@@ -21,7 +21,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back x wall.json",
-            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall5.json",
             "pipeline": "default"
         },
         {
@@ -44,7 +44,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front x wall.json",
-            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall5.json",
             "pipeline": "default"
         },
         {
@@ -67,7 +67,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.json",
-            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall5.json",
             "pipeline": "default"
         },
         {
@@ -121,7 +121,7 @@
             "transform": {
                 "location": [
                     0.0,
-                    -5.0,
+                    16.0,
                     0.0
                 ],
                 "rotation": [
@@ -205,7 +205,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/front y wall.json",
-            "material": "/Users/j/Desktop/g10/assets/material/wall.json",
+            "material": "/Users/j/Desktop/g10/assets/material/wall5.json",
             "pipeline": "default"
         },
         {
@@ -251,30 +251,7 @@
                 ]
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/floor.json",
-            "material": "/Users/j/Desktop/g10/assets/material/floor.json",
-            "pipeline": "default"
-        },
-        {
-            "name": "white lighting sign",
-            "transform": {
-                "location": [
-                    -19.8,
-                    10.5,
-                    1.75
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/white lighting sign.json",
-            "material": "/Users/j/Desktop/g10/assets/material/pitch white sign.json",
+            "material": "/Users/j/Desktop/g10/assets/material/floor3.json",
             "pipeline": "default"
         },
         {
@@ -347,52 +324,6 @@
             "pipeline": "default"
         },
         {
-            "name": "normal lighting sign",
-            "transform": {
-                "location": [
-                    -19.8,
-                    1.5,
-                    1.75
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal lighting sign.json",
-            "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
-            "pipeline": "default"
-        },
-        {
-            "name": "pitch white object",
-            "transform": {
-                "location": [
-                    -18.0,
-                    13.5,
-                    2.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.json",
-            "material": "/Users/j/Desktop/g10/assets/material/r.json",
-            "pipeline": "default"
-        },
-        {
             "name": "back y wall.001",
             "transform": {
                 "location": [
@@ -413,29 +344,6 @@
             },
             "geometry": "/Users/j/Desktop/g10/assets/geometry/back y wall.001.json",
             "material": "/Users/j/Desktop/g10/assets/material/wall.001.json",
-            "pipeline": "default"
-        },
-        {
-            "name": "normal object",
-            "transform": {
-                "location": [
-                    -18.0,
-                    4.5,
-                    2.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal object.json",
-            "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
             "pipeline": "default"
         },
         {
@@ -485,12 +393,12 @@
             "pipeline": "default"
         },
         {
-            "name": "normal2 lighting sign",
+            "name": "pitch white object.001",
             "transform": {
                 "location": [
-                    -19.8,
-                    -7.5,
-                    1.75
+                    -18.0,
+                    4.5,
+                    2.0
                 ],
                 "rotation": [
                     0.0,
@@ -498,17 +406,40 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.667,
+                    0.667,
+                    0.667
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 lighting sign.json",
-            "material": "/Users/j/Desktop/g10/assets/material/normal sign.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.001.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
             "pipeline": "default"
         },
         {
-            "name": "normal2 object",
+            "name": "pitch white object.002",
+            "transform": {
+                "location": [
+                    -18.0,
+                    13.5,
+                    2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.667,
+                    0.667,
+                    0.667
+                ]
+            },
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.002.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.json",
+            "pipeline": "default"
+        },
+        {
+            "name": "pitch white object.003",
             "transform": {
                 "location": [
                     -18.0,
@@ -521,36 +452,13 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.667,
+                    0.667,
+                    0.667
                 ]
             },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/normal2 object.json",
-            "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
-            "pipeline": "default"
-        },
-        {
-            "name": "Cube",
-            "transform": {
-                "location": [
-                    0.0,
-                    0.0,
-                    2.0
-                ],
-                "rotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": [
-                    0.5,
-                    0.5,
-                    0.5
-                ]
-            },
-            "geometry": "/Users/j/Desktop/g10/assets/geometry/Cube.json",
-            "material": "/Users/j/Desktop/g10/assets/material/calibration.json",
+            "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.003.json",
+            "material": "/Users/j/Desktop/g10/assets/material/r.002.json",
             "pipeline": "default"
         }
     ],
@@ -560,7 +468,7 @@
             "fov": 39.598,
             "location": [
                 0.0,
-                -11.0,
+                13.0,
                 2.0
             ],
             "up": [
@@ -570,7 +478,7 @@
             ],
             "orientation": [
                 0.0,
-                -10.0,
+                14.0,
                 2.0
             ],
             "clip": {

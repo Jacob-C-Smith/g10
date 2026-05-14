@@ -554,8 +554,8 @@ int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value 
 {
 
     // argument check
-    if ( p_instance    ==        (void *) 0 ) goto no_instance;
-    if ( p_value       ==        (void *) 0 ) goto no_value;
+    if ( p_instance    ==              NULL ) goto no_instance;
+    if ( p_value       ==              NULL ) goto no_value;
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
 
     // initialized data

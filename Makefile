@@ -75,15 +75,17 @@ assets:
 	rm -rf ./assets/scene/*
 
 	# geometry
-# 	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
 	@./scripts/geometry/gport-geometry.sh g10_test_room #| grep 'gport'
+	@./scripts/geometry/gport-geometry.sh lightspeed #| grep 'gport'
 
 	# texture
 	@./scripts/texture/gport-texture.sh g10_base_geometry #| grep 'gport'
 	@./scripts/texture/gport-texture.sh g10_test_room #| grep 'gport'
+	@./scripts/texture/gport-texture.sh lightspeed #| grep 'gport'
 
 	# material
 	@./scripts/material/gport-material.sh g10_test_room #| grep 'gport'
+	@./scripts/material/gport-material.sh lightspeed #| grep 'gport'
 	
 	# entities
 	@./scripts/entity/gport-entity.sh g10_base_geometry #| grep 'gport'
@@ -91,6 +93,7 @@ assets:
 
 	# scene
 	@./scripts/scene/gport-scene.sh g10_test_room #| grep 'gport'
+	@./scripts/scene/gport-scene.sh lightspeed #| grep 'gport'
 
 	# shaders
 	@./scripts/pipeline/compile-metal-shader.sh quad 
@@ -107,14 +110,14 @@ assets:
 	mv ./assets/input/entity/* ./assets/entity/
 	mv ./assets/input/geometry/* ./assets/geometry/
 	mv ./assets/input/material/* ./assets/material/
-	mv ./assets/input/scene/* ./assets/scene/
 	mv ./assets/input/texture/* ./assets/texture/
+	mv ./assets/input/scene/* ./assets/scene/
 
 	rm -rf ./assets/input/entity || exit 0
 	rm -rf ./assets/input/geometry || exit 0
 	rm -rf ./assets/input/material || exit 0
-	rm -rf ./assets/input/scene || exit 0
 	rm -rf ./assets/input/texture || exit 0
+	rm -rf ./assets/input/scene || exit 0
 	
 	touch ./assets/input/ignore
 

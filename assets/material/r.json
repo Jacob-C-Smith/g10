@@ -1,6 +1,10 @@
 {
     "name": "r",
-    "albedo": "assets/texture/rock albedo.png",
+    "albedo": [
+        1.0,
+        0.0,
+        0.0
+    ],
     "roughness": 0.0,
     "metallic": 0.0,
     "normal": [

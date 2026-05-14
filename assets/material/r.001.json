@@ -1,9 +1,17 @@
 {
     "name": "r.001",
-    "albedo": "assets/texture/rock albedo.png",
+    "albedo": [
+        0.0,
+        1.0,
+        0.0
+    ],
     "roughness": 0.0,
     "metallic": 0.0,
-    "normal": "assets/texture/rock normal.png",
+    "normal": [
+        0.0,
+        0.0,
+        0.0
+    ],
     "emission": [
         0.0,
         0.0,

@@ -82,7 +82,7 @@
     ],
     "parts": [
         {
-            "material": "floor",
+            "material": "floor3",
             "idx": [
                 0,
                 2,

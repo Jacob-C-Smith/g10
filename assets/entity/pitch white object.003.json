@@ -1,0 +1,23 @@
+{
+    "name": "pitch white object.003",
+    "transform": {
+        "location": [
+            -18.0,
+            -4.5,
+            2.0
+        ],
+        "rotation": [
+            0.0,
+            -0.0,
+            0.0
+        ],
+        "scale": [
+            0.667,
+            0.667,
+            0.667
+        ]
+    },
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.003.json",
+    "material": "/Users/j/Desktop/g10/assets/material/r.002.json",
+    "pipeline": "default"
+}

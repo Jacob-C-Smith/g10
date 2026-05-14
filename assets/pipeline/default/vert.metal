@@ -40,11 +40,9 @@ vertex VSOut vs_main(
     float3 worldTangent = normalize(normalMatrix * in.tangent.xyz);
     float3 worldBitangent = cross(worldNormal, worldTangent) * in.tangent.w;
 
-    out.normal = worldNormal;
     out.worldNormal = worldNormal;
     out.worldTangent = worldTangent;
     out.worldBitangent = worldBitangent;
-    out.viewNormal = (camera.V * float4(worldNormal, 0.0)).xyz;
     
     return out;
 }
