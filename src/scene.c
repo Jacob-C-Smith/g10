@@ -28,18 +28,23 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
     }
 
     dict *p_dict = p_value->object;
-    json_value *p_name = dict_get(p_dict, "name"),
-               *p_entities = dict_get(p_dict, "entities"),
-               *p_cameras = dict_get(p_dict, "cameras");
+    json_value *p_name = NULL,
+               *p_entities = NULL,
+               *p_cameras = NULL;
     
+    dict_get(p_dict, "name"    , (void **)&p_name);
+    dict_get(p_dict, "entities", (void **)&p_entities);
+    dict_get(p_dict, "cameras" , (void **)&p_cameras);
+
     // store the name
     strncpy(p_scene->_name, p_name->string, 63);
 
     // construct an entity list
-    dict_construct(&p_scene->entities, 64, NULL);
-    dict_construct(&p_scene->cameras, 64, NULL);
+    dict_construct(&p_scene->entities, 64, NULL, (fn_key_accessor *)entity_key_accessor, NULL);
+    dict_construct(&p_scene->cameras, 64, NULL, (fn_key_accessor *)camera_key_accessor, NULL);
 
     // construct entities
+    if ( p_entities )
     {
 
         // initialized data
@@ -55,17 +60,18 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
             entity *p_entity = NULL;
 
             // get the i'th attachment
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // construct an entity from a json value
             entity_from_json(&p_entity, p_value);
 
             // add the entity to the scene
-            dict_add(p_scene->entities, p_entity->_name, p_entity);
+            dict_add(p_scene->entities, p_entity);
         }
     }
 
     // construct cameras
+    if ( p_cameras )
     {
 
         // initialized data
@@ -81,13 +87,13 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
             camera *p_camera = NULL;
 
             // get the i'th attachment
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // construct an camera from a json value
             camera_from_json(&p_camera, p_value);
 
             // add the camera to the scene
-            dict_add(p_scene->cameras, p_camera->_name, p_camera);
+            dict_add(p_scene->cameras, p_camera);
             
             p_scene->p_active_camera = p_camera;
         }
@@ -116,7 +122,7 @@ int scene_info ( scene *p_scene )
 
     logger_pad(), printf("entities: \n"),
     logger_push(),
-    dict_foreach(p_scene->entities, (void (*)(const void *const, size_t i))entity_info);
+    dict_foreach(p_scene->entities, (fn_foreach *)entity_info);
     logger_pop(),
     
     logger_pop();
@@ -151,10 +157,11 @@ int scene_gather_drawable
     
     // initialized data
     g_instance *p_instance = g_active_instance();
-    size_t entity_count = dict_values(p_scene->entities, 0);
+    size_t entity_count = 0;
+    dict_size(p_scene->entities, &entity_count);
     
-    entity *_p_entities[64] = {0};
-    dict_values(p_scene->entities, &_p_entities);
+    entity **_pp_entities = default_allocator(0, entity_count * sizeof(entity *));
+    dict_values(p_scene->entities, (void **)_pp_entities, entity_count);
 
     // iterate through each entity in the scene
     for ( size_t i = 0; i < entity_count; i++ )
@@ -162,14 +169,17 @@ int scene_gather_drawable
         
         // initialized data
         pipeline *p_pipeline = NULL;
-        entity *p_entity = _p_entities[i];
+        entity *p_entity = _pp_entities[i];
 
         // error check
         if ( NULL == p_entity ) goto no_drawable_list;
 
         // store the pipeline
-        p_pipeline = dict_get(p_instance->cache.p_pipeline, p_entity->pipeline);
+        dict_get(p_instance->cache.p_pipeline, p_entity->pipeline, (void **)&p_pipeline);
     }
+
+    // free entities list
+    default_allocator(_pp_entities, 0);
 
     // done
     return 1;

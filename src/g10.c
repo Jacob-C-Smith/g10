@@ -54,26 +54,36 @@ int g_init
     p_active_instance = p_instance;
 
     // construct caches
-    dict_construct(&p_instance->cache.p_attachment, 64, NULL);
-    dict_construct(&p_instance->cache.p_pipeline, 64, NULL);
-    dict_construct(&p_instance->cache.p_texture, 64, NULL);
-    dict_construct(&p_instance->cache.p_geometry, 64, NULL);
+    dict_construct(&p_instance->cache.p_attachment, 64, NULL, (fn_key_accessor *)attachment_key_accessor, NULL);
+    dict_construct(&p_instance->cache.p_pipeline, 64, NULL, (fn_key_accessor *)pipeline_key_accessor, NULL);
+    dict_construct(&p_instance->cache.p_texture, 64, NULL, (fn_key_accessor *)texture_key_accessor, NULL);
+    dict_construct(&p_instance->cache.p_geometry, 64, NULL, (fn_key_accessor *)geometry_key_accessor, NULL);
 
     // parse the json value into an instance
     {
 
         // initialized data
         dict *const p_dict = p_value->object;
-        const json_value *p_name_value      = dict_get(p_dict, "name"),
-                         *p_version         = dict_get(p_dict, "version"),
-                         *p_schedule        = dict_get(p_dict, "schedule"),
-                         *p_renderer        = dict_get(p_dict, "renderer"),
-                         *p_fixed_tick_rate = dict_get(p_dict, "fixed tick rate"),
-                         *p_vulkan          = dict_get(p_dict, "vulkan"),
-                         *p_scene           = dict_get(p_dict, "scene"),
-                         *p_input           = dict_get(p_dict, "input"),
-                         *p_window          = dict_get(p_dict, "window");
+        json_value *p_name_value      = NULL,
+                   *p_version         = NULL,
+                   *p_schedule        = NULL,
+                   *p_renderer        = NULL,
+                   *p_fixed_tick_rate = NULL,
+                   *p_vulkan          = NULL,
+                   *p_scene           = NULL,
+                   *p_input           = NULL,
+                   *p_window          = NULL;
     
+        dict_get(p_dict, "name"           , (void **)&p_name_value);
+        dict_get(p_dict, "version"        , (void **)&p_version);
+        dict_get(p_dict, "schedule"       , (void **)&p_schedule);
+        dict_get(p_dict, "renderer"       , (void **)&p_renderer);
+        dict_get(p_dict, "fixed tick rate", (void **)&p_fixed_tick_rate);
+        dict_get(p_dict, "vulkan"         , (void **)&p_vulkan);
+        dict_get(p_dict, "scene"          , (void **)&p_scene);
+        dict_get(p_dict, "input"          , (void **)&p_input);
+        dict_get(p_dict, "window"         , (void **)&p_window);
+
                 
         // store the name
         if ( p_name_value )
@@ -108,9 +118,13 @@ int g_init
 
                 // initialized data
                 dict *p_version_dict = p_version->object;
-                const json_value *const p_major = dict_get(p_version_dict, "major"),
-                                 *const p_minor = dict_get(p_version_dict, "minor"),
-                                 *const p_patch = dict_get(p_version_dict, "patch");
+                json_value *p_major = NULL,
+                           *p_minor = NULL,
+                           *p_patch = NULL;
+                
+                dict_get(p_version_dict, "major", (void **)&p_major);
+                dict_get(p_version_dict, "minor", (void **)&p_minor);
+                dict_get(p_version_dict, "patch", (void **)&p_patch);
                 
                 // error check
                 if ( ! ( p_major && p_minor && p_patch ) ) goto missing_version_properties;
@@ -154,7 +168,7 @@ int g_init
         #ifdef G10_BUILD_WITH_SDL3
 
             // external functions
-            extern int g_sdl3_renderer_from_json ( renderer *pp_renderer, const json_value *p_value );
+            extern int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_value );
 
             // create an sdl3 renderer
             g_sdl3_renderer_from_json(&p_instance->context.p_renderer, p_renderer);
@@ -189,14 +203,14 @@ int g_init
     // error handling
     {
 
-        // Argument errors
+        // argument errors
         {
             no_instance:
                 #ifndef NDEBUG
                     log_error("[g10] Null pointer provided for \"pp_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
 
             no_path:
@@ -204,7 +218,7 @@ int g_init
                     log_error("[g10] Null pointer provided for parameter \"p_path\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
         }
 
@@ -215,7 +229,7 @@ int g_init
                     log_error("[g10] Failed to construct scene in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
         }
 
@@ -226,7 +240,7 @@ int g_init
                     log_error("[g10] Failed to parse file \"%s\" in call to function \"%s\"\n", p_path, __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 goto error_after_file_allocated;
 
             instance_value_is_wrong_type:
@@ -235,7 +249,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
                 
             missing_name_property:
@@ -243,7 +257,7 @@ int g_init
                     log_error("[g10] Parameter \"p_value\" is missing required property \"name\" in call to function \"%s\"\n", p_path, __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             fixed_tick_rate_is_wrong_type:
@@ -252,7 +266,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             missing_version_properties:
@@ -261,7 +275,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             version_major_wrong_type:
@@ -270,7 +284,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             version_minor_wrong_type:
@@ -279,7 +293,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             version_patch_wrong_type:
@@ -288,7 +302,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             name_property_is_wrong_type:
@@ -297,7 +311,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
             
             name_property_is_too_long:
@@ -306,7 +320,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
             
             name_property_is_too_short:
@@ -315,7 +329,7 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
 
             wrong_version_type:
@@ -324,29 +338,29 @@ int g_init
                     log_info("\tRefer to gschema: https://schema.g10.app/instance.json\n");
                 #endif
 
-                // Error
+                // error
                 goto error_after_json_parsed;
         }
 
-        // Parallel errors
+        // parallel errors
         {
             failed_to_load_schedule_from_json_value:
                 #ifndef NDEBUG
                     log_error("[g10] Failed to construct schedule in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
         }
 
-        // Standard library errors
+        // standard library errors
         {
             no_mem:
                 #ifndef NDEBUG
                     log_error("[Standard Library] Memory allocator returned an erroneous value in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
             
             failed_to_load_file:
@@ -354,17 +368,17 @@ int g_init
                     log_error("[Standard Library] Failed to load file in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 goto error_after_file_allocated;
         }
 
-        // Clean up
+        // clean up
         error_after_json_parsed:
             json_value_free(p_value, 0);
         error_after_file_allocated:
             p_file_contents = default_allocator(p_file_contents, 0);
 
-        // Error
+        // error
         return 0;
     }
 }
@@ -379,50 +393,53 @@ g_instance *g_active_instance( void )
 int poll_input ( g_instance *p_instance ) 
 {
 
-    // Argument check
+    // argument check
     if ( p_instance == (void *) 0 ) goto no_instance;
     
-    // Initialized data
+    // initialized data
     input *p_input = p_instance->context.p_input;
     int num_keys = 0;
     const bool* keyboard_state = SDL_GetKeyboardState(&num_keys);
 
-    for (size_t i = 0; i < p_input->bind_quantity; i++)
+    if ( p_input )
     {
-        
-        // Initialize data
-        input_bind *p_bind = p_input->_p_binds[i];
+        for (size_t i = 0; i < p_input->bind_quantity; i++)
+        {
+            
+            // initialize data
+            input_bind *p_bind = p_input->_p_binds[i];
 
-        // Clear the input
-        p_bind->value = 0.0;
+            // clear the input
+            p_bind->value = 0.0;
+        }
     }
     
-    // Process each event
+    // process each event
     while (SDL_PollEvent(&p_instance->window.sdl3.event))
     {
         
-        // Switch on the event type
+        // switch on the event type
         switch (p_instance->window.sdl3.event.type)
         {
 
-            // Process should exit
+            // process should exit
             case SDL_EVENT_QUIT:
             {
 
-                // Clear the running flag
+                // clear the running flag
                 p_instance->running = false;
 
-                // Done
+                // done
                 break;
             }
 
             case SDL_EVENT_WINDOW_RESIZED:
             {
 
-                // // External functions
+                // // external functions
                 // extern int g_window_resize ( g_instance *p_instance, u32 width, u32 height );
                 
-                // // Resize the window
+                // // resize the window
                 // g_window_resize
                 // (
                 //     p_instance,
@@ -430,22 +447,22 @@ int poll_input ( g_instance *p_instance )
                 //     (u32) p_instance->window.sdl3.event.window.data2
                 // );
 
-                // Done
+                // done
                 break;
             }
 
-            // Mouse moves
+            // mouse moves
             case SDL_EVENT_MOUSE_BUTTON_DOWN:break;
             case SDL_EVENT_MOUSE_BUTTON_UP:
             {
                 
-                // Done
+                // done
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION:
             {
 
-                // Initialized data
+                // initialized data
                 int xrel = p_instance->window.sdl3.event.motion.xrel,
                     yrel = p_instance->window.sdl3.event.motion.yrel;
                 camera *p_camera = p_instance->context.p_scene->p_active_camera;
@@ -466,60 +483,60 @@ int poll_input ( g_instance *p_instance )
 
                 // printf("[ %4.2f, %4.2f ]\n", p_instance->window.sdl3.event.motion.x, p_instance->window.sdl3.event.motion.y);
                 
-                // Done
+                // done
                 break;
             }
         }
     }
     
-    // Update the keyboard state
-    for (size_t i = 0; i < num_keys; i++) 
+    // update the keyboard state
+    for (size_t i = 0; i < ( ( num_keys < SDL_SCANCODE_COUNT ) ? num_keys : SDL_SCANCODE_COUNT ); i++) 
         _key_lookup[i]._active = keyboard_state[i];
 
-    // Update the binds
+    // update the binds
     if ( p_input )
     {
         for (size_t i = 0; i < p_input->bind_quantity; i++)
         {
             
-            // Initialize data
+            // initialize data
             input_bind *p_bind = p_input->_p_binds[i];
 
-            // Iterate through each scancode
+            // iterate through each scancode
             for (size_t j = 0; j < p_bind->scancode_quantity; j++)
             {
 
-                // Initialized data
+                // initialized data
                 size_t p_scancode = (size_t) p_bind->_scancodes[j];
 
-                // Update the scancode 
+                // update the scancode 
                 if ( _key_lookup[p_scancode]._active )
                 {
 
-                    // Set the input
+                    // set the input
                     p_bind->value = 1.0;
 
-                    // Done with this bind
+                    // done with this bind
                     break;
                 }
             }
         }
     }
 
-    // Success
+    // success
     return 1;
 
-    // Error handling
+    // error handling
     {
 
-        // Argument errors
+        // argument errors
         {
             no_instance:
                 #ifndef NDEBUG
                     log_error("[g10] [sdl3] Null pointer provided for parameter \"p_instance\" in call to function \"%s\"\n", __FUNCTION__);
                 #endif
 
-                // Error
+                // error
                 return 0;
         }
     }
@@ -530,7 +547,9 @@ int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_p
 
     // initialized data
     g_instance *p_instance = g_active_instance();
-    pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, _name);
+    pipeline *p_pipeline = NULL;
+    
+    dict_get(p_instance->cache.p_pipeline, _name, (void **)&p_pipeline);
 
     // error check
     if ( NULL == p_pipeline ) goto failed_to_find_pipeline;
@@ -569,18 +588,18 @@ size_t load_file ( const char *path, void *buffer, bool binary_mode )
     size_t  ret = 0;
     FILE   *f   = fopen(path, (binary_mode) ? "rb" : "r");
     
-    // Check if file is valid
+    // check if file is valid
     if ( f == NULL ) goto invalid_file;
 
-    // Find file size and prep for read
+    // find file size and prep for read
     fseek(f, 0, SEEK_END);
     ret = ftell(f);
     fseek(f, 0, SEEK_SET);
     
-    // Read to data
+    // read to data
     if ( buffer ) ret = fread(buffer, 1, ret, f);
 
-    // The file is no longer needed
+    // the file is no longer needed
     fclose(f);
     
     // success
@@ -600,7 +619,7 @@ size_t load_file ( const char *path, void *buffer, bool binary_mode )
                 return 0;
         }
 
-        // File errors
+        // file errors
         {
             invalid_file:
 

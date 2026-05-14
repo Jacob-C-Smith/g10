@@ -46,6 +46,26 @@ struct camera_s
 };
 
 // function declarations
+/// key accessor
+/** 
+ *  Get the name of an camera
+ * 
+ * @param p_camera the camera
+ * 
+ * @return the name of the camera
+ */
+const char *camera_key_accessor ( const camera *const p_camera );
+
+/// equality
+/** 
+ * Test the equality of two cameras
+ * 
+ * @param p_a the camera
+ * 
+ * @return the name of the camera
+ */
+int camera_equality ( const camera *p_a, const camera *p_b );
+
 /// constructors
 /** !
  *  Construct a camera from view and projection parameters

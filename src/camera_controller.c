@@ -66,8 +66,8 @@ int camera_controller_first_person_update ( camera *p_camera )
         float up_down   = 0.05f * ( input_bind_value("CAMERA DOWN") - input_bind_value("CAMERA UP") ),
               side_side = 0.05f * ( input_bind_value("CAMERA LEFT") - input_bind_value("CAMERA RIGHT") );
 
-        // Construct a forward vector from the view matrix 
-        // Note: The third column of the view matrix is the camera's Z axis (Backwards)
+        // construct a forward vector from the view matrix 
+        // note: The third column of the view matrix is the camera's Z axis (Backwards)
         vec3 back = 
         {
             .x = p_camera->matrix._view.c,
@@ -79,7 +79,7 @@ int camera_controller_first_person_update ( camera *p_camera )
         vec3_mul_scalar(&front, back, -1.0f);
         vec3_normalize(&front, front);
 
-        // Convert cartesian direction vector to polar coordinates
+        // convert cartesian direction vector to polar coordinates
         float pitch = asinf(front.z);
         float yaw   = atan2f(front.y, front.x);
 
@@ -87,7 +87,7 @@ int camera_controller_first_person_update ( camera *p_camera )
         pitch -= up_down;
         yaw   += side_side;
 
-        // Clamp Pitch
+        // clamp Pitch
         if ( pitch > 1.55f ) pitch = 1.55f;
         if ( pitch < -1.55f ) pitch = -1.55f;
 
@@ -108,6 +108,6 @@ int camera_controller_first_person_update ( camera *p_camera )
         p_camera->view.up
     );
 
-    // Success
+    // success
     return 1;
 }

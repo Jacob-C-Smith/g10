@@ -98,7 +98,7 @@ struct callback_parameter_s
  */
 int input_from_json ( input **pp_input, const json_value *const p_value );
 
-// Info
+// info
 /** !
  *  Print information about an input
  *
@@ -108,7 +108,7 @@ int input_from_json ( input **pp_input, const json_value *const p_value );
  */
 int input_info ( const input *const p_input );
 
-// Input poll
+// input poll
 /** !
  * Update the binds of an instance
  * 
@@ -128,5 +128,5 @@ int input_poll ( g_instance *p_instance );
 */
 float input_bind_value ( const char *const p_bind_name );
 
-// Global state
+// global state
 void input_mouse_lock_toggle ( void );

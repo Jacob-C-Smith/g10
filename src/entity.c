@@ -2,6 +2,12 @@
 #include <entity.h>
 #include <material.h>
 
+// key accessor
+const char *entity_key_accessor ( const entity *const p_entity )
+{
+    return p_entity->_name;
+}
+
 // function definitions
 int entity_info ( entity *p_entity )
 {
@@ -45,11 +51,17 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     entity *p_entity = default_allocator(0, sizeof(entity));
 
     dict *p_dict = p_value->object;
-    json_value *p_name          = dict_get(p_dict, "name"),
-               *p_transform     = dict_get(p_dict, "transform"),
-               *p_geometry      = dict_get(p_dict, "geometry"),
-               *p_material      = dict_get(p_dict, "material"),
-               *p_pipeline_name = dict_get(p_dict, "pipeline");
+    json_value *p_name          = NULL,
+               *p_transform     = NULL,
+               *p_geometry      = NULL,
+               *p_material      = NULL,
+               *p_pipeline_name = NULL;
+
+    dict_get(p_dict, "name"     , (void **)&p_name);
+    dict_get(p_dict, "transform", (void **)&p_transform);
+    dict_get(p_dict, "geometry" , (void **)&p_geometry);
+    dict_get(p_dict, "material" , (void **)&p_material);
+    dict_get(p_dict, "pipeline" , (void **)&p_pipeline_name);
 
     // store the name
     strncpy(p_entity->_name, p_name->string, 63);
@@ -62,7 +74,8 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
     {
 
         // initialized data
-        pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, p_pipeline_name->string);
+        pipeline *p_pipeline = NULL;
+        dict_get(p_instance->cache.p_pipeline, p_pipeline_name->string, (void **)&p_pipeline);
 
         // store the pipeline name
         p_entity->pipeline = p_pipeline->_name;
@@ -89,17 +102,18 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         aabb_from_entity(&p_entity->p_geometry->_bounds, p_entity);
 
         {
-            pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "aabb");
+            pipeline *p_pipeline = NULL;
+            dict_get(p_instance->cache.p_pipeline, "aabb", (void **)&p_pipeline);
             if ( p_pipeline )
                 array_add(p_pipeline->p_static_draw_list, &p_entity->p_geometry->_bounds);
         }
 
     }
 
-    // Parse Material
+    // parse Material
     if ( p_material && p_material->type == JSON_VALUE_STRING )
     {
-        // Load material from file
+        // load material from file
         const char *path = p_material->string;
         size_t len = load_file(path, 0, false);
         
@@ -110,17 +124,17 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
             if ( buf )
             {
                 load_file(path, buf, false);
-                buf[len] = '\0'; // Null terminate
+                buf[len] = '\0'; // null terminate
 
                 json_value *mat_json = 0;
                 if ( json_value_parse(buf, 0, &mat_json) )
                 {
                     material_from_json(&p_entity->p_material, mat_json);
                     
-                    // Ideally free mat_json here if logic existed
+                    // ideally free mat_json here if logic existed
                 }
                 
-                // Free buffer
+                // free buffer
                 // default_allocator(buf, 0); 
             }
         }

@@ -34,7 +34,7 @@ vertex VSOut vs_main(
     out.worldPos = worldPosition.xyz;
     out.uv = float2(in.uv.x, 1.0 - in.uv.y);
 
-    // Create the TBN vectors
+    // create the TBN vectors
     float3x3 normalMatrix = float3x3(inv_mat.N[0].xyz, inv_mat.N[1].xyz, inv_mat.N[2].xyz);
     float3 worldNormal = normalize(normalMatrix * in.normal.xyz);
     float3 worldTangent = normalize(normalMatrix * in.tangent.xyz);

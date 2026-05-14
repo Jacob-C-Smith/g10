@@ -17,14 +17,14 @@ fragment float4 fs_main(
     sampler          normalSmp [[sampler(1)]],
     constant FragmentUniforms &uniforms [[buffer(0)]]
 ) {
-    // Hard-coded point light properties
+    // hard-coded point light properties
     //float3 lightPos = float3(-18.0, 13.5, 3.5);
     //float3 lightColor = float3(2.0, 2.0, 2.0);
     float3 lightPos = float3(0.0, 0.0, 30.0);
     float3 lightColor = float3(3.0, 3.0, 3.0);
     float ambientStrength = 0.5;
 
-    // Sample textures
+    // sample textures
     float4 albedo = colorMap.sample(colorSmp, in.uv);
     float3 normalSample = normalMap.sample(normalSmp, in.uv).xyz;
     normalSample.x = 1.0 - normalSample.x;
@@ -33,16 +33,16 @@ fragment float4 fs_main(
     // Unpack normal from [0, 1] to [-1, 1]
     float3 tangentNormal = normalize(normalSample * 2.0 - 1.0);
 
-    // Construct TBN Matrix
+    // construct TBN Matrix
     float3 T = normalize(in.worldTangent);
     float3 B = normalize(in.worldBitangent);
     float3 N = normalize(in.worldNormal);
     float3x3 TBN = float3x3(T, B, N);
 
-    // Transform normal from tangent space to world space
+    // transform normal from tangent space to world space
     float3 worldNormal = normalize(TBN * tangentNormal);
 
-    // Lighting calculation
+    // lighting calculation
     float3 lightDirVector = lightPos - in.worldPos;
     float distance = length(lightDirVector);
     float3 lightDir = normalize(lightDirVector);

@@ -7,7 +7,7 @@ struct VertexInput {
 vertex VSOut vs_main(VertexInput in [[stage_in]])
 {
     VSOut out;
-    // Expand float3 to float4 (w = 1)
+    // expand float3 to float4 (w = 1)
     out.position = float4(in.position, 1.0);
     return out;
 }

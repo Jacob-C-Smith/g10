@@ -18,13 +18,13 @@ struct material_s
 {
     char _name[63+1];
 
-    // PBR Properties
+    // pBR Properties
     vec3 albedo_color;
     float roughness_value;
     float metallic_value;
     vec3 emission_color;
 
-    // Texture Maps
+    // texture Maps
     texture *p_albedo_map;
     texture *p_roughness_map;
     texture *p_metal_map;

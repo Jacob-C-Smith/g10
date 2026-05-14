@@ -17,13 +17,15 @@ int material_from_json ( material **pp_material, json_value *p_value )
 
     dict *p_dict = p_value->object;
 
-    // Name
-    json_value *p_name = dict_get(p_dict, "name");
+    // name
+    json_value *p_name = NULL;
+    dict_get(p_dict, "name", (void **)&p_name);
     if ( p_name && p_name->type == JSON_VALUE_STRING )
         strncpy(p_material->_name, p_name->string, 63);
 
     // --- Albedo ---
-    json_value *p_albedo = dict_get(p_dict, "albedo");
+    json_value *p_albedo = NULL;
+    dict_get(p_dict, "albedo", (void **)&p_albedo);
     if ( p_albedo )
     {
         if ( p_albedo->type == JSON_VALUE_STRING )
@@ -32,19 +34,20 @@ int material_from_json ( material **pp_material, json_value *p_value )
         {
             array *list = p_albedo->list;
             json_value *r=0, *g=0, *b=0;
-            array_index(list, 0, &r);
-            array_index(list, 1, &g);
-            array_index(list, 2, &b);
+            array_index(list, 0, (void **)&r);
+            array_index(list, 1, (void **)&g);
+            array_index(list, 2, (void **)&b);
             if(r) p_material->albedo_color.x = (float)r->number;
             if(g) p_material->albedo_color.y = (float)g->number;
             if(b) p_material->albedo_color.z = (float)b->number;
 
-            g_sdl3_texture_from_color(&p_material->p_albedo_map, r->number, g->number, b->number, 1.0);
+            g_sdl3_texture_from_color(&p_material->p_albedo_map, (r) ? r->number : 0, (g) ? g->number : 0, (b) ? b->number : 0, 1.0);
         }
     }
 
     // --- Normal ---
-    json_value *p_normal = dict_get(p_dict, "normal");
+    json_value *p_normal = NULL;
+    dict_get(p_dict, "normal", (void **)&p_normal);
     if ( p_normal )
     {
         if ( p_normal->type == JSON_VALUE_STRING )
@@ -56,7 +59,8 @@ int material_from_json ( material **pp_material, json_value *p_value )
     }
 
     // --- Roughness ---
-    json_value *p_roughness = dict_get(p_dict, "roughness");
+    json_value *p_roughness = NULL;
+    dict_get(p_dict, "roughness", (void **)&p_roughness);
     if ( p_roughness )
     {
         if ( p_roughness->type == JSON_VALUE_STRING )
@@ -66,7 +70,8 @@ int material_from_json ( material **pp_material, json_value *p_value )
     }
 
     // --- Metallic ---
-    json_value *p_metallic = dict_get(p_dict, "metallic");
+    json_value *p_metallic = NULL;
+    dict_get(p_dict, "metallic", (void **)&p_metallic);
     if ( p_metallic )
     {
         if ( p_metallic->type == JSON_VALUE_STRING )
@@ -91,8 +96,8 @@ int material_bind ( render_pass *p_render_pass, pipeline *p_pipeline, material *
     sampler *p_roughness_sampler = NULL;
     sampler *p_metal_sampler = NULL;
     
-    array_index(p_pipeline->p_samplers, 0, &p_texture_sampler);
-    array_index(p_pipeline->p_samplers, 1, &p_normal_sampler);
+    array_index(p_pipeline->p_samplers, 0, (void **)&p_texture_sampler);
+    array_index(p_pipeline->p_samplers, 1, (void **)&p_normal_sampler);
     //array_index(p_pipeline->p_samplers, 2, &p_roughness_sampler);
     //array_index(p_pipeline->p_samplers, 3, &p_metal_sampler);
 

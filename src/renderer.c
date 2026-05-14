@@ -12,7 +12,7 @@ int renderer_info ( renderer *p_renderer )
     logger_pad(), printf("attachments:\n"),
     
     logger_push(),
-    dict_foreach(p_renderer->p_attachments, (void (*)(const void *const, size_t))attachment_info),
+    dict_foreach(p_renderer->p_attachments, (fn_foreach *)attachment_info),
     logger_pop(),
 
     logger_pad(), printf("render passes: \n"),

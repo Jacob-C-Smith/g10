@@ -12,10 +12,10 @@ fragment FragmentOutput fs_main(
     
     FragmentOutput output;
 
-    // Sample the texture using the UVs from the vertex shader
+    // sample the texture using the UVs from the vertex shader
     float4 sampledColor = tex.sample(smp, in.uv);
 
-    // Combine sampled color with your uniform or UV visualization
+    // combine sampled color with your uniform or UV visualization
     output.color0 = sampledColor;
 
     return output;

@@ -1,5 +1,11 @@
 #include <uniform.h>
 
+// key accessor
+const char *uniform_key_accessor ( const uniform *const p_uniform )
+{
+    return p_uniform->_name;
+}
+
 // function definitions
 int uniform_set_pack_push ( uniform *p_uniform, void *p_data, fn_pack *pfn_pack )
 {
@@ -19,8 +25,8 @@ int uniform_set_pack_push ( uniform *p_uniform, void *p_data, fn_pack *pfn_pack 
     p_uniform->len = pfn_pack(&p_uniform->_buffer, p_uniform->p_data);
 
     // push
-    SDL_PushGPUVertexUniformData(p_instance->graphics.sdl3.command_buffer, p_uniform->idx, p_uniform->_buffer, p_uniform->len);
-    SDL_PushGPUFragmentUniformData(p_instance->graphics.sdl3.command_buffer, p_uniform->idx, p_uniform->_buffer, p_uniform->len);
+    SDL_PushGPUVertexUniformData(p_instance->graphics.sdl3.command_buffer, (u32)p_uniform->idx, p_uniform->_buffer, (u32)p_uniform->len);
+    SDL_PushGPUFragmentUniformData(p_instance->graphics.sdl3.command_buffer, (u32)p_uniform->idx, p_uniform->_buffer, (u32)p_uniform->len);
 
     // success
     return 1;
@@ -55,13 +61,6 @@ int uniform_info ( uniform *p_uniform, size_t i )
 
     // success
     return 1;
-}
-
-const char *uniform_key_accessor ( const uniform *const p_uniform )
-{
-
-    // done
-    return 0;
 }
 
 int uniform_equality ( const uniform *p_a, const uniform *p_b )

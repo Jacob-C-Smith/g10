@@ -232,10 +232,15 @@ int transform_from_json
     mat4 model;
     dict *const p_dict = p_value->object;
     json_value *p_scratch[4] = { 0 };
-    const json_value *const p_location   = dict_get(p_dict, "location"),
-                     *const p_rotation   = dict_get(p_dict, "rotation"),
-                     *const p_quaternion = dict_get(p_dict, "quaternion"),
-                     *const p_scale      = dict_get(p_dict, "scale");
+    json_value *p_location   = NULL,
+               *p_rotation   = NULL,
+               *p_quaternion = NULL,
+               *p_scale      = NULL;
+
+    dict_get(p_dict, "location"  , (void **)&p_location);
+    dict_get(p_dict, "rotation"  , (void **)&p_rotation);
+    dict_get(p_dict, "quaternion", (void **)&p_quaternion);
+    dict_get(p_dict, "scale"     , (void **)&p_scale);
 
     // property check
     if ( p_location   == (void *) 0 )       goto no_location_property;
@@ -582,7 +587,7 @@ int transform_get_matrix_world_recursive (
     // argument check
     if ( p_model_matrix == (void *) 0 ) goto no_return;
 
-    // Base case
+    // base case
     if ( p_transform == (void *) 0 ) goto no_transform;
 
     // initialized data

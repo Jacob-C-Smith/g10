@@ -70,7 +70,7 @@ int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value )
 /// uniform
 int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value );
 
-// Static data
+// static data
 dict *p_sdl2_key_lookup = (void *) 0;
 dict *p_sdl2_key_scancode = (void *) 0;
 
@@ -82,10 +82,10 @@ struct
 } _key_lookup[SDL_SCANCODE_COUNT] = 
 {
 
-    // Invalid
+    // invalid
     [SDL_SCANCODE_UNKNOWN] = { ._name = "INVALID", ._active = false, ._scancode = SDL_SCANCODE_UNKNOWN },
 
-    // Letters
+    // letters
     [SDL_SCANCODE_A] = { ._name = "A", ._active = false, ._scancode = SDL_SCANCODE_A },
     [SDL_SCANCODE_B] = { ._name = "B", ._active = false, ._scancode = SDL_SCANCODE_B },
     [SDL_SCANCODE_C] = { ._name = "C", ._active = false, ._scancode = SDL_SCANCODE_C },
@@ -124,14 +124,14 @@ struct
     [SDL_SCANCODE_9] = { ._name = "9", ._active = false, ._scancode = SDL_SCANCODE_9 },
     [SDL_SCANCODE_0] = { ._name = "0", ._active = false, ._scancode = SDL_SCANCODE_0 },
 
-    // White space
+    // white space
     [SDL_SCANCODE_RETURN]    = { ._name = "RETURN"   , ._active = false, ._scancode = SDL_SCANCODE_RETURN },
     [SDL_SCANCODE_ESCAPE]    = { ._name = "ESCAPE"   , ._active = false, ._scancode = SDL_SCANCODE_ESCAPE },
     [SDL_SCANCODE_BACKSPACE] = { ._name = "BACKSPACE", ._active = false, ._scancode = SDL_SCANCODE_BACKSPACE },
     [SDL_SCANCODE_TAB]       = { ._name = "TAB"      , ._active = false, ._scancode = SDL_SCANCODE_TAB },
     [SDL_SCANCODE_SPACE]     = { ._name = "SPACE"    , ._active = false, ._scancode = SDL_SCANCODE_SPACE },
 
-    // Symbols
+    // symbols
     [SDL_SCANCODE_MINUS]        = { ._name = "MINUS"        , ._active = false, ._scancode = SDL_SCANCODE_MINUS },
     [SDL_SCANCODE_EQUALS]       = { ._name = "EQUALS"       , ._active = false, ._scancode = SDL_SCANCODE_EQUALS },
     [SDL_SCANCODE_LEFTBRACKET]  = { ._name = "LEFT BRACKET" , ._active = false, ._scancode = SDL_SCANCODE_LEFTBRACKET },
@@ -145,7 +145,7 @@ struct
     [SDL_SCANCODE_PERIOD]       = { ._name = "PERIOD"       , ._active = false, ._scancode = SDL_SCANCODE_PERIOD },
     [SDL_SCANCODE_SLASH]        = { ._name = "SLASH"        , ._active = false, ._scancode = SDL_SCANCODE_SLASH },
 
-    // F keys
+    // f keys
     [SDL_SCANCODE_F1]   = { ._name = "F1", ._active = false, ._scancode = SDL_SCANCODE_F1},
     [SDL_SCANCODE_F2]   = { ._name = "F2", ._active = false, ._scancode = SDL_SCANCODE_F2},
     [SDL_SCANCODE_F3]   = { ._name = "F3", ._active = false, ._scancode = SDL_SCANCODE_F3},
@@ -159,14 +159,14 @@ struct
     [SDL_SCANCODE_F11]  = { ._name = "F11", ._active = false, ._scancode = SDL_SCANCODE_F11},
     [SDL_SCANCODE_F12]  = { ._name = "F12", ._active = false, ._scancode = SDL_SCANCODE_F12},
 
-    // Special
+    // special
     [SDL_SCANCODE_CAPSLOCK]    = { ._name = "CAPS LOCK"   , ._active = false, ._scancode = SDL_SCANCODE_SLASH },
     [SDL_SCANCODE_PRINTSCREEN] = { ._name = "PRINT SCREEN", ._active = false, ._scancode = SDL_SCANCODE_PRINTSCREEN },
     [SDL_SCANCODE_SCROLLLOCK]  = { ._name = "SCROLL LOCK" , ._active = false, ._scancode = SDL_SCANCODE_SCROLLLOCK },
     [SDL_SCANCODE_PAUSE]       = { ._name = "PAUSE"       , ._active = false, ._scancode = SDL_SCANCODE_PAUSE },
     [SDL_SCANCODE_INSERT]      = { ._name = "INSERT"      , ._active = false, ._scancode = SDL_SCANCODE_INSERT },
     
-    // Navigation
+    // navigation
     [SDL_SCANCODE_HOME]         = { ._name = "HOME"     , ._active = false, ._scancode = SDL_SCANCODE_HOME },
     [SDL_SCANCODE_PAGEUP]       = { ._name = "PAGE UP"  , ._active = false, ._scancode = SDL_SCANCODE_PAGEUP },
     [SDL_SCANCODE_DELETE]       = { ._name = "DELETE"   , ._active = false, ._scancode = SDL_SCANCODE_DELETE },
@@ -178,7 +178,7 @@ struct
     [SDL_SCANCODE_UP]           = { ._name = "UP"       , ._active = false, ._scancode = SDL_SCANCODE_UP },
     [SDL_SCANCODE_NUMLOCKCLEAR] = { ._name = "NUM LOCK" , ._active = false, ._scancode = SDL_SCANCODE_NUMLOCKCLEAR },
     
-    // Keypad
+    // keypad
     [SDL_SCANCODE_KP_DIVIDE]   = { ._name = "KEYPAD DIVIDE"  , ._active = false, ._scancode = SDL_SCANCODE_KP_DIVIDE },
     [SDL_SCANCODE_KP_MULTIPLY] = { ._name = "KEYPAD MULTIPLY", ._active = false, ._scancode = SDL_SCANCODE_KP_MULTIPLY },
     [SDL_SCANCODE_KP_MINUS]    = { ._name = "KEYPAD MINUS"   , ._active = false, ._scancode = SDL_SCANCODE_KP_MINUS },
@@ -196,7 +196,7 @@ struct
     [SDL_SCANCODE_KP_0]        = { ._name = "KEYPAD 0"       , ._active = false, ._scancode = SDL_SCANCODE_KP_0 },
     [SDL_SCANCODE_KP_PERIOD]   = { ._name = "KEYPAD PERIOD"  , ._active = false, ._scancode = SDL_SCANCODE_KP_PERIOD },
 
-    // Modifier
+    // modifier
     [SDL_SCANCODE_LCTRL]  = { ._name = "LEFT CONTROL" , ._active = false, ._scancode = SDL_SCANCODE_LCTRL },
     [SDL_SCANCODE_LSHIFT] = { ._name = "LEFT SHIFT"   , ._active = false, ._scancode = SDL_SCANCODE_LSHIFT },
     [SDL_SCANCODE_LALT]   = { ._name = "LEFT ALT"     , ._active = false, ._scancode = SDL_SCANCODE_LALT },
@@ -206,6 +206,17 @@ struct
 };
 
 // function definitions
+const char *key_lookup_key_accessor ( const void *const p_value )
+{
+    struct {
+        char _name[64];
+        SDL_Scancode _scancode;
+        bool _active;
+    } *p_key_lookup = (void *)p_value;
+
+    return p_key_lookup->_name;
+}
+
 int g_sdl3_init ( g_instance *p_instance )
 {
 
@@ -219,17 +230,17 @@ int g_sdl3_init ( g_instance *p_instance )
     ok = SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
     if ( !ok ) goto failed_to_initialize_sdl3;
 
-    // Construct the key lookups
-    if ( dict_construct(&p_sdl2_key_lookup  , SDL_SCANCODE_COUNT, 0) == 0 ) goto failed_to_construct_dict;
-    if ( dict_construct(&p_sdl2_key_scancode, SDL_SCANCODE_COUNT, 0) == 0 ) goto failed_to_construct_dict;
+    // construct the key lookups
+    if ( dict_construct(&p_sdl2_key_lookup  , SDL_SCANCODE_COUNT, NULL, (fn_key_accessor *)key_lookup_key_accessor, NULL) == 0 ) goto failed_to_construct_dict;
+    if ( dict_construct(&p_sdl2_key_scancode, SDL_SCANCODE_COUNT, NULL, (fn_key_accessor *)key_lookup_key_accessor, NULL) == 0 ) goto failed_to_construct_dict;
 
-    // Populate the key lookup
+    // populate the key lookup
     for (size_t i = 0; i < SDL_SCANCODE_COUNT; i++)
     {
 
         // Add the key
-        dict_add(p_sdl2_key_lookup  , _key_lookup[i]._name, &_key_lookup[i]._active);
-        dict_add(p_sdl2_key_scancode, _key_lookup[i]._name, (void *)_key_lookup[i]._scancode);
+        dict_add(p_sdl2_key_lookup  , &_key_lookup[i]);
+        dict_add(p_sdl2_key_scancode, &_key_lookup[i]);
     }
 
     // success
@@ -346,7 +357,7 @@ int g_sdl3_render_draw ( g_instance *p_instance )
         render_pass *p_render_pass = NULL;
         
         // get the i'th render pass
-        array_index(p_passes, i, &p_render_pass);
+        array_index(p_passes, i, (void **)&p_render_pass);
 
         // draw the render pass 
         g_sdl3_render_pass_draw(p_instance, p_render_pass);
@@ -420,7 +431,7 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
         attachment *p_attachment = NULL;
 
         // get the i'th attachment
-        array_index(p_framebuffer->p_attachments, i, &p_attachment);
+        array_index(p_framebuffer->p_attachments, i, (void **)&p_attachment);
 
         // setup the color target info
         _color_target_ci[i] = (SDL_GPUColorTargetInfo)
@@ -462,7 +473,7 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
     p_render_pass->p_handle = SDL_BeginGPURenderPass(
         p_instance->graphics.sdl3.command_buffer, 
         
-        &_color_target_ci, 
+        (const SDL_GPUColorTargetInfo *)&_color_target_ci, 
         attachment_len, 
         ( p_framebuffer->p_depth ) ? &_depth_target_ci : (void *) 0
     );
@@ -504,7 +515,7 @@ int g_sdl3_render_pass_draw ( g_instance *p_instance, render_pass *p_render_pass
         pipeline *p_pipeline = NULL;
 
         // store the i'th pipeline
-        array_index(p_render_pass->p_pipelines, i, &p_pipeline);
+        array_index(p_render_pass->p_pipelines, i, (void **)&p_pipeline);
 
         // bind the pipeline
         g_sdl3_pipeline_bind(p_render_pass, p_pipeline);
@@ -556,9 +567,13 @@ int g_sdl3_window_from_json ( g_instance *p_instance, const json_value *p_value 
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_width  = (json_value *)dict_get(p_dict, "width"),
-                   *p_height = (json_value *)dict_get(p_dict, "height"),
-                   *p_title  = (json_value *)dict_get(p_dict, "title");
+        json_value *p_width  = NULL,
+                   *p_height = NULL,
+                   *p_title  = NULL;
+
+        dict_get(p_dict, "width" , (void **)&p_width);
+        dict_get(p_dict, "height", (void **)&p_height);
+        dict_get(p_dict, "title" , (void **)&p_title);
 
         // error check
         if ( p_width  == (void *) 0 ) goto no_width_property;
@@ -743,10 +758,15 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name        = (json_value *)dict_get(p_dict, "name"),
-                   *p_pipelines   = (json_value *)dict_get(p_dict, "pipelines"),
-                   *p_attachments = (json_value *)dict_get(p_dict, "attachments"),
-                   *p_passes      = (json_value *)dict_get(p_dict, "passes");
+        json_value *p_name        = NULL,
+                   *p_pipelines   = NULL,
+                   *p_attachments = NULL,
+                   *p_passes      = NULL;
+        
+        dict_get(p_dict, "name"       , (void **)&p_name);
+        dict_get(p_dict, "pipelines"  , (void **)&p_pipelines);
+        dict_get(p_dict, "attachments", (void **)&p_attachments);
+        dict_get(p_dict, "passes"     , (void **)&p_passes);
 
         // error check
         if ( p_name        == (void *) 0 ) goto no_name_property;
@@ -764,7 +784,7 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
         strncpy(p_renderer->_name, p_name->string, sizeof(p_renderer->_name) - 1);
 
         // construct lookups
-        dict_construct(&p_renderer->p_attachments, 64, NULL);
+        dict_construct(&p_renderer->p_attachments, 64, NULL, (fn_key_accessor *)attachment_key_accessor, NULL);
 
         // iterate through each pipeline json
         for (size_t i = 0; i < array_size(p_pipelines->list); i++)
@@ -775,7 +795,7 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
             json_value *p_value = NULL;
             
             // store the i'th pipeline json
-            array_index(p_pipelines->list, i, &p_value);
+            array_index(p_pipelines->list, i, (void **)&p_value);
 
             // construct the i'th pipeline
             g_sdl3_pipeline_from_json(&p_pipeline, p_value);
@@ -790,13 +810,13 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
             json_value *p_value = NULL;
             
             // store the i'th attachment json
-            array_index(p_attachments->list, i, &p_value);
+            array_index(p_attachments->list, i, (void **)&p_value);
 
             // construct the i'th attachment
             g_sdl3_attachment_from_json(&p_attachment, p_value);
 
             // store the i'th attachment
-            dict_add(p_renderer->p_attachments, p_attachment->_name, p_attachment);
+            dict_add(p_renderer->p_attachments, p_attachment);
         }
     
         // construct render passes
@@ -817,7 +837,7 @@ int g_sdl3_renderer_from_json ( renderer **pp_renderer, const json_value *p_valu
                 json_value *p_value = NULL;
                 
                 // store the i'th render pass json
-                array_index(p_passes->list, i, &p_value);
+                array_index(p_passes->list, i, (void **)&p_value);
 
                 // construct the i'th render pass
                 g_sdl3_render_pass_from_json(&p_render_pass, p_value);
@@ -991,8 +1011,11 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                   *p_type = (json_value *)dict_get(p_dict, "type");
+        json_value *p_name = NULL,
+                   *p_type = NULL;
+
+        dict_get(p_dict, "name", (void **)&p_name);
+        dict_get(p_dict, "type", (void **)&p_type);
 
         // error check
         if ( p_name  == (void *) 0 ) goto no_name_property;
@@ -1033,7 +1056,7 @@ int g_sdl3_attachment_from_json ( attachment **pp_attachment, const json_value *
     }
 
 done:
-    dict_add(p_instance->cache.p_attachment, p_attachment->_name, p_attachment);
+    dict_add(p_instance->cache.p_attachment, p_attachment);
 
     // return a pointer to the caller
     *pp_attachment = p_attachment;
@@ -1178,14 +1201,26 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                   *p_source = (json_value *)dict_get(p_dict, "source"),
-                   *p_vert = (json_value *)dict_get(p_source->object, "vert"),
-                   *p_frag = (json_value *)dict_get(p_source->object, "frag"),
-                   *p_primitive = (json_value *)dict_get(p_dict, "primitive"),
-                   *p_uniforms = (json_value *)dict_get(p_dict, "uniforms"),
-                   *p_samplers = (json_value *)dict_get(p_dict, "samplers"),
-                   *p_input = (json_value *)dict_get(p_dict, "input");
+        json_value *p_name      = NULL,
+                   *p_source    = NULL,
+                   *p_vert      = NULL,
+                   *p_frag      = NULL,
+                   *p_primitive = NULL,
+                   *p_uniforms  = NULL,
+                   *p_samplers  = NULL,
+                   *p_input     = NULL;
+
+        dict_get(p_dict, "name"     , (void **)&p_name);
+        dict_get(p_dict, "source"   , (void **)&p_source);
+        if ( p_source )
+        {
+            dict_get(p_source->object, "vert", (void **)&p_vert);
+            dict_get(p_source->object, "frag", (void **)&p_frag);
+        }
+        dict_get(p_dict, "primitive", (void **)&p_primitive);
+        dict_get(p_dict, "uniforms" , (void **)&p_uniforms);
+        dict_get(p_dict, "samplers" , (void **)&p_samplers);
+        dict_get(p_dict, "input"    , (void **)&p_input);
 
         // error check
         if ( p_name  == (void *) 0 ) goto no_name_property;
@@ -1208,7 +1243,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             if ( 0 == len ) goto no_uniforms;
 
             array_construct(&p_pipeline->p_uniforms, len);
-            dict_construct(&p_pipeline->uniforms, len, NULL);
+            dict_construct(&p_pipeline->uniforms, len, NULL, (fn_key_accessor *)uniform_key_accessor, NULL);
 
             // iterate through each uniform json
             for (size_t i = 0; i < len; i++)
@@ -1218,7 +1253,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 json_value *p_value = NULL;
                 
                 // store the i'th uniform json
-                array_index(p_uniforms->list, i, &p_value);
+                array_index(p_uniforms->list, i, (void **)&p_value);
 
                 // construct the i'th uniform
                 g_sdl3_uniform_from_json(&p_uniform, p_value);
@@ -1228,6 +1263,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
                 // store the i'th uniform
                 array_add(p_pipeline->p_uniforms, p_uniform);
+                dict_add(p_pipeline->uniforms, p_uniform);
             }
         }
         no_uniforms:;
@@ -1242,7 +1278,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
             if ( 0 == len ) goto no_samplers;
 
             array_construct(&p_pipeline->p_samplers, len);
-            dict_construct(&p_pipeline->samplers, len, NULL);
+            dict_construct(&p_pipeline->samplers, len, NULL, NULL, NULL);
 
             // iterate through each sampler json
             for (size_t i = 0; i < len; i++)
@@ -1252,7 +1288,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                 json_value *p_value = NULL;
                 
                 // store the i'th sampler json
-                array_index(p_samplers->list, i, &p_value);
+                array_index(p_samplers->list, i, (void **)&p_value);
 
                 // construct the i'th sampler
                 g_sdl3_sampler_from_json(&p_sampler, p_value);
@@ -1370,7 +1406,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
                     json_value *p_value = NULL;
                     
                     // store the i'th vertex buffer
-                    array_index(p_array, i, &p_value);
+                    array_index(p_array, i, (void **)&p_value);
 
                     // xyz
                     if ( 0 == strcmp(p_value->string, "xyz") )
@@ -1527,7 +1563,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
     array_construct(&p_pipeline->p_static_draw_list, 512);
 
     // add the pipeline to the cache
-    dict_add(p_instance->cache.p_pipeline, p_pipeline->_name, p_pipeline);
+    dict_add(p_instance->cache.p_pipeline, p_pipeline);
     
     // return a pointer to the caller
     *pp_pipeline = p_pipeline;
@@ -1671,7 +1707,7 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
         entity *p_drawable = NULL;
 
         // retrieve the i'th drawable
-        array_index(p_pipeline->p_static_draw_list, i, &p_drawable);
+        array_index(p_pipeline->p_static_draw_list, i, (void **)&p_drawable);
 
         // bind the drawable
         if ( p_pipeline->pfn_bind_each )
@@ -1706,9 +1742,13 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name = (json_value *)dict_get(p_dict, "name"),
-                   *p_framebuffer = (json_value *)dict_get(p_dict, "framebuffer"),
-                   *p_pipelines = (json_value *)dict_get(p_dict, "pipelines");
+        json_value *p_name        = NULL,
+                   *p_framebuffer = NULL,
+                   *p_pipelines   = NULL;
+
+        dict_get(p_dict, "name"       , (void **)&p_name);
+        dict_get(p_dict, "framebuffer", (void **)&p_framebuffer);
+        dict_get(p_dict, "pipelines"  , (void **)&p_pipelines);
 
         // error check
         if ( p_name  == (void *) 0 ) goto no_name_property;
@@ -1745,13 +1785,13 @@ int g_sdl3_render_pass_from_json ( render_pass **pp_render_pass, const json_valu
                 char *p_name = NULL;
                 
                 // store the i'th pipeline json
-                array_index(p_pipelines->list, i, &p_value);
+                array_index(p_pipelines->list, i, (void **)&p_value);
 
                 // store the name of the pipeline
                 p_name = p_value->string;
 
                 // retrieve the pipeline from the cache
-                p_pipeline = dict_get(p_instance->cache.p_pipeline, p_name);
+                dict_get(p_instance->cache.p_pipeline, p_name, (void **)&p_pipeline);
 
                 // store the i'th pipeline
                 array_add(p_render_pass->p_pipelines, p_pipeline);
@@ -1885,9 +1925,13 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_clear = (json_value *)dict_get(p_dict, "clear"),
-                   *p_color = (json_value *)dict_get(p_dict, "color"),
-                   *p_depth = (json_value *)dict_get(p_dict, "depth");
+        json_value *p_clear = NULL,
+                   *p_color = NULL,
+                   *p_depth = NULL;
+
+        dict_get(p_dict, "clear", (void **)&p_clear);
+        dict_get(p_dict, "color", (void **)&p_color);
+        dict_get(p_dict, "depth", (void **)&p_depth);
 
         // error check
         if ( p_clear  == (void *) 0 ) goto no_clear_property;
@@ -1909,7 +1953,7 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
             {
 
                 // store the i'th channel
-                array_index(p_clear->list, i, &p_i);
+                array_index(p_clear->list, i, (void **)&p_i);
 
                 // error check
                 if ( NULL == p_i ) goto channel_is_null;
@@ -1941,13 +1985,13 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
                 attachment *p_attachment = NULL;
 
                 // store the i'th attachment name json
-                array_index(p_color->list, i, &p_attachment_name);
+                array_index(p_color->list, i, (void **)&p_attachment_name);
 
                 // store the i'th attachment name
                 p_name = p_attachment_name->string;
 
                 // retrieve the attachment from the cache
-                p_attachment = dict_get(p_instance->cache.p_attachment, p_name);
+                dict_get(p_instance->cache.p_attachment, p_name, (void **)&p_attachment);
 
                 array_add(p_framebuffer->p_attachments, p_attachment);
             }
@@ -1968,7 +2012,7 @@ int g_sdl3_framebuffer_from_json ( framebuffer **pp_framebuffer, const json_valu
             p_name = p_depth->string;
 
             // retrieve the attachment from the cache
-            p_attachment = dict_get(p_instance->cache.p_attachment, p_name);
+            dict_get(p_instance->cache.p_attachment, p_name, (void **)&p_attachment);
 
             p_framebuffer->p_depth = p_attachment;
         }
@@ -2142,14 +2186,14 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     if ( p_value->type != JSON_VALUE_OBJECT ) goto wrong_type;
     
     p_dict  = p_value->object;
-    p_name  = (json_value *)dict_get(p_dict, "name"),
-    p_xyz   = (json_value *)dict_get(p_dict, "xyz"),
-    p_uv    = (json_value *)dict_get(p_dict, "uv"),
-    p_nxyz  = (json_value *)dict_get(p_dict, "nxyz"),
-    p_txyz  = (json_value *)dict_get(p_dict, "txyz"),
-    p_bxyz  = (json_value *)dict_get(p_dict, "bxyz"),
-    p_idx   = (json_value *)dict_get(p_dict, "idx"),
-    p_parts = (json_value *)dict_get(p_dict, "parts");
+    dict_get(p_dict, "name" , (void **)&p_name);
+    dict_get(p_dict, "xyz"  , (void **)&p_xyz);
+    dict_get(p_dict, "uv"   , (void **)&p_uv);
+    dict_get(p_dict, "nxyz" , (void **)&p_nxyz);
+    dict_get(p_dict, "txyz" , (void **)&p_txyz);
+    dict_get(p_dict, "bxyz" , (void **)&p_bxyz);
+    dict_get(p_dict, "idx"  , (void **)&p_idx);
+    dict_get(p_dict, "parts", (void **)&p_parts);
 
     // parse the geometry object
     {
@@ -2456,7 +2500,8 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
     *pp_geometry = p_geometry;
 
     // cache the geometry
-    dict_add(p_instance->cache.p_geometry, p_geometry->_name, p_geometry);
+    // add the geometry to the cache
+    dict_add(p_instance->cache.p_geometry, p_geometry);
 
     // success
     return 1;
@@ -2483,7 +2528,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // store the i'th number
             xyz[i] = p_value->number;
@@ -2533,7 +2578,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // store the i'th number
             uv[i] = p_value->number;
@@ -2562,7 +2607,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // store the i'th number
             nxyz[i] = p_value->number;
@@ -2591,7 +2636,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // store the i'th number
             txyz[i] = p_value->number;
@@ -2623,7 +2668,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // store the i'th number
             idx[i] = p_value->integer;
@@ -2651,7 +2696,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
             json_value *p_value = NULL;
 
             // store the i'th json value
-            array_index(p_array, i, &p_value);
+            array_index(p_array, i, (void **)&p_value);
 
             // parse the part
             {
@@ -2659,9 +2704,11 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                 // initialized data
                 dict *p_dict = p_value->object;
 
-                json_value *p_material = dict_get(p_dict, "material"),
-                           *p_idx      = dict_get(p_dict, "idx"); 
-                
+                json_value *p_material = NULL,
+                           *p_idx      = NULL;
+
+                dict_get(p_dict, "material", (void **)&p_material);
+                dict_get(p_dict, "idx"     , (void **)&p_idx);
                 // store the name 
                 strncpy(
                     p_geometry->_parts[i]._material_name,
@@ -2683,7 +2730,7 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                     json_value *p_value = NULL;
 
                     // store the i'th json value
-                    array_index(p_array, j, &p_value);
+                    array_index(p_array, j, (void **)&p_value);
 
                     // store the i'th number
                     p_geometry->_parts[i].p_data[j] = p_value->integer;
@@ -2839,7 +2886,7 @@ int g_sdl3_geometry_bind ( render_pass *p_render_pass, geometry *p_geometry )
     SDL_BindGPUVertexBuffers(
         p_render_pass->p_handle,
         0,
-        &_bindings,
+        (const SDL_GPUBufferBinding *)&_bindings,
         len
     );
 
@@ -2964,7 +3011,7 @@ int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a
 
     // name the texture
     snprintf(
-        &p_texture->_name, 
+        (char *)&p_texture->_name, 
         sizeof(p_texture->_name),
 
         "#%02hhx%02hhx%02hhx%02hhx",
@@ -2976,7 +3023,7 @@ int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a
     );
 
     // cache query
-    p_maybe = dict_get(p_instance->cache.p_texture, p_texture->_name);
+    dict_get(p_instance->cache.p_texture, p_texture->_name, (void **)&p_maybe);
 
     // cache hit
     if ( p_maybe ) 
@@ -3070,7 +3117,7 @@ int g_sdl3_texture_from_color ( texture **pp_texture, f32 r, f32 g, f32 b, f32 a
     SDL_ReleaseGPUTransferBuffer(p_instance->graphics.sdl3.device, p_transfer_buffer);
 
     // cache the color
-    dict_add(p_instance->cache.p_texture, p_texture->_name, p_texture),
+    dict_add(p_instance->cache.p_texture, p_texture),
     printf("[g10] [texture] cached: %s\n", p_texture->_name);
 
 
@@ -3315,15 +3362,17 @@ int g_sdl3_sampler_from_json ( sampler **pp_sampler, const json_value *p_value )
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name    = (json_value *)dict_get(p_dict, "name"),
-                   *p_filter  = (json_value *)dict_get(p_dict, "filter"),
-                //    *p_min     = (json_value *)dict_get(p_filter->object, "min"),
-                //    *p_mag     = (json_value *)dict_get(p_filter->object, "mag"),
-                   *p_mipmap  = (json_value *)dict_get(p_dict, "mipmap"),
-                   *p_address = (json_value *)dict_get(p_dict, "address"),
-                //    *p_u       = (json_value *)dict_get(p_address->object, "u"),
-                //    *p_v       = (json_value *)dict_get(p_address->object, "v"),
-                   *p_compare = (json_value *)dict_get(p_dict, "compare");
+        json_value *p_name    = NULL,
+                   *p_filter  = NULL,
+                   *p_mipmap  = NULL,
+                   *p_address = NULL,
+                   *p_compare = NULL;
+
+        dict_get(p_dict, "name"   , (void **)&p_name);
+        dict_get(p_dict, "filter" , (void **)&p_filter);
+        dict_get(p_dict, "mipmap" , (void **)&p_mipmap);
+        dict_get(p_dict, "address", (void **)&p_address);
+        dict_get(p_dict, "compare", (void **)&p_compare);
 
         // defaults
         _ci = (SDL_GPUSamplerCreateInfo)
@@ -3491,7 +3540,9 @@ int g_sdl3_uniform_from_json ( uniform **pp_uniform, const json_value *p_value )
 
         // initialized data
         dict *p_dict = p_value->object;
-        json_value *p_name = (json_value *)dict_get(p_dict, "name");
+        json_value *p_name = NULL;
+        
+        dict_get(p_dict, "name", (void **)&p_name);
 
         // error check
         if ( p_name == (void *) 0 ) goto no_name_property;

@@ -150,8 +150,8 @@ u0 vec4_length ( float *p_result, vec4 v )
     *p_result = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
-// Matrix operations - COLUMN MAJOR STORAGE
-// Structure layout:
+// matrix operations - COLUMN MAJOR STORAGE
+// structure layout:
 // a e i m (Col 0)
 // b f j n (Col 1)
 // c g k o (Col 2)
@@ -159,10 +159,10 @@ u0 vec4_length ( float *p_result, vec4 v )
 
 u0 mat2_mul_vec2 ( vec2 *p_result, mat2 m, vec2 v )
 {
-    // Col-Major: x' = a*x + c*y, y' = b*x + d*y
-    // Struct: a, b (Col 0); c, d (Col 1)
+    // col-Major: x' = a*x + c*y, y' = b*x + d*y
+    // struct: a, b (Col 0); c, d (Col 1)
     // Actually struct is usually linear a,b,c,d.
-    // If a,b is Col 0 and c,d is Col 1:
+    // if a,b is Col 0 and c,d is Col 1:
     // x' = m.a * v.x + m.c * v.y
     // y' = m.b * v.x + m.d * v.y
     *p_result = (vec2){
@@ -173,9 +173,9 @@ u0 mat2_mul_vec2 ( vec2 *p_result, mat2 m, vec2 v )
 
 u0 mat2_mul_mat2 ( mat2 *p_result, mat2 m, mat2 n )
 {
-    // Result = M * N
-    // Col 0 = M * N_col0
-    // N_col0 = (n.a, n.b)
+    // result = M * N
+    // col 0 = M * N_col0
+    // n_col0 = (n.a, n.b)
     // res.a (0,0) = Row0_M . Col0_N = (m.a, m.c) . (n.a, n.b) = m.a*n.a + m.c*n.b
     // res.b (1,0) = Row1_M . Col0_N = (m.b, m.d) . (n.a, n.b) = m.b*n.a + m.d*n.b
     
@@ -239,19 +239,19 @@ u0 mat3_mul_vec3 ( vec3 *p_result, mat3 m, vec3 v )
 
 u0 mat3_mul_mat3 ( mat3 *p_result, mat3 m, mat3 n )
 {
-    // Result = M * N
+    // result = M * N
     *p_result = (mat3){
-        // Col 0
+        // col 0
         .a = m.a * n.a + m.d * n.b + m.g * n.c,
         .b = m.b * n.a + m.e * n.b + m.h * n.c,
         .c = m.c * n.a + m.f * n.b + m.i * n.c,
         
-        // Col 1
+        // col 1
         .d = m.a * n.d + m.d * n.e + m.g * n.f,
         .e = m.b * n.d + m.e * n.e + m.h * n.f,
         .f = m.c * n.d + m.f * n.e + m.i * n.f,
         
-        // Col 2
+        // col 2
         .g = m.a * n.g + m.d * n.h + m.g * n.i,
         .h = m.b * n.g + m.e * n.h + m.h * n.i,
         .i = m.c * n.g + m.f * n.h + m.i * n.i
@@ -322,29 +322,29 @@ u0 mat4_mul_vec4 ( vec4 *p_result, mat4 m, vec4 v )
 
 u0 mat4_mul_mat4 ( mat4 *p_result, mat4 m, mat4 n )
 {
-    // Result = M * N
-    // Res_Col0 = M * N_Col0
+    // result = M * N
+    // res_Col0 = M * N_Col0
     
     *p_result = (mat4){
-        // Col 0
+        // col 0
         .a = m.a * n.a + m.e * n.b + m.i * n.c + m.m * n.d,
         .b = m.b * n.a + m.f * n.b + m.j * n.c + m.n * n.d,
         .c = m.c * n.a + m.g * n.b + m.k * n.c + m.o * n.d,
         .d = m.d * n.a + m.h * n.b + m.l * n.c + m.p * n.d,
 
-        // Col 1
+        // col 1
         .e = m.a * n.e + m.e * n.f + m.i * n.g + m.m * n.h,
         .f = m.b * n.e + m.f * n.f + m.j * n.g + m.n * n.h,
         .g = m.c * n.e + m.g * n.f + m.k * n.g + m.o * n.h,
         .h = m.d * n.e + m.h * n.f + m.l * n.g + m.p * n.h,
 
-        // Col 2
+        // col 2
         .i = m.a * n.i + m.e * n.j + m.i * n.k + m.m * n.l,
         .j = m.b * n.i + m.f * n.j + m.j * n.k + m.n * n.l,
         .k = m.c * n.i + m.g * n.j + m.k * n.k + m.o * n.l,
         .l = m.d * n.i + m.h * n.j + m.l * n.k + m.p * n.l,
 
-        // Col 3
+        // col 3
         .m = m.a * n.m + m.e * n.n + m.i * n.o + m.m * n.p,
         .n = m.b * n.m + m.f * n.n + m.j * n.o + m.n * n.p,
         .o = m.c * n.m + m.g * n.n + m.k * n.o + m.o * n.p,
@@ -364,7 +364,7 @@ u0 mat4_transpose ( mat4 *p_result, mat4 m )
 
 u0 mat4_inverse ( mat4 *p_result, mat4 m )
 {
-    // Mapping for Col-Major
+    // mapping for Col-Major
     // m00=a, m10=b, m20=c, m30=d (Col 0)
     // m01=e, m11=f, m21=g, m31=h (Col 1)
     // m02=i, m12=j, m22=k, m32=l (Col 2)
@@ -451,7 +451,7 @@ u0 mat4_to_mat3 ( mat3 *p_result, mat4 m )
 
 u0 mat4_translation ( mat4 *p_result, vec3 location )
 {
-    // Col 3 = tx, ty, tz, 1 -> m, n, o, p
+    // col 3 = tx, ty, tz, 1 -> m, n, o, p
     *p_result = (mat4){
         .a = 1.f       , .b = 0.f       , .c = 0.f       , .d = 0.f,
         .e = 0.f       , .f = 1.f       , .g = 0.f       , .h = 0.f,
@@ -476,18 +476,18 @@ u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation )
     float cy = cosf(rotation.y * DEG_TO_RAD), sy = sinf(rotation.y * DEG_TO_RAD);
     float cz = cosf(rotation.z * DEG_TO_RAD), sz = sinf(rotation.z * DEG_TO_RAD);
 
-    // XYZ Rotation - Column Major
-    // Rx * Ry * Rz ? Or Rz * Ry * Rx ?
-    // Standard Euler usually Rz * Ry * Rx (Roll Pitch Yaw) for intrinsic?
-    // Let's assume standard XYZ application order: X then Y then Z.
-    // M = Rz * Ry * Rx
+    // xYZ Rotation - Column Major
+    // rx * Ry * Rz ? Or Rz * Ry * Rx ?
+    // standard Euler usually Rz * Ry * Rx (Roll Pitch Yaw) for intrinsic?
+    // let's assume standard XYZ application order: X then Y then Z.
+    // m = Rz * Ry * Rx
     
-    // Result of RzRyRx in Col Major:
-    // Row 0: cy*cz,              -cy*sz,             sy
-    // Row 1: cx*sz + sx*sy*cz,   cx*cz - sx*sy*sz,  -sx*cy
-    // Row 2: sx*sz - cx*sy*cz,   sx*cz + cx*sy*sz,   cx*cy
+    // result of RzRyRx in Col Major:
+    // row 0: cy*cz,              -cy*sz,             sy
+    // row 1: cx*sz + sx*sy*cz,   cx*cz - sx*sy*sz,  -sx*cy
+    // row 2: sx*sz - cx*sy*cz,   sx*cz + cx*sy*sz,   cx*cy
     
-    // Transpose of Row-Major gives Col-Major memory layout for same matrix.
+    // transpose of Row-Major gives Col-Major memory layout for same matrix.
     // m.a (0,0) = cy*cz
     // m.b (1,0) = cx*sz + sx*sy*cz
     // m.c (2,0) = sx*sz - cx*sy*cz
@@ -520,7 +520,7 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     mat4_rotation_from_vec3(&_rotation, rotation);
     mat4_scale(&_scale, scale);
 
-    // M = T * R * S
+    // m = T * R * S
     mat4_mul_mat4(&_rs, _rotation, _scale);
     mat4_mul_mat4(p_result, _location, _rs);
 }

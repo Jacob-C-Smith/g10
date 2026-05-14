@@ -1,6 +1,12 @@
 // header file
 #include <camera.h>
 
+// key accessor
+const char *camera_key_accessor ( const camera *const p_camera )
+{
+    return p_camera->_name;
+}
+
 // function declarations
 /** !
  * Allocate memory for a camera
@@ -77,13 +83,21 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
     float fov, near_clip, far_clip;
     dict *const p_dict = p_value->object;
     json_value *p_scratch[4] = { 0 };
-    const json_value *const p_name        = dict_get(p_dict, "name"),
-                     *const p_location    = dict_get(p_dict, "location"),
-                     *const p_orientation = dict_get(p_dict, "orientation"),
-                     *const p_up          = dict_get(p_dict, "up"),
-                     *const p_fov         = dict_get(p_dict, "fov"),
-                     *const p_scale       = dict_get(p_dict, "scale"),
-                     *const p_clip        = dict_get(p_dict, "clip");
+    json_value *p_name        = NULL,
+               *p_location    = NULL,
+               *p_orientation = NULL,
+               *p_up          = NULL,
+               *p_fov         = NULL,
+               *p_scale       = NULL,
+               *p_clip        = NULL;
+
+    dict_get(p_dict, "name"       , (void **) &p_name);
+    dict_get(p_dict, "location"   , (void **) &p_location);
+    dict_get(p_dict, "orientation", (void **) &p_orientation);
+    dict_get(p_dict, "up"         , (void **) &p_up);
+    dict_get(p_dict, "fov"        , (void **) &p_fov);
+    dict_get(p_dict, "scale"      , (void **) &p_scale);
+    dict_get(p_dict, "clip"       , (void **) &p_clip);
     
     // property check
     if ( p_location    == (void *) 0 ) goto no_location_property;
@@ -195,8 +209,11 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
 
         // initialized data
         dict *const p_clip_dict = p_clip->object;
-        const json_value *const p_near = dict_get(p_clip_dict, "near"),
-                         *const p_far  = dict_get(p_clip_dict, "far");
+        json_value *p_near = NULL,
+                   *p_far  = NULL;
+        
+        dict_get(p_clip_dict, "near", (void **)&p_near);
+        dict_get(p_clip_dict, "far" , (void **)&p_far);
 
         // property check
         if ( p_near == (void *) 0 ) goto no_clip_near_property;
@@ -234,7 +251,7 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
     _camera = (camera)
     {
         ._name = { 0 },
-        .pfn_camera_controller = camera_controller_first_person_update,
+        .pfn_camera_controller = (fn_camera_controller *)camera_controller_first_person_update,
         .view  = 
         {
             .location = location,
@@ -671,7 +688,7 @@ u0 camera_matrix_view ( mat4 *p_view, vec3 eye, vec3 target, vec3 up )
     // compute the left vector
     vec3_cross_product(&_scratch, up, _forward);
 
-    // Normalize the left vector
+    // normalize the left vector
     vec3_normalize(&_left, _scratch);
 
     // (re)compute the up vector

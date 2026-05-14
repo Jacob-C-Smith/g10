@@ -34,16 +34,16 @@
 struct g_instance_s
 {
 
-    // Name
+    // name
     char _name[255+1];
 
-    // Running?
+    // running?
     bool running; 
 
-    // Schedule
+    // schedule
     // schedule *p_schedule;
 
-    // Context
+    // context
     struct
     {
         fn_user_code *pfn_user_code;
@@ -53,7 +53,7 @@ struct g_instance_s
         u16 fixed_tick_rate;
     } context;
 
-    // Graphics
+    // graphics
     union
     {
         #ifdef G10_BUILD_WITH_VULKAN
@@ -93,7 +93,7 @@ struct g_instance_s
         #endif
     } graphics;
 
-    // Version
+    // version
     struct
     {
         u16 major,

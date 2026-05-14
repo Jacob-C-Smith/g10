@@ -45,7 +45,8 @@ int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
 
     // initialized data
     g_instance *p_instance = g_active_instance();
-    pipeline *p_pipeline = dict_get(p_instance->cache.p_pipeline, "aabb");
+    pipeline *p_pipeline = NULL;
+    dict_get(p_instance->cache.p_pipeline, "aabb", (void **)&p_pipeline);
 
     // populate the struct
     *p_aabb = (aabb)
@@ -112,7 +113,7 @@ int aabb_from_transform ( aabb *p_aabb, transform *p_transform )
     vec3 min_bounds = { 0 };
     vec3 max_bounds = { 0 };
 
-    // Transform first corner to initialize min/max
+    // transform first corner to initialize min/max
     {
         vec4 v4_in = { corners[0].x, corners[0].y, corners[0].z, 1.0f };
         vec4 v4_out = { 0 };
@@ -121,7 +122,7 @@ int aabb_from_transform ( aabb *p_aabb, transform *p_transform )
         max_bounds = min_bounds;
     }
 
-    // Transform remaining corners
+    // transform remaining corners
     for ( int i = 1; i < 8; ++i )
     {
         vec4 v4_in = { corners[i].x, corners[i].y, corners[i].z, 1.0f };
