@@ -25,7 +25,7 @@ GSDK_LIB_DIR = gsdk/build/lib
 G10_SRC_DIR = src
 
 # Sources / objects
-G10_SRC = $(wildcard $(G10_SRC_DIR)/*.c)
+G10_SRC = $(wildcard $(G10_SRC_DIR)/*.c) $(wildcard $(G10_SRC_DIR)/*/*.c)
 G10_OBJ = $(patsubst $(G10_SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(G10_SRC))
 
 # Library / executables (in build/)
@@ -46,6 +46,7 @@ $(BUILD_DIR):
 
 # Object files
 $(BUILD_DIR)/%.o: $(G10_SRC_DIR)/%.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 # Shared library
