@@ -22,7 +22,7 @@
 #include <geometry.h>
 #include <render_pass.h>
 #include <uniform.h>
-#include <aabb.h>
+#include <bv.h>
 #include <user_code.h>
 
 // function declarations
@@ -55,8 +55,8 @@ int main ( int argc, const char *argv[] )
         // program aabb pipeline
         ok &= program_pipeline("aabb", 
             (fn_pipeline_bind_once *)camera_bind_active,
-            (fn_pipeline_bind_each *)aabb_bind,
-            (fn_pipeline_draw *)aabb_draw
+            (fn_pipeline_bind_each *)bv_bind,
+            (fn_pipeline_draw *)bv_draw
         );
     }
 

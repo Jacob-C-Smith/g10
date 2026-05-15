@@ -50,6 +50,7 @@ typedef struct { float u, i, j, k; } quaternion;
 // structure declarations
 struct aabb_s;
 struct attachment_s;
+struct bv_s;
 struct camera_s;
 struct entity_s;
 struct framebuffer_s;
@@ -79,6 +80,7 @@ struct input_bind_s;
 // type definitions
 typedef struct aabb_s        aabb;
 typedef struct attachment_s  attachment;
+typedef struct bv_s           bv;
 typedef struct camera_s      camera;
 typedef struct entity_s      entity;
 typedef struct framebuffer_s framebuffer;
@@ -94,10 +96,9 @@ typedef struct transform_s   transform;
 typedef struct texture_s     texture;
 typedef struct uniform_s     uniform;
 typedef struct input_s       input;
-typedef struct input_bind_s input_bind;
+typedef struct input_bind_s  input_bind;
 
 // typedef struct ai_s               ai;
-// typedef struct bv_s               bv;
 // typedef struct cull_operation_s   cull_operation;
 // typedef struct mesh_s             mesh;
 // typedef struct mesh_data_s        mesh_data;
@@ -106,6 +107,8 @@ typedef struct input_bind_s input_bind;
 // typedef struct shell_s            shell;
 
 // function pointers
+typedef int (fn_bv_resize)( bv *p_bv );
+typedef int (fn_bv_bounds)( bv *p_bv, vec3 *p_min, vec3 *p_max );
 typedef int (fn_render_early)( g_instance *p_instance );
 typedef int (fn_render_late)( g_instance *p_instance );
 typedef int (fn_render_draw)( g_instance *p_instance );
@@ -115,7 +118,7 @@ typedef int (fn_pipeline_bind_once)( render_pass *p_render_pass, pipeline *p_pip
 typedef int (fn_pipeline_bind_each)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
 typedef int (fn_pipeline_draw)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
 typedef int (fn_user_code)( g_instance *p_instance );
-typedef int (*fn_camera_controller)( camera *p_camera );
+typedef int (fn_camera_controller)( camera *p_camera );
 
 // typedef int (*fn_bv_bounds_getter)( void *p_value, vec3 *p_min, vec3 *p_max );
 // typedef int (*fn_cull_operation)( void *p_object );

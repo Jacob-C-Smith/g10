@@ -1,6 +1,7 @@
 // header
 #include <entity.h>
 #include <material.h>
+#include <aabb.h>
 
 // key accessor
 const char *entity_key_accessor ( const entity *const p_entity )
@@ -19,6 +20,11 @@ int entity_info ( entity *p_entity )
     logger_pad(), printf("name     - %s\n", p_entity->_name),
     logger_pad(), printf("pipeline - %s\n", p_entity->pipeline),    
     
+    logger_pad(), printf("bounds:\n"),
+    logger_push(),
+    bv_info(p_entity->p_bounds),
+    logger_pop(),
+
     logger_pad(), printf("geometry:\n"),
     logger_push();
 
@@ -99,13 +105,13 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
         // TODO: clean this up later so no dangling pointers
         p_entity->p_geometry->p_local_transform->p_parent = p_entity->p_transform;
 
-        aabb_from_entity(&p_entity->p_geometry->_bounds, p_entity);
+        bv_from_entity(&p_entity->p_bounds, p_entity);
 
         {
             pipeline *p_pipeline = NULL;
             dict_get(p_instance->cache.p_pipeline, "aabb", (void **)&p_pipeline);
             if ( p_pipeline )
-                array_add(p_pipeline->p_static_draw_list, &p_entity->p_geometry->_bounds);
+                array_add(p_pipeline->p_static_draw_list, p_entity->p_bounds);
         }
 
     }
@@ -159,8 +165,9 @@ int aabb_from_entity ( aabb *p_aabb, entity *p_entity )
     if ( NULL == p_entity->p_transform ) goto no_transform;
 
     // initialized data
-    vec3 min = p_entity->p_geometry->_bounds._min;
-    vec3 max = p_entity->p_geometry->_bounds._max;
+    aabb *p_geom_aabb = (aabb *) p_entity->p_geometry->p_bounds->p_data;
+    vec3 min = p_geom_aabb->_min;
+    vec3 max = p_geom_aabb->_max;
     mat4 model = p_entity->p_transform->model;
 
     // corners of the aabb

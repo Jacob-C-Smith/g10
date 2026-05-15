@@ -18,7 +18,7 @@ int geometry_info ( geometry *p_geometry )
 
     logger_pad(), printf("bounds:\n"),
     logger_push(),
-    aabb_info(&p_geometry->_bounds),
+    bv_info(p_geometry->p_bounds),
     logger_pop(),
 
     logger_pop();

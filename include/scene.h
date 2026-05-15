@@ -17,6 +17,7 @@
 #include <g10.h>
 #include <entity.h>
 #include <camera.h>
+#include <bv.h>
 
 // structure definitions
 struct scene_s
@@ -25,6 +26,7 @@ struct scene_s
     dict *entities;
     dict *cameras;
     camera *p_active_camera;
+    bv *p_bounds;
 };
 
 // function declarations

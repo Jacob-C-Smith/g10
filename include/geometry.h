@@ -15,7 +15,7 @@
 // g10
 #include <gtypedef.h>
 #include <transform.h>
-#include <aabb.h>
+#include <bv.h>
 #include <g10.h>
 
 // enumeration definitions
@@ -33,7 +33,7 @@ enum geometry_vertex_attribute_e
 struct geometry_s
 {
     char _name[63+1];
-    aabb _bounds;
+    bv *p_bounds;
     u32 vertex_count;
     void *_p_handles[GEOMETRY_QTY];
     u32 index_count;

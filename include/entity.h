@@ -30,6 +30,7 @@ struct entity_s
     transform *p_transform;
     geometry *p_geometry;
     material *p_material;
+    bv *p_bounds;
     mat3 _inv_normal;
     char *pipeline;
 };

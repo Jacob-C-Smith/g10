@@ -1,5 +1,6 @@
 // header
 #include <transform.h>
+#include <aabb.h>
 
 int transform_create ( transform **pp_transform )
 {

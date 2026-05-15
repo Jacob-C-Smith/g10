@@ -2550,9 +2550,12 @@ int g_sdl3_geometry_from_json ( geometry **pp_geometry, const json_value *p_valu
                 max.z = (max.z < xyz[i]) ? xyz[i] : max.z;
         }
 
-        // construct an aabb 
-        aabb_from_bounds(&p_geometry->_bounds, min, max);
-
+        // construct an aabb
+        {
+            aabb *p_aabb = default_allocator(NULL, sizeof(aabb));
+            aabb_from_bounds(p_aabb, min, max);
+            bv_from_aabb(&p_geometry->p_bounds, p_aabb);
+        }
         transform_construct(&p_geometry->p_local_transform, (vec3){0.0,0.0,0.0}, (vec3){0.0,0.0,0.0}, (vec3){1.0,1.0,1.0}, NULL);
         
         // done

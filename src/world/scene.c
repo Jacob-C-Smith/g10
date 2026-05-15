@@ -99,6 +99,17 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
         }
     }
 
+    // compute the scene bounds
+    bv_from_scene(&p_scene->p_bounds, p_scene);
+
+    {
+        g_instance *p_instance = g_active_instance();
+        pipeline *p_pipeline = NULL;
+        dict_get(p_instance->cache.p_pipeline, "aabb", (void **)&p_pipeline);
+        if ( p_pipeline )
+            array_add(p_pipeline->p_static_draw_list, p_scene->p_bounds);
+    }
+
     // return a pointer to the caller
     *pp_scene = p_scene;
 
@@ -119,6 +130,11 @@ int scene_info ( scene *p_scene )
 
     logger_push(),
     logger_pad(), printf("name - %s\n", p_scene->_name),
+
+    logger_pad(), printf("bounds: \n"),
+    logger_push(),
+    bv_info(p_scene->p_bounds),
+    logger_pop(),
 
     logger_pad(), printf("entities: \n"),
     logger_push(),

@@ -2,51 +2,11 @@
 #include <aabb.h>
 
 // function definitions
-/*
-static float frand(void)
-{
-    return (float)rand() / (float)RAND_MAX;
-}
-
-void hsv_to_rgb(float h, float s, float v, float *r, float *g, float *b)
-{
-    float c = v * s;
-    float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
-    float m = v - c;
-
-    float rp, gp, bp;
-
-    if (h < 1.0f/6.0f)      { rp = c; gp = x; bp = 0; }
-    else if (h < 2.0f/6.0f) { rp = x; gp = c; bp = 0; }
-    else if (h < 3.0f/6.0f) { rp = 0; gp = c; bp = x; }
-    else if (h < 4.0f/6.0f) { rp = 0; gp = x; bp = c; }
-    else if (h < 5.0f/6.0f) { rp = x; gp = 0; bp = c; }
-    else                    { rp = c; gp = 0; bp = x; }
-
-    *r = rp + m;
-    *g = gp + m;
-    *b = bp + m;
-}
-void random_vibrant_color(float *r, float *g, float *b)
-{
-    float h = frand();          // random hue
-    float s = 0.9f + 0.1f * frand(); // high saturation
-    float v = 0.9f + 0.1f * frand(); // high brightness
-
-    hsv_to_rgb(h, s, v, r, g, b);
-}
-*/
-
 int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
 {
 
     // error check
     if ( NULL == p_aabb ) goto no_aabb;
-
-    // initialized data
-    g_instance *p_instance = g_active_instance();
-    pipeline *p_pipeline = NULL;
-    dict_get(p_instance->cache.p_pipeline, "aabb", (void **)&p_pipeline);
 
     // populate the struct
     *p_aabb = (aabb)
@@ -54,9 +14,6 @@ int aabb_from_bounds ( aabb *p_aabb, vec3 min, vec3 max )
         ._min = min,
         ._max = max
     };
-
-    if ( p_pipeline )
-        array_add(p_pipeline->p_static_draw_list, p_aabb);
 
     // done
     return 1;
