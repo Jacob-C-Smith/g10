@@ -48,6 +48,7 @@ int main ( int argc, const char *argv[] )
         // program default pipeline
         ok &= program_pipeline("default", 
             (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_cull *)entity_cull,
             (fn_pipeline_bind_each *)entity_bind,
             (fn_pipeline_draw *)entity_draw
         );
@@ -55,6 +56,7 @@ int main ( int argc, const char *argv[] )
         // program aabb pipeline
         ok &= program_pipeline("aabb", 
             (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_cull *)bv_cull_pipeline,
             (fn_pipeline_bind_each *)bv_bind,
             (fn_pipeline_draw *)bv_draw
         );

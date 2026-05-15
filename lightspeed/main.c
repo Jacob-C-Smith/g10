@@ -48,6 +48,7 @@ int main ( int argc, const char *argv[] )
         // program default pipeline
         ok &= program_pipeline("default", 
             (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_cull *)entity_cull,
             (fn_pipeline_bind_each *)entity_bind,
             (fn_pipeline_draw *)entity_draw
         );
@@ -55,6 +56,7 @@ int main ( int argc, const char *argv[] )
         // program aabb pipeline
         ok &= program_pipeline("aabb", 
             (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_cull *)bv_cull_pipeline,
             (fn_pipeline_bind_each *)bv_bind,
             (fn_pipeline_draw *)bv_draw
         );
@@ -102,11 +104,26 @@ int main ( int argc, const char *argv[] )
     }
 }
 
+void ptr_prt(void *p_element)
+{
+    printf("%p, ", p_element);
+}
+
 int game_logic ( g_instance *p_instance )
 {
 
     // update the camera
     camera_controller_first_person_update(p_instance->context.p_scene->p_active_camera);
+
+    if ( input_bind_value("SNAPSHOT") )    
+    {
+        pipeline *p_pipeline = NULL;
+
+        dict_get(p_instance->cache.p_pipeline, "default", (void **)&p_pipeline);
+
+        printf("        \r%d\r", array_size(p_pipeline->p_dynamic_draw_list));
+        fflush(stdout);
+    }
     
     // success
     return 1;

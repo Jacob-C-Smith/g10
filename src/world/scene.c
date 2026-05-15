@@ -162,6 +162,45 @@ int scene_info ( scene *p_scene )
     }
 }
 
+static void clear_dynamic_list(pipeline *p_pipeline)
+{
+    if ( !p_pipeline || !p_pipeline->p_dynamic_draw_list ) return;
+
+    while(array_size(p_pipeline->p_dynamic_draw_list))
+    {
+        array_remove(p_pipeline->p_dynamic_draw_list, 0, NULL);
+    }
+}
+
+static void bvh_gather_recursive(bv *p_bv, const vec4 planes[6], g_instance *p_instance)
+{
+    if ( !p_bv ) return;
+
+    if ( bv_cull(p_bv, planes) ) return;
+
+    if ( p_bv->p_user_data )
+    {
+        entity *p_entity = (entity *)p_bv->p_user_data;
+        if ( p_entity->pipeline )
+        {
+            pipeline *p_pipeline = NULL;
+            dict_get(p_instance->cache.p_pipeline, p_entity->pipeline, (void **)&p_pipeline);
+            if ( p_pipeline && p_pipeline->p_dynamic_draw_list )
+            {
+                array_add(p_pipeline->p_dynamic_draw_list, p_entity);
+            }
+        }
+    }
+    else
+    {
+        for ( int i = 0; i < 4; i++ )
+        {
+            if ( p_bv->p_data[i] )
+                bvh_gather_recursive((bv *)p_bv->p_data[i], planes, p_instance);
+        }
+    }
+}
+
 int scene_gather_drawable 
 ( 
     scene *p_scene
@@ -173,33 +212,18 @@ int scene_gather_drawable
     
     // initialized data
     g_instance *p_instance = g_active_instance();
-    size_t entity_count = 0;
-    dict_size(p_scene->entities, &entity_count);
     
-    entity **_pp_entities = default_allocator(0, entity_count * sizeof(entity *));
-    dict_values(p_scene->entities, (void **)_pp_entities, entity_count);
+    // Clear all dynamic draw lists
+    if ( p_instance->cache.p_pipeline )
+        dict_foreach(p_instance->cache.p_pipeline, (fn_foreach *)clear_dynamic_list);
 
-    // iterate through each entity in the scene
-    for ( size_t i = 0; i < entity_count; i++ )
+    if ( p_scene->p_active_camera && p_scene->p_bounds )
     {
-        
-        // initialized data
-        pipeline *p_pipeline = NULL;
-        entity *p_entity = _pp_entities[i];
-
-        // error check
-        if ( NULL == p_entity ) goto no_drawable_list;
-
-        // store the pipeline
-        dict_get(p_instance->cache.p_pipeline, p_entity->pipeline, (void **)&p_pipeline);
+        bvh_gather_recursive(p_scene->p_bounds, p_scene->p_active_camera->frustum.planes, p_instance);
     }
-
-    // free entities list
-    default_allocator(_pp_entities, 0);
 
     // done
     return 1;
 
     no_scene: return 0;
-    no_drawable_list: return 0;
 }

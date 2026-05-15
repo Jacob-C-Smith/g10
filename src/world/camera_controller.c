@@ -108,6 +108,9 @@ int camera_controller_first_person_update ( camera *p_camera )
         p_camera->view.up
     );
 
+    // Update frustum planes
+    camera_update_frustum(p_camera);
+
     // success
     return 1;
 }

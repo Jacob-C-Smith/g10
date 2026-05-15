@@ -25,6 +25,7 @@ struct pipeline_s
     void *pipeline;
 
     array *p_static_draw_list;
+    array *p_dynamic_draw_list;
 
     array *p_uniforms;
     array *p_samplers;
@@ -33,12 +34,14 @@ struct pipeline_s
     dict *samplers;
 
     fn_pipeline_bind_once *pfn_bind_once;
+    fn_pipeline_cull      *pfn_cull;
     fn_pipeline_bind_each *pfn_bind_each;
     fn_pipeline_draw      *pfn_draw;
 };
 
 // function declarations
 int pipeline_set_bind_once (pipeline *p_pipeline, fn_pipeline_bind_once *pfn_bind_once);
+int pipeline_set_cull (pipeline *p_pipeline, fn_pipeline_cull *pfn_cull);
 int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bind_each);
 int pipeline_set_draw (pipeline *p_pipeline, fn_pipeline_draw *pfn_draw);
 

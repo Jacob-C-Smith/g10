@@ -1561,6 +1561,7 @@ int g_sdl3_pipeline_from_json ( pipeline **pp_pipeline, const json_value *p_valu
 
     // construct a static draw list
     array_construct(&p_pipeline->p_static_draw_list, 512);
+    array_construct(&p_pipeline->p_dynamic_draw_list, 512);
 
     // add the pipeline to the cache
     dict_add(p_instance->cache.p_pipeline, p_pipeline);
@@ -1697,25 +1698,45 @@ int g_sdl3_pipeline_draw ( render_pass *p_render_pass, pipeline *p_pipeline )
     
     // initialized data
     g_instance *p_instance = g_active_instance();
-    size_t len = array_size(p_pipeline->p_static_draw_list);
     
-    // iterate through each drawable
-    for (size_t i = 0; i < len; i++)
+    // iterate static draw list
+    if ( p_pipeline->p_static_draw_list )
     {
-        
-        // initialized data
-        entity *p_drawable = NULL;
+        size_t len = array_size(p_pipeline->p_static_draw_list);
+        for (size_t i = 0; i < len; i++)
+        {
+            entity *p_drawable = NULL;
+            array_index(p_pipeline->p_static_draw_list, i, (void **)&p_drawable);
 
-        // retrieve the i'th drawable
-        array_index(p_pipeline->p_static_draw_list, i, (void **)&p_drawable);
+            if ( p_pipeline->pfn_cull && p_pipeline->pfn_cull(p_render_pass, p_pipeline, p_drawable) )
+                continue;
 
-        // bind the drawable
-        if ( p_pipeline->pfn_bind_each )
-            p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
+            if ( p_pipeline->pfn_bind_each )
+                p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
 
-        // draw the drawable
-        if ( p_pipeline->pfn_draw )
-            p_pipeline->pfn_draw(p_render_pass, p_pipeline, p_drawable);
+            if ( p_pipeline->pfn_draw )
+                p_pipeline->pfn_draw(p_render_pass, p_pipeline, p_drawable);
+        }
+    }
+    
+    // iterate dynamic draw list
+    if ( p_pipeline->p_dynamic_draw_list )
+    {
+        size_t len = array_size(p_pipeline->p_dynamic_draw_list);
+        for (size_t i = 0; i < len; i++)
+        {
+            entity *p_drawable = NULL;
+            array_index(p_pipeline->p_dynamic_draw_list, i, (void **)&p_drawable);
+
+            if ( p_pipeline->pfn_cull && p_pipeline->pfn_cull(p_render_pass, p_pipeline, p_drawable) )
+                continue;
+
+            if ( p_pipeline->pfn_bind_each )
+                p_pipeline->pfn_bind_each(p_render_pass, p_pipeline, p_drawable);
+
+            if ( p_pipeline->pfn_draw )
+                p_pipeline->pfn_draw(p_render_pass, p_pipeline, p_drawable);
+        }
     }
     
     // success

@@ -70,3 +70,36 @@ const char *aabb_key_accessor ( const aabb *const p_aabb );
  * @return the name of the aabb
  */
 int aabb_equality ( const aabb *p_a, const aabb *p_b );
+
+/// intersection
+/**
+ * Test the intersection of two aabbs
+ *
+ * @param p_a the first aabb
+ * @param p_b the second aabb
+ *
+ * @return 1 if they intersect, 0 otherwise
+ */
+int aabb_intersect ( const aabb *p_a, const aabb *p_b );
+
+/// contains
+/**
+ * Test if an aabb contains a point
+ *
+ * @param p_aabb the aabb
+ * @param point  the point
+ *
+ * @return 1 if contained, 0 otherwise
+ */
+int aabb_contains ( const aabb *p_aabb, vec3 point );
+
+/// cull frustum
+/**
+ * Test if an aabb is outside a frustum (should be culled)
+ *
+ * @param p_aabb the aabb
+ * @param planes the 6 frustum planes
+ *
+ * @return 1 if outside (cull), 0 if inside/intersecting (keep)
+ */
+int aabb_cull_frustum ( const aabb *p_aabb, const vec4 planes[6] );

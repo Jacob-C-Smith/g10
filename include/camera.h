@@ -43,6 +43,11 @@ struct camera_s
     {
         mat4 _view, _projection;
     } matrix;
+
+    struct
+    {
+        vec4 planes[6];
+    } frustum;
 };
 
 // function declarations
@@ -65,6 +70,14 @@ const char *camera_key_accessor ( const camera *const p_camera );
  * @return the name of the camera
  */
 int camera_equality ( const camera *p_a, const camera *p_b );
+
+/// update frustum
+/**
+ * Update the camera's frustum planes
+ *
+ * @param p_camera the camera
+ */
+void camera_update_frustum ( camera *p_camera );
 
 /// constructors
 /** !

@@ -40,6 +40,10 @@ int renderer_render ( g_instance *p_instance )
     // early
     if ( 0 == p_renderer->pfn_early(p_instance) ) return 1;
 
+    // cull draw list
+    if ( p_instance->context.p_scene )
+        scene_gather_drawable(p_instance->context.p_scene);
+
     // draw
     p_renderer->pfn_draw(p_instance);
 

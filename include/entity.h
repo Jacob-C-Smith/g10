@@ -64,4 +64,6 @@ int aabb_from_entity ( aabb *p_aabb, entity *p_entity );
 
 int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity );
 
+int entity_cull ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity );
+
 int entity_draw ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity );

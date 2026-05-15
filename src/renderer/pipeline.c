@@ -11,6 +11,12 @@ int pipeline_set_bind_once (pipeline *p_pipeline, fn_pipeline_bind_once *pfn_bin
     return 1;
 }
 
+int pipeline_set_cull (pipeline *p_pipeline, fn_pipeline_cull *pfn_cull)
+{
+    p_pipeline->pfn_cull = pfn_cull;
+    return 1;
+}
+
 int pipeline_set_bind_each (pipeline *p_pipeline, fn_pipeline_bind_each *pfn_bind_each)
 {
 

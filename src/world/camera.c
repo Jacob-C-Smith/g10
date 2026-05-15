@@ -18,6 +18,65 @@ const char *camera_key_accessor ( const camera *const p_camera )
 int camera_create ( camera **const pp_camera );
 
 // function definitions
+void camera_update_frustum ( camera *p_camera )
+{
+    if ( !p_camera ) return;
+
+    mat4 m;
+    mat4_mul_mat4(&m, p_camera->matrix._projection, p_camera->matrix._view);
+
+    // Left
+    p_camera->frustum.planes[0].x = m.d + m.a;
+    p_camera->frustum.planes[0].y = m.h + m.e;
+    p_camera->frustum.planes[0].z = m.l + m.i;
+    p_camera->frustum.planes[0].w = m.p + m.m;
+
+    // Right
+    p_camera->frustum.planes[1].x = m.d - m.a;
+    p_camera->frustum.planes[1].y = m.h - m.e;
+    p_camera->frustum.planes[1].z = m.l - m.i;
+    p_camera->frustum.planes[1].w = m.p - m.m;
+
+    // Bottom
+    p_camera->frustum.planes[2].x = m.d + m.b;
+    p_camera->frustum.planes[2].y = m.h + m.f;
+    p_camera->frustum.planes[2].z = m.l + m.j;
+    p_camera->frustum.planes[2].w = m.p + m.n;
+
+    // Top
+    p_camera->frustum.planes[3].x = m.d - m.b;
+    p_camera->frustum.planes[3].y = m.h - m.f;
+    p_camera->frustum.planes[3].z = m.l - m.j;
+    p_camera->frustum.planes[3].w = m.p - m.n;
+
+    // Near (SDL3/Vulkan uses 0 to 1 depth, so plane is m.d + m.c or just m.c? Wait, let's use standard -1 to 1 for now or 0 to 1 depending on projection)
+    // Actually standard near plane for 0..1 depth is:
+    p_camera->frustum.planes[4].x = m.d + m.c;
+    p_camera->frustum.planes[4].y = m.h + m.g;
+    p_camera->frustum.planes[4].z = m.l + m.k;
+    p_camera->frustum.planes[4].w = m.p + m.o;
+
+    // Far
+    p_camera->frustum.planes[5].x = m.d - m.c;
+    p_camera->frustum.planes[5].y = m.h - m.g;
+    p_camera->frustum.planes[5].z = m.l - m.k;
+    p_camera->frustum.planes[5].w = m.p - m.o;
+
+    for ( int i = 0; i < 6; i++ ) {
+        float length = sqrtf(
+            p_camera->frustum.planes[i].x * p_camera->frustum.planes[i].x +
+            p_camera->frustum.planes[i].y * p_camera->frustum.planes[i].y +
+            p_camera->frustum.planes[i].z * p_camera->frustum.planes[i].z
+        );
+        if ( length > 0.0f ) {
+            p_camera->frustum.planes[i].x /= length;
+            p_camera->frustum.planes[i].y /= length;
+            p_camera->frustum.planes[i].z /= length;
+            p_camera->frustum.planes[i].w /= length;
+        }
+    }
+}
+
 int camera_create ( camera **const pp_camera )
 {
 
@@ -290,6 +349,8 @@ int camera_from_json ( camera **pp_camera, json_value *p_value )
         _camera.projection.near_clip,
         _camera.projection.far_clip
     );
+
+    camera_update_frustum(&_camera);
 
     // copy the name
     if ( p_name ) goto copy_name;

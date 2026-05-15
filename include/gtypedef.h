@@ -116,6 +116,7 @@ typedef int (fn_render_pass_bind)( renderer *p_renderer );
 typedef int (fn_render_pass_draw)( renderer *p_renderer );
 typedef int (fn_pipeline_bind_once)( render_pass *p_render_pass, pipeline *p_pipeline );
 typedef int (fn_pipeline_bind_each)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
+typedef int (fn_pipeline_cull)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
 typedef int (fn_pipeline_draw)( render_pass *p_render_pass, pipeline *p_pipeline, void *p_drawable );
 typedef int (fn_user_code)( g_instance *p_instance );
 typedef int (fn_camera_controller)( camera *p_camera );

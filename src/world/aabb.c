@@ -160,3 +160,44 @@ int aabb_equality ( const aabb *p_a, const aabb *p_b )
 
     return p_a == p_b;
 }
+
+int aabb_intersect ( const aabb *p_a, const aabb *p_b )
+{
+    if ( !p_a || !p_b ) return 0;
+    
+    if ( p_a->_max.x < p_b->_min.x || p_a->_min.x > p_b->_max.x ) return 0;
+    if ( p_a->_max.y < p_b->_min.y || p_a->_min.y > p_b->_max.y ) return 0;
+    if ( p_a->_max.z < p_b->_min.z || p_a->_min.z > p_b->_max.z ) return 0;
+
+    return 1;
+}
+
+int aabb_contains ( const aabb *p_aabb, vec3 point )
+{
+    if ( !p_aabb ) return 0;
+
+    if ( point.x < p_aabb->_min.x || point.x > p_aabb->_max.x ) return 0;
+    if ( point.y < p_aabb->_min.y || point.y > p_aabb->_max.y ) return 0;
+    if ( point.z < p_aabb->_min.z || point.z > p_aabb->_max.z ) return 0;
+
+    return 1;
+}
+
+int aabb_cull_frustum ( const aabb *p_aabb, const vec4 planes[6] )
+{
+    if ( !p_aabb || !planes ) return 0;
+
+    for ( int i = 0; i < 6; i++ )
+    {
+        float px = planes[i].x > 0.0f ? p_aabb->_max.x : p_aabb->_min.x;
+        float py = planes[i].y > 0.0f ? p_aabb->_max.y : p_aabb->_min.y;
+        float pz = planes[i].z > 0.0f ? p_aabb->_max.z : p_aabb->_min.z;
+
+        float distance = planes[i].x * px + planes[i].y * py + planes[i].z * pz + planes[i].w;
+
+        if ( distance < 0.0f )
+            return 1; // Outside the frustum
+    }
+
+    return 0; // Inside or intersecting
+}

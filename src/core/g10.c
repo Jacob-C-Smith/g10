@@ -542,7 +542,7 @@ int poll_input ( g_instance *p_instance )
     }
 }
 
-int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_bind_each *pfn_each, fn_pipeline_draw *pfn_draw )
+int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_pipeline_cull *pfn_cull, fn_pipeline_bind_each *pfn_each, fn_pipeline_draw *pfn_draw )
 {
 
     // initialized data
@@ -556,6 +556,7 @@ int program_pipeline ( const char _name[], fn_pipeline_bind_once *pfn_once, fn_p
 
     // program the pipeline
     pipeline_set_bind_once(p_pipeline, pfn_once),
+    pipeline_set_cull(p_pipeline, pfn_cull),
     pipeline_set_bind_each(p_pipeline, pfn_each),
     pipeline_set_draw(p_pipeline, pfn_draw);
 

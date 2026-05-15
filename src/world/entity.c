@@ -85,9 +85,6 @@ int entity_from_json ( entity **pp_entity, json_value *p_value )
 
         // store the pipeline name
         p_entity->pipeline = p_pipeline->_name;
-        
-        // add the entity to the pipeline's static draw list
-        array_add(p_pipeline->p_static_draw_list, p_entity);
     }
 
     if ( p_geometry )
@@ -165,7 +162,7 @@ int aabb_from_entity ( aabb *p_aabb, entity *p_entity )
     if ( NULL == p_entity->p_transform ) goto no_transform;
 
     // initialized data
-    aabb *p_geom_aabb = (aabb *) p_entity->p_geometry->p_bounds->p_data;
+    aabb *p_geom_aabb = (aabb *) p_entity->p_geometry->p_bounds->p_data[0];
     vec3 min = p_geom_aabb->_min;
     vec3 max = p_geom_aabb->_max;
     mat4 model = p_entity->p_transform->model;
@@ -219,6 +216,7 @@ int aabb_from_entity ( aabb *p_aabb, entity *p_entity )
 
 int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )
 {
+    if ( !p_entity ) return 0;
 
     // transform
     transform_bind(p_render_pass, p_pipeline, p_entity->p_geometry->p_local_transform);
@@ -233,8 +231,23 @@ int entity_bind ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_en
     return 1;
 }
 
+int entity_cull ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )
+{
+    if ( !p_entity ) return 0;
+    
+    g_instance *p_instance = g_active_instance();
+    if ( !p_instance || !p_instance->context.p_scene || !p_instance->context.p_scene->p_active_camera ) return 0;
+    
+    camera *p_camera = p_instance->context.p_scene->p_active_camera;
+    if ( p_entity->p_bounds ) {
+        return bv_cull(p_entity->p_bounds, p_camera->frustum.planes);
+    }
+    return 0; // If no bounds, don't cull
+}
+
 int entity_draw ( render_pass *p_render_pass, pipeline *p_pipeline, entity *p_entity )
 {
+    if ( !p_entity ) return 0;
 
     // draw geometry
     if ( p_entity->p_geometry )

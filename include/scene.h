@@ -33,3 +33,5 @@ struct scene_s
 int scene_from_json ( scene **pp_scene, json_value *p_value );
 
 int scene_info ( scene *p_scene );
+
+int scene_gather_drawable ( scene *p_scene );

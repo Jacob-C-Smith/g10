@@ -30,7 +30,8 @@
             "PRONE"        : [ "LEFT SHIFT" ],
             "MOUSE LOCK"   : [ "M" ],
             "JUMP"         : [ "SPACE" ],
-            "QUIT"         : [ "ESCAPE" ]
+            "QUIT"         : [ "ESCAPE" ],
+            "SNAPSHOT"     : [ "P" ]
         }
     },
     "scene" : "assets/scene/level 1.json",
