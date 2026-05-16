@@ -1,0 +1,38 @@
+{
+    "name" : "skybox",
+    "source" : 
+    {
+        "vert" : "assets/pipeline/skybox/skybox.metallib",
+        "frag" : "assets/pipeline/skybox/skybox.metallib"
+    },
+    "input" : [ "xyz" ],
+    "primitive" : "triangle",
+    "uniforms" :
+    [
+        {
+            "name" : "unused"
+        },
+        {
+            "name" : "unused"
+        },
+        {
+            "name" : "camera",
+            "data" : 
+            [
+                { "V" : "mat4" },
+                { "P" : "mat4" }
+            ]
+        }
+    ],
+    "samplers" :
+    [
+        {
+            "name" : "skybox"
+        }
+    ],
+    "depth": {
+        "test": true,
+        "write": false,
+        "compare": "less_equal"
+    }
+}

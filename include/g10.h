@@ -22,6 +22,7 @@
 #include <pipeline.h>
 #include <renderer.h>
 #include <camera.h>
+#include <skybox.h>
 #include <scene.h>
 
 #define G10_BUILD_WITH_SDL3

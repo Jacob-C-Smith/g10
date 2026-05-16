@@ -39,7 +39,7 @@ fragment float4 fs_main(
     float4 albedo = colorMap.sample(colorSmp, in.uv);
     
     float3 result = (ambient + diffuse) * albedo.rgb;
-
+    
     //return float4(T, 1.0);
     return albedo;
     // return float4(normalSample, 1.0);

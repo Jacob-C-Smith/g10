@@ -38,7 +38,7 @@ LIGHTSPEED = $(BUILD_DIR)/lightspeed
 GSDK_LIBS = $(wildcard $(GSDK_LIB_DIR)/*.$(SHARED_EXT))
 
 # Default target
-all: $(G10_LIB) $(CLIENT) $(LIGHTSPEED)
+all: $(G10_LIB) $(CLIENT) $(LIGHTSPEED) transform_info
 
 # Ensure build directory exists
 $(BUILD_DIR):
@@ -60,6 +60,9 @@ $(CLIENT): main.c $(G10_LIB)
 $(LIGHTSPEED): lightspeed/main.c $(G10_LIB)
 	$(CC) $(CFLAGS) -o $@ $< $(G10_LIB) $(GSDK_LIBS) $(SDL_LIBS) $(RPATH_FLAGS)
 
+transform_info: util/transform/info.c $(G10_LIB)
+	$(CC) $(CFLAGS) -o $@ $< $(G10_LIB) $(GSDK_LIBS) $(SDL_LIBS) $(RPATH_FLAGS)
+
 # Assets
 assets: 
 
@@ -78,6 +81,7 @@ assets:
 	# geometry
 	@./scripts/geometry/gport-geometry.sh g10_test_room #| grep 'gport'
 	@./scripts/geometry/gport-geometry.sh lightspeed #| grep 'gport'
+	@./scripts/geometry/gport-geometry.sh g10_base_geometry #| grep 'gport'
 
 	# texture
 	@./scripts/texture/gport-texture.sh g10_base_geometry #| grep 'gport'
@@ -106,6 +110,7 @@ assets:
 	@./scripts/pipeline/compile-metal-shader.sh texture
 	@./scripts/pipeline/compile-metal-shader.sh normal
 	@./scripts/pipeline/compile-metal-shader.sh tbn
+	@./scripts/pipeline/compile-metal-shader.sh skybox
 	@./scripts/pipeline/compile-metal-shader.sh default
 
 	mv ./assets/input/entity/* ./assets/entity/

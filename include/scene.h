@@ -26,6 +26,7 @@ struct scene_s
     dict *entities;
     dict *cameras;
     camera *p_active_camera;
+    skybox *p_skybox;
     bv *p_bounds;
 };
 

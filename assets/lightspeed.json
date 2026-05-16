@@ -34,12 +34,13 @@
             "SNAPSHOT"     : [ "P" ]
         }
     },
-    "scene" : "assets/scene/level 1.json",
+    "scene" : "assets/scene/test room.json",
     "renderer" : 
     {
         "name"      : "renderer",
         "pipelines" :
         [
+            "assets/pipeline/skybox.json",
             "assets/pipeline/default.json",
             "assets/pipeline/aabb.json"
         ],
@@ -64,7 +65,7 @@
                     "color" : [ "OUTPUT" ],
                     "depth" : "depth"
                 },
-                "pipelines" : [ "default", "aabb" ]
+                "pipelines" : [ "skybox", "default", "aabb" ]
             }
         ]
     }

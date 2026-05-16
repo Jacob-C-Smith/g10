@@ -1,0 +1,6 @@
+{
+    "name": "default skybox",
+    "texture": "assets/skybox/sky.png",
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/cube.json",
+    "pipeline": "skybox"
+}

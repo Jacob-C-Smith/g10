@@ -89,6 +89,10 @@ int transform_bind ( render_pass *p_render_pass, pipeline *p_pipeline, transform
 /// info
 int transform_info ( transform *p_transform );
 
+/// reflection
+int transform_pack ( void *p_buffer, transform *p_transform );
+int transform_unpack ( transform **pp_transform, void *p_buffer );
+
 /** !
  * Construct a transform from an AABB
  * 

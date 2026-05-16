@@ -733,6 +733,136 @@ int transform_info ( transform *p_transform )
     return 1;
 }
 
+int transform_pack ( void *p_buffer, transform *p_transform )
+{
+    // argument check
+    if ( NULL ==     p_buffer ) goto no_buffer;
+    if ( NULL ==  p_transform ) goto no_transform;
+
+    // initialized data 
+    char *p = p_buffer;
+
+    // pack the location
+    p += pack_pack(p, "%3f32", 
+        p_transform->location.x,
+        p_transform->location.y,
+        p_transform->location.z
+    );
+
+    // pack the rotation
+    p += pack_pack(p, "%3f32",
+        p_transform->rotation.x,
+        p_transform->rotation.y,
+        p_transform->rotation.z
+    );
+
+    // pack the scale
+    p += pack_pack(p, "%3f32",
+        p_transform->scale.x,
+        p_transform->scale.y,
+        p_transform->scale.z
+    );
+    
+    // success
+    return p - (char *)p_buffer;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_buffer:
+                #ifndef NDEBUG
+                    log_error("[transform] Null pointer provided for parameter \"p_buffer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[transform] Null pointer provided for parameter \"p_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+int transform_unpack ( transform **pp_transform, void *p_buffer )
+{
+
+    // argument check
+    if ( NULL == pp_transform ) goto no_transform;
+    if ( NULL ==     p_buffer ) goto no_buffer;
+
+    // initialized data 
+    transform *p_transform = NULL;
+    char *p = p_buffer;
+
+    transform_create(&p_transform);
+
+    // unpack the location
+    p += pack_unpack(p, "%3f32", 
+        p_transform->location.x,
+        p_transform->location.y,
+        p_transform->location.z
+    );
+
+    // unpack the rotation
+    p += pack_unpack(p, "%3f32",
+        p_transform->rotation.x,
+        p_transform->rotation.y,
+        p_transform->rotation.z
+    );
+
+    // unpack the scale
+    p += pack_unpack(p, "%3f32",
+        p_transform->scale.x,
+        p_transform->scale.y,
+        p_transform->scale.z
+    );
+
+    // compute the model matrix
+    mat4_model_from_vec3(
+        &p_transform->model,
+        p_transform->location,
+        p_transform->rotation,
+        p_transform->scale
+    );
+
+    // return a pointer to the caller
+    *pp_transform = p_transform;
+    
+    // success
+    return p - (char *)p_buffer;
+
+    // error handling
+    {
+        
+        // argument errors
+        {
+            no_transform:
+                #ifndef NDEBUG
+                    log_error("[transform] Null pointer provided for parameter \"pp_transform\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+
+            no_buffer:
+                #ifndef NDEBUG
+                    log_error("[transform] Null pointer provided for parameter \"p_buffer\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // error
+                return 0;
+        }
+    }
+}
+
+
 int transform_from_aabb ( transform *p_transform, aabb *p_aabb )
 {
 

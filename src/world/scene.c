@@ -30,11 +30,13 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
     dict *p_dict = p_value->object;
     json_value *p_name = NULL,
                *p_entities = NULL,
-               *p_cameras = NULL;
+               *p_cameras = NULL,
+               *p_skybox = NULL;
     
     dict_get(p_dict, "name"    , (void **)&p_name);
     dict_get(p_dict, "entities", (void **)&p_entities);
     dict_get(p_dict, "cameras" , (void **)&p_cameras);
+    dict_get(p_dict, "skybox"  , (void **)&p_skybox);
 
     // store the name
     strncpy(p_scene->_name, p_name->string, 63);
@@ -97,6 +99,12 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
             
             p_scene->p_active_camera = p_camera;
         }
+    }
+
+    // construct skybox
+    if ( p_skybox )
+    {
+        skybox_from_json(&p_scene->p_skybox, p_skybox);
     }
 
     // compute the scene bounds
@@ -167,9 +175,7 @@ static void clear_dynamic_list(pipeline *p_pipeline)
     if ( !p_pipeline || !p_pipeline->p_dynamic_draw_list ) return;
 
     while(array_size(p_pipeline->p_dynamic_draw_list))
-    {
         array_remove(p_pipeline->p_dynamic_draw_list, 0, NULL);
-    }
 }
 
 static void bvh_gather_recursive(bv *p_bv, const vec4 planes[6], g_instance *p_instance)
@@ -220,6 +226,16 @@ int scene_gather_drawable
     if ( p_scene->p_active_camera && p_scene->p_bounds )
     {
         bvh_gather_recursive(p_scene->p_bounds, p_scene->p_active_camera->frustum.planes, p_instance);
+    }
+
+    if ( p_scene->p_skybox && p_scene->p_skybox->pipeline )
+    {
+        pipeline *p_pipeline = NULL;
+        dict_get(p_instance->cache.p_pipeline, p_scene->p_skybox->pipeline, (void **)&p_pipeline);
+        if ( p_pipeline && p_pipeline->p_dynamic_draw_list )
+        {
+            array_add(p_pipeline->p_dynamic_draw_list, p_scene->p_skybox);
+        }
     }
 
     // done
