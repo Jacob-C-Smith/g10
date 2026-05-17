@@ -24,7 +24,7 @@ struct uniform_s
     fn_pack *pfn_pack;
     size_t len;
     size_t idx;
-    char _buffer[256];
+    char _buffer[2048];
 };
 
 // function declarations

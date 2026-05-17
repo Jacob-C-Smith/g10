@@ -1,9 +1,9 @@
 {
-    "name": "pitch white object.002",
+    "name": "green",
     "transform": {
         "location": [
             -18.0,
-            13.5,
+            4.5,
             2.0
         ],
         "rotation": [
@@ -17,7 +17,7 @@
             0.667
         ]
     },
-    "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.002.json",
-    "material": "/Users/j/Desktop/g10/assets/material/r.json",
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/green.json",
+    "material": "/Users/j/Desktop/g10/assets/material/r.001.json",
     "pipeline": "default"
 }

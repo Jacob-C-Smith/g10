@@ -1,5 +1,5 @@
 {
-    "name": "pitch white object.003",
+    "name": "blue",
     "transform": {
         "location": [
             -18.0,
@@ -17,7 +17,7 @@
             0.667
         ]
     },
-    "geometry": "/Users/j/Desktop/g10/assets/geometry/pitch white object.003.json",
+    "geometry": "/Users/j/Desktop/g10/assets/geometry/blue.json",
     "material": "/Users/j/Desktop/g10/assets/material/r.002.json",
     "pipeline": "default"
 }

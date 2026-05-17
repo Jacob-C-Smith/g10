@@ -25,6 +25,7 @@ struct scene_s
     char _name[63+1];
     dict *entities;
     dict *cameras;
+    dict *lights;
     camera *p_active_camera;
     skybox *p_skybox;
     bv *p_bounds;

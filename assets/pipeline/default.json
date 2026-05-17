@@ -28,7 +28,17 @@
             "data" : 
             [
                 { "V" : "mat4" },
-                { "P" : "mat4" }
+                { "P" : "mat4" },
+                { "camera_pos" : "vec3" }
+            ]
+        },
+        {
+            "name" : "lighting",
+            "data" : 
+            [
+                { "lights" : "struct[16]" },
+                { "light_count" : "i32" },
+                { "ambient_color" : "vec3" }
             ]
         }
     ],

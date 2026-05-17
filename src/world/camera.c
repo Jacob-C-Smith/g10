@@ -917,6 +917,16 @@ int camera_pack ( void *p_buffer, camera *p_camera )
         P.m, P.n, P.o, P.p
     );
 
+    // pack the camera position
+    p += pack_pack(
+        p,
+        "%4f32",
+        p_camera->view.location.x,
+        p_camera->view.location.y,
+        p_camera->view.location.z,
+        1.0f
+    );
+
     // success
     return p - (char *)p_buffer;
 

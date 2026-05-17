@@ -14,6 +14,7 @@ struct VertexUniforms {
 struct CameraUniforms {
     float4x4 V;
     float4x4 P;
+    float3 camera_pos;
 };
 
 vertex VSOut vs_main(

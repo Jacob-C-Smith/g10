@@ -4,7 +4,7 @@
 
 # imports
 import bpy, bmesh
-import math, json, sys, time, os, getpass, importlib
+import math, json, sys, time, os, getpass, importlib, mathutils
 
 from struct import pack
 
@@ -458,19 +458,26 @@ class Scene:
         # Scene lists
         self.entities = []
         self.cameras = []
+        self.lights = []
         self.json_data = { }
 
         # Scene JSON
         self.json_data["name"] = scene.name
         self.json_data["entities"] = []
         self.json_data["cameras"] = []
+        self.json_data["lights"] = []
         
         # Iterate over each object in the scene
         for object in scene.objects:
 
             # light 
             if object.type == 'LIGHT':
-                continue
+                
+                # construct a light
+                l = Light(object)
+
+                # add the light to the scene
+                self.json_data["lights"].append(l.json_data.copy())
 
             # camera
             elif object.type == 'CAMERA':
@@ -532,7 +539,12 @@ class Light:
     name      : str  = None
     location  : list = None
     color     : list = None
-    light_type: str  = None
+    light_type: int  = None
+    intensity : float = None
+    radius    : float = None
+    direction : list = None
+    inner_angle: float = None
+    outer_angle: float = None
 
     json_data : dict = None
 
@@ -544,53 +556,80 @@ class Light:
             return
 
         # Set class data
-
-        # Name
-        self.name                  = object.name
+        self.name = object.name
+        
+        # Mapping Blender types to G10 Uber-Light types
+        # 0 = Directional, 1 = Point, 2 = Spot
+        b_type = object.data.type
+        if b_type == 'SUN':
+            self.light_type = 0
+        elif b_type == 'POINT':
+            self.light_type = 1
+        elif b_type == 'SPOT':
+            self.light_type = 2
+        else:
+            self.light_type = 1 # Default to point
 
         # Location
-        self.location = [ None, None, None ]
-        self.location[0]           = object.location[0]
-        self.location[1]           = object.location[1]
-        self.location[2]           = object.location[2]
+        self.location = [round(object.location[0], 3), round(object.location[1], 3), round(object.location[2], 3)]
         
-        # Color
-        self.color    = [ None, None, None ]
-        self.color[0]              = object.data.color[0] * object.data.energy
-        self.color[1]              = object.data.color[1] * object.data.energy
-        self.color[2]              = object.data.color[2] * object.data.energy
+        # Direction (from rotation)
+        # Blender's light direction is -Z in local space
+        direction_vec = object.matrix_world.to_quaternion() @ mathutils.Vector((0.0, 0.0, -1.0))
+        self.direction = [round(direction_vec.x, 3), round(direction_vec.y, 3), round(direction_vec.z, 3)]
+
+        # Color and Intensity
+        self.color = [round(object.data.color[0], 3), round(object.data.color[1], 3), round(object.data.color[2], 3)]
         
+        # Intensity Scaling
+        if b_type == 'SUN':
+            self.intensity = round(object.data.energy, 3)
+        else:
+            # Treat 65W as 1.0 intensity
+            self.intensity = round(object.data.energy / 65.0, 3)
+        
+        # Radius (for point/spot)
+        if b_type == 'SUN':
+            self.radius = 0.0
+        else:
+            # Take radius directly from Blender's soft size
+            self.radius = round(object.data.shadow_soft_size, 3)
+
+        # Spot Angles (Shader expects cosines of half-angles)
+        self.inner_angle = 0.0
+        self.outer_angle = 0.0
+        if b_type == 'SPOT':
+            # Blender's spot_size is the full cone angle
+            half_outer = object.data.spot_size / 2.0
+            half_inner = half_outer * (1.0 - object.data.spot_blend)
+            
+            self.outer_angle = round(math.cos(half_outer), 3)
+            self.inner_angle = round(math.cos(half_inner), 3)
+
         # Set up the dictionary
-        self.json_data             = { }
-        self.json_data["$schema"]  = "https://raw.githubusercontent.com/Jacob-C-Smith/G10-Schema/main/light-schema.json"
-        self.json_data["name"]     = self.name
-        self.json_data["location"] = self.location.copy()
-        self.json_data["color"]    = self.color.copy()
+        self.json_data = {
+            "name": self.name,
+            "type": self.light_type,
+            "location": self.location,
+            "direction": self.direction,
+            "color": self.color,
+            "intensity": self.intensity,
+            "radius": self.radius,
+            "inner_angle": self.inner_angle,
+            "outer_angle": self.outer_angle
+        }
 
         return
 
     # Returns file JSON
     def json(self):
-
-        '''           
-            Returns a G10 readable JSON object as a string
-        '''
-
-        # Dump the dictionary as a JSON object string
         return json.dumps(self.json_data, indent=4)
 
     # Writes JSON to a specified file
     def write_to_file(self, path: str):
-        
-        ''' 
-            Write a G10 readable JSON object text to a file path
-        '''
-
-        # Write the JSON data to the specified path
         with open(path, "w+") as f:
             try: f.write(self.json())
             except FileExistsError: pass
-
         return
 
     @staticmethod

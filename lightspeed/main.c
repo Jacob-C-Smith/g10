@@ -15,6 +15,7 @@
 
 // g10
 #include <g10.h>
+#include <light.h>
 #include <transform.h>
 #include <renderer.h>
 #include <entity.h>
@@ -65,7 +66,7 @@ int main ( int argc, const char *argv[] )
 
         // program default pipeline
         ok &= program_pipeline("default", 
-            (fn_pipeline_bind_once *)camera_bind_active,
+            (fn_pipeline_bind_once *)lighting_bind_once,
             (fn_pipeline_cull *)entity_cull,
             (fn_pipeline_bind_each *)entity_bind,
             (fn_pipeline_draw *)entity_draw

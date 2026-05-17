@@ -1,5 +1,6 @@
 // header
 #include <scene.h>
+#include <light.h>
 
 // function definitions
 int scene_from_json ( scene **pp_scene, json_value *p_value )
@@ -31,11 +32,13 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
     json_value *p_name = NULL,
                *p_entities = NULL,
                *p_cameras = NULL,
+               *p_lights = NULL,
                *p_skybox = NULL;
     
     dict_get(p_dict, "name"    , (void **)&p_name);
     dict_get(p_dict, "entities", (void **)&p_entities);
     dict_get(p_dict, "cameras" , (void **)&p_cameras);
+    dict_get(p_dict, "lights"  , (void **)&p_lights);
     dict_get(p_dict, "skybox"  , (void **)&p_skybox);
 
     // store the name
@@ -44,6 +47,7 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
     // construct an entity list
     dict_construct(&p_scene->entities, 64, NULL, (fn_key_accessor *)entity_key_accessor, NULL);
     dict_construct(&p_scene->cameras, 64, NULL, (fn_key_accessor *)camera_key_accessor, NULL);
+    dict_construct(&p_scene->lights, 64, NULL, (fn_key_accessor *)light_key_accessor, NULL);
 
     // construct entities
     if ( p_entities )
@@ -98,6 +102,33 @@ int scene_from_json ( scene **pp_scene, json_value *p_value )
             dict_add(p_scene->cameras, p_camera);
             
             p_scene->p_active_camera = p_camera;
+        }
+    }
+
+    // construct lights
+    if ( p_lights )
+    {
+
+        // initialized data
+        array *p_array = p_lights->list;
+        size_t len = array_size(p_array);
+
+        // iterate through each light
+        for (size_t i = 0; i < len; i++)
+        {
+            
+            // initialized data
+            json_value *p_value = NULL;
+            light *p_light = NULL;
+
+            // get the i'th attachment
+            array_index(p_array, i, (void **)&p_value);
+
+            // construct a light from a json value
+            light_from_json(&p_light, p_value);
+
+            // add the light to the scene
+            dict_add(p_scene->lights, p_light);
         }
     }
 
